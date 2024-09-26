@@ -32,7 +32,7 @@ internal class PdlHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(PdlHendelserRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, PdlHendelserKeys.PERSONHENDELSE) {

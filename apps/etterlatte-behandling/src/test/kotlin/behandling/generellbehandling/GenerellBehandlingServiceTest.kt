@@ -45,7 +45,9 @@ import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.personOpplysning
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterEach
@@ -71,7 +73,8 @@ internal class GenerellBehandlingServiceTest(
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var hendelseDao: HendelseDao
     private lateinit var oppgaveService: OppgaveService
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
+    private lateinit var sakLesDao: SakLesDao
     private lateinit var service: GenerellBehandlingService
     private lateinit var behandlingRepo: BehandlingDao
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
@@ -85,7 +88,8 @@ internal class GenerellBehandlingServiceTest(
     fun beforeAll() {
         dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
         hendelseDao = spyk(HendelseDao(ConnectionAutoclosingTest(dataSource)))
         behandlingRepo =
             BehandlingDao(
@@ -96,7 +100,7 @@ internal class GenerellBehandlingServiceTest(
         oppgaveService =
             OppgaveService(
                 OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
-                sakRepo,
+                sakLesDao,
                 hendelseDao,
                 hendelser,
             )
@@ -133,7 +137,7 @@ internal class GenerellBehandlingServiceTest(
         val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling, SAKSBEHANDLER)
         dao.oppdaterGenerellBehandling(opprettBehandling.copy(status = GenerellBehandling.Status.FATTET))
         assertThrows<KanIkkeEndreGenerellBehandling> {
-            service.lagreNyeOpplysninger(opprettBehandling)
+            service.lagreNyeOpplysninger(opprettBehandling, sak.id)
         }
     }
 
@@ -299,7 +303,7 @@ internal class GenerellBehandlingServiceTest(
         val utlandsOppgave = hentOppgaverForReferanse[0]
         oppgaveService.tildelSaksbehandler(utlandsOppgave.id, SAKSBEHANDLER.ident)
 
-        service.avbrytBehandling(opprettBehandling.id, SAKSBEHANDLER)
+        service.avbrytBehandling(opprettBehandling.id, sak.id, SAKSBEHANDLER)
         val avbruttBehandling = service.hentBehandlingMedId(opprettBehandling.id)
         assertEquals(GenerellBehandling.Status.AVBRUTT, avbruttBehandling!!.status)
         val avbruttOppgave = oppgaveService.hentOppgave(utlandsOppgave.id)
@@ -331,13 +335,13 @@ internal class GenerellBehandlingServiceTest(
                 "124124124",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
-        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
         service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
 
         fattetBehandling?.status shouldBe GenerellBehandling.Status.FATTET
         assertThrows<KanIkkeEndreGenerellBehandling> {
-            service.avbrytBehandling(opprettBehandling.id, SAKSBEHANDLER)
+            service.avbrytBehandling(opprettBehandling.id, sak.id, SAKSBEHANDLER)
         }
     }
 
@@ -366,7 +370,7 @@ internal class GenerellBehandlingServiceTest(
                 "124124124",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
-        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
         service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
 
@@ -412,7 +416,7 @@ internal class GenerellBehandlingServiceTest(
                 "124124124",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
-        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
         assertThrows<DokumentManglerDatoException> {
             service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         }
@@ -442,7 +446,7 @@ internal class GenerellBehandlingServiceTest(
             )
         val behandlingUtfylt =
             opprettBehandling.copy(innhold = kravpakkeUtlandInnhold, status = GenerellBehandling.Status.FATTET)
-        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
         assertThrows<IllegalStateException> {
             service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         }
@@ -471,7 +475,7 @@ internal class GenerellBehandlingServiceTest(
                 "",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
-        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
         assertThrows<ManglerRinanummerException> {
             service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         }
@@ -500,7 +504,7 @@ internal class GenerellBehandlingServiceTest(
                 "rinanummer",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
-        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
         assertThrows<ManglerLandkodeException> {
             service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         }
@@ -529,7 +533,7 @@ internal class GenerellBehandlingServiceTest(
                 "rinanummer",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
-        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
         assertThrows<UgyldigLandkodeIsokode3> {
             service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         }
@@ -560,7 +564,7 @@ internal class GenerellBehandlingServiceTest(
                 "124124124",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
-        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
         service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
 
         val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
@@ -581,8 +585,8 @@ internal class GenerellBehandlingServiceTest(
                 .hentOppgaverForReferanse(opprettBehandling.id.toString())
                 .single(OppgaveIntern::erAttestering)
 
-        val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
-        assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
+        val todagerfrem = Tidspunkt.now().plus(2L, ChronoUnit.DAYS).toNorskLocalDate()
+        assertEquals(todagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
         oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
 
         service.attester(oppdaterBehandling.id, attestant)
@@ -625,7 +629,7 @@ internal class GenerellBehandlingServiceTest(
                 "124124124",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
-        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
         service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
         assertEquals(GenerellBehandling.Status.FATTET, fattetBehandling?.status)
@@ -647,9 +651,9 @@ internal class GenerellBehandlingServiceTest(
             }
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
+        val todagerfrem = Tidspunkt.now().plus(2L, ChronoUnit.DAYS).toNorskLocalDate()
 
-        assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
+        assertEquals(todagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
         oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
         val ugyldigAttesteringsForespoersel =
             assertThrows<UgyldigAttesteringsForespoersel> {
@@ -669,7 +673,7 @@ internal class GenerellBehandlingServiceTest(
         val behandlingsoppgave = oppgaveService.hentOppgaverForReferanse(behandling.id.toString()).single()
         oppgaveService.tildelSaksbehandler(behandlingsoppgave.id, SAKSBEHANDLER.ident)
 
-        val behandlingMedKravpakke = service.lagreNyeOpplysninger(behandling.copy(innhold = kravpakkeUtland()))
+        val behandlingMedKravpakke = service.lagreNyeOpplysninger(behandling.copy(innhold = kravpakkeUtland()), sak.id)
         service.sendTilAttestering(behandlingMedKravpakke, SAKSBEHANDLER)
 
         val nyAttesteringsoppgave =
@@ -681,7 +685,7 @@ internal class GenerellBehandlingServiceTest(
 
         val begrunnelse = "Ikke godkjent"
         val kommentar = Kommentar(begrunnelse)
-        service.underkjenn(behandlingMedKravpakke.id, ATTESTANT, kommentar)
+        service.underkjenn(behandlingMedKravpakke.id, ATTESTANT, kommentar, sak.id)
         val underkjentBehandling = service.hentBehandlingMedId(behandlingMedKravpakke.id)
 
         underkjentBehandling?.status shouldBe GenerellBehandling.Status.RETURNERT

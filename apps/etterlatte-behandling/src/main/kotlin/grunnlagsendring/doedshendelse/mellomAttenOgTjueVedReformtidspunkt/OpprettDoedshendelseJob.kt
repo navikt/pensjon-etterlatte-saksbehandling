@@ -33,7 +33,7 @@ class OpprettDoedshendelseJob(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    private var jobContext: Context = Context(Self(this::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
+    private var jobContext: Context = Context(Self(this::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao, null)
 
     override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med periode $interval")
@@ -52,7 +52,7 @@ class OpprettDoedshendelseJob(
     }
 
     private fun run() {
-        withLogContext(correlationId = getCorrelationId(), kv = mapOf("migrering" to "true")) {
+        withLogContext(correlationId = getCorrelationId(), kv = mapOf("send_brev_18_20_aar_opprett" to "true")) {
             val dryRun = !featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)
             val listeOverAvdoede =
                 inTransaction {

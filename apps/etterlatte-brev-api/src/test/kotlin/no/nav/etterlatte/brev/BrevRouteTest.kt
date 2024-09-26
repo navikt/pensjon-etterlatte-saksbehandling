@@ -20,6 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -34,6 +35,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
@@ -61,7 +63,7 @@ internal class BrevRouteTest {
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -239,7 +241,7 @@ internal class BrevRouteTest {
     private fun opprettBrev(id: BrevID) =
         Brev(
             id = id,
-            sakId = 41,
+            sakId = randomSakId(),
             behandlingId = null,
             tittel = null,
             spraak = Spraak.NB,

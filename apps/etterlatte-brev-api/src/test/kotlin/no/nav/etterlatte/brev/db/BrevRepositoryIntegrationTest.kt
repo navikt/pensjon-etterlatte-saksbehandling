@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.DatabaseExtension
@@ -26,6 +27,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.junit.jupiter.api.AfterEach
@@ -39,7 +41,6 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import org.postgresql.util.PSQLException
 import java.util.UUID
 import javax.sql.DataSource
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRepositoryIntegrationTest(
@@ -89,11 +90,11 @@ internal class BrevRepositoryIntegrationTest(
 
     @Test
     fun `Hent brev med sak_id`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
         repeat(10) {
             // Opprette brev for andre saker
-            db.opprettBrev(ulagretBrev(Random.nextLong()))
+            db.opprettBrev(ulagretBrev(randomSakId()))
         }
 
         db.hentBrevForSak(sakId) shouldBe emptyList()
@@ -256,7 +257,7 @@ internal class BrevRepositoryIntegrationTest(
 
     @Test
     fun `Sletting av brev fungerer som forventet`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
         repeat(9) {
             db.opprettBrev(ulagretBrev(sakId))
@@ -432,7 +433,7 @@ internal class BrevRepositoryIntegrationTest(
     }
 
     private fun ulagretBrev(
-        sakId: Long = Random.nextLong(),
+        sakId: SakId = randomSakId(),
         behandlingId: UUID? = null,
         innhold: BrevInnhold? = null,
         innhold_vedlegg: List<BrevInnholdVedlegg>? = null,

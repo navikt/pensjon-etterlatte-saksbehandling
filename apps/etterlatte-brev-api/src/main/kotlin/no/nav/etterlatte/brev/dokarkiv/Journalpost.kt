@@ -2,13 +2,15 @@ package no.nav.etterlatte.brev.dokarkiv
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
+import no.nav.etterlatte.libs.common.Enhetsnummer
+import org.slf4j.LoggerFactory
 
 interface OpprettJournalpost {
     val avsenderMottaker: AvsenderMottaker?
     val bruker: Bruker
     val dokumenter: List<JournalpostDokument>
     val eksternReferanseId: String
-    val journalfoerendeEnhet: String
+    val journalfoerendeEnhet: Enhetsnummer
     val journalposttype: JournalPostType
     val kanal: String?
     val sak: JournalpostSak
@@ -31,7 +33,7 @@ data class JournalpostRequest(
     override val bruker: Bruker,
     override val dokumenter: List<JournalpostDokument>,
     override val eksternReferanseId: String,
-    override val journalfoerendeEnhet: String,
+    override val journalfoerendeEnhet: Enhetsnummer,
     override val journalposttype: JournalPostType,
     override val kanal: String,
     override val sak: JournalpostSak,
@@ -63,7 +65,7 @@ data class OpprettNotatJournalpostRequest(
     override val bruker: Bruker,
     override val dokumenter: List<JournalpostDokument>,
     override val eksternReferanseId: String,
-    override val journalfoerendeEnhet: String,
+    override val journalfoerendeEnhet: Enhetsnummer,
     override val sak: JournalpostSak,
     override val tema: String,
     override val tittel: String,
@@ -95,7 +97,7 @@ data class KnyttTilAnnenSakRequest(
     val bruker: Bruker,
     val fagsakId: String,
     val fagsaksystem: String,
-    val journalfoerendeEnhet: String,
+    val journalfoerendeEnhet: Enhetsnummer,
     val tema: String,
     val sakstype: Sakstype,
 )
@@ -122,6 +124,8 @@ data class JournalpostDokument(
     val dokumentvarianter: List<DokumentVariant>,
 )
 
+val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.Journalpost")
+
 data class JournalpostSak(
     val sakstype: Sakstype,
     val fagsakId: String? = null,
@@ -130,8 +134,16 @@ data class JournalpostSak(
 ) {
     init {
         if (sakstype == Sakstype.FAGSAK) {
-            check(!fagsakId.isNullOrBlank()) { "fagsakId må være satt når sakstype=${Sakstype.FAGSAK}" }
-            check(!fagsaksystem.isNullOrBlank()) { "fagsaksystem må være satt når sakstype=${Sakstype.FAGSAK}" }
+            check(!fagsakId.isNullOrBlank()) {
+                val error = "fagsakId må være satt når sakstype=${Sakstype.FAGSAK}"
+                logger.error(error)
+                error
+            }
+            check(!fagsaksystem.isNullOrBlank()) {
+                val error = "fagsaksystem må være satt når sakstype=${Sakstype.FAGSAK}"
+                logger.error(error)
+                error
+            }
         }
     }
 }

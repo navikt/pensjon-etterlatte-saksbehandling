@@ -8,7 +8,9 @@ import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.ForskjelligAvdoedPeriode
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.ManglerFrivilligSkattetrekk
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -25,6 +27,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
     val brukerUnder18Aar: Boolean,
+    val frivilligSkattetrekk: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
     val harUtbetaling: Boolean,
@@ -50,6 +53,9 @@ data class BarnepensjonInnvilgelseForeldreloes(
         ): BarnepensjonInnvilgelseForeldreloes {
             val beregningsperioder =
                 barnepensjonBeregningsperioder(utbetalingsinfo)
+            val frivilligSkattetrekk =
+                brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
+                    ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
 
             return BarnepensjonInnvilgelseForeldreloes(
                 innhold = innhold.innhold(),
@@ -63,17 +69,18 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         trygdetid,
                         erForeldreloes = true,
                     ),
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
-                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
+                erGjenoppretting = erGjenoppretting,
+                erMigrertYrkesskade = erMigrertYrkesskade,
+                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
+                frivilligSkattetrekk = frivilligSkattetrekk,
+                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
-                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                erGjenoppretting = erGjenoppretting,
                 vedtattIPesys = vedtattIPesys,
-                erMigrertYrkesskade = erMigrertYrkesskade,
             )
         }
     }
@@ -88,15 +95,19 @@ data class BarnepensjonForeldreloesRedigerbar(
     val harUtbetaling: Boolean,
     val erGjenoppretting: Boolean,
     val vedtattIPesys: Boolean,
+    val forskjelligAvdoedPeriode: ForskjelligAvdoedPeriode?,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             etterbetaling: EtterbetalingDTO?,
             utbetalingsinfo: Utbetalingsinfo,
+            avdoede: List<Avdoed>,
             vedtaksloesning: Vedtaksloesning,
             loependeIPesys: Boolean,
         ): BarnepensjonForeldreloesRedigerbar {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
+
+            val forskjelligAvdoedPeriode = finnEventuellForskjelligAvdoedPeriode(avdoede, utbetalingsinfo)
 
             return BarnepensjonForeldreloesRedigerbar(
                 virkningsdato = utbetalingsinfo.virkningsdato,
@@ -117,6 +128,7 @@ data class BarnepensjonForeldreloesRedigerbar(
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 erGjenoppretting = vedtaksloesning == Vedtaksloesning.GJENOPPRETTA,
                 vedtattIPesys = loependeIPesys,
+                forskjelligAvdoedPeriode = forskjelligAvdoedPeriode,
             )
         }
     }

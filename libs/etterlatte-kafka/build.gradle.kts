@@ -1,5 +1,5 @@
 plugins {
-    id("etterlatte.libs")
+    kotlin("jvm")
     id("java-library")
     id("java-test-fixtures")
 }
@@ -23,4 +23,5 @@ dependencies {
     testFixturesImplementation(libs.test.testcontainer.kafka)
 
     testFixturesImplementation(libs.ktor2.servercontentnegotiation)
+    testFixturesImplementation(libs.kafka.clients)
 }

@@ -1,0 +1,92 @@
+name: etterlatte-api
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+    inputs:
+      deploy-prod:
+        description: 'Deploy til produksjon'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+  push:
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-api/src/**
+      - apps/etterlatte-api/*.kts
+      - apps/etterlatte-api/.nais/**
+      - '!apps/etterlatte-api/**.md'
+      - libs/etterlatte-beregning-model/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-vedtaksvurdering-model/**
+      - gradle/libs.versions.toml
+      - "!**/test/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-api/src/**
+      - apps/etterlatte-api/*.kts
+      - '!apps/etterlatte-api/**.md'
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-sporingslogg/**
+      - libs/etterlatte-vedtaksvurdering-model/**
+      - gradle/libs.versions.toml
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.test.yaml
+    secrets: inherit
+
+  build:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/.build-and-deploy.yaml
+    secrets: inherit
+
+  deploy-api-dev:
+    if: github.event_name != 'pull_request'
+    name: deploy-api-dev
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/dev-api.yaml
+          VAR: image=${{ needs.build.outputs.image }}
+
+  deploy-api-prod:
+    name: deploy-api-prod
+    if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
+    needs: [deploy-api-dev, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: andstor/file-existence-action@v3
+        id: check_files
+        with:
+          files: "apps/${{ github.workflow }}/.nais/prod.yaml"
+      - uses: nais/deploy/actions/deploy@v2
+        if: steps.check_files.outputs.files_exists == 'true'
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/prod-api.yaml
+          VAR: image=${{ needs.build.outputs.image }}

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -280,7 +282,7 @@ class VedtaksvurderingRepository(
     ): Vedtak = requireNotNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
 
     fun hentVedtakForSak(
-        sakId: Long,
+        sakId: SakId,
         tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """
@@ -370,7 +372,7 @@ class VedtaksvurderingRepository(
                 params =
                     mapOf(
                         "saksbehandlerId" to vedtakFattet.ansvarligSaksbehandler,
-                        "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet,
+                        "saksbehandlerEnhet" to vedtakFattet.ansvarligEnhet.enhetNr,
                         "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
                         "behandlingId" to behandlingId,
                     ),
@@ -395,7 +397,7 @@ class VedtaksvurderingRepository(
                 params =
                     mapOf(
                         "attestant" to attestasjon.attestant,
-                        "attestertVedtakEnhet" to attestasjon.attesterendeEnhet,
+                        "attestertVedtakEnhet" to attestasjon.attesterendeEnhet.enhetNr,
                         "vedtakstatus" to VedtakStatus.ATTESTERT.name,
                         "behandlingId" to behandlingId,
                     ),
@@ -488,7 +490,7 @@ class VedtaksvurderingRepository(
                 stringOrNull("saksbehandlerid")?.let {
                     VedtakFattet(
                         ansvarligSaksbehandler = string("saksbehandlerid"),
-                        ansvarligEnhet = string("fattetVedtakEnhet"),
+                        ansvarligEnhet = Enhetsnummer(string("fattetVedtakEnhet")),
                         tidspunkt = sqlTimestamp("datofattet").toTidspunkt(),
                     )
                 },
@@ -496,7 +498,7 @@ class VedtaksvurderingRepository(
                 stringOrNull("attestant")?.let {
                     Attestasjon(
                         attestant = string("attestant"),
-                        attesterendeEnhet = string("attestertVedtakEnhet"),
+                        attesterendeEnhet = Enhetsnummer(string("attestertVedtakEnhet")),
                         tidspunkt = sqlTimestamp("datoattestert").toTidspunkt(),
                     )
                 },

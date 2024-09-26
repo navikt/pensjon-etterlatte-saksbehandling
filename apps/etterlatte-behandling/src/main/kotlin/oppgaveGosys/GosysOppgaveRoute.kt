@@ -8,10 +8,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.gosysOppgaveId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
@@ -24,7 +24,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             kunSaksbehandler {
                 val saksbehandler = call.request.queryParameters["saksbehandler"].takeUnless { it.isNullOrBlank() }
                 val tema = call.request.queryParameters["tema"].takeUnless { it.isNullOrBlank() }
-                val enhet = call.request.queryParameters["enhet"].takeUnless { it.isNullOrBlank() }
+                val enhet = Enhetsnummer.nullable(call.request.queryParameters["enhet"])
                 val harTildeling =
                     call.request.queryParameters["harTildeling"]
                         .takeUnless { it.isNullOrBlank() }
@@ -36,6 +36,14 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 
         get("/journalfoering/{journalpostId}") {
             call.respond(gosysService.hentJournalfoeringsoppgave(call.parameters["journalpostId"]!!, brukerTokenInfo))
+        }
+
+        post("/person") {
+            kunSaksbehandler {
+                val request = call.receive<FoedselsnummerDTO>()
+
+                call.respond(gosysService.hentOppgaverForPerson(request.foedselsnummer, brukerTokenInfo))
+            }
         }
 
         route("{$OPPGAVEID_GOSYS_CALL_PARAMETER}") {
@@ -50,12 +58,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             post("/flytt-til-gjenny") {
                 kunSaksbehandler {
                     val sakId = call.request.queryParameters["sakid"]!!.toLong()
-                    val nyOppgave =
-                        inTransaction {
-                            runBlocking {
-                                gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), sakId, brukerTokenInfo)
-                            }
-                        }
+                    val nyOppgave = gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), sakId, brukerTokenInfo)
                     call.respond(nyOppgave)
                 }
             }

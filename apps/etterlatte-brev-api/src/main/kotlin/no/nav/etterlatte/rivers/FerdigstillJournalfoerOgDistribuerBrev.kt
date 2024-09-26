@@ -7,7 +7,9 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory
@@ -21,9 +23,9 @@ class FerdigstillJournalfoerOgDistribuerBrev(
 
     suspend fun ferdigstillOgGenererPDF(
         brevKode: Brevkoder,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
         brevId: BrevID,
     ): BrevID {
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")
@@ -47,7 +49,7 @@ class FerdigstillJournalfoerOgDistribuerBrev(
 
     suspend fun journalfoerOgDistribuer(
         brevKode: Brevkoder,
-        sakId: Long,
+        sakId: SakId,
         brevId: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {

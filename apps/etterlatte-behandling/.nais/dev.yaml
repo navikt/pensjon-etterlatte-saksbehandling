@@ -199,6 +199,7 @@ spec:
         - host: axsys.dev-fss-pub.nais.io
     inbound:
       rules:
+        - application: etterlatte-vilkaarsvurdering-kafka
         - application: etterlatte-egne-ansatte-lytter
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui

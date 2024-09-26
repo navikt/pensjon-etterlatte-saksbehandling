@@ -10,6 +10,8 @@ class AvstemmingsdataSender(
     private val jmsConnectionFactory: EtterlatteJmsConnectionFactory,
     private val queue: String,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun sendGrensesnittavstemming(avstemmingsdata: Avstemmingsdata): String {
         logger.info("Sender avstemmingsdata til Oppdrag")
         val xml = GrensesnittavstemmingsdataJaxb.toXml(avstemmingsdata)
@@ -29,9 +31,5 @@ class AvstemmingsdataSender(
     private fun sendAvstemmingsdata(xml: String) {
         // Fjerner JMS-headers med targetClient=1
         jmsConnectionFactory.send(xml = xml, queue = "queue:///$queue?targetClient=1")
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(AvstemmingsdataSender::class.java)
     }
 }

@@ -14,8 +14,10 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -42,7 +44,7 @@ import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BeregningRoutesTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val beregningRepository = mockk<BeregningRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
@@ -61,14 +63,14 @@ internal class BeregningRoutesTest {
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -76,7 +78,7 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hent(any()) } returns null
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregning(beregningService, behandlingKlient)
             }
 
@@ -98,11 +100,11 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        every { behandling.sak } returns 1L
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
+        every { behandling.sak } returns sakId1
+        every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregning(beregningService, behandlingKlient)
             }
 
@@ -126,7 +128,7 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregning(beregningService, behandlingKlient)
             }
 
@@ -148,12 +150,12 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
+        every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregning(beregningService, behandlingKlient)
             }
 
@@ -181,17 +183,17 @@ internal class BeregningRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        every { behandling.sak } returns 1L
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns
+        every { behandling.sak } returns sakId1
+        every { beregningRepository.hentOverstyrBeregning(sakId1) } returns
             OverstyrBeregning(
-                1L,
+                sakId1,
                 "Test",
                 Tidspunkt.now(),
                 kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
             )
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregning(beregningService, behandlingKlient)
             }
 
@@ -216,11 +218,11 @@ internal class BeregningRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        every { behandling.sak } returns 1L
-        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
+        every { behandling.sak } returns sakId1
+        every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 beregning(beregningService, behandlingKlient)
             }
 
@@ -245,7 +247,7 @@ internal class BeregningRoutesTest {
         beregnetDato = Tidspunkt.now(),
         grunnlagMetadata =
             no.nav.etterlatte.libs.common.grunnlag
-                .Metadata(1, 1),
+                .Metadata(sakId1, 1),
         beregningsperioder =
             listOf(
                 Beregningsperiode(
@@ -266,11 +268,11 @@ internal class BeregningRoutesTest {
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-            every { sak } returns 1
+            every { sak } returns sakId1
             every { sakType } returns SakType.BARNEPENSJON
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
             every { opphoerFraOgMed } returns null
         }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken() }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 }

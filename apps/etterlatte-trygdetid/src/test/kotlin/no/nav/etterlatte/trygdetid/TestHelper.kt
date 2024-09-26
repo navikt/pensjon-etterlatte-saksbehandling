@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -9,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -28,7 +30,7 @@ private val regelKilde: Grunnlagsopplysning.RegelKilde = Grunnlagsopplysning.Reg
 
 fun behandling(
     behandlingId: UUID = randomUUID(),
-    sakId: Long = 1,
+    sakId: SakId = sakId1,
     behandlingStatus: BehandlingStatus = BehandlingStatus.VILKAARSVURDERT,
 ) = DetaljertBehandling(
     id = behandlingId,
@@ -46,11 +48,12 @@ fun behandling(
     kilde = Vedtaksloesning.GJENNY,
     sendeBrev = true,
     opphoerFraOgMed = null,
+    relatertBehandlingId = null,
 )
 
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
-    sakId: Long = 1,
+    sakId: SakId = sakId1,
     ident: String =
         GrunnlagTestData()
             .avdoede

@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import java.util.UUID
 
@@ -52,7 +53,7 @@ class BehandlingKlient(
             .longValue()
 
     suspend fun opprettOppgave(
-        sakId: Long,
+        sakId: SakId,
         merknad: String,
         referanse: String,
     ): UUID =

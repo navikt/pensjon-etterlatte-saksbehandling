@@ -2,32 +2,20 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import no.nav.etterlatte.libs.common.EnvEnum
-import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarKafkaKey.ETTERLATTE_VILKAARSVURDERING_URL
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingServiceImpl
 
-class AppBuilder(
-    props: Miljoevariabler,
-) {
+class AppBuilder {
     private val config: Config = ConfigFactory.load()
     private val vilkaarsvurderingHttpKlient =
         httpClientClientCredentials(
             azureAppClientId = config.getString("azure.app.client.id"),
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("vilkaarsvurdering.azure.scope"),
+            azureAppScope = config.getString("behandling.azure.scope"),
         )
-    private val vilkaarsvurderingUrl = requireNotNull(props[ETTERLATTE_VILKAARSVURDERING_URL])
+    private val vilkaarsvurderingUrl = requireNotNull(config.getString("behandling.resource.url"))
 
     fun lagVilkaarsvurderingKlient(): VilkaarsvurderingServiceImpl =
         VilkaarsvurderingServiceImpl(vilkaarsvurderingHttpKlient, vilkaarsvurderingUrl)
-}
-
-enum class VilkaarKafkaKey : EnvEnum {
-    ETTERLATTE_VILKAARSVURDERING_URL,
-    ;
-
-    override fun key() = name
 }

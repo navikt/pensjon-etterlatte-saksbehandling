@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.ManglerFrivilligSkattetrekk
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -25,6 +26,7 @@ data class BarnepensjonInnvilgelse(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
+    val frivilligSkattetrekk: Boolean,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
@@ -48,20 +50,25 @@ data class BarnepensjonInnvilgelse(
             erMigrertYrkesskade: Boolean,
         ): BarnepensjonInnvilgelse {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
+            val frivilligSkattetrekk =
+                brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
+                    ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
+
             return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning =
                     barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
-                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
+                erGjenoppretting = erGjenoppretting,
+                erMigrertYrkesskade = erMigrertYrkesskade,
+                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
+                frivilligSkattetrekk = frivilligSkattetrekk,
+                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
-                erGjenoppretting = erGjenoppretting,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                erMigrertYrkesskade = erMigrertYrkesskade,
             )
         }
     }
@@ -70,6 +77,7 @@ data class BarnepensjonInnvilgelse(
 data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val virkningsdato: LocalDate,
     val avdoed: Avdoed,
+    val senereAvdoed: Avdoed?,
     val sisteBeregningsperiodeDatoFom: LocalDate,
     val sisteBeregningsperiodeBeloep: Kroner,
     val erEtterbetaling: Boolean,
@@ -86,23 +94,21 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
         ): BarnepensjonInnvilgelseRedigerbartUtfall {
             val beregningsperioder =
                 utbetalingsinfo.beregningsperioder.map {
-                    BarnepensjonBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        grunnbeloep = it.grunnbeloep,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        antallBarn = it.antallBarn,
-                    )
+                    BarnepensjonBeregningsperiode.fra(it)
                 }
+
+            val foersteAvdoed =
+                avdoede.minByOrNull { it.doedsdato }
+                    ?: throw UgyldigForespoerselException(
+                        code = "AVDOED_MED_DOEDSDATO_MANGLER",
+                        detail = "Ingen avdød med dødsdato",
+                    )
+            val senereAvdoed = avdoede.find { it.fnr != foersteAvdoed.fnr }
 
             return BarnepensjonInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
-                avdoed =
-                    avdoede.minByOrNull { it.doedsdato }
-                        ?: throw UgyldigForespoerselException(
-                            code = "AVDOED_MED_DOEDSDATO_MANGLER",
-                            detail = "Ingen avdød med dødsdato",
-                        ),
+                avdoed = foersteAvdoed,
+                senereAvdoed = senereAvdoed,
                 sisteBeregningsperiodeDatoFom =
                     beregningsperioder.maxByOrNull { it.datoFOM }?.datoFOM
                         ?: throw UgyldigForespoerselException(

@@ -15,6 +15,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -34,6 +35,7 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
@@ -118,7 +120,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
@@ -150,7 +152,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
@@ -181,7 +183,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
@@ -213,7 +215,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
@@ -237,7 +239,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
@@ -291,7 +293,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_2,
             )
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
@@ -318,7 +320,7 @@ internal class VedtakBehandlingServiceTest(
                 vedtakFattet =
                     VedtakFattet(
                         ansvarligSaksbehandler = saksbehandler.ident,
-                        ansvarligEnhet = "",
+                        ansvarligEnhet = ENHET_1,
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
@@ -350,7 +352,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
@@ -393,7 +395,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
@@ -425,7 +427,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
@@ -463,7 +465,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
@@ -494,7 +496,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
@@ -539,7 +541,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 GJENLEVENDE_FOEDSELSNUMMER.value,
                 SakType.OMSTILLINGSSTOENAD,
-                1L,
+                sakId1,
                 ENHET_1,
             )
 
@@ -638,7 +640,7 @@ internal class VedtakBehandlingServiceTest(
     @Test
     fun `skal rulle tilbake vedtak som blir fattet hvis attesteringsoppgave feiler`() {
         val behandlingId = randomUUID()
-        val sakId = 1L
+        val sakId = sakId1
         val virkningstidspunkt = YearMonth.of(2022, Month.AUGUST)
         val gjeldendeSaksbehandler = saksbehandler
 
@@ -722,7 +724,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_2,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
@@ -773,7 +775,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_2,
             )
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
@@ -820,7 +822,7 @@ internal class VedtakBehandlingServiceTest(
         val regulering =
             DetaljertBehandling(
                 id = behandlingId,
-                sak = 1L,
+                sak = sakId1,
                 sakType = SakType.BARNEPENSJON,
                 behandlingType = BehandlingType.REVURDERING,
                 revurderingsaarsak = Revurderingaarsak.REGULERING,
@@ -840,12 +842,13 @@ internal class VedtakBehandlingServiceTest(
                 kilde = Vedtaksloesning.GJENNY,
                 sendeBrev = false,
                 opphoerFraOgMed = null,
+                relatertBehandlingId = null,
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
@@ -889,7 +892,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
@@ -953,7 +956,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
@@ -996,7 +999,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
@@ -1043,7 +1046,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
@@ -1105,7 +1108,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
@@ -1148,7 +1151,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
@@ -1191,7 +1194,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
@@ -1263,7 +1266,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
@@ -1304,7 +1307,7 @@ internal class VedtakBehandlingServiceTest(
             val oppretta =
                 repository
                     .opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-                    .let { repository.fattVedtak(behandlingId, VedtakFattet(SAKSBEHANDLER_1, "0001", Tidspunkt.now())) }
+                    .let { repository.fattVedtak(behandlingId, VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())) }
             Assertions.assertEquals(oppretta.status, VedtakStatus.FATTET_VEDTAK)
             val tilbakestilt = service.tilbakestillIkkeIverksatteVedtak(behandlingId)
             Assertions.assertEquals(tilbakestilt!!.status, VedtakStatus.RETURNERT)
@@ -1332,7 +1335,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
 
@@ -1381,7 +1384,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
 
@@ -1415,7 +1418,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
         runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
@@ -1450,7 +1453,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
 
@@ -1487,7 +1490,7 @@ internal class VedtakBehandlingServiceTest(
             Sak(
                 SAKSBEHANDLER_1,
                 SakType.BARNEPENSJON,
-                1L,
+                sakId1,
                 ENHET_1,
             )
 
@@ -1681,7 +1684,7 @@ internal class VedtakBehandlingServiceTest(
         saktype: SakType = SakType.BARNEPENSJON,
         revurderingAarsak: Revurderingaarsak? = null,
         revurderingInfo: RevurderingInfo? = null,
-        sakId: Long = 1L,
+        sakId: SakId = sakId1,
         opphoerFom: YearMonth? = null,
     ): DetaljertBehandling =
         DetaljertBehandling(
@@ -1710,6 +1713,7 @@ internal class VedtakBehandlingServiceTest(
             kilde = Vedtaksloesning.GJENNY,
             sendeBrev = true,
             opphoerFraOgMed = opphoerFom,
+            relatertBehandlingId = null,
         )
 
     private companion object {

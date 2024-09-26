@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -47,10 +48,10 @@ class VedtakBehandlingService(
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun sjekkOmVedtakErLoependePaaDato(
-        sakId: Long,
+        sakId: SakId,
         dato: LocalDate,
     ): LoependeYtelse {
         logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
@@ -369,7 +370,7 @@ class VedtakBehandlingService(
         return null
     }
 
-    suspend fun samordningsinfo(sakId: Long): List<SamordningsvedtakWrapper> {
+    suspend fun samordningsinfo(sakId: SakId): List<SamordningsvedtakWrapper> {
         val vedtaksliste = repository.hentVedtakForSak(sakId)
         return vedtaksliste.firstOrNull()?.let { vedtak ->
             return samordningsKlient
@@ -412,7 +413,7 @@ class VedtakBehandlingService(
         }
     }
 
-    suspend fun iverksattVedtak(
+    fun iverksattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
@@ -690,7 +691,7 @@ class VedtakBehandlingService(
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
-    fun hentIverksatteVedtakISak(sakId: Long): List<Vedtak> =
+    fun hentIverksatteVedtakISak(sakId: SakId): List<Vedtak> =
         repository
             .hentVedtakForSak(sakId)
             .filter { it.status == VedtakStatus.IVERKSATT }

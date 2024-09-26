@@ -14,9 +14,9 @@ data class PdlGraphqlBolkRequest(
     val variables: PdlBolkVariables,
 )
 
-data class PdlFolkeregisterIdentRequest(
+data class PdlIdentRequest(
     val query: String,
-    val variables: PdlFolkeregisterIdentVariables,
+    val variables: PdlIdentVariables,
 )
 
 data class PdlAdressebeskyttelseRequest(
@@ -55,7 +55,7 @@ data class PdlBolkVariables(
     val vergemaal: Boolean,
 )
 
-data class PdlFolkeregisterIdentVariables(
+data class PdlIdentVariables(
     val ident: String,
     val grupper: List<String>,
     val historikk: Boolean,
@@ -159,6 +159,7 @@ data class PdlHentPersonNavnFoedselsdato(
     val navn: List<PdlNavn>,
     val foedsel: List<PdlFoedsel>,
     val doedsfall: List<PdlDoedsfall>,
+    val vergemaalEllerFremtidsfullmakt: List<PdlVergemaalEllerFremtidsfullmakt>?,
 )
 
 data class PdlHentPerson(

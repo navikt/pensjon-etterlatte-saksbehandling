@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.generellbehandling
 
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
@@ -38,7 +39,7 @@ internal class GenerellBehandlingDaoTest(
 
     @Test
     fun `opprette kun med type`() {
-        val generellBehandlingUtland = GenerellBehandling.opprettUtland(1L, null)
+        val generellBehandlingUtland = GenerellBehandling.opprettUtland(sakId1, null)
         val hentetGenBehandling = dao.opprettGenerellbehandling(generellBehandlingUtland)
 
         Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling.id)
@@ -50,7 +51,7 @@ internal class GenerellBehandlingDaoTest(
         assertThrows<IllegalArgumentException> {
             GenerellBehandling(
                 UUID.randomUUID(),
-                1L,
+                sakId1,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
                 Innhold.Annen("content"),
@@ -64,7 +65,7 @@ internal class GenerellBehandlingDaoTest(
         val kravpakkeUtland =
             GenerellBehandling(
                 UUID.randomUUID(),
-                1L,
+                sakId1,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
                 Innhold.KravpakkeUtland(
@@ -83,11 +84,11 @@ internal class GenerellBehandlingDaoTest(
 
     @Test
     fun `Kan hente for sak`() {
-        val sakId = 1L
+        val sakId = sakId1
         val kravpakkeUtland =
             GenerellBehandling(
                 UUID.randomUUID(),
-                1L,
+                sakId1,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
                 Innhold.KravpakkeUtland(
@@ -101,7 +102,7 @@ internal class GenerellBehandlingDaoTest(
         val annengenerebehandling =
             GenerellBehandling(
                 UUID.randomUUID(),
-                1L,
+                sakId1,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.ANNEN,
                 Innhold.Annen("vlabla"),

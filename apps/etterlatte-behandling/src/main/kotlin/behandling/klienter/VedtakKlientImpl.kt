@@ -4,10 +4,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -27,19 +29,19 @@ interface VedtakKlient {
     suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long
 
     suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long
 
     suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): TilbakekrevingVedtakLagretDto
 
     suspend fun underkjennVedtakTilbakekreving(
@@ -68,7 +70,7 @@ interface VedtakKlient {
     ): VedtakDto
 
     suspend fun sakHarLopendeVedtakPaaDato(
-        sakId: Long,
+        sakId: SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO
@@ -94,7 +96,7 @@ class VedtakKlientImpl(
     override suspend fun lagreVedtakTilbakekreving(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long {
         try {
             logger.info(
@@ -131,7 +133,7 @@ class VedtakKlientImpl(
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): Long {
         try {
             logger.info("Sender tilbakekreving som skal fatte vedtak for tilbakekreving=$tilbakekrevingId til vedtak")
@@ -163,7 +165,7 @@ class VedtakKlientImpl(
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
+        enhet: Enhetsnummer,
     ): TilbakekrevingVedtakLagretDto {
         try {
             logger.info("Sender attesteringsinfo for tilbakekreving=$tilbakekrevingId til vedtak")
@@ -327,7 +329,7 @@ class VedtakKlientImpl(
     }
 
     override suspend fun sakHarLopendeVedtakPaaDato(
-        sakId: Long,
+        sakId: SakId,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): LoependeYtelseDTO {

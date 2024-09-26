@@ -257,6 +257,7 @@ internal class BehandlingInfoServiceTest {
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
+            frivilligSkattetrekk = true,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 

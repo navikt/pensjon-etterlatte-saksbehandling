@@ -22,7 +22,9 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
@@ -59,7 +61,7 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksvurderingRouteTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtaksvurderingService: VedtaksvurderingService = mockk()
     private val vedtakBehandlingService: VedtakBehandlingService = mockk()
@@ -68,7 +70,7 @@ internal class VedtaksvurderingRouteTest {
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -85,13 +87,13 @@ internal class VedtaksvurderingRouteTest {
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
     fun `skal returnere 401 naar token mangler`() {
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -114,7 +116,7 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } throws Exception("ukjent feil")
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -143,7 +145,7 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns null
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -173,7 +175,7 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -228,7 +230,7 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -283,7 +285,7 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -332,7 +334,7 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns attestertVedtak
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -380,7 +382,7 @@ internal class VedtaksvurderingRouteTest {
         coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -415,7 +417,7 @@ internal class VedtaksvurderingRouteTest {
         coEvery { vedtakBehandlingService.opprettEllerOppdaterVedtak(any(), any()) } returns opprettetVedtak
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -479,7 +481,7 @@ internal class VedtaksvurderingRouteTest {
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -546,7 +548,7 @@ internal class VedtaksvurderingRouteTest {
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -614,7 +616,7 @@ internal class VedtaksvurderingRouteTest {
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -678,7 +680,7 @@ internal class VedtaksvurderingRouteTest {
         coEvery { vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(any()) } returns tilbakestiltVedtak
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -710,7 +712,7 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns vedtakKlage
 
         testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,
                     vedtakBehandlingService,
@@ -743,12 +745,12 @@ internal class VedtaksvurderingRouteTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
 
     private fun klage(): Klage =
         Klage(
             UUID.randomUUID(),
-            Sak("ident", SakType.BARNEPENSJON, 1L, "einheit"),
+            Sak("ident", SakType.BARNEPENSJON, sakId1, ENHET_1),
             Tidspunkt.now(),
             KlageStatus.OPPRETTET,
             kabalResultat = null,

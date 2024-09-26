@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -37,6 +38,15 @@ data class OmstillingsstoenadRevurdering(
     val omsRettUtenTidsbegrensning: Boolean,
     val feilutbetaling: FeilutbetalingType,
 ) : BrevDataFerdigstilling {
+    init {
+        if (erOmgjoering && datoVedtakOmgjoering == null) {
+            throw InternfeilException(
+                "Kunne ikke lage revurderingsbrevet for omstillingsstønad siden vi ikke" +
+                    " fikk dato vedtak for omgjøring, i en revurdering som er omgjøring.",
+            )
+        }
+    }
+
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
@@ -48,6 +58,7 @@ data class OmstillingsstoenadRevurdering(
             revurderingaarsak: Revurderingaarsak?,
             navnAvdoed: String,
             vilkaarsVurdering: VilkaarsvurderingDto,
+            datoVedtakOmgjoering: LocalDate?,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -96,8 +107,7 @@ data class OmstillingsstoenadRevurdering(
                     ) ||
                         revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                // TODO klage kobler seg på her
-                datoVedtakOmgjoering = null,
+                datoVedtakOmgjoering = datoVedtakOmgjoering,
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),

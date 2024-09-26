@@ -29,6 +29,8 @@ dependencies {
     }
     implementation(libs.ktor2.server) // For å kompensere for exclude-en over
 
+    implementation(libs.database.kotliquery)
+
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
@@ -40,11 +42,4 @@ dependencies {
     testImplementation(testFixtures(project(":libs:etterlatte-database")))
     testImplementation(testFixtures((project(":libs:etterlatte-funksjonsbrytere"))))
     testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
-}
-
-tasks {
-    withType<Test> {
-        useJUnitPlatform()
-        maxParallelForks = 1
-    }
 }

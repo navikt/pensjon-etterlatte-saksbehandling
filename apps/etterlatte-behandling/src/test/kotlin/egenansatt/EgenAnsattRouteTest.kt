@@ -63,7 +63,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
             coEvery {
@@ -165,7 +165,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 

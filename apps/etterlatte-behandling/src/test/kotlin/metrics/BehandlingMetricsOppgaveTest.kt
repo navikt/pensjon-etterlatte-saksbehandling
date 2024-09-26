@@ -1,10 +1,13 @@
 package no.nav.etterlatte.metrics
 
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
-import io.prometheus.client.CollectorRegistry
+import io.micrometer.core.instrument.Gauge
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -15,7 +18,9 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -30,19 +35,20 @@ internal class BehandlingMetricsOppgaveTest(
     private val ds: DataSource,
 ) {
     private lateinit var oppgaveDao: OppgaveDaoImpl
-    private lateinit var sakDao: SakDao
+    private lateinit var sakSkrivDao: SakSkrivDao
 
     private lateinit var behandlingMetrikkerDao: BehandlingMetrikkerDao
     private lateinit var oppgaveMetrikkerDao: OppgaveMetrikkerDao
     private lateinit var gjenopprettingDao: GjenopprettingMetrikkerDao
     private lateinit var behandlingMetrics: BehandlingMetrics
 
-    private val testreg = CollectorRegistry(true)
+    private val testreg = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
     @BeforeAll
     fun beforeAll() {
+        Kontekst.set(null)
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
-        sakDao = SakDao(ConnectionAutoclosingTest(ds))
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
 
         behandlingMetrikkerDao = BehandlingMetrikkerDao(ds)
         oppgaveMetrikkerDao = OppgaveMetrikkerDao(ds)
@@ -56,97 +62,73 @@ internal class BehandlingMetricsOppgaveTest(
     @Nested
     inner class Oppgaver {
         @Test
-        fun `Metrikker for oppgaver labels i riktig rekkefoelge`() {
-            val metrikker =
-                behandlingMetrics.oppgaver
-                    .collect()
-                    .first()
-                    .samples
-            metrikker.first().labelNames shouldContainExactly listOf("status", "enhet", "saktype")
-        }
-
-        @Test
         fun `Metrikker for oppgaver totalt`() {
-            val metrikker =
-                behandlingMetrics.oppgaver
-                    .collect()
-                    .first()
-                    .samples
-            metrikker.size shouldBe 4
+            testreg.get("etterlatte oppgaver").gauges().size shouldBe 4
         }
 
         @Test
         fun `Metrikker for oppgaver status`() {
-            val metrikker =
-                behandlingMetrics.oppgaver
-                    .collect()
-                    .first()
-                    .samples
-            metrikker.filter { it.labelValues[0] == Status.NY.name }.size shouldBe 1
-            metrikker.filter { it.labelValues[0] == Status.UNDER_BEHANDLING.name }.size shouldBe 1
-            metrikker.filter { it.labelValues[0] == Status.FEILREGISTRERT.name }.size shouldBe 1
-            metrikker.filter { it.labelValues[0] == Status.FERDIGSTILT.name }.size shouldBe 1
+            val metrikker = metrikker("etterlatte oppgaver")
+            val tag = "status"
+            assertEquals(4, metrikker.size)
+            assertEquals(1, hentVerdi(metrikker, tag, Status.NY.name))
+            assertEquals(1, hentVerdi(metrikker, tag, Status.UNDER_BEHANDLING.name))
+            assertEquals(1, hentVerdi(metrikker, tag, Status.FEILREGISTRERT.name))
+            assertEquals(1, hentVerdi(metrikker, tag, Status.FERDIGSTILT.name))
         }
 
         @Test
         fun `Metrikker for oppgaver enhet`() {
-            val metrikker =
-                behandlingMetrics.oppgaver
-                    .collect()
-                    .first()
-                    .samples
-            metrikker.filter { it.labelValues[1] == Enheter.AALESUND.enhetNr }.size shouldBe 2
-            metrikker.filter { it.labelValues[1] == Enheter.PORSGRUNN.enhetNr }.size shouldBe 2
+            val tag = "enhet"
+            val metrikker = metrikker("etterlatte oppgaver")
+            assertEquals(2, hentVerdi(metrikker, tag, Enheter.AALESUND.enhetNr.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enheter.PORSGRUNN.enhetNr.enhetNr))
         }
 
         @Test
         fun `Metrikker for oppgaver saktype`() {
-            val metrikker =
-                behandlingMetrics.oppgaver
-                    .collect()
-                    .first()
-                    .samples
-            metrikker.filter { it.labelValues[2] == SakType.BARNEPENSJON.name }.size shouldBe 2
-            metrikker.filter { it.labelValues[2] == SakType.OMSTILLINGSSTOENAD.name }.size shouldBe 2
+            val tag = "saktype"
+            val metrikker = metrikker("etterlatte oppgaver")
+            assertEquals(2, hentVerdi(metrikker, tag, SakType.BARNEPENSJON.name))
+            assertEquals(2, hentVerdi(metrikker, tag, SakType.OMSTILLINGSSTOENAD.name))
         }
     }
+
+    private fun hentVerdi(
+        metrikker: Collection<Gauge>,
+        tag: String,
+        verdi: String,
+    ) = metrikker
+        .filter {
+            it.id.getTag(tag) == verdi
+        }.sumOf { it.value() }
+        .toInt()
+
+    private fun metrikker(metrikk: String) = testreg.get(metrikk).gauges()
 
     @Nested
     inner class Saksbehandler {
         @Test
-        fun `Metrikker for saksbehandler labels i riktig rekkefoelge`() {
-            val metrikker =
-                behandlingMetrics.saksbehandler
-                    .collect()
-                    .first()
-                    .samples
-            metrikker.first().labelNames shouldContainExactly listOf("enhet")
-        }
-
-        @Test
         fun `Metrikker for oppgaver totalt og per enhet`() {
-            val metrikker =
-                behandlingMetrics.saksbehandler
-                    .collect()
-                    .first()
-                    .samples
-            metrikker.first { it.labelValues[0] == Enheter.AALESUND.enhetNr }.value shouldBe 2
-            metrikker.first { it.labelValues[0] == Enheter.PORSGRUNN.enhetNr }.value shouldBe 2
-            metrikker.first { it.labelValues[0] == "Totalt" }.value shouldBe 3
+            val metrikker = metrikker("etterlatte_oppgaver_saksbehandler")
+            val tag = "enhet"
+            assertEquals(2, hentVerdi(metrikker, tag, Enheter.AALESUND.enhetNr.enhetNr))
+            assertEquals(2, hentVerdi(metrikker, tag, Enheter.PORSGRUNN.enhetNr.enhetNr))
+            assertEquals(3, hentVerdi(metrikker, tag, "Totalt"))
         }
     }
 
     private fun opprettOppgaver() {
-        sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.NY, "saksbehandler1"))
         }
-        sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.UNDER_BEHANDLING, "saksbehandler2"))
         }
-        sakDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.FEILREGISTRERT, "saksbehandler1"))
         }
-        sakDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
+        sakSkrivDao.opprettSak("fnr", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr).let {
             oppgaveDao.opprettOppgave(lagNyOppgave(it, Status.FERDIGSTILT, "saksbehandler3"))
         }
     }

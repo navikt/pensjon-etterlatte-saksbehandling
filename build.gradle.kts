@@ -1,5 +1,6 @@
 import com.github.jk1.license.render.InventoryReportRenderer
 import com.github.jk1.license.render.JsonReportRenderer
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 setupRepositories()
 setupTestLogging()
@@ -44,8 +45,10 @@ fun Project.setupTestLogging() {
                 .pluginId,
         )
         sub.tasks.withType<Test> {
+            useJUnitPlatform()
             maxParallelForks = hentAntallKjerner()
             testLogging {
+                events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
             }
         }

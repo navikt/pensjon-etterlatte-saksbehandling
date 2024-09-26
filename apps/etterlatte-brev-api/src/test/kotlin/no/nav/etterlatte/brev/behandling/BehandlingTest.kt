@@ -394,6 +394,7 @@ internal class BehandlingTest {
                 UUID.randomUUID(),
                 Aldersgruppe.OVER_18,
                 Feilutbetaling(FeilutbetalingValg.NEI, null),
+                frivilligSkattetrekk = true,
                 Grunnlagsopplysning.Saksbehandler("Casey", Tidspunkt.now()),
             )
         val grunnlagService = GrunnlagService(mockk(), adresseService)

@@ -13,6 +13,7 @@ import no.nav.etterlatte.trygdetid.avtale.AvtaleRepository
 import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
+import no.nav.etterlatte.trygdetid.klienter.PesysKlientImpl
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -31,6 +32,7 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             grunnlagKlient = grunnlagKlient,
             beregnTrygdetidService = TrygdetidBeregningService,
+            pesysKlient = PesysKlientImpl(config, httpClient()),
         )
     private val avtaleRepository = AvtaleRepository(dataSource)
     val avtaleService = AvtaleService(avtaleRepository)

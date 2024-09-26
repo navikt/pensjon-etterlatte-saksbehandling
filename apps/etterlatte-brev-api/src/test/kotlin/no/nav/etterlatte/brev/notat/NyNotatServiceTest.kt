@@ -8,6 +8,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.NotatAlleredeJournalfoert
 import no.nav.etterlatte.brev.NyNotatService
@@ -17,9 +18,13 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpost
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
+import no.nav.etterlatte.brev.pdfgen.SlatePDFMal
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,7 +36,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import javax.sql.DataSource
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
@@ -64,9 +68,9 @@ internal class NyNotatServiceTest(
 
     @Test
     fun `Hent og opprett notat for sak fungerer`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
-        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
+        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
 
         assertEquals(0, nyNotatService.hentForSak(sakId).size)
 
@@ -97,9 +101,9 @@ internal class NyNotatServiceTest(
 
     @Test
     fun `Oppdater tittel paa notat`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
-        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
+        coEvery { behandlingServiceMock.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
 
         val nyttNotat =
             runBlocking {
@@ -128,12 +132,12 @@ internal class NyNotatServiceTest(
 
     @Test
     fun `Journalfoer notat`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
 
-        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, "4808")
+        val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
         coEvery { behandlingServiceMock.hentSak(any(), any()) } returns sak
         coEvery { dokarkivServiceMock.journalfoer(any()) } returns OpprettJournalpostResponse("123", true)
-        coEvery { pdfGeneratorKlientMock.genererPdf(any()) } returns "pdf".toByteArray()
+        coEvery { pdfGeneratorKlientMock.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()
 
         val nyttNotat =
             runBlocking {
@@ -143,7 +147,8 @@ internal class NyNotatServiceTest(
                     bruker = saksbehandler,
                 )
             }
-        val payload = nyNotatService.hentPayload(nyttNotat.id)
+        val payload = SlatePDFMal(nyNotatService.hentPayload(nyttNotat.id))
+        assertTrue(payload.toJsonNode().has("slate"), "OBS! Payload må ha feltet [Slate] for at PDFGEN skal virke.")
 
         runBlocking { nyNotatService.journalfoer(nyttNotat.id, saksbehandler) }
 
@@ -156,7 +161,7 @@ internal class NyNotatServiceTest(
         coVerify {
             behandlingServiceMock.hentSak(sakId, saksbehandler)
             dokarkivServiceMock.journalfoer(capture(journalpostRequest))
-            pdfGeneratorKlientMock.genererPdf(PdfGenRequest(nyttNotat.tittel, payload))
+            pdfGeneratorKlientMock.genererPdf(nyttNotat.tittel, payload, NotatMal.TOM_MAL)
         }
 
         with(journalpostRequest.captured) {

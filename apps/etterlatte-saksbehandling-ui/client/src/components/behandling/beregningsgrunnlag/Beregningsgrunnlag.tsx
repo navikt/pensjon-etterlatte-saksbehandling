@@ -10,13 +10,16 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { OverstyrBeregning } from '~shared/types/Beregning'
 import React, { useEffect, useState } from 'react'
 import OverstyrBeregningGrunnlag from './overstyrGrunnlagsBeregning/OverstyrBeregningGrunnlag'
-import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
+import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
 import { SkruPaaOverstyrtBeregning } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/SkruPaaOverstyrtBeregning'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { formaterNavn } from '~shared/types/Person'
+import { Personopplysninger } from '~shared/types/grunnlag'
 
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -55,7 +58,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 
   /* For å håndtere første aktivering og deaktivering av overstyrt beregning */
   useEffect(() => {
-    setVisOverstyrtBeregningGrunnlag(!erBehandlingFerdigstilt && overstyrtBeregning)
+    setVisOverstyrtBeregningGrunnlag(!erBehandlingFerdigstilt && !!overstyrtBeregning)
   }, [overstyrtBeregning])
 
   return (
@@ -64,7 +67,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         <Heading spacing size="large" level="1">
           Beregningsgrunnlag
         </Heading>
-        <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
+        <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       <VStack gap="12" paddingInline="16">
         {(isSuccess(overstyrtBeregningResponse) || isSuccess(overstyrtBeregningGrunnlagResponse)) && (
@@ -80,7 +83,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
             {!visOverstyrtBeregningGrunnlag &&
               {
                 [SakType.BARNEPENSJON]: <BeregningsgrunnlagBarnepensjon />,
-                [SakType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad behandling={behandling} />,
+                [SakType.OMSTILLINGSSTOENAD]: <BeregningsgrunnlagOmstillingsstoenad />,
               }[behandling.sakType]}
           </>
         )}{' '}
@@ -94,3 +97,24 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 }
 
 export default Beregningsgrunnlag
+
+export const tagTekstForKunEnJuridiskForelder = (behandling: IBehandlingReducer) => {
+  const datoTomKunEnJuridiskForelder = behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
+
+  return datoTomKunEnJuridiskForelder
+    ? `Kun én juridisk forelder til og med ${formaterDato(datoTomKunEnJuridiskForelder)}`
+    : `Kun én juridisk forelder`
+}
+
+export const mapNavn = (fnr: string, personopplysninger: Personopplysninger | null): string => {
+  if (!personopplysninger) return fnr
+
+  const opplysning = personopplysninger.avdoede.find(
+    (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
+  )?.opplysning
+
+  if (!opplysning) {
+    return fnr
+  }
+  return `${formaterNavn(opplysning)} (${fnr})`
+}

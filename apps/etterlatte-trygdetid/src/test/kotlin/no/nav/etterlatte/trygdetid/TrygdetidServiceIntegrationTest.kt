@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -22,12 +23,12 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
+import no.nav.etterlatte.trygdetid.klienter.PesysKlient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
-import java.security.SecureRandom
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
@@ -59,6 +60,7 @@ internal class TrygdetidServiceIntegrationTest(
                 mockk<BehandlingKlient>(),
                 grunnlagKlient,
                 TrygdetidBeregningService,
+                mockk<PesysKlient>(),
             )
     }
 
@@ -84,7 +86,7 @@ internal class TrygdetidServiceIntegrationTest(
         repository.opprettTrygdetid(
             trygdetid(
                 behandlingId = behandlingId,
-                sakId = SecureRandom().nextLong(100_000),
+                sakId = randomSakId(),
                 opplysninger = opplysningsgrunnlag(grunnlagTestData),
             ),
         )
@@ -126,7 +128,7 @@ internal class TrygdetidServiceIntegrationTest(
         repository.opprettTrygdetid(
             trygdetid(
                 behandlingId = behandlingId,
-                sakId = SecureRandom().nextLong(100_000),
+                sakId = randomSakId(),
                 opplysninger = opplysningsgrunnlag(grunnlagTestData),
             ),
         )
@@ -173,7 +175,7 @@ internal class TrygdetidServiceIntegrationTest(
         repository.opprettTrygdetid(
             trygdetid(
                 behandlingId = behandlingId,
-                sakId = SecureRandom().nextLong(100_000),
+                sakId = randomSakId(),
                 ident = UKJENT_AVDOED,
                 opplysninger = emptyList(),
             ),
@@ -199,7 +201,7 @@ internal class TrygdetidServiceIntegrationTest(
         repository.opprettTrygdetid(
             trygdetid(
                 behandlingId = behandlingId,
-                sakId = SecureRandom().nextLong(100_000),
+                sakId = randomSakId(),
                 ident = "123",
                 opplysninger = opplysningsgrunnlag(grunnlagTestData),
             ),

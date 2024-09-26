@@ -7,6 +7,8 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.tilSakId
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -36,7 +38,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingVedtakDto(
                 UUID.randomUUID(),
-                123L,
+                tilSakId(123L),
                 SakType.OMSTILLINGSSTOENAD,
                 Folkeregisteridentifikator.of("04417103428"),
                 objectMapper.createObjectNode(),
@@ -67,7 +69,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingVedtakDto(
                 UUID.randomUUID(),
-                123L,
+                tilSakId(123L),
                 SakType.OMSTILLINGSSTOENAD,
                 Folkeregisteridentifikator.of("04417103428"),
                 objectMapper.createObjectNode(),
@@ -96,7 +98,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingVedtakDto(
                 UUID.randomUUID(),
-                123L,
+                tilSakId(123L),
                 SakType.OMSTILLINGSSTOENAD,
                 Folkeregisteridentifikator.of("04417103428"),
                 objectMapper.createObjectNode(),
@@ -115,7 +117,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = ENHET_1,
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak()
         every { repo.fattVedtak(any(), any()) } returns vedtak()
@@ -139,7 +141,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = ENHET_1,
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.FATTET_VEDTAK)
 
@@ -154,7 +156,7 @@ class VedtakTilbakekrevingServiceTest {
         val attesterDto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = ENHET_1,
             )
 
         every { repo.hentVedtak(attesterDto.tilbakekrevingId) } returns
@@ -163,7 +165,7 @@ class VedtakTilbakekrevingServiceTest {
                 vedtakFattet =
                     VedtakFattet(
                         ansvarligSaksbehandler = "saksbehandler",
-                        ansvarligEnhet = "enhet",
+                        ansvarligEnhet = ENHET_1,
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
@@ -179,13 +181,13 @@ class VedtakTilbakekrevingServiceTest {
                 vedtakFattet =
                     VedtakFattet(
                         ansvarligSaksbehandler = "saksbehandler",
-                        ansvarligEnhet = "enhet",
+                        ansvarligEnhet = ENHET_1,
                         tidspunkt = Tidspunkt.now(),
                     ),
                 attestasjon =
                     Attestasjon(
                         attestant = "annen saksbehandler",
-                        attesterendeEnhet = "enhet",
+                        attesterendeEnhet = ENHET_1,
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
@@ -197,7 +199,7 @@ class VedtakTilbakekrevingServiceTest {
         with(vedtakDto) {
             id shouldBe 1L
             fattetAv shouldBe "saksbehandler"
-            enhet shouldBe "enhet"
+            enhet shouldBe Enheter.STEINKJER.enhetNr
             dato shouldBe attestertVedtak.vedtakFattet!!.tidspunkt.toLocalDate()
         }
         verify { repo.hentVedtak(attesterDto.tilbakekrevingId) }
@@ -232,7 +234,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = ENHET_1,
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.ATTESTERT)
 
@@ -247,7 +249,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                enhet = "enhet",
+                enhet = ENHET_1,
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns
             vedtak(
@@ -255,7 +257,7 @@ class VedtakTilbakekrevingServiceTest {
                 vedtakFattet =
                     VedtakFattet(
                         saksbehandler.ident,
-                        "enhet",
+                        ENHET_1,
                         Tidspunkt.now().minus(1, ChronoUnit.DAYS),
                     ),
             )

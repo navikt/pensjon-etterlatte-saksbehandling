@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -213,7 +215,7 @@ enum class TilbakekrevingResultat(
 * N.B Inneholder ikke alle vedtaksinfo kun det som er nødvendig for Tilbakekrevingskomponent.
 */
 data class TilbakekrevingVedtak(
-    val sakId: Long,
+    val sakId: SakId,
     val vedtakId: Long,
     val fattetVedtak: FattetVedtak,
     val aarsak: TilbakekrevingAarsak,
@@ -225,7 +227,7 @@ data class TilbakekrevingVedtak(
 
 data class FattetVedtak(
     val saksbehandler: String,
-    val enhet: String,
+    val enhet: Enhetsnummer,
     val dato: LocalDate,
 )
 

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -14,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
@@ -54,7 +56,7 @@ class StatistikkService(
     private val beregningKlient: BeregningKlient,
     private val aktivitetspliktService: AktivitetspliktService,
 ) {
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun registrerStatistikkForVedtak(
         vedtak: VedtakDto,
@@ -63,20 +65,36 @@ class StatistikkService(
     ): Pair<SakRad?, StoenadRad?> {
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid)
         if (vedtakKafkaHendelseType == VedtakKafkaHendelseHendelseType.IVERKSATT) {
+            val enhet = vedtak.attestasjon?.attesterendeEnhet
+            if (enhet in listOf(Enheter.STRENGT_FORTROLIG.enhetNr, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)) {
+                return sakRad to null
+            }
+            val gradering = runBlocking { behandlingKlient.hentGraderingForSak(vedtak.sak.id) }
+            when (gradering.adressebeskyttelseGradering) {
+                AdressebeskyttelseGradering.FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+                -> return sakRad to null
+
+                null, AdressebeskyttelseGradering.UGRADERT -> Unit
+            }
             val stoenadRad =
                 when (vedtak.type) {
                     VedtakType.INNVILGELSE,
                     VedtakType.ENDRING,
                     VedtakType.OPPHOER,
                     ->
-                        stoenadRepository.lagreStoenadsrad(
-                            vedtakTilStoenadsrad(
-                                vedtak,
-                                tekniskTid,
-                                sakRad!!.kilde,
-                                sakRad.pesysId,
-                            ),
-                        )
+                        stoenadRepository
+                            .lagreStoenadsrad(
+                                vedtakTilStoenadsrad(
+                                    vedtak,
+                                    tekniskTid,
+                                    sakRad!!.kilde,
+                                    sakRad.pesysId,
+                                ),
+                            ).also {
+                                hentSisteAktivitetspliktDto(vedtak)
+                            }
 
                     VedtakType.TILBAKEKREVING,
                     VedtakType.AVVIST_KLAGE,
@@ -86,6 +104,22 @@ class StatistikkService(
             return sakRad to stoenadRad
         }
         return sakRad to null
+    }
+
+    private fun hentSisteAktivitetspliktDto(vedtak: VedtakDto) {
+        try {
+            if (vedtak.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+                val aktivitetspliktDto =
+                    runBlocking { behandlingKlient.hentAktivitetspliktDto(vedtak.sak.id, vedtak.behandlingId) }
+                aktivitetspliktService.oppdaterVurderingAktivitetsplikt(aktivitetspliktDto)
+            }
+        } catch (e: Exception) {
+            logger.error(
+                "Kunne ikke hente og oppdatere aktivitetspliktstatusen for OMS-sak med id=${vedtak.sak.id}" +
+                    "Dette betyr at vi ikke kjenner til den oppdaterte aktivitetspliktstatusen for saken," +
+                    "og trenger å følges opp for å få de riktig med i statistikken.",
+            )
+        }
     }
 
     fun produserStoenadStatistikkForMaaned(maaned: YearMonth): MaanedStatistikk {

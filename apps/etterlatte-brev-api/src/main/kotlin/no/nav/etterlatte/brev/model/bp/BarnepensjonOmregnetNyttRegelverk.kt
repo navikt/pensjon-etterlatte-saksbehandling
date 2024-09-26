@@ -62,6 +62,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
+    val frivilligSkattetrekk: Boolean?,
     val erUnder18Aar: Boolean,
     val erBosattUtlandet: Boolean,
 ) : BrevDataFerdigstilling {
@@ -96,6 +97,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         trygdetid,
                     ),
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
+                frivilligSkattetrekk = etterbetaling?.frivilligSkattetrekk ?: false,
                 erBosattUtlandet =
                     (
                         requireNotNull(utlandstilknytning)

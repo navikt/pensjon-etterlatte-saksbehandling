@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
@@ -42,7 +43,7 @@ class SaksbehandlerServiceImplTest(
     fun beforeAll() {
         dao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
         service = SaksbehandlerServiceImpl(dao, axsysKlient, navansattKlient)
-        nyKontekstMedBrukerOgDatabase(user, dataSource)
+        nyKontekstMedBrukerOgDatabase(user.also { every { it.name() } returns this::class.java.simpleName }, dataSource)
     }
 
     @AfterEach
@@ -125,7 +126,7 @@ class SaksbehandlerServiceImplTest(
     @Test
     fun `Ikke registrert enhet må kalle axsys`() {
         val ident = "ident"
-        val navMoldeEnhetsnr = "1502"
+        val navMoldeEnhetsnr = Enhetsnummer("1502")
         val navMoldeNavn = "NAV Molde"
         val molde = SaksbehandlerEnhet(navMoldeEnhetsnr, navMoldeNavn)
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(molde)

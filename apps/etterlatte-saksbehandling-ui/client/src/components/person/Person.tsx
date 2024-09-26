@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import { SakOversikt } from './sakOgBehandling/SakOversikt'
-import Spinner from '~shared/Spinner'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Box, Tabs } from '@navikt/ds-react'
+import { Tabs } from '@navikt/ds-react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import {
@@ -17,12 +16,10 @@ import {
   PersonIcon,
 } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
-import { isSuccess, mapAllApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { isSuccess, Result } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
-import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
@@ -51,11 +48,9 @@ export const Person = () => {
   const [search, setSearch] = useSearchParams()
   const { fnr } = usePersonLocationState(search.get('key'))
 
-  const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavnogFoedsel)
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
   const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
-  const skalViseAktivitet = useFeatureEnabledMedDefault('flere-perioder-aktivitet-vurdering', false)
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
@@ -66,18 +61,9 @@ export const Person = () => {
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
-      personNavnFetch(fnr!!)
       sakFetch(fnr!!)
     }
   }, [fnr])
-
-  const handleError = (error: ApiError) => {
-    if (error.status === 400) {
-      return <ApiErrorAlert>Ugyldig forespørsel: {error.detail}</ApiErrorAlert>
-    } else {
-      return <ApiErrorAlert>Feil oppsto ved henting av person med fødselsnummer {fnr}</ApiErrorAlert>
-    }
-  }
 
   if (!fnrHarGyldigFormat(fnr)) {
     return <ApiErrorAlert>Fødselsnummeret {fnr} har et ugyldig format (ikke 11 siffer)</ApiErrorAlert>
@@ -89,71 +75,53 @@ export const Person = () => {
 
   return (
     <>
-      {mapSuccess(personNavnResult, (person) => (
-        <PdlPersonStatusBar person={person} />
-      ))}
+      <StatusBar ident={fnr} />
 
       <NavigerTilbakeMeny to="/">Tilbake til oppgavebenken</NavigerTilbakeMeny>
 
-      {mapAllApiResult(
-        personNavnResult,
-        <Spinner label="Laster personinfo ..." />,
-        null,
-        (error) => (
-          <Box padding="8">{handleError(error)}</Box>
-        ),
-        (person) => (
-          <Tabs value={fane} onChange={velgFane}>
-            <Tabs.List>
-              <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
-              <Tabs.Tab
-                value={PersonOversiktFane.PERSONOPPLYSNINGER}
-                label="Personopplysninger"
-                icon={<PersonIcon />}
-              />
-              <Tabs.Tab value={PersonOversiktFane.HENDELSER} label="Hendelser" icon={<BellIcon />} />
-              {isOmstillingsstoenad(sakResult) && skalViseAktivitet && (
-                <Tabs.Tab value={PersonOversiktFane.AKTIVITET} label="Aktivitet" icon={<BriefcaseClockIcon />} />
-              )}
-              <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
-              <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
-              {skalViseNotater && (
-                <Tabs.Tab value={PersonOversiktFane.NOTATER} label="Notater" icon={<FileTextIcon />} />
-              )}
-              {isOmstillingsstoenad(sakResult) && (
-                <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
-              )}
-            </Tabs.List>
+      <Tabs value={fane} onChange={velgFane}>
+        <Tabs.List>
+          <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
+          <Tabs.Tab value={PersonOversiktFane.PERSONOPPLYSNINGER} label="Personopplysninger" icon={<PersonIcon />} />
+          <Tabs.Tab value={PersonOversiktFane.HENDELSER} label="Hendelser" icon={<BellIcon />} />
+          {isOmstillingsstoenad(sakResult) && (
+            <Tabs.Tab value={PersonOversiktFane.AKTIVITET} label="Aktivitet" icon={<BriefcaseClockIcon />} />
+          )}
+          <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
+          <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
+          {skalViseNotater && <Tabs.Tab value={PersonOversiktFane.NOTATER} label="Notater" icon={<FileTextIcon />} />}
+          {isOmstillingsstoenad(sakResult) && (
+            <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
+          )}
+        </Tabs.List>
 
-            <Tabs.Panel value={PersonOversiktFane.SAKER}>
-              <SakOversikt sakResult={sakResult} fnr={person.foedselsnummer} />
-            </Tabs.Panel>
-            <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
-              <Personopplysninger sakResult={sakResult} fnr={person.foedselsnummer} />
-            </Tabs.Panel>
-            <Tabs.Panel value={PersonOversiktFane.HENDELSER}>
-              <Hendelser sakResult={sakResult} fnr={person.foedselsnummer} />
-            </Tabs.Panel>
-            <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
-              <Dokumentliste sakResult={sakResult} fnr={person.foedselsnummer} />
-            </Tabs.Panel>
-            <Tabs.Panel value={PersonOversiktFane.BREV}>
-              <BrevOversikt sakResult={sakResult} />
-            </Tabs.Panel>
-            {skalViseNotater && (
-              <Tabs.Panel value={PersonOversiktFane.NOTATER}>
-                <NotatOversikt sakResult={sakResult} />
-              </Tabs.Panel>
-            )}
-            <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
-              <SamordningSak fnr={person.foedselsnummer} sakResult={sakResult} />
-            </Tabs.Panel>
-            <Tabs.Panel value={PersonOversiktFane.AKTIVITET}>
-              <Aktivitet fnr={person.foedselsnummer} sakResult={sakResult} />
-            </Tabs.Panel>
-          </Tabs>
-        )
-      )}
+        <Tabs.Panel value={PersonOversiktFane.SAKER}>
+          <SakOversikt sakResult={sakResult} fnr={fnr} />
+        </Tabs.Panel>
+        <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
+          <Personopplysninger sakResult={sakResult} fnr={fnr} />
+        </Tabs.Panel>
+        <Tabs.Panel value={PersonOversiktFane.HENDELSER}>
+          <Hendelser sakResult={sakResult} fnr={fnr} />
+        </Tabs.Panel>
+        <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
+          <Dokumentliste sakResult={sakResult} fnr={fnr} />
+        </Tabs.Panel>
+        <Tabs.Panel value={PersonOversiktFane.BREV}>
+          <BrevOversikt sakResult={sakResult} />
+        </Tabs.Panel>
+        {skalViseNotater && (
+          <Tabs.Panel value={PersonOversiktFane.NOTATER}>
+            <NotatOversikt sakResult={sakResult} />
+          </Tabs.Panel>
+        )}
+        <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
+          <SamordningSak fnr={fnr} sakResult={sakResult} />
+        </Tabs.Panel>
+        <Tabs.Panel value={PersonOversiktFane.AKTIVITET}>
+          <Aktivitet fnr={fnr} sakResult={sakResult} />
+        </Tabs.Panel>
+      </Tabs>
     </>
   )
 }

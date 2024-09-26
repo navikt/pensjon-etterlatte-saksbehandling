@@ -4,14 +4,16 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAkt
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
 
 fun unntak(
     id: UUID = UUID.randomUUID(),
-    sakId: Long = 1L,
+    sakId: SakId = sakId1,
     behandlingId: UUID? = null,
     oppgaveId: UUID? = null,
     unntak: AktivitetspliktUnntakType = AktivitetspliktUnntakType.OMSORG_BARN_UNDER_ETT_AAR,
@@ -44,11 +46,12 @@ fun unntak(
 
 fun aktivitetsgrad(
     id: UUID = UUID.randomUUID(),
-    sakId: Long = 1L,
+    sakId: SakId = sakId1,
     behandlingId: UUID? = null,
     oppgaveId: UUID? = null,
     aktivitetsgrad: AktivitetspliktAktivitetsgradType = AktivitetspliktAktivitetsgradType.AKTIVITET_100,
     fom: LocalDate = LocalDate.now(),
+    tom: LocalDate = LocalDate.now(),
     opprettet: Grunnlagsopplysning.Saksbehandler =
         Grunnlagsopplysning.Saksbehandler(
             ident = "Z123456",
@@ -68,6 +71,7 @@ fun aktivitetsgrad(
         oppgaveId = oppgaveId,
         aktivitetsgrad = aktivitetsgrad,
         fom = fom,
+        tom = tom,
         opprettet = opprettet,
         endret = endret,
         beskrivelse = beskrivelse,

@@ -1,7 +1,7 @@
 import React from 'react'
 import { SakType } from '~shared/types/sak'
 import { Tag } from '@navikt/ds-react'
-import { ChildEyesIcon, PlantIcon } from '@navikt/aksel-icons'
+import { ChildHairEyesIcon, PlantIcon } from '@navikt/aksel-icons'
 
 export const SakTypeTag = ({
   sakType,
@@ -15,7 +15,7 @@ export const SakTypeTag = ({
   switch (sakType) {
     case SakType.BARNEPENSJON:
       return (
-        <Tag variant="alt2-moderate" icon={<ChildEyesIcon aria-hidden />} size={size}>
+        <Tag variant="alt2-moderate" icon={<ChildHairEyesIcon aria-hidden />} size={size}>
           {kort ? 'BP' : 'Barnepensjon'}
         </Tag>
       )

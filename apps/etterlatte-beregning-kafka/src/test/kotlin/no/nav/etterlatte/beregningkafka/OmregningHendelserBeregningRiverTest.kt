@@ -8,6 +8,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -45,7 +45,6 @@ class OmregningHendelserBeregningRiverTest {
                 SakType.BARNEPENSJON,
                 behandlingId = nyBehandling,
                 behandlingViOmregnerFra = gammelBehandling,
-                LocalDate.of(2024, Month.APRIL, 10),
             )
         }
     }
@@ -69,7 +68,6 @@ class OmregningHendelserBeregningRiverTest {
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
-                    LocalDate.of(2024, Month.MAY, 10),
                 )
             }
         }
@@ -95,7 +93,6 @@ class OmregningHendelserBeregningRiverTest {
                 SakType.BARNEPENSJON,
                 behandlingId = nyBehandling,
                 behandlingViOmregnerFra = gammelBehandling,
-                LocalDate.of(2024, Month.APRIL, 10),
             )
         }
     }
@@ -119,7 +116,6 @@ class OmregningHendelserBeregningRiverTest {
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
-                    LocalDate.of(2024, Month.MAY, 10),
                 )
             }
         }
@@ -144,7 +140,6 @@ class OmregningHendelserBeregningRiverTest {
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
-                    LocalDate.of(2024, Month.MAY, 10),
                 )
 
             assertNotNull(resultat)
@@ -179,7 +174,7 @@ class OmregningHendelserBeregningRiverTest {
                         },
                     ),
                 beregnetDato = Tidspunkt.now(),
-                grunnlagMetadata = Metadata(sakId = 1L, versjon = 1L),
+                grunnlagMetadata = Metadata(sakId = sakId1, versjon = 1L),
                 overstyrBeregning = null,
             )
     }

@@ -19,15 +19,18 @@ import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.lagContext
+import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -66,7 +69,7 @@ class TilgangsstyringTest {
         @BeforeAll
         @JvmStatic
         fun before() {
-            mockOAuth2Server.start(1234)
+            mockOAuth2Server.startRandomPort()
         }
 
         @AfterAll
@@ -87,7 +90,7 @@ class TilgangsstyringTest {
                     mockk<SakTilgangDao> {
                         every {
                             hentSakMedGraderingOgSkjerming(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -100,7 +103,7 @@ class TilgangsstyringTest {
                     mockk<SakTilgangDao> {
                         every {
                             hentSakMedGraderingOgSkjerming(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -116,7 +119,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaBehandling(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -132,7 +135,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaBehandling(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -151,7 +154,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaOppgave(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -170,7 +173,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaOppgave(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -192,7 +195,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaKlage(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -214,7 +217,7 @@ class TilgangsstyringTest {
                         } returns null
                         every {
                             hentSakMedGraderingOgSkjermingPaaKlage(any())
-                        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.PORSGRUNN.enhetNr)
+                        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -226,8 +229,8 @@ class TilgangsstyringTest {
                     },
                     mockk<SakTilgangDao> {
                         every {
-                            hentSakMedGraderingOgSkjerming(2L)
-                        } returns SakMedGraderingOgSkjermet(2, null, null, Enheter.PORSGRUNN.enhetNr)
+                            hentSakMedGraderingOgSkjerming(sakId2)
+                        } returns SakMedGraderingOgSkjermet(sakId2, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     200,
                 ),
@@ -239,8 +242,8 @@ class TilgangsstyringTest {
                     },
                     mockk<SakTilgangDao> {
                         every {
-                            hentSakMedGraderingOgSkjerming(2L)
-                        } returns SakMedGraderingOgSkjermet(2, null, null, Enheter.PORSGRUNN.enhetNr)
+                            hentSakMedGraderingOgSkjerming(sakId2)
+                        } returns SakMedGraderingOgSkjermet(sakId2, null, null, Enheter.PORSGRUNN.enhetNr)
                     },
                     403,
                 ),
@@ -274,7 +277,8 @@ class TilgangsstyringTest {
             val client =
                 runServer(mockOAuth2Server) {
                     intercept(ApplicationCallPipeline.Call) {
-                        val context = lagContext(user, sakTilgangDao = sakTilgangDao)
+                        val context =
+                            lagContext(user.also { every { it.name() } returns this::class.java.simpleName }, sakTilgangDao = sakTilgangDao)
 
                         withContext(
                             Dispatchers.Default +
@@ -326,7 +330,7 @@ class TilgangsstyringTest {
                         }
                         route("/annet") {
                             get("/sak") {
-                                kunSaksbehandlerMedSkrivetilgang(sakId = 2L) {
+                                kunSaksbehandlerMedSkrivetilgang(sakId = sakId2) {
                                     call.respond("OK")
                                 }
                             }

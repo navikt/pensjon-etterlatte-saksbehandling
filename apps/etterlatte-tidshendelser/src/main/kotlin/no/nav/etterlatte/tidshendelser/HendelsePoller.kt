@@ -14,7 +14,7 @@ class HendelsePollerTask(
     private val hendelsePoller: HendelsePoller,
     private val maxAntallHendelsePerPoll: Int = 5,
 ) : TimerJob {
-    private val logger = LoggerFactory.getLogger(HendelsePollerTask::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun schedule(): Timer {
         logger.info("Starter polling av nye hendelser pr $periode")

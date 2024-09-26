@@ -12,6 +12,7 @@ import no.nav.etterlatte.LITE_BARN
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
@@ -81,20 +82,6 @@ class DoedshendelseKontrollpunktServiceTest {
     fun oppsett() {
         coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr, bruker) } returns emptyList()
         coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr, bruker) } returns emptyList()
-        coEvery {
-            pesysKlient.erTilstoetendeBehandlet(
-                doedshendelseInternalOMS.beroertFnr,
-                any(),
-                bruker,
-            )
-        } returns false
-        coEvery {
-            pesysKlient.erTilstoetendeBehandlet(
-                doedshendelseInternalBP.beroertFnr,
-                any(),
-                bruker,
-            )
-        } returns false
 
         every { behandlingService.hentSisteIverksatte(any()) } returns null
         every {
@@ -157,7 +144,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakId1, Enheter.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -199,7 +186,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakId1, Enheter.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
                 doedshendelseInternalAvdoed.avdoedFnr,
@@ -274,7 +261,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        val sakIdd = 1L
+        val sakIdd = sakId1
         val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
@@ -335,8 +322,8 @@ class DoedshendelseKontrollpunktServiceTest {
             Sak(
                 ident = doedshendelseInternalBP.beroertFnr,
                 sakType = doedshendelseInternalBP.sakTypeForEpsEllerBarn(),
-                id = 1L,
-                enhet = "0000",
+                id = sakId1,
+                enhet = Enheter.defaultEnhet.enhetNr,
             )
         val oppgaveIntern =
             mockk<OppgaveIntern> {
@@ -401,20 +388,6 @@ class DoedshendelseKontrollpunktServiceTest {
             )
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.GjenlevendeManglerAdresse)
-    }
-
-    @Test
-    fun `Skal opprette kontrollpunkt hvis saken er behandlet i Pesys`() {
-        coEvery {
-            pesysKlient.erTilstoetendeBehandlet(
-                doedshendelseInternalBP.beroertFnr,
-                any(),
-                bruker,
-            )
-        } returns true
-
-        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP, bruker) shouldBe
-            listOf(DoedshendelseKontrollpunkt.TilstoetendeBehandletIPesys)
     }
 
     @Test

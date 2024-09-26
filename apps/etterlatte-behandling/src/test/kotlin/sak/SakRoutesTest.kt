@@ -21,10 +21,14 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
@@ -55,7 +59,7 @@ internal class SakRoutesTest {
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start(1234)
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -78,16 +82,16 @@ internal class SakRoutesTest {
             Sak(
                 ident = "12345",
                 sakType = SakType.BARNEPENSJON,
-                id = 123455,
-                enhet = "birger",
+                id = randomSakId(),
+                enhet = Enheter.defaultEnhet.enhetNr,
             )
         every { oppgaveService.hentOppgaverForSak(any()) } returns
             listOf(
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.UNDER_BEHANDLING,
-                    enhet = "4808",
-                    sakId = 1,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
+                    sakId = sakId1,
                     kilde = null,
                     type = OppgaveType.FOERSTEGANGSBEHANDLING,
                     saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
@@ -101,8 +105,8 @@ internal class SakRoutesTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.UNDER_BEHANDLING,
-                    enhet = "4808",
-                    sakId = 1,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
+                    sakId = sakId1,
                     kilde = null,
                     type = OppgaveType.KLAGE,
                     saksbehandler = null,
@@ -116,8 +120,8 @@ internal class SakRoutesTest {
                 OppgaveIntern(
                     id = UUID.randomUUID(),
                     status = Status.FERDIGSTILT,
-                    enhet = "4808",
-                    sakId = 1,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
+                    sakId = sakId1,
                     kilde = null,
                     type = OppgaveType.KLAGE,
                     saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
@@ -134,7 +138,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = "4808"))
+                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))
                 }
             assertEquals(200, response.status.value)
             verify(exactly = 1) { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) }
@@ -156,7 +160,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = "4805"))
+                    setBody(EnhetRequest(enhet = Enhetsnummer("4805")))
                 }
             assertEquals(400, response.status.value)
             verify(exactly = 0) { sakService.finnSak(any()) }
@@ -177,7 +181,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = "4808"))
+                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))
                 }
             assertEquals(400, response.status.value)
         }
@@ -186,7 +190,7 @@ internal class SakRoutesTest {
     @Test
     fun `siste iverksatte route returnerer 200 ok og behandling`() {
         val sakId = 1
-        coEvery { behandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)
+        coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns mockk(relaxed = true)
 
         withTestApplication { client ->
             val response =
@@ -201,7 +205,7 @@ internal class SakRoutesTest {
     @Test
     fun `siste iverksatte route returnerer 404 naar det ikke finnes noen iverksatt behandling`() {
         val sakId = 1
-        coEvery { behandlingService.hentSisteIverksatte(1) } returns null
+        coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns null
         withTestApplication { client ->
             val response =
                 client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
@@ -213,7 +217,7 @@ internal class SakRoutesTest {
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
         every { user.enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
 

@@ -21,6 +21,7 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main

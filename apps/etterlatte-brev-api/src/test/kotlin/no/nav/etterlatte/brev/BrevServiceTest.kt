@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
@@ -52,7 +53,7 @@ internal class BrevServiceTest {
     private val innholdTilRedigerbartBrevHenter =
         InnholdTilRedigerbartBrevHenter(brevDataFacade, brevbakerService, adresseService, redigerbartVedleggHenter)
     private val brevoppretter =
-        Brevoppretter(adresseService, db, behandlingService, innholdTilRedigerbartBrevHenter)
+        Brevoppretter(adresseService, db, innholdTilRedigerbartBrevHenter)
 
     private val brevService =
         BrevService(
@@ -94,11 +95,11 @@ internal class BrevServiceTest {
             every { db.hentBrevForSak(any()) } returns
                 listOf(
                     opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
-                    opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
+                    opprettBrev(Status.OPPRETTET, BrevProsessType.REDIGERBAR),
                     opprettBrev(Status.FERDIGSTILT, BrevProsessType.AUTOMATISK),
                 )
 
-            val sakId = Random.nextLong()
+            val sakId = randomSakId()
             val brevListe = brevService.hentBrevForSak(sakId)
             brevListe.size shouldBe 3
 
@@ -247,7 +248,7 @@ internal class BrevServiceTest {
         behandlingId: UUID? = null,
     ) = Brev(
         id = Random.nextLong(10000),
-        sakId = Random.nextLong(10000),
+        sakId = randomSakId(),
         behandlingId = behandlingId,
         tittel = null,
         spraak = Spraak.NB,

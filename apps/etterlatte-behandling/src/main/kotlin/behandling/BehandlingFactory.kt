@@ -8,7 +8,6 @@ import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
-import no.nav.etterlatte.behandling.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
@@ -24,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -36,14 +36,17 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -59,7 +62,7 @@ class BehandlingFactory(
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val migreringKlient: MigreringKlient,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -119,8 +122,8 @@ class BehandlingFactory(
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService
-                            .hentOppgaverForSak(sak.id)
-                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG && !it.erAvsluttet() }
+                            .hentOppgaverForSak(sak.id, OppgaveType.GJENOPPRETTING_ALDERSOVERGANG)
+                            .find { !it.erAvsluttet() }
                             ?.let {
                                 oppgaveService.ferdigstillOppgave(it.id, brukerTokenInfo)
                             }
@@ -155,7 +158,11 @@ class BehandlingFactory(
             opplysninger.add(lagOpplysning(Opplysningstype.UFOERE, kilde, request.ufoere.toJsonNode()))
         }
 
-        grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
+        grunnlagService.leggTilNyeOpplysninger(
+            behandling.id,
+            NyeSaksopplysninger(sak.id, opplysninger),
+            HardkodaSystembruker.opprettGrunnlag,
+        )
 
         if (request.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
             coroutineScope {
@@ -168,13 +175,13 @@ class BehandlingFactory(
     }
 
     fun opprettBehandling(
-        sakId: Long,
+        sakId: SakId,
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
         request: DataHentetForOpprettBehandling,
         prosessType: Prosesstype = Prosesstype.MANUELL,
-    ): BehandlingOgOppgave? {
+    ): BehandlingOgOppgave {
         logger.info("Starter behandling i sak $sakId")
 
         return if (request.harIverksattBehandling()) {
@@ -205,8 +212,13 @@ class BehandlingFactory(
                     kilde,
                     prosessType,
                 )
-                    ?: return null
-            runBlocking { grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri) }
+            runBlocking {
+                grunnlagService.leggInnNyttGrunnlag(
+                    behandling,
+                    persongalleri,
+                    HardkodaSystembruker.opprettGrunnlag,
+                )
+            }
             val oppgave =
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                     referanse = behandling.id.toString(),
@@ -233,7 +245,7 @@ class BehandlingFactory(
     }
 
     fun opprettOmgjoeringAvslag(
-        sakId: Long,
+        sakId: SakId,
         saksbehandler: Saksbehandler,
         skalKopiere: Boolean,
     ): Behandling {
@@ -241,7 +253,8 @@ class BehandlingFactory(
             inTransaction {
                 val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
                 val behandlingerISak = behandlingDao.hentBehandlingerForSak(sakId)
-                val foerstegangsbehandlinger = behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
+                val foerstegangsbehandlinger =
+                    behandlingerISak.filter { it.type == BehandlingType.FØRSTEGANGSBEHANDLING }
                 if (foerstegangsbehandlinger.isEmpty()) {
                     throw AvslagOmgjoering.IngenFoerstegangsbehandling()
                 }
@@ -264,7 +277,9 @@ class BehandlingFactory(
                 }
 
                 val sisteAvslaatteBehandling =
-                    behandlingerISak.filter { it.status == BehandlingStatus.AVSLAG }.maxByOrNull { it.behandlingOpprettet }
+                    behandlingerISak
+                        .filter { it.status == BehandlingStatus.AVSLAG }
+                        .maxByOrNull { it.behandlingOpprettet }
 
                 val foerstegangsbehandlingViOmgjoerer =
                     foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
@@ -296,13 +311,20 @@ class BehandlingFactory(
 
         val persongalleri =
             runBlocking { grunnlagService.hentPersongalleri(behandlingerForOmgjoering.foerstegangsbehandlingViOmgjoerer.id) }
-        runBlocking { grunnlagService.leggInnNyttGrunnlag(behandlingerForOmgjoering.nyFoerstegangsbehandling, persongalleri) }
+        runBlocking {
+            grunnlagService.leggInnNyttGrunnlag(
+                behandlingerForOmgjoering.nyFoerstegangsbehandling,
+                persongalleri,
+                HardkodaSystembruker.opprettGrunnlag,
+            )
+        }
 
         if (skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
             runBlocking {
                 // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
-                vilkaarsvurderingKlient.kopierVilkaarsvurdering(
-                    kopierTilBehandling = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
+
+                vilkaarsvurderingService.kopierVilkaarsvurdering(
+                    behandlingId = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
                     kopierFraBehandling = behandlingerForOmgjoering.sisteAvslaatteBehandling.id,
                     brukerTokenInfo = saksbehandler,
                 )
@@ -343,7 +365,7 @@ class BehandlingFactory(
         }
     }
 
-    internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {
+    internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {
         val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
         val harBehandlingerForSak =
             behandlingDao.hentBehandlingerForSak(sak.id)
@@ -365,7 +387,7 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
-    ): Behandling? {
+    ): Behandling {
         behandlingerUnderBehandling.forEach {
             behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
             oppgaveService.avbrytAapneOppgaverMedReferanse(it.id.toString())
@@ -386,6 +408,10 @@ class BehandlingFactory(
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
             behandlingDao.hentBehandling(opprettBehandling.id)
+                ?: throw InternfeilException(
+                    "Behandlingen vi akkurat opprettet finnes ikke i databasen. Id burde være " +
+                        "${opprettBehandling.id}, i sak ${opprettBehandling.sakId}",
+                )
         }
     }
 }
@@ -422,7 +448,7 @@ sealed class AvslagOmgjoering {
         )
 
     class FoerstegangsbehandlingFeilStatus(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
     ) : UgyldigForespoerselException(
             "FOERSTEGANGSBEHANDLING_UGYLDIG_STATUS",

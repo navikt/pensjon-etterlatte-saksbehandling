@@ -4,9 +4,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseFeatureToggle
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -20,12 +18,15 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 
 class DoedshendelseReminderService(
-    private val featureToggleService: FeatureToggleService,
     private val doedshendelseDao: DoedshendelseDao,
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    companion object {
+        private val fireMaaneder = 4L
+    }
 
     fun setupKontekstAndRun(context: Context) {
         Kontekst.set(context)
@@ -33,12 +34,10 @@ class DoedshendelseReminderService(
     }
 
     private fun run() {
-        if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, false)) {
-            val alleFerdigDoedsmeldingerMedBrevBp = inTransaction { hentAlleFerdigDoedsmeldingerMedBrevBp() }
-            val toMaanedGamlehendelser = hendelserErGamleNok(alleFerdigDoedsmeldingerMedBrevBp)
-            toMaanedGamlehendelser.forEach {
-                inTransaction { lagOppgaveOmIkkeSoekt(it) }
-            }
+        val alleFerdigDoedsmeldingerMedBrevBp = inTransaction { hentAlleFerdigDoedsmeldingerMedBrevBp() }
+        val toMaanedGamlehendelser = hendelserErGamleNok(alleFerdigDoedsmeldingerMedBrevBp)
+        toMaanedGamlehendelser.forEach {
+            inTransaction { lagOppgaveOmIkkeSoekt(it) }
         }
     }
 
@@ -53,14 +52,14 @@ class DoedshendelseReminderService(
         val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId)
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }
         if (!harSoekt) {
-            val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId)
-            if (oppgaver.none { it.type == OppgaveType.VURDER_KONSEKVENS }) {
+            val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId, OppgaveType.MANGLER_SOEKNAD)
+            if (oppgaver.isEmpty()) {
                 oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = hendelse.sakId,
-                    kilde = OppgaveKilde.HENDELSE,
-                    type = OppgaveType.VURDER_KONSEKVENS,
-                    merknad = "${hendelse.beroertFnr} Har ikke søkt om Barnepensjon 2 måneder etter utsendt brev",
+                    kilde = OppgaveKilde.DOEDSHENDELSE,
+                    type = OppgaveType.MANGLER_SOEKNAD,
+                    merknad = "Har ikke søkt om barnepensjon 2 mnd. etter utsendt brev. Sjekk om det må sendes påminnelse.",
                     frist = Tidspunkt.now().plus(30L, ChronoUnit.DAYS),
                 )
             }
@@ -69,8 +68,7 @@ class DoedshendelseReminderService(
 
     private fun hendelserErGamleNok(hendelser: List<DoedshendelseReminder>): List<DoedshendelseReminder> {
         val idag = LocalDateTime.now(norskTidssone)
-        val toMaaneder = 2L
-        return hendelser.filter { ChronoUnit.MONTHS.between(it.endret.toLocalDatetimeNorskTid(), idag).absoluteValue >= toMaaneder }
+        return hendelser.filter { ChronoUnit.MONTHS.between(it.endret.toLocalDatetimeNorskTid(), idag).absoluteValue >= fireMaaneder }
     }
 
     private fun hentAlleFerdigDoedsmeldingerMedBrevBp() = doedshendelseDao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp()

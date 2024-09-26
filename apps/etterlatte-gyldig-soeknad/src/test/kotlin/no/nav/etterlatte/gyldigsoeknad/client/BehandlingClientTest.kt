@@ -14,6 +14,7 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.gyldigsoeknad.PersongalleriMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
@@ -34,14 +35,14 @@ internal class BehandlingClientTest {
         val soeknad = objectMapper.treeToValue<Barnepensjon>(hendelseJson[FordelerFordelt.skjemaInfoKey])
         val hentetSaksid =
             behandlingClient.opprettBehandling(
-                1,
+                sakId1,
                 soeknad.mottattDato,
                 PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad),
             )
 
         assertEquals(behandlingId, hentetSaksid)
         assertEquals(
-            1,
+            sakId1,
             objectMapper
                 .readValue<BehandlingsBehov>(
                     (runBlocking { String(requestList[0].body.toByteArray()) }),

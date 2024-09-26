@@ -22,7 +22,7 @@ class BehandlingKlient(
     private val behandlingHttpClient: HttpClient,
     private val resourceUrl: String,
 ) {
-    private val logger = LoggerFactory.getLogger(this.javaClass.name)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun haandterHendelse(record: ConsumerRecord<String, String>) {
         logger.debug(
@@ -81,6 +81,12 @@ class BehandlingKlient(
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
                                 BehandlingResultat.HENLAGT,
+                            )
+
+                        BehandlingEventType.BEHANDLING_ETTER_TRYGDERETTEN_OPPHEVET_AVSLUTTET ->
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
                             )
                     }
                 } catch (e: Exception) {

@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.PDFGenerator
-import no.nav.etterlatte.brev.VedtaksbrevKanIkkeSlettes
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.PersonerISak
@@ -27,6 +26,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevKanIkkeSlettes
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -34,8 +34,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.LocalDate
@@ -57,7 +59,7 @@ interface OversendelseBrevService {
 
     fun ferdigstillOversendelseBrev(
         brevId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf
 
@@ -102,7 +104,7 @@ class OversendelseBrevServiceImpl(
                     opprettet = Tidspunkt.now(),
                     innhold =
                         BrevInnhold(
-                            tittel = Brevkoder.OVERSENDELSE_KLAGE.tittel ?: "Klage oversendelse",
+                            tittel = Brevkoder.OVERSENDELSE_KLAGE.tittel,
                             spraak = spraak,
                         ),
                     innholdVedlegg = listOf(),
@@ -180,25 +182,22 @@ class OversendelseBrevServiceImpl(
         personerISak: PersonerISak,
     ): Mottaker =
         with(personerISak) {
-            val mottakerFnr: String? =
-                when (verge) {
-                    is Vergemaal -> verge.foedselsnummer.value
-                    is UkjentVergemaal -> null
+            when (verge) {
+                is Vergemaal -> tomMottaker().copy(foedselsnummer = MottakerFoedselsnummer(verge.foedselsnummer.value))
+                is UkjentVergemaal -> tomMottaker()
 
-                    else ->
+                else ->
+                    adresseService.hentMottakerAdresse(
+                        sakType,
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
-                            ?: soeker.fnr.value
-                }
-            return if (mottakerFnr != null) {
-                adresseService.hentMottakerAdresse(sakType, mottakerFnr)
-            } else {
-                tomMottaker()
+                            ?: soeker.fnr.value,
+                    )
             }
         }
 
     override fun ferdigstillOversendelseBrev(
         brevId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         val brev = brevRepository.hentBrev(brevId)
@@ -319,7 +318,7 @@ data class OversendelseBrevFerdigstillingData(
 
 class MismatchSakOgBrevException(
     brevId: BrevID,
-    sakId: Long,
+    sakId: SakId,
 ) : UgyldigForespoerselException(
         code = "SAKID_MATCHER_IKKE",
         detail = "Brevet med id=$brevId har ikke angitt sakId=$sakId",

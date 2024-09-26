@@ -16,10 +16,12 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -52,10 +54,12 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
@@ -78,22 +82,22 @@ fun mockedSakTilgangDao(): SakTilgangDao =
             hentSakMedGraderingOgSkjerming(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
         every {
             hentSakMedGraderingOgSkjermingPaaBehandling(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
         every {
             hentSakMedGraderingOgSkjermingPaaOppgave(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
         every {
             hentSakMedGraderingOgSkjermingPaaKlage(
                 any(),
             )
-        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        } returns SakMedGraderingOgSkjermet(sakId1, null, null, Enheter.defaultEnhet.enhetNr)
     }
 
 fun lagContext(
@@ -111,6 +115,7 @@ fun lagContext(
     testUser,
     databaseContext,
     sakTilgangDao,
+    HardkodaSystembruker.testdata,
 )
 
 fun nyKontekstMedBrukerOgDatabaseContext(
@@ -131,6 +136,25 @@ fun nyKontekstMedBrukerOgDatabase(
 ) = Kontekst.set(lagContext(testUser, DatabaseContext(dataSource)))
 
 fun nyKontekstMedBruker(testUser: User) = Kontekst.set(lagContext(testUser))
+
+fun Route.attachMockContextWithDb(
+    testUser: User,
+    dataSource: DataSource,
+) {
+    intercept(ApplicationCallPipeline.Call) {
+        val context1 = lagContext(testUser, DatabaseContext(dataSource))
+
+        withContext(
+            Dispatchers.Default +
+                Kontekst.asContextElement(
+                    value = context1,
+                ),
+        ) {
+            proceed()
+        }
+        Kontekst.remove()
+    }
+}
 
 fun Route.attachMockContext(testUser: User? = null) {
     intercept(ApplicationCallPipeline.Call) {
@@ -153,7 +177,7 @@ fun mockSaksbehandler(
     harRolleAttestant: Boolean = false,
     harRolleStrengtFortrolig: Boolean = false,
     harRolleEgenAnsatt: Boolean = false,
-    enheter: List<String> = listOf(Enheter.defaultEnhet.enhetNr),
+    enheter: List<Enhetsnummer> = listOf(Enheter.defaultEnhet.enhetNr),
 ): SaksbehandlerMedEnheterOgRoller =
     mockk<SaksbehandlerMedEnheterOgRoller> {
         every { saksbehandlerMedRoller } returns
@@ -169,7 +193,7 @@ fun mockSaksbehandler(
 
 fun opprettBehandling(
     type: BehandlingType,
-    sakId: Long,
+    sakId: SakId,
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     virkningstidspunkt: Virkningstidspunkt? = null,
@@ -177,6 +201,7 @@ fun opprettBehandling(
     fritekstAarsak: String? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
+    opphoerFraOgMed: YearMonth? = null,
 ) = OpprettBehandling(
     type = type,
     sakId = sakId,
@@ -188,11 +213,12 @@ fun opprettBehandling(
     prosesstype = prosesstype,
     kilde = kilde,
     sendeBrev = true,
+    opphoerFraOgMed = opphoerFraOgMed,
 )
 
 fun foerstegangsbehandling(
     id: UUID = UUID.randomUUID(),
-    sakId: Long,
+    sakId: SakId,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -205,7 +231,7 @@ fun foerstegangsbehandling(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enheter.defaultEnhet.enhetNr,
+    enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     opphoerFraOgMed: YearMonth? = null,
 ) = Foerstegangsbehandling(
     id = id,
@@ -232,7 +258,7 @@ fun foerstegangsbehandling(
 
 fun revurdering(
     id: UUID = UUID.randomUUID(),
-    sakId: Long,
+    sakId: SakId,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -244,7 +270,7 @@ fun revurdering(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enheter.defaultEnhet.enhetNr,
+    enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     revurderingInfo: RevurderingInfoMedBegrunnelse? = null,
     begrunnelse: String? = null,
     relatertBehandlingId: String? = null,
@@ -295,7 +321,7 @@ fun ikkeSamsvarMellomPdlOgGrunnlagDoed(doedsdato: LocalDate?) = samsvarDoedsdato
 
 fun grunnlagsendringshendelseMedSamsvar(
     id: UUID = UUID.randomUUID(),
-    sakId: Long = 1,
+    sakId: SakId = sakId1,
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     gjelderPerson: String,

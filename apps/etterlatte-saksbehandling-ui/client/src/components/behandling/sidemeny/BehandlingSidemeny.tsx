@@ -4,7 +4,12 @@ import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehand
 import React, { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { IBehandlingStatus, IBehandlingsType, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  IDetaljertBehandling,
+  UtlandstilknytningType,
+} from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
@@ -32,6 +37,8 @@ import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteL
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { OppgaveEndring } from './OppgaveEndring'
+import { NotatPanel } from '~components/behandling/sidemeny/NotatPanel'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -68,6 +75,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useSelectorBehandlingSidemenyFane()
 
+  const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
   const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: behandling.id })
 
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
@@ -75,22 +83,27 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const kanAttestere =
     behandling && innloggetSaksbehandler.kanAttestere && behandlingsinfo?.status === IBehandlingStatus.FATTET_VEDTAK
 
+  const [hentSjekklisteResult, hentSjekklisteForBehandling, resetSjekklisteResult] = useApiCall(hentSjekkliste)
+  const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =
+    useApiCall(opprettSjekkliste)
+
+  const skalViseSjekkliste = (behandling: IDetaljertBehandling): boolean => {
+    return (
+      behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ||
+      behandling.behandlingType === IBehandlingsType.REVURDERING
+    )
+  }
+
   useEffect(() => {
     fetchVedtakSammendrag(behandling.id, (vedtakSammendrag) => {
       dispatch(updateVedtakSammendrag(vedtakSammendrag))
     })
   }, [])
 
-  const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-
-  const [hentSjekklisteResult, hentSjekklisteForBehandling, resetSjekklisteResult] = useApiCall(hentSjekkliste)
-  const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =
-    useApiCall(opprettSjekkliste)
-
   useEffect(() => {
     resetSjekklisteResult()
     resetOpprettSjekkliste()
-    if (behandling && erFoerstegangsbehandling && isInitial(hentSjekklisteResult)) {
+    if (behandling && skalViseSjekkliste(behandling) && isInitial(hentSjekklisteResult)) {
       hentSjekklisteForBehandling(behandling.id, (result, statusCode) => {
         if (statusCode === 204) {
           if (!erFerdigBehandlet(behandling.status)) {
@@ -151,7 +164,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
       <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
         <Tabs.List>
           <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
-          {erFoerstegangsbehandling && (
+          {skalViseSjekkliste(behandling) && (
             <Tabs.Tab
               value={BehandlingFane.SJEKKLISTE}
               label="Sjekkliste"
@@ -162,13 +175,20 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         </Tabs.List>
 
         <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
-          {soeker?.foedselsnummer && <DokumentlisteLiten fnr={soeker.foedselsnummer} />}
+          {soeker?.foedselsnummer && (
+            <>
+              {skalViseNotater && (
+                <NotatPanel sakId={behandling.sakId} behandlingId={behandling.id} fnr={soeker?.foedselsnummer} />
+              )}
+              <DokumentlisteLiten fnr={soeker.foedselsnummer} />
+            </>
+          )}
         </Tabs.Panel>
         <Tabs.Panel value={BehandlingFane.HISTORIKK}>
           <OppgaveEndring oppgaveResult={oppgaveResult} />
         </Tabs.Panel>
 
-        {erFoerstegangsbehandling && (
+        {skalViseSjekkliste(behandling) && (
           <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
             <Sjekkliste behandling={behandling} />
 

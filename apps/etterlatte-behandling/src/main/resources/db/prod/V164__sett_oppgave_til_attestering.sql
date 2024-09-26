@@ -1,0 +1,1 @@
+update oppgave set status = 'ATTESTERING' where id = '15c50596-9541-4e4b-9496-4154b9363b51';

@@ -13,6 +13,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.junit.jupiter.api.Test
@@ -24,9 +25,9 @@ internal class AxsysKlientTest {
 
         val saksbehandlerEnheter =
             listOf(
-                SaksbehandlerEnhet("id1", "navn1"),
-                SaksbehandlerEnhet("id2", "navn2"),
-                SaksbehandlerEnhet("id3", "navn3"),
+                SaksbehandlerEnhet(Enhetsnummer("1111"), "navn1"),
+                SaksbehandlerEnhet(Enhetsnummer("2222"), "navn2"),
+                SaksbehandlerEnhet(Enhetsnummer("3333"), "navn3"),
             )
 
         val klient =

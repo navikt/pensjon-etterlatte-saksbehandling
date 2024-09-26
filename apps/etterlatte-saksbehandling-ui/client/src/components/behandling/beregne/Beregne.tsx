@@ -21,7 +21,7 @@ import { SakType } from '~shared/types/sak'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
+import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -108,7 +108,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         <Heading spacing size="large" level="1">
           Beregning og vedtak
         </Heading>
-        <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
+        <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       {erOpphoer ? (
         <Box paddingInline="18" paddingBlock="4">

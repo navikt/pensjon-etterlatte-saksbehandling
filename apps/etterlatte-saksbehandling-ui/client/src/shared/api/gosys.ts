@@ -15,6 +15,10 @@ export const hentGosysOppgaver = async (filter: GosysFilter): Promise<ApiRespons
   return apiClient.get(`/oppgaver/gosys?${queryParams}`)
 }
 
+export const hentGosysOppgaverForPerson = async (ident: string): Promise<ApiResponse<GosysOppgave[]>> => {
+  return apiClient.post(`/oppgaver/gosys/person`, { foedselsnummer: ident })
+}
+
 export const hentJournalfoeringsoppgaverFraGosys = async (
   journalpostId: string
 ): Promise<ApiResponse<GosysOppgave[]>> => apiClient.get(`/oppgaver/gosys/journalfoering/${journalpostId}`)

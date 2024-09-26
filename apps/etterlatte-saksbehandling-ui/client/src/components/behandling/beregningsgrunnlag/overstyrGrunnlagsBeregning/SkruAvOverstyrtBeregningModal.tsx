@@ -6,6 +6,9 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { deaktiverOverstyrtBeregning } from '~shared/api/beregning'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { isPending } from '~shared/api/apiUtils'
+import { useAppDispatch } from '~store/Store'
+import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 interface Props {
   behandlingId: string
@@ -14,12 +17,14 @@ interface Props {
 
 export const SkruAvOverstyrtBeregningModal = ({ behandlingId, setOverstyrt }: Props) => {
   const [open, setOpen] = useState<boolean>(false)
+  const dispatch = useAppDispatch()
 
   const [deaktiverOverstyrtBeregningResult, deaktiverOverstyrtBeregningRequest] =
     useApiCall(deaktiverOverstyrtBeregning)
 
   const skruAvOverstyrtBeregning = () => {
     deaktiverOverstyrtBeregningRequest(behandlingId, () => {
+      dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
       setOpen(false)
       setOverstyrt(undefined)
     })

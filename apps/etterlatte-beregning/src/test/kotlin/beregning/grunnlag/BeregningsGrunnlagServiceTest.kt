@@ -11,8 +11,11 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId3
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.beregning.BeregningRepository
-import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -27,6 +30,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -36,8 +40,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -66,6 +70,12 @@ internal class BeregningsGrunnlagServiceTest {
             grunnlagKlient,
         )
 
+    @BeforeEach
+    fun beforeEach() {
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
+    }
+
     @Test
     fun `alle søsken må være avdødes barn hvis ikke kast BPBeregningsgrunnlagBrukerUgydligFnr`() {
         val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
@@ -79,7 +89,7 @@ internal class BeregningsGrunnlagServiceTest {
                         ),
                 ),
             )
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk {
                 coEvery { sakType } returns SakType.BARNEPENSJON
@@ -113,7 +123,7 @@ internal class BeregningsGrunnlagServiceTest {
                         ),
                 ),
             )
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk {
                 coEvery { sakType } returns SakType.BARNEPENSJON
@@ -160,7 +170,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -180,7 +190,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `skal ikke tillate endringer i beregningsgrunnlaget før virk på revurdering`() {
-        val sakId = 1337L
+        val sakId = randomSakId()
         val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
 
         val virk = YearMonth.of(2023, JANUARY)
@@ -221,7 +231,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
-        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(revurdering.id, any(), any()) } returns true
         coEvery {
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
         } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
@@ -236,25 +246,142 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            val lagret =
+            val beregningsGrunnlag =
                 beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId = revurdering.id,
                     beregningsGrunnlag =
                         LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                            institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
+                            institusjonsopphold = grunnlagEndring.institusjonsopphold,
                         ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )
-            assertFalse(lagret)
+            assertNotNull(beregningsGrunnlag)
         }
 
         coVerify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
     }
 
     @Test
+    fun `skal ikke tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler`() {
+        val sakId = randomSakId()
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                uuid = randomUUID(),
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+
+        val grunnlagEndring =
+            beregningsgrunnlag(
+                behandlingId = revurdering.id,
+                soeskenMedIBeregning = emptyList(),
+            )
+
+        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
+        coEvery {
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
+        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+
+        every {
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
+        } returns null
+
+        every {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(foerstegangsbehandling.id)
+        } returns emptyList()
+
+        every {
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(revurdering.id)
+        } returns grunnlagEndring
+
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+
+        runBlocking {
+            assertThrows<ManglerForrigeGrunnlag> {
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
+                    behandlingId = revurdering.id,
+                    beregningsGrunnlag =
+                        LagreBeregningsGrunnlag(
+                            soeskenMedIBeregning = emptyList(),
+                            institusjonsopphold = emptyList(),
+                        ),
+                    brukerTokenInfo = mockk(relaxed = true),
+                )
+            }
+        }
+
+        coVerify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+    }
+
+    @Test
+    fun `skal tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler pga overstyrt beregning`() {
+        val sakId = randomSakId()
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                uuid = randomUUID(),
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+
+        val grunnlagEndring =
+            beregningsgrunnlag(
+                behandlingId = revurdering.id,
+                soeskenMedIBeregning = emptyList(),
+            )
+
+        coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
+        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
+        coEvery {
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
+        coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
+
+        every {
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
+        } returns null
+
+        every {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(foerstegangsbehandling.id)
+        } returns listOf(mockk<OverstyrBeregningGrunnlagDao>())
+
+        every {
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(revurdering.id)
+        } returns grunnlagEndring
+
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+
+        runBlocking {
+            val lagret =
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
+                    behandlingId = revurdering.id,
+                    beregningsGrunnlag =
+                        LagreBeregningsGrunnlag(
+                            soeskenMedIBeregning = emptyList(),
+                            institusjonsopphold = emptyList(),
+                        ),
+                    brukerTokenInfo = mockk(relaxed = true),
+                )
+            assertNotNull(lagret)
+        }
+
+        coVerify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
+    }
+
+    @Test
     fun `skal tillate endringer i beregningsgrunnlaget etter virk på revurdering`() {
-        val sakId = 1337L
+        val sakId = randomSakId()
         val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
 
         val virk = YearMonth.of(2023, JANUARY)
@@ -295,7 +422,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
-        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(revurdering.id, any(), any()) } returns true
         coEvery {
             vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
         } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
@@ -311,17 +438,17 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            val lagret =
+            val beregningsGrunnlag =
                 beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId = revurdering.id,
                     beregningsGrunnlag =
                         LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
-                            institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
+                            institusjonsopphold = grunnlagEndring.institusjonsopphold,
                         ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )
-            assertTrue(lagret)
+            assertNotNull(beregningsGrunnlag)
         }
 
         coVerify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
@@ -337,7 +464,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every {
@@ -372,7 +499,7 @@ internal class BeregningsGrunnlagServiceTest {
         val overstyrBeregningGrunnlagDao = mockk<OverstyrBeregningGrunnlagDao>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every {
             beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
@@ -410,7 +537,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId) } returns null
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
@@ -431,13 +558,13 @@ internal class BeregningsGrunnlagServiceTest {
         val omregningsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns
             BeregningsGrunnlag(
                 behandlingId = behandlingsId,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 soeskenMedIBeregning = emptyList(),
-                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -457,7 +584,7 @@ internal class BeregningsGrunnlagServiceTest {
         val slot = slot<BeregningsGrunnlag>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -488,7 +615,7 @@ internal class BeregningsGrunnlagServiceTest {
         val slot = slot<BeregningsGrunnlag>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -532,7 +659,7 @@ internal class BeregningsGrunnlagServiceTest {
         val slot = slot<BeregningsGrunnlag>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+
         every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
         every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -573,7 +700,7 @@ internal class BeregningsGrunnlagServiceTest {
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 1",
                     aarsak = "ANNET",
                     kilde =
@@ -593,7 +720,7 @@ internal class BeregningsGrunnlagServiceTest {
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 2",
                     aarsak = "ANNET",
                     kilde =
@@ -639,7 +766,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery {
             behandlingKlient.hentBehandling(any(), any())
-        } returns mockBehandling(SakType.BARNEPENSJON, randomUUID(), BehandlingType.FØRSTEGANGSBEHANDLING, 3L)
+        } returns mockBehandling(SakType.BARNEPENSJON, randomUUID(), BehandlingType.FØRSTEGANGSBEHANDLING, sakId3)
 
         every {
             beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
@@ -684,7 +811,7 @@ internal class BeregningsGrunnlagServiceTest {
                 dao.datoTOM shouldBe tom
                 dao.utbetaltBeloep shouldBe 12L
                 dao.trygdetid shouldBe 25L
-                dao.sakId shouldBe 3L
+                dao.sakId shouldBe sakId3
             }
 
             verify(exactly = 1) {
@@ -695,7 +822,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `reguler overstyrt beregningsgrunnlag til sak med utbetalingsperioder før reguleringsmåned`() {
-        val behandlingId = UUID.randomUUID()
+        val behandlingId = randomUUID()
         val behandling = mockk<DetaljertBehandling>()
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(
@@ -774,7 +901,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `reguler overstyrt beregningsgrunnlag til sak med utbetalingsperioder etter reguleringsmåned`() {
-        val behandlingId = UUID.randomUUID()
+        val behandlingId = randomUUID()
         val behandling = mockk<DetaljertBehandling>()
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(
@@ -825,7 +952,7 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `reguler overstyrt beregningsgrunnlag til sak med utbetalingsperuoder før og etter reguleringsmåned`() {
-        val behandlingId = UUID.randomUUID()
+        val behandlingId = randomUUID()
         val behandling = mockk<DetaljertBehandling>()
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(
@@ -909,11 +1036,41 @@ internal class BeregningsGrunnlagServiceTest {
         }
     }
 
+    @Test
+    fun `skal ikke tillate kun en juridisk forelder hvis ikke registrert i persongalleri`() {
+        val behandlingId = randomUUID()
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk {
+                coEvery { sakType } returns SakType.BARNEPENSJON
+                coEvery { behandlingType } returns BehandlingType.REVURDERING
+            }
+
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+
+        assertThrows<BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri> {
+            runBlocking {
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
+                    behandlingId,
+                    LagreBeregningsGrunnlag(
+                        soeskenMedIBeregning = emptyList(),
+                        institusjonsopphold = emptyList(),
+                        beregningsMetode = BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
+                        beregningsMetodeFlereAvdoede = emptyList(),
+                        kunEnJuridiskForelder = GrunnlagMedPeriode(fom = LocalDate.now(), data = TomVerdi),
+                    ),
+                    brukerTokenInfo = mockk(relaxed = true),
+                )
+            }
+        }
+    }
+
     private fun mockBehandling(
         type: SakType,
         uuid: UUID,
         behandlingstype: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        sakId: Long = 1L,
+        sakId: SakId = sakId1,
         virkningstidspunktdato: YearMonth = REFORM_TIDSPUNKT_BP,
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
@@ -935,7 +1092,7 @@ internal class BeregningsGrunnlagServiceTest {
             behandlingId = behandlingId,
             kilde = kilde,
             soeskenMedIBeregning = soeskenMedIBeregning,
-            institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
+            institusjonsopphold = institusjonsoppholdBeregningsgrunnlag,
             beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
         )
 
@@ -945,13 +1102,13 @@ internal class BeregningsGrunnlagServiceTest {
     ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null, null)
 
     private fun overstyrtBeregningsgrunnlag(
-        behandlingId: UUID = UUID.randomUUID(),
+        behandlingId: UUID = randomUUID(),
         utbetaltBeloep: Long = 0L,
         datoFOM: LocalDate,
         datoTOM: LocalDate? = null,
         beskrivelse: String = "",
     ) = OverstyrBeregningGrunnlagDao(
-        id = UUID.randomUUID(),
+        id = randomUUID(),
         behandlingId = behandlingId,
         datoFOM = datoFOM,
         datoTOM = datoTOM,
@@ -960,7 +1117,7 @@ internal class BeregningsGrunnlagServiceTest {
         trygdetidForIdent = "",
         prorataBroekTeller = null,
         prorataBroekNevner = null,
-        sakId = 123L,
+        sakId = tilSakId(123L),
         beskrivelse = beskrivelse,
         aarsak = "ANNET",
         kilde = Grunnlagsopplysning.Saksbehandler.create(""),

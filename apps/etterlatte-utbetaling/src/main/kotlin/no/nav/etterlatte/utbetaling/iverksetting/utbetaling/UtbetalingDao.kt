@@ -7,7 +7,9 @@ import kotliquery.param
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -28,6 +30,8 @@ data class UtbetalingNotFoundException(
 class UtbetalingDao(
     private val dataSource: DataSource,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun opprettUtbetaling(utbetaling: Utbetaling) =
         dataSource
             .transaction { tx ->
@@ -57,9 +61,9 @@ class UtbetalingDao(
                             "endret" to utbetaling.endret.toTimestamp().param(),
                             "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param(),
                             "saksbehandler" to utbetaling.saksbehandler.value.param(),
-                            "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet.param(),
+                            "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet?.enhetNr.param(),
                             "attestant" to utbetaling.attestant.value.param(),
-                            "attestantEnhet" to utbetaling.attestantEnhet.param(),
+                            "attestantEnhet" to utbetaling.attestantEnhet?.enhetNr.param(),
                             "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param(),
                             "saktype" to utbetaling.sakType.name.param(),
                         ),
@@ -286,7 +290,7 @@ class UtbetalingDao(
             }
         }
 
-    fun hentUtbetalinger(sakId: Long): List<Utbetaling> =
+    fun hentUtbetalinger(sakId: SakId): List<Utbetaling> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
@@ -376,9 +380,9 @@ class UtbetalingDao(
             avstemmingsnoekkel = sqlTimestamp("avstemmingsnoekkel").toTidspunkt(),
             stoenadsmottaker = Foedselsnummer(string("stoenadsmottaker")),
             saksbehandler = NavIdent(string("saksbehandler")),
-            saksbehandlerEnhet = string("saksbehandler_enhet"),
+            saksbehandlerEnhet = Enhetsnummer.nullable(string("saksbehandler_enhet")),
             attestant = NavIdent(string("attestant")),
-            attestantEnhet = string("attestant_enhet"),
+            attestantEnhet = Enhetsnummer.nullable(string("attestant_enhet")),
             vedtak = string("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
             oppdrag = string("oppdrag").let(OppdragJaxb::toOppdrag),
             kvittering =
@@ -415,9 +419,9 @@ class UtbetalingDao(
             avstemmingsnoekkel = sqlTimestamp("avstemmingsnoekkel").toTidspunkt(),
             stoenadsmottaker = Foedselsnummer(string("stoenadsmottaker")),
             saksbehandler = NavIdent(string("saksbehandler")),
-            saksbehandlerEnhet = string("saksbehandler_enhet"),
+            saksbehandlerEnhet = Enhetsnummer.nullable(string("saksbehandler_enhet")),
             attestant = NavIdent(string("attestant")),
-            attestantEnhet = string("attestant_enhet"),
+            attestantEnhet = Enhetsnummer.nullable(string("attestant_enhet")),
             utbetalingslinjer = utbetalingslinjer,
             utbetalingshendelser = utbetalingshendelser,
         )
@@ -461,8 +465,4 @@ class UtbetalingDao(
             "12" -> UtbetalingStatus.FEILET
             else -> UtbetalingStatus.FEILET
         }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(UtbetalingDao::class.java)
-    }
 }

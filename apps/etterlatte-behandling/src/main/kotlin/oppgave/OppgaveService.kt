@@ -10,6 +10,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -24,16 +25,18 @@ import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
-    private val sakDao: SakDao,
+    private val sakDao: SakLesDao,
     private val hendelseDao: HendelseDao,
     private val hendelser: BehandlingHendelserKafkaProducer,
 ) {
@@ -223,7 +226,6 @@ class OppgaveService(
         referanse: String,
         type: OppgaveType,
         merknad: String?,
-        frist: Tidspunkt? = null,
     ): OppgaveIntern {
         val oppgaver =
             hentOppgaverForReferanse(referanse)
@@ -241,9 +243,8 @@ class OppgaveService(
         val oppdatertMerknad = merknad ?: oppgave.merknad ?: ""
         oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, oppdatertMerknad, Status.ATTESTERING)
 
-        if (frist != null) {
-            oppgaveDao.redigerFrist(oppgave.id, frist)
-        }
+        val toDagerFremITid = Tidspunkt.now().plus(2L, ChronoUnit.DAYS)
+        oppgaveDao.redigerFrist(oppgave.id, toDagerFremITid)
 
         settSaksbehandlerSomForrigeSaksbehandlerOgFjern(oppgave.id)
 
@@ -416,12 +417,12 @@ class OppgaveService(
 
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
-            endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
             fjernSaksbehandlerFraOppgaveVedFlytt(it.id)
+            endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
         }
     }
 
-    private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: Long) {
+    private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: SakId) {
         for (oppgaveIntern in hentOppgaverForSak(sakId)) {
             if (oppgaveIntern.saksbehandler != null &&
                 oppgaveIntern.erUnderBehandling()
@@ -432,16 +433,24 @@ class OppgaveService(
     }
 
     private fun endreEnhetForOppgaverTilknyttetSak(
-        sakId: Long,
-        enhetsID: String,
+        sakId: SakId,
+        enhetsID: Enhetsnummer,
     ) {
-        val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
+        val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId, OppgaveType.entries)
         oppgaverForSak.forEach {
+            if (it.erUnderBehandling()) {
+                oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
+            }
             oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
         }
     }
 
-    fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
+    fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId, OppgaveType.entries)
+
+    fun hentOppgaverForSak(
+        sakId: SakId,
+        type: OppgaveType,
+    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId, listOf(type))
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
@@ -496,7 +505,7 @@ class OppgaveService(
 
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,
-        sakId: Long,
+        sakId: SakId,
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
         merknad: String? = null,
     ): OppgaveIntern {
@@ -517,7 +526,7 @@ class OppgaveService(
 
     fun opprettOppgaveBulk(
         referanse: String,
-        sakIds: List<Long>,
+        sakIds: List<SakId>,
         kilde: OppgaveKilde?,
         type: OppgaveType,
         merknad: String?,
@@ -549,7 +558,7 @@ class OppgaveService(
 
     fun opprettOppgave(
         referanse: String,
-        sakId: Long,
+        sakId: SakId,
         kilde: OppgaveKilde?,
         type: OppgaveType,
         merknad: String?,
@@ -608,7 +617,7 @@ class OppgaveService(
     fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =
         oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver, request.grense)
 
-    fun tilbakestillOppgaverUnderAttestering(saker: List<Long>) {
+    fun tilbakestillOppgaverUnderAttestering(saker: List<SakId>) {
         val oppgaverTilAttestering =
             oppgaveDao
                 .hentOppgaverTilSaker(
@@ -623,6 +632,7 @@ class OppgaveService(
                         OppgaveType.TILBAKEKREVING,
                         OppgaveType.OMGJOERING,
                         OppgaveType.JOURNALFOERING,
+                        OppgaveType.TILLEGGSINFORMASJON,
                         OppgaveType.GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
                         OppgaveType.AKTIVITETSPLIKT,
                         OppgaveType.AKTIVITETSPLIKT_REVURDERING,
@@ -631,6 +641,7 @@ class OppgaveService(
                             true
                         OppgaveType.KLAGE,
                         OppgaveType.KRAVPAKKE_UTLAND,
+                        OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
                         -> {
                             logger.info(

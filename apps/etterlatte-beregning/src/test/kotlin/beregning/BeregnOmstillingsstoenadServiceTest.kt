@@ -6,6 +6,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -303,7 +304,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns 1
+            every { sak } returns sakId1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         }
@@ -352,7 +353,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
             every { tidspunkt } returns Tidspunkt.now()
             every { type } returns ""
         },
-        institusjonsoppholdBeregningsgrunnlag =
+        institusjonsopphold =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),

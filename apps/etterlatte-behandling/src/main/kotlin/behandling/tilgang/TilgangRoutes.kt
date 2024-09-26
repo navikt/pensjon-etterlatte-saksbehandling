@@ -25,7 +25,7 @@ import no.nav.etterlatte.tilgangsstyring.sjekkSkrivetilgang
 const val SKRIVETILGANG_CALL_QUERYPARAMETER = "skrivetilgang"
 inline val PipelineContext<*, ApplicationCall>.berOmSkrivetilgang: Boolean
     get() =
-        call.request.queryParameters[SKRIVETILGANG_CALL_QUERYPARAMETER]?.let { it.toBoolean() } ?: throw NullPointerException(
+        call.request.queryParameters[SKRIVETILGANG_CALL_QUERYPARAMETER]?.toBoolean() ?: throw NullPointerException(
             "Skrivetilgangparameter er ikke i query params",
         )
 

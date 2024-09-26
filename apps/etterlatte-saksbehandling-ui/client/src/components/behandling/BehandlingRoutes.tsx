@@ -85,7 +85,7 @@ const routeTypes = {
   trygdetid: {
     path: 'trygdetid',
     description: 'Trygdetid',
-    kreverBehandlingsstatus: () => IBehandlingStatus.TRYGDETID_OPPDATERT,
+    kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
   },
   beregningsgrunnlag: {
     path: 'beregningsgrunnlag',

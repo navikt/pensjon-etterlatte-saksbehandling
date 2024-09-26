@@ -2,13 +2,13 @@ package no.nav.etterlatte.behandling.klage
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -71,11 +71,8 @@ class KlageBrevService(
                     brevId = innstillingsbrev.brevId,
                     brukerTokenInfo = saksbehandler,
                 )
-            val notatTilKa =
-                journalfoerNotatKa(
-                    klage = klage,
-                    brukerInfoToken = saksbehandler,
-                )
+            val notatTilKa = brevApiKlient.journalfoerNotatKa(klage, saksbehandler)
+
             logger.info(
                 "Journalførte notat til KA for innstilling i klageId=${klage.id} på " +
                     "journalpostId=${notatTilKa.journalpostId}",
@@ -123,7 +120,7 @@ class KlageBrevService(
     }
 
     private fun ferdigstillOgDistribuerBrev(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         saksbehandler: Saksbehandler,
     ): Pair<Tidspunkt, String> =
@@ -165,19 +162,11 @@ class KlageBrevService(
         }
 
     private fun hentBrev(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
         runBlocking {
             brevApiKlient.hentBrev(sakId, brevId, brukerTokenInfo)
-        }
-
-    private fun journalfoerNotatKa(
-        klage: Klage,
-        brukerInfoToken: BrukerTokenInfo,
-    ): OpprettJournalpostDto =
-        runBlocking {
-            brevApiKlient.journalfoerNotatKa(klage, brukerInfoToken)
         }
 }

@@ -2,6 +2,7 @@ package no.nav.etterlatte.personweb.dto
 
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
 
 data class PersonNavnFoedselsaar(
@@ -12,6 +13,7 @@ data class PersonNavnFoedselsaar(
     val foedselsaar: Int,
     val foedselsdato: LocalDate? = null,
     val doedsdato: LocalDate? = null,
+    val vergemaal: VergemaalEllerFremtidsfullmakt? = null,
 )
 
 data class PersonSoekSvar(

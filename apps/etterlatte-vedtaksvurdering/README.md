@@ -26,7 +26,7 @@ Oppdateringer av ACL er ikke automatisk, og må kjøres inn manuelt med `kubectl
 | virkningFom | yyyy-mm-dd | Dato vedtaket gjelder fra                                               |
 
 - Se [Vedtakshendelse](./src/main/kotlin/no/nav/etterlatte/vedtaksvurdering/outbox/OutboxService.kt) for implementasjon.
-- Dette er designet til å gå i tospann med denne [vedtaksinformasjonstjenesten](../etterlatte-samordning-vedtak/README.md), dersom en trenger informasjon om utbetalt ytelse.
+- Dette er designet til å gå i tospann med denne [vedtaksinformasjonstjenesten](../etterlatte-api/README.md), dersom en trenger informasjon om utbetalt ytelse.
 - **NB:** _REGULERING_ er en spesifikk variant av _ENDRING_. Spesialhåndtert da det vil komme et større volum av denne under den årlige reguleringen.
 
 ## Kom i gang

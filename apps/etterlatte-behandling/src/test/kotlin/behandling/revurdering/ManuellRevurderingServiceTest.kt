@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
@@ -95,7 +96,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     ): Pair<Sak, Foerstegangsbehandling?> {
         val sak =
             inTransaction {
-                applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
         val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =
@@ -151,7 +152,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
 
         coVerify {
             grunnlagService.hentPersongalleri(any())
-            grunnlagService.leggInnNyttGrunnlag(revurdering, any())
+            grunnlagService.leggInnNyttGrunnlag(revurdering, any(), any())
         }
         verify {
             oppgaveService.opprettOppgave(
@@ -276,7 +277,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
             coVerify {
                 grunnlagService.hentPersongalleri(any())
-                grunnlagService.leggInnNyttGrunnlag(any(), any())
+                grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
             }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
@@ -306,14 +307,14 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = oppgaveService,
                 grunnlagService = grunnlagService,
-                revurderingService = AutomatiskRevurderingService(revurderingService),
+                revurderingService = AutomatiskRevurderingService(revurderingService, mockk(), mockk()),
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = hendelser,
                 migreringKlient = mockk(),
-                vilkaarsvurderingKlient = applicationContext.vilkaarsvuderingKlient,
+                vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
                 kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             )
 
@@ -378,8 +379,8 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
             coVerify {
                 grunnlagService.hentPersongalleri(any())
-                grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any())
-                grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling.id)
+                grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any(), any())
+                grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling.id, any())
             }
             verify {
                 oppgaveService.hentOppgaverForSak(sak.id)
@@ -473,7 +474,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
 
         coVerify {
-            grunnlagService.leggInnNyttGrunnlag(revurdering, any())
+            grunnlagService.leggInnNyttGrunnlag(revurdering, any(), any())
             grunnlagService.hentPersongalleri(any())
         }
         verify {
@@ -637,7 +638,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
 
         val sak =
             inTransaction {
-                applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
 
         assertThrows<RevurderingManglerIverksattBehandling> {
@@ -855,7 +856,13 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     mockk<BehandlingService>().also {
                         every { it.hentSisteIverksatte(any()) } returns
                             mockk<Behandling>().also {
-                                every { it.sak } returns Sak(sakType = SakType.BARNEPENSJON, id = 1L, enhet = "", ident = "")
+                                every { it.sak } returns
+                                    Sak(
+                                        sakType = SakType.BARNEPENSJON,
+                                        id = sakId1,
+                                        enhet = Enheter.defaultEnhet.enhetNr,
+                                        ident = "",
+                                    )
                                 every { it.opphoerFraOgMed } returns YearMonth.now()
                                 every { it.id } returns UUID.randomUUID()
                                 every { it.utlandstilknytning } returns null
@@ -865,7 +872,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 grunnlagService = mockk<GrunnlagService>().also { coEvery { it.hentPersongalleri(any()) } returns mockk() },
             )
         service.opprettManuellRevurderingWrapper(
-            sakId = 1L,
+            sakId = sakId1,
             aarsak = Revurderingaarsak.REVURDERE_ETTER_OPPHOER,
             paaGrunnAvHendelseId = null,
             paaGrunnAvOppgaveId = null,
@@ -965,7 +972,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             hendelseDao = applicationContext.hendelseDao,
             behandlingHendelser = applicationContext.behandlingsHendelser,
             migreringKlient = mockk(),
-            vilkaarsvurderingKlient = applicationContext.vilkaarsvuderingKlient,
+            vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         )
 }

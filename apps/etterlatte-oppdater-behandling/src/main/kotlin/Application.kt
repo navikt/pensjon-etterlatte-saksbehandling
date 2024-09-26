@@ -1,9 +1,11 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.inntektsjustering.InntektsjusteringVarselOmVedtakRiver
+import no.nav.etterlatte.inntektsjustering.OppdaterInntektsjusteringBrevDistribuert
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
 import no.nav.etterlatte.regulering.FinnSakerTilReguleringRiver
+import no.nav.etterlatte.regulering.OmregningFeiletRiver
 import no.nav.etterlatte.regulering.OmregningsHendelserBehandlingRiver
-import no.nav.etterlatte.regulering.ReguleringFeiletRiver
 import no.nav.etterlatte.regulering.ReguleringsforespoerselRiver
 import no.nav.etterlatte.regulering.VedtakAttestertRiver
 import no.nav.etterlatte.regulering.YtelseIkkeLoependeRiver
@@ -26,10 +28,12 @@ private fun settOppRivers(
     OmregningsHendelserBehandlingRiver(rapidsConnection, behandlingservice)
     FinnSakerTilReguleringRiver(rapidsConnection, behandlingservice)
     ReguleringsforespoerselRiver(rapidsConnection, behandlingservice, featureToggleService)
-    ReguleringFeiletRiver(rapidsConnection, behandlingservice)
+    OmregningFeiletRiver(rapidsConnection, behandlingservice)
     VedtakAttestertRiver(rapidsConnection, behandlingservice)
     AvbrytBehandlingHvisMigreringFeilaRiver(rapidsConnection, behandlingservice)
     YtelseIkkeLoependeRiver(rapidsConnection, behandlingservice)
     TidshendelseRiver(rapidsConnection, tidshendelseService)
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
+    InntektsjusteringVarselOmVedtakRiver(rapidsConnection, behandlingservice, featureToggleService)
+    OppdaterInntektsjusteringBrevDistribuert(rapidsConnection, behandlingservice)
 }

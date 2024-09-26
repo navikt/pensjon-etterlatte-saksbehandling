@@ -2,6 +2,7 @@ package no.nav.etterlatte.avkorting
 
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
@@ -32,10 +33,11 @@ internal class AvkortingRepositoryTest(
     fun `Skal lagre og oppdatere avkorting`() {
         val behandlingId: UUID = UUID.randomUUID()
         val aarsoppgjoer = nyAvkorting(2024)
+        val sakId = randomSakId()
 
         avkortingRepository.lagreAvkorting(
             behandlingId,
-            123L,
+            sakId,
             Avkorting(
                 aarsoppgjoer = listOf(aarsoppgjoer),
             ),
@@ -64,7 +66,7 @@ internal class AvkortingRepositoryTest(
 
         avkortingRepository.lagreAvkorting(
             behandlingId,
-            123L,
+            sakId,
             Avkorting(
                 aarsoppgjoer =
                     listOf(

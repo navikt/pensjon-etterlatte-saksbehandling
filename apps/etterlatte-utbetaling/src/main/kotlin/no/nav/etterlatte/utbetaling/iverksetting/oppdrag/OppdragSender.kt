@@ -10,6 +10,8 @@ class OppdragSender(
     private val queue: String,
     private val replyQueue: String,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun sendOppdrag(
         oppdrag: Oppdrag,
         prioritet: Prioritet = Prioritet.NORMAL,
@@ -29,9 +31,5 @@ class OppdragSender(
                 prioritet = prioritet,
             ).also { logger.info("Utbetaling overført til oppdrag") }
         return xml
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(OppdragSender::class.java)
     }
 }

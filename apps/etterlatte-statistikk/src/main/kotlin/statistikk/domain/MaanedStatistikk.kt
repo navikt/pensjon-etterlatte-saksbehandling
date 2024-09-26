@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.service.AktivitetForMaaned
@@ -21,7 +22,7 @@ data class MaanedStoenadRad(
     val beregningType: String,
     val anvendtSats: String,
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val sakNummer: Long,
     val tekniskTid: Tidspunkt,
     val sakYtelse: String,
@@ -43,10 +44,12 @@ data class MaanedStoenadRad(
     val sanksjon: String?,
 )
 
+private const val EN_G_PER_MND = 10336
+
 class MaanedStatistikk(
     val maaned: YearMonth,
     stoenadRader: List<StoenadRad>,
-    aktiviteter: Map<Long, AktivitetForMaaned>,
+    aktiviteter: Map<SakId, AktivitetForMaaned>,
 ) {
     val rader: List<MaanedStoenadRad>
 
@@ -73,6 +76,7 @@ class MaanedStatistikk(
                         null ->
                             sisteVedtak.vedtakType == VedtakType.OPPHOER ||
                                 (sisteVedtak.opphoerFom != null && sisteVedtak.opphoerFom <= maaned)
+
                         else -> aktuellUtbetalingsperiode.type == StoenadPeriodeType.OPPHOER
                     }
                 if (erOpphoer) {
@@ -90,12 +94,38 @@ class MaanedStatistikk(
                         val avkortingGrunnlag =
                             avkorting.avkortingGrunnlag.find { it.fom <= maaned && (it.tom ?: maaned) >= maaned }
                         val aarsinntekt = avkortingGrunnlag?.let { it.aarsinntekt - it.fratrekkInnAar }
-                        Triple(aktuellAvkorting?.avkortingsbeloep, aarsinntekt, aktuellAvkorting?.sanksjonertYtelse?.sanksjonType)
+                        Triple(
+                            aktuellAvkorting?.avkortingsbeloep,
+                            aarsinntekt,
+                            aktuellAvkorting?.sanksjonertYtelse?.sanksjonType,
+                        )
                     } ?: Triple(null, null, null)
 
                 val aktivitetForMaaned =
                     (aktiviteter[sakId] ?: AktivitetForMaaned.FALLBACK_OMSTILLINGSSTOENAD)
                         .takeIf { sisteVedtak.sakYtelse == SakType.OMSTILLINGSSTOENAD.name }
+
+                val sakYtelsesgruppe =
+                    if (sisteVedtak.sakYtelse == SakType.OMSTILLINGSSTOENAD.name) {
+                        sisteVedtak.sakYtelsesgruppe
+                    } else {
+                        when (sisteVedtak.sakYtelsesgruppe) {
+                            SakYtelsesgruppe.FORELDRELOES -> SakYtelsesgruppe.FORELDRELOES
+                            null, SakYtelsesgruppe.EN_AVDOED_FORELDER -> {
+                                // Kan være foreldreløs med overstyrt beregning
+                                if (sisteVedtak.beregning?.overstyrtBeregning == true &&
+                                    (
+                                        aktuellBeregning?.utbetaltBeloep
+                                            ?: 0
+                                    ) > EN_G_PER_MND
+                                ) {
+                                    SakYtelsesgruppe.FORELDRELOES
+                                } else {
+                                    SakYtelsesgruppe.EN_AVDOED_FORELDER
+                                }
+                            }
+                        }
+                    }
 
                 MaanedStoenadRad(
                     id = -1,
@@ -130,7 +160,7 @@ class MaanedStatistikk(
                     utbetalingsdato = sisteVedtak.utbetalingsdato,
                     kilde = sisteVedtak.kilde,
                     pesysId = sisteVedtak.pesysId,
-                    sakYtelsesgruppe = sisteVedtak.sakYtelsesgruppe,
+                    sakYtelsesgruppe = sakYtelsesgruppe,
                     harAktivitetsplikt = aktivitetForMaaned?.harAktivitetsplikt?.name,
                     oppfyllerAktivitet = aktivitetForMaaned?.oppfyllerAktivitet,
                     aktivitet = aktivitetForMaaned?.aktivitet,

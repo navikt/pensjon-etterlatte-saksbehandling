@@ -8,7 +8,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -45,7 +47,7 @@ class TidshendelseRiverTest {
     @Test
     fun `skal haandtere hendelse og sette oppgave id paa meldingen`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 321L
+        val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned)
 
@@ -82,10 +84,11 @@ class TidshendelseRiverTest {
     fun `skal haandtere hendelse og sette omregning id paa meldingen`() {
         val hendelseId = UUID.randomUUID()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
+        val sakId = randomSakId()
         val melding =
             lagMeldingForVurdertLoependeYtelse(
                 hendelseId = hendelseId,
-                sakId = 321L,
+                sakId = sakId,
                 behandlingsmaaned = behandlingsmaaned,
                 type = OMS_DOED_5AAR,
             )
@@ -111,7 +114,7 @@ class TidshendelseRiverTest {
 
         // Verifiser det som ble sendt til service
         packetSlot.captured.hendelseId shouldBeEqual hendelseId.toString()
-        packetSlot.captured.sakId shouldBe 321L
+        packetSlot.captured.sakId shouldBe sakId
         packetSlot.captured.jobbtype shouldBe OMS_DOED_5AAR
         packetSlot.captured.dryrun shouldBe false
         packetSlot.captured.behandlingsmaaned shouldBe behandlingsmaaned
@@ -124,7 +127,7 @@ class TidshendelseRiverTest {
     @Test
     fun `skal haandtere hendelse som blir skippet`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 321L
+        val sakId = randomSakId()
         val april2024 = YearMonth.of(2024, Month.APRIL)
 
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, april2024, dryRun = false)
@@ -148,7 +151,7 @@ class TidshendelseRiverTest {
         // Verifiser det som ble sendt til service
         with(packetSlot.captured) {
             this.hendelseId shouldBeEqual hendelseId.toString()
-            this.sakId shouldBe 321L
+            this.sakId shouldBe sakId
             this.jobbtype shouldBe AO_BP20
             this.dryrun shouldBe false
             this.behandlingsmaaned shouldBe april2024
@@ -162,7 +165,7 @@ class TidshendelseRiverTest {
 
 fun lagMeldingForVurdertLoependeYtelse(
     hendelseId: UUID = UUID.randomUUID(),
-    sakId: Long,
+    sakId: SakId,
     behandlingsmaaned: YearMonth,
     type: TidshendelseService.TidshendelserJobbType = AO_BP20,
     dryRun: Boolean = false,
@@ -192,7 +195,7 @@ fun lagMeldingForVurdertLoependeYtelse(
 }
 
 fun lagMeldingForVurdertLoependeYtelse(
-    sakId: Long,
+    sakId: SakId,
     behandlingsmaaned: YearMonth,
     type: TidshendelseService.TidshendelserJobbType = AO_BP20,
     dryRun: Boolean = false,

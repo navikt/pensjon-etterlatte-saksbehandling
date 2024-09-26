@@ -1,6 +1,6 @@
 package no.nav.etterlatte.rivers
 
-import no.nav.etterlatte.brev.VedtaksbrevService
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage

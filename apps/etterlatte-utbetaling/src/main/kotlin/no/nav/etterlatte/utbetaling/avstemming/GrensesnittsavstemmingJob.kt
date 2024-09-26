@@ -50,6 +50,19 @@ class GrensesnittsavstemmingJob(
         fun run() {
             log.info("Starter $jobbNavn")
             if (leaderElection.isLeader()) {
+                /**
+                 * Periode kan spesifiseres her dersom man ønsker å gjøre avstemming for en gitt dato.
+                 * Dette kan være kjekt dersom avstemming feiler eller man av andre grunner har behov
+                 * for å kjøre avstemming på nytt.
+                 *
+                 * Eksempel:
+                 *
+                 * periode =
+                 *   Avstemmingsperiode(
+                 *     fraOgMed = Tidspunkt.parse("2024-01-02T23:00:00.00Z"),
+                 *     til = Tidspunkt.parse("2024-01-03T23:00:00.00Z"),
+                 *   )
+                 */
                 grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
             }
         }

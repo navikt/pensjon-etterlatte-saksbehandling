@@ -11,12 +11,7 @@ import {
   sisteBehandlingHendelse,
   statusErRedigerbar,
 } from '~components/behandling/felles/utils'
-import {
-  IBehandlingStatus,
-  IBehandlingsType,
-  IDetaljertBehandling,
-  Vedtaksloesning,
-} from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
 import { BrevProsessType, IBrev } from '~shared/types/Brev'
@@ -61,6 +56,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const [visBrevutfall, setVisBrevutfall] = useState(true)
 
+  const [avbruttUtenBrev, setAvbruttUtenBrev] = useState(false)
+
   const sjekkliste = useSjekkliste()
   const valideringsfeil = useSjekklisteValideringsfeil()
   const behandling = useBehandling()
@@ -97,10 +94,14 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       hentBrev(behandlingId, (brev, statusCode) => {
         if (statusCode === 200) {
           setVedtaksbrev(brev)
-        } else if (statusCode === 204) {
+        } else if (statusCode === 204 && redigerbar) {
           opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
             setVedtaksbrev(nyttBrev)
           })
+        } else {
+          if (behandling?.status === IBehandlingStatus.AVBRUTT) {
+            setAvbruttUtenBrev(true)
+          }
         }
       })
     }
@@ -136,21 +137,20 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     return <Spinner label="Ingen brev funnet. Oppretter brev ..." />
   }
 
+  if (avbruttUtenBrev) {
+    return <Alert variant="warning">Behandlingen er avbrutt og ingen brev finnes</Alert>
+  }
+
   const kanSendeTilAttestering = (): boolean => {
-    const erForestegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-    if (erForestegangsbehandling) {
-      const sjekklisteErBekreftet = sjekkliste !== null && sjekkliste.bekreftet
-      if (!sjekklisteErBekreftet) {
-        const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
-        if (!fant) {
-          dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
-        }
-        dispatch(visSjekkliste())
+    const sjekklisteErBekreftet = sjekkliste !== null && sjekkliste.bekreftet
+    if (!sjekklisteErBekreftet) {
+      const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
+      if (!fant) {
+        dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
       }
-      return sjekklisteErBekreftet
-    } else {
-      return true
+      dispatch(visSjekkliste())
     }
+    return sjekklisteErBekreftet
   }
 
   return (

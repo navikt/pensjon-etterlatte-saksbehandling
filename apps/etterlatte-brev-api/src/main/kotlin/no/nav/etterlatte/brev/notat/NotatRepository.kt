@@ -8,6 +8,7 @@ import kotliquery.using
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -22,17 +23,30 @@ class NotatRepository(
     fun hent(id: NotatID): Notat =
         using(sessionOf(ds)) {
             it.run(
-                queryOf("SELECT id, sak_id, journalpost_id, tittel, opprettet FROM notat WHERE id = ?", id)
+                queryOf("SELECT id, sak_id, journalpost_id, tittel, opprettet, referanse FROM notat WHERE id = ?", id)
                     .map(tilNotat)
                     .asSingle,
             )
         }!!
 
-    fun hentForSak(sakId: Long): List<Notat> =
+    fun hentForSak(sakId: SakId): List<Notat> =
         using(sessionOf(ds)) {
             it.run(
-                queryOf("SELECT id, sak_id, journalpost_id, tittel, opprettet FROM notat WHERE sak_id = ?", sakId)
-                    .map(tilNotat)
+                queryOf(
+                    "SELECT id, sak_id, journalpost_id, tittel, opprettet, referanse FROM notat WHERE sak_id = ?",
+                    sakId,
+                ).map(tilNotat)
+                    .asList,
+            )
+        }
+
+    fun hentForReferanse(referanse: String): List<Notat> =
+        using(sessionOf(ds)) {
+            it.run(
+                queryOf(
+                    "SELECT id, sak_id, journalpost_id, tittel, opprettet, referanse FROM notat WHERE referanse = ?",
+                    referanse,
+                ).map(tilNotat)
                     .asList,
             )
         }
@@ -42,6 +56,15 @@ class NotatRepository(
             it.run(
                 queryOf("SELECT payload FROM notat WHERE id = ?", id)
                     .map { row -> deserialize<Slate>(row.string("payload")) }
+                    .asSingle,
+            )!!
+        }
+
+    fun hentPdf(id: NotatID): ByteArray =
+        using(sessionOf(ds)) {
+            it.run(
+                queryOf("SELECT bytes FROM notat WHERE id = ?", id)
+                    .map { row -> row.bytes("bytes") }
                     .asSingle,
             )!!
         }
@@ -110,14 +133,15 @@ class NotatRepository(
                 tx.run(
                     queryOf(
                         """
-                        INSERT INTO notat (sak_id, tittel, payload, opprettet)
-                        VALUES (:sak_id, :tittel, :payload, :opprettet)
+                        INSERT INTO notat (sak_id, tittel, payload, opprettet, referanse)
+                        VALUES (:sak_id, :tittel, :payload, :opprettet, :referanse)
                     """,
                         mapOf(
                             "sak_id" to notat.sakId,
                             "tittel" to notat.tittel,
                             "payload" to notat.payload.toJson(),
                             "opprettet" to Tidspunkt.now().toTimestamp(),
+                            "referanse" to notat.referanse,
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )
@@ -179,11 +203,12 @@ class NotatRepository(
 
     private val tilNotat: Row.() -> Notat = {
         Notat(
-            long("id"),
-            long("sak_id"),
-            stringOrNull("journalpost_id"),
-            string("tittel"),
-            tidspunkt("opprettet"),
+            id = long("id"),
+            sakId = long("sak_id"),
+            referanse = stringOrNull("referanse"),
+            journalpostId = stringOrNull("journalpost_id"),
+            tittel = string("tittel"),
+            opprettet = tidspunkt("opprettet"),
         )
     }
 }

@@ -1,8 +1,12 @@
 package no.nav.etterlatte.utbetaling
 
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -34,7 +38,7 @@ fun vedtak(
             ),
         ),
     ident: String = "12345678913",
-    sakId: Long = 1,
+    sakId: SakId = sakId1,
     behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),
@@ -57,13 +61,13 @@ fun vedtak(
     vedtakFattet =
         VedtakFattet(
             ansvarligSaksbehandler = "12345678",
-            ansvarligEnhet = "123",
+            ansvarligEnhet = Enhetsnummer("1234"),
             tidspunkt = Tidspunkt.now(),
         ),
     attestasjon =
         Attestasjon(
             attestant = "87654321",
-            attesterendeEnhet = "123",
+            attesterendeEnhet = Enhetsnummer("1234"),
             tidspunkt = Tidspunkt.now(),
         ),
     innhold =
@@ -89,7 +93,7 @@ fun ugyldigVedtakTilUtbetaling(
     status = VedtakStatus.ATTESTERT,
     sak =
         VedtakSak(
-            id = 1,
+            id = sakId1,
             ident = "12345678913",
             sakType = saktype,
         ),
@@ -98,7 +102,7 @@ fun ugyldigVedtakTilUtbetaling(
     attestasjon =
         Attestasjon(
             attestant = "87654321",
-            attesterendeEnhet = "123",
+            attesterendeEnhet = Enhetsnummer("1234"),
             tidspunkt = Tidspunkt.now(),
         ),
     innhold =
@@ -159,13 +163,13 @@ fun revurderingVedtak(
     vedtakFattet =
         VedtakFattet(
             ansvarligSaksbehandler = "12345678",
-            ansvarligEnhet = "123",
+            ansvarligEnhet = Enhetsnummer("1234"),
             tidspunkt = Tidspunkt.now(),
         ),
     attestasjon =
         Attestasjon(
             attestant = "87654321",
-            attesterendeEnhet = "123",
+            attesterendeEnhet = Enhetsnummer("1234"),
             tidspunkt = Tidspunkt.now(),
         ),
     innhold =
@@ -193,13 +197,13 @@ fun opphoersVedtak(
     vedtakFattet =
         VedtakFattet(
             ansvarligSaksbehandler = "12345678",
-            ansvarligEnhet = "123",
+            ansvarligEnhet = Enhetsnummer("1234"),
             tidspunkt = Tidspunkt.now(),
         ),
     attestasjon =
         Attestasjon(
             attestant = "87654321",
-            attesterendeEnhet = "123",
+            attesterendeEnhet = Enhetsnummer("1234"),
             tidspunkt = Tidspunkt.now(),
         ),
     innhold =
@@ -286,7 +290,7 @@ fun main() {
             vedtakId = 40,
             utbetalingsperioder = listOf(initiellUtbetalingsperiode),
             ident = "16018222837",
-            sakId = 15,
+            sakId = randomSakId(),
         )
     val vedtakEvent = attestertvedtakEvent(vedtak)
 

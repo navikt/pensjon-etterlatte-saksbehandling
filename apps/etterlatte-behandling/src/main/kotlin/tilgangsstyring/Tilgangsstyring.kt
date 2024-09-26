@@ -18,7 +18,11 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.CallParamAuthId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -29,7 +33,7 @@ import no.nav.etterlatte.sak.TilgangService
 class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
-    var harTilgangTilSak: (sakId: Long, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    var harTilgangTilSak: (sakId: SakId, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var harTilgangTilOppgave: (oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
@@ -89,7 +93,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -99,7 +103,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -109,7 +113,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -119,7 +123,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -129,7 +133,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -139,7 +143,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                                     SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                                 )
                             ) {
-                                call.respond(HttpStatusCode.NotFound)
+                                throw GenerellIkkeFunnetException()
                             }
                             return@on
                         }
@@ -168,7 +172,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
             if (harTilgang) {
                 onSuccess(foedselsnummer)
             } else {
-                call.respond(HttpStatusCode.NotFound)
+                throw GenerellIkkeFunnetException()
             }
         }
 
@@ -177,8 +181,8 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
 }
 
 fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
-    sakId: Long? = null,
-    enhetNr: String? = null,
+    sakId: SakId? = null,
+    enhetNr: Enhetsnummer? = null,
 ): Boolean {
     application.log.debug("Sjekker skrivetilgang")
     return when (val user = Kontekst.get().AppUser) {
@@ -199,7 +203,7 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     }
 }
 
-private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Long? = null): String? {
+private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: SakId? = null): Enhetsnummer? {
     val sakTilgangDao = Kontekst.get().sakTilgangDao
     if (sakId != null) {
         return sakTilgangDao.hentSakMedGraderingOgSkjerming(sakId)?.enhetNr
@@ -223,9 +227,9 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Lo
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
-    sakId: Long? = null,
-    enhetNr: String? = null,
+inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
+    sakId: SakId? = null,
+    enhetNr: Enhetsnummer? = null,
     onSuccess: () -> Unit,
 ) {
     application.log.debug("Sjekker skrivetilgang")
@@ -234,16 +238,22 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
             application.log.debug("Har skrivetilgang, fortsetter")
             onSuccess()
         }
+
         false -> {
             application.log.debug("Mangler skrivetilgang, avviser forespørselen")
-            call.respond(HttpStatusCode.Forbidden)
+
+            throw ForespoerselException(
+                status = HttpStatusCode.Forbidden.value,
+                code = "MANGLER_SKRIVETILGANG",
+                detail = "Mangler skrivetilgang til enhet $enhetNr",
+            )
         }
     }
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(
-    sakId: Long? = null,
-    enhetNr: String? = null,
+    sakId: SakId? = null,
+    enhetNr: Enhetsnummer? = null,
     onSuccess: (Saksbehandler) -> Unit,
 ) {
     application.log.debug("Sjekker skrivetilgang")

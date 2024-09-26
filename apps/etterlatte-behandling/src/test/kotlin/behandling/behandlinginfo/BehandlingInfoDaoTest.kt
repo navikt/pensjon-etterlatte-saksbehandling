@@ -2,12 +2,15 @@ package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -20,7 +23,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,14 +40,14 @@ internal class BehandlingInfoDaoTest(
     val dataSource: DataSource,
 ) {
     private lateinit var behandlingDao: BehandlingDao
-    private lateinit var sakDao: SakDao
+    private lateinit var sakSkrivDao: SakSkrivDao
     private lateinit var dao: BehandlingInfoDao
 
     private lateinit var behandlingId: UUID
 
     @BeforeAll
     fun setup() {
-        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
         behandlingDao =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
@@ -56,6 +60,7 @@ internal class BehandlingInfoDaoTest(
 
     @BeforeEach
     fun reset() {
+        Kontekst.set(null)
         dataSource.connection.use { it.prepareStatement("""TRUNCATE TABLE behandling_info""").executeUpdate() }
 
         val sak = opprettSakForTest()
@@ -145,6 +150,7 @@ internal class BehandlingInfoDaoTest(
             aldersgruppe = Aldersgruppe.UNDER_18,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
+            frivilligSkattetrekk = true,
         )
 
     private fun etterbetaling(behandlingId: UUID) =
@@ -159,10 +165,10 @@ internal class BehandlingInfoDaoTest(
         )
 
     private fun opprettSakForTest() =
-        sakDao.opprettSak(
+        sakSkrivDao.opprettSak(
             fnr = "12345678910",
             type = SakType.BARNEPENSJON,
-            enhet = "1234",
+            enhet = Enheter.defaultEnhet.enhetNr,
         )
 
     private fun opprettBehandlingForTest(sak: Sak) =

@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
@@ -19,11 +20,11 @@ class OppgaveFristGaarUtJobServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val service = OppgaveFristGaarUtJobService(oppgaveService)
     private val dataSource = mockk<DataSource>()
-    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk())
+    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk(), null)
 
     @Test
     fun `Skal klare å ta oppgave av vent hvis frist har gått ut`() {
-        val sakId = 1L
+        val sakId = sakId1
         val fristUte = VentefristGaarUt(sakId, "referanse", UUID.randomUUID(), OppgaveKilde.BEHANDLING, "merk")
         every { oppgaveService.hentFristGaarUt(any()) } returns listOf(fristUte)
         every { oppgaveService.oppdaterStatusOgMerknad(fristUte.oppgaveId, fristUte.merknad!!, Status.UNDER_BEHANDLING) } just runs
@@ -35,7 +36,7 @@ class OppgaveFristGaarUtJobServiceTest {
 
     @Test
     fun `Skal klare å ta neste av vent om en tryner`() {
-        val sakId = 1L
+        val sakId = sakId1
         val fristUte = VentefristGaarUt(sakId, "referanse", UUID.randomUUID(), OppgaveKilde.BEHANDLING, "merk")
         val fristUteMenFaarIkkeOppdatertStatusOgMerknad =
             VentefristGaarUt(sakId, "referanse", UUID.randomUUID(), OppgaveKilde.BEHANDLING, "feil")

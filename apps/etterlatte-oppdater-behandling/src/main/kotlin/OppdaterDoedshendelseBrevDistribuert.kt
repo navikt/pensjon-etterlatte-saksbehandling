@@ -10,6 +10,7 @@ import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.brevId
+import no.nav.etterlatte.rapidsandrivers.brevKode
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -41,7 +42,7 @@ internal class OppdaterDoedshendelseBrevDistribuert(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val brevkode = packet[BREV_KODE].asText()
+        val brevkode = packet.brevKode
         if (brevkode == Brevkoder.BP_INFORMASJON_DOEDSFALL.name || brevkode == Brevkoder.OMS_INFORMASJON_DOEDSFALL.name) {
             logger.info("Oppdaterer brev distribuert for dødshendelse ${packet.sakId}, ${packet.brevId}")
             try {

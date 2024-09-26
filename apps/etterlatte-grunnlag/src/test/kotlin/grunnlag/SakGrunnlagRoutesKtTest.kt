@@ -17,8 +17,10 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -35,11 +37,11 @@ import kotlin.random.Random
 internal class SakGrunnlagRoutesKtTest {
     private val grunnlagService = mockk<GrunnlagService>()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -50,7 +52,7 @@ internal class SakGrunnlagRoutesKtTest {
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -78,7 +80,7 @@ internal class SakGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/sak/$sakId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -91,7 +93,7 @@ internal class SakGrunnlagRoutesKtTest {
 
     @Test
     fun `Hent grunnlag for sak`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns testData
@@ -102,7 +104,7 @@ internal class SakGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/sak/$sakId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -115,5 +117,5 @@ internal class SakGrunnlagRoutesKtTest {
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient =
-        runServer(server, "api/grunnlag") { sakGrunnlagRoute(grunnlagService, behandlingKlient) }
+        runServer(mockOAuth2Server, "api/grunnlag") { sakGrunnlagRoute(grunnlagService, behandlingKlient) }
 }

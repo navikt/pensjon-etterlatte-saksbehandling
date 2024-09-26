@@ -30,7 +30,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.nyKontekstMedBruker
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -41,7 +41,7 @@ import java.util.UUID
 
 internal class GyldighetsproevingServiceImplTest {
     private val user = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
-    private val sakDaoMock = mockk<SakDao>()
+    private val sakSkrivDaoMock = mockk<SakSkrivDao>()
     private val behandlingDaoMock = mockk<BehandlingDao>()
     private val hendelseDaoMock = mockk<HendelseDao>()
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
@@ -60,7 +60,7 @@ internal class GyldighetsproevingServiceImplTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(sakDaoMock, behandlingDaoMock, hendelseDaoMock, behandlingHendelserKafkaProducerMock)
+        confirmVerified(sakSkrivDaoMock, behandlingDaoMock, hendelseDaoMock, behandlingHendelserKafkaProducerMock)
         clearAllMocks()
     }
 
@@ -77,7 +77,7 @@ internal class GyldighetsproevingServiceImplTest {
                     Sak(
                         ident = "Ola Olsen",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -115,7 +115,7 @@ internal class GyldighetsproevingServiceImplTest {
         val behandling =
             Foerstegangsbehandling(
                 id = id,
-                sak = Sak("", SakType.BARNEPENSJON, 1, Enheter.PORSGRUNN.enhetNr),
+                sak = Sak("", SakType.BARNEPENSJON, sakId1, Enheter.PORSGRUNN.enhetNr),
                 behandlingOpprettet = now,
                 sistEndret = now,
                 status = BehandlingStatus.OPPRETTET,
@@ -192,7 +192,7 @@ internal class GyldighetsproevingServiceImplTest {
                     Sak(
                         ident = "Ola Olsen",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.PORSGRUNN.enhetNr,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),

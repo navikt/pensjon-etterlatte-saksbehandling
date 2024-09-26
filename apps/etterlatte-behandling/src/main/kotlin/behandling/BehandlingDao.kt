@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -75,7 +77,7 @@ class BehandlingDao(
             }
         }
 
-    fun hentBehandlingerForSak(sakid: Long): List<Behandling> =
+    fun hentBehandlingerForSak(sakid: SakId): List<Behandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -92,7 +94,7 @@ class BehandlingDao(
         }
 
     fun hentAlleRevurderingerISakMedAarsak(
-        sakid: Long,
+        sakid: SakId,
         revurderingaarsak: Revurderingaarsak,
     ): List<Revurdering> =
         connectionAutoclosing.hentConnection {
@@ -190,7 +192,7 @@ class BehandlingDao(
             id = rs.getLong("sak_id"),
             sakType = enumValueOf(rs.getString("saktype")),
             ident = rs.getString("fnr"),
-            enhet = rs.getString("enhet"),
+            enhet = Enhetsnummer(rs.getString("enhet")),
         )
 
     fun opprettBehandling(behandling: OpprettBehandling) =

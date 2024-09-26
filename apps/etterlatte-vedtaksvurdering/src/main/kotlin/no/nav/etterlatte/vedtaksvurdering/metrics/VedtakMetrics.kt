@@ -1,28 +1,28 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics
 
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.Gauge
+import io.micrometer.core.instrument.Gauge
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.etterlatte.jobs.MetrikkUthenter
+import no.nav.etterlatte.libs.ktor.Metrikker
 import org.slf4j.LoggerFactory
 
 class VedtakMetrics(
     private val vedtakMetrikkerDao: VedtakMetrikkerDao,
-    private val registry: CollectorRegistry = CollectorRegistry.defaultRegistry,
+    private val registry: PrometheusMeterRegistry = Metrikker.registrySaksbehandling,
 ) : MetrikkUthenter {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    val loependeVedtak by lazy {
-        Gauge
-            .build("etterlatte_vedtak_loepende", "Løpende vedtak for etterlatte ytelser")
-            .labelNames("saktype")
-            .register(registry)
-    }
 
     override fun run() {
         logger.info("Samler metrikker med ${this::class.simpleName}")
 
-        vedtakMetrikkerDao.hentLoependeYtelseAntall().forEach {
-            loependeVedtak.labels(it.sakType.name).set(it.antall.toDouble())
-        }
+        vedtakMetrikkerDao.hentLoependeYtelseAntall().forEach { tell(it) }
+    }
+
+    private fun tell(it: VedtakAntall) {
+        Gauge
+            .builder("etterlatte_vedtak_loepende") { it.antall.toDouble() }
+            .description("Løpende vedtak for etterlatte ytelser")
+            .tag("saktype", it.sakType.name)
+            .register(registry)
     }
 }

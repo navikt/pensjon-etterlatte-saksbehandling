@@ -1,5 +1,7 @@
 package no.nav.etterlatte.tilbakekreving
 
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.UUID30
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -38,12 +40,12 @@ fun readFile(file: String) =
 
 fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
     TilbakekrevingVedtak(
-        sakId = 1,
+        sakId = sakId1,
         vedtakId = vedtakId,
         fattetVedtak =
             FattetVedtak(
                 saksbehandler = "Z123456",
-                enhet = "1234",
+                enhet = Enhetsnummer("1234"),
                 dato = LocalDate.now(),
             ),
         perioder =
@@ -81,7 +83,7 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
     )
 
 fun kravgrunnlag(
-    sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, 1L, "12345"),
+    sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, sakId1, Enhetsnummer("1234")),
     behandlingId: UUID30 = UUID.randomUUID().toUUID30(),
     status: KravgrunnlagStatus = KravgrunnlagStatus.NY,
     perioder: List<KravgrunnlagPeriode>? = null,
@@ -134,7 +136,7 @@ fun kravgrunnlag(
 )
 
 fun kravOgVedtakStatus(
-    sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, 1L, "12345"),
+    sak: Sak = Sak("12345678901", SakType.BARNEPENSJON, sakId1, Enhetsnummer("1234")),
     behandlingId: UUID30 = UUID.randomUUID().toUUID30(),
     status: KravgrunnlagStatus = KravgrunnlagStatus.NY,
 ) = KravOgVedtakstatus(

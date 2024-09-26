@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.util.UUID
@@ -25,7 +26,7 @@ class OmgjoeringKlageRevurderingService(
     private val grunnlagService: GrunnlagService,
 ) {
     fun opprettOmgjoeringKlage(
-        sakId: Long,
+        sakId: SakId,
         oppgaveIdOmgjoering: UUID,
         saksbehandler: Saksbehandler,
     ): Revurdering {
@@ -107,7 +108,7 @@ sealed class FeilIOmgjoering {
         )
 
     class OppgaveOgSakErForskjellig(
-        sakId: Long,
+        sakId: SakId,
         oppgave: OppgaveIntern,
     ) : UgyldigForespoerselException(
             "SAK_I_OPPGAVE_MATCHER_IKKE",

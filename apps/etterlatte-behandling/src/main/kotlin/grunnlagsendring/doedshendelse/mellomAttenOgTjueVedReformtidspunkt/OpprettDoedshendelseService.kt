@@ -9,8 +9,6 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.PersonFnrMedRelasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Utfall
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService.Companion.SENESTE_TIDSPUNKT
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.mellomAttenOgTjueVedReformtidspunkt.OpprettDoedshendelseService.Companion.TIDLIGSTE_TIDSPUNKT
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -53,7 +51,9 @@ class OpprettDoedshendelseService(
 
         if (avdoed.doedsdato == null) {
             sikkerLogg.info("Mottok dødshendelse for ${avdoed.foedselsnummer}, men personen er i live i følge PDL.")
-            logger.info("Mottok dødshendelse fra PDL for en levende person. Avbryter. Se sikkerlogg for detaljer.")
+            logger.info(
+                "Mottok dødshendelse fra PDL for en levende person (${fnr.maskerFnr()}. Avbryter. Se sikkerlogg for detaljer.",
+            )
             return
         }
 
@@ -110,8 +110,14 @@ class OpprettDoedshendelseService(
     private fun finnBeroerteBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> =
         with(avdoed.avdoedesBarn ?: emptyList()) {
             this
-                .filter { barn -> barn.doedsdato == null }
-                .filter { barn -> merEnnEller18PaaVirkningstidspunkt(barn, avdoed.doedsdato!!.verdi) }
+                .filter { barn ->
+                    val barnLever = barn.doedsdato == null
+                    barnLever.let {
+                        sikkerLogg.info("Barn ${barn.foedselsnummer.value} lever ${if (it) "" else "ikke"}")
+                        logger.info("Barn ${barn.foedselsnummer.value.maskerFnr()} lever ${if (it) "" else "ikke"}")
+                        barnLever
+                    }
+                }.filter { barn -> merEnnEller18PaaVirkningstidspunkt(barn, avdoed.doedsdato!!.verdi) }
                 .filter { barn -> mellom18og20PaaReformtidspunkt(barn) }
                 .map { PersonFnrMedRelasjon(it.foedselsnummer.value, Relasjon.BARN) }
         }
@@ -142,6 +148,9 @@ class OpprettDoedshendelseService(
                 !(foedselsdato.isBefore(TIDLIGSTE_TIDSPUNKT) || foedselsdato.isAfter(SENESTE_TIDSPUNKT))
 
             return mellomAttenOgTjuePaaReformtidspunkt(benyttetFoedselsdato).let {
+                sikkerLogg.info(
+                    "Person (${person.foedselsnummer.value}) er ${if (it) "" else "ikke"} mellom 18 og 20 på reformtidspunkt",
+                )
                 logger.info(
                     "Person (${person.foedselsnummer.value.maskerFnr()}) er ${if (it) "" else "ikke"} mellom 18 og 20 på reformtidspunkt",
                 )
@@ -162,6 +171,9 @@ class OpprettDoedshendelseService(
             val virkningstidspunkt = doedsdato.plusMonths(1).withDayOfMonth(1)
 
             return (ChronoUnit.YEARS.between(benyttetFoedselsdato, virkningstidspunkt).absoluteValue >= 18).let {
+                sikkerLogg.info(
+                    "Person (${person.foedselsnummer.value}) er ${if (it) "" else "ikke"} mellom 18 og 20 på virkningstidspunkt ($virkningstidspunkt)",
+                )
                 logger.info(
                     "Person (${person.foedselsnummer.value.maskerFnr()}) er ${if (it) "" else "ikke"} mellom 18 og 20 på virkningstidspunkt ($virkningstidspunkt)",
                 )

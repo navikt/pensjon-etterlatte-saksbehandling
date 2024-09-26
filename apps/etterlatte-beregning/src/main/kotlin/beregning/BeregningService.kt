@@ -100,22 +100,30 @@ class BeregningService(
             validerFoersteVirke(behandlingKlient, behandling, brukerTokenInfo)
         }
 
-        return hentOverstyrBeregning(behandling).takeIf { it != null }
-            ?: beregningRepository.opprettOverstyrBeregning(
-                OverstyrBeregning(
-                    behandling.sak,
-                    overstyrBeregning.beskrivelse,
-                    Tidspunkt.now(),
-                    kategori = overstyrBeregning.kategori,
-                ),
-            )
+        if (behandlingKlient.kanSetteStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)) {
+            return hentOverstyrBeregning(behandling).takeIf { it != null } ?: run {
+                val opprettetOverstyrtBeregning =
+                    beregningRepository.opprettOverstyrBeregning(
+                        OverstyrBeregning(
+                            behandling.sak,
+                            overstyrBeregning.beskrivelse,
+                            Tidspunkt.now(),
+                            kategori = overstyrBeregning.kategori,
+                        ),
+                    )
+                behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
+                opprettetOverstyrtBeregning
+            }
+        } else {
+            throw KanIkkeEndreOverstyrtBeregningGrunnetStatus(behandlingId)
+        }
     }
 
     suspend fun deaktiverOverstyrtberegning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        if (behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false)) {
+        if (behandlingKlient.kanSetteStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
             if (behandling.behandlingType === BehandlingType.REVURDERING) {
@@ -124,8 +132,9 @@ class BeregningService(
 
             beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
             beregningRepository.slettOverstyrtBeregningsgrunnlag(behandling.id)
+            behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
         } else {
-            throw KanIkkeDeaktivereOverstyrtBeregningGrunnetStatus()
+            throw KanIkkeEndreOverstyrtBeregningGrunnetStatus(behandlingId)
         }
     }
 
@@ -156,16 +165,12 @@ class KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato :
         detail = "For å legge til eller fjerne overstyre beregning må behandlingen revurderes fra sakens første virkningstidspunkt",
     )
 
-class KanIkkeDeaktivereOverstyrtBeregningGrunnetStatus :
-    UgyldigForespoerselException(
+class KanIkkeEndreOverstyrtBeregningGrunnetStatus(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
         code = "UGYLDIG_STATUS_BEHANDLING",
         detail = "Behandlingen kan ikke endre overstyrt beregning da den har feil status",
-    )
-
-class KanIkkeDeaktivereOverstyrtBeregningGrunnetIverksatteBehandlinger :
-    UgyldigForespoerselException(
-        code = "IVERKSATTE_BEHANDLINGER_MED_OVERSTYRT",
-        detail = "Behandlingen kan ikke deaktivere overstyrt beregning da den har iverksatte behandlinger som er overstyrt",
+        meta = mapOf("behandlingId" to behandlingId),
     )
 
 class TrygdetidMangler(
@@ -186,7 +191,9 @@ class BeregningsgrunnlagMangler(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(
         code = "BEREGNINGSGRUNNLAG_MANGLER",
-        detail = "Behandling med id: $behandlingId mangler beregningsgrunnlag oms",
+        detail =
+            "Behandling med id: $behandlingId mangler beregningsgrunnlag, " +
+                "sett trygdetid metode i beregningen ovenfor.",
     )
 
 class AnvendtGrunnbeloepIkkeFunnet :

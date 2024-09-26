@@ -1,6 +1,10 @@
 package no.nav.etterlatte.libs.testdata.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.grunnlag.GenerellKilde
+import no.nav.etterlatte.grunnlag.Personopplysning
+import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -9,11 +13,17 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOEDESBARN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import java.time.LocalDateTime
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 data class GrunnlagTestData(
@@ -105,7 +115,7 @@ data class GrunnlagTestData(
                     halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
                 ) + opplysningsmapAvdoedeOverrides,
             sak = sak,
-            metadata = Metadata(1, 15),
+            metadata = Metadata(sakId1, 15),
         )
 
     fun hentGrunnlagMedEgneAvdoedesBarn(): Grunnlag =
@@ -120,7 +130,7 @@ data class GrunnlagTestData(
                     halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
                 ) + opplysningsmapAvdoedeOverrides,
             sak = sak,
-            metadata = Metadata(1, 15),
+            metadata = Metadata(sakId1, 15),
         )
 
     fun hentPersonGalleri(): Persongalleri =
@@ -140,6 +150,17 @@ data class GrunnlagTestData(
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                 ),
             sak = sak,
-            metadata = Metadata(1, 1),
+            metadata = Metadata(sakId1, 1),
         )
+
+    fun hentPersonopplysninger(): PersonopplysningerResponse =
+        PersonopplysningerResponse(
+            innsender = Personopplysning(INNSENDER_PDL_V1, UUID.randomUUID(), kilde(), gjenlevende),
+            soeker = Personopplysning(SOEKER_PDL_V1, randomUUID(), kilde(), soeker),
+            avdoede = avdoede.map { Personopplysning(AVDOED_PDL_V1, randomUUID(), kilde(), it) },
+            gjenlevende = listOf(Personopplysning(GJENLEVENDE_FORELDER_PDL_V1, randomUUID(), kilde(), gjenlevende)),
+            annenForelder = null,
+        )
+
+    private fun kilde() = GenerellKilde("", Tidspunkt.now(), "")
 }

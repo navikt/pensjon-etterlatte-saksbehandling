@@ -24,6 +24,8 @@ class UtbetalingService(
     val clock: Clock,
     val vedtaksverifiserer: Vedtaksverifiserer,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): IverksettResultat {
         val utbetalingForVedtak = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
         val dupliserteUtbetalingslinjer =
@@ -116,10 +118,6 @@ class UtbetalingService(
         this.status() != UtbetalingStatus.SENDT && this.status() != UtbetalingStatus.MOTTATT
 
     private fun Utbetaling?.utbetalingEksisterer() = this != null && this.status() != UtbetalingStatus.MOTTATT
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(UtbetalingService::class.java)
-    }
 }
 
 sealed class IverksettResultat {

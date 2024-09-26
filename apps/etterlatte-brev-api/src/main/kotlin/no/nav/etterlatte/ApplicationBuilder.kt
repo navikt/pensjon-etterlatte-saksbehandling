@@ -29,7 +29,6 @@ import no.nav.etterlatte.brev.NyNotatService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.PDFService
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
-import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
@@ -59,20 +58,21 @@ import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
-import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.BehandlingVilkaarsvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.notat.NotatRepository
-import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
 import no.nav.etterlatte.brev.notat.notatRoute
 import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
+import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
-import no.nav.etterlatte.brev.vedtaksbrevRoute
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
+import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.EnvEnum
@@ -129,7 +129,7 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
+    private val vilkaarsvurderingKlient = BehandlingVilkaarsvurderingKlient(config, httpClient())
 
     private val behandlingService = BehandlingService(behandlingKlient)
     private val trygdetidService = TrygdetidService(trygdetidKlient)
@@ -192,7 +192,7 @@ class ApplicationBuilder {
             redigerbartVedleggHenter,
         )
     private val brevoppretter =
-        Brevoppretter(adresseService, db, behandlingService, innholdTilRedigerbartBrevHenter)
+        Brevoppretter(adresseService, db, innholdTilRedigerbartBrevHenter)
 
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
@@ -245,7 +245,7 @@ class ApplicationBuilder {
     private val notatRepository = NotatRepository(datasource)
     private val pdfGeneratorKlient = PdfGeneratorKlient(httpClient(), env.requireEnvValue(PDFGEN_URL))
     private val nyNotatService = NyNotatService(notatRepository, pdfGeneratorKlient, dokarkivService, behandlingService)
-    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagService, dokarkivKlient)
+    private val notatService = NotatService(notatRepository, pdfGeneratorKlient, dokarkivService, grunnlagService)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 

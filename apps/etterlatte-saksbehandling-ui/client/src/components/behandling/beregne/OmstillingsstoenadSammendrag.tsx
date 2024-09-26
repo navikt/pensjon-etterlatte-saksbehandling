@@ -49,7 +49,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
                 )}
               </Table.DataCell>
               <Table.DataCell>{NOK(beregningsperiode.grunnbelop)}</Table.DataCell>
-              <Table.DataCell>{beregningsperiode.institusjonsopphold && 'institusjonsopphold'}</Table.DataCell>
+              <Table.DataCell>{beregningsperiode.institusjonsopphold && 'Institusjonsopphold'}</Table.DataCell>
               <Table.DataCell>
                 {NOK(beregningsperiode.utbetaltBeloep)}{' '}
                 <ToolTip title="Få mer informasjon om beregningsgrunnlaget">

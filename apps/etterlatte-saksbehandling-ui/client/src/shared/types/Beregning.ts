@@ -42,6 +42,12 @@ export interface BeregningsMetodeBeregningsgrunnlag {
   begrunnelse?: string | null
 }
 
+export interface BeregningsMetodeBeregningsgrunnlagForm {
+  beregningsMetode: BeregningsMetode | null
+  begrunnelse?: string | null
+  datoTilKunEnJuridiskForelder?: Date
+}
+
 export interface BeregningsmetodeForAvdoed {
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
   avdoed: string
@@ -78,17 +84,29 @@ export interface OverstyrBeregningsperiode {
 export interface BeregningsGrunnlagDto {
   behandlingId: string
   kilde: KildeSaksbehandler
-  institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
+  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
   beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO
+  kunEnJuridiskForelder: KunEnJuridiskForelderDTO
 }
 
-export interface BeregningsGrunnlagOMSDto {
-  behandlingId: string
-  kilde: KildeSaksbehandler
-  institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
-  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
+export interface LagreBeregningsGrunnlagDto {
+  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
+  soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto | undefined
+  beregningsMetode: BeregningsMetodeBeregningsgrunnlag | undefined
+  beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO | undefined
+  kunEnJuridiskForelder: KunEnJuridiskForelderDTO | undefined
+}
+
+export function toLagreBeregningsGrunnlagDto(beregningsgrunnlag?: BeregningsGrunnlagDto): LagreBeregningsGrunnlagDto {
+  return {
+    institusjonsopphold: beregningsgrunnlag?.institusjonsopphold,
+    soeskenMedIBeregning: beregningsgrunnlag?.soeskenMedIBeregning,
+    beregningsMetode: beregningsgrunnlag?.beregningsMetode,
+    beregningsMetodeFlereAvdoede: beregningsgrunnlag?.beregningsMetodeFlereAvdoede,
+    kunEnJuridiskForelder: beregningsgrunnlag?.kunEnJuridiskForelder,
+  }
 }
 
 export type InstitusjonsoppholdGrunnlagDTO = PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[]
@@ -104,23 +122,10 @@ export interface OverstyrBeregningGrunnlagPostDTO {
   perioder: OverstyrBeregningGrunnlagDTO
 }
 
-export interface BeregningsGrunnlagPostDto {
-  soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
-  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
-  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
-  beregningsMetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO | undefined
-}
-
-export interface BeregningsGrunnlagOMSPostDto {
-  institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
-  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
-}
-
 export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
-export type OverstyrBeregingsperiodeGrunnlagData = PeriodisertBeregningsgrunnlag<OverstyrBeregningsperiode>[]
 export type BeregningsmetodeFlereAvdoedeDTO = PeriodisertBeregningsgrunnlagDto<BeregningsmetodeForAvdoed>[]
-export type BeregningsmetodeFlereAvdoedeData = PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>[]
+export type KunEnJuridiskForelderDTO = PeriodisertBeregningsgrunnlagDto<any>
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: ReduksjonKey

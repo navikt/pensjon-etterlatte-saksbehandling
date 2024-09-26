@@ -1,9 +1,11 @@
 package no.nav.etterlatte.statistikk.domain
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
@@ -57,7 +59,7 @@ enum class SakYtelsesgruppe {
 data class SakRad(
     val id: Long,
     val referanseId: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val mottattTidspunkt: Tidspunkt,
     val registrertTidspunkt: Tidspunkt,
     val ferdigbehandletTidspunkt: Tidspunkt?,
@@ -67,7 +69,7 @@ data class SakRad(
     val resultat: String?,
     val resultatBegrunnelse: String?,
     val saksbehandler: String?,
-    val ansvarligEnhet: String?,
+    val ansvarligEnhet: Enhetsnummer?,
     val soeknadFormat: SoeknadFormat?,
     val sakUtland: SakUtland?,
     val behandlingMetode: BehandlingMetode?,

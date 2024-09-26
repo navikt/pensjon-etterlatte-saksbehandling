@@ -1,5 +1,5 @@
 plugins {
-    id("etterlatte.libs")
+    kotlin("jvm")
     id("java-library")
     id("java-test-fixtures")
 }
@@ -22,4 +22,6 @@ dependencies {
     testFixturesImplementation(libs.test.testcontainer.jupiter)
     testFixturesImplementation(libs.test.testcontainer.postgresql)
     testFixturesImplementation(libs.database.flywaydb)
+    testFixturesImplementation(libs.database.hikaricp)
+    testFixturesImplementation(libs.database.kotliquery)
 }

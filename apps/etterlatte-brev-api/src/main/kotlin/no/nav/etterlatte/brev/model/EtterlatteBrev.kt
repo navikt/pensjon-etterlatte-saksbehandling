@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.hentinformasjon.beregning.UgyldigBeregningsMetode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
@@ -12,6 +13,7 @@ import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
+import java.util.UUID
 
 data class BarnepensjonEtterbetaling(
     val inneholderKrav: Boolean?,
@@ -35,15 +37,31 @@ data class BarnepensjonBeregning(
     val bruktTrygdetid: TrygdetidMedBeregningsmetode,
     val trygdetid: List<TrygdetidMedBeregningsmetode>,
     val erForeldreloes: Boolean = false,
-) : BrevdataMedInnhold
+    val forskjelligTrygdetid: ForskjelligTrygdetid? = null,
+) : HarVedlegg
 
 data class BarnepensjonBeregningsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val grunnbeloep: Kroner,
     val antallBarn: Int,
+    val avdoedeForeldre: List<String?>?,
+    val trygdetidForIdent: String?,
     var utbetaltBeloep: Kroner,
-)
+) {
+    companion object {
+        fun fra(beregningsperiode: Beregningsperiode): BarnepensjonBeregningsperiode =
+            BarnepensjonBeregningsperiode(
+                datoFOM = beregningsperiode.datoFOM,
+                datoTOM = beregningsperiode.datoTOM,
+                grunnbeloep = beregningsperiode.grunnbeloep,
+                utbetaltBeloep = beregningsperiode.utbetaltBeloep,
+                antallBarn = beregningsperiode.antallBarn,
+                avdoedeForeldre = beregningsperiode.avdoedeForeldre,
+                trygdetidForIdent = beregningsperiode.trygdetidForIdent,
+            )
+    }
+}
 
 data class OmstillingsstoenadBeregning(
     override val innhold: List<Slate.Element>,
@@ -51,7 +69,7 @@ data class OmstillingsstoenadBeregning(
     val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
     val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
     val trygdetid: TrygdetidMedBeregningsmetode,
-) : BrevdataMedInnhold
+) : HarVedlegg
 
 data class OmstillingsstoenadBeregningsperiode(
     val datoFOM: LocalDate,
@@ -79,6 +97,21 @@ data class TrygdetidMedBeregningsmetode(
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
+    val ident: String,
+)
+
+data class ForskjelligTrygdetid(
+    val foersteTrygdetid: TrygdetidMedBeregningsmetode,
+    val foersteVirkningsdato: LocalDate,
+    val senereVirkningsdato: LocalDate,
+    val harForskjelligMetode: Boolean,
+    val erForskjellig: Boolean,
+)
+
+data class ForskjelligAvdoedPeriode(
+    val foersteAvdoed: Avdoed,
+    val senereAvdoed: Avdoed,
+    val senereVirkningsdato: LocalDate,
 )
 
 data class Trygdetidsperiode(
@@ -165,10 +198,12 @@ fun TrygdetidDto.fromDto(
             ?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
     beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag,
     beregningsMetodeAnvendt = beregningsMetodeAnvendt,
+    ident = this.ident,
 )
 
 enum class FeilutbetalingType {
     FEILUTBETALING_UTEN_VARSEL,
+    FEILUTBETALING_4RG_UTEN_VARSEL,
     FEILUTBETALING_MED_VARSEL,
     INGEN_FEILUTBETALING,
 }
@@ -202,4 +237,22 @@ class IngenStoetteForUkjentAvdoed :
     UgyldigForespoerselException(
         code = "INGEN_STOETTE_FOR_UKJENT_AVDOED",
         detail = "Brevløsningen støtter ikke ukjent avdød",
+    )
+
+class ManglerFrivilligSkattetrekk(
+    behandlingId: UUID?,
+) : UgyldigForespoerselException(
+        code = "BEHANDLING_MANGLER_FRIVILLIG_SKATTETREKK",
+        detail =
+            "Behandling mangler informasjon om frivillig skattetrekk, som er påkrevd for barnepensjon. " +
+                "Du kan legge til dette i Valg av utfall i brev.",
+        meta = mapOf("behandlingId" to behandlingId.toString()),
+    )
+
+class ManglerBrevutfall(
+    behandlingId: UUID?,
+) : UgyldigForespoerselException(
+        code = "BEHANDLING_MANGLER_BREVUTFALL",
+        detail = "Behandling mangler brevutfall, som er påkrevd. Legg til dette ved å lagre Valg av utfall i brev.",
+        meta = mapOf("behandlingId" to behandlingId.toString()),
     )

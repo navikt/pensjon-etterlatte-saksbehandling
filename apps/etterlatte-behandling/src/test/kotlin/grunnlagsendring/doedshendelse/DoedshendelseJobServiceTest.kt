@@ -12,6 +12,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -46,14 +47,14 @@ class DoedshendelseJobServiceTest {
         }
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val dataSource = mockk<DataSource>()
-    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk())
+    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk(), null)
     private val sakService =
         mockk<SakService> {
             every { finnEllerOpprettSakMedGrunnlag(any(), any()) } returns
                 Sak(
                     ident = "12345678901",
                     sakType = SakType.BARNEPENSJON,
-                    id = 1L,
+                    id = sakId1,
                     enhet = Enheter.AALESUND.enhetNr,
                 )
         }
@@ -93,7 +94,6 @@ class DoedshendelseJobServiceTest {
         DoedshendelseJobService(
             doedshendelseDao = dao,
             doedshendelseKontrollpunktService = kontrollpunktService,
-            featureToggleService = toggle,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = femDagerGammel,
@@ -195,39 +195,6 @@ class DoedshendelseJobServiceTest {
     }
 
     @Test
-    fun `skal ikke opprette oppgave for doedshendelse dersom feature-toggle er av`() {
-        val doedshendelseInternal =
-            DoedshendelseInternal
-                .nyHendelse(
-                    avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
-                    avdoedDoedsdato = LocalDate.now(),
-                    beroertFnr = "12345678901",
-                    relasjon = Relasjon.BARN,
-                    endringstype = Endringstype.OPPRETTET,
-                ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
-
-        every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
-        every { dao.oppdaterDoedshendelse(any()) } returns Unit
-        val oppgaveId = UUID.randomUUID()
-        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
-            mockk {
-                every { id } returns oppgaveId
-            }
-        every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns false
-        every { kontrollpunktService.identifiserKontrollerpunkter(any(), bruker) } returns
-            listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
-        val doedshendelseCapture = slot<DoedshendelseInternal>()
-
-        service.setupKontekstAndRun(kontekst, bruker)
-
-        verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
-        verify(exactly = 0) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
-        doedshendelseCapture.captured.status shouldBe Status.FERDIG
-        doedshendelseCapture.captured.utfall shouldBe Utfall.OPPGAVE
-        doedshendelseCapture.captured.oppgaveId shouldBe null
-    }
-
-    @Test
     fun `Skal sjekke sende med bor i utlandet til brev`() {
         val doedshendelseInternal =
             DoedshendelseInternal
@@ -246,7 +213,6 @@ class DoedshendelseJobServiceTest {
             mockk {
                 every { id } returns oppgaveId
             }
-        every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns true
         every { kontrollpunktService.identifiserKontrollerpunkter(any(), bruker) } returns
             emptyList()
         every { doedshendelserProducer.sendBrevRequestBP(any(), any(), any()) } just runs

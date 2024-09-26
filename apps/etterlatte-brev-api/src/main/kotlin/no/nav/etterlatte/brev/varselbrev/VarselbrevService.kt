@@ -12,8 +12,10 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -27,7 +29,7 @@ internal class VarselbrevService(
     fun hentVarselbrev(behandlingId: UUID) = db.hentBrevForBehandling(behandlingId, Brevtype.VARSEL)
 
     suspend fun opprettVarselbrev(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
@@ -73,7 +75,7 @@ internal class VarselbrevService(
     suspend fun ferdigstillOgGenererPDF(
         brevId: BrevID,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest =
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest =
             { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
     ) = pdfGenerator.ferdigstillOgGenererPDF(
         id = brevId,
@@ -89,7 +91,7 @@ internal class VarselbrevService(
     suspend fun genererPdf(
         brevId: Long,
         bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, String) -> AvsenderRequest =
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest =
             { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
     ) = pdfGenerator.genererPdf(
         id = brevId,

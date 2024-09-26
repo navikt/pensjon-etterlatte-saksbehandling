@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 
@@ -54,6 +55,7 @@ data class Mottaker(
     val foedselsnummer: MottakerFoedselsnummer? = null,
     val orgnummer: String? = null,
     val adresse: Adresse,
+    val tvingSentralPrint: Boolean = false,
 ) {
     fun erGyldig(): Boolean =
         if (navn.isBlank()) {
@@ -67,7 +69,7 @@ data class Mottaker(
 
 data class Brev(
     val id: BrevID,
-    val sakId: Long,
+    val sakId: SakId,
     val behandlingId: UUID?,
     val tittel: String?,
     val spraak: Spraak,
@@ -86,6 +88,10 @@ data class Brev(
 }
 
 enum class BrevProsessType {
+    @Deprecated(
+        "Bruk heller redigerbar. " +
+            "Det er noen brev i databasen som er oppretta med denne, så ikke slett statusen",
+    )
     MANUELL,
     REDIGERBAR,
     AUTOMATISK,

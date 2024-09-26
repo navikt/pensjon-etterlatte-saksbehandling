@@ -11,6 +11,7 @@ data class DistribuerJournalpostRequest(
     val dokumentProdApp: String,
     val distribusjonstype: DistribusjonsType,
     val distribusjonstidspunkt: DistribusjonsTidspunktType,
+    val tvingSentralPrint: Boolean,
 )
 
 data class Adresse(

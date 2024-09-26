@@ -43,7 +43,6 @@ import { Familieforhold } from '~components/behandling/soeknadsoversikt/familief
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { RevurderingKravpakke } from '~components/behandling/revurderingsoversikt/RevurderingKravpakke'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
@@ -111,8 +110,6 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
 
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
 
-  const viderefoertOpphoerEnabled = useFeatureEnabledMedDefault('viderefoer-opphoer', false)
-
   return (
     <>
       <Box paddingInline="16" paddingBlock="4">
@@ -173,7 +170,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           {{ info: <GrunnlagForVirkningstidspunkt /> }}
         </Virkningstidspunkt>
 
-        {viderefoertOpphoerEnabled && <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />}
+        <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />

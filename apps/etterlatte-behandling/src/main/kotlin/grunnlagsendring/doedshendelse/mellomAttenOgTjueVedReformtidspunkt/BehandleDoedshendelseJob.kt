@@ -12,7 +12,10 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -32,7 +35,8 @@ class BehandleDoedshendelseJob(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    private var jobContext: Context = Context(Self(this::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
+    private var jobContext: Context =
+        Context(Self(this::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao, HardkodaSystembruker.doedshendelse)
 
     override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med periode $interval")
@@ -51,14 +55,16 @@ class BehandleDoedshendelseJob(
     }
 
     private fun run() {
-        if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
-            val doedshendelserSomSkalHaanderes = inTransaction { hentAlleNyeDoedsmeldinger() }
-            logger.info("Antall nye dødsmeldinger ${doedshendelserSomSkalHaanderes.size}")
+        withLogContext(correlationId = getCorrelationId(), kv = mapOf("send_brev_18_20_aar_behandle" to "true")) {
+            if (featureToggleService.isEnabled(MellomAttenOgTjueVedReformtidspunktFeatureToggle.KanLagreDoedshendelse, false)) {
+                val doedshendelserSomSkalHaanderes = inTransaction { hentAlleNyeDoedsmeldinger() }
+                logger.info("Antall nye dødsmeldinger ${doedshendelserSomSkalHaanderes.size}")
 
-            doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
-                inTransaction {
-                    logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                    behandleDoedshendelseService.haandterDoedshendelse(doedshendelse)
+                doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
+                    inTransaction {
+                        logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
+                        behandleDoedshendelseService.haandterDoedshendelse(doedshendelse)
+                    }
                 }
             }
         }

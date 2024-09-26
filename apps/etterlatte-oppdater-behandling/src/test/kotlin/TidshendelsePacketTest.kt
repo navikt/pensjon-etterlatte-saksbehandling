@@ -1,6 +1,10 @@
+
 import io.kotest.matchers.shouldBe
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.etterlatte.TidshendelsePacket
 import no.nav.etterlatte.TidshendelseService
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
@@ -21,6 +25,7 @@ class TidshendelsePacketTest {
                     TIDSHENDELSE_TYPE_KEY to TidshendelseService.TidshendelserJobbType.AO_BP21,
                 ).toJson(),
                 MessageProblems(""),
+                PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
             )
         interestedIn(jsonMessage)
 
@@ -34,7 +39,7 @@ class TidshendelsePacketTest {
         tidshendelsePacket.harRettUtenTidsbegrensning shouldBe false
         tidshendelsePacket.hendelseId shouldBe ""
         tidshendelsePacket.jobbtype shouldBe TidshendelseService.TidshendelserJobbType.AO_BP21
-        tidshendelsePacket.sakId shouldBe 0L
+        tidshendelsePacket.sakId shouldBe tilSakId(0L)
     }
 
     @Test
@@ -57,6 +62,7 @@ class TidshendelsePacketTest {
                     "ao_id" to "min_id",
                 ).toJson(),
                 MessageProblems(""),
+                PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
             )
         interestedIn(jsonMessage)
 
@@ -70,7 +76,7 @@ class TidshendelsePacketTest {
         tidshendelsePacket.harRettUtenTidsbegrensning shouldBe true
         tidshendelsePacket.hendelseId shouldBe "min_id"
         tidshendelsePacket.jobbtype shouldBe TidshendelseService.TidshendelserJobbType.AO_BP20
-        tidshendelsePacket.sakId shouldBe 8448L
+        tidshendelsePacket.sakId shouldBe tilSakId(8448L)
     }
 
     private fun interestedIn(jsonMessage: JsonMessage) {

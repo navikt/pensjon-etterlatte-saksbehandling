@@ -16,12 +16,13 @@ import no.nav.etterlatte.brev.notat.NotatID
 import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.brev.notat.NotatRepository
 import no.nav.etterlatte.brev.notat.NyttNotat
-import no.nav.etterlatte.brev.notat.PdfGenRequest
-import no.nav.etterlatte.brev.notat.PdfGeneratorKlient
 import no.nav.etterlatte.brev.notat.opprettSamordningsnotatPayload
+import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
+import no.nav.etterlatte.brev.pdfgen.SlatePDFMal
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory
@@ -37,10 +38,16 @@ class NyNotatService(
 
     fun hent(id: NotatID): Notat = notatRepository.hent(id)
 
-    fun hentForSak(sakId: Long): List<Notat> {
+    fun hentForSak(sakId: SakId): List<Notat> {
         logger.info("Henter notater for sak $sakId")
 
         return notatRepository.hentForSak(sakId)
+    }
+
+    fun hentForReferanse(referanse: String): List<Notat> {
+        logger.info("Henter notat for referanse $referanse")
+
+        return notatRepository.hentForReferanse(referanse)
     }
 
     fun hentPayload(id: NotatID): Slate = notatRepository.hentPayload(id)
@@ -60,30 +67,38 @@ class NyNotatService(
 
     suspend fun genererPdf(id: NotatID): ByteArray {
         val notat = hent(id)
-        val payload = hentPayload(id)
 
-        return pdfGeneratorKlient.genererPdf(
-            PdfGenRequest(
-                tittel = notat.tittel,
-                payload = payload,
-            ),
-        )
+        return if (notat.kanRedigeres()) {
+            val payload = SlatePDFMal(hentPayload(id))
+
+            pdfGeneratorKlient.genererPdf(
+                notat.tittel,
+                payload,
+                NotatMal.TOM_MAL,
+            )
+        } else {
+            notatRepository.hentPdf(id)
+        }
     }
 
     suspend fun opprett(
-        sakId: Long,
+        sakId: SakId,
         mal: NotatMal,
         tittel: String = "Mangler tittel",
+        referanse: String? = null,
         params: NotatParametre? = null,
         bruker: BrukerTokenInfo,
     ): Notat {
         val sak = behandlingService.hentSak(sakId, bruker)
 
+        logger.info("Oppretter notat for sak $sakId og referanse '$referanse'")
+
         val id =
             notatRepository.opprett(
                 NyttNotat(
-                    sak.id,
-                    tittel,
+                    sakId = sak.id,
+                    referanse = referanse,
+                    tittel = tittel,
                     payload =
                         when (mal) {
                             NotatMal.TOM_MAL ->
@@ -104,6 +119,8 @@ class NyNotatService(
                             NotatMal.MANUELL_SAMORDNING -> {
                                 opprettSamordningsnotatPayload(params)
                             }
+
+                            NotatMal.KLAGE_OVERSENDELSE_BLANKETT -> TODO("Foreløpig ikke støttet i ny service")
                         },
                     mal = mal,
                 ),

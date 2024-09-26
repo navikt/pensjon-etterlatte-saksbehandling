@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.simulering
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -53,12 +54,12 @@ class SimuleringOsService(
                     vedtakFattet =
                         VedtakFattet(
                             ansvarligSaksbehandler = brukerTokenInfo.ident(),
-                            ansvarligEnhet = OppdragDefaults.OPPDRAGSENHET.enhet,
+                            ansvarligEnhet = Enhetsnummer.nullable(OppdragDefaults.OPPDRAGSENHET.enhet),
                         ),
                     attestasjon =
                         Attestasjon(
                             attestant = OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER,
-                            attesterendeEnhet = OppdragDefaults.OPPDRAGSENHET.enhet,
+                            attesterendeEnhet = Enhetsnummer.nullable(OppdragDefaults.OPPDRAGSENHET.enhet),
                         ),
                 )
             val utbetalingMapper =

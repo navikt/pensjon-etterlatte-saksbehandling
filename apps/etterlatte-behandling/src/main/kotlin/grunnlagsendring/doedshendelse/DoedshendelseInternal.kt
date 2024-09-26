@@ -3,10 +3,12 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
 
+@ConsistentCopyVisibility
 data class DoedshendelseInternal internal constructor(
     val id: UUID = UUID.randomUUID(),
     val avdoedFnr: String,
@@ -20,7 +22,7 @@ data class DoedshendelseInternal internal constructor(
     val utfall: Utfall? = null,
     val oppgaveId: UUID? = null,
     val brevId: Long? = null,
-    val sakId: Long? = null,
+    val sakId: SakId? = null,
     val kontrollpunkter: List<DoedshendelseKontrollpunkt>? = null,
     val migrertMellomAttenOgTjue: Boolean = false,
 ) {
@@ -57,7 +59,7 @@ data class DoedshendelseInternal internal constructor(
         )
 
     fun tilAvbrutt(
-        sakId: Long? = null,
+        sakId: SakId? = null,
         oppgaveId: UUID? = null,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
     ): DoedshendelseInternal =
@@ -81,7 +83,7 @@ data class DoedshendelseInternal internal constructor(
 
     fun tilBehandlet(
         utfall: Utfall,
-        sakId: Long?,
+        sakId: SakId?,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
         oppgaveId: UUID? = null,
         brevId: Long? = null,

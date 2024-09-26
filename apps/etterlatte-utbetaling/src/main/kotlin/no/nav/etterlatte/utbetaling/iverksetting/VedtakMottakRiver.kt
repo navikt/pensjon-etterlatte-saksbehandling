@@ -33,6 +33,8 @@ class VedtakMottakRiver(
     rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
 ) : ListenerMedLogging() {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     init {
         // Barnepensjon
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
@@ -165,8 +167,4 @@ class VedtakMottakRiver(
 
     private fun UtbetalingslinjerForVedtakEksisterer.utbetalingslinjeIDer() =
         this.utbetalingslinjer.joinToString(",") { it.id.value.toString() }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(VedtakMottakRiver::class.java)
-    }
 }

@@ -63,6 +63,7 @@ private fun settOppEmbeddedServer(
                     environment.monitor.subscribe(ServerReady) {
                         val scheduledJobs = cronjobs.map { it.schedule() }
                         addShutdownHook(scheduledJobs)
+                        setReady(true)
                     }
                     environment.monitor.subscribe(ApplicationStopPreparing) {
                         setReady(false)
@@ -73,6 +74,5 @@ private fun settOppEmbeddedServer(
     )
 
 fun CIOApplicationEngine.run() {
-    setReady(true)
     start(true)
 }

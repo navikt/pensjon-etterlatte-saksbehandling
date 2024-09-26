@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -8,15 +9,18 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.beregning.grunnlag.TomVerdi
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
+import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
@@ -67,6 +71,10 @@ internal class BeregnBarnepensjonServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val anvendtTrygdetidRepository =
+        mockk<AnvendtTrygdetidRepository>().also {
+            every { it.lagreAnvendtTrygdetid(any(), any()) } returns 1
+        }
     private val periodensSisteDato = LocalDate.of(2024, Month.APRIL, 30)
 
     private fun beregnBarnepensjonService() =
@@ -75,6 +83,7 @@ internal class BeregnBarnepensjonServiceTest {
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
+            anvendtTrygdetidRepository = anvendtTrygdetidRepository,
         )
 
     @Test
@@ -100,7 +109,7 @@ internal class BeregnBarnepensjonServiceTest {
                 type shouldBe Beregningstype.BP
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                beregningsperioder.size shouldBeGreaterThanOrEqual 3
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -111,7 +120,27 @@ internal class BeregnBarnepensjonServiceTest {
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                 }
+                with(beregningsperioder[1]) {
+                    datoFOM shouldBe YearMonth.of(2023, Month.MAY)
+                    utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_MAI_23
+                    datoTOM shouldBe YearMonth.of(2023, Month.DECEMBER)
+                }
+                with(beregningsperioder[2]) {
+                    datoFOM shouldBe YearMonth.of(2024, Month.JANUARY)
+                    utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                }
+
+                // Videre perioder gjenspeiler G-endringer
+                beregningsperioder.drop(3).map { it.datoFOM } shouldContainExactly
+                    GrunnbeloepRepository.historiskeGrunnbeloep
+                        .filter { it.dato > YearMonth.of(2023, Month.DECEMBER) }
+                        .map { it.dato }
+                        .reversed()
+                beregningsperioder.last().datoTOM shouldBe null
+
                 beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
+                beregningsperioder.filter { p -> p.datoTOM == null }.size shouldBe 1
             }
         }
     }
@@ -494,17 +523,20 @@ internal class BeregnBarnepensjonServiceTest {
                 datoFOM shouldBe YearMonth.of(2023, 1)
                 datoTOM shouldBe YearMonth.of(2023, 4)
                 avdodeForeldre shouldBe null
+                kunEnJuridiskForelder shouldBe false
             }
             with(beregning.beregningsperioder[1]) {
                 datoFOM shouldBe YearMonth.of(2023, 5)
                 datoTOM shouldBe YearMonth.of(2023, 12)
                 avdodeForeldre shouldBe null
+                kunEnJuridiskForelder shouldBe false
             }
             with(beregning.beregningsperioder[2]) {
                 datoFOM shouldBe YearMonth.of(2024, 1)
                 datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe forventetUtbetalt
                 avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value, AVDOED2_FOEDSELSNUMMER.value)
+                kunEnJuridiskForelder shouldBe false
             }
         }
     }
@@ -568,6 +600,7 @@ internal class BeregnBarnepensjonServiceTest {
                 datoFOM shouldBe YearMonth.of(2024, 1)
                 datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe GRUNNBELOEP_MAI_23
+                kunEnJuridiskForelder shouldBe false
             }
         }
     }
@@ -694,6 +727,71 @@ internal class BeregnBarnepensjonServiceTest {
         }
     }
 
+    @Test
+    fun `beregne foerstegangsbehandling med en avdoed og kun en juridisk forelder gir foreldreloessats - nytt regelverk`() {
+        val virk = YearMonth.of(2024, Month.JANUARY)
+        val datoAdopsjon = YearMonth.of(2024, Month.MARCH).atEndOfMonth()
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virk)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                behandlingId = behandling.id,
+                soesken = emptyList(),
+                kunEnJuridiskForelder = GrunnlagMedPeriode(TomVerdi, virk.atDay(1), datoAdopsjon),
+            )
+        coEvery {
+            trygdetidKlient.hentTrygdetid(
+                any(),
+                any(),
+            )
+        } returns listOf(mockTrygdetid(behandling.id))
+
+        runBlocking {
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.BP
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                with(beregningsperioder[0]) {
+                    utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_TO_DOEDE_FORELDRE
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2024, Month.MARCH)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
+                    soeskenFlokk shouldBe emptyList()
+                    trygdetid shouldBe MAKS_TRYGDETID
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                    avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
+                    kunEnJuridiskForelder shouldBe true
+                }
+                with(beregningsperioder[1]) {
+                    utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
+                    datoFOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
+                    soeskenFlokk shouldBe emptyList()
+                    trygdetid shouldBe MAKS_TRYGDETID
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                    avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
+                    kunEnJuridiskForelder shouldBe false
+                }
+                beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
+            }
+        }
+    }
+
     private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
         val grunnlagEnAvdoed = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
@@ -724,6 +822,7 @@ internal class BeregnBarnepensjonServiceTest {
             defaultAvdoedeBeregningmetode(
                 beregningsMetode,
             ),
+        kunEnJuridiskForelder: GrunnlagMedPeriode<TomVerdi>? = null,
     ) = BeregningsGrunnlag(
         behandlingId,
         defaultKilde(),
@@ -741,9 +840,10 @@ internal class BeregnBarnepensjonServiceTest {
                         },
                 ),
             ),
-        institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
+        institusjonsopphold = institusjonsoppholdBeregningsgrunnlag,
         beregningsMetode = beregningsMetode.toGrunnlag(),
         beregningsMetodeFlereAvdoede = avdoedeBeregningmetode,
+        kunEnJuridiskForelder = kunEnJuridiskForelder,
     )
 
     private fun beregningsGrunnlagMedSoesken(
@@ -766,7 +866,7 @@ internal class BeregnBarnepensjonServiceTest {
                         },
                 )
             },
-        institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
+        institusjonsopphold = defaultInstitusjonsopphold(),
         beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
         beregningsMetodeFlereAvdoede = defaultAvdoedeBeregningmetode(),
     )
@@ -810,7 +910,7 @@ internal class BeregnBarnepensjonServiceTest {
     ): DetaljertBehandling =
         mockk<DetaljertBehandling> {
             every { id } returns randomUUID()
-            every { sak } returns 1
+            every { sak } returns sakId1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
             every { kilde } returns vedtaksloesning
@@ -845,7 +945,9 @@ internal class BeregnBarnepensjonServiceTest {
         val PRORATA_BROEK: IntBroek = IntBroek(1, 2)
         const val GRUNNBELOEP_JAN_23: Int = 9290
         const val GRUNNBELOEP_MAI_23: Int = 9885
+        const val GRUNNBELOEP_MAI_24: Int = 10336
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23: Int = 3716
+        const val BP_BELOEP_INGEN_SOESKEN_MAI_23: Int = 3954
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23_PRORATA: Int = 1394
         const val BP_BELOEP_ETT_SOESKEN_JAN_23: Int = 3019
         const val BP_BELOEP_TO_SOESKEN_JAN_23: Int = 2787

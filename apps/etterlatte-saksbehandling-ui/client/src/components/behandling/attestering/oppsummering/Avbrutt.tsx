@@ -1,6 +1,6 @@
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { Box, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { formaterBehandlingstype } from '~utils/formatering/formatering'
 import React, { useEffect } from 'react'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
@@ -62,26 +62,26 @@ export const Avbrutt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo 
             pending: <Spinner label="Henter oppgave med saksbehandler" />,
             error: () => <ApiErrorAlert>Kunne ikke hente oppgave for behandling</ApiErrorAlert>,
             success: (oppgaver) => {
-              const oppgaveravbrutt = finnAvbrutteOppgaver(oppgaver)
-              if (oppgaveravbrutt.length) {
-                const riktigOppgave = oppgaveravbrutt[0]
+              const oppgaverAvbrutt = finnAvbrutteOppgaver(oppgaver)
+              if (oppgaverAvbrutt.length) {
+                const riktigOppgave = oppgaverAvbrutt[0]
                 const hentetNavn = isSuccess(saksbehandlerNavn) ? saksbehandlerNavn.data : undefined
                 return (
                   <div>
                     <Label size="small">Saksbehandler</Label>
-                    <Detail>
+                    <BodyShort size="small">
                       {hentetNavn || riktigOppgave.saksbehandler?.navn || riktigOppgave.saksbehandler?.ident}
-                    </Detail>
+                    </BodyShort>
                   </div>
                 )
               } else {
-                return <Detail>Ingen oppgave med status avbrutt funnet</Detail>
+                return <BodyShort size="small">Ingen oppgave med status avbrutt funnet</BodyShort>
               }
             },
           })}
           <div>
             <Label size="small">Kilde</Label>
-            <Detail>{behandlingsInfo.kilde}</Detail>
+            <BodyShort size="small">{behandlingsInfo.kilde}</BodyShort>
           </div>
         </VStack>
 

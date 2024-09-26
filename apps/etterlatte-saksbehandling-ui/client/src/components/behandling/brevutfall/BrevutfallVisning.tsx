@@ -9,6 +9,7 @@ import {
 import { SakType } from '~shared/types/sak'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterMaanedDato } from '~utils/formatering/dato'
+import { hasValue } from '~components/behandling/felles/utils'
 
 function aldersgruppeToString(aldersgruppe?: Aldersgruppe | null) {
   switch (aldersgruppe) {
@@ -78,13 +79,13 @@ export const BrevutfallVisning = (props: {
               </HStack>
               {sakType == SakType.BARNEPENSJON && (
                 <>
-                  {brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav !== undefined && (
+                  {hasValue(brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav) && (
                     <VStack gap="2">
                       <Label>Er det krav i etterbetalingen?</Label>
                       <BodyShort>{brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav ? 'Ja' : 'Nei'}</BodyShort>
                     </VStack>
                   )}
-                  {brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg && (
+                  {hasValue(brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg) && (
                     <VStack gap="2">
                       <Label>Hvor mange måneder etterbetales det for?</Label>
                       <BodyShort>
@@ -98,13 +99,12 @@ export const BrevutfallVisning = (props: {
               )}
             </>
           )}
-          {sakType == SakType.BARNEPENSJON &&
-            brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk !== undefined && (
-              <VStack gap="2">
-                <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
-                <BodyShort>{brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk ? 'Ja' : 'Nei'}</BodyShort>
-              </VStack>
-            )}
+          {sakType == SakType.BARNEPENSJON && hasValue(brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk) && (
+            <VStack gap="2">
+              <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
+              <BodyShort>{brevutfallOgEtterbetaling.brevutfall.frivilligSkattetrekk ? 'Ja' : 'Nei'}</BodyShort>
+            </VStack>
+          )}
         </VStack>
       )}
       {sakType == SakType.BARNEPENSJON && (

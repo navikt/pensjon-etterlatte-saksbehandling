@@ -20,7 +20,6 @@ import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
-import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -116,8 +115,9 @@ internal class OmregningHendelserBeregningRiver(
         beregning: BeregningOgAvkorting,
         packet: JsonMessage,
     ) {
+        val dato = packet.omregningData.fradato
         val forrige =
-            requireNotNull(beregning.forrigeBeregning.beregningsperioder.paaDato(packet.dato))
+            requireNotNull(beregning.forrigeBeregning.beregningsperioder.paaDato(dato))
                 .let {
                     Pair(it.utbetaltBeloep, it.grunnbelop)
                 }.also {
@@ -125,7 +125,7 @@ internal class OmregningHendelserBeregningRiver(
                     packet[ReguleringEvents.BEREGNING_G_FOER] = it.second
                 }
         val naavaerende =
-            requireNotNull(beregning.beregning.beregningsperioder.paaDato(packet.dato))
+            requireNotNull(beregning.beregning.beregningsperioder.paaDato(dato))
                 .let {
                     Pair(it.utbetaltBeloep, it.grunnbelop)
                 }.also {
@@ -135,10 +135,10 @@ internal class OmregningHendelserBeregningRiver(
         packet[ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR] =
             BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first))
 
-        beregning.forrigeAvkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
+        beregning.forrigeAvkorting?.avkortetYtelse?.paaDato(dato)?.let {
             packet[AVKORTING_FOER] = it.avkortingsbeloep
         }
-        beregning.avkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
+        beregning.avkorting?.avkortetYtelse?.paaDato(dato)?.let {
             packet[AVKORTING_ETTER] = it.avkortingsbeloep
         }
     }

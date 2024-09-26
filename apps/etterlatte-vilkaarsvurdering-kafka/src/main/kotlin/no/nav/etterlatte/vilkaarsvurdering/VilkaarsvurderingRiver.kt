@@ -6,7 +6,6 @@ import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -22,8 +21,8 @@ internal class VilkaarsvurderingRiver(
 
     init {
         initialiserRiver(rapidsConnection, OmregningHendelseType.BEHANDLING_OPPRETTA) {
-            validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
+            validate { it.requireKey(OmregningDataPacket.SAK_ID) }
             validate { it.requireKey(OmregningDataPacket.BEHANDLING_ID) }
             validate { it.requireKey(OmregningDataPacket.FORRIGE_BEHANDLING_ID) }
         }

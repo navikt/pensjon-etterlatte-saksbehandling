@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -43,7 +42,6 @@ internal class VilkaarsvurderingRiverTest {
                 .newMessage(
                     mapOf(
                         OmregningHendelseType.BEHANDLING_OPPRETTA.lagParMedEventNameKey(),
-                        SAK_ID_KEY to 1,
                         HENDELSE_DATA_KEY to omregningData.toPacket(),
                     ),
                 ).toJson()

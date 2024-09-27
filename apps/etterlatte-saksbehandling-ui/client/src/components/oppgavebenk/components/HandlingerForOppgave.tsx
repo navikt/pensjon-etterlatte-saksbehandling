@@ -12,6 +12,7 @@ import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfo6MndVarigUnntakModal'
 import { BrevOppgaveModal } from '~components/oppgavebenk/oppgaveModal/BrevOppgaveModal'
+import { TilleggsinformasjonOppgaveModal } from '~components/oppgavebenk/oppgaveModal/TilleggsinformasjonOppgaveModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -114,6 +115,12 @@ export const HandlingerForOppgave = ({
           <Button size="small" href={`/oppgave/${oppgave.id}`} as="a">
             Gå til oppgave
           </Button>
+        )
+      )
+    case Oppgavetype.TILLEGGSINFORMASJON:
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <TilleggsinformasjonOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
     case Oppgavetype.OMGJOERING:

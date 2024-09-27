@@ -114,39 +114,39 @@ class OpprettJournalfoerOgDistribuerRiver(
                         sakId = sakId,
                         behandlingId = null,
                         bruker = brukerTokenInfo,
-                        brevKodeMapping = { brevKode },
+                        brevkoder = brevKode,
                         brevtype = brevKode.brevtype,
-                    ) {
-                        when (brevKode) {
-                            Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
-                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                                val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
-                                opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
-                            }
+                        brevData =
+                            when (brevKode) {
+                                Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
+                                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                                    val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
+                                    opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
+                                }
 
-                            Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
-                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                                opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
-                                    sakId,
-                                    borIutland,
-                                )
-                            }
+                                Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
+                                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                                    opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
+                                        sakId,
+                                        borIutland,
+                                    )
+                                }
 
-                            Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
-                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                                opprettOmstillingsstoenadInformasjonDoedsfall(
-                                    sakId,
-                                    borIutland,
-                                )
-                            }
+                                Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
+                                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                                    opprettOmstillingsstoenadInformasjonDoedsfall(
+                                        sakId,
+                                        borIutland,
+                                    )
+                                }
 
-                            Brevkoder.OMS_INNTEKTSJUSTERING -> {
-                                OmstillingsstoenadInntektsjustering()
-                            }
+                                Brevkoder.OMS_INNTEKTSJUSTERING -> {
+                                    OmstillingsstoenadInntektsjustering()
+                                }
 
-                            else -> ManueltBrevData()
-                        }
-                    }
+                                else -> ManueltBrevData()
+                            },
+                    )
                 }
             } catch (e: Exception) {
                 val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"

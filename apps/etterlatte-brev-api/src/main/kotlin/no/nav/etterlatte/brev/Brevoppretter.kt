@@ -33,7 +33,6 @@ class Brevoppretter(
         brevKode: Brevkoder,
         brevtype: Brevtype,
         brevData: BrevDataRedigerbar,
-        validerMottaker: Boolean = true,
     ): Pair<Brev, Enhetsnummer> {
         with(
             innholdTilRedigerbartBrevHenter.hentInnDataForBrevMedData(
@@ -57,14 +56,7 @@ class Brevoppretter(
                     brevtype = brevtype,
                     brevkoder = brevkode,
                 )
-            if (validerMottaker && nyttBrev.mottaker.erGyldig().isNotEmpty()) {
-                sikkerLogg.error("Ugyldig mottaker: ${nyttBrev.mottaker.toJson()}")
-                throw UgyldigMottakerKanIkkeFerdigstilles(
-                    id = null,
-                    sakId = nyttBrev.sakId,
-                    nyttBrev.mottaker.erGyldig(),
-                )
-            }
+
             return Pair(db.opprettBrev(nyttBrev), enhet)
         }
     }

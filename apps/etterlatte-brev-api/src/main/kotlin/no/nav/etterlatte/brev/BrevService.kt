@@ -47,7 +47,6 @@ class BrevService(
                 brevKode = brevkode,
                 brevData = brevData,
                 brevtype = brevkode.brevtype,
-                validerMottaker = false,
             ).first
 
     data class BrevPayload(

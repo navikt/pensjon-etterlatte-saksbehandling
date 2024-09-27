@@ -1,5 +1,4 @@
-import { Button, Heading, HelpText, Table } from '@navikt/ds-react'
-import styled from 'styled-components'
+import { Button, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { NOK } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
@@ -52,10 +51,10 @@ export const AvkortingInntekt = ({
   }
 
   return (
-    <AvkortingInntektWrapper>
+    <VStack maxWidth="70rem">
       {avkortingGrunnlagFrontend &&
         (avkortingGrunnlagFrontend.fraVirk || avkortingGrunnlagFrontend.historikk.length > 0) && (
-          <InntektAvkortingTabell>
+          <VStack marginBlock="4">
             <Heading size="small">{avkortingGrunnlagFrontend.aar}</Heading>
             <Table className="table" zebraStripes>
               <Table.Header>
@@ -135,7 +134,7 @@ export const AvkortingInntekt = ({
                 })}
               </Table.Body>
             </Table>
-          </InntektAvkortingTabell>
+          </VStack>
         )}
       {erInnevaerendeAar &&
         avkortingGrunnlagFrontend &&
@@ -152,7 +151,7 @@ export const AvkortingInntekt = ({
         />
       )}
       {erRedigerbar && !visForm && (
-        <LeggTilRediger>
+        <HStack marginBlock="4 0">
           <Button
             size="small"
             variant="secondary"
@@ -165,20 +164,8 @@ export const AvkortingInntekt = ({
           >
             {knappTekst()}
           </Button>
-        </LeggTilRediger>
+        </HStack>
       )}
-    </AvkortingInntektWrapper>
+    </VStack>
   )
 }
-
-const AvkortingInntektWrapper = styled.div`
-  max-width: 70rem;
-`
-
-const InntektAvkortingTabell = styled.div`
-  margin: 1em 0 1em 0;
-`
-const LeggTilRediger = styled.div`
-  margin-top: 0.75em;
-  flex-direction: column;
-`

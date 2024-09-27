@@ -10,7 +10,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
-import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -19,9 +18,7 @@ import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.sikkerLogg
 import java.util.UUID
 
 class Brevoppretter(
@@ -35,7 +32,6 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevtype: Brevtype,
-        validerMottaker: Boolean,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, Enhetsnummer> =
         with(
@@ -60,10 +56,6 @@ class Brevoppretter(
                     brevtype = brevtype,
                     brevkoder = brevkode,
                 )
-            if (validerMottaker && nyttBrev.mottaker.erGyldig().isNotEmpty()) {
-                sikkerLogg.error("Ugyldig mottaker: ${nyttBrev.mottaker.toJson()}")
-                throw UgyldigMottakerKanIkkeFerdigstilles(id = null, sakId = nyttBrev.sakId, nyttBrev.mottaker.erGyldig())
-            }
             return Pair(db.opprettBrev(nyttBrev), enhet)
         }
 

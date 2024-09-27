@@ -116,7 +116,6 @@ class OpprettJournalfoerOgDistribuerRiver(
                         bruker = brukerTokenInfo,
                         brevKodeMapping = { brevKode },
                         brevtype = brevKode.brevtype,
-                        validerMottaker = true,
                     ) {
                         when (brevKode) {
                             Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
@@ -182,7 +181,7 @@ class OpprettJournalfoerOgDistribuerRiver(
             )
             return Pair(brevID, true)
         } catch (e: Exception) {
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...")
+            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...", e)
             return Pair(brev.id, false)
         }
     }

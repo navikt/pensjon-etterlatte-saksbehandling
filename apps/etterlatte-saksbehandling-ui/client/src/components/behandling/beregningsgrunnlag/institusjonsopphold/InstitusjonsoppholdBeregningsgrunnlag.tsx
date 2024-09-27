@@ -51,25 +51,26 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
         />
       </Box>
 
-      {redigerbar && visInstitusjonsoppholdBeregningPeriodeSkjema ? (
-        <InstitusjonsoppholdBeregningsgrunnlagSkjema
-          sakType={sakType}
-          institusjonsopphold={institusjonsopphold}
-          paaAvbryt={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(false)}
-          paaLagre={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(false)}
-        />
-      ) : (
-        <div>
-          <Button
-            size="small"
-            variant="secondary"
-            icon={<PlusIcon aria-hidden />}
-            onClick={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(true)}
-          >
-            Ny periode
-          </Button>
-        </div>
-      )}
+      {redigerbar &&
+        (visInstitusjonsoppholdBeregningPeriodeSkjema ? (
+          <InstitusjonsoppholdBeregningsgrunnlagSkjema
+            sakType={sakType}
+            institusjonsopphold={institusjonsopphold}
+            paaAvbryt={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(false)}
+            paaLagre={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(false)}
+          />
+        ) : (
+          <div>
+            <Button
+              size="small"
+              variant="secondary"
+              icon={<PlusIcon aria-hidden />}
+              onClick={() => setVisInstitusjonsoppholdBeregningPeriodeSkjema(true)}
+            >
+              Ny periode
+            </Button>
+          </div>
+        ))}
     </VStack>
   )
 }

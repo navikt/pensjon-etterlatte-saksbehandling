@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentTrygdetider, ITrygdetid, opprettTrygdetider } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { Alert, BodyShort, Box, ErrorMessage, Heading, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -20,6 +20,7 @@ import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { TrygdetidMelding } from '~components/behandling/trygdetid/components/TrygdetidMelding'
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface Props {
   redigerbar: boolean
@@ -83,7 +84,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           setTrygdetidManglerVedAvslag(true)
         } else {
           setTrygdetidIdMangler(true)
-          throw new Error('Kan ikke opprette trygdetid når readonly')
+          if (behandling.status !== IBehandlingStatus.AVBRUTT) {
+            throw new Error('Kan ikke opprette trygdetid når readonly')
+          }
         }
       } else {
         setTrygdetider(trygdetider)
@@ -211,13 +214,13 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           errorMessage: 'Hent feil har oppstått ved henting av landliste',
         })}
 
-        {behandlingsIdMangler && <ErrorMessage>Finner ikke behandling - ID mangler</ErrorMessage>}
+        {behandlingsIdMangler && <ApiErrorAlert>Finner ikke behandling - ID mangler</ApiErrorAlert>}
         {trygdetidIdMangler && (
-          <ErrorMessage>
+          <ApiErrorAlert>
             {behandling.status === IBehandlingStatus.AVBRUTT
               ? 'Behandlingen har ingen trygdetid'
               : 'Finner ikke trygdetid - ID mangler'}
-          </ErrorMessage>
+          </ApiErrorAlert>
         )}
       </VStack>
     </Box>

@@ -34,6 +34,7 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import BrevutfallModal from '~components/behandling/brevutfall/BrevutfallModal'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -138,7 +139,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   if (avbruttUtenBrev) {
-    return <Alert variant="warning">Behandlingen er avbrutt og ingen brev finnes</Alert>
+    return <ApiErrorAlert>Behandlingen er avbrutt og ingen brev finnes</ApiErrorAlert>
   }
 
   const kanSendeTilAttestering = (): boolean => {

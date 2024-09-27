@@ -167,7 +167,8 @@ const BeregningsgrunnlagBarnepensjon = () => {
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
               success: (trygdetider) => (
                 <>
-                  {trygdetider.length > 1 &&
+                  {trygdetider &&
+                    trygdetider.length > 1 &&
                     (!!tidligsteAvdoede ? (
                       <BeregningsmetoderFlereAvdoede
                         redigerbar={redigerbar}
@@ -180,7 +181,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
                         flere avdøde i persongalleriet.
                       </ApiErrorAlert>
                     ))}
-                  {trygdetider.length === 1 && (
+                  {trygdetider && trygdetider.length === 1 && (
                     <BeregningsMetodeBrukt
                       redigerbar={redigerbar}
                       navn={mapNavn(trygdetider[0].ident, personopplysninger)}

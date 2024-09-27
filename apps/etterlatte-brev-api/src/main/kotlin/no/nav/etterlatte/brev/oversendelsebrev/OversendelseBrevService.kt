@@ -223,6 +223,7 @@ class OversendelseBrevServiceImpl(
 
         val pdf =
             runBlocking {
+                // TODO: se på disse
                 pdfGenerator.ferdigstillOgGenererPDF(
                     id = brev.id,
                     bruker = brukerTokenInfo,

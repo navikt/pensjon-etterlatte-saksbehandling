@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -42,7 +41,6 @@ class PDFGenerator(
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest,
         brevKodeMapping: (BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
-        lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
     ): Pdf {
         val brev = sjekkOmBrevKanEndres(id)
         if (brev.mottaker.erGyldig().isNotEmpty()) {
@@ -57,7 +55,6 @@ class PDFGenerator(
                 avsenderRequest,
                 brevKodeMapping,
                 brevDataMapping,
-                lagrePdfHvisVedtakFattet,
             )
         db.lagrePdfOgFerdigstillBrev(id, pdf)
         return pdf
@@ -69,13 +66,12 @@ class PDFGenerator(
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest,
         brevKodeMapping: (BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
-        lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
 
         if (!brev.kanEndres()) {
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }
+            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke pdf for brev med id=${brev.id}" }
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
             logger.info("Brev er en opplastet PDF – returnerer lagret innhold")
             return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke pdf for brev med id=${brev.id}" }
@@ -139,14 +135,6 @@ class PDFGenerator(
 
         return brevbakerService
             .genererPdf(brev.id, brevRequest)
-            .also {
-                lagrePdfHvisVedtakFattet(
-                    generellBrevData.forenkletVedtak?.status,
-                    generellBrevData.forenkletVedtak?.saksbehandlerIdent,
-                    brev,
-                    it,
-                )
-            }
     }
 
     private fun hentLagretInnhold(brev: Brev) =
@@ -167,3 +155,8 @@ class PDFGenerator(
         return brev
     }
 }
+
+class PdfOgForenkletVedtak(
+    val pdf: Pdf,
+    val forenkletVedtak: ForenkletVedtak? = null,
+)

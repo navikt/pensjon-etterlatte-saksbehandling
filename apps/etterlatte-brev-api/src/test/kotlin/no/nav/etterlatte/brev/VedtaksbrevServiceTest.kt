@@ -70,6 +70,8 @@ import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -682,17 +684,24 @@ internal class VedtaksbrevServiceTest {
             mode = EnumSource.Mode.EXCLUDE,
             names = ["OPPRETTET", "OPPDATERT"],
         )
-        fun `Brev innhold kan ikke endres`(status: Status) {
-            val brev = opprettBrev(status, mockk())
+        fun `Brev innhold kan ikke endres`(brevstatus: Status) {
+            val brev = opprettBrev(brevstatus, mockk())
 
             every { db.hentBrev(any()) } returns brev
             every { db.hentPdf(any()) } returns Pdf(PDF_BYTES)
 
+            coEvery { vedtaksvurderingService.hentVedtak(any(), any()) } returns
+                mockk<VedtakDto> {
+                    every { status } returns VedtakStatus.FATTET_VEDTAK
+                    every { vedtakFattet } returns VedtakFattet("ident", Enheter.PORSGRUNN.enhetNr, Tidspunkt.now())
+                }
             runBlocking {
                 vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
+                db.oppdaterBrevkoder(any(), any())
+                db.lagrePdf(any(), any())
                 db.hentBrev(brev.id)
                 db.hentPdf(brev.id)
             }

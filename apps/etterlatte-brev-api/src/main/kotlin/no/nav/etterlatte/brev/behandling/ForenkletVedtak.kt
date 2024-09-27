@@ -9,8 +9,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 import java.time.YearMonth
 
-fun VedtakType?.somTittel() = this?.name?.lowercase()?.replace("_", " ")
-
 data class ForenkletVedtak(
     val id: Long,
     val status: VedtakStatus,

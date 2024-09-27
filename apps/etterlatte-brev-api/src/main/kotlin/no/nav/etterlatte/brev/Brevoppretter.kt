@@ -26,12 +26,45 @@ class Brevoppretter(
     private val db: BrevRepository,
     private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
+    suspend fun opprettBrevSomHarInnhold(
+        sakId: SakId,
+        behandlingId: UUID?,
+        bruker: BrukerTokenInfo,
+        brevKode: Brevkoder,
+        brevData: BrevDataRedigerbar,
+    ): Pair<Brev, Enhetsnummer> {
+        with(
+            innholdTilRedigerbartBrevHenter.hentInnDataForBrevMedData(
+                sakId,
+                behandlingId,
+                bruker,
+                brevKode,
+                brevData,
+            ),
+        ) {
+            val nyttBrev =
+                OpprettNyttBrev(
+                    sakId = sakId,
+                    behandlingId = behandlingId,
+                    prosessType = BrevProsessType.REDIGERBAR,
+                    soekerFnr = soekerFnr,
+                    mottaker = finnMottaker(sakType, personerISak),
+                    opprettet = Tidspunkt.now(),
+                    innhold = innhold,
+                    innholdVedlegg = innholdVedlegg,
+                    brevtype = brevKode.brevtype,
+                    brevkoder = brevkode,
+                )
+
+            return Pair(db.opprettBrev(nyttBrev), enhet)
+        }
+    }
+
     suspend fun opprettBrev(
         sakId: SakId,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
-        brevtype: Brevtype,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, Enhetsnummer> =
         with(
@@ -53,7 +86,7 @@ class Brevoppretter(
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
-                    brevtype = brevtype,
+                    brevtype = brevkode.brevtype,
                     brevkoder = brevkode,
                 )
             return Pair(db.opprettBrev(nyttBrev), enhet)

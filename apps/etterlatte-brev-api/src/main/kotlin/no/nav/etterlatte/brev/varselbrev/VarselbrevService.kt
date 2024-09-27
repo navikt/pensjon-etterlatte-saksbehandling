@@ -35,22 +35,23 @@ internal class VarselbrevService(
     ): Brev {
         val sakType = behandlingService.hentSak(sakId, brukerTokenInfo).sakType
         val brevkode = hentBrevkode(sakType, behandlingId, brukerTokenInfo)
+        val behandling = behandlingService.hentBehandling(behandlingId, brukerTokenInfo)
 
+        val brevdata =
+            BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
+                sakType,
+                brukerTokenInfo,
+                behandling.utlandstilknytning?.type,
+                behandling.revurderingsaarsak,
+            )
         return brevoppretter
-            .opprettBrev(
+            .opprettBrevSomHarInnhold(
                 sakId = sakId,
                 behandlingId = behandlingId,
                 bruker = brukerTokenInfo,
-                brevKodeMapping = { brevkode },
-                brevtype = Brevtype.VARSEL,
-            ) {
-                BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
-                    sakType,
-                    brukerTokenInfo,
-                    it.utlandstilknytningType,
-                    it.revurderingsaarsak,
-                )
-            }.first
+                brevKode = brevkode,
+                brevData = brevdata,
+            ).first
     }
 
     private suspend fun hentBrevkode(
@@ -88,7 +89,7 @@ internal class VarselbrevService(
         brevDataMapping = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 
-    suspend fun genererPdf(
+    suspend fun genererPdfFerdigstilling(
         brevId: Long,
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest =

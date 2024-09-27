@@ -221,17 +221,15 @@ class OversendelseBrevServiceImpl(
                 behandlingService.hentKlage(klageId = behandlingId, brukerTokenInfo)
             }
 
-        val pdf =
-            runBlocking {
-                pdfGenerator.ferdigstillOgGenererPDF(
-                    id = brev.id,
-                    bruker = brukerTokenInfo,
-                    avsenderRequest = { bruker, _, enhet -> AvsenderRequest(bruker.ident(), enhet) },
-                    brevKodeMapping = { Brevkoder.OVERSENDELSE_KLAGE },
-                    brevDataMapping = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
-                )
-            }
-        return pdf
+        return runBlocking {
+            pdfGenerator.ferdigstillOgGenererPDF(
+                id = brev.id,
+                bruker = brukerTokenInfo,
+                avsenderRequest = { bruker, _, enhet -> AvsenderRequest(bruker.ident(), enhet) },
+                brevKodeMapping = { Brevkoder.OVERSENDELSE_KLAGE },
+                brevDataMapping = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
+            )
+        }
     }
 
     override suspend fun slettOversendelseBrev(

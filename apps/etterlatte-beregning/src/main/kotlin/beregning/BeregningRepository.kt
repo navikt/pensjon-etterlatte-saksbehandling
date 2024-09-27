@@ -144,6 +144,7 @@ class BeregningRepository(
             "avdoedeForeldre" to beregningsperiode.avdoedeForeldre?.toJson(),
             "regelResultat" to beregningsperiode.regelResultat?.toJson(),
             "regelVersjon" to beregningsperiode.regelVersjon,
+            "regelverk" to beregningsperiode.regelverk?.name,
             "kilde" to beregningsperiode.kilde?.toJson(),
             "kunEnJuridiskForelder" to beregningsperiode.kunEnJuridiskForelder,
         )

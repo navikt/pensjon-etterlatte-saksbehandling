@@ -7,6 +7,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -38,9 +40,27 @@ data class Beregningsperiode(
     val avdoedeForeldre: List<String?>? = null,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
+    val regelverk: AnvendtRegelverk? = null, // TODO denne må migreres slik at den blir riktig bakover i tid
     val kunEnJuridiskForelder: Boolean = false,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
 )
+
+enum class AnvendtRegelverk {
+    REGELVERK_FOM_JAN_2024,
+    REGELVERK_TOM_DES_2023,
+    ;
+
+    companion object {
+        private val DATO_ETTERLATTE_REFORMEN = LocalDate.of(2024, Month.JANUARY, 1)
+
+        fun fra(dato: LocalDate): AnvendtRegelverk =
+            if (dato >= DATO_ETTERLATTE_REFORMEN) {
+                REGELVERK_FOM_JAN_2024
+            } else {
+                REGELVERK_TOM_DES_2023
+            }
+    }
+}
 
 data class OverstyrBeregningDTO(
     val beskrivelse: String,

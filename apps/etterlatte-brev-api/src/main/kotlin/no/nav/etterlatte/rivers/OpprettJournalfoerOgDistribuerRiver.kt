@@ -145,7 +145,6 @@ class OpprettJournalfoerOgDistribuerRiver(
                         behandlingId = null,
                         bruker = brukerTokenInfo,
                         brevKode = brevKode,
-                        brevtype = brevKode.brevtype,
                         brevData = brevdata,
                     )
                 }

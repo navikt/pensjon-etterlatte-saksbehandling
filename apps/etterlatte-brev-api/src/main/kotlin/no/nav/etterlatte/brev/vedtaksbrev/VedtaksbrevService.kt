@@ -78,7 +78,6 @@ class VedtaksbrevService(
                 behandlingId = behandlingId,
                 bruker = brukerTokenInfo,
                 brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
-                brevtype = Brevtype.VEDTAK,
                 brevDataMapping = { brevDataMapperRedigerbartUtfallVedtak.brevData(it) },
             ).first
     }

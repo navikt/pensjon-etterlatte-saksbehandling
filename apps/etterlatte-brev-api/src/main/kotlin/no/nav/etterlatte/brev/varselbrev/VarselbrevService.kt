@@ -42,7 +42,6 @@ internal class VarselbrevService(
                 behandlingId = behandlingId,
                 bruker = brukerTokenInfo,
                 brevKodeMapping = { brevkode },
-                brevtype = Brevtype.VARSEL,
             ) {
                 BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
                     sakType,

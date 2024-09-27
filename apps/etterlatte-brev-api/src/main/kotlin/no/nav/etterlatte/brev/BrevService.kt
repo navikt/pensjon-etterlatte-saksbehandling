@@ -46,7 +46,6 @@ class BrevService(
                 bruker = bruker,
                 brevKode = brevkode,
                 brevData = brevData,
-                brevtype = brevkode.brevtype,
             ).first
 
     data class BrevPayload(

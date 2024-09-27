@@ -31,7 +31,6 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKode: Brevkoder,
-        brevtype: Brevtype,
         brevData: BrevDataRedigerbar,
     ): Pair<Brev, Enhetsnummer> {
         with(
@@ -53,7 +52,7 @@ class Brevoppretter(
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
-                    brevtype = brevtype,
+                    brevtype = brevKode.brevtype,
                     brevkoder = brevkode,
                 )
 
@@ -66,7 +65,6 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
-        brevtype: Brevtype,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, Enhetsnummer> =
         with(
@@ -88,7 +86,7 @@ class Brevoppretter(
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
-                    brevtype = brevtype,
+                    brevtype = brevkode.brevtype,
                     brevkoder = brevkode,
                 )
             return Pair(db.opprettBrev(nyttBrev), enhet)

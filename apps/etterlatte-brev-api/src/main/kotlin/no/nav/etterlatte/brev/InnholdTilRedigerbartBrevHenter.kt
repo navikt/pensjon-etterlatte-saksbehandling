@@ -37,13 +37,12 @@ class InnholdTilRedigerbartBrevHenter(
     ): OpprettBrevRequest {
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, null, bruker) }
-        val kode = brevKode
         return coroutineScope {
             val innhold =
                 async {
                     brevbaker.hentRedigerbarTekstFraBrevbakeren(
                         BrevbakerRequest.fra(
-                            brevKode = kode.redigering,
+                            brevKode = brevKode.redigering,
                             brevData = brevData,
                             avsender =
                                 adresseService.hentAvsender(
@@ -61,7 +60,7 @@ class InnholdTilRedigerbartBrevHenter(
                 async {
                     redigerbartVedleggHenter.hentInitiellPayloadVedlegg(
                         bruker,
-                        kode.brevtype,
+                        brevKode.brevtype,
                         generellBrevData.sak.sakType,
                         generellBrevData.forenkletVedtak?.type,
                         generellBrevData.behandlingId,
@@ -79,9 +78,9 @@ class InnholdTilRedigerbartBrevHenter(
                 sakType = generellBrevData.sak.sakType,
                 enhet = generellBrevData.sak.enhet,
                 personerISak = generellBrevData.personerISak,
-                innhold = BrevInnhold(kode.tittel, generellBrevData.spraak, innhold.await()),
+                innhold = BrevInnhold(brevKode.tittel, generellBrevData.spraak, innhold.await()),
                 innholdVedlegg = innholdVedlegg.await(),
-                brevkode = kode,
+                brevkode = brevKode,
             )
         }
     }

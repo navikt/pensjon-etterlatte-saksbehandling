@@ -28,10 +28,16 @@ import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
@@ -128,7 +134,20 @@ class VarselbrevTest(
                     )
                 } returns listOf()
             }
-        val behandlingService = mockk<BehandlingService>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
+        val behandlingService =
+            mockk<BehandlingService>().also {
+                coEvery { it.hentSak(sak.id, any()) } returns sak
+                coEvery { it.hentBehandling(any(), any()) } returns
+                    mockk<DetaljertBehandling> {
+                        every { utlandstilknytning } returns
+                            Utlandstilknytning(
+                                UtlandstilknytningType.NASJONAL,
+                                Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now()),
+                                "begrunnelse",
+                            )
+                        every { revurderingsaarsak } returns Revurderingaarsak.AKTIVITETSPLIKT
+                    }
+            }
 
         val innholdTilRedigerbartBrevHenter =
             InnholdTilRedigerbartBrevHenter(brevdataFacade, brevbaker, adresseService, redigerbartVedleggHenter)

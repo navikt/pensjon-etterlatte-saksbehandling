@@ -43,21 +43,50 @@ class Brevoppretter(
                 brevDataMapping,
             ),
         ) {
-            val nyttBrev =
-                OpprettNyttBrev(
-                    sakId = sakId,
-                    behandlingId = behandlingId,
-                    prosessType = BrevProsessType.REDIGERBAR,
-                    soekerFnr = soekerFnr,
-                    mottaker = finnMottaker(sakType, personerISak),
-                    opprettet = Tidspunkt.now(),
-                    innhold = innhold,
-                    innholdVedlegg = innholdVedlegg,
-                    brevtype = brevtype,
-                    brevkoder = brevkode,
-                )
-            return Pair(db.opprettBrev(nyttBrev), enhet)
+            return opprettBrev(sakId, behandlingId, this, brevtype)
         }
+
+    suspend fun opprettBrev(
+        sakId: SakId,
+        behandlingId: UUID?,
+        bruker: BrukerTokenInfo,
+        brevkoder: Brevkoder,
+        brevtype: Brevtype,
+        brevData: BrevDataRedigerbar,
+    ): Pair<Brev, Enhetsnummer> =
+        with(
+            innholdTilRedigerbartBrevHenter.hentInnData(
+                sakId,
+                behandlingId,
+                bruker,
+                brevkoder,
+                brevData,
+            ),
+        ) {
+            return opprettBrev(sakId, behandlingId, this, brevtype)
+        }
+
+    private suspend fun opprettBrev(
+        sakId: SakId,
+        behandlingId: UUID?,
+        opprettBrevRequest: OpprettBrevRequest,
+        brevtype: Brevtype,
+    ): Pair<Brev, Enhetsnummer> {
+        val nyttBrev =
+            OpprettNyttBrev(
+                sakId = sakId,
+                behandlingId = behandlingId,
+                prosessType = BrevProsessType.REDIGERBAR,
+                soekerFnr = opprettBrevRequest.soekerFnr,
+                mottaker = finnMottaker(opprettBrevRequest.sakType, opprettBrevRequest.personerISak),
+                opprettet = Tidspunkt.now(),
+                innhold = opprettBrevRequest.innhold,
+                innholdVedlegg = opprettBrevRequest.innholdVedlegg,
+                brevtype = brevtype,
+                brevkoder = opprettBrevRequest.brevkode,
+            )
+        return Pair(db.opprettBrev(nyttBrev), opprettBrevRequest.enhet)
+    }
 
     suspend fun hentNyttInnhold(
         sakId: SakId,

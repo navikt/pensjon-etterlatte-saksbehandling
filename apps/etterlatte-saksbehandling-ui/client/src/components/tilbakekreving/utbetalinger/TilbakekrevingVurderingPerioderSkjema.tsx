@@ -197,7 +197,13 @@ export function TilbakekrevingVurderingPerioderSkjema({
                       </Select>
                     </Table.DataCell>
                     <Table.DataCell key="resultat">
-                      <Select {...register(`values.${index}.ytelse.resultat`)} label="Resultat" hideLabel={true}>
+                      <Select
+                        {...register(`values.${index}.ytelse.resultat`, {
+                          validate: (value) => value || 'Kan ikke være tomt resultat',
+                        })}
+                        label="Resultat"
+                        hideLabel={true}
+                      >
                         <option value="">Velg..</option>
                         {Object.values(TilbakekrevingResultat).map((resultat) => (
                           <option key={resultat} value={resultat}>

@@ -199,12 +199,15 @@ export function TilbakekrevingVurderingPerioderSkjema({
                     <Table.DataCell key="resultat">
                       <Select
                         {...register(`values.${index}.ytelse.resultat`, {
-                          validate: (value) =>
-                            (value && Object.values(TilbakekrevingResultat).includes(value)) ||
-                            'Kan ikke være tomt resultat',
+                          validate: (value) => {
+                            return value
+                              ? Object.values(TilbakekrevingResultat).includes(value) || `Feil type: ${value}`
+                              : 'Må velge verdi'
+                          },
                         })}
                         label="Resultat"
                         hideLabel={true}
+                        error={errors.values && errors.values[index]?.ytelse?.resultat?.message}
                       >
                         <option value="">Velg..</option>
                         {Object.values(TilbakekrevingResultat).map((resultat) => (

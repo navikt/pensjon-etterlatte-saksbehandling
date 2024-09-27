@@ -189,13 +189,12 @@ fun Route.brevRoute(
                 val brevParametre = call.receive<BrevParametre>()
                 val sak = behandlingService.hentSak(sakId, brukerTokenInfo)
                 grunnlagService.oppdaterGrunnlagForSak(sak, brukerTokenInfo)
-                val data = brevParametre.brevDataMapping()
                 measureTimedValue {
                     service.opprettNyttManueltBrev(
                         sakId,
                         brukerTokenInfo,
                         brevParametre.brevkode,
-                        data,
+                        brevParametre.brevDataMapping(),
                     )
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")

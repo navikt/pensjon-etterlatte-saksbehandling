@@ -36,6 +36,12 @@ internal class LoependeYtelserforespoerselRiverTest {
             mapOf(
                 ReguleringHendelseType.SAK_FUNNET.lagParMedEventNameKey(),
                 SAK_ID_KEY to sakId,
+                HENDELSE_DATA_KEY to
+                    OmregningData(
+                        kjoering = "kjoering",
+                        sakId = sakId,
+                        revurderingaarsak = Revurderingaarsak.REGULERING,
+                    ).toPacket(),
                 DATO_KEY to dato,
                 TILBAKESTILTE_BEHANDLINGER_KEY to "",
             ),
@@ -75,7 +81,7 @@ internal class LoependeYtelserforespoerselRiverTest {
             .asText() shouldBe ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET.lagEventnameForType()
 
         objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), OmregningData::class.java) shouldBe
-            OmregningData(sakId, fraDato, Revurderingaarsak.REGULERING)
+            OmregningData("kjoering", sakId, Revurderingaarsak.REGULERING, fraDato)
     }
 
     @Test
@@ -107,7 +113,12 @@ internal class LoependeYtelserforespoerselRiverTest {
         val melding =
             mapOf(
                 ReguleringHendelseType.SAK_FUNNET.lagParMedEventNameKey(),
-                SAK_ID_KEY to 1,
+                HENDELSE_DATA_KEY to
+                    OmregningData(
+                        kjoering = "kjoering",
+                        sakId = sakId,
+                        revurderingaarsak = Revurderingaarsak.REGULERING,
+                    ).toPacket(),
                 DATO_KEY to foersteMai2023,
                 TILBAKESTILTE_BEHANDLINGER_KEY to "${behandlinger[0]};${behandlinger[1]}",
             ).let { JsonMessage.newMessage(it) }

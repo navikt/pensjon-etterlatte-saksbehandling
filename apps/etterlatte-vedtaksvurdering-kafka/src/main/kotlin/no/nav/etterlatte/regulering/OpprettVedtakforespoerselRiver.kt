@@ -48,7 +48,7 @@ internal class OpprettVedtakforespoerselRiver(
         val sakId = omregningData.sakId
         logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
         val behandlingId = omregningData.hentBehandlingId()
-        val dato = omregningData.fradato
+        val dato = omregningData.hentFraDato()
 
         val respons =
             if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {

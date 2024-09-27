@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
@@ -35,7 +36,12 @@ interface OppgaveDao {
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
 
-    fun hentOppgaverForSak(
+    fun oppgaveMedTypeFinnes(
+        sakId: SakId,
+        type: OppgaveType,
+    ): Boolean
+
+    fun hentOppgaverForSakMedType(
         sakId: SakId,
         typer: List<OppgaveType>,
     ): List<OppgaveIntern>
@@ -220,7 +226,33 @@ class OppgaveDaoImpl(
             }
         }
 
-    override fun hentOppgaverForSak(
+    override fun oppgaveMedTypeFinnes(
+        sakId: SakId,
+        type: OppgaveType,
+    ): Boolean {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT EXISTS(
+                            SELECT id
+                            FROM oppgave
+                            WHERE sak_id = ? AND type = ?
+                        )
+                        """.trimIndent(),
+                    )
+                statement.setLong(1, sakId)
+                statement.setString(2, type.name)
+                statement.executeQuery().single {
+                    val trueOrFalsePostgresFormat = getString("exists")
+                    return@single trueOrFalsePostgresFormat == "t"
+                }
+            }
+        }
+    }
+
+    override fun hentOppgaverForSakMedType(
         sakId: SakId,
         typer: List<OppgaveType>,
     ): List<OppgaveIntern> =

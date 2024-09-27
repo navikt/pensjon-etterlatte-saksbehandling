@@ -155,8 +155,3 @@ class PDFGenerator(
         return brev
     }
 }
-
-class PdfOgForenkletVedtak(
-    val pdf: Pdf,
-    val forenkletVedtak: ForenkletVedtak? = null,
-)

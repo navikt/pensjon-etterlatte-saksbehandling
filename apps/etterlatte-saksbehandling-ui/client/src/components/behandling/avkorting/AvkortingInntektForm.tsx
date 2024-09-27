@@ -179,7 +179,7 @@ export const AvkortingInntektForm = ({
           {...register('spesifikasjon')}
           resize="vertical"
           label={
-            <SpesifikasjonLabel>
+            <>
               <Label>Spesifikasjon av inntekt</Label>
               <ReadMore header="Hva regnes som inntekt?">
                 Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
@@ -187,7 +187,7 @@ export const AvkortingInntektForm = ({
                 sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og foreldrepenger etter kap
                 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
               </ReadMore>
-            </SpesifikasjonLabel>
+            </>
           }
         />
         <HStack gap="1" marginBlock="4">
@@ -197,8 +197,7 @@ export const AvkortingInntektForm = ({
           <Button
             size="small"
             variant="tertiary"
-            onClick={(e) => {
-              e.preventDefault()
+            onClick={() => {
               setVisForm(false)
             }}
           >
@@ -225,5 +224,3 @@ const TextAreaWrapper = styled(Textarea)`
     height: 98px;
   }
 `
-
-const SpesifikasjonLabel = styled.div``

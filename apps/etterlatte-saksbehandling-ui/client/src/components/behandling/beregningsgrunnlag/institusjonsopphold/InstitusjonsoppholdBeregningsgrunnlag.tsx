@@ -51,8 +51,8 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
         />
       </Box>
 
-      {redigerbar ? (
-        visInstitusjonsoppholdBeregningPeriodeSkjema ? (
+      {redigerbar &&
+        (visInstitusjonsoppholdBeregningPeriodeSkjema ? (
           <InstitusjonsoppholdBeregningsgrunnlagSkjema
             sakType={sakType}
             institusjonsopphold={institusjonsopphold}
@@ -70,8 +70,7 @@ export const InstitusjonsoppholdBeregningsgrunnlag = ({
               Ny periode
             </Button>
           </div>
-        )
-      ) : null}
+        ))}
     </VStack>
   )
 }

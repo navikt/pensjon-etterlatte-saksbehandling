@@ -339,13 +339,7 @@ internal fun Route.behandlingRoutes(
                     behandlingService.oppdaterTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
                 }
 
-                call.respondText(
-                    contentType = ContentType.Application.Json,
-                    status = HttpStatusCode.OK,
-                    text = tidligereFamiliepleier.toJson(),
-                )
-
-                call.respond(HttpStatusCode.OK)
+                call.respond(tidligereFamiliepleier)
             }
         }
 

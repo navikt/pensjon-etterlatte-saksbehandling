@@ -199,7 +199,9 @@ export function TilbakekrevingVurderingPerioderSkjema({
                     <Table.DataCell key="resultat">
                       <Select
                         {...register(`values.${index}.ytelse.resultat`, {
-                          validate: (value) => value || 'Kan ikke være tomt resultat',
+                          validate: (value) =>
+                            (value && Object.values(TilbakekrevingResultat).includes(value)) ||
+                            'Kan ikke være tomt resultat',
                         })}
                         label="Resultat"
                         hideLabel={true}

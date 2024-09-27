@@ -326,29 +326,24 @@ internal fun Route.behandlingRoutes(
         post("/tidligere-familiepleier") {
             kunSkrivetilgang {
                 val body = call.receive<TidligereFamiliepleierRequest>()
-                try {
-                    val tidligereFamiliepleier =
-                        TidligereFamiliepleier(
-                            svar = body.svar,
-                            kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
-                            foedselsnummer = body.foedselsnummer,
-                            opphoertPleieforhold = body.opphoertPleieforhold,
-                            begrunnelse = body.begrunnelse,
-                        )
-
-                    inTransaction {
-                        behandlingService.oppdaterTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
-                    }
-
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = tidligereFamiliepleier.toJson(),
+                val tidligereFamiliepleier =
+                    TidligereFamiliepleier(
+                        svar = body.svar,
+                        kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
+                        foedselsnummer = body.foedselsnummer,
+                        opphoertPleieforhold = body.opphoertPleieforhold,
+                        begrunnelse = body.begrunnelse,
                     )
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    logger.warn("Ugyldig tilstand for lagre tidligereFamiliepleier", e)
-                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+
+                inTransaction {
+                    behandlingService.oppdaterTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
                 }
+
+                call.respondText(
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.OK,
+                    text = tidligereFamiliepleier.toJson(),
+                )
 
                 call.respond(HttpStatusCode.OK)
             }

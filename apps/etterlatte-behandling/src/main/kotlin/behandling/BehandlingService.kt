@@ -240,8 +240,6 @@ interface BehandlingService {
         behandlingId: UUID,
         tidligereFamiliepleier: TidligereFamiliepleier,
     )
-
-    fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier?
 }
 
 internal class BehandlingServiceImpl(
@@ -823,11 +821,9 @@ internal class BehandlingServiceImpl(
 
         behandling.oppdaterTidligereFamiliepleier(tidligereFamiliepleier).also {
             behandlingDao.lagreTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
+            behandlingDao.lagreStatus(it)
         }
     }
-
-    override fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
-        behandlingDao.hentTidligereFamiliepleier(behandlingId)
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

@@ -99,7 +99,7 @@ export const TidligereFamiliepleierVurdering = ({
 
   return (
     <VurderingsboksWrapper
-      tittel="Er gjenlevende tidligere familiepleier?"
+      tittel="Er søker tidligere familiepleier?"
       subtittelKomponent={<TidligereFamiliepleierVisning tidligereFamiliepleier={tidligereFamiliepleier} />}
       redigerbar={redigerbar}
       vurdering={
@@ -117,7 +117,7 @@ export const TidligereFamiliepleierVurdering = ({
     >
       <>
         <Heading level="3" size="small">
-          Er gjenlevende tidligere familiepleier?
+          Er søker tidligere familiepleier?
         </Heading>
 
         <Box width="15rem">

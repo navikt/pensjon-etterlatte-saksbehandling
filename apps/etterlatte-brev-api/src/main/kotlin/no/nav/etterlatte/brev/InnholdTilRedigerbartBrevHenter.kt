@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.erForeldreloes
 import no.nav.etterlatte.brev.behandling.loependeIPesys
@@ -10,6 +11,7 @@ import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
@@ -38,42 +40,39 @@ class InnholdTilRedigerbartBrevHenter(
     ): OpprettBrevRequest {
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, overstyrSpraak, bruker) }
+        return hentInnData(
+            sakId,
+            bruker,
+            hentBrevkode(generellBrevData, brevKodeMapping),
+            hentBrevdata(bruker, generellBrevData, behandlingId, brevDataMapping),
+            generellBrevData,
+        )
+    }
 
-        val brevkodeRequest =
-            BrevkodeRequest(
-                loependeIPesys(
-                    systemkilde = generellBrevData.systemkilde,
-                    behandlingId = generellBrevData.behandlingId,
-                    revurderingsaarsak = generellBrevData.revurderingsaarsak,
-                ),
-                erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
-                generellBrevData.sak.sakType,
-                generellBrevData.forenkletVedtak?.type,
-            )
+    internal suspend fun hentInnData(
+        sakId: SakId,
+        behandlingId: UUID?,
+        bruker: BrukerTokenInfo,
+        kode: Brevkoder,
+        brevData: BrevData,
+        overstyrSpraak: Spraak? = null,
+    ): OpprettBrevRequest =
+        hentInnData(
+            sakId,
+            bruker,
+            kode,
+            brevData,
+            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, overstyrSpraak, bruker) },
+        )
 
-        val kode = brevKodeMapping(brevkodeRequest)
-        return coroutineScope {
-            val brevDataRedigerbarRequest =
-                BrevDataRedigerbarRequest(
-                    brukerTokenInfo = bruker,
-                    soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
-                    sakType = generellBrevData.sak.sakType,
-                    forenkletVedtak = generellBrevData.forenkletVedtak,
-                    utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
-                    revurderingsaarsak = generellBrevData.revurderingsaarsak,
-                    behandlingId = behandlingId,
-                    erForeldreloes = erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
-                    loependeIPesys =
-                        loependeIPesys(
-                            generellBrevData.systemkilde,
-                            generellBrevData.behandlingId,
-                            generellBrevData.revurderingsaarsak,
-                        ),
-                    systemkilde = generellBrevData.systemkilde,
-                    avdoede = generellBrevData.personerISak.avdoede,
-                )
-            val brevData: BrevDataRedigerbar = brevDataMapping(brevDataRedigerbarRequest)
-
+    private suspend fun hentInnData(
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+        kode: Brevkoder,
+        brevData: BrevData,
+        generellBrevData: GenerellBrevData,
+    ): OpprettBrevRequest =
+        coroutineScope {
             val innhold =
                 async {
                     brevbaker.hentRedigerbarTekstFraBrevbakeren(
@@ -119,6 +118,58 @@ class InnholdTilRedigerbartBrevHenter(
                 brevkode = kode,
             )
         }
+
+    private suspend fun hentBrevdata(
+        bruker: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+        behandlingId: UUID?,
+        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
+    ): BrevDataRedigerbar {
+        val brevDataRedigerbarRequest =
+            BrevDataRedigerbarRequest(
+                brukerTokenInfo = bruker,
+                soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
+                sakType = generellBrevData.sak.sakType,
+                forenkletVedtak = generellBrevData.forenkletVedtak,
+                utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
+                revurderingsaarsak = generellBrevData.revurderingsaarsak,
+                behandlingId = behandlingId,
+                erForeldreloes =
+                    erForeldreloes(
+                        generellBrevData.personerISak.soeker,
+                        generellBrevData.personerISak.avdoede,
+                    ),
+                loependeIPesys =
+                    loependeIPesys(
+                        generellBrevData.systemkilde,
+                        generellBrevData.behandlingId,
+                        generellBrevData.revurderingsaarsak,
+                    ),
+                systemkilde = generellBrevData.systemkilde,
+                avdoede = generellBrevData.personerISak.avdoede,
+            )
+        val brevData: BrevDataRedigerbar = brevDataMapping(brevDataRedigerbarRequest)
+        return brevData
+    }
+
+    private fun hentBrevkode(
+        generellBrevData: GenerellBrevData,
+        brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
+    ): Brevkoder {
+        val brevkodeRequest =
+            BrevkodeRequest(
+                loependeIPesys(
+                    systemkilde = generellBrevData.systemkilde,
+                    behandlingId = generellBrevData.behandlingId,
+                    revurderingsaarsak = generellBrevData.revurderingsaarsak,
+                ),
+                erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
+                generellBrevData.sak.sakType,
+                generellBrevData.forenkletVedtak?.type,
+            )
+
+        val kode = brevKodeMapping(brevkodeRequest)
+        return kode
     }
 }
 

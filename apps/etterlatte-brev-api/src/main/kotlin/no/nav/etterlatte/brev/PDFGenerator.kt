@@ -46,9 +46,9 @@ class PDFGenerator(
         lagrePdfHvisVedtakFattet: (VedtakStatus?, String?, Brev, Pdf) -> Unit = { _, _, _, _ -> run {} },
     ): Pdf {
         val brev = sjekkOmBrevKanEndres(id)
-        if (!brev.mottaker.erGyldig()) {
+        if (brev.mottaker.erGyldig().isNotEmpty()) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottaker.erGyldig())
         }
 
         val pdf =

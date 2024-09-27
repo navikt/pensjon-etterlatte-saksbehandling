@@ -3,11 +3,15 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 
 internal class DoedshendelseKontrollpunktAvdoedService {
-    fun identifiser(avdoed: PersonDTO): List<DoedshendelseKontrollpunkt> =
+    fun identifiser(
+        avdoed: PersonDTO,
+        kontrollerDNummer: Boolean = true,
+        kontrollerUtvandring: Boolean = true,
+    ): List<DoedshendelseKontrollpunkt> =
         listOfNotNull(
             kontrollerDoedsdato(avdoed),
-            kontrollerDNummer(avdoed),
-            kontrollerUtvandring(avdoed),
+            if (kontrollerDNummer) kontrollerDNummer(avdoed) else null,
+            if (kontrollerUtvandring) kontrollerUtvandring(avdoed) else null,
         )
 
     private fun kontrollerDoedsdato(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =

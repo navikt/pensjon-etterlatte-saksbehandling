@@ -2,13 +2,13 @@ import { formaterVedtaksResultat, VedtakResultat } from '~components/behandling/
 import { BodyShort } from '@navikt/ds-react'
 import React from 'react'
 
-export const Vilkaarsresultat = (props: {
+export const Vedtaksresultat = (props: {
   vedtaksresultat: VedtakResultat | null
   virkningstidspunktFormatert: string | undefined
 }) => {
   return (
     <BodyShort spacing>
-      Vilkårsresultat:{' '}
+      Vedtaksresultat:{' '}
       <strong>{formaterVedtaksResultat(props.vedtaksresultat, props.virkningstidspunktFormatert)}</strong>
     </BodyShort>
   )

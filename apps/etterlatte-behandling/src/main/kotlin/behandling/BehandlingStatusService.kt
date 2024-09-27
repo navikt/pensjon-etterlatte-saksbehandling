@@ -308,8 +308,7 @@ class BehandlingStatusServiceImpl(
 
             val oppgaveFraBehandlingMedFeilutbetaling =
                 oppgaveService
-                    .hentOppgaverForSak(behandling.sak.id)
-                    .filter { it.type == OppgaveType.TILBAKEKREVING }
+                    .hentOppgaverForSak(behandling.sak.id, OppgaveType.TILBAKEKREVING)
                     .filter { !it.erAvsluttet() }
                     .maxByOrNull { it.opprettet }
 

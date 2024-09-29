@@ -5,6 +5,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -17,6 +18,7 @@ import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import java.time.LocalDate
 import java.time.LocalTime
@@ -26,13 +28,14 @@ class AutomatiskRevurderingService(
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagServiceImpl,
     private val vedtakKlient: VedtakKlient,
+    private val beregningKlient: BeregningKlient,
 ) {
     /*
      * Denne tjenesten er tiltenkt automatiske jobber der det kan utføres mange samtidig.
      * Det er derfor behov for retries rundt oppfølgingsmetoder.
      */
     suspend fun oppprettRevurderingOgOppfoelging(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse {
-        validerSakensTilstand(request.sakId, request.revurderingAarsak)
+        gyldigForAutomatiskRevurdering(request)
 
         val brukerTokenInfo =
             when (val appUser = Kontekst.get().AppUser) {
@@ -83,6 +86,63 @@ class AutomatiskRevurderingService(
         )
     }
 
+    private suspend fun gyldigForAutomatiskRevurdering(request: AutomatiskRevurderingRequest) {
+        when (request.revurderingAarsak) {
+            Revurderingaarsak.ALDERSOVERGANG -> {
+                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(request.sakId)
+            }
+
+            /*
+             * Skal ikke kjøre regulering hvis:
+             * Det ikke er en løpende sak
+             * Sak er under samordning
+             * Sak har aktivt overstyrt beregning OG en åpen behandling samtidig
+             */
+            Revurderingaarsak.REGULERING -> {
+                // TODO utfører per nå sjekkene i egne Rivers før dette gjør derfor ingenting her
+            }
+
+            /*
+             * Skal ikke automatisk revurdere by default hvis:
+             * Det ikke er en løpende sak
+             * Sak er under samordning
+             * Sak har aktivt overstyrt beregning
+             */
+            else -> {
+                val brukerTokenInfo = hentBrukerToken()
+                val vedtak = vedtakKlient.sakHarLopendeVedtakPaaDato(request.sakId, request.fraDato, brukerTokenInfo)
+
+                if (!vedtak.erLoepende) {
+                    throw Exception("")
+                }
+                if (vedtak.underSamordning) {
+                    throw Exception("")
+                }
+
+                val forrigeBehandling = hentForrigeBehandling(vedtak, request.sakId)
+                val overstyrtBeregning = beregningKlient.harOverstyrt(forrigeBehandling.id, brukerTokenInfo)
+                if (!overstyrtBeregning) {
+                    throw Exception("")
+                }
+            }
+        }
+    }
+
+    private fun hentBrukerToken() =
+        when (val appUser = Kontekst.get().AppUser) {
+            is SystemUser -> appUser.brukerTokenInfo
+            else -> throw KunSystembrukerException()
+        }
+
+    private fun hentForrigeBehandling(
+        vedtak: LoependeYtelseDTO,
+        sakId: SakId,
+    ) = vedtak.sisteLoependeBehandlingId?.let {
+        inTransaction {
+            behandlingService.hentBehandling(it)
+        }
+    } ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
+
     fun opprettAutomatiskRevurdering(
         sakId: SakId,
         forrigeBehandling: Behandling,
@@ -110,15 +170,6 @@ class AutomatiskRevurderingService(
             frist = frist,
             opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
         )
-    }
-
-    fun validerSakensTilstand(
-        sakId: SakId,
-        revurderingAarsak: Revurderingaarsak,
-    ) {
-        if (revurderingAarsak == Revurderingaarsak.ALDERSOVERGANG) {
-            revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
-        }
     }
 }
 

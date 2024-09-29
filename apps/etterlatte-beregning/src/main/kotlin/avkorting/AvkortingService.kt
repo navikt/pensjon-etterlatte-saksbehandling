@@ -2,6 +2,8 @@ package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -18,11 +20,21 @@ import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
+enum class AvkortingToggles(
+    val value: String,
+) : FeatureToggle {
+    VALIDERE_AARSINNTEKT_NESTE_AAR("validere_aarsintnekt_neste_aar"),
+    ;
+
+    override fun key(): String = this.value
+}
+
 class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
     private val avkortingRepository: AvkortingRepository,
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -97,20 +109,29 @@ class AvkortingService(
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)
-        val lagretAvkorting =
+        val lagretAvkorting = hentAvkortingNonNull(behandling.id)
+        val avkortingFrontend =
             if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-                avkortingMedTillegg(hentAvkortingNonNull(behandling.id), behandling)
+                avkortingMedTillegg(lagretAvkorting, behandling)
             } else {
                 val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
                 avkortingMedTillegg(
-                    hentAvkortingNonNull(behandling.id),
+                    lagretAvkorting,
                     behandling,
                     forrigeAvkorting,
                 )
             }
 
-        behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
-        return lagretAvkorting
+        if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING &&
+            featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, defaultValue = false)
+        ) {
+            if (lagretAvkorting.aarsoppgjoer.size == 2) {
+                behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
+            }
+        } else {
+            behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
+        }
+        return avkortingFrontend
     }
 
     fun slettAvkorting(behandlingId: UUID) = avkortingRepository.slettForBehandling(behandlingId)

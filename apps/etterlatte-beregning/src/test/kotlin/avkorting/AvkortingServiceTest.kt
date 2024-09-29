@@ -15,6 +15,7 @@ import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -36,12 +37,17 @@ internal class AvkortingServiceTest {
     private val avkortingRepository: AvkortingRepository = mockk()
     private val beregningService: BeregningService = mockk()
     private val sanksjonService: SanksjonService = mockk()
+    private val featureToggleService: FeatureToggleService =
+        mockk(relaxed = true) {
+            every { isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, any(), any()) } returns false
+        }
     private val service =
         AvkortingService(
             behandlingKlient,
             avkortingRepository,
             beregningService,
             sanksjonService,
+            featureToggleService,
         )
 
     @BeforeEach
@@ -368,6 +374,7 @@ internal class AvkortingServiceTest {
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
                 lagretAvkorting.toFrontend(YearMonth.of(2024, 1), null, BehandlingStatus.BEREGNET)
+                featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, false)
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
             coVerify(exactly = 2) {
@@ -456,6 +463,141 @@ internal class AvkortingServiceTest {
 
             coVerify {
                 behandlingKlient.avkort(behandlingId, bruker, false)
+            }
+        }
+
+        @Test
+        fun `Hvis bryter er på skal behandlingstatus oppdateres hvis inntekt for inneværende og neste år er angitt`() {
+            val behandlingId = UUID.randomUUID()
+            val sakId = randomSakId()
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    sak = sakId,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
+                )
+
+            every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
+            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+            mockkObject(AvkortingValider)
+            every { AvkortingValider.validerInntekt(any(), any(), any()) } returns Unit
+            every { beregningService.hentBeregningNonnull(any()) } returns beregning
+            every { sanksjonService.hentSanksjon(behandlingId) } returns null
+            every {
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
+            } returns beregnetAvkorting
+            every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
+            coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
+            every { lagretAvkorting.toFrontend(any(), any(), any()) } returns avkortingFrontend
+            every { lagretAvkorting.aarsoppgjoer } returns listOf(mockk(), mockk())
+
+            every {
+                featureToggleService.isEnabled(
+                    AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR,
+                    any(),
+                    any(),
+                )
+            } returns true
+
+            runBlocking {
+                service.beregnAvkortingMedNyttGrunnlag(
+                    behandlingId,
+                    bruker,
+                    endretGrunnlag,
+                ) shouldBe avkortingFrontend
+            }
+
+            coVerify(exactly = 1) {
+                behandlingKlient.avkort(behandlingId, bruker, false)
+                behandlingKlient.hentBehandling(behandlingId, bruker)
+                AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, true)
+                beregningService.hentBeregningNonnull(behandlingId)
+                sanksjonService.hentSanksjon(behandlingId)
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
+                    endretGrunnlag,
+                    bruker,
+                    beregning,
+                    any(),
+                    any(),
+                )
+                avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
+                lagretAvkorting.toFrontend(YearMonth.of(2024, 1), null, BehandlingStatus.BEREGNET)
+                featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, false)
+                lagretAvkorting.aarsoppgjoer
+
+                behandlingKlient.avkort(behandlingId, bruker, true)
+            }
+            coVerify(exactly = 2) {
+                avkortingRepository.hentAvkorting(behandlingId)
+            }
+        }
+
+        @Test
+        fun `Hvis bryter er på skal behandlingstatus ikke oppdateres hvis inntekt for inneværende eller neste år mangler`() {
+            val behandlingId = UUID.randomUUID()
+            val sakId = randomSakId()
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    sak = sakId,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
+                )
+
+            every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
+            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+            mockkObject(AvkortingValider)
+            every { AvkortingValider.validerInntekt(any(), any(), any()) } returns Unit
+            every { beregningService.hentBeregningNonnull(any()) } returns beregning
+            every { sanksjonService.hentSanksjon(behandlingId) } returns null
+            every {
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
+            } returns beregnetAvkorting
+            every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
+            coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
+            every { lagretAvkorting.toFrontend(any(), any(), any()) } returns avkortingFrontend
+            every { lagretAvkorting.aarsoppgjoer } returns listOf(mockk())
+
+            every {
+                featureToggleService.isEnabled(
+                    AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR,
+                    any(),
+                    any(),
+                )
+            } returns true
+
+            runBlocking {
+                service.beregnAvkortingMedNyttGrunnlag(
+                    behandlingId,
+                    bruker,
+                    endretGrunnlag,
+                ) shouldBe avkortingFrontend
+            }
+
+            coVerify(exactly = 1) {
+                behandlingKlient.avkort(behandlingId, bruker, false)
+                behandlingKlient.hentBehandling(behandlingId, bruker)
+                AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, true)
+                beregningService.hentBeregningNonnull(behandlingId)
+                sanksjonService.hentSanksjon(behandlingId)
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
+                    endretGrunnlag,
+                    bruker,
+                    beregning,
+                    any(),
+                    any(),
+                )
+                avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
+                lagretAvkorting.toFrontend(YearMonth.of(2024, 1), null, BehandlingStatus.BEREGNET)
+                featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, false)
+                lagretAvkorting.aarsoppgjoer
+            }
+            coVerify(exactly = 2) {
+                avkortingRepository.hentAvkorting(behandlingId)
+            }
+            coVerify(exactly = 0) {
+                behandlingKlient.avkort(behandlingId, bruker, true)
             }
         }
     }

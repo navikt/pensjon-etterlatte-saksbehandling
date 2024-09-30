@@ -5,6 +5,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -202,11 +203,13 @@ class OppgaveDaoMedEndringssporingImpl(
     }
 
     override fun oppdaterPaaVent(
-        paavent: PaaVent,
+        oppgaveId: UUID,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
         oppgaveStatus: Status,
     ) {
-        lagreEndringerPaaOppgave(paavent.oppgaveId) {
-            oppgaveDao.oppdaterPaaVent(paavent, oppgaveStatus)
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.oppdaterPaaVent(oppgaveId, merknad, aarsak, oppgaveStatus)
         }
     }
 

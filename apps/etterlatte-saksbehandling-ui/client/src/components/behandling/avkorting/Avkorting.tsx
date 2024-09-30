@@ -5,14 +5,9 @@ import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInnt
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
-import {
-  IBehandlingReducer,
-  oppdaterAvkorting,
-  oppdaterBehandlingsstatus,
-  resetAvkorting,
-} from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterAvkorting, resetAvkorting } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { mapResult } from '~shared/api/apiUtils'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
@@ -54,12 +49,6 @@ export const Avkorting = ({
     if (!avkorting) {
       dispatch(resetAvkorting())
       hentAvkortingRequest(behandling.id, (res) => {
-        const ferdigAvkortetOgErUnderBehandling = !skalHaInntektNesteAar
-          ? res && redigerbar
-          : res && res.avkortingGrunnlag.length === 2 && redigerbar
-        if (ferdigAvkortetOgErUnderBehandling) {
-          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
-        }
         dispatch(oppdaterAvkorting(res))
       })
     }

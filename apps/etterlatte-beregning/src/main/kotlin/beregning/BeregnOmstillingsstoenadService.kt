@@ -150,7 +150,7 @@ class BeregnOmstillingsstoenadService(
                                 periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)
                                     ?: throw AnvendtGrunnbeloepIkkeFunnet()
 
-                            val regelverk = Regelverk.fra(periodisertResultat.periode.fraDato)
+                            val regelverk = Regelverk.OMS_REGELVERK_FOM_2024
 
                             val trygdetid =
                                 periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)

@@ -121,8 +121,9 @@ enum class UtbetalingsperiodeType {
 }
 
 enum class Regelverk {
-    REGELVERK_TOM_2023,
-    REGELVERK_FOM_2024,
+    BP_REGELVERK_TOM_2023,
+    BP_REGELVERK_FOM_2024,
+    OMS_REGELVERK_FOM_2024,
 }
 
 data class AvkortetYtelsePeriode(

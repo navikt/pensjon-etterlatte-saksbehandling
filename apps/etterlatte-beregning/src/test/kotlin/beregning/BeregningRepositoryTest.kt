@@ -204,7 +204,7 @@ internal class BeregningRepositoryTest(
                     broek = broek,
                     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
                     regelVersjon = "1",
-                    regelverk = Regelverk.fra(datoFOM.atDay(1)),
+                    regelverk = Regelverk.BP_REGELVERK_FOM_2024,
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
                     kunEnJuridiskForelder = true,
                 ),

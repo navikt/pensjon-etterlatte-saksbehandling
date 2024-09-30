@@ -7,8 +7,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.LocalDate
-import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -46,20 +44,9 @@ data class Beregningsperiode(
 )
 
 enum class Regelverk {
-    REGELVERK_TOM_2023,
-    REGELVERK_FOM_2024,
-    ;
-
-    companion object {
-        private val DATO_ETTERLATTEREFORMEN = LocalDate.of(2024, Month.JANUARY, 1)
-
-        fun fra(dato: LocalDate): Regelverk =
-            if (dato >= DATO_ETTERLATTEREFORMEN) {
-                REGELVERK_FOM_2024
-            } else {
-                REGELVERK_TOM_2023
-            }
-    }
+    BP_REGELVERK_TOM_2023,
+    BP_REGELVERK_FOM_2024,
+    OMS_REGELVERK_FOM_2024,
 }
 
 data class OverstyrBeregningDTO(

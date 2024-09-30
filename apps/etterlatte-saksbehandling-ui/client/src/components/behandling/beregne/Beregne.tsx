@@ -29,6 +29,7 @@ import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -57,6 +58,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   const [manglerBrevutfall, setManglerbrevutfall] = useState(false)
   const [manglerAvkorting, setManglerAvkorting] = useState(false)
+  const skalHaInntektNesteAar = useFeatureEnabledMedDefault('validere_aarsintnekt_neste_aar', false)
 
   const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
@@ -157,8 +159,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                 )}
                 {manglerAvkorting && (
                   <Alert style={{ maxWidth: '16em' }} variant="error">
-                    Du må legge til inntektsavkorting, også når etterlatte ikke har inntekt. Legg da inn 0 i
-                    inntektsfeltene.
+                    {skalHaInntektNesteAar
+                      ? 'Du må legge til inntektsavkorting for inneværende og neste år, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'
+                      : 'Du må legge til inntektsavkorting, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'}
                   </Alert>
                 )}
               </Box>

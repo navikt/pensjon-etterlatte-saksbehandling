@@ -9,7 +9,7 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -52,7 +52,7 @@ internal class OpprettJournalfoerOgDistribuer {
             mockk<JournalfoerBrevService>().also {
                 coEvery { it.journalfoerVedtaksbrev(any(), any()) } returns
                     Pair(
-                        OpprettJournalpostResponse(
+                        OpprettJournalpostResponsee(
                             journalpostId = "123",
                             journalpostferdigstilt = true,
                         ),

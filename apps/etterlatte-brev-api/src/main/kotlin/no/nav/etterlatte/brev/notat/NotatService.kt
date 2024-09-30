@@ -8,11 +8,10 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.DokumentVariant
 import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.notat.Notat
 import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.brev.notat.NotatRepository
@@ -38,7 +37,7 @@ class NotatService(
     suspend fun journalfoerNotatISak(
         blankett: StrukturertNotat.KlageBlankett,
         bruker: BrukerTokenInfo,
-    ): OpprettJournalpostResponse {
+    ): OpprettJournalpostResponsee {
         val sak = blankett.klage.sak
 
         val notater = notatRepository.hentForReferanse(blankett.klage.id.toString())
@@ -120,7 +119,7 @@ class NotatService(
         notat: Notat,
         sak: Sak,
         pdf: ByteArray,
-    ): OpprettJournalpostResponse {
+    ): OpprettJournalpostResponsee {
         val tittel = notat.tittel
 
         val journalpostRequest =

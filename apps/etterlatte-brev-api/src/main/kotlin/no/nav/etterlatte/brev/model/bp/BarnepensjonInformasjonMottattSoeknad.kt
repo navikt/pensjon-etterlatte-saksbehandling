@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import java.time.LocalDate
 
 data class BarnepensjonInformasjonMottattSoeknad(

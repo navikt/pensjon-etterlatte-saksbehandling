@@ -10,7 +10,7 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
 import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
 import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
@@ -50,7 +50,7 @@ class JournalfoerBrevService(
     suspend fun journalfoerVedtaksbrev(
         vedtak: VedtakTilJournalfoering,
         bruker: Systembruker,
-    ): Pair<OpprettJournalpostResponse, BrevID>? {
+    ): Pair<OpprettJournalpostResponsee, BrevID>? {
         logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
         val behandlingId = vedtak.behandlingId
 
@@ -81,7 +81,7 @@ class JournalfoerBrevService(
     private suspend fun journalfoer(
         brev: Brev,
         sak: Sak,
-    ): OpprettJournalpostResponse {
+    ): OpprettJournalpostResponsee {
         logger.info("Skal journalføre brev ${brev.id}")
         if (brev.status != Status.FERDIGSTILT) {
             throw FeilStatusForJournalfoering(brev.id, brev.status)

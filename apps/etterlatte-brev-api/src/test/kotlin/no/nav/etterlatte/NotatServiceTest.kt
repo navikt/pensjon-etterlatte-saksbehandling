@@ -9,7 +9,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.brev.notat.NotatRepository
@@ -97,7 +97,7 @@ class NotatServiceTest(
             )
         } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { pdfGeneratorKlient.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()
-        coEvery { dokarkivService.journalfoer(any()) } returns OpprettJournalpostResponse("123", true)
+        coEvery { dokarkivService.journalfoer(any()) } returns OpprettJournalpostResponsee("123", true)
 
         runBlocking {
             notatService.journalfoerNotatISak(

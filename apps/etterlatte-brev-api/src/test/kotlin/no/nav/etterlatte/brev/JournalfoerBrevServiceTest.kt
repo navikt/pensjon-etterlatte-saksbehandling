@@ -19,7 +19,7 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.JournalPostType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
 import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
@@ -27,7 +27,6 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
@@ -68,7 +67,7 @@ class JournalfoerBrevServiceTest {
     fun `Journalfoering fungerer som forventet`() {
         val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.REDIGERBAR)
         val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, Enheter.defaultEnhet.enhetNr)
-        val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
+        val journalpostResponse = OpprettJournalpostResponsee("444", journalpostferdigstilt = true)
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
@@ -214,7 +213,7 @@ class JournalfoerBrevServiceTest {
             )
 
         val journalpostResponse =
-            OpprettJournalpostResponse(
+            OpprettJournalpostResponsee(
                 journalpostId = Random.nextLong().toString(),
                 journalpostferdigstilt = true,
             )
@@ -286,7 +285,7 @@ class JournalfoerBrevServiceTest {
         every { db.hentBrevInnhold(any()) } returns innhold
 
         val journalpostResponse =
-            OpprettJournalpostResponse(
+            OpprettJournalpostResponsee(
                 journalpostId = Random.nextLong().toString(),
                 journalpostferdigstilt = true,
             )

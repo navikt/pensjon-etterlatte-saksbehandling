@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevkoder.AVVIST_KLAGE
 import no.nav.etterlatte.brev.Brevkoder.BP_AVSLAG

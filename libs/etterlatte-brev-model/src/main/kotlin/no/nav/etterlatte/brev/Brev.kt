@@ -1,8 +1,11 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.etterlatte.brev.AvsenderRequest
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -105,3 +108,16 @@ enum class BrevProsessType {
     AUTOMATISK,
     OPPLASTET_PDF,
 }
+
+class OpprettJournalfoerOgDistribuerRequest(
+    val brevKode: Brevkoder,
+    val brevDataRedigerbar: BrevDataRedigerbar,
+    val avsenderRequest: AvsenderRequest,
+    val brevkode: Brevkoder,
+    val sakId: SakId,
+)
+
+class JournalfoerVedtaksbrevResponse(
+    val brevId: BrevID,
+    val opprett: OpprettJournalpostResponse,
+)

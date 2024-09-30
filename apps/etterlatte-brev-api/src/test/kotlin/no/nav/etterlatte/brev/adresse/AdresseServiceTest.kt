@@ -8,6 +8,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.adresse.navansatt.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter

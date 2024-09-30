@@ -31,7 +31,7 @@ internal class DokarkivServiceTest {
 
     @Test
     fun `Opprett journalpost`() {
-        val forventetResponse = OpprettJournalpostResponse("12345", journalpostferdigstilt = true)
+        val forventetResponse = OpprettJournalpostResponsee("12345", journalpostferdigstilt = true)
 
         coEvery { mockKlient.opprettJournalpost(any<OpprettJournalpost>(), any()) } returns forventetResponse
 

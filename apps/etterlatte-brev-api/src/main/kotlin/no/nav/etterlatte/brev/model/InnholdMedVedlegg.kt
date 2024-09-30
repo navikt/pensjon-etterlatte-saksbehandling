@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import org.slf4j.LoggerFactory
 
@@ -14,7 +15,7 @@ data class InnholdMedVedlegg(
     val innholdVedlegg: () -> List<BrevInnholdVedlegg>,
 ) {
     fun finnVedlegg(key: BrevVedleggKey): List<Slate.Element> {
-        val vedlegg = innholdVedlegg().find { vedlegg -> vedlegg.key == key }?.payload?.elements
+        val vedlegg = Slate.elements
         if (vedlegg == null) {
             logger.warn(
                 "Fant ikke vedlegg for brev av type=$key, lette " +

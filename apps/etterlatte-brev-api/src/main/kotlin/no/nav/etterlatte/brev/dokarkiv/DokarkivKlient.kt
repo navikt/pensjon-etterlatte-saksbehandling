@@ -27,7 +27,7 @@ class DokarkivKlient(
     internal suspend fun opprettJournalpost(
         request: OpprettJournalpost,
         ferdigstill: Boolean,
-    ): OpprettJournalpostResponse {
+    ): OpprettJournalpostResponsee {
         val response =
             client.post("$url?forsoekFerdigstill=$ferdigstill") {
                 accept(ContentType.Application.Json)
@@ -37,7 +37,7 @@ class DokarkivKlient(
 
         return if (response.status.isSuccess()) {
             response
-                .body<OpprettJournalpostResponse>()
+                .body<OpprettJournalpostResponsee>()
                 .also {
                     logger.info(
                         "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
@@ -45,7 +45,7 @@ class DokarkivKlient(
                 }
         } else if (response.status == HttpStatusCode.Conflict) {
             response
-                .body<OpprettJournalpostResponse>()
+                .body<OpprettJournalpostResponsee>()
                 .also { logger.warn("Konflikt ved lagring av journalpost ${it.journalpostId}") }
         } else {
             logger.error("Feil oppsto på opprett journalpost: ${response.bodyAsText()}")

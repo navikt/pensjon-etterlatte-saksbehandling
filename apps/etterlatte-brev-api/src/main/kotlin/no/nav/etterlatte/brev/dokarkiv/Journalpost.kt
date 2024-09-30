@@ -78,7 +78,7 @@ data class OpprettNotatJournalpostRequest(
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class OpprettJournalpostResponse(
+data class OpprettJournalpostResponsee(
     val journalpostId: String,
     val journalpostferdigstilt: Boolean,
     val dokumenter: List<DokumentInfo> = emptyList(),

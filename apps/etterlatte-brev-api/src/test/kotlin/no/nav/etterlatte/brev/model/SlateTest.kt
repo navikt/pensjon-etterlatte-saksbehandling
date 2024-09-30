@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.deserialize
 import org.junit.jupiter.api.Test
 

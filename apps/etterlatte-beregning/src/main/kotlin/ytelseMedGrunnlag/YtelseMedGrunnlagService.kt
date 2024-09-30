@@ -1,5 +1,6 @@
 package no.nav.etterlatte.ytelseMedGrunnlag
 
+import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
@@ -9,6 +10,7 @@ import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagPeriodisertDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.YearMonth
 import java.util.UUID
 
 class YtelseMedGrunnlagService(
@@ -20,19 +22,10 @@ class YtelseMedGrunnlagService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): YtelseMedGrunnlagDto? {
-        val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
-        // avkortingUtenLoependeYtelse.aarsoppgjoer.size > 1
-        // TODO: et aarsoppgjør som også er for neste år
-        // etteroppgjør
-
-        // en inntekt for hvert år, avkorter mot
-
-        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
-
-        // TODO: basert på dette, årsoppgjør som er året etter virk
-        val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
-
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
+        val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
+        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
+        val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
 
         val avkortinger =
             avkorting.avkortetYtelse.map { avkortetYtelse ->
@@ -67,7 +60,20 @@ class YtelseMedGrunnlagService(
 
         return YtelseMedGrunnlagDto(
             perioder = avkortinger,
+            inntektForNesteAar = harInntektForNesteAar(avkortingUtenLoependeYtelse),
         )
+    }
+
+    private fun harInntektForNesteAar(avkortingUtenLoependeYtelse: Avkorting): Boolean {
+        if (avkortingUtenLoependeYtelse.aarsoppgjoer.size > 1) {
+            avkortingUtenLoependeYtelse.aarsoppgjoer.forEach { aarsoppgjoer ->
+                if (aarsoppgjoer.aar > YearMonth.now().year) {
+                    return true
+                }
+            }
+        }
+
+        return false
     }
 }
 

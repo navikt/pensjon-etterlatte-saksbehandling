@@ -34,6 +34,14 @@ fun Project.setupRepositories() {
                 }
             }
         }
+        sub.tasks {
+            withType<Test> {
+                useJUnitPlatform()
+                testLogging {
+                    events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+                }
+            }
+        }
     }
 }
 
@@ -45,10 +53,8 @@ fun Project.setupTestLogging() {
                 .pluginId,
         )
         sub.tasks.withType<Test> {
-            useJUnitPlatform()
             maxParallelForks = hentAntallKjerner()
             testLogging {
-                events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
             }
         }

@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDaoTest.Companion.kilde
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_100
@@ -32,7 +31,6 @@ import no.nav.etterlatte.oppgave.lagNyOppgave
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -54,9 +52,6 @@ class AktivitetspliktAktivitetsgradDaoTest(
             RevurderingDao(ConnectionAutoclosingTest(ds)),
             (ConnectionAutoclosingTest(ds)),
         )
-
-    @BeforeEach
-    fun resetKontekst() = Kontekst.set(null)
 
     @Test
     fun `skal lagre ned og hente opp en ny aktivitetsgrad for oppgave`() {

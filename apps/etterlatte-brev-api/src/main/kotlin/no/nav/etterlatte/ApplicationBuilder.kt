@@ -26,8 +26,6 @@ import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.NyNotatService
-import no.nav.etterlatte.brev.PDFGenerator
-import no.nav.etterlatte.brev.PDFService
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
@@ -69,6 +67,8 @@ import no.nav.etterlatte.brev.notat.notatRoute
 import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
+import no.nav.etterlatte.brev.pdf.PDFGenerator
+import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService

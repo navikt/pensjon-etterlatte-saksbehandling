@@ -134,7 +134,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                                 )
                             }
 
-                            Brevkoder.OMS_INNTEKTSJUSTERING -> {
+                            Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
                                 OmstillingsstoenadInntektsjustering()
                             }
 

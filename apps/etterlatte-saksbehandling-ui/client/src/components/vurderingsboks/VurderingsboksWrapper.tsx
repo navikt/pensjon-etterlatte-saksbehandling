@@ -1,6 +1,6 @@
 import { BodyShort, Button, Detail, Heading } from '@navikt/ds-react'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
-import React, { ReactElement, useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
 import { VilkaarVurdertInformasjon } from '~components/behandling/vilkaarsvurdering/Vurdering'
@@ -23,11 +23,19 @@ interface Props {
   children?: ReactElement
   lagreklikk?: (onSuccess?: () => void) => void
   avbrytklikk?: (onSuccess?: () => void) => void
+  overstyrRediger?: boolean
+  setOverstyrRediger?: (rediger: boolean) => void
 }
 
 export const VurderingsboksWrapper = (props: Props) => {
   const [rediger, setRediger] = useState<boolean>((props.defaultRediger && props.redigerbar) ?? false)
   const [lagrer, setLagrer] = useState(false)
+
+  useEffect(() => {
+    if (props.overstyrRediger !== undefined) {
+      setRediger(props.overstyrRediger)
+    }
+  }, [props.overstyrRediger])
 
   return (
     <div>
@@ -65,7 +73,12 @@ export const VurderingsboksWrapper = (props: Props) => {
 
           {props.redigerbar && (
             <>
-              <RedigerWrapper onClick={() => setRediger(true)}>
+              <RedigerWrapper
+                onClick={() => {
+                  setRediger(true)
+                  if (props.setOverstyrRediger) props.setOverstyrRediger(true)
+                }}
+              >
                 <PencilIcon aria-hidden="true" />
                 <span className="text"> Rediger</span>
               </RedigerWrapper>

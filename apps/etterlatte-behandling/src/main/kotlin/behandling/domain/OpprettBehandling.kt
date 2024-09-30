@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -30,6 +31,7 @@ data class OpprettBehandling(
     val relatertBehandlingId: String? = null,
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth? = null,
+    val tidligereFamiliepleier: TidligereFamiliepleier? = null,
 ) {
     val id: UUID = UUID.randomUUID()
     val opprettet: Tidspunkt = Tidspunkt.now()

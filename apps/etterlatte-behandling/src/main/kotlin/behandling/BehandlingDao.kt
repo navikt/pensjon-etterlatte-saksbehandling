@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -178,6 +179,10 @@ class BehandlingDao(
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
             sendeBrev = rs.getBoolean("sende_brev"),
             opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
+            tidligereFamiliepleier =
+                rs
+                    .getString("tidligere_familiepleier")
+                    ?.let { objectMapper.readValue(it) },
         )
     }
 
@@ -204,8 +209,8 @@ class BehandlingDao(
                         INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                         soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
                         revurdering_aarsak, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
-                        sende_brev, opphoer_fom)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        sende_brev, opphoer_fom, tidligere_familiepleier)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -228,6 +233,7 @@ class BehandlingDao(
                     stmt.setString(16, relatertBehandlingId)
                     stmt.setBoolean(17, sendeBrev)
                     stmt.setString(18, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
+                    stmt.setJsonb(19, tidligereFamiliepleier)
                 }
                 require(stmt.executeUpdate() == 1)
             }
@@ -296,6 +302,29 @@ class BehandlingDao(
             require(statement.executeUpdate() == 1)
         }
     }
+
+    fun lagreTidligereFamiliepleier(
+        behandlingId: UUID,
+        tidligereFamiliepleier: TidligereFamiliepleier,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling set tidligere_familiepleier = ? where id = ?")
+            statement.setJsonb(1, tidligereFamiliepleier)
+            statement.setObject(2, behandlingId)
+            require(statement.executeUpdate() == 1)
+        }
+    }
+
+    fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement = prepareStatement("SELECT tidligere_familiepleier FROM behandling where id = ?")
+                statement.setObject(1, behandlingId)
+                statement.executeQuery().singleOrNull {
+                    toTidligereFamiliepleier()
+                }
+            }
+        }
 
     fun lagreViderefoertOpphoer(
         behandlingId: UUID,
@@ -439,6 +468,11 @@ class BehandlingDao(
 }
 
 fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLocalDatetimeUTC()
+
+private fun ResultSet.toTidligereFamiliepleier(): TidligereFamiliepleier =
+    this.getString("tidligere_familiepleier").let {
+        objectMapper.readValue(it)
+    }
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

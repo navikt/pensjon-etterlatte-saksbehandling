@@ -50,7 +50,13 @@ class AvkortingService(
             return eksisterendeAvkorting?.let {
                 if (behandling.status == BehandlingStatus.BEREGNET) {
                     val reberegnetAvkorting =
-                        reberegnOgLagreAvkorting(behandling.id, behandling.sak, eksisterendeAvkorting, brukerTokenInfo)
+                        reberegnOgLagreAvkorting(
+                            behandling.id,
+                            behandling.sak,
+                            eksisterendeAvkorting,
+                            brukerTokenInfo,
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
+                        )
                     avkortingMedTillegg(reberegnetAvkorting, behandling)
                 } else {
                     avkortingMedTillegg(eksisterendeAvkorting, behandling)
@@ -65,7 +71,13 @@ class AvkortingService(
             avkortingMedTillegg(nyAvkorting, behandling, forrigeAvkorting)
         } else if (behandling.status == BehandlingStatus.BEREGNET) {
             val reberegnetAvkorting =
-                reberegnOgLagreAvkorting(behandling.id, behandling.sak, eksisterendeAvkorting, brukerTokenInfo)
+                reberegnOgLagreAvkorting(
+                    behandling.id,
+                    behandling.sak,
+                    eksisterendeAvkorting,
+                    brukerTokenInfo,
+                    BehandlingType.REVURDERING,
+                )
             avkortingMedTillegg(reberegnetAvkorting, behandling, forrigeAvkorting)
         } else {
             avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
@@ -122,15 +134,7 @@ class AvkortingService(
                 )
             }
 
-        if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING &&
-            featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, defaultValue = false)
-        ) {
-            if (lagretAvkorting.aarsoppgjoer.size == 2) {
-                behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
-            }
-        } else {
-            behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
-        }
+        settBehandlingStatusAvkortet(brukerTokenInfo, behandling.id, behandling.behandlingType, lagretAvkorting)
         return avkortingFrontend
     }
 
@@ -159,7 +163,13 @@ class AvkortingService(
     ): Avkorting {
         val opphoerFraOgMed = behandling.opphoerFraOgMed
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
-        return reberegnOgLagreAvkorting(behandling.id, sakId, kopiertAvkorting, brukerTokenInfo)
+        return reberegnOgLagreAvkorting(
+            behandling.id,
+            sakId,
+            kopiertAvkorting,
+            brukerTokenInfo,
+            behandling.behandlingType,
+        )
     }
 
     private suspend fun reberegnOgLagreAvkorting(
@@ -167,6 +177,7 @@ class AvkortingService(
         sakId: SakId,
         avkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
+        behandlingType: BehandlingType,
     ): Avkorting {
         tilstandssjekk(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
@@ -174,8 +185,25 @@ class AvkortingService(
         val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning, sanksjoner)
         avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandlingId)
-        behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
+        settBehandlingStatusAvkortet(brukerTokenInfo, behandlingId, behandlingType, lagretAvkorting)
         return lagretAvkorting
+    }
+
+    private suspend fun settBehandlingStatusAvkortet(
+        brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID,
+        behandlingType: BehandlingType,
+        lagretAvkorting: Avkorting,
+    ) {
+        if (behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING &&
+            featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, defaultValue = false)
+        ) {
+            if (lagretAvkorting.aarsoppgjoer.size == 2) {
+                behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
+            }
+        } else {
+            behandlingKlient.avkort(behandlingId, brukerTokenInfo, true)
+        }
     }
 
     private fun hentAvkortingNonNull(behandlingId: UUID) =

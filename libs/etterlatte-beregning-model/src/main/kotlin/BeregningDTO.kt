@@ -40,7 +40,7 @@ data class Beregningsperiode(
     val avdoedeForeldre: List<String?>? = null,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
-    val regelverk: Regelverk? = null, // TODO denne må migreres slik at den blir riktig bakover i tid
+    val regelverk: Regelverk? = null,
     val kunEnJuridiskForelder: Boolean = false,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
 )

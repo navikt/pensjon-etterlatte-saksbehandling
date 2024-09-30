@@ -10,11 +10,11 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
 import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
 import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -50,7 +50,7 @@ class JournalfoerBrevService(
     suspend fun journalfoerVedtaksbrev(
         vedtak: VedtakTilJournalfoering,
         bruker: Systembruker,
-    ): Pair<OpprettJournalpostResponsee, BrevID>? {
+    ): Pair<OpprettJournalpostResponse, BrevID>? {
         logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
         val behandlingId = vedtak.behandlingId
 
@@ -81,7 +81,7 @@ class JournalfoerBrevService(
     private suspend fun journalfoer(
         brev: Brev,
         sak: Sak,
-    ): OpprettJournalpostResponsee {
+    ): OpprettJournalpostResponse {
         logger.info("Skal journalføre brev ${brev.id}")
         if (brev.status != Status.FERDIGSTILT) {
             throw FeilStatusForJournalfoering(brev.id, brev.status)

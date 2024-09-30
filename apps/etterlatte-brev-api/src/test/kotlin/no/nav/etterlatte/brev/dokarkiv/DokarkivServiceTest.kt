@@ -8,6 +8,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -31,7 +32,7 @@ internal class DokarkivServiceTest {
 
     @Test
     fun `Opprett journalpost`() {
-        val forventetResponse = OpprettJournalpostResponsee("12345", journalpostferdigstilt = true)
+        val forventetResponse = OpprettJournalpostResponse("12345", journalpostferdigstilt = true)
 
         coEvery { mockKlient.opprettJournalpost(any<OpprettJournalpost>(), any()) } returns forventetResponse
 

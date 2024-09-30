@@ -15,7 +15,7 @@ data class InnholdMedVedlegg(
     val innholdVedlegg: () -> List<BrevInnholdVedlegg>,
 ) {
     fun finnVedlegg(key: BrevVedleggKey): List<Slate.Element> {
-        val vedlegg = Slate.elements
+        val vedlegg = innholdVedlegg().find { vedlegg -> vedlegg.key == key }?.payload?.elements
         if (vedlegg == null) {
             logger.warn(
                 "Fant ikke vedlegg for brev av type=$key, lette " +

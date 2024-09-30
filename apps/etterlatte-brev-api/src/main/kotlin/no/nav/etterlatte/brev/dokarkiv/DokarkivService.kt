@@ -1,10 +1,11 @@
 package no.nav.etterlatte.brev.dokarkiv
 
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import org.slf4j.LoggerFactory
 
 interface DokarkivService {
-    suspend fun journalfoer(request: OpprettJournalpost): OpprettJournalpostResponsee
+    suspend fun journalfoer(request: OpprettJournalpost): OpprettJournalpostResponse
 
     suspend fun oppdater(
         journalpostId: String,
@@ -33,7 +34,7 @@ internal class DokarkivServiceImpl(
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override suspend fun journalfoer(request: OpprettJournalpost): OpprettJournalpostResponsee {
+    override suspend fun journalfoer(request: OpprettJournalpost): OpprettJournalpostResponse {
         logger.info("Oppretter journalpost med eksternReferanseId: ${request.eksternReferanseId}")
 
         return client.opprettJournalpost(request, ferdigstill = true)

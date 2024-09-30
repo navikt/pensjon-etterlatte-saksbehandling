@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -22,6 +21,7 @@ import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
@@ -187,7 +187,7 @@ internal class BrevRepositoryIntegrationTest(
 
         val brev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
 
-        assertTrue(db.settBrevJournalfoert(brev.id, OpprettJournalpostResponsee(journalpostId, journalpostferdigstilt = true)))
+        assertTrue(db.settBrevJournalfoert(brev.id, OpprettJournalpostResponse(journalpostId, journalpostferdigstilt = true)))
     }
 
     @Test
@@ -210,7 +210,7 @@ internal class BrevRepositoryIntegrationTest(
         db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES))
         db.hentBrev(opprettetBrev.id).status shouldBe Status.FERDIGSTILT
 
-        db.settBrevJournalfoert(opprettetBrev.id, OpprettJournalpostResponsee("id", journalpostferdigstilt = true))
+        db.settBrevJournalfoert(opprettetBrev.id, OpprettJournalpostResponse("id", journalpostferdigstilt = true))
         db.hentBrev(opprettetBrev.id).status shouldBe Status.JOURNALFOERT
 
         db.settBrevDistribuert(opprettetBrev.id, DistribuerJournalpostResponse("id"))
@@ -234,7 +234,7 @@ internal class BrevRepositoryIntegrationTest(
         val opprettetBrev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
         db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES))
 
-        val journalpostResponse = OpprettJournalpostResponsee("id", journalpostferdigstilt = true)
+        val journalpostResponse = OpprettJournalpostResponse("id", journalpostferdigstilt = true)
         db.settBrevJournalfoert(opprettetBrev.id, journalpostResponse)
 
         db.hentBrev(opprettetBrev.id).status shouldBe Status.JOURNALFOERT
@@ -337,8 +337,8 @@ internal class BrevRepositoryIntegrationTest(
             )
 
             val payload = db.hentBrevPayload(opprettetBrev.id)!!
-            Slate.elements.size shouldBeExactly 1
-            Slate.Element.type shouldBe Slate.ElementType.HEADING_TWO
+            payload.elements.size shouldBeExactly 1
+            payload.elements[0].type shouldBe Slate.ElementType.HEADING_TWO
         }
 
         @Test
@@ -420,8 +420,15 @@ internal class BrevRepositoryIntegrationTest(
             )
 
             val vedleggPayload = db.hentBrevPayloadVedlegg(opprettetBrev.id)!!
-            Slate.elements.size shouldBeExactly 1
-            Slate.Element.type shouldBe Slate.ElementType.HEADING_TWO
+            vedleggPayload
+                .first()
+                .payload!!
+                .elements.size shouldBeExactly 1
+            vedleggPayload
+                .first()
+                .payload!!
+                .elements[0]
+                .type shouldBe Slate.ElementType.HEADING_TWO
         }
     }
 

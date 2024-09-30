@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Spraak
@@ -140,9 +141,11 @@ fun Route.brevRoute(
         post("journalfoer-vedtak") {
             kunSystembruker {
                 val vedtak = call.receive<VedtakTilJournalfoering>()
-                val journalpostId = service.journalfoerVedtaksbrev(brukerTokenInfo as Systembruker, vedtak)
+                val blalba =
+                    service.journalfoerVedtaksbrev(brukerTokenInfo as Systembruker, vedtak)
+                        ?: throw RuntimeException("Bruker ikke i vedtaksbrev")
 
-                call.respond(JournalpostIdDto(journalpostId))
+                call.respond(JournalfoerVedtaksbrevResponse(blalba.second, blalba.first))
             }
         }
 

@@ -26,7 +26,6 @@ import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_MOTTAKER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_PDF_QUERY
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -34,6 +33,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
@@ -336,7 +336,7 @@ class BrevRepository(
 
     fun settBrevJournalfoert(
         brevId: BrevID,
-        journalpostResponse: OpprettJournalpostResponsee,
+        journalpostResponse: OpprettJournalpostResponse,
     ): Boolean =
         ds.transaction { tx ->
             tx

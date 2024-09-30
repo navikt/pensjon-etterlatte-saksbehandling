@@ -6,10 +6,10 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.DokumentVariant
 import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.notat.Notat
 import no.nav.etterlatte.brev.notat.NotatID
 import no.nav.etterlatte.brev.notat.NotatMal
@@ -158,7 +158,7 @@ class NyNotatService(
     suspend fun journalfoer(
         id: NotatID,
         bruker: BrukerTokenInfo,
-    ): OpprettJournalpostResponsee {
+    ): OpprettJournalpostResponse {
         val notat = hent(id)
 
         if (!notat.kanRedigeres()) {

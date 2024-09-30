@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -27,7 +28,7 @@ class DokarkivKlient(
     internal suspend fun opprettJournalpost(
         request: OpprettJournalpost,
         ferdigstill: Boolean,
-    ): OpprettJournalpostResponsee {
+    ): OpprettJournalpostResponse {
         val response =
             client.post("$url?forsoekFerdigstill=$ferdigstill") {
                 accept(ContentType.Application.Json)
@@ -37,7 +38,7 @@ class DokarkivKlient(
 
         return if (response.status.isSuccess()) {
             response
-                .body<OpprettJournalpostResponsee>()
+                .body<OpprettJournalpostResponse>()
                 .also {
                     logger.info(
                         "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
@@ -45,7 +46,7 @@ class DokarkivKlient(
                 }
         } else if (response.status == HttpStatusCode.Conflict) {
             response
-                .body<OpprettJournalpostResponsee>()
+                .body<OpprettJournalpostResponse>()
                 .also { logger.warn("Konflikt ved lagring av journalpost ${it.journalpostId}") }
         } else {
             logger.error("Feil oppsto på opprett journalpost: ${response.bodyAsText()}")

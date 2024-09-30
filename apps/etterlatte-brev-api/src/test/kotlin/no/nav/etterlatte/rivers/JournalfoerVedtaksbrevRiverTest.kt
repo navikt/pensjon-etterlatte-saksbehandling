@@ -16,9 +16,9 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
@@ -79,7 +79,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 brevtype = Brevtype.VEDTAK,
                 brevkoder = Brevkoder.BP_INNVILGELSE,
             )
-        val response = OpprettJournalpostResponsee("1234", true, emptyList())
+        val response = OpprettJournalpostResponse("1234", true, emptyList())
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
         coEvery { journalfoerBrevService.journalfoerVedtaksbrev(any(), any()) } returns Pair(response, 1)

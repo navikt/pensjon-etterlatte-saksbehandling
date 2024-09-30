@@ -15,9 +15,9 @@ import no.nav.etterlatte.brev.NyNotatService
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpost
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponsee
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.brev.pdfgen.SlatePDFMal
 import no.nav.etterlatte.common.Enheter
@@ -136,7 +136,7 @@ internal class NyNotatServiceTest(
 
         val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.PORSGRUNN.enhetNr)
         coEvery { behandlingServiceMock.hentSak(any(), any()) } returns sak
-        coEvery { dokarkivServiceMock.journalfoer(any()) } returns OpprettJournalpostResponsee("123", true)
+        coEvery { dokarkivServiceMock.journalfoer(any()) } returns OpprettJournalpostResponse("123", true)
         coEvery { pdfGeneratorKlientMock.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()
 
         val nyttNotat =

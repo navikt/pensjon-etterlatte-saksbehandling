@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -121,3 +120,15 @@ class JournalfoerVedtaksbrevResponse(
     val brevId: BrevID,
     val opprett: OpprettJournalpostResponse,
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class OpprettJournalpostResponse(
+    val journalpostId: String,
+    val journalpostferdigstilt: Boolean,
+    val dokumenter: List<DokumentInfo> = emptyList(),
+) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class DokumentInfo(
+        val dokumentInfoId: String,
+    )
+}

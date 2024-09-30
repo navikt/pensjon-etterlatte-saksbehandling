@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.vedtaksbrev
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -29,6 +30,24 @@ fun Route.vedtaksbrevRoute(
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedtaksbrevRoute")
 
     route("brev/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
+        post("fjern-ferdigstilt") {
+            withBehandlingId(tilgangssjekker) { behandlingId ->
+                val vedtakId = call.request.queryParameters["vedtakId"]
+                logger.info("Vedtak (id=$vedtakId) er underkjent - åpner vedtaksbrev for nye endringer")
+                val vedtak = call.receive<JsonNode>()
+                val vedtaksbrev = service.hentVedtaksbrev(behandlingId)
+                if (vedtaksbrev == null) {
+                    logger.warn("Fant ingen vedtaksbrev for behandling (id=$behandlingId) - avbryter ")
+                    call.respond(HttpStatusCode.OK)
+                }
+                val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(vedtaksbrev!!.id, vedtak)
+                if (endretOK) {
+                    logger.info("Vedtaksbrev (id=${vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
+                } else {
+                    throw Exception("Kunne ikke åpne vedtaksbrev (id=${vedtaksbrev.id}) for endringer")
+                }
+            }
+        }
         get("vedtak") {
             withBehandlingId(tilgangssjekker) { behandlingId ->
                 logger.info("Henter vedtaksbrev for behandling (behandlingId=$behandlingId)")

@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
@@ -113,16 +114,16 @@ class AutomatiskRevurderingService(
                 val vedtak = vedtakKlient.sakHarLopendeVedtakPaaDato(request.sakId, request.fraDato, brukerTokenInfo)
 
                 if (!vedtak.erLoepende) {
-                    throw Exception("")
+                    throw OmregningKreverLoependeVedtak()
                 }
                 if (vedtak.underSamordning) {
-                    throw Exception("")
+                    throw OmregningAvSakUnderSamordning()
                 }
 
                 val forrigeBehandling = hentForrigeBehandling(vedtak, request.sakId)
                 val overstyrtBeregning = beregningKlient.harOverstyrt(forrigeBehandling.id, brukerTokenInfo)
                 if (!overstyrtBeregning) {
-                    throw Exception("")
+                    throw OmregningOverstyrtBeregning()
                 }
             }
         }
@@ -174,3 +175,18 @@ class AutomatiskRevurderingService(
 }
 
 class KunSystembrukerException : Exception("Hendelser kan kun utføres av systembruker")
+
+class OmregningKreverLoependeVedtak :
+    UgyldigForespoerselException("OMREGNING_KREVER_LØPENDE_VEDTAK", "Omregning krever at sak har løpende vedtak")
+
+class OmregningAvSakUnderSamordning :
+    UgyldigForespoerselException(
+        "OMREGNING_SAK_UNDER_SAMORDNING",
+        "Omregning kan ikke utføres om sak er under samordning",
+    )
+
+class OmregningOverstyrtBeregning :
+    UgyldigForespoerselException(
+        "OMREGNING_OVERSTYRT_BEREGNING",
+        "Omregning kan ikke utføres om sak har aktiv overstyrt beregning",
+    )

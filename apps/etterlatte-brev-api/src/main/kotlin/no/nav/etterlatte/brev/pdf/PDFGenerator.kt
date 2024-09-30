@@ -1,5 +1,7 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.pdf
 
+import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
@@ -153,17 +155,10 @@ class PDFGenerator(
                                     sak.sakType,
                                 ),
                             )
-                        PDFService.kombinerPdfListeTilEnPdf(listOf(vedtaksbrev, it))
+                        PDFHelper.kombinerPdfListeTilEnPdf(listOf(vedtaksbrev, it))
                     }
                     else -> it
                 }
-            }.also {
-                lagrePdfHvisVedtakFattet(
-                    generellBrevData.forenkletVedtak?.status,
-                    generellBrevData.forenkletVedtak?.saksbehandlerIdent,
-                    brev,
-                    it,
-                )
             }
     }
 

@@ -1,8 +1,10 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.pdf
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.content.PartData
 import io.ktor.http.content.streamProvider
+import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -18,10 +20,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import org.apache.pdfbox.Loader
-import org.apache.pdfbox.multipdf.PDFMergerUtility
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayOutputStream
 
 class PDFService(
     private val db: BrevRepository,
@@ -85,26 +84,6 @@ class PDFService(
         db.lagrePdf(brev.id, Pdf(fil))
 
         return brev
-    }
-
-    companion object {
-        // Kombinerer en liste med PDF-er til én enkelt PDF, og bevarer rekkefølgen fra listen.
-        fun kombinerPdfListeTilEnPdf(pdfListe: List<Pdf>): Pdf {
-            val pdfMerger = PDFMergerUtility()
-            val finalPdf = Loader.loadPDF(pdfListe.first().bytes)
-
-            pdfListe.drop(1).forEach { pdf ->
-                val sourcePdf = Loader.loadPDF(pdf.bytes)
-                pdfMerger.appendDocument(finalPdf, sourcePdf)
-                sourcePdf.close()
-            }
-
-            val out = ByteArrayOutputStream()
-            finalPdf.save(out)
-            finalPdf.close()
-
-            return Pdf(out.toByteArray())
-        }
     }
 }
 

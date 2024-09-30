@@ -2,11 +2,11 @@ package no.nav.etterlatte.rivers
 
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.JournalfoerBrevService
-import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
+import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId

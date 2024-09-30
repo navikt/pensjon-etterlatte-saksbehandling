@@ -40,24 +40,24 @@ data class Beregningsperiode(
     val avdoedeForeldre: List<String?>? = null,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
-    val regelverk: AnvendtRegelverk? = null, // TODO denne må migreres slik at den blir riktig bakover i tid
+    val regelverk: Regelverk? = null, // TODO denne må migreres slik at den blir riktig bakover i tid
     val kunEnJuridiskForelder: Boolean = false,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
 )
 
-enum class AnvendtRegelverk {
-    REGELVERK_FOM_JAN_2024,
-    REGELVERK_TOM_DES_2023,
+enum class Regelverk {
+    REGELVERK_FOM_2024,
+    REGELVERK_TOM_2023,
     ;
 
     companion object {
-        private val DATO_ETTERLATTE_REFORMEN = LocalDate.of(2024, Month.JANUARY, 1)
+        private val DATO_ETTERLATTEREFORMEN = LocalDate.of(2024, Month.JANUARY, 1)
 
-        fun fra(dato: LocalDate): AnvendtRegelverk =
-            if (dato >= DATO_ETTERLATTE_REFORMEN) {
-                REGELVERK_FOM_JAN_2024
+        fun fra(dato: LocalDate): Regelverk =
+            if (dato >= DATO_ETTERLATTEREFORMEN) {
+                REGELVERK_FOM_2024
             } else {
-                REGELVERK_TOM_DES_2023
+                REGELVERK_TOM_2023
             }
     }
 }

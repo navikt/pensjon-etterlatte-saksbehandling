@@ -23,10 +23,10 @@ import no.nav.etterlatte.libs.common.behandling.AnnenForelder.AnnenForelderVurde
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
-import no.nav.etterlatte.libs.common.beregning.AnvendtRegelverk
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.beregning.Regelverk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
@@ -182,7 +182,7 @@ class BeregnBarnepensjonService(
                                 periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)
                                     ?: throw AnvendtGrunnbeloepIkkeFunnet()
 
-                            val anvendtRegelverk = AnvendtRegelverk.fra(periodisertResultat.periode.fraDato)
+                            val regelverk = Regelverk.fra(periodisertResultat.periode.fraDato)
 
                             val anvendtTrygdetid =
                                 periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)
@@ -241,7 +241,7 @@ class BeregnBarnepensjonService(
                                         ).verdi,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
-                                regelverk = anvendtRegelverk,
+                                regelverk = regelverk,
                             )
                         },
                 )

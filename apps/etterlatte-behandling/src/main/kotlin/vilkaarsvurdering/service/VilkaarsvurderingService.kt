@@ -106,8 +106,8 @@ class VilkaarsvurderingService(
             val vilkaarsvurdering = vilkaarsvurderingRepositoryWrapper.hent(behandlingId)
             if (vilkaarsvurdering?.resultat != null) {
                 throw VilkaarsvurderingTilstandException(
-                    "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering som har et resultat. " +
-                        "Vilkårsvurderingid: ${vilkaarsvurdering.id} Behandlingid: ${vilkaarsvurdering.behandlingId}",
+                    "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering som har et resultat. ",
+                    vilkaarsvurdering,
                 )
             }
             vilkaarsvurderingRepositoryWrapper.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
@@ -122,8 +122,8 @@ class VilkaarsvurderingService(
             val vilkaarsvurdering = vilkaarsvurderingRepositoryWrapper.hent(behandlingId)
             if (vilkaarsvurdering?.resultat != null) {
                 throw VilkaarsvurderingTilstandException(
-                    "Kan ikke slette et vilkår ($vilkaarId) på en vilkårsvurdering som har et resultat. " +
-                        "Vilkårsvurderingid: ${vilkaarsvurdering.id} Behandlingid: ${vilkaarsvurdering.behandlingId}",
+                    "Kan ikke slette et vilkår ($vilkaarId) på en vilkårsvurdering som har et resultat. ",
+                    vilkaarsvurdering,
                 )
             }
 
@@ -428,8 +428,17 @@ class BehandlingstilstandException(
 ) : IllegalStateException(message, e)
 
 class VilkaarsvurderingTilstandException(
-    message: String,
-) : IllegalStateException(message)
+    detail: String,
+    vilkaarvurdering: Vilkaarsvurdering,
+) : UgyldigForespoerselException(
+        code = "UGYLDIG_TILSTAND_VILKAARSVURDERING",
+        detail = detail,
+        meta =
+            mapOf(
+                "vilkaarvurderingId" to vilkaarvurdering.id,
+                "behandlingId" to vilkaarvurdering.behandlingId,
+            ),
+    )
 
 class VilkaarsvurderingIkkeFunnet :
     IkkeFunnetException(

@@ -31,11 +31,8 @@ data class OmstillingsstoenadInnvilgelse(
     val omsRettUtenTidsbegrensning: Boolean,
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
     val harUtbetaling: Boolean,
+    val harInntektNesteAar: Boolean,
 ) : BrevDataFerdigstilling {
-    // TODO: legge til et felt for inntekt neste år - en eller annen plass
-
-    // TODO: dette som sendes til pensjonsbrev
-
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
@@ -102,6 +99,7 @@ data class OmstillingsstoenadInnvilgelse(
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
+                harInntektNesteAar = avkortingsinfo.harInntektNesteAar,
             )
         }
     }

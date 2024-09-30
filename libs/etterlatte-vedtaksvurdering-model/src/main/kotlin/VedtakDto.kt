@@ -112,11 +112,17 @@ data class Utbetalingsperiode(
     val periode: Periode,
     val beloep: BigDecimal?,
     val type: UtbetalingsperiodeType,
+    val regelverk: Regelverk? = null,
 )
 
 enum class UtbetalingsperiodeType {
     OPPHOER,
     UTBETALING,
+}
+
+enum class Regelverk {
+    REGELVERK_TOM_2023,
+    REGELVERK_FOM_2024,
 }
 
 data class AvkortetYtelsePeriode(

@@ -46,8 +46,8 @@ data class Beregningsperiode(
 )
 
 enum class Regelverk {
-    REGELVERK_FOM_2024,
     REGELVERK_TOM_2023,
+    REGELVERK_FOM_2024,
     ;
 
     companion object {

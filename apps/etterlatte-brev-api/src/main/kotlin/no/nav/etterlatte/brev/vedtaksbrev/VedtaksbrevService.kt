@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.vedtaksbrev
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
@@ -77,32 +78,39 @@ class VedtaksbrevService(
                 behandlingId = behandlingId,
                 bruker = brukerTokenInfo,
                 brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
-                brevtype = Brevtype.VEDTAK,
-                validerMottaker = false,
                 brevDataMapping = { brevDataMapperRedigerbartUtfallVedtak.brevData(it) },
             ).first
     }
 
-    suspend fun genererPdf(
+    fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
-    ): Pdf =
-        pdfGenerator.genererPdf(
-            id = id,
-            bruker = bruker,
-            avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
-            brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
-            brevDataMapping = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
-        ) { vedtakStatus, saksbehandler, brev, pdf ->
-            brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
-            lagrePdfHvisVedtakFattet(
-                brev.id,
-                pdf,
-                bruker,
-                vedtakStatus!!,
-                saksbehandler!!,
-            )
-        }
+    ): Pdf {
+        val pdf =
+            runBlocking {
+                pdfGenerator.genererPdf(
+                    id = id,
+                    bruker = bruker,
+                    avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
+                    brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
+                    brevDataMapping = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
+                )
+            }
+
+        val brev = db.hentBrev(id)
+        val vedtakDeferred = brev.behandlingId?.let { runBlocking { vedtaksvurderingService.hentVedtak(it, bruker) } }
+        val saksbehandlerident: String = vedtakDeferred?.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
+        brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
+        lagrePdfHvisVedtakFattet(
+            brev.id,
+            pdf,
+            bruker,
+            vedtakDeferred?.status!!,
+            saksbehandlerident,
+        )
+
+        return pdf
+    }
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,

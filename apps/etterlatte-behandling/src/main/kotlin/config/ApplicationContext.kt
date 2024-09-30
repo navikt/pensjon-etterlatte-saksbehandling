@@ -420,7 +420,7 @@ internal class ApplicationContext(
             aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
     val automatiskRevurderingService =
-        AutomatiskRevurderingService(revurderingService, behandlingService, grunnlagsService)
+        AutomatiskRevurderingService(revurderingService, behandlingService, grunnlagsService, vedtakKlient)
     val manuellRevurderingService =
         ManuellRevurderingService(
             revurderingService = revurderingService,

@@ -5,6 +5,8 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.generellbehandling.Attestant
 import no.nav.etterlatte.libs.common.generellbehandling.Behandler
@@ -65,7 +67,7 @@ class ManglerRinanummerException(
 
 class KanIkkeEndreGenerellBehandling(
     message: String,
-) : Exception(message)
+) : IkkeTillattException("KAN_IKKE_ENDRE_GENERELL_BEHANDLING", message)
 
 class UgyldigAttesteringsForespoersel(
     message: String,
@@ -332,9 +334,14 @@ class GenerellBehandlingService(
     }
 
     private fun finnesOgErRedigerbar(generellBehandling: GenerellBehandling?) {
-        requireNotNull(generellBehandling) { "Behandlingen finnes ikke." }
+        if (generellBehandling == null) {
+            throw IkkeFunnetException("GENERELL_BEHANDLING_FINNES_IKKE", "Behandlingen finnes ikke.")
+        }
         if (!generellBehandling.kanEndres()) {
-            throw KanIkkeEndreGenerellBehandling("Behandling kan ikke være fattet, attestert eller avbrutt hvis du skal endre den")
+            throw KanIkkeEndreGenerellBehandling(
+                "Behandling kan ikke ha status ${generellBehandling.status} " +
+                    "hvis du skal endre den.",
+            )
         }
     }
 

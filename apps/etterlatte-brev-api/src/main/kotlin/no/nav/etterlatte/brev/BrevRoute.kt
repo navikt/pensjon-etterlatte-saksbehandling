@@ -174,7 +174,8 @@ fun Route.brevRoute(
                         sakId,
                         brukerTokenInfo,
                         Brevkoder.TOMT_INFORMASJONSBREV,
-                    ) { ManueltBrevData() }
+                        ManueltBrevData(),
+                    )
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)
@@ -193,7 +194,8 @@ fun Route.brevRoute(
                         sakId,
                         brukerTokenInfo,
                         brevParametre.brevkode,
-                    ) { redigerbarTekstRequest -> brevParametre.brevDataMapping(redigerbarTekstRequest) }
+                        brevParametre.brevDataMapping(),
+                    )
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)

@@ -37,17 +37,15 @@ class BrevService(
         sakId: SakId,
         bruker: BrukerTokenInfo,
         brevkode: Brevkoder,
-        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
+        brevData: BrevDataRedigerbar,
     ): Brev =
         brevoppretter
-            .opprettBrev(
+            .opprettBrevSomHarInnhold(
                 sakId = sakId,
                 behandlingId = null,
                 bruker = bruker,
-                brevKodeMapping = { brevkode },
-                brevtype = brevkode.brevtype,
-                validerMottaker = false,
-                brevDataMapping = brevDataMapping,
+                brevKode = brevkode,
+                brevData = brevData,
             ).first
 
     data class BrevPayload(

@@ -1,13 +1,13 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
@@ -58,12 +58,13 @@ internal class LoependeYtelserforespoerselRiver(
         if (respons.underSamordning) {
             throw SakErUnderSamordning()
         }
+
         packet[HENDELSE_DATA_KEY] =
-            Omregningshendelse(
+            OmregningData(
                 sakId = sakId,
                 fradato = respons.dato,
+                revurderingaarsak = Revurderingaarsak.REGULERING,
             )
-        respons.sisteLoependeBehandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
         if (respons.erLoepende) {
             packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
             context.publish(packet.toJson())

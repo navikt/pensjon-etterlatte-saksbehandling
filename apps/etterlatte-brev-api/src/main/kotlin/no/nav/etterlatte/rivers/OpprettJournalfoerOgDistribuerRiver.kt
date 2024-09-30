@@ -110,14 +110,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         val (brev, enhetsnummer) =
             try {
                 retryOgPakkUt {
-                    brevoppretter.opprettBrev(
-                        sakId = sakId,
-                        behandlingId = null,
-                        bruker = brukerTokenInfo,
-                        brevKodeMapping = { brevKode },
-                        brevtype = brevKode.brevtype,
-                        validerMottaker = true,
-                    ) {
+                    val brevdata =
                         when (brevKode) {
                             Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
@@ -147,7 +140,13 @@ class OpprettJournalfoerOgDistribuerRiver(
 
                             else -> ManueltBrevData()
                         }
-                    }
+                    brevoppretter.opprettBrevSomHarInnhold(
+                        sakId = sakId,
+                        behandlingId = null,
+                        bruker = brukerTokenInfo,
+                        brevKode = brevKode,
+                        brevData = brevdata,
+                    )
                 }
             } catch (e: Exception) {
                 val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"
@@ -182,7 +181,7 @@ class OpprettJournalfoerOgDistribuerRiver(
             )
             return Pair(brevID, true)
         } catch (e: Exception) {
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...")
+            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...", e)
             return Pair(brev.id, false)
         }
     }

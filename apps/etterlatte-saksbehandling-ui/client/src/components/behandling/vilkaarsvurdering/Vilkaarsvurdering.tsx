@@ -159,7 +159,9 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
       {isFailure(opprettNyVilkaarsvurderingStatus) && (
         <ApiErrorAlert>
           {opprettNyVilkaarsvurderingStatus.error.status === 412
-            ? 'Virkningstidspunkt og kommer søker tilgode må avklares før vilkårsvurdering kan starte'
+            ? behandling.status === IBehandlingStatus.AVBRUTT
+              ? 'Behandlingen er avbrutt, vilkårsvurderingen finnes ikke.'
+              : 'Virkningstidspunkt og kommer søker tilgode må avklares før vilkårsvurdering kan starte'
             : 'En feil har oppstått'}
         </ApiErrorAlert>
       )}

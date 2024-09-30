@@ -107,6 +107,7 @@ data class AvkortetYtelseDto(
 
 data class YtelseMedGrunnlagDto(
     val perioder: List<YtelseMedGrunnlagPeriodisertDto>,
+    // TODO: legge til felt for inntektsjustering? har to aarsoppgjoer
 )
 
 data class YtelseMedGrunnlagPeriodisertDto(

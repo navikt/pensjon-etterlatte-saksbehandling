@@ -21,7 +21,15 @@ class YtelseMedGrunnlagService(
         brukerTokenInfo: BrukerTokenInfo,
     ): YtelseMedGrunnlagDto? {
         val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
+        // avkortingUtenLoependeYtelse.aarsoppgjoer.size > 1
+        // TODO: et aarsoppgjør som også er for neste år
+        // etteroppgjør
+
+        // en inntekt for hvert år, avkorter mot
+
         val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
+
+        // TODO: basert på dette, årsoppgjør som er året etter virk
         val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
 
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)

@@ -32,6 +32,10 @@ data class OmstillingsstoenadInnvilgelse(
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
     val harUtbetaling: Boolean,
 ) : BrevDataFerdigstilling {
+    // TODO: legge til et felt for inntekt neste år - en eller annen plass
+
+    // TODO: dette som sendes til pensjonsbrev
+
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,

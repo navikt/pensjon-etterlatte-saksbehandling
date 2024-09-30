@@ -32,7 +32,7 @@ class DoedshendelseReminderServiceTest {
     private val antallMaaneder = 4L
 
     @Test
-    fun `Skal opprette oppgave hvis 2 mnd gammel BP hendelse ikke har soekt`() {
+    fun `Skal opprette oppgave hvis 4 mnd gammel BP hendelse ikke har soekt`() {
         val doedshendelseBP =
             DoedshendelseReminder(
                 beroertFnr = "12345678901",
@@ -52,7 +52,7 @@ class DoedshendelseReminderServiceTest {
         every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP)
         every { behandlingService.hentBehandlingerForSak(sakId1) } returns emptyList()
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns mockOppgave
-        every { oppgaveService.hentOppgaverForSak(sakId1, OppgaveType.MANGLER_SOEKNAD) } returns emptyList()
+        every { oppgaveService.oppgaveMedTypeFinnes(sakId1, OppgaveType.MANGLER_SOEKNAD) } returns false
 
         val service =
             DoedshendelseReminderService(
@@ -64,7 +64,7 @@ class DoedshendelseReminderServiceTest {
 
         verify(exactly = 1) {
             behandlingService.hentBehandlingerForSak(sakId1)
-            oppgaveService.hentOppgaverForSak(sakId1, OppgaveType.MANGLER_SOEKNAD)
+            oppgaveService.oppgaveMedTypeFinnes(sakId1, OppgaveType.MANGLER_SOEKNAD)
 
             oppgaveService.opprettOppgave(
                 doedshendelseBP.id.toString(),
@@ -87,17 +87,9 @@ class DoedshendelseReminderServiceTest {
                 sakId = sakId1,
             )
 
-        val eksisterendeOppgave =
-            opprettNyOppgaveMedReferanseOgSak(
-                "vurder konsekvens",
-                Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr),
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.MANGLER_SOEKNAD,
-                null,
-            )
         every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP)
         every { behandlingService.hentBehandlingerForSak(sakId1) } returns emptyList()
-        every { oppgaveService.hentOppgaverForSak(sakId1, OppgaveType.MANGLER_SOEKNAD) } returns listOf(eksisterendeOppgave)
+        every { oppgaveService.oppgaveMedTypeFinnes(sakId1, OppgaveType.MANGLER_SOEKNAD) } returns true
 
         val service =
             DoedshendelseReminderService(

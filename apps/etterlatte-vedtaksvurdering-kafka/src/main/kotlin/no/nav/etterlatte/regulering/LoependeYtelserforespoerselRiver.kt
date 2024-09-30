@@ -1,18 +1,15 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
-import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.OmregningData
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import no.nav.etterlatte.rapidsandrivers.dato
-import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -27,7 +24,8 @@ internal class LoependeYtelserforespoerselRiver(
 
     init {
         initialiserRiver(rapidsConnection, ReguleringHendelseType.SAK_FUNNET) {
-            validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(OmregningDataPacket.KEY) }
+            validate { it.requireKey(OmregningDataPacket.SAK_ID) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(TILBAKESTILTE_BEHANDLINGER_KEY) }
         }
@@ -39,7 +37,9 @@ internal class LoependeYtelserforespoerselRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val sakId = packet.sakId
+        val omregningData = packet.omregningData
+
+        val sakId = omregningData.sakId
         logger.info("Leser reguleringsfoerespoersel for sak $sakId")
 
         val reguleringsdato = packet.dato
@@ -59,12 +59,8 @@ internal class LoependeYtelserforespoerselRiver(
             throw SakErUnderSamordning()
         }
 
-        packet[HENDELSE_DATA_KEY] =
-            OmregningData(
-                sakId = sakId,
-                fradato = respons.dato,
-                revurderingaarsak = Revurderingaarsak.REGULERING,
-            )
+        omregningData.endreFraDato(respons.dato)
+        packet.omregningData = omregningData
         if (respons.erLoepende) {
             packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
             context.publish(packet.toJson())

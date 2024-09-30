@@ -26,6 +26,7 @@ internal class OpprettVedtakforespoerselRiverTest {
                 OmregningHendelseType.BEREGNA.lagParMedEventNameKey(),
                 HENDELSE_DATA_KEY to
                     OmregningData(
+                        "kjoering",
                         sakId = sakId,
                         fradato = foersteMai2023,
                         revurderingaarsak = Revurderingaarsak.REGULERING,

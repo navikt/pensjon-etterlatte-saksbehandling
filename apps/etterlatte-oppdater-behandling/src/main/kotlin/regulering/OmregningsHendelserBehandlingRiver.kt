@@ -4,10 +4,10 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OmregningData
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -24,7 +24,8 @@ internal class OmregningsHendelserBehandlingRiver(
     init {
         initialiserRiver(rapidsConnection, OmregningHendelseType.KLAR_FOR_OMREGNING) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(HENDELSE_DATA_KEY) }
+            validate { it.requireKey(OmregningDataPacket.KEY) }
+            validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
         }
     }
 
@@ -41,7 +42,7 @@ internal class OmregningsHendelserBehandlingRiver(
             behandlinger.opprettAutomatiskRevurdering(
                 AutomatiskRevurderingRequest(
                     sakId = omregningData.sakId,
-                    fraDato = omregningData.fradato,
+                    fraDato = omregningData.hentFraDato(),
                     revurderingAarsak = omregningData.revurderingaarsak,
                 ),
             )

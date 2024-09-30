@@ -88,6 +88,7 @@ class VedtaksbrevService(
     ): Pdf {
         val pdf =
             runBlocking {
+                // TODO: bruke brevService.genererPdf
                 pdfGenerator.genererPdf(
                     id = id,
                     bruker = bruker,

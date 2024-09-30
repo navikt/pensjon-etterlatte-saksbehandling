@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.pdf
 
 import no.nav.etterlatte.brev.Brevkoder
-import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
@@ -20,12 +19,8 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
-import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.Enhetsnummer
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -36,32 +31,6 @@ class PDFGenerator(
     private val brevbakerService: BrevbakerService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val sikkerlogger = sikkerlogger()
-
-    suspend fun ferdigstillOgGenererPDF(
-        id: BrevID,
-        bruker: BrukerTokenInfo,
-        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest,
-        brevKodeMapping: (BrevkodeRequest) -> Brevkoder,
-        brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
-    ): Pdf {
-        val brev = sjekkOmBrevKanEndres(id)
-        if (brev.mottaker.erGyldig().isNotEmpty()) {
-            sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottaker.erGyldig())
-        }
-
-        val pdf =
-            genererPdf(
-                id,
-                bruker,
-                avsenderRequest,
-                brevKodeMapping,
-                brevDataMapping,
-            )
-        db.lagrePdfOgFerdigstillBrev(id, pdf)
-        return pdf
-    }
 
     suspend fun genererPdf(
         id: BrevID,
@@ -138,28 +107,6 @@ class PDFGenerator(
 
         return brevbakerService
             .genererPdf(brev.id, brevRequest)
-            .let {
-                // TODO: finne et bedre sted for dette?
-                when (brev.brevkoder) {
-                    Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
-                        val vedtaksbrev =
-                            brevbakerService.genererPdf(
-                                brev.id,
-                                BrevbakerRequest.fra(
-                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING, // TODO: gjennbruke eller egen ny mal for vedtaksbrev
-                                    OmstillingsstoenadInntektsjustering(), // TODO: må ha riktig data iht brevkode
-                                    avsender,
-                                    generellBrevData.personerISak.soekerOgEventuellVerge(),
-                                    sak.id,
-                                    generellBrevData.spraak,
-                                    sak.sakType,
-                                ),
-                            )
-                        PDFHelper.kombinerPdfListeTilEnPdf(listOf(vedtaksbrev, it))
-                    }
-                    else -> it
-                }
-            }
     }
 
     private fun hentLagretInnhold(brev: Brev) =

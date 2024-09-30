@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.oversendelsebrev
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -25,7 +26,6 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevKanIkkeSlettes
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
@@ -71,7 +71,7 @@ interface OversendelseBrevService {
 
 class OversendelseBrevServiceImpl(
     private val brevRepository: BrevRepository,
-    private val pdfGenerator: PDFGenerator,
+    private val brevService: BrevService,
     private val adresseService: AdresseService,
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagService,
@@ -168,7 +168,7 @@ class OversendelseBrevServiceImpl(
         }
 
         val klage = behandlingService.hentKlage(requireNotNull(brev.behandlingId), brukerTokenInfo)
-        return pdfGenerator.genererPdf(
+        return brevService.genererPdf(
             id = brev.id,
             bruker = brukerTokenInfo,
             avsenderRequest = { bruker, _, enhet -> AvsenderRequest(bruker.ident(), enhet) },
@@ -222,7 +222,7 @@ class OversendelseBrevServiceImpl(
             }
 
         return runBlocking {
-            pdfGenerator.ferdigstillOgGenererPDF(
+            brevService.ferdigstillOgGenererPDF(
                 id = brev.id,
                 bruker = brukerTokenInfo,
                 avsenderRequest = { bruker, _, enhet -> AvsenderRequest(bruker.ident(), enhet) },

@@ -1,12 +1,12 @@
 package no.nav.etterlatte.rivers
 
+import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
-import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 
 class FerdigstillJournalfoerOgDistribuerBrev(
-    private val pdfGenerator: PDFGenerator,
+    private val brevService: BrevService,
     private val journalfoerBrevService: JournalfoerBrevService,
     private val brevdistribuerer: Brevdistribuerer,
 ) {
@@ -30,7 +30,7 @@ class FerdigstillJournalfoerOgDistribuerBrev(
     ): BrevID {
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")
         retryOgPakkUt {
-            pdfGenerator.ferdigstillOgGenererPDF(
+            brevService.ferdigstillOgGenererPDF(
                 id = brevId,
                 bruker = brukerTokenInfo,
                 avsenderRequest = { _, _, _ ->

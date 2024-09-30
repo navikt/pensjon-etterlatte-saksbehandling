@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.varselbrev
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.Brevtype
@@ -11,7 +12,6 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -23,7 +23,7 @@ internal class VarselbrevService(
     private val db: BrevRepository,
     private val brevoppretter: Brevoppretter,
     private val behandlingService: BehandlingService,
-    private val pdfGenerator: PDFGenerator,
+    private val brevService: BrevService,
     private val brevDataMapperFerdigstillVarsel: BrevDataMapperFerdigstillVarsel,
 ) {
     fun hentVarselbrev(behandlingId: UUID) = db.hentBrevForBehandling(behandlingId, Brevtype.VARSEL)
@@ -78,7 +78,7 @@ internal class VarselbrevService(
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest =
             { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
-    ) = pdfGenerator.ferdigstillOgGenererPDF(
+    ) = brevService.ferdigstillOgGenererPDF(
         id = brevId,
         bruker = bruker,
         avsenderRequest = avsenderRequest,
@@ -94,7 +94,7 @@ internal class VarselbrevService(
         bruker: BrukerTokenInfo,
         avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest =
             { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
-    ) = pdfGenerator.genererPdf(
+    ) = brevService.genererPdf(
         id = brevId,
         bruker = bruker,
         avsenderRequest = avsenderRequest,

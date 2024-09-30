@@ -215,9 +215,6 @@ class ApplicationBuilder {
     private val brevDataMapperFerdigstillVarsel =
         BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, vilkaarsvurderingService)
 
-    private val varselbrevService =
-        VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel)
-
     private val journalfoerBrevService = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
@@ -227,6 +224,9 @@ class ApplicationBuilder {
             journalfoerBrevService,
             pdfGenerator,
         )
+
+    private val varselbrevService =
+        VarselbrevService(db, brevoppretter, behandlingService, brevService, brevDataMapperFerdigstillVarsel)
 
     private val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue(CLAMAV_ENDPOINT_URL))
     private val virusScanService = VirusScanService(clamAvClient)
@@ -240,7 +240,7 @@ class ApplicationBuilder {
     private val oversendelseBrevService =
         OversendelseBrevServiceImpl(
             brevRepository = db,
-            pdfGenerator = pdfGenerator,
+            brevService = brevService,
             adresseService = adresseService,
             behandlingService = behandlingService,
             grunnlagService = grunnlagService,
@@ -277,7 +277,7 @@ class ApplicationBuilder {
             )
             val ferdigstillJournalfoerOgDistribuerBrev =
                 FerdigstillJournalfoerOgDistribuerBrev(
-                    pdfGenerator,
+                    brevService,
                     journalfoerBrevService,
                     brevdistribuerer,
                 )

@@ -13,11 +13,13 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
@@ -63,7 +65,20 @@ fun Route.brevRoute(
                 logger.info("Genererer PDF for brev (id=$brevId)")
 
                 measureTimedValue {
-                    service.genererPdf(brevId, brukerTokenInfo).bytes
+                    service
+                        .genererPdf(
+                            brevId,
+                            brukerTokenInfo,
+                            avsenderRequest = {
+                                    b,
+                                    vedtak,
+                                    enhet,
+                                ->
+                                opprettAvsenderRequest(b, vedtak, enhet)
+                            },
+                            brevKodeMapping = { Brevkoder.TOMT_INFORMASJONSBREV },
+                            brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+                        ).bytes
                 }.let { (pdf, varighet) ->
                     logger.info("Oppretting av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(pdf)

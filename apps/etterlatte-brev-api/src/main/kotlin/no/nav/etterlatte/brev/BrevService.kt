@@ -1,12 +1,17 @@
 package no.nav.etterlatte.brev
 
+import no.nav.etterlatte.brev.adresse.AvsenderRequest
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
@@ -14,6 +19,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -122,13 +128,16 @@ class BrevService(
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest,
+        brevKodeMapping: (BrevkodeRequest) -> Brevkoder,
+        brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
     ): Pdf =
         pdfGenerator.genererPdf(
             id,
             bruker,
-            avsenderRequest = { b, vedtak, enhet -> opprettAvsenderRequest(b, vedtak, enhet) },
-            brevKodeMapping = { Brevkoder.TOMT_INFORMASJONSBREV },
-            brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+            avsenderRequest,
+            brevKodeMapping,
+            brevDataMapping,
         )
 
     suspend fun ferdigstill(
@@ -136,16 +145,53 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ) {
         val brev = sjekkOmBrevKanEndres(id)
-
         if (brev.mottaker.erGyldig().isNotEmpty()) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
             throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottaker.erGyldig())
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
             db.settBrevFerdigstilt(id)
         } else {
-            val pdf = genererPdf(id, bruker)
+            val pdf =
+                genererPdf(
+                    id,
+                    bruker,
+                    avsenderRequest = {
+                            b,
+                            vedtak,
+                            enhet,
+                        ->
+                        opprettAvsenderRequest(b, vedtak, enhet)
+                    },
+                    brevKodeMapping = { Brevkoder.TOMT_INFORMASJONSBREV },
+                    brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+                )
             db.lagrePdfOgFerdigstillBrev(id, pdf)
         }
+    }
+
+    suspend fun ferdigstillOgGenererPDF(
+        id: BrevID,
+        bruker: BrukerTokenInfo,
+        avsenderRequest: (BrukerTokenInfo, ForenkletVedtak?, Enhetsnummer) -> AvsenderRequest,
+        brevKodeMapping: (BrevkodeRequest) -> Brevkoder,
+        brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
+    ): Pdf {
+        val brev = sjekkOmBrevKanEndres(id)
+        if (brev.mottaker.erGyldig().isNotEmpty()) {
+            sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottaker.erGyldig())
+        }
+
+        val pdf =
+            pdfGenerator.genererPdf(
+                id,
+                bruker,
+                avsenderRequest,
+                brevKodeMapping,
+                brevDataMapping,
+            )
+        db.lagrePdfOgFerdigstillBrev(id, pdf)
+        return pdf
     }
 
     suspend fun journalfoer(

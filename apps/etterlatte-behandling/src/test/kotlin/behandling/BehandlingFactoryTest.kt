@@ -684,6 +684,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
+            behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
         }
         coVerify {
             grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)

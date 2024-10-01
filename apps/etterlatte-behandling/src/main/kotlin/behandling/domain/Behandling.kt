@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -64,6 +65,7 @@ sealed class Behandling {
     abstract val kilde: Vedtaksloesning
     abstract val sendeBrev: Boolean
     abstract val opphoerFraOgMed: YearMonth?
+    abstract val tidligereFamiliepleier: TidligereFamiliepleier?
 
     open val relatertBehandlingId: String? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
@@ -105,7 +107,7 @@ sealed class Behandling {
                 "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt.",
         )
 
-    open fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling =
+    open fun oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere bodd eller arbeidet utlandet på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av bodd eller arbeidet utlandet.",
@@ -121,6 +123,12 @@ sealed class Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere videreført opphør på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av videreført opphør.",
+        )
+
+    open fun oppdaterTidligereFamiliepleier(tidligereFamililiepleier: TidligereFamiliepleier): Behandling =
+        throw NotImplementedError(
+            "Kan ikke oppdatere tidligere famililiepleier på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av tidligere famililiepleier.",
         )
 
     protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -45,22 +46,33 @@ enum class OmregningHendelseType : EventnameHendelseType {
 * Av den grunn er det er feltene tilgjengeliggjort gjennom "hent-" og "endre-" metoder.
 */
 data class OmregningData(
+    val kjoering: String,
     val sakId: SakId,
-    val fradato: LocalDate,
     val revurderingaarsak: Revurderingaarsak,
+    private var fradato: LocalDate? = null,
     private var sakType: SakType? = null,
     private var behandlingId: UUID? = null,
     private var forrigeBehandlingId: UUID? = null,
 ) {
     fun toPacket() =
         OmregningDataPacket(
+            kjoering,
             sakId,
-            fradato,
             revurderingaarsak,
+            fradato,
             sakType,
             behandlingId,
             forrigeBehandlingId,
         )
+
+    fun hentFraDato(): LocalDate = fradato ?: throw OmregningshendelseHarFeilTilstand(OmregningData::fradato.name)
+
+    fun endreFraDato(value: LocalDate) {
+        if (fradato != null) {
+            throw OmregningshendelseSkalIkkeMuteres(OmregningData::fradato.name)
+        }
+        fradato = value
+    }
 
     fun hentSakType(): SakType = sakType ?: throw OmregningshendelseHarFeilTilstand(OmregningData::sakType.name)
 
@@ -91,14 +103,17 @@ data class OmregningData(
 }
 
 data class OmregningDataPacket(
+    val kjoering: String,
     val sakId: SakId,
-    val fradato: LocalDate,
     val revurderingaarsak: Revurderingaarsak,
+    val fradato: LocalDate?,
     val sakType: SakType?,
     val behandlingId: UUID?,
     val forrigeBehandlingId: UUID?,
 ) {
     companion object KEYS {
+        val KEY = HENDELSE_DATA_KEY
+        val KJOERING = "$HENDELSE_DATA_KEY.${OmregningDataPacket::kjoering.name}"
         val SAK_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::sakId.name}"
         val SAK_TYPE = "$HENDELSE_DATA_KEY.${OmregningDataPacket::sakType.name}"
         val FRA_DATO = "$HENDELSE_DATA_KEY.${OmregningDataPacket::fradato.name}"
@@ -115,8 +130,8 @@ var JsonMessage.omregningData: OmregningData
 
 class OmregningshendelseHarFeilTilstand(
     felt: String,
-) : IllegalStateException("${OmregningData::class.simpleName} krever på dette stadiet $felt")
+) : InternfeilException("${OmregningData::class.simpleName} krever på dette stadiet $felt")
 
 class OmregningshendelseSkalIkkeMuteres(
     felt: String,
-) : IllegalStateException("${OmregningData::class.simpleName}.$felt skal ikke kunne endres etter det er satt.")
+) : InternfeilException("${OmregningData::class.simpleName}.$felt skal ikke kunne endres etter det er satt.")

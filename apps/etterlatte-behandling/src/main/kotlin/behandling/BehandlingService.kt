@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -234,6 +235,11 @@ interface BehandlingService {
     )
 
     fun hentAapenRegulering(sakId: SakId): UUID?
+
+    fun oppdaterTidligereFamiliepleier(
+        behandlingId: UUID,
+        tidligereFamiliepleier: TidligereFamiliepleier,
+    )
 }
 
 internal class BehandlingServiceImpl(
@@ -644,6 +650,7 @@ internal class BehandlingServiceImpl(
             kilde = behandling.kilde,
             sendeBrev = behandling.sendeBrev,
             viderefoertOpphoer = viderefoertOpphoer,
+            tidligereFamiliepleier = behandling.tidligereFamiliepleier,
         )
     }
 
@@ -736,7 +743,7 @@ internal class BehandlingServiceImpl(
 
         try {
             behandling
-                .oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet)
+                .oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet)
                 .also {
                     behandlingDao.lagreBoddEllerArbeidetUtlandet(behandlingId, boddEllerArbeidetUtlandet)
                     behandlingDao.lagreStatus(it)
@@ -803,6 +810,20 @@ internal class BehandlingServiceImpl(
             .singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
             }?.id
+
+    override fun oppdaterTidligereFamiliepleier(
+        behandlingId: UUID,
+        tidligereFamiliepleier: TidligereFamiliepleier,
+    ) {
+        val behandling =
+            hentBehandling(behandlingId)
+                ?: throw InternfeilException("Kunne ikke oppdatere tidligere familiepleier fordi behandlingen ikke finnes")
+
+        behandling.oppdaterTidligereFamiliepleier(tidligereFamiliepleier).also {
+            behandlingDao.lagreTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
+            behandlingDao.lagreStatus(it)
+        }
+    }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

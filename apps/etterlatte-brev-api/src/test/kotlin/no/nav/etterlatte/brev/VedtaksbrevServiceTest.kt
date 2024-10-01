@@ -52,6 +52,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.BrevManglerPDF
 import no.nav.etterlatte.brev.vedtaksbrev.KanIkkeOppretteVedtaksbrev
 import no.nav.etterlatte.brev.vedtaksbrev.SaksbehandlerOgAttestantSammePerson

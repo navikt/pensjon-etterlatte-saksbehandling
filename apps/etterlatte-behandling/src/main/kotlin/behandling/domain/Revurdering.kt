@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -31,6 +32,7 @@ sealed class Revurdering(
     open val begrunnelse: String?,
     override val relatertBehandlingId: String?,
     override val opphoerFraOgMed: YearMonth?,
+    override val tidligereFamiliepleier: TidligereFamiliepleier?,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
 
@@ -57,6 +59,7 @@ sealed class Revurdering(
             begrunnelse: String?,
             sendeBrev: Boolean,
             opphoerFraOgMed: YearMonth? = null,
+            tidligereFamiliepleier: TidligereFamiliepleier? = null,
         ) = when (prosesstype) {
             Prosesstype.MANUELL ->
                 ManuellRevurdering(
@@ -76,6 +79,7 @@ sealed class Revurdering(
                     relatertBehandlingId = relatertBehandlingId,
                     sendeBrev = sendeBrev,
                     opphoerFraOgMed = opphoerFraOgMed,
+                    tidligereFamiliepleier = tidligereFamiliepleier,
                 )
 
             Prosesstype.AUTOMATISK ->
@@ -96,6 +100,7 @@ sealed class Revurdering(
                     relatertBehandlingId = relatertBehandlingId,
                     sendeBrev = sendeBrev,
                     opphoerFraOgMed = opphoerFraOgMed,
+                    tidligereFamiliepleier = tidligereFamiliepleier,
                 )
         }
     }

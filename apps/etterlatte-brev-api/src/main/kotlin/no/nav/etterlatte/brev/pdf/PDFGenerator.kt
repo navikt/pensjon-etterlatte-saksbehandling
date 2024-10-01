@@ -1,5 +1,7 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.pdf
 
+import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
@@ -18,6 +20,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -135,6 +138,28 @@ class PDFGenerator(
 
         return brevbakerService
             .genererPdf(brev.id, brevRequest)
+            .let {
+                // TODO: finne et bedre sted for dette?
+                when (brev.brevkoder) {
+                    Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
+                        val vedtaksbrev =
+                            brevbakerService.genererPdf(
+                                brev.id,
+                                BrevbakerRequest.fra(
+                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING, // TODO: gjennbruke eller egen ny mal for vedtaksbrev
+                                    OmstillingsstoenadInntektsjustering(), // TODO: må ha riktig data iht brevkode
+                                    avsender,
+                                    generellBrevData.personerISak.soekerOgEventuellVerge(),
+                                    sak.id,
+                                    generellBrevData.spraak,
+                                    sak.sakType,
+                                ),
+                            )
+                        PDFHelper.kombinerPdfListeTilEnPdf(listOf(vedtaksbrev, it))
+                    }
+                    else -> it
+                }
+            }
     }
 
     private fun hentLagretInnhold(brev: Brev) =

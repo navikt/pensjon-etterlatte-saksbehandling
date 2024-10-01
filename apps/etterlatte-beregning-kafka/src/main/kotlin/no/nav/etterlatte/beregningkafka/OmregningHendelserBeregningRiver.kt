@@ -115,7 +115,7 @@ internal class OmregningHendelserBeregningRiver(
         beregning: BeregningOgAvkorting,
         packet: JsonMessage,
     ) {
-        val dato = packet.omregningData.fradato
+        val dato = packet.omregningData.hentFraDato()
         val forrige =
             requireNotNull(beregning.forrigeBeregning.beregningsperioder.paaDato(dato))
                 .let {

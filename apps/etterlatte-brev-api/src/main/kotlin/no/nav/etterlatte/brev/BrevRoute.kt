@@ -157,10 +157,12 @@ fun Route.brevRoute(
         }
 
         post("opprett-journalfoer-og-distribuer") {
-            withSakId(tilgangssjekker, skrivetilgang = true) {
-                val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
+            kunSystembruker {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
 
-                service.opprettJournalfoerOgDistribuerRiver(brevId, brukerTokenInfo, req)
+                    service.opprettJournalfoerOgDistribuerRiver(brevId, brukerTokenInfo, req)
+                }
             }
         }
 

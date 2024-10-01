@@ -419,14 +419,23 @@ data class Aarsoppgjoer(
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
     init {
-        if (!ytelseFoerAvkorting.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
-            throw InternfeilException("fom for ytelseFoerAvkorting i feil rekkefølge")
+        ytelseFoerAvkorting.forEach {
+            if (it.periode.fom.year != aar || it.periode.tom?.year != aar) {
+                throw InternfeilException("Perioder må være innenfor årsoppgjøret sitt år")
+            }
         }
-        if (!inntektsavkorting.zipWithNext().all { it.first.grunnlag.periode.fom < it.second.grunnlag.periode.fom }) {
-            throw InternfeilException("fom for inntektsavkorting.grunnlag er i feil rekkefølge")
+        inntektsavkorting.forEach {
+            if (it.grunnlag.periode.fom.year != aar ||
+                it.grunnlag.periode.tom
+                    ?.year != aar
+            ) {
+                throw InternfeilException("Perioder må være innenfor årsoppgjøret sitt år")
+            }
         }
-        if (!avkortetYtelseAar.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
-            throw InternfeilException("fom for avkortetYtelseAar er i feil rekkefølge")
+        avkortetYtelseAar.forEach {
+            if (it.periode.fom.year != aar || it.periode.tom?.year != aar) {
+                throw InternfeilException("Perioder må være innenfor årsoppgjøret sitt år")
+            }
         }
     }
 

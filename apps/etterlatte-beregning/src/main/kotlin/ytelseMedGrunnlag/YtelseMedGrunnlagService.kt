@@ -69,11 +69,15 @@ class YtelseMedGrunnlagService(
     ): Boolean {
         if (avkortingUtenLoependeYtelse.aarsoppgjoer.isNotEmpty()) {
             avkortingUtenLoependeYtelse.aarsoppgjoer.forEach { aarsoppgjoer ->
+                if (aarsoppgjoer.aar > virkningstidspunkt.dato.year) {
+                    return true
+                }
+                /*
                 aarsoppgjoer.avkortetYtelseAar.forEach { avkortetYtelse ->
                     if (avkortetYtelse.periode.fom.year > virkningstidspunkt.dato.year) {
                         return true
                     }
-                }
+                }*/
             }
         }
 

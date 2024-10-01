@@ -108,6 +108,7 @@ class ApplicationContext {
             avkortingRepository = avkortingRepository,
             beregningService = beregningService,
             sanksjonService = sanksjonService,
+            featureToggleService = featureToggleService,
         )
     val ytelseMedGrunnlagService =
         YtelseMedGrunnlagService(

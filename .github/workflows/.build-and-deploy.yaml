@@ -97,6 +97,7 @@ jobs:
         id: attest-sign
         uses: nais/attest-sign@v1
         env:
+          TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
           ACTIONS_RUNTIME_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           image_ref: ${{ env.IMAGE_WITH_DIGEST }}

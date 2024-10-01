@@ -176,7 +176,7 @@ internal class BrevRepositoryIntegrationTest(
         val ferdigstiltBrev = db.hentBrev(brev.id)
         ferdigstiltBrev.status shouldBe Status.FERDIGSTILT
 
-        db.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, """{"key":"value"}""".toJsonNode())
+        db.settBrevOppdatert(brev.id, """{"key":"value"}""".toJsonNode())
         val underkjentBrev = db.hentBrev(brev.id)
         underkjentBrev.status shouldBe Status.OPPDATERT
     }

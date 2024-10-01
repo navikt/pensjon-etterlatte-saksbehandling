@@ -258,7 +258,7 @@ class BrevRepository(
         }
     }
 
-    fun fjernFerdigstiltStatusUnderkjentVedtak(
+    fun settBrevOppdatert(
         id: BrevID,
         vedtak: JsonNode,
     ): Boolean =

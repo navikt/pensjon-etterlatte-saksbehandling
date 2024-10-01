@@ -207,14 +207,14 @@ internal class VedtaksbrevServiceTest {
 
         @Test
         fun `Sletting av brev`() {
-            every { db.fjernFerdigstiltStatusUnderkjentVedtak(any(), any()) } returns true
+            every { db.settBrevOppdatert(any(), any()) } returns true
 
             val vedtak = """{}""".toJsonNode()
             val gjenaapnetOK = vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak)
 
             gjenaapnetOK shouldBe true
 
-            verify { db.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak) }
+            verify { db.settBrevOppdatert(1, vedtak) }
         }
 
         @Test

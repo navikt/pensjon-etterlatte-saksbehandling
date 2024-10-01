@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.vedtaksbrev
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -12,6 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.model.BrevOgVedtakDto
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
@@ -36,17 +36,12 @@ fun Route.vedtaksbrevRoute(
                 withBehandlingId(tilgangssjekker) { behandlingId ->
                     val vedtakId = call.request.queryParameters["vedtakId"]
                     logger.info("Vedtak (id=$vedtakId) er underkjent - åpner vedtaksbrev for nye endringer")
-                    val vedtak = call.receive<JsonNode>()
-                    val vedtaksbrev = service.hentVedtaksbrev(behandlingId)
-                    if (vedtaksbrev == null) {
-                        logger.warn("Fant ingen vedtaksbrev for behandling (id=$behandlingId) - avbryter ")
-                        call.respond(HttpStatusCode.OK)
-                    }
-                    val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(vedtaksbrev!!.id, vedtak)
+                    val brevOgVedtakDto = call.receive<BrevOgVedtakDto>()
+                    val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(brevOgVedtakDto.vedtaksbrev.id, brevOgVedtakDto.vedtak)
                     if (endretOK) {
-                        logger.info("Vedtaksbrev (id=${vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
+                        logger.info("Vedtaksbrev (id=${brevOgVedtakDto.vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
                     } else {
-                        throw Exception("Kunne ikke åpne vedtaksbrev (id=${vedtaksbrev.id}) for endringer")
+                        throw Exception("Kunne ikke åpne vedtaksbrev (id=${brevOgVedtakDto.vedtaksbrev.id}) for endringer")
                     }
                 }
             }

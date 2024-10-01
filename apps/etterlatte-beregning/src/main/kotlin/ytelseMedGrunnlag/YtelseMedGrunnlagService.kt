@@ -63,26 +63,15 @@ class YtelseMedGrunnlagService(
         )
     }
 
-    private fun harInntektForNesteAar(
+    // validerer at det eksisterer et aarsoppgjoer for neste aar
+    // og at det er aaret etter virkningstidspunktet
+    fun harInntektForNesteAar(
         avkortingUtenLoependeYtelse: Avkorting,
         virkningstidspunkt: Virkningstidspunkt,
-    ): Boolean {
-        if (avkortingUtenLoependeYtelse.aarsoppgjoer.isNotEmpty()) {
-            avkortingUtenLoependeYtelse.aarsoppgjoer.forEach { aarsoppgjoer ->
-                if (aarsoppgjoer.aar > virkningstidspunkt.dato.year) {
-                    return true
-                }
-                /*
-                aarsoppgjoer.avkortetYtelseAar.forEach { avkortetYtelse ->
-                    if (avkortetYtelse.periode.fom.year > virkningstidspunkt.dato.year) {
-                        return true
-                    }
-                }*/
-            }
+    ): Boolean =
+        avkortingUtenLoependeYtelse.aarsoppgjoer.any {
+            it.aar > virkningstidspunkt.dato.year && (it.aar - virkningstidspunkt.dato.year) <= 1
         }
-
-        return false
-    }
 }
 
 class BeregningFinnesIkkeException(

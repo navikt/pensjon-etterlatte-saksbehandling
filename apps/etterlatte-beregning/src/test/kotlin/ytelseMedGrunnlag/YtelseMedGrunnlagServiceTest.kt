@@ -46,20 +46,20 @@ internal class YtelseMedGrunnlagServiceTest {
     @Test
     fun `inntekt for neste aar er true hvis avkorting er oppgitt for neste aar`() {
         val behandlingsId = UUID.randomUUID()
-        val virkningstidspunkt = YearMonth.of(YearMonth.now().year, 11)
+        val virkningstidspunkt = YearMonth.of(2024, 11)
 
         val beregning =
             mutableListOf(
                 beregningsperiode(
-                    datoFOM = YearMonth.of(YearMonth.now().year, 11),
-                    datoTOM = YearMonth.of(YearMonth.now().year, 12),
+                    datoFOM = YearMonth.of(virkningstidspunkt.year, 11),
+                    datoTOM = YearMonth.of(virkningstidspunkt.year, 12),
                     utbetaltBeloep = 20000,
                     trygdetid = 40,
                     grunnbeloep = 120000,
                     grunnbeloepMnd = 10000,
                 ),
                 beregningsperiode(
-                    datoFOM = YearMonth.of(YearMonth.now().year + 1, 1),
+                    datoFOM = YearMonth.of(virkningstidspunkt.year + 1, 1),
                     datoTOM = null,
                     utbetaltBeloep = 21000,
                     trygdetid = 40,
@@ -75,8 +75,8 @@ internal class YtelseMedGrunnlagServiceTest {
                         avkortinggrunnlag(
                             periode =
                                 Periode(
-                                    fom = YearMonth.of(YearMonth.now().year, 11),
-                                    tom = YearMonth.of(YearMonth.now().year, 12),
+                                    fom = YearMonth.of(virkningstidspunkt.year, 11),
+                                    tom = YearMonth.of(virkningstidspunkt.year, 12),
                                 ),
                             aarsinntekt = 300000,
                             fratrekkInnAar = 25000,
@@ -85,7 +85,7 @@ internal class YtelseMedGrunnlagServiceTest {
                 Inntektsavkorting(
                     grunnlag =
                         avkortinggrunnlag(
-                            periode = Periode(fom = YearMonth.of(YearMonth.now().year + 1, 1), tom = null),
+                            periode = Periode(fom = YearMonth.of(virkningstidspunkt.year + 1, 1), tom = null),
                             aarsinntekt = 350000,
                             fratrekkInnAar = 25000,
                         ),
@@ -97,8 +97,8 @@ internal class YtelseMedGrunnlagServiceTest {
                 avkortetYtelse(
                     periode =
                         Periode(
-                            fom = YearMonth.of(YearMonth.now().year, 11),
-                            tom = YearMonth.of(YearMonth.now().year, 12),
+                            fom = YearMonth.of(virkningstidspunkt.year, 11),
+                            tom = YearMonth.of(virkningstidspunkt.year, 12),
                         ),
                     ytelseEtterAvkorting = 15000,
                     ytelseFoerAvkorting = 20000,
@@ -107,7 +107,7 @@ internal class YtelseMedGrunnlagServiceTest {
                 avkortetYtelse(
                     periode =
                         Periode(
-                            fom = YearMonth.of(YearMonth.now().year + 1, 1),
+                            fom = YearMonth.of(virkningstidspunkt.year + 1, 1),
                             tom = null,
                         ),
                     ytelseEtterAvkorting = 17000,

@@ -4,13 +4,13 @@ import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagPeriodisertDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import java.time.YearMonth
 import java.util.UUID
 
 class YtelseMedGrunnlagService(
@@ -59,15 +59,18 @@ class YtelseMedGrunnlagService(
 
         return YtelseMedGrunnlagDto(
             perioder = avkortinger,
-            inntektForNesteAar = harInntektForNesteAar(avkortingUtenLoependeYtelse),
+            inntektForNesteAar = harInntektForNesteAar(avkortingUtenLoependeYtelse, virkningstidspunkt),
         )
     }
 
-    private fun harInntektForNesteAar(avkortingUtenLoependeYtelse: Avkorting): Boolean {
+    private fun harInntektForNesteAar(
+        avkortingUtenLoependeYtelse: Avkorting,
+        virkningstidspunkt: Virkningstidspunkt,
+    ): Boolean {
         if (avkortingUtenLoependeYtelse.aarsoppgjoer.isNotEmpty()) {
             avkortingUtenLoependeYtelse.aarsoppgjoer.forEach { aarsoppgjoer ->
                 aarsoppgjoer.avkortetYtelseAar.forEach { avkortetYtelse ->
-                    if (avkortetYtelse.periode.fom.year > YearMonth.now().year) {
+                    if (avkortetYtelse.periode.fom.year > virkningstidspunkt.dato.year) {
                         return true
                     }
                 }

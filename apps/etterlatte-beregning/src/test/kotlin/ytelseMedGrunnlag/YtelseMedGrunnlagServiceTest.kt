@@ -44,6 +44,130 @@ internal class YtelseMedGrunnlagServiceTest {
     }
 
     @Test
+    fun `inntekt for neste aar er true hvis avkorting er oppgitt for neste aar`() {
+        val behandlingsId = UUID.randomUUID()
+        val virkningstidspunkt = YearMonth.of(YearMonth.now().year, 11)
+
+        val beregning =
+            mutableListOf(
+                beregningsperiode(
+                    datoFOM = YearMonth.of(YearMonth.now().year, 11),
+                    datoTOM = YearMonth.of(YearMonth.now().year, 12),
+                    utbetaltBeloep = 20000,
+                    trygdetid = 40,
+                    grunnbeloep = 120000,
+                    grunnbeloepMnd = 10000,
+                ),
+                beregningsperiode(
+                    datoFOM = YearMonth.of(YearMonth.now().year + 1, 1),
+                    datoTOM = null,
+                    utbetaltBeloep = 21000,
+                    trygdetid = 40,
+                    grunnbeloep = 132000,
+                    grunnbeloepMnd = 11000,
+                ),
+            )
+
+        val inntektsavkorting =
+            mutableListOf(
+                Inntektsavkorting(
+                    grunnlag =
+                        avkortinggrunnlag(
+                            periode =
+                                Periode(
+                                    fom = YearMonth.of(YearMonth.now().year, 11),
+                                    tom = YearMonth.of(YearMonth.now().year, 12),
+                                ),
+                            aarsinntekt = 300000,
+                            fratrekkInnAar = 25000,
+                        ),
+                ),
+                Inntektsavkorting(
+                    grunnlag =
+                        avkortinggrunnlag(
+                            periode = Periode(fom = YearMonth.of(YearMonth.now().year + 1, 1), tom = null),
+                            aarsinntekt = 350000,
+                            fratrekkInnAar = 25000,
+                        ),
+                ),
+            )
+
+        val avkortetYtelseAar =
+            mutableListOf(
+                avkortetYtelse(
+                    periode =
+                        Periode(
+                            fom = YearMonth.of(YearMonth.now().year, 11),
+                            tom = YearMonth.of(YearMonth.now().year, 12),
+                        ),
+                    ytelseEtterAvkorting = 15000,
+                    ytelseFoerAvkorting = 20000,
+                    avkortingsbeloep = 5000,
+                ),
+                avkortetYtelse(
+                    periode =
+                        Periode(
+                            fom = YearMonth.of(YearMonth.now().year + 1, 1),
+                            tom = null,
+                        ),
+                    ytelseEtterAvkorting = 17000,
+                    ytelseFoerAvkorting = 20000,
+                    avkortingsbeloep = 3000,
+                ),
+            )
+
+        // positiv test
+        coEvery {
+            behandlingKlient.hentBehandling(behandlingsId, bruker)
+        } returns behandling(virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virkningstidspunkt))
+
+        every { beregningRepository.hent(behandlingsId) } returns
+            beregning(
+                beregninger = beregning,
+            )
+
+        every { avkortingRepository.hentAvkorting(behandlingsId) } returns
+            avkorting(
+                inntektsavkorting = inntektsavkorting,
+                avkortetYtelseAar = avkortetYtelseAar,
+            )
+
+        val positivTest =
+            runBlocking {
+                service.hentYtelseMedGrunnlag(behandlingsId, bruker)
+            }
+
+        positivTest!!.inntektForNesteAar shouldBe true
+
+        // negativ test
+        beregning.removeLast()
+        inntektsavkorting.removeLast()
+        avkortetYtelseAar.removeLast()
+
+        coEvery {
+            behandlingKlient.hentBehandling(behandlingsId, bruker)
+        } returns behandling(virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(virkningstidspunkt))
+
+        every { beregningRepository.hent(behandlingsId) } returns
+            beregning(
+                beregninger = beregning,
+            )
+
+        every { avkortingRepository.hentAvkorting(behandlingsId) } returns
+            avkorting(
+                inntektsavkorting = inntektsavkorting,
+                avkortetYtelseAar = avkortetYtelseAar,
+            )
+
+        val negativTest =
+            runBlocking {
+                service.hentYtelseMedGrunnlag(behandlingsId, bruker)
+            }
+
+        negativTest!!.inntektForNesteAar shouldBe false
+    }
+
+    @Test
     fun `skal hente ytelse oppdelt i perioder med alle grunnlag`() {
         val behandlingsId = UUID.randomUUID()
         val virkningstidspunkt = YearMonth.of(2024, 2)

@@ -418,7 +418,6 @@ class BrevDataMapperFerdigstillingVedtak(
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
-        val ytelseMedGrunnlag = async { beregningService.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo) }
 
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,

@@ -22,11 +22,10 @@ class YtelseMedGrunnlagService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): YtelseMedGrunnlagDto? {
-        val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
         val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
         val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
         val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
-
+        val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
         val avkortinger =
             avkorting.avkortetYtelse.map { avkortetYtelse ->
                 val beregningIPeriode =
@@ -65,10 +64,12 @@ class YtelseMedGrunnlagService(
     }
 
     private fun harInntektForNesteAar(avkortingUtenLoependeYtelse: Avkorting): Boolean {
-        if (avkortingUtenLoependeYtelse.aarsoppgjoer.size > 1) {
+        if (avkortingUtenLoependeYtelse.aarsoppgjoer.isNotEmpty()) {
             avkortingUtenLoependeYtelse.aarsoppgjoer.forEach { aarsoppgjoer ->
-                if (aarsoppgjoer.aar > YearMonth.now().year) {
-                    return true
+                aarsoppgjoer.avkortetYtelseAar.forEach { avkortetYtelse ->
+                    if (avkortetYtelse.periode.fom.year > YearMonth.now().year) {
+                        return true
+                    }
                 }
             }
         }

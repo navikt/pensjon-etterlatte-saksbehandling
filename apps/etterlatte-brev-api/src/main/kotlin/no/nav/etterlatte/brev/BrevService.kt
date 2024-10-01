@@ -52,10 +52,13 @@ class BrevService(
             brevKodeMapping = { req.brevkode },
             brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
+
         logger.info("Journalfører brev med id: $id")
         journalfoerBrevService.journalfoer(id, bruker)
+
         logger.info("Distribuerer brev med id: $id")
         distribuerer.distribuer(id)
+
         logger.info("Brevid: $id er distribuert")
     }
 

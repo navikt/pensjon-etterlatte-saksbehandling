@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
@@ -31,20 +32,22 @@ fun Route.vedtaksbrevRoute(
 
     route("brev/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("fjern-ferdigstilt") {
-            withBehandlingId(tilgangssjekker) { behandlingId ->
-                val vedtakId = call.request.queryParameters["vedtakId"]
-                logger.info("Vedtak (id=$vedtakId) er underkjent - åpner vedtaksbrev for nye endringer")
-                val vedtak = call.receive<JsonNode>()
-                val vedtaksbrev = service.hentVedtaksbrev(behandlingId)
-                if (vedtaksbrev == null) {
-                    logger.warn("Fant ingen vedtaksbrev for behandling (id=$behandlingId) - avbryter ")
-                    call.respond(HttpStatusCode.OK)
-                }
-                val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(vedtaksbrev!!.id, vedtak)
-                if (endretOK) {
-                    logger.info("Vedtaksbrev (id=${vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
-                } else {
-                    throw Exception("Kunne ikke åpne vedtaksbrev (id=${vedtaksbrev.id}) for endringer")
+            kunSystembruker {
+                withBehandlingId(tilgangssjekker) { behandlingId ->
+                    val vedtakId = call.request.queryParameters["vedtakId"]
+                    logger.info("Vedtak (id=$vedtakId) er underkjent - åpner vedtaksbrev for nye endringer")
+                    val vedtak = call.receive<JsonNode>()
+                    val vedtaksbrev = service.hentVedtaksbrev(behandlingId)
+                    if (vedtaksbrev == null) {
+                        logger.warn("Fant ingen vedtaksbrev for behandling (id=$behandlingId) - avbryter ")
+                        call.respond(HttpStatusCode.OK)
+                    }
+                    val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(vedtaksbrev!!.id, vedtak)
+                    if (endretOK) {
+                        logger.info("Vedtaksbrev (id=${vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
+                    } else {
+                        throw Exception("Kunne ikke åpne vedtaksbrev (id=${vedtaksbrev.id}) for endringer")
+                    }
                 }
             }
         }

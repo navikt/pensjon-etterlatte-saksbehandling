@@ -1,9 +1,8 @@
 package no.nav.etterlatte.libs.common
 
-import com.fasterxml.jackson.annotation.JsonValue
-
-data class Enhetsnummer(
-    @JsonValue val enhetNr: String,
+@JvmInline
+value class Enhetsnummer(
+    val enhetNr: String,
 ) {
     init {
         require(enhetNr.length == 4 && enhetNr.toIntOrNull() != null) {

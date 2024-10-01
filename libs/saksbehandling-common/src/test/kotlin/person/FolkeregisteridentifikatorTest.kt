@@ -10,7 +10,7 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
-internal class FoedselsnummerTest {
+internal class FolkeregisteridentifikatorTest {
     @Test
     fun `Sjekk diverse gyldige test fnr`() {
         val gyldigeFnrListe =

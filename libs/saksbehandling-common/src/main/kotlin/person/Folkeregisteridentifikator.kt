@@ -1,11 +1,9 @@
 package no.nav.etterlatte.libs.common.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 /**
  * Norwegian national identity number
@@ -15,8 +13,9 @@ import java.time.temporal.ChronoUnit
  *
  * @see <a href="https://www.skatteetaten.no/person/folkeregister/fodsel-og-navnevalg/barn-fodt-i-norge/fodselsnummer">Skatteetaten om fødselsnummer</a>
  */
-class Folkeregisteridentifikator private constructor(
-    @JsonValue val value: String,
+@JvmInline
+value class Folkeregisteridentifikator private constructor(
+    val value: String,
 ) {
     companion object {
         @JvmStatic
@@ -69,11 +68,6 @@ class Folkeregisteridentifikator private constructor(
     }
 
     /**
-     * @return the birthdate as a ISO 8601 [String]
-     */
-    fun getBirthDateAsIso() = getBirthDate().toString()
-
-    /**
      * Checks if the identity number is of type D-number.
      *
      * A D-number consists of 11 digits, of which the first six digits show the date of birth,
@@ -92,8 +86,6 @@ class Folkeregisteridentifikator private constructor(
 
         return firesifretAarstallFraTosifret(year, individnummer)
     }
-
-    fun getAge(): Int = ChronoUnit.YEARS.between(getBirthDate(), LocalDate.now()).toInt()
 
     /**
      * Sjekker om fødselsnummeret er av typen "Hjelpenummer".
@@ -118,10 +110,6 @@ class Folkeregisteridentifikator private constructor(
      */
 
     private fun isFhNumber(): Boolean = Character.getNumericValue(value[0]) in 8..9
-
-    override fun equals(other: Any?): Boolean = this.value == (other as? Folkeregisteridentifikator)?.value
-
-    override fun hashCode(): Int = this.value.hashCode()
 
     /**
      * Skal ALLTID returnere anonymisert fødselsnummer.

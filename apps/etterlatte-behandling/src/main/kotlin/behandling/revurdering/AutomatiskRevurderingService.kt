@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import java.time.LocalDate
 import java.time.LocalTime
@@ -36,26 +37,20 @@ class AutomatiskRevurderingService(
      * Det er derfor behov for retries rundt oppfølgingsmetoder.
      */
     suspend fun oppprettRevurderingOgOppfoelging(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse {
-        gyldigForAutomatiskRevurdering(request)
+        if (request.revurderingAarsak == Revurderingaarsak.ALDERSOVERGANG) {
+            revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(request.sakId)
+        }
 
-        val brukerTokenInfo =
-            when (val appUser = Kontekst.get().AppUser) {
-                is SystemUser -> appUser.brukerTokenInfo
-                else -> throw KunSystembrukerException()
-            }
+        val brukerTokenInfo = hentBrukerToken()
         val loepende =
             vedtakKlient.sakHarLopendeVedtakPaaDato(
                 request.sakId,
                 request.fraDato,
                 brukerTokenInfo,
             )
+        val forrigeBehandling = hentForrigeBehandling(loepende, request.sakId)
 
-        val forrigeBehandling =
-            loepende.sisteLoependeBehandlingId?.let {
-                inTransaction {
-                    behandlingService.hentBehandling(it)
-                }
-            } ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak ${request.sakId}")
+        gyldigForAutomatiskRevurdering(request, loepende, forrigeBehandling, brukerTokenInfo)
 
         val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
 
@@ -87,12 +82,15 @@ class AutomatiskRevurderingService(
         )
     }
 
-    private suspend fun gyldigForAutomatiskRevurdering(request: AutomatiskRevurderingRequest) {
+    private suspend fun gyldigForAutomatiskRevurdering(
+        request: AutomatiskRevurderingRequest,
+        vedtak: LoependeYtelseDTO,
+        forrigeBehandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         when (request.revurderingAarsak) {
-            Revurderingaarsak.ALDERSOVERGANG -> {
-                revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(request.sakId)
-            }
-
+            // Har egen sjekk tidligere for å slippe kall mot vedtak
+            Revurderingaarsak.ALDERSOVERGANG -> {}
             /*
              * Skal ikke kjøre regulering hvis:
              * Det ikke er en løpende sak
@@ -110,9 +108,6 @@ class AutomatiskRevurderingService(
              * Sak har aktivt overstyrt beregning
              */
             else -> {
-                val brukerTokenInfo = hentBrukerToken()
-                val vedtak = vedtakKlient.sakHarLopendeVedtakPaaDato(request.sakId, request.fraDato, brukerTokenInfo)
-
                 if (!vedtak.erLoepende) {
                     throw OmregningKreverLoependeVedtak()
                 }
@@ -120,9 +115,8 @@ class AutomatiskRevurderingService(
                     throw OmregningAvSakUnderSamordning()
                 }
 
-                val forrigeBehandling = hentForrigeBehandling(vedtak, request.sakId)
                 val overstyrtBeregning = beregningKlient.harOverstyrt(forrigeBehandling.id, brukerTokenInfo)
-                if (!overstyrtBeregning) {
+                if (overstyrtBeregning) {
                     throw OmregningOverstyrtBeregning()
                 }
             }

@@ -17,17 +17,19 @@ import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
-import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withSakId
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
@@ -135,12 +137,32 @@ fun Route.brevRoute(
                 call.respond(JournalpostIdDto(journalpostId))
             }
         }
+        post("journalfoer-vedtak") {
+            kunSystembruker {
+                val vedtak = call.receive<VedtakTilJournalfoering>()
+                val journalfoervedtaksbrevResponse =
+                    service.journalfoerVedtaksbrev(brukerTokenInfo as Systembruker, vedtak)
+                        ?: throw RuntimeException("Bruker ikke i vedtaksbrev")
+
+                call.respond(journalfoervedtaksbrevResponse)
+            }
+        }
 
         post("distribuer") {
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 val bestillingsId = distribuerer.distribuer(brevId)
 
                 call.respond(BestillingsIdDto(bestillingsId))
+            }
+        }
+
+        post("opprett-journalfoer-og-distribuer") {
+            kunSystembruker {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
+
+                    service.opprettJournalfoerOgDistribuerRiver(brevId, brukerTokenInfo, req)
+                }
             }
         }
 

@@ -8,11 +8,10 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.DokumentVariant
 import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
-import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.notat.Notat
 import no.nav.etterlatte.brev.notat.NotatMal
 import no.nav.etterlatte.brev.notat.NotatRepository

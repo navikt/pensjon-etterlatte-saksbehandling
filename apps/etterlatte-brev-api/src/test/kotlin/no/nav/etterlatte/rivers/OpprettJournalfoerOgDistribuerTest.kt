@@ -9,11 +9,12 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
@@ -51,12 +52,12 @@ internal class OpprettJournalfoerOgDistribuer {
         val journalfoerBrevService =
             mockk<JournalfoerBrevService>().also {
                 coEvery { it.journalfoerVedtaksbrev(any(), any()) } returns
-                    Pair(
+                    JournalfoerVedtaksbrevResponseOgBrevid(
+                        brev.id,
                         OpprettJournalpostResponse(
                             journalpostId = "123",
                             journalpostferdigstilt = true,
                         ),
-                        brev.id,
                     )
             }
         val distribusjonService =

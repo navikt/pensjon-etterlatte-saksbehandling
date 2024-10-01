@@ -12,8 +12,8 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.DatabaseExtension
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -21,9 +21,9 @@ import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
@@ -176,7 +176,7 @@ internal class BrevRepositoryIntegrationTest(
         val ferdigstiltBrev = db.hentBrev(brev.id)
         ferdigstiltBrev.status shouldBe Status.FERDIGSTILT
 
-        db.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, """{"key":"value"}""".toJsonNode())
+        db.settBrevOppdatert(brev.id, """{"key":"value"}""".toJsonNode())
         val underkjentBrev = db.hentBrev(brev.id)
         underkjentBrev.status shouldBe Status.OPPDATERT
     }

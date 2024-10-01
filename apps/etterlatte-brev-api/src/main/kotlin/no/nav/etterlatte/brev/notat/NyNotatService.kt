@@ -6,11 +6,10 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.DokumentVariant
 import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettNotatJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
-import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.notat.Notat
 import no.nav.etterlatte.brev.notat.NotatID
 import no.nav.etterlatte.brev.notat.NotatMal
@@ -79,6 +78,19 @@ class NyNotatService(
         } else {
             notatRepository.hentPdf(id)
         }
+    }
+
+    internal suspend fun opprettOgJournalfoer(
+        sakId: SakId,
+        mal: NotatMal,
+        tittel: String = "Mangler tittel",
+        referanse: String? = null,
+        params: NotatParametre? = null,
+        bruker: BrukerTokenInfo,
+    ): Notat {
+        val notat = opprett(sakId, mal, tittel, referanse, params, bruker)
+        journalfoer(notat.id, bruker)
+        return notat
     }
 
     suspend fun opprett(

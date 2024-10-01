@@ -1,10 +1,10 @@
 package no.nav.etterlatte.brev.varselbrev
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository

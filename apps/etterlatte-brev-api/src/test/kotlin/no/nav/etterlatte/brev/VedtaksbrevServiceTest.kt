@@ -38,7 +38,6 @@ import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingS
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -49,7 +48,6 @@ import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.pdf.PDFGenerator
@@ -209,14 +207,14 @@ internal class VedtaksbrevServiceTest {
 
         @Test
         fun `Sletting av brev`() {
-            every { db.fjernFerdigstiltStatusUnderkjentVedtak(any(), any()) } returns true
+            every { db.settBrevOppdatert(any(), any()) } returns true
 
             val vedtak = """{}""".toJsonNode()
             val gjenaapnetOK = vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak)
 
             gjenaapnetOK shouldBe true
 
-            verify { db.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak) }
+            verify { db.settBrevOppdatert(1, vedtak) }
         }
 
         @Test

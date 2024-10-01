@@ -2,15 +2,14 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
@@ -19,6 +18,8 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 
 class BrevService(
@@ -26,9 +27,40 @@ class BrevService(
     private val brevoppretter: Brevoppretter,
     private val journalfoerBrevService: JournalfoerBrevService,
     private val pdfGenerator: PDFGenerator,
+    private val distribuerer: Brevdistribuerer,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
+
+    suspend fun opprettJournalfoerOgDistribuerRiver(
+        id: BrevID,
+        bruker: BrukerTokenInfo,
+        req: OpprettJournalfoerOgDistribuerRequest,
+    ) {
+        brevoppretter.opprettBrevSomHarInnhold(
+            sakId = req.sakId,
+            behandlingId = null,
+            bruker = bruker,
+            brevKode = req.brevKode,
+            brevData = req.brevDataRedigerbar,
+        )
+
+        pdfGenerator.ferdigstillOgGenererPDF(
+            id,
+            bruker,
+            avsenderRequest = { _, _, _ -> req.avsenderRequest },
+            brevKodeMapping = { req.brevkode },
+            brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+        )
+
+        logger.info("Journalfører brev med id: $id")
+        journalfoerBrevService.journalfoer(id, bruker)
+
+        logger.info("Distribuerer brev med id: $id")
+        distribuerer.distribuer(id)
+
+        logger.info("Brevid: $id er distribuert")
+    }
 
     fun hentBrev(id: BrevID): Brev = db.hentBrev(id)
 
@@ -152,6 +184,11 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) = journalfoerBrevService.journalfoer(id, bruker)
+
+    suspend fun journalfoerVedtaksbrev(
+        bruker: Systembruker,
+        vedtak: VedtakTilJournalfoering,
+    ) = journalfoerBrevService.journalfoerVedtaksbrev(vedtak, bruker)
 
     fun slett(
         id: BrevID,

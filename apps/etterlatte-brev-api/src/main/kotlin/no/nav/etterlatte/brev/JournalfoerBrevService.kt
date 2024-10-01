@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
 import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
@@ -50,7 +51,7 @@ class JournalfoerBrevService(
     suspend fun journalfoerVedtaksbrev(
         vedtak: VedtakTilJournalfoering,
         bruker: Systembruker,
-    ): Pair<OpprettJournalpostResponse, BrevID>? {
+    ): JournalfoerVedtaksbrevResponseOgBrevid? {
         logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
         val behandlingId = vedtak.behandlingId
 
@@ -75,7 +76,7 @@ class JournalfoerBrevService(
 
         return journalfoer(brev, sak)
             .also { logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK") }
-            .let { Pair(it, brev.id) }
+            .let { JournalfoerVedtaksbrevResponseOgBrevid(brev.id, it) }
     }
 
     private suspend fun journalfoer(

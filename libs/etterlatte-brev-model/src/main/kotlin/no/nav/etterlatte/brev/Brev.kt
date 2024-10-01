@@ -116,9 +116,9 @@ class OpprettJournalfoerOgDistribuerRequest(
     val sakId: SakId,
 )
 
-class JournalfoerVedtaksbrevResponse(
+class JournalfoerVedtaksbrevResponseOgBrevid(
     val brevId: BrevID,
-    val opprett: OpprettJournalpostResponse,
+    val opprettetJournalpost: OpprettJournalpostResponse,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

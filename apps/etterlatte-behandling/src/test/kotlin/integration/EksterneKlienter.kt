@@ -220,7 +220,13 @@ class BeregningKlientTest : BeregningKlient {
     override suspend fun slettAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {}
+    ) {
+    }
+
+    override suspend fun harOverstyrt(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean = false
 }
 
 class VedtakKlientTest : VedtakKlient {

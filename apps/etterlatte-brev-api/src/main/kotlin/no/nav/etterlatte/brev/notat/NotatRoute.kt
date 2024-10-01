@@ -140,7 +140,7 @@ fun Route.notatRoute(
                         val req = call.receive<SamordningManueltBehandletRequest>()
 
                         val notat =
-                            nyNotatService.opprett(
+                            nyNotatService.opprettOgJournalfoer(
                                 sakId = sakId,
                                 mal = NotatMal.MANUELL_SAMORDNING,
                                 bruker = brukerTokenInfo,
@@ -154,11 +154,6 @@ fun Route.notatRoute(
                                         saksbehandlerId = req.saksbehandlerId,
                                     ),
                             )
-
-                        nyNotatService.journalfoer(
-                            id = notat.id,
-                            bruker = brukerTokenInfo,
-                        )
                         call.respond(notat)
                     }
                 }

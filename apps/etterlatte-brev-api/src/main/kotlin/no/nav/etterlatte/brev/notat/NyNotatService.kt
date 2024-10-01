@@ -80,6 +80,19 @@ class NyNotatService(
         }
     }
 
+    internal suspend fun opprettOgJournalfoer(
+        sakId: SakId,
+        mal: NotatMal,
+        tittel: String = "Mangler tittel",
+        referanse: String? = null,
+        params: NotatParametre? = null,
+        bruker: BrukerTokenInfo,
+    ): Notat {
+        val notat = opprett(sakId, mal, tittel, referanse, params, bruker)
+        journalfoer(notat.id, bruker)
+        return notat
+    }
+
     suspend fun opprett(
         sakId: SakId,
         mal: NotatMal,

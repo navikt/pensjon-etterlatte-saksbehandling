@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -47,12 +48,24 @@ class SjekklisteService(
                 SakType.BARNEPENSJON ->
                     when (behandling.type) {
                         BehandlingType.FØRSTEGANGSBEHANDLING -> skjekklisteItemsFoerstegangsbehandlingBP
-                        BehandlingType.REVURDERING -> sjekklisteItemsRevurderingBP
+                        BehandlingType.REVURDERING -> {
+                            if (behandling.revurderingsaarsak() == Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
+                                sjekklisteItemsRevurderingBP + sjekklisteItemsBosattNorgeSluttbehandling
+                            } else {
+                                sjekklisteItemsRevurderingBP
+                            }
+                        }
                     }
                 SakType.OMSTILLINGSSTOENAD -> {
                     when (behandling.type) {
                         BehandlingType.FØRSTEGANGSBEHANDLING -> sjekklisteItemsFoerstegangsbehandlingOMS
-                        BehandlingType.REVURDERING -> sjekklisteItemsRevurderingOMS
+                        BehandlingType.REVURDERING -> {
+                            if (behandling.revurderingsaarsak() == Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
+                                sjekklisteItemsRevurderingOMS + sjekklisteItemsBosattNorgeSluttbehandling
+                            } else {
+                                sjekklisteItemsRevurderingOMS
+                            }
+                        }
                     }
                 }
             }

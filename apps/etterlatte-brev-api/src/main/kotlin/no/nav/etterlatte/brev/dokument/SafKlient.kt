@@ -51,26 +51,34 @@ class SafKlient(
                     contentType(ContentType.Application.Json)
                 }.body()
         } catch (re: ResponseException) {
-            logger.error("Feil i kall mot Saf: ${re.response.bodyAsText()}")
+            when (re.response.status) {
+                HttpStatusCode.Forbidden -> {
+                    val errorMessage = re.response.body<JsonNode>()["message"]?.asText()
+                    logger.error(errorMessage ?: "Feil fra Saf: ${re.response.bodyAsText()}")
 
-            if (re.response.status == HttpStatusCode.Forbidden) {
-                val errorMessage = re.response.body<JsonNode>()["message"]?.asText()
-                logger.error(errorMessage ?: "Feil fra Saf: ${re.response.bodyAsText()}")
+                    throw IkkeTilgangTilJournalpost()
+                }
+                HttpStatusCode.NotFound -> {
+                    throw IkkeFunnetException(
+                        code = "JOURNALPOST_DOKUMENT_IKKE_FUNNET",
+                        detail = "Fant ikke dokumentet i Joark",
+                        meta =
+                            mapOf(
+                                "journalpostId" to journalpostId,
+                                "dokumentInfoId" to dokumentInfoId,
+                                "variantFormat" to "ARKIV",
+                            ),
+                    )
+                }
+                else -> {
+                    logger.error("Ukjent feil i kall mot Saf: ${re.response.bodyAsText()}")
 
-                throw IkkeTilgangTilJournalpost()
-            } else if (re.response.status == HttpStatusCode.NotFound) {
-                throw IkkeFunnetException(
-                    code = "JOURNALPOST_DOKUMENT_IKKE_FUNNET",
-                    detail =
-                        "Dokument med journalpostId=$journalpostId, dokumentInfoId=$dokumentInfoId, " +
-                            "variantFormat=ARKIV ikke funnet i Joark",
-                )
-            } else {
-                throw ForespoerselException(
-                    status = re.response.status.value,
-                    code = "UKJENT_FEIL_HENT_JOURNALPOST_PDF",
-                    detail = "Ukjent feil oppsto ved henting av journalpost",
-                )
+                    throw ForespoerselException(
+                        status = re.response.status.value,
+                        code = "UKJENT_FEIL_HENT_JOURNALPOST_PDF",
+                        detail = "Ukjent feil oppsto ved henting av journalpost",
+                    )
+                }
             }
         }
 

@@ -30,9 +30,10 @@ internal class VilkaarsvurderingRiverTest {
         val behandlingViOmregnerFra = UUID.randomUUID()
         val omregningData =
             OmregningData(
-                1L,
-                LocalDate.now(),
-                Revurderingaarsak.REGULERING,
+                kjoering = "kjoering",
+                sakId = 1L,
+                revurderingaarsak = Revurderingaarsak.REGULERING,
+                fradato = LocalDate.now(),
                 behandlingId = behandlingId,
                 forrigeBehandlingId = behandlingViOmregnerFra,
             )

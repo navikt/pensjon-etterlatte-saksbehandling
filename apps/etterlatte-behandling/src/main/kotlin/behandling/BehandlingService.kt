@@ -234,7 +234,7 @@ interface BehandlingService {
         opphoerFraOgMed: YearMonth,
     )
 
-    fun hentAapenRegulering(sakId: SakId): UUID?
+    fun hentAapenOmregning(sakId: SakId): UUID?
 
     fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,
@@ -380,7 +380,7 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling? =
-        hentBehandling(behandlingId) ?.let {
+        hentBehandling(behandlingId)?.let {
             val persongalleri: Persongalleri =
                 runBlocking {
                     grunnlagKlient
@@ -450,7 +450,8 @@ internal class BehandlingServiceImpl(
             return true
         }
 
-        val foersteDoedsdato = hentFoersteDoedsdato(behandling.id, brukerTokenInfo, behandling.sak.sakType)?.let { YearMonth.from(it) }
+        val foersteDoedsdato =
+            hentFoersteDoedsdato(behandling.id, brukerTokenInfo, behandling.sak.sakType)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
         if (foersteDoedsdato == null) {
@@ -521,7 +522,8 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): LocalDate? {
-        val personopplysninger = grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo, sakType)
+        val personopplysninger =
+            grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo, sakType)
         return personopplysninger.avdoede
             .mapNotNull { it.opplysning.doedsdato }
             .minOrNull()
@@ -539,7 +541,13 @@ internal class BehandlingServiceImpl(
         hentBehandlingOrThrow(behandlingId)
             .tilOpprettet()
             .let { behandling ->
-                runBlocking { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType) }
+                runBlocking {
+                    grunnlagService.oppdaterGrunnlag(
+                        behandling.id,
+                        behandling.sak.id,
+                        behandling.sak.sakType,
+                    )
+                }
                 behandlingDao.lagreStatus(behandling)
                 hendelseDao.opppdatertGrunnlagHendelse(behandlingId, behandling.sak.id, brukerTokenInfo.ident())
             }
@@ -804,10 +812,12 @@ internal class BehandlingServiceImpl(
         kilde: Grunnlagsopplysning.Kilde,
     ) = behandlingDao.fjernViderefoertOpphoer(behandlingId, kilde)
 
-    override fun hentAapenRegulering(sakId: SakId): UUID? =
+    override fun hentAapenOmregning(sakId: SakId): UUID? =
         behandlingDao
-            .hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING)
-            .singleOrNull {
+            .hentAlleRevurderingerISakMedAarsak(
+                sakId,
+                listOf(Revurderingaarsak.REGULERING, Revurderingaarsak.OMREGNING),
+            ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
             }?.id
 

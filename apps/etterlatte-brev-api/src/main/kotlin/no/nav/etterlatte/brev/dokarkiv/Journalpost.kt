@@ -118,22 +118,7 @@ data class JournalpostSak(
     val fagsakId: String? = null,
     val tema: String? = null,
     val fagsaksystem: String? = null,
-) {
-    init {
-        if (sakstype == Sakstype.FAGSAK) {
-            check(!fagsakId.isNullOrBlank()) {
-                val error = "fagsakId må være satt når sakstype=${Sakstype.FAGSAK}"
-                logger.error(error)
-                error
-            }
-            check(!fagsaksystem.isNullOrBlank()) {
-                val error = "fagsaksystem må være satt når sakstype=${Sakstype.FAGSAK}"
-                logger.error(error)
-                error
-            }
-        }
-    }
-}
+)
 
 enum class Sakstype {
     FAGSAK,

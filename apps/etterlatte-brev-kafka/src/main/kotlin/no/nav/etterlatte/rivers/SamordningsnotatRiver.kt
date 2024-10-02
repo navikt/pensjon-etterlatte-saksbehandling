@@ -1,11 +1,9 @@
 package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.NyNotatService
-import no.nav.etterlatte.brev.notat.NotatMal
-import no.nav.etterlatte.brev.notat.SamordningsnotatParametre
+import no.nav.etterlatte.BrevapiKlient
+import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -14,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 class SamordningsnotatRiver(
     rapidsConnection: RapidsConnection,
-    private val notatService: NyNotatService,
+    private val brevapiKlient: BrevapiKlient,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(SamordningsnotatRiver::class.java)
 
@@ -42,25 +40,16 @@ class SamordningsnotatRiver(
             logger.info("Oppretter notat for sak $sakId, samID $samordningsmeldingId")
 
             runBlocking {
-                val notat =
-                    notatService.opprett(
-                        sakId = sakId,
-                        mal = NotatMal.MANUELL_SAMORDNING,
-                        tittel = "Manuell samordning - vedtak $vedtakId",
-                        params =
-                            SamordningsnotatParametre(
-                                sakId = sakId,
-                                vedtakId = vedtakId,
-                                samordningsmeldingId = samordningsmeldingId,
-                                kommentar = kommentar,
-                                saksbehandlerId = saksbehandlerId,
-                            ),
-                        bruker = HardkodaSystembruker.river,
-                    )
-
-                notatService.journalfoer(
-                    id = notat.id,
-                    bruker = HardkodaSystembruker.river,
+                brevapiKlient.opprettOgJournalfoerNotat(
+                    sakId = sakId,
+                    samordningManueltBehandletRequest =
+                        SamordningManueltBehandletRequest(
+                            tittel = "Manuell samordning - vedtak $vedtakId",
+                            vedtakId = vedtakId,
+                            samordningsmeldingId = samordningsmeldingId,
+                            kommentar = kommentar,
+                            saksbehandlerId = saksbehandlerId,
+                        ),
                 )
             }
         } catch (e: Exception) {

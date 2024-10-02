@@ -1,6 +1,8 @@
 package no.nav.etterlatte.rivers
 
-import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.BrevapiKlient
+import no.nav.etterlatte.brev.model.BrevOgVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -11,7 +13,7 @@ import java.util.UUID
 
 internal class VedtaksbrevUnderkjentRiver(
     rapidsConnection: RapidsConnection,
-    private val service: VedtaksbrevService,
+    private val brevapiKlient: BrevapiKlient,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(VedtaksbrevUnderkjentRiver::class.java)
 
@@ -34,18 +36,17 @@ internal class VedtaksbrevUnderkjentRiver(
 
             logger.info("Vedtak (id=$vedtakId) er underkjent - åpner vedtaksbrev for nye endringer")
 
-            val vedtaksbrev = service.hentVedtaksbrev(behandlingId)
+            val vedtaksbrev = runBlocking { brevapiKlient.hentVedtaksbrev(behandlingId) }
             if (vedtaksbrev == null) {
                 logger.warn("Fant ingen vedtaksbrev for behandling (id=$behandlingId) - avbryter ")
                 return
             }
 
-            val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(vedtaksbrev.id, packet["vedtak"])
-
-            if (endretOK) {
-                logger.info("Vedtaksbrev (id=${vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
-            } else {
-                throw Exception("Kunne ikke åpne vedtaksbrev (id=${vedtaksbrev.id}) for endringer")
+            runBlocking {
+                brevapiKlient.fjernFerdigstiltStatusUnderkjentVedtak(
+                    BrevOgVedtakDto(vedtaksbrev, packet["vedtak"]),
+                    behandlingId,
+                )
             }
         } catch (e: Exception) {
             logger.error("Feil ved gjenåpning av vedtaksbrev for underkjent vedtak (id=$vedtakId): ", e)

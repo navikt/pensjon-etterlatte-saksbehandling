@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BrevapiKlient
 import no.nav.etterlatte.brev.BrevHendelseType
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.deserialize
@@ -13,7 +12,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -52,16 +50,16 @@ internal class JournalfoerVedtaksbrevRiver(
                 VedtakTilJournalfoering(
                     vedtakId = packet["vedtak.id"].asLong(),
                     sak = deserialize(packet["vedtak.sak"].toJson()),
-                    behandlingId = hentBehandling(packet),
+                    behandlingId = hentBehandlingId(packet),
                     ansvarligEnhet = Enhetsnummer(packet["vedtak.vedtakFattet.ansvarligEnhet"].asText()),
                     saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText(),
                 )
 
-            val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak, HardkodaSystembruker.river) } ?: return
+            val journalfoervedtaksbrevResponse = runBlocking { brevapiKlient.journalfoerBrev(vedtak) } ?: return
             rapidsConnection.svarSuksess(
                 packet,
-                response.second,
-                response.first.journalpostId,
+                journalfoervedtaksbrevResponse.brevId,
+                journalfoervedtaksbrevResponse.opprettetJournalpost.journalpostId,
             )
         } catch (e: Exception) {
             logger.error("Feil ved journalføring av vedtaksbrev: ", e)
@@ -69,7 +67,7 @@ internal class JournalfoerVedtaksbrevRiver(
         }
     }
 
-    private fun hentBehandling(packet: JsonMessage) = UUID.fromString(packet["vedtak.behandlingId"].asText())
+    private fun hentBehandlingId(packet: JsonMessage) = UUID.fromString(packet["vedtak.behandlingId"].asText())
 
     private fun RapidsConnection.svarSuksess(
         packet: JsonMessage,
@@ -80,7 +78,7 @@ internal class JournalfoerVedtaksbrevRiver(
         packet.setEventNameForHendelseType(BrevHendelseType.JOURNALFOERT)
         packet[BREV_ID_KEY] = brevId
         packet["journalpostId"] = journalpostId
-        packet["distribusjonType"] = DistribusjonsType.VEDTAK.toString()
+        packet["distribusjonType"] = "VEDTAK" // DistribusjonsType.VEDTAK.toString() Må flyttes over til brev-model
 
         publish(packet.toJson())
     }

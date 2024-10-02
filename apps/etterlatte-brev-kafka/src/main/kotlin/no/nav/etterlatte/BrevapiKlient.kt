@@ -1,57 +1,153 @@
 package no.nav.etterlatte
 
-import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.ResponseException
-import no.nav.etterlatte.brev.Brevkoder
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevOgVedtakDto
+import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
+import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
+import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
-
-// TODO: legg i modell
-class BrevkodeMedData(
-    val brevkode: Brevkoder,
-    val data: Map<String, Any>,
-)
+import java.util.UUID
 
 class BrevapiKlient(
     config: Config,
-    httpClient: HttpClient,
+    val httpClient: HttpClient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    private val clientId = config.getString("brevapi.client.id")
     private val baseUrl = config.getString("brevapi.resource.url")
-    private val azureAdClient = AzureAdClient(config)
-    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    internal suspend fun opprettBrev(
+    internal suspend fun opprettJournalFoerOgDistribuer(
         sakid: SakId,
-        brevkodeMedData: BrevkodeMedData,
+        opprett: OpprettJournalfoerOgDistribuerRequest,
     ) {
         try {
             logger.info("Oppretter brev for sak med sakId=$sakid")
-            return downstreamResourceClient
-                .post(
-                    Resource(clientId, "$baseUrl/api/brev/sak/$sakid/opprettbrevriver"),
-                    brukerTokenInfo = HardkodaSystembruker.river,
-                    postBody = brevkodeMedData,
-                ).mapBoth(
-                    success = { true },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: ResponseException) {
+            httpClient.post("$baseUrl/api/brev/sak/$sakid/opprett-journalfoer-og-distribuer") {
+                contentType(ContentType.Application.Json)
+                setBody(opprett.toJson())
+            }
+        } catch (e: Exception) {
             logger.error("Henting av grunnlag for sak med sakId=$sakid feilet", e)
 
             throw ForespoerselException(
-                status = e.response.status.value,
+                status = HttpStatusCode.InternalServerError.value,
                 code = "UKJENT_FEIL_OPPRETTELSE_AV_BREV",
                 detail = "Kunne ikke opprette brev for sak: $sakid",
+            )
+        }
+    }
+
+    internal suspend fun distribuer(
+        brevId: BrevID,
+        distribusjonsType: String, // TODO: vurdere å flytte distribusjosnmodell til modell
+        journalpostIdInn: String? = null,
+    ): BestillingsIdDto {
+        try {
+            logger.info("Distribuerer brev med id $brevId")
+            return httpClient
+                .post(
+                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=$distribusjonsType",
+                ) {
+                    contentType(ContentType.Application.Json)
+                }.body<BestillingsIdDto>()
+        } catch (e: Exception) {
+            logger.error("Henting av grunnlag for sak med brevId=$brevId feilet", e)
+
+            throw ForespoerselException(
+                status = HttpStatusCode.InternalServerError.value,
+                code = "UKJENT_FEIL_KAN_IKKE_DISTRIBUERE_BREV",
+                detail = "Kunne ikke opprette brev brev emd id: $brevId",
+            )
+        }
+    }
+
+    internal suspend fun journalfoerBrev(vedtakjournalfoering: VedtakTilJournalfoering): JournalfoerVedtaksbrevResponseOgBrevid? {
+        val sakId = vedtakjournalfoering.sak.id
+        try {
+            logger.info("Journalfører brev med sakid: $sakId")
+            return httpClient
+                .post("$baseUrl/api/brev/sak/$sakId/journalfoer-vedtak") {
+                    contentType(ContentType.Application.Json)
+                    setBody(vedtakjournalfoering.toJson())
+                }.body<JournalfoerVedtaksbrevResponseOgBrevid?>()
+        } catch (e: Exception) {
+            logger.error("Journalføring for brev med sakid=$sakId feilet", e)
+
+            throw ForespoerselException(
+                status = HttpStatusCode.InternalServerError.value,
+                code = "UKJENT_FEIL_JOURNALFOERING_AV_BREV",
+                detail = "Kunne ikke journalføre brev for sakidid: $sakId",
+            )
+        }
+    }
+
+    internal suspend fun opprettOgJournalfoerNotat(
+        sakId: SakId,
+        samordningManueltBehandletRequest: SamordningManueltBehandletRequest,
+    ) {
+        try {
+            logger.info("Oppretet og journalfører notat med sakid: $sakId")
+            httpClient.post("$baseUrl/api/notat/sak/$sakId/manuellsamordning") {
+                contentType(ContentType.Application.Json)
+                setBody(samordningManueltBehandletRequest.toJson())
+            }
+        } catch (e: Exception) {
+            logger.error("Opprettelse og journalføring for notat med sakid=$sakId feilet", e)
+
+            throw ForespoerselException(
+                status = HttpStatusCode.InternalServerError.value,
+                code = "UKJENT_FEIL_OPPRETT_OG_JOURNALFOERING_AV_NOTAT",
+                detail = "Kunne ikke opprettet og journalføre notat for sakidid: $sakId",
+            )
+        }
+    }
+
+    internal suspend fun hentVedtaksbrev(behandlingId: UUID): Brev? {
+        try {
+            logger.info("Henter vedtaksbrev for behandlingid $behandlingId")
+            return httpClient.get("$baseUrl/api/brev/behandling/$behandlingId/vedtak").body<Brev?>()
+        } catch (e: Exception) {
+            logger.error("Kunne ikke hente vedtaksbrev for behandling $behandlingId", e)
+
+            throw ForespoerselException(
+                status = HttpStatusCode.InternalServerError.value,
+                code = "UKJENT_FEIL_HENT_VEDTAKSBREV",
+                detail = "Kunne ikke hente vedtaksbrev for behandlingid: $behandlingId",
+            )
+        }
+    }
+
+    internal suspend fun fjernFerdigstiltStatusUnderkjentVedtak(
+        brevOgVedtakDto: BrevOgVedtakDto,
+        behandlingId: UUID,
+    ) {
+        try {
+            logger.info("Henter vedtaksbrev for behandlingid $behandlingId")
+            httpClient.post("$baseUrl/api/brev/behandling/$behandlingId/fjern-ferdigstilt") {
+                contentType(ContentType.Application.Json)
+                setBody(brevOgVedtakDto.toJson())
+            }
+        } catch (e: Exception) {
+            logger.error("Kunne ikke hente vedtaksbrev for behandling $behandlingId", e)
+
+            throw ForespoerselException(
+                status = HttpStatusCode.InternalServerError.value,
+                code = "UKJENT_FEIL_HENT_VEDTAKSBREV",
+                detail = "Kunne ikke hente vedtaksbrev for behandlingid: $behandlingId",
             )
         }
     }

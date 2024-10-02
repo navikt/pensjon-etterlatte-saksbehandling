@@ -6,18 +6,20 @@ import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.ManueltBrevData
+import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
 import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
@@ -73,66 +75,50 @@ class OpprettJournalfoerOgDistribuerRiver(
         packet: JsonMessage,
     ): BrevID {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
-
-        val brevOgData =
-            try {
-                brevapiKlient.opprettBrev(sakId)
-                retryOgPakkUt {
-                    brevoppretter.opprettBrev(
-                        sakId = sakId,
-                        behandlingId = null,
-                        bruker = brukerTokenInfo,
-                        brevKodeMapping = { brevKode },
-                        brevtype = brevKode.brevtype,
-                    ) {
-                        when (brevKode) {
-                            Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
-                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                                val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
-                                opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
-                            }
-                            Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
-                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                                opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
-                            }
-                            Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
-                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                                opprettOmstillingsstoenadInformasjonDoedsfall(
-                                    sakId,
-                                    borIutland,
-                                )
-                            }
-                            Brevkoder.OMS_INNTEKTSJUSTERING -> {
-                                OmstillingsstoenadInntektsjustering()
-                            }
-                            else -> ManueltBrevData()
-                        }
-                    }
+        val brevdata =
+            when (brevKode) {
+                Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
+                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                    val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
+                    opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
                 }
-            } catch (e: Exception) {
-                val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"
-                logger.error(feilMelding, e)
-                throw OpprettJournalfoerOgDistribuerRiverException(
-                    feilMelding,
-                    e,
-                )
+                Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
+                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                    opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
+                }
+                Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
+                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                    opprettOmstillingsstoenadInformasjonDoedsfall(
+                        sakId,
+                        borIutland,
+                    )
+                }
+                // TODO: ughhhh
+                Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
+                    OmstillingsstoenadInntektsjustering()
+                }
+                else -> ManueltBrevData()
             }
 
-        val brevID =
-            ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
-                brevKode,
-                sakId,
-                brukerTokenInfo,
-                brevOgData.second,
-                brevOgData.first.id,
+        try {
+            val req =
+                OpprettJournalfoerOgDistribuerRequest(
+                    brevKode = brevKode,
+                    brevDataRedigerbar = brevdata,
+                    avsenderRequest = SaksbehandlerOgAttestant(Fagsaksystem.EY.navn, Fagsaksystem.EY.navn),
+                    sakId = sakId,
+                )
+            brevapiKlient.opprettJournalFoerOgDistribuer(sakId, req)
+        } catch (e: Exception) {
+            val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"
+            logger.error(feilMelding, e)
+            throw OpprettJournalfoerOgDistribuerRiverException(
+                feilMelding,
+                e,
             )
-        ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
-            brevKode,
-            sakId,
-            brevID,
-            brukerTokenInfo,
-        )
-        return brevID
+        }
+
+        return 1L
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(

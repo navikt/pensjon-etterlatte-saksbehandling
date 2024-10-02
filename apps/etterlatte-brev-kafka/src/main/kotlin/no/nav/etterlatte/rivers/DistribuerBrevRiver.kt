@@ -1,9 +1,9 @@
 package no.nav.etterlatte.rivers
 
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.BrevapiKlient
 import no.nav.etterlatte.brev.BrevHendelseType
-import no.nav.etterlatte.brev.distribusjon.BestillingsID
-import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
+import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 
 internal class DistribuerBrevRiver(
     private val rapidsConnection: RapidsConnection,
-    private val brevdistribuerer: Brevdistribuerer,
+    private val brevapiKlient: BrevapiKlient,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(DistribuerBrevRiver::class.java)
 
@@ -30,14 +30,18 @@ internal class DistribuerBrevRiver(
         context: MessageContext,
     ) {
         val bestillingsId =
-            brevdistribuerer.distribuer(
-                id = packet[BREV_ID_KEY].asLong(),
-                distribusjonsType = packet.distribusjonType(),
-                journalpostIdInn = packet["journalpostId"].asText(),
-            )
+            runBlocking {
+                brevapiKlient.distribuer(
+                    brevId = packet[BREV_ID_KEY].asLong(),
+                    distribusjonsType = packet.hentVerdiEllerKastFeil("distribusjonType"),
+                    journalpostIdInn = packet["journalpostId"].asText(),
+                )
+            }
         rapidsConnection.svarSuksess(packet, bestillingsId)
     }
 
+    /*
+    TODO: vurdere å flytte distribusjosnmodell til modell
     private fun JsonMessage.distribusjonType(): DistribusjonsType =
         try {
             DistribusjonsType.valueOf(this["distribusjonType"].asText())
@@ -45,15 +49,25 @@ internal class DistribuerBrevRiver(
             logger.error("Klarte ikke hente ut distribusjonstype:", ex)
             throw ex
         }
+*/
 
     private fun RapidsConnection.svarSuksess(
         packet: JsonMessage,
-        bestillingsId: BestillingsID,
+        bestillingsIdDto: BestillingsIdDto,
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
         packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
-        packet["bestillingsId"] = bestillingsId
+        packet["bestillingsId"] = bestillingsIdDto.bestillingsId
 
         publish(packet.toJson())
+    }
+}
+
+private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {
+    val verdi = this[key].toString()
+    if (verdi.isEmpty()) {
+        throw RuntimeException("Må ha verdi for key $key")
+    } else {
+        return verdi
     }
 }

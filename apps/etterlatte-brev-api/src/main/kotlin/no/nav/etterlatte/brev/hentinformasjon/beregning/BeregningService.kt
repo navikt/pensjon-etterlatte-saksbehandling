@@ -99,7 +99,7 @@ class BeregningService(
                     institusjon = it.institusjonsopphold != null,
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
                     beregningsMetodeFraGrunnlag = finnBeregningsmetodeIGrunnlag(beregningsGrunnlag, it),
-                    avdoedeForeldre = it.avdodeForeldre,
+                    avdoedeForeldre = it.avdoedeForeldre,
                 )
             }
 

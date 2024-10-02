@@ -172,8 +172,16 @@ data class Avkorting(
                                 periode = Periode(fom = nyttGrunnlag.fom, tom = opphoerFom?.minusMonths(1)),
                                 aarsinntekt = nyttGrunnlag.aarsinntekt,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
+                                fratrekkUtAar = 0,
                                 inntektUtland = nyttGrunnlag.inntektUtland,
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
+                                fratrekkUtAarUtlang = 0,
+                                innvilgaMaaneder =
+                                    (aarsoppgjoer.fom!!.monthValue - 1).let { antallMaanederFoerFom ->
+                                        // TODO trekk ut og unittest!!!
+                                        val antallMaanederEtterVirk = opphoerFom?.monthValue?.let { it - 1 } ?: 0
+                                        12 - antallMaanederFoerFom - antallMaanederEtterVirk
+                                    },
                                 spesifikasjon = nyttGrunnlag.spesifikasjon,
                                 kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
                             ),
@@ -384,7 +392,7 @@ data class Avkorting(
         return funnet ?: Aarsoppgjoer(
             id = UUID.randomUUID(),
             aar = fom.year,
-            forventaInnvilgaMaaneder = 12 - fom.monthValue + 1,
+            forventaInnvilgaMaaneder = 12 - fom.monthValue + 1, // TODO fjern?...
         )
     }
 
@@ -404,8 +412,11 @@ data class AvkortingGrunnlag(
     val periode: Periode,
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
+    val fratrekkUtAar: Int? = null,
     val inntektUtland: Int,
     val fratrekkInnAarUtland: Int,
+    val fratrekkUtAarUtlang: Int? = null,
+    val innvilgaMaaneder: Int? = null,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler,
 )
@@ -414,6 +425,7 @@ data class Aarsoppgjoer(
     val id: UUID,
     val aar: Int,
     val forventaInnvilgaMaaneder: Int,
+    val fom: YearMonth? = null,
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 enum class AvkortingToggles(
@@ -111,13 +112,16 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
 
+        val forutsettAldersovergang: YearMonth? = YearMonth.now() // TODO kalle en tjeneste som kan si om det er AO?
+        val opphoerFom = forutsettAldersovergang ?: behandling.opphoerFraOgMed
+
         val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
                 lagreGrunnlag,
                 brukerTokenInfo,
                 beregning,
                 sanksjoner,
-                behandling.opphoerFraOgMed,
+                opphoerFom,
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)

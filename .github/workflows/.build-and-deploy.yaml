@@ -45,7 +45,7 @@ jobs:
           team: etterlatte
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          salsa: false
+          #salsa: false
           dockerfile: docker/Dockerfile
           docker_context: apps/${{ github.workflow }}/
           image_suffix: ${{ github.workflow }}

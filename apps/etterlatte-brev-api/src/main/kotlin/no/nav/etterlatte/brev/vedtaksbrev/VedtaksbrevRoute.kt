@@ -11,6 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.model.BrevOgVedtakDto
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -20,17 +21,29 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 fun Route.vedtaksbrevRoute(
     service: VedtaksbrevService,
+    journalfoerBrevService: JournalfoerBrevService,
     tilgangssjekker: Tilgangssjekker,
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedtaksbrevRoute")
 
     route("brev/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
+        post("/journalfoer-vedtak") {
+            kunSystembruker { systembruker ->
+                val vedtak = call.receive<VedtakTilJournalfoering>()
+                val journalfoervedtaksbrevResponse =
+                    journalfoerBrevService.journalfoerVedtaksbrev(vedtak, systembruker)
+
+                call.respond(journalfoervedtaksbrevResponse ?: HttpStatusCode.NoContent)
+            }
+        }
+
         post("fjern-ferdigstilt") {
             kunSystembruker {
                 withBehandlingId(tilgangssjekker) { behandlingId ->
@@ -40,6 +53,7 @@ fun Route.vedtaksbrevRoute(
                     val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(brevOgVedtakDto.vedtaksbrev.id, brevOgVedtakDto.vedtak)
                     if (endretOK) {
                         logger.info("Vedtaksbrev (id=${brevOgVedtakDto.vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
+                        call.respond(endretOK)
                     } else {
                         throw Exception("Kunne ikke åpne vedtaksbrev (id=${brevOgVedtakDto.vedtaksbrev.id}) for endringer")
                     }

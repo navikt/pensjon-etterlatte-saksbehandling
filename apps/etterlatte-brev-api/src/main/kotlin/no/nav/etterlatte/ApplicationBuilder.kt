@@ -227,6 +227,7 @@ class ApplicationBuilder {
             journalfoerBrevService,
             pdfGenerator,
             brevdistribuerer,
+            oppgaveService,
         )
 
     private val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue(CLAMAV_ENDPOINT_URL))
@@ -260,7 +261,7 @@ class ApplicationBuilder {
             restModule = {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagService, behandlingService)
-                    vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
+                    vedtaksbrevRoute(vedtaksbrevService, journalfoerBrevService, tilgangssjekker)
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
                     notatRoute(notatService, nyNotatService, tilgangssjekker)

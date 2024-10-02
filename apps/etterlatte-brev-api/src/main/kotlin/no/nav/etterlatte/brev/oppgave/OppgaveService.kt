@@ -24,7 +24,7 @@ class OppgaveService(
 
         val nyOppgave =
             NyOppgaveDto(
-                oppgaveKilde = OppgaveKilde.DOEDSHENDELSE,
+                oppgaveKilde = OppgaveKilde.DOEDSHENDELSE, // TODO: denne må bli mer granulert når automatiske inntektsbrev skal inn
                 oppgaveType = OppgaveType.MANUELL_UTSENDING_BREV,
                 merknad = "Kunne ikke sende informasjonsbrev automatisk for dødshendelse.",
                 referanse = brevID.toString(),

@@ -9,10 +9,10 @@ import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
+import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
-import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
-import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
 import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException

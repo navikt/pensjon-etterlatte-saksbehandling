@@ -28,9 +28,7 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withSakId
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
@@ -177,16 +175,6 @@ fun Route.brevRoute(
                     logger.info("Henting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(brev)
                 }
-            }
-        }
-
-        post("journalfoer-vedtak") {
-            kunSystembruker {
-                val vedtak = call.receive<VedtakTilJournalfoering>()
-                val journalfoervedtaksbrevResponse =
-                    service.journalfoerVedtaksbrev(brukerTokenInfo as Systembruker, vedtak)
-
-                call.respond(journalfoervedtaksbrevResponse ?: HttpStatusCode.NoContent)
             }
         }
 

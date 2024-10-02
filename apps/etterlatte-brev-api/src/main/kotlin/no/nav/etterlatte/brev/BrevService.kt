@@ -18,8 +18,6 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Systembruker
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 
 class BrevService(
@@ -191,11 +189,6 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) = journalfoerBrevService.journalfoer(id, bruker)
-
-    suspend fun journalfoerVedtaksbrev(
-        bruker: Systembruker,
-        vedtak: VedtakTilJournalfoering,
-    ) = journalfoerBrevService.journalfoerVedtaksbrev(vedtak, bruker)
 
     fun slett(
         id: BrevID,

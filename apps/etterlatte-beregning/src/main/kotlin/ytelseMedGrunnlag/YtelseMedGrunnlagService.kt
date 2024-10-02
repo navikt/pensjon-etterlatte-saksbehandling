@@ -63,8 +63,8 @@ class YtelseMedGrunnlagService(
         )
     }
 
-    // validerer at det eksisterer et aarsoppgjoer for neste aar
-    // og at det er aaret etter virkningstidspunktet
+    // validerer at det eksisterer et årsoppgjør for neste år
+    // og at det er året etter virkningstidspunktet
     fun harInntektForNesteAar(
         avkortingUtenLoependeYtelse: Avkorting,
         virkningstidspunkt: Virkningstidspunkt,

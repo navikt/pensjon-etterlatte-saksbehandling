@@ -218,11 +218,11 @@ fun Route.brevRoute(
         }
 
         post("opprett-journalfoer-og-distribuer") {
-            kunSystembruker {
+            kunSystembruker { systembruker ->
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
 
-                    service.opprettJournalfoerOgDistribuerRiver(brukerTokenInfo, req)
+                    service.opprettJournalfoerOgDistribuerRiver(systembruker, req)
                     call.respond(HttpStatusCode.OK)
                 }
             }

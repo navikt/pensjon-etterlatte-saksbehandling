@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
@@ -36,10 +35,10 @@ fun Route.vedtaksbrevRoute(
 
     route("brev/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/journalfoer-vedtak") {
-            kunSystembruker {
+            kunSystembruker { systembruker ->
                 val vedtak = call.receive<VedtakTilJournalfoering>()
                 val journalfoervedtaksbrevResponse =
-                    journalfoerBrevService.journalfoerVedtaksbrev(vedtak, brukerTokenInfo as Systembruker)
+                    journalfoerBrevService.journalfoerVedtaksbrev(vedtak, systembruker)
 
                 call.respond(journalfoervedtaksbrevResponse ?: HttpStatusCode.NoContent)
             }

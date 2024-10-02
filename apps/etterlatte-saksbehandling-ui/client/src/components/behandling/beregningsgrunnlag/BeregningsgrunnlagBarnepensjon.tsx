@@ -170,6 +170,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
                   {trygdetider && (
                     <>
                       {trygdetider?.length &&
+                        trygdetider.length > 1 &&
                         (!!tidligsteAvdoede ? (
                           <BeregningsmetoderFlereAvdoede
                             redigerbar={redigerbar}

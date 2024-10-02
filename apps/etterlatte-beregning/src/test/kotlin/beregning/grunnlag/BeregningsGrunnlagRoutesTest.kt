@@ -119,7 +119,7 @@ internal class BeregningsGrunnlagRoutesTest {
     }
 
     @Test
-    fun `skal hente beregningsgrunnlag for sist iverksatte hvis ikke noe finnes og det er revurdering`() {
+    fun `skal hente og lagre beregningsgrunnlag for sist iverksatte hvis ikke noe finnes og det er revurdering`() {
         val idRevurdering = randomUUID()
         val idForrigeIverksatt = randomUUID()
         val sakId = randomSakId()
@@ -169,6 +169,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
             )
+        every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
             runServer(mockOAuth2Server) {
@@ -188,6 +189,7 @@ internal class BeregningsGrunnlagRoutesTest {
             repository.finnBeregningsGrunnlag(idRevurdering)
             repository.finnBeregningsGrunnlag(idForrigeIverksatt)
             behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
+            repository.lagreBeregningsGrunnlag(any())
         }
     }
 

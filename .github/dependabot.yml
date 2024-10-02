@@ -1,9 +1,9 @@
 version: 2
+
 updates:
   # ==============
   # KOTLIN BACKEND
   # ==============
-
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
@@ -54,11 +54,13 @@ updates:
         patterns:
           - "io.micrometer*"
 
+    automerged-updates:
+      - match:
+          update-type: "patch"
 
   # =============
   # FRONTEND
   # =============
-
   - package-ecosystem: "npm"
     directories:
       - "/apps/etterlatte-saksbehandling-ui/client"
@@ -116,10 +118,13 @@ updates:
           - "unleash-client"
           - "license-checker-rseidelsohn"
 
+    automerged-updates:
+      - match:
+          update-type: "patch"
+
   # =============
   # FRONTEND ROOT
   # =============
-
   - package-ecosystem: "npm"
     directory: "/apps/etterlatte-saksbehandling-ui/"
     schedule:
@@ -135,23 +140,22 @@ updates:
           - "lint-staged"
           - "@typescript-eslint/*"
 
+    automerged-updates:
+      - match:
+          update-type: "patch"
+
   # ==============
   # GITHUB ACTIONS
   # ==============
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
       day: "sunday"
 
-
-
-
   # ==============
   # Docker
   # ==============
-
   - package-ecosystem: "docker"
     directories:
       - /docker

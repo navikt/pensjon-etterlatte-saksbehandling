@@ -17,6 +17,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.BeregningRepository
@@ -186,10 +187,12 @@ internal class BeregningsGrunnlagRoutesTest {
         }
 
         coVerify(exactly = 1) {
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
+        }
+        verify(exactly = 1) {
+            repository.lagreBeregningsGrunnlag(any())
             repository.finnBeregningsGrunnlag(idRevurdering)
             repository.finnBeregningsGrunnlag(idForrigeIverksatt)
-            behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
-            repository.lagreBeregningsGrunnlag(any())
         }
     }
 
@@ -595,7 +598,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 }.let { response ->
                     response.status shouldBe HttpStatusCode.OK
 
-                    val grunnlag = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlagDTO::class.java)
+                    val grunnlag =
+                        objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlagDTO::class.java)
 
                     grunnlag.perioder.let { perioder ->
                         perioder.size shouldBe 2

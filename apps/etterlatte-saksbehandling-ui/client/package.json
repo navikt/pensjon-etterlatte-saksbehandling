@@ -22,7 +22,7 @@
     "@reduxjs/toolkit": "^2.2.7",
     "bowser": "^2.11.0",
     "classnames": "^2.5.1",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.1.0",
     "error-stack-parser": "^2.1.4",
     "is-hotkey": "^0.2.0",
     "lodash": "~4.17.21",

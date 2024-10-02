@@ -87,6 +87,29 @@ internal class BeregnBarnepensjonServiceTest {
         )
 
     @Test
+    fun `skal kaste feil hvis beregningsgrunnlag hentet er på en annen behandling`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                randomUUID(),
+                emptyList(),
+            )
+
+        assertThrows<BeregningsgrunnlagMangler> {
+            runBlocking {
+                beregnBarnepensjonService().beregn(behandling, bruker)
+            }
+        }
+    }
+
+    @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - nasjonal`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()

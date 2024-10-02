@@ -227,6 +227,7 @@ class ApplicationBuilder {
             journalfoerBrevService,
             pdfGenerator,
             brevdistribuerer,
+            oppgaveService,
         )
 
     private val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue(CLAMAV_ENDPOINT_URL))

@@ -10,6 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -47,6 +48,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -72,6 +74,11 @@ internal class BeregningsGrunnlagRoutesTest {
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        clearAllMocks()
     }
 
     @AfterAll
@@ -649,6 +656,9 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         every { repository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, capture(slot)) } just runs
+
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
 
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(

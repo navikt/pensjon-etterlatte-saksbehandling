@@ -14,6 +14,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
+import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
@@ -137,32 +138,24 @@ fun Route.brevRoute(
                 call.respond(JournalpostIdDto(journalpostId))
             }
         }
-        post("journalfoer-vedtak") {
-            kunSystembruker {
-                val vedtak = call.receive<VedtakTilJournalfoering>()
-                val journalfoervedtaksbrevResponse =
-                    service.journalfoerVedtaksbrev(brukerTokenInfo as Systembruker, vedtak)
-                        ?: throw RuntimeException("Bruker ikke i vedtaksbrev")
-
-                call.respond(journalfoervedtaksbrevResponse)
-            }
-        }
 
         post("distribuer") {
             withSakId(tilgangssjekker, skrivetilgang = true) {
-                val bestillingsId = distribuerer.distribuer(brevId)
+                val queryparamDistribusjonstype = call.request.queryParameters["distribusjonsType"]
+                val distribusjonsType =
+                    when (queryparamDistribusjonstype) {
+                        is String -> DistribusjonsType.valueOf(queryparamDistribusjonstype)
+                        else -> DistribusjonsType.ANNET
+                    }
+                val journalpostIdInn = call.request.queryParameters["journalpostIdInn"]
+                val bestillingsId =
+                    distribuerer.distribuer(
+                        brevId,
+                        distribusjonsType = distribusjonsType,
+                        journalpostIdInn = journalpostIdInn,
+                    )
 
                 call.respond(BestillingsIdDto(bestillingsId))
-            }
-        }
-
-        post("opprett-journalfoer-og-distribuer") {
-            kunSystembruker {
-                withSakId(tilgangssjekker, skrivetilgang = true) {
-                    val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
-
-                    service.opprettJournalfoerOgDistribuerRiver(brevId, brukerTokenInfo, req)
-                }
             }
         }
 
@@ -184,6 +177,16 @@ fun Route.brevRoute(
                     logger.info("Henting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(brev)
                 }
+            }
+        }
+
+        post("journalfoer-vedtak") {
+            kunSystembruker {
+                val vedtak = call.receive<VedtakTilJournalfoering>()
+                val journalfoervedtaksbrevResponse =
+                    service.journalfoerVedtaksbrev(brukerTokenInfo as Systembruker, vedtak)
+
+                call.respond(journalfoervedtaksbrevResponse ?: HttpStatusCode.NoContent)
             }
         }
 
@@ -222,6 +225,17 @@ fun Route.brevRoute(
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)
+                }
+            }
+        }
+
+        post("opprett-journalfoer-og-distribuer") {
+            kunSystembruker {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
+
+                    service.opprettJournalfoerOgDistribuerRiver(brukerTokenInfo, req)
+                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

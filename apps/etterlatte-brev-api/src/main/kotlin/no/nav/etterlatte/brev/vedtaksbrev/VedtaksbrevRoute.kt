@@ -40,6 +40,7 @@ fun Route.vedtaksbrevRoute(
                     val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(brevOgVedtakDto.vedtaksbrev.id, brevOgVedtakDto.vedtak)
                     if (endretOK) {
                         logger.info("Vedtaksbrev (id=${brevOgVedtakDto.vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
+                        call.respond(endretOK)
                     } else {
                         throw Exception("Kunne ikke åpne vedtaksbrev (id=${brevOgVedtakDto.vedtaksbrev.id}) for endringer")
                     }

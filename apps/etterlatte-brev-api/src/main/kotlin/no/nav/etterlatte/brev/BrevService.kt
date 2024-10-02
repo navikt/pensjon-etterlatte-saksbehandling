@@ -33,33 +33,40 @@ class BrevService(
     private val sikkerlogger = sikkerlogger()
 
     suspend fun opprettJournalfoerOgDistribuerRiver(
-        id: BrevID,
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
     ) {
-        brevoppretter.opprettBrevSomHarInnhold(
-            sakId = req.sakId,
-            behandlingId = null,
-            bruker = bruker,
-            brevKode = req.brevKode,
-            brevData = req.brevDataRedigerbar,
-        )
+        val (brev, enhetsnummer) =
+            brevoppretter.opprettBrevSomHarInnhold(
+                sakId = req.sakId,
+                behandlingId = null,
+                bruker = bruker,
+                brevKode = req.brevKode,
+                brevData = req.brevDataRedigerbar,
+            )
+        val brevId = brev.id
 
         pdfGenerator.ferdigstillOgGenererPDF(
-            id,
+            brevId,
             bruker,
-            avsenderRequest = { _, _, _ -> req.avsenderRequest },
-            brevKodeMapping = { req.brevkode },
+            avsenderRequest = { _, _, _ ->
+                AvsenderRequest(
+                    saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
+                    attestantIdent = req.avsenderRequest.attestantIdent,
+                    sakenhet = enhetsnummer,
+                )
+            },
+            brevKodeMapping = { req.brevKode },
             brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 
-        logger.info("Journalfører brev med id: $id")
-        journalfoerBrevService.journalfoer(id, bruker)
+        logger.info("Journalfører brev med id: $brevId")
+        journalfoerBrevService.journalfoer(brevId, bruker)
 
-        logger.info("Distribuerer brev med id: $id")
-        distribuerer.distribuer(id)
+        logger.info("Distribuerer brev med id: $brevId")
+        distribuerer.distribuer(brevId)
 
-        logger.info("Brevid: $id er distribuert")
+        logger.info("Brevid: $brevId er distribuert")
     }
 
     fun hentBrev(id: BrevID): Brev = db.hentBrev(id)

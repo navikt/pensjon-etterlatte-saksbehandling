@@ -65,6 +65,9 @@ class BeregnBarnepensjonService(
         val beregningsGrunnlag =
             beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id, brukerTokenInfo)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
+        if (beregningsGrunnlag.behandlingId != behandling.id) {
+            throw BeregningsgrunnlagMangler(behandling.id)
+        }
 
         val trygdetidListe =
             try {

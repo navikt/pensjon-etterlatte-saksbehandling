@@ -74,6 +74,9 @@ class BeregnOmstillingsstoenadService(
         val beregningsgrunnlag =
             beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id, brukerTokenInfo)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
+        if (beregningsgrunnlag.behandlingId != behandling.id) {
+            throw BeregningsgrunnlagMangler(behandling.id)
+        }
 
         logger.info("Beregner omstillingsstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 

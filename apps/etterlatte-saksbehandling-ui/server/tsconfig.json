@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
+
+    "target": "es2016",
+    "module": "commonjs",
     "outDir": "./build",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import { fetch } from '../utils/fetch'
 import { logger } from '../monitoring/logger'
 import { NextFunction, Request, Response } from 'express'
 import { AdConfig } from '../config/config'

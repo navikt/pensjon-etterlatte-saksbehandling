@@ -92,10 +92,6 @@ val erYrkesskade: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean> =
         finnFelt = { it.yrkesskade },
     )
 
-/**
- * Opptjeningstid er fra 16 år frem til siste dag i den måned som er før dødsfall. Input er fødselsdato og dødsdato.
- */
-
 val trygdetidGrunnlagListe: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, List<TrygdetidGrunnlag>> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,

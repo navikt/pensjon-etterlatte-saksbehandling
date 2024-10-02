@@ -433,9 +433,6 @@ data class Aarsoppgjoer(
             if (!zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
                 throw InternfeilException("YtelseFoerAvkorting: fom for ytelseFoerAvkorting er ikke i år")
             }
-            forEach {
-                validerPeriode(it.periode, "YtelseFoerAvkorting: Perioder må være innenfor årsoppgjøret sitt år")
-            }
         }
 
         with(inntektsavkorting) {

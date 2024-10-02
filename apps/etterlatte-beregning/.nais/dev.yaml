@@ -16,6 +16,7 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
+  leaderElection: true
   prometheus:
     enabled: true
     path: /metrics

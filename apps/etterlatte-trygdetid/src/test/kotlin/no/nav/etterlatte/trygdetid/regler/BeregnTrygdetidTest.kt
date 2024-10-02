@@ -936,16 +936,16 @@ internal class BeregnTrygdetidTest {
                             ),
                         fremtidigTrygdetidNorge =
                             FremtidigTrygdetid(
-                                periode = Period.of(19, 2, 0),
-                                antallMaaneder = 230,
-                                opptjeningstidIMaaneder = 312,
+                                periode = Period.of(19, 8, 0),
+                                antallMaaneder = 236,
+                                opptjeningstidIMaaneder = 305,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = true,
                             ),
                         fremtidigTrygdetidTeoretisk =
                             FremtidigTrygdetid(
                                 periode = Period.of(22, 5, 0),
                                 antallMaaneder = 269,
-                                opptjeningstidIMaaneder = 312,
+                                opptjeningstidIMaaneder = 305,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = false,
                             ),
                         samletTrygdetidNorge = 21,

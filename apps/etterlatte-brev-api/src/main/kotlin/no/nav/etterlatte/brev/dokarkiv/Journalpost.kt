@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.dokarkiv
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import org.slf4j.LoggerFactory
@@ -75,18 +74,6 @@ data class OpprettNotatJournalpostRequest(
     override val kanal = null
     override val avsenderMottaker = null
     override val tilleggsopplysninger = emptyMap<String, String>()
-}
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class OpprettJournalpostResponse(
-    val journalpostId: String,
-    val journalpostferdigstilt: Boolean,
-    val dokumenter: List<DokumentInfo> = emptyList(),
-) {
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class DokumentInfo(
-        val dokumentInfoId: String,
-    )
 }
 
 data class OppdaterJournalpostResponse(

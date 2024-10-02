@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup

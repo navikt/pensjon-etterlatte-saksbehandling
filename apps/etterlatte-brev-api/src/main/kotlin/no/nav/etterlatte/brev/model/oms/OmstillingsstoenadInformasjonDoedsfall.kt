@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model.oms
 
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 
 class OmstillingsstoenadInformasjonDoedsfall(
     val avdoedNavn: String,

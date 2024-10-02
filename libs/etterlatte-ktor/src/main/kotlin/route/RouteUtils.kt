@@ -167,7 +167,7 @@ suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody
     onSuccess(body)
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: (systemBruker: Systembruker) -> Unit) {
+inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: (systemBruker: Systembruker) -> Unit) {
     when (val bruker = brukerTokenInfo) {
         is Systembruker -> {
             onSuccess(bruker)

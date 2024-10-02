@@ -8,8 +8,8 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
-import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -22,9 +22,9 @@ import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tomMottaker
+import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning

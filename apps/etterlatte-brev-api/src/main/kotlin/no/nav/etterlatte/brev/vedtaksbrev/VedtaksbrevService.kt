@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -18,6 +17,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -238,7 +238,7 @@ class VedtaksbrevService(
     ): Boolean {
         logger.info("Fjerner status FERDIGSTILT på vedtaksbrev (id=$id)")
 
-        return db.fjernFerdigstiltStatusUnderkjentVedtak(id, vedtak)
+        return db.settBrevOppdatert(id, vedtak)
     }
 }
 

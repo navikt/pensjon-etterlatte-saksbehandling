@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import org.slf4j.LoggerFactory
 

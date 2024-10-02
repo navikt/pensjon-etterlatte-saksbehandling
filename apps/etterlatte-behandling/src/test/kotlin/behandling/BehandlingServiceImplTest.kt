@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -847,6 +848,43 @@ internal class BehandlingServiceImplTest {
             behandlingDaoMock.hentBehandlingerForSak(sak1.id)
             behandlingDaoMock.hentBehandlingerForSak(sak2.id)
         }
+    }
+
+    @Test
+    fun `kan oppdatere tidligere familiepleier`() {
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
+
+        val uuid = UUID.randomUUID()
+
+        val slot = slot<TidligereFamiliepleier>()
+
+        every { behandlingDaoMock.hentBehandling(any()) } returns
+            foerstegangsbehandling(
+                id = uuid,
+                sakId = 1,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
+
+        every { behandlingDaoMock.lagreTidligereFamiliepleier(any(), capture(slot)) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
+
+        inTransaction {
+            behandlingService.oppdaterTidligereFamiliepleier(
+                uuid,
+                TidligereFamiliepleier(
+                    true,
+                    Grunnlagsopplysning.Saksbehandler.create("ident"),
+                    "123",
+                    LocalDate.now(),
+                    "Test",
+                ),
+            )
+        }
+
+        assertEquals(true, slot.captured.svar)
+        assertEquals("123", slot.captured.foedselsnummer)
+        assertEquals("Test", slot.captured.begrunnelse)
+        assertEquals("ident", (slot.captured.kilde as Grunnlagsopplysning.Saksbehandler).ident)
     }
 
     @Test

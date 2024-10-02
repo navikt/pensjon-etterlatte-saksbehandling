@@ -1,8 +1,8 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
 data class BarnepensjonAvslag(

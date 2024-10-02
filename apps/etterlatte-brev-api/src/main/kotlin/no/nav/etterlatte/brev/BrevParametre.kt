@@ -2,8 +2,6 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
-import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknad
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnhentingAvOpplysninger

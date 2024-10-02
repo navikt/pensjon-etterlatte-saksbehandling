@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.klage.KlageDao
@@ -54,7 +53,6 @@ internal class VedtaksbehandlingDaoTest(
 
     @BeforeAll
     fun beforeAll() {
-        Kontekst.set(null)
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         val revurderingDao = RevurderingDao(ConnectionAutoclosingTest(dataSource))
         sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })

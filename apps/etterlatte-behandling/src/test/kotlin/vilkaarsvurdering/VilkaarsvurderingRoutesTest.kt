@@ -553,13 +553,13 @@ internal class VilkaarsvurderingRoutesTest(
                     setBody(vurdertVilkaarDto.toJson())
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
-                }.let { assertEquals(HttpStatusCode.PreconditionFailed, it.status) }
+                }.let { assertEquals(HttpStatusCode.BadRequest, it.status) }
             client
                 .delete("/api/vilkaarsvurdering/$behandlingId/${vurdertVilkaarDto.vilkaarId}") {
                     setBody(vurdertVilkaarDto.toJson())
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
-                }.let { assertEquals(HttpStatusCode.PreconditionFailed, it.status) }
+                }.let { assertEquals(HttpStatusCode.BadRequest, it.status) }
         }
     }
 

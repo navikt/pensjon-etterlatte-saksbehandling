@@ -15,7 +15,7 @@ class OmregningService(
         bruker: BrukerTokenInfo,
     ) {
         if (request.status == KjoeringStatus.FEILA) {
-            behandlingService.hentAapenRegulering(request.sakId)?.let {
+            behandlingService.hentAapenOmregning(request.sakId)?.let {
                 behandlingService.avbrytBehandling(it, bruker)
             }
         }

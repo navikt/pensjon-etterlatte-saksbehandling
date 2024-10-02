@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 
 data class BarnepensjonInformasjonDoedsfall(
     val avdoedNavn: String,

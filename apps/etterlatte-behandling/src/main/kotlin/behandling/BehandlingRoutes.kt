@@ -30,6 +30,8 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.SendBrev
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleierRequest
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -318,6 +320,26 @@ internal fun Route.behandlingRoutes(
                     logger.warn("Ugyldig tilstand for lagre boddellerarbeidetutlandet", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
+            }
+        }
+
+        post("/tidligere-familiepleier") {
+            kunSkrivetilgang {
+                val body = call.receive<TidligereFamiliepleierRequest>()
+                val tidligereFamiliepleier =
+                    TidligereFamiliepleier(
+                        svar = body.svar,
+                        kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
+                        foedselsnummer = body.foedselsnummer,
+                        opphoertPleieforhold = body.opphoertPleieforhold,
+                        begrunnelse = body.begrunnelse,
+                    )
+
+                inTransaction {
+                    behandlingService.oppdaterTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
+                }
+
+                call.respond(tidligereFamiliepleier)
             }
         }
 

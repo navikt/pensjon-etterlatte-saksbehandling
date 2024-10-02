@@ -15,11 +15,13 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.NyNotatService
-import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
@@ -128,6 +130,32 @@ fun Route.notatRoute(
                         )
 
                     call.respond(notat)
+                }
+            }
+
+            post("/manuellsamordning") {
+                kunSystembruker {
+                    withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
+
+                        val req = call.receive<SamordningManueltBehandletRequest>()
+
+                        val notat =
+                            nyNotatService.opprettOgJournalfoer(
+                                sakId = sakId,
+                                mal = NotatMal.MANUELL_SAMORDNING,
+                                bruker = brukerTokenInfo,
+                                tittel = req.tittel,
+                                params =
+                                    SamordningsnotatParametre(
+                                        sakId = sakId,
+                                        vedtakId = req.vedtakId,
+                                        samordningsmeldingId = req.samordningsmeldingId,
+                                        kommentar = req.kommentar,
+                                        saksbehandlerId = req.saksbehandlerId,
+                                    ),
+                            )
+                        call.respond(notat)
+                    }
                 }
             }
 

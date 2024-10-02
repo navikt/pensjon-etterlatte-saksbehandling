@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -233,7 +234,12 @@ interface BehandlingService {
         opphoerFraOgMed: YearMonth,
     )
 
-    fun hentAapenRegulering(sakId: SakId): UUID?
+    fun hentAapenOmregning(sakId: SakId): UUID?
+
+    fun oppdaterTidligereFamiliepleier(
+        behandlingId: UUID,
+        tidligereFamiliepleier: TidligereFamiliepleier,
+    )
 }
 
 internal class BehandlingServiceImpl(
@@ -374,7 +380,7 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling? =
-        hentBehandling(behandlingId) ?.let {
+        hentBehandling(behandlingId)?.let {
             val persongalleri: Persongalleri =
                 runBlocking {
                     grunnlagKlient
@@ -444,7 +450,8 @@ internal class BehandlingServiceImpl(
             return true
         }
 
-        val foersteDoedsdato = hentFoersteDoedsdato(behandling.id, brukerTokenInfo, behandling.sak.sakType)?.let { YearMonth.from(it) }
+        val foersteDoedsdato =
+            hentFoersteDoedsdato(behandling.id, brukerTokenInfo, behandling.sak.sakType)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
         if (foersteDoedsdato == null) {
@@ -515,7 +522,8 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): LocalDate? {
-        val personopplysninger = grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo, sakType)
+        val personopplysninger =
+            grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo, sakType)
         return personopplysninger.avdoede
             .mapNotNull { it.opplysning.doedsdato }
             .minOrNull()
@@ -533,7 +541,13 @@ internal class BehandlingServiceImpl(
         hentBehandlingOrThrow(behandlingId)
             .tilOpprettet()
             .let { behandling ->
-                runBlocking { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType) }
+                runBlocking {
+                    grunnlagService.oppdaterGrunnlag(
+                        behandling.id,
+                        behandling.sak.id,
+                        behandling.sak.sakType,
+                    )
+                }
                 behandlingDao.lagreStatus(behandling)
                 hendelseDao.opppdatertGrunnlagHendelse(behandlingId, behandling.sak.id, brukerTokenInfo.ident())
             }
@@ -644,6 +658,7 @@ internal class BehandlingServiceImpl(
             kilde = behandling.kilde,
             sendeBrev = behandling.sendeBrev,
             viderefoertOpphoer = viderefoertOpphoer,
+            tidligereFamiliepleier = behandling.tidligereFamiliepleier,
         )
     }
 
@@ -736,7 +751,7 @@ internal class BehandlingServiceImpl(
 
         try {
             behandling
-                .oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet)
+                .oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet)
                 .also {
                     behandlingDao.lagreBoddEllerArbeidetUtlandet(behandlingId, boddEllerArbeidetUtlandet)
                     behandlingDao.lagreStatus(it)
@@ -797,12 +812,28 @@ internal class BehandlingServiceImpl(
         kilde: Grunnlagsopplysning.Kilde,
     ) = behandlingDao.fjernViderefoertOpphoer(behandlingId, kilde)
 
-    override fun hentAapenRegulering(sakId: SakId): UUID? =
+    override fun hentAapenOmregning(sakId: SakId): UUID? =
         behandlingDao
-            .hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING)
-            .singleOrNull {
+            .hentAlleRevurderingerISakMedAarsak(
+                sakId,
+                listOf(Revurderingaarsak.REGULERING, Revurderingaarsak.OMREGNING),
+            ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
             }?.id
+
+    override fun oppdaterTidligereFamiliepleier(
+        behandlingId: UUID,
+        tidligereFamiliepleier: TidligereFamiliepleier,
+    ) {
+        val behandling =
+            hentBehandling(behandlingId)
+                ?: throw InternfeilException("Kunne ikke oppdatere tidligere familiepleier fordi behandlingen ikke finnes")
+
+        behandling.oppdaterTidligereFamiliepleier(tidligereFamiliepleier).also {
+            behandlingDao.lagreTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
+            behandlingDao.lagreStatus(it)
+        }
+    }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

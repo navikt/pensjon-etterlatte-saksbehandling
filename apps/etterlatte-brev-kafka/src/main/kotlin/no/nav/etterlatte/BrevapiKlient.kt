@@ -75,12 +75,13 @@ class BrevapiKlient(
         }
     }
 
-    internal suspend fun journalfoerBrev(vedtakjournalfoering: VedtakTilJournalfoering): JournalfoerVedtaksbrevResponseOgBrevid? {
+    internal suspend fun journalfoerVedtaksbrev(vedtakjournalfoering: VedtakTilJournalfoering): JournalfoerVedtaksbrevResponseOgBrevid? {
         val sakId = vedtakjournalfoering.sak.id
         try {
             logger.info("Journalfører brev med sakid: $sakId")
+
             return httpClient
-                .post("$baseUrl/api/brev/sak/$sakId/journalfoer-vedtak") {
+                .post("$baseUrl/api/brev/behandling/${vedtakjournalfoering.behandlingId}/journalfoer-vedtak") {
                     contentType(ContentType.Application.Json)
                     setBody(vedtakjournalfoering.toJson())
                 }.body<JournalfoerVedtaksbrevResponseOgBrevid?>()

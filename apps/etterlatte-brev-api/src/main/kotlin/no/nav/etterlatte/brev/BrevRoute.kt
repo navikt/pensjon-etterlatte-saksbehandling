@@ -143,7 +143,7 @@ fun Route.brevRoute(
                 val distribusjonsType =
                     when (queryparamDistribusjonstype) {
                         is String -> DistribusjonsType.valueOf(queryparamDistribusjonstype)
-                        else -> DistribusjonsType.ANNET
+                        null -> DistribusjonsType.ANNET
                     }
                 val journalpostIdInn = call.request.queryParameters["journalpostIdInn"]
                 val bestillingsId =

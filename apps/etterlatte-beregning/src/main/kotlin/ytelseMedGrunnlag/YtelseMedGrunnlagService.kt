@@ -70,7 +70,7 @@ class YtelseMedGrunnlagService(
         virkningstidspunkt: Virkningstidspunkt,
     ): Boolean =
         avkortingUtenLoependeYtelse.aarsoppgjoer.any {
-            it.aar > virkningstidspunkt.dato.year && (it.aar == virkningstidspunkt.dato.year + 1)
+            it.aar == virkningstidspunkt.dato.year + 1
         }
 }
 

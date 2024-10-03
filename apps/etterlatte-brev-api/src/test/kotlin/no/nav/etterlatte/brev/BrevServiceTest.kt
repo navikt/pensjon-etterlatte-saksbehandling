@@ -62,6 +62,7 @@ internal class BrevServiceTest {
             journalfoerBrevService,
             pdfGenerator,
             mockk(),
+            mockk(),
         )
 
     private val bruker = simpleSaksbehandler("Z123456")

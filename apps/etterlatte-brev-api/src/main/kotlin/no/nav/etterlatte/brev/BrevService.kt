@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -18,8 +19,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Systembruker
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
+import no.nav.etterlatte.rapidsandrivers.sakId
 import org.slf4j.LoggerFactory
 
 class BrevService(
@@ -28,38 +28,51 @@ class BrevService(
     private val journalfoerBrevService: JournalfoerBrevService,
     private val pdfGenerator: PDFGenerator,
     private val distribuerer: Brevdistribuerer,
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
 
     suspend fun opprettJournalfoerOgDistribuerRiver(
-        id: BrevID,
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
     ) {
-        brevoppretter.opprettBrevSomHarInnhold(
-            sakId = req.sakId,
-            behandlingId = null,
-            bruker = bruker,
-            brevKode = req.brevKode,
-            brevData = req.brevDataRedigerbar,
-        )
+        val (brev, enhetsnummer) =
+            brevoppretter.opprettBrevSomHarInnhold(
+                sakId = req.sakId,
+                behandlingId = null,
+                bruker = bruker,
+                brevKode = req.brevKode,
+                brevData = req.brevDataRedigerbar,
+            )
+        val brevId = brev.id
 
-        pdfGenerator.ferdigstillOgGenererPDF(
-            id,
-            bruker,
-            avsenderRequest = { _, _, _ -> req.avsenderRequest },
-            brevKodeMapping = { req.brevkode },
-            brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
-        )
+        try {
+            pdfGenerator.ferdigstillOgGenererPDF(
+                brevId,
+                bruker,
+                avsenderRequest = { _, _, _ ->
+                    AvsenderRequest(
+                        saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
+                        attestantIdent = req.avsenderRequest.attestantIdent,
+                        sakenhet = enhetsnummer,
+                    )
+                },
+                brevKodeMapping = { req.brevKode },
+                brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+            )
 
-        logger.info("Journalfører brev med id: $id")
-        journalfoerBrevService.journalfoer(id, bruker)
+            logger.info("Journalfører brev med id: $brevId")
+            journalfoerBrevService.journalfoer(brevId, bruker)
 
-        logger.info("Distribuerer brev med id: $id")
-        distribuerer.distribuer(id)
+            logger.info("Distribuerer brev med id: $brevId")
+            distribuerer.distribuer(brevId)
 
-        logger.info("Brevid: $id er distribuert")
+            logger.info("Brevid: $brevId er distribuert")
+        } catch (e: Exception) {
+            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...", e)
+            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
+        }
     }
 
     fun hentBrev(id: BrevID): Brev = db.hentBrev(id)
@@ -184,11 +197,6 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) = journalfoerBrevService.journalfoer(id, bruker)
-
-    suspend fun journalfoerVedtaksbrev(
-        bruker: Systembruker,
-        vedtak: VedtakTilJournalfoering,
-    ) = journalfoerBrevService.journalfoerVedtaksbrev(vedtak, bruker)
 
     fun slett(
         id: BrevID,

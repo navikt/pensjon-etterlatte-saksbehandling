@@ -118,7 +118,7 @@ data class Beregningsperiode(
                 samletNorskTrygdetid = dto.samletNorskTrygdetid,
                 samletTeoretiskTrygdetid = dto.samletTeoretiskTrygdetid,
                 broek = dto.broek,
-                anvendteAvdoede = dto.avdodeForeldre,
+                anvendteAvdoede = dto.avdoedeForeldre,
             )
     }
 }

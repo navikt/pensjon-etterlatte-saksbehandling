@@ -89,12 +89,6 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
-import no.nav.etterlatte.rivers.DistribuerBrevRiver
-import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
-import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
-import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
-import no.nav.etterlatte.rivers.SamordningsnotatRiver
-import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import org.slf4j.Logger
@@ -277,7 +271,7 @@ class ApplicationBuilder {
                     }
                 },
             )
-            val ferdigstillJournalfoerOgDistribuerBrev =
+            /*val ferdigstillJournalfoerOgDistribuerBrev =
                 FerdigstillJournalfoerOgDistribuerBrev(
                     pdfGenerator,
                     journalfoerBrevService,
@@ -295,6 +289,8 @@ class ApplicationBuilder {
             VedtaksbrevUnderkjentRiver(rapidsConnection, vedtaksbrevService)
             DistribuerBrevRiver(rapidsConnection, brevdistribuerer)
             SamordningsnotatRiver(rapidsConnection, nyNotatService)
+
+             */
         }
 
     private fun httpClient(

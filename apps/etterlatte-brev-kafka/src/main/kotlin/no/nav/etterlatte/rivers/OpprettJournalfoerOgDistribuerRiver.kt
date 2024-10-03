@@ -10,8 +10,9 @@ import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
-import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevErdistribuert
 import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.OmstillingsstoenadInntektsjustering
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
 import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
@@ -60,8 +62,14 @@ class OpprettJournalfoerOgDistribuerRiver(
     ) {
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
-            packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, packet)
-            packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
+            val brevErdistribuert = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, packet)
+            packet.brevId = brevErdistribuert.brevId
+            if (brevErdistribuert.erDistribuert) {
+                packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
+            } else {
+                // Oppgave har blitt opprettet i brev-api hvis vi har kommet hit
+                packet.setEventNameForHendelseType(EventNames.FEILA)
+            }
             context.publish(packet.toJson())
         }
     }
@@ -70,7 +78,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         sakId: SakId,
         brevKode: Brevkoder,
         packet: JsonMessage,
-    ): BrevID {
+    ): BrevErdistribuert {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
         val brevdata =
             when (brevKode) {
@@ -90,7 +98,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         borIutland,
                     )
                 }
-                // TODO: ughhhh
+                // TODO: @Andreas Balevik
                 Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
                     OmstillingsstoenadInntektsjustering()
                 }
@@ -105,8 +113,8 @@ class OpprettJournalfoerOgDistribuerRiver(
                     avsenderRequest = SaksbehandlerOgAttestant(Fagsaksystem.EY.navn, Fagsaksystem.EY.navn),
                     sakId = sakId,
                 )
-            val brevId = brevapiKlient.opprettJournalFoerOgDistribuer(sakId, req)
-            return brevId
+            val brevErdistribuert = brevapiKlient.opprettJournalFoerOgDistribuer(sakId, req)
+            return brevErdistribuert
         } catch (e: Exception) {
             val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"
             logger.error(feilMelding, e)

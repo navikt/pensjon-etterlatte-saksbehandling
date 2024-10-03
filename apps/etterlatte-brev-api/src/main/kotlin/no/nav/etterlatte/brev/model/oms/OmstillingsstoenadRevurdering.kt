@@ -120,7 +120,6 @@ data class OmstillingsstoenadRevurdering(
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = navnAvdoed,
                             ),
-                        harInntektNesteAar = avkortingsinfo.harInntektNesteAar,
                     ),
                 etterbetaling =
                     etterbetalingDTO?.let {

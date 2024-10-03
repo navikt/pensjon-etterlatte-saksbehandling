@@ -71,7 +71,7 @@ data class OmstillingsstoenadBeregning(
     val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
     val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
     val trygdetid: TrygdetidMedBeregningsmetode,
-    val harInntektNesteAar: Boolean,
+    val harInntektNesteAar: Boolean = false,
 ) : HarVedlegg
 
 data class OmstillingsstoenadBeregningsperiode(

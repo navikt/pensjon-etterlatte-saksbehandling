@@ -37,7 +37,7 @@ class BrevapiKlient(
     ): BrevErdistribuert {
         try {
             logger.info("Oppretter brev for sak med sakId=$sakid")
-            httpClient
+            return httpClient
                 .post("$baseUrl/api/brev/sak/$sakid/opprett-journalfoer-og-distribuer") {
                     contentType(ContentType.Application.Json)
                     setBody(opprett.toJson())

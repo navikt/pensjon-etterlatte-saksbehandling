@@ -36,7 +36,7 @@ class BrevService(
     suspend fun opprettJournalfoerOgDistribuerRiver(
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
-    ) {
+    ): BrevID {
         val (brev, enhetsnummer) =
             brevoppretter.opprettBrevSomHarInnhold(
                 sakId = req.sakId,
@@ -69,6 +69,8 @@ class BrevService(
             distribuerer.distribuer(brevId)
 
             logger.info("Brevid: $brevId er distribuert")
+
+            return brevId
         } catch (e: Exception) {
             logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...", e)
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)

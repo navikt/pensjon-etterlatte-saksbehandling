@@ -181,6 +181,7 @@ class BeregningService(
         return Avkortingsinfo(
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder = beregningsperioder,
+            harInntektNesteAar = ytelseMedGrunnlag.inntektForNesteAar,
         )
     }
 }

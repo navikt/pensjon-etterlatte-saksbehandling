@@ -107,6 +107,7 @@ data class AvkortetYtelseDto(
 
 data class YtelseMedGrunnlagDto(
     val perioder: List<YtelseMedGrunnlagPeriodisertDto>,
+    val inntektForNesteAar: Boolean,
 )
 
 data class YtelseMedGrunnlagPeriodisertDto(

@@ -31,6 +31,7 @@ data class OmstillingsstoenadInnvilgelse(
     val omsRettUtenTidsbegrensning: Boolean,
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
     val harUtbetaling: Boolean,
+    val harInntektNesteAar: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -98,6 +99,7 @@ data class OmstillingsstoenadInnvilgelse(
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
+                harInntektNesteAar = avkortingsinfo.harInntektNesteAar,
             )
         }
     }

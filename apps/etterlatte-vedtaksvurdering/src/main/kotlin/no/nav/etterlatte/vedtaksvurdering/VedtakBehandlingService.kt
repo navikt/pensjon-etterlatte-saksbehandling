@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import Regelverk
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -7,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -609,6 +611,7 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.utbetaltBeloep.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
+                                    regelverk = it.regelverk,
                                 )
                             }
                         }
@@ -627,6 +630,7 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.ytelseEtterAvkorting.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
+                                    regelverk = hentRegelverkFraBeregningForPeriode(beregningOgAvkorting.beregning, it.fom),
                                 )
                             }
                         }
@@ -647,6 +651,7 @@ class VedtakBehandlingService(
                         periode = Periode(opphoerFraOgMed, null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
+                        regelverk = Regelverk.fraDato(opphoerFraOgMed.atDay(1)),
                     ),
                 )
             } else {
@@ -655,6 +660,15 @@ class VedtakBehandlingService(
 
         return perioderMedUtbetaling + perioderMedOpphoer
     }
+
+    private fun hentRegelverkFraBeregningForPeriode(
+        beregning: BeregningDTO,
+        fom: YearMonth,
+    ): Regelverk? =
+        beregning.beregningsperioder
+            .sortedBy { it.datoFOM }
+            .first { fom.isAfter(it.datoFOM) || fom == it.datoFOM }
+            .regelverk
 
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,

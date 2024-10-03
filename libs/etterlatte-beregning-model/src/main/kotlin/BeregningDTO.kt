@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.beregning
 
+import Regelverk
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
@@ -42,12 +43,6 @@ data class Beregningsperiode(
     val kunEnJuridiskForelder: Boolean = false,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
 )
-
-enum class Regelverk {
-    BP_REGELVERK_TOM_2023,
-    BP_REGELVERK_FOM_2024,
-    OMS_REGELVERK_FOM_2024,
-}
 
 data class OverstyrBeregningDTO(
     val beskrivelse: String,

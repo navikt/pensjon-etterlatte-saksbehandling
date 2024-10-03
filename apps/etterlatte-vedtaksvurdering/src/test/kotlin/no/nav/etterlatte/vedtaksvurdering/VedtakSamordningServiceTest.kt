@@ -86,6 +86,7 @@ class VedtakSamordningServiceTest {
                                 periode = Periode(virkFom2024Januar, null),
                                 beloep = BigDecimal(2500),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                     avkorting =
@@ -109,6 +110,7 @@ class VedtakSamordningServiceTest {
                                 periode = Periode(virkFom2024Februar, null),
                                 beloep = BigDecimal(2500),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                     avkorting =

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import Regelverk
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
@@ -22,7 +23,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.beregning.Regelverk
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -116,7 +116,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
-                    regelverk shouldBe Regelverk.OMS_REGELVERK_FOM_2024
+                    regelverk shouldBe Regelverk.REGELVERK_FOM_JAN_2024
                 }
             }
         }

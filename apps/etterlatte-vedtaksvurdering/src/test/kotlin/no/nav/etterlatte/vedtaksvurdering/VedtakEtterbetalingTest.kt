@@ -171,6 +171,7 @@ class VedtakEtterbetalingTest {
                     periode = Periode(virkningstidspunkt, null),
                     beloep = BigDecimal.valueOf(beloep),
                     type = UtbetalingsperiodeType.UTBETALING,
+                    regelverk = Regelverk.fraDato(virkningstidspunkt.atDay(1)),
                 ),
             ),
     )

@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
-import no.nav.etterlatte.libs.common.beregning.Regelverk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
@@ -204,7 +203,7 @@ internal class BeregningRepositoryTest(
                     broek = broek,
                     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
                     regelVersjon = "1",
-                    regelverk = Regelverk.BP_REGELVERK_FOM_2024,
+                    regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
                     kunEnJuridiskForelder = true,
                 ),

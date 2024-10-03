@@ -544,6 +544,7 @@ class VedtaksvurderingRepository(
                 ),
             beloep = bigDecimalOrNull("beloep"),
             type = UtbetalingsperiodeType.valueOf(string("type")),
+            regelverk = stringOrNull("regelverk")?.let { Regelverk.valueOf(it) },
         )
 
     private fun Row.toAvkortetYtelsePeriode() =

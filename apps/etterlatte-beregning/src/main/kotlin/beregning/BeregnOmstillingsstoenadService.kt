@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import Regelverk
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
@@ -21,7 +22,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.beregning.Regelverk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -150,7 +150,7 @@ class BeregnOmstillingsstoenadService(
                                 periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)
                                     ?: throw AnvendtGrunnbeloepIkkeFunnet()
 
-                            val regelverk = Regelverk.OMS_REGELVERK_FOM_2024
+                            val regelverk = Regelverk.REGELVERK_FOM_JAN_2024
 
                             val trygdetid =
                                 periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)

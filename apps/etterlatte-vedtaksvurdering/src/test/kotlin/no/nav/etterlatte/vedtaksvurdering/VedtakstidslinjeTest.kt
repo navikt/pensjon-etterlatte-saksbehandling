@@ -635,6 +635,7 @@ internal class VedtakstidslinjeTest {
                                 periode = Periode(mars2024, null),
                                 beloep = BigDecimal.valueOf(140),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                 )
@@ -670,18 +671,21 @@ internal class VedtakstidslinjeTest {
                                 periode = Periode(januar2024, januar2024),
                                 beloep = BigDecimal.valueOf(140),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                             Utbetalingsperiode(
                                 id = 11,
                                 periode = Periode(feb2024, april2024),
                                 beloep = BigDecimal.valueOf(150),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                             Utbetalingsperiode(
                                 id = 12,
                                 periode = Periode(mai2024, null),
                                 beloep = BigDecimal.valueOf(160),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                 )
@@ -700,6 +704,7 @@ internal class VedtakstidslinjeTest {
                                 periode = Periode(mars2024, null),
                                 beloep = BigDecimal.valueOf(180),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                 )
@@ -737,6 +742,7 @@ internal class VedtakstidslinjeTest {
                                 periode = Periode(januar2024, null),
                                 beloep = BigDecimal.valueOf(140),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                 )
@@ -755,6 +761,7 @@ internal class VedtakstidslinjeTest {
                                 periode = Periode(mars2024, null),
                                 beloep = null,
                                 type = UtbetalingsperiodeType.OPPHOER,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                 )
@@ -773,11 +780,13 @@ internal class VedtakstidslinjeTest {
                                 periode = Periode(feb2024, feb2024),
                                 beloep = BigDecimal.valueOf(160),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                             Utbetalingsperiode(
                                 periode = Periode(mars2024, null),
                                 beloep = null,
                                 type = UtbetalingsperiodeType.OPPHOER,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                 )
@@ -872,6 +881,7 @@ private fun lagStandardVedtakMedEnAapenUtbetalingsperiode(
                 periode = Periode(virkningFom, null),
                 beloep = BigDecimal.valueOf(140),
                 type = UtbetalingsperiodeType.UTBETALING,
+                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
             ),
         ),
 )

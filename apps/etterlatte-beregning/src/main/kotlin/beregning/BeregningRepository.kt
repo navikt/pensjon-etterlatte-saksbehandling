@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import Regelverk
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
@@ -10,7 +11,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
-import no.nav.etterlatte.libs.common.beregning.Regelverk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper

@@ -157,7 +157,7 @@ class RyddeBeregningsgrunnlagDao(
                              left outer join overstyr_beregningsgrunnlag obg on bp.behandlingid = obg.behandlings_id
                     where bg.behandlings_id is null
                       and obg.behandlings_id is null
-                      limit = 1
+                      limit 1
                     """.trimIndent(),
                 ).map {
                     it.uuid("behandlingid") to it.long("sakId")

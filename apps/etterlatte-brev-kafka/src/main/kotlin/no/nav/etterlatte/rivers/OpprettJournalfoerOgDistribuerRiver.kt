@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.BrevErdistribuert
@@ -151,7 +152,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         hentAvdoede(sakId),
     )
 
-    private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> = grunnlagKlient.hentGrunnlagForSak(sakId, null, null).mapAvdoede().avdoeode
+    private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> = grunnlagKlient.hentGrunnlagForSak(sakId).mapAvdoede()
 }
 
 private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {

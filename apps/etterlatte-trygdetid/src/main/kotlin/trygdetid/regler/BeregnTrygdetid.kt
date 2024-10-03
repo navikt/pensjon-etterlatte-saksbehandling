@@ -178,9 +178,9 @@ val fremtidigTrygdetidFra =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Henter ut periode for fremtidig trygdetid",
-        regelReferanse = RegelReferanse(id = "REGEL-FINN-FREMTIDIG-TRYGDETIDSPERIODE"),
+        regelReferanse = RegelReferanse(id = "REGEL-FINN-START-FREMTIDIG-TRYGDETIDSPERIODE"),
     ) benytter normalisertTrygdetidGrunnlagListe med { trygdetidPerioder ->
-        trygdetidPerioder.firstOrNull { it.type == TrygdetidType.FREMTIDIG }?.let {
+        trygdetidPerioder.singleOrNull { it.type == TrygdetidType.FREMTIDIG }?.let {
             it.periode.fra
         }
     }
@@ -192,8 +192,8 @@ val fremtidigTrygdetidFra =
 val finnDatoerForOpptjeningstid =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
-        beskrivelse = "Konverter foedselsdato og doedsdato til opptjeningsdatoer",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-OPPTJENINGSDATOER"),
+        beskrivelse = "Konverter foedselsdato og doedsdato eller start fremtidig trygdetid til opptjeningsdatoer",
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-OPPTJENINGSDATOER", versjon = "2"),
     ) benytter opptjeningsDatoer og fremtidigTrygdetidFra med {
             opptjeningsDatoer,
             fremtidigFra,

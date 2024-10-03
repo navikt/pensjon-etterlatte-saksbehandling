@@ -33,7 +33,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
     formState: { errors },
     control,
   } = useForm<AnnenForelder>({
-    defaultValues: personopplysninger?.annenForelder,
+    defaultValues: personopplysninger?.annenForelder ?? { vurdering: null },
   })
 
   const onAvbryt = () => {
@@ -63,6 +63,10 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
       }
     )
     setRedigerModus(false)
+  }
+
+  const tekstAnnenForelderVurdering = (vurdering: AnnenForelderVurdering | null) => {
+    return vurdering && teksterAnnenForelderVurdering[vurdering]
   }
 
   return (
@@ -164,7 +168,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
             })}
           />
           <Heading size="xsmall" level="4" spacing>
-            {watch().vurdering && teksterAnnenForelderVurdering[watch().vurdering]}
+            {tekstAnnenForelderVurdering(watch().vurdering)}
           </Heading>
 
           {watch().vurdering === AnnenForelderVurdering.FORELDER_UTEN_IDENT_I_PDL && (

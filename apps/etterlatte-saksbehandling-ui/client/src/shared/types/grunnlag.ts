@@ -58,10 +58,10 @@ export interface RedigertFamilieforhold {
 }
 
 export interface AnnenForelder {
-  vurdering: AnnenForelderVurdering
-  begrunnelse?: string
-  navn?: string
-  foedselsdato?: Date
+  vurdering: AnnenForelderVurdering | null
+  begrunnelse?: string | null
+  navn?: string | null
+  foedselsdato?: Date | null
 }
 
 export enum AnnenForelderVurdering {

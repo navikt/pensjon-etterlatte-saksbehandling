@@ -1,8 +1,10 @@
 package no.nav.etterlatte.ytelseMedGrunnlag
 
+import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagPeriodisertDto
@@ -23,9 +25,7 @@ class YtelseMedGrunnlagService(
         val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
         val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
         val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
-
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
-
         val avkortinger =
             avkorting.avkortetYtelse.map { avkortetYtelse ->
                 val beregningIPeriode =
@@ -59,8 +59,19 @@ class YtelseMedGrunnlagService(
 
         return YtelseMedGrunnlagDto(
             perioder = avkortinger,
+            inntektForNesteAar = harInntektForNesteAar(avkortingUtenLoependeYtelse, virkningstidspunkt),
         )
     }
+
+    // validerer at det eksisterer et årsoppgjør for neste år
+    // og at det er året etter virkningstidspunktet
+    fun harInntektForNesteAar(
+        avkortingUtenLoependeYtelse: Avkorting,
+        virkningstidspunkt: Virkningstidspunkt,
+    ): Boolean =
+        avkortingUtenLoependeYtelse.aarsoppgjoer.any {
+            it.aar == virkningstidspunkt.dato.year + 1
+        }
 }
 
 class BeregningFinnesIkkeException(

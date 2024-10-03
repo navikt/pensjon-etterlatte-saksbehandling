@@ -60,4 +60,5 @@ enum class DistribusjonsTidspunktType {
 data class DistribuerJournalpostResponse(
     val bestillingsId: BestillingsID,
 )
+
 typealias BestillingsID = String

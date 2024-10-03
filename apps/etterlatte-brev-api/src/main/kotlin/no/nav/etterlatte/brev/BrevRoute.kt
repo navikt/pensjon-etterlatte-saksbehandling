@@ -222,8 +222,8 @@ fun Route.brevRoute(
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
 
-                    val brevId = service.opprettJournalfoerOgDistribuerRiver(systembruker, req)
-                    call.respond(brevId)
+                    val brevErDistribuert = service.opprettJournalfoerOgDistribuerRiver(systembruker, req)
+                    call.respond(brevErDistribuert)
                 }
             }
         }

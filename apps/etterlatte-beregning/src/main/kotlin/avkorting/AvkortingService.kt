@@ -5,6 +5,7 @@ import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -18,7 +19,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 import java.util.UUID
 
 enum class AvkortingToggles(
@@ -35,6 +35,7 @@ class AvkortingService(
     private val avkortingRepository: AvkortingRepository,
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
+    private val grunnlagKlient: GrunnlagKlient,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -112,8 +113,13 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
 
-        val forutsettAldersovergang: YearMonth? = YearMonth.now() // TODO kalle en tjeneste som kan si om det er AO?
-        val opphoerFom = forutsettAldersovergang ?: behandling.opphoerFraOgMed
+        val aldersovergangMaaned =
+            grunnlagKlient.aldersovergangMaaned(behandling.sak, behandling.sakType, brukerTokenInfo)
+        val opphoerFom =
+            when (aldersovergangMaaned.year) {
+                lagreGrunnlag.fom.year -> aldersovergangMaaned
+                else -> behandling.opphoerFraOgMed
+            }
 
         val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(

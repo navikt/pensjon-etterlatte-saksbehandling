@@ -2,6 +2,7 @@ package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevHendelseType
+import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
@@ -33,15 +34,13 @@ internal class DistribuerBrevRiver(
             runBlocking {
                 brevapiKlient.distribuer(
                     brevId = packet[BREV_ID_KEY].asLong(),
-                    distribusjonsType = packet.hentVerdiEllerKastFeil("distribusjonType"),
+                    distribusjonsType = packet.distribusjonType(),
                     journalpostIdInn = packet["journalpostId"].asText(),
                 )
             }
         rapidsConnection.svarSuksess(packet, bestillingsId)
     }
 
-    /*
-    TODO: vurdere å flytte distribusjosnmodell til modell
     private fun JsonMessage.distribusjonType(): DistribusjonsType =
         try {
             DistribusjonsType.valueOf(this["distribusjonType"].asText())
@@ -49,7 +48,6 @@ internal class DistribuerBrevRiver(
             logger.error("Klarte ikke hente ut distribusjonstype:", ex)
             throw ex
         }
-*/
 
     private fun RapidsConnection.svarSuksess(
         packet: JsonMessage,
@@ -60,14 +58,5 @@ internal class DistribuerBrevRiver(
         packet["bestillingsId"] = bestillingsIdDto.bestillingsId
 
         publish(packet.toJson())
-    }
-}
-
-private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {
-    val verdi = this[key].toString()
-    if (verdi.isEmpty()) {
-        throw RuntimeException("Må ha verdi for key $key")
-    } else {
-        return verdi
     }
 }

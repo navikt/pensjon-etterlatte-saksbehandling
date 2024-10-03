@@ -10,6 +10,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
+import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevErdistribuert
 import no.nav.etterlatte.brev.model.BrevID
@@ -55,14 +56,14 @@ class BrevapiKlient(
 
     internal suspend fun distribuer(
         brevId: BrevID,
-        distribusjonsType: String, // TODO: vurdere å flytte distribusjosnmodell til modell
+        distribusjonsType: DistribusjonsType,
         journalpostIdInn: String? = null,
     ): BestillingsIdDto {
         try {
             logger.info("Distribuerer brev med id $brevId")
             return httpClient
                 .post(
-                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=$distribusjonsType",
+                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}",
                 ) {
                     contentType(ContentType.Application.Json)
                 }.body<BestillingsIdDto>()

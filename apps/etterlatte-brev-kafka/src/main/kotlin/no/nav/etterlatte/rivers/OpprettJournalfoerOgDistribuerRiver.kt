@@ -105,7 +105,8 @@ class OpprettJournalfoerOgDistribuerRiver(
                     avsenderRequest = SaksbehandlerOgAttestant(Fagsaksystem.EY.navn, Fagsaksystem.EY.navn),
                     sakId = sakId,
                 )
-            brevapiKlient.opprettJournalFoerOgDistribuer(sakId, req)
+            val brevId = brevapiKlient.opprettJournalFoerOgDistribuer(sakId, req)
+            return brevId
         } catch (e: Exception) {
             val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"
             logger.error(feilMelding, e)
@@ -114,8 +115,6 @@ class OpprettJournalfoerOgDistribuerRiver(
                 e,
             )
         }
-
-        return 1L // TODO:
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(

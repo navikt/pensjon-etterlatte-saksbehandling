@@ -33,13 +33,14 @@ class BrevapiKlient(
     internal suspend fun opprettJournalFoerOgDistribuer(
         sakid: SakId,
         opprett: OpprettJournalfoerOgDistribuerRequest,
-    ) {
+    ): BrevID {
         try {
             logger.info("Oppretter brev for sak med sakId=$sakid")
-            httpClient.post("$baseUrl/api/brev/sak/$sakid/opprett-journalfoer-og-distribuer") {
-                contentType(ContentType.Application.Json)
-                setBody(opprett.toJson())
-            }
+            httpClient
+                .post("$baseUrl/api/brev/sak/$sakid/opprett-journalfoer-og-distribuer") {
+                    contentType(ContentType.Application.Json)
+                    setBody(opprett.toJson())
+                }.body<BrevID>()
         } catch (e: Exception) {
             logger.error("Henting av grunnlag for sak med sakId=$sakid feilet", e)
 

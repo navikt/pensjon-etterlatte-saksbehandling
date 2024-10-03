@@ -32,7 +32,7 @@ class AvkortingRepository(
                                 Aarsoppgjoer(
                                     id = row.uuid("id"),
                                     aar = row.int("aar"),
-                                    fom = YearMonth.now(), // TODO
+                                    fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
                                 )
                             }.asList,
                     )
@@ -216,9 +216,9 @@ class AvkortingRepository(
         statement =
             """
             INSERT INTO avkorting_aarsoppgjoer(
-            	id, behandling_id, sak_id, aar, innvilga_maaneder
+            	id, behandling_id, sak_id, aar, fom
             ) VALUES (
-            	:id, :behandling_id, :sak_id, :aar, :innvilga_maaneder
+            	:id, :behandling_id, :sak_id, :aar, :fom
             )
             """.trimIndent(),
         paramMap =
@@ -227,7 +227,7 @@ class AvkortingRepository(
                 "behandling_id" to behandlingId,
                 "sak_id" to sakId,
                 "aar" to aarsoppgjoer.aar,
-                "innvilga_maaneder" to 0, // TODO
+                "fom" to aarsoppgjoer.fom.atDay(1),
             ),
     ).let { query -> tx.run(query.asUpdate) }
 

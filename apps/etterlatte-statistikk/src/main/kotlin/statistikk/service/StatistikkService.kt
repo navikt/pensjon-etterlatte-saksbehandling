@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
@@ -46,6 +47,7 @@ import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.domain.tilStoenadUtbetalingsperiode
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -335,8 +337,10 @@ class StatistikkService(
         status = hendelse.name,
         ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet,
         resultat =
-            mapTilbakekrevingResultat(statistikkTilbakekreving.tilbakekreving.tilbakekreving)?.name?.takeIf {
-                statistikkTilbakekreving.tilbakekreving.status == TilbakekrevingStatus.ATTESTERT
+            when (statistikkTilbakekreving.tilbakekreving.status) {
+                TilbakekrevingStatus.ATTESTERT -> mapTilbakekrevingResultat(statistikkTilbakekreving.tilbakekreving.tilbakekreving)?.name
+                TilbakekrevingStatus.AVBRUTT -> "AVBRUTT"
+                else -> null
             },
         tekniskTid = tekniskTid.toTidspunkt(),
         sakYtelse = statistikkTilbakekreving.tilbakekreving.sak.sakType.name,
@@ -381,8 +385,14 @@ class StatistikkService(
         id = -1,
         referanseId = statistikkKlage.klage.id,
         sakId = statistikkKlage.klage.sak.id,
-        mottattTidspunkt = statistikkKlage.klage.opprettet,
-        registrertTidspunkt = statistikkKlage.tidspunkt,
+        mottattTidspunkt =
+            statistikkKlage.klage.innkommendeDokument?.mottattDato?.let {
+                Tidspunkt.ofNorskTidssone(
+                    it,
+                    LocalTime.NOON,
+                )
+            } ?: statistikkKlage.klage.opprettet,
+        registrertTidspunkt = statistikkKlage.klage.opprettet,
         type = "KLAGE",
         status = hendelse.name,
         resultat = resultatKlage(statistikkKlage),

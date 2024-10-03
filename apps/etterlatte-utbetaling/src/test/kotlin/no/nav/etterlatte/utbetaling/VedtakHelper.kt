@@ -35,6 +35,7 @@ fun vedtak(
                 periode = Periode(fom = YearMonth.of(2022, 1), null),
                 beloep = BigDecimal.valueOf(2000),
                 type = UtbetalingsperiodeType.UTBETALING,
+                regelverk = Regelverk.REGELVERK_TOM_DES_2023,
             ),
         ),
     ident: String = "12345678913",
@@ -116,6 +117,7 @@ fun ugyldigVedtakTilUtbetaling(
                         Periode(YearMonth.of(2022, 1), null),
                         BigDecimal.valueOf(1000),
                         UtbetalingsperiodeType.UTBETALING,
+                        regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                     ),
                 ),
             opphoerFraOgMed = null,
@@ -151,6 +153,7 @@ fun revurderingVedtak(
                                 .longValueExact() - 1000,
                         ),
                     type = UtbetalingsperiodeType.UTBETALING,
+                    regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                 ),
             )
         },
@@ -226,6 +229,7 @@ fun opphoersVedtak(
                                 ),
                             beloep = null,
                             type = UtbetalingsperiodeType.OPPHOER,
+                            regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                         ),
                     ),
                 opphoerFraOgMed =
@@ -254,6 +258,7 @@ fun genererEtterfolgendeUtbetalingsperioder(
                 ),
             beloep = BigDecimal(startBelop.toLong() + index * 1000),
             type = UtbetalingsperiodeType.UTBETALING,
+            regelverk = Regelverk.REGELVERK_TOM_DES_2023,
         )
     } else {
         Utbetalingsperiode(
@@ -265,6 +270,7 @@ fun genererEtterfolgendeUtbetalingsperioder(
                 ),
             beloep = BigDecimal(startBelop.toLong() + index * 1000),
             type = UtbetalingsperiodeType.UTBETALING,
+            regelverk = Regelverk.REGELVERK_TOM_DES_2023,
         )
     }
 }
@@ -284,6 +290,7 @@ fun main() {
             Periode(fom = YearMonth.of(2019, Month.JANUARY), tom = null),
             BigDecimal(1000),
             UtbetalingsperiodeType.UTBETALING,
+            Regelverk.REGELVERK_TOM_DES_2023,
         )
     val vedtak =
         vedtak(

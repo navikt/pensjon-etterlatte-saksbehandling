@@ -17,7 +17,8 @@ class AldersovergangService(
         val foedselsdato = dao.hentFoedselsdato(sakId, Opplysningstype.SOEKER_PDL_V1)
         return when (sakType) {
             SakType.BARNEPENSJON -> TODO()
-            SakType.OMSTILLINGSSTOENAD -> foedselsdato?.let { YearMonth.from(it.plusYears(67)) }
+            // Mottaker av Omstillingstønad opphører måned etter fylt 67 (§ 22-12 sjette ledd)
+            SakType.OMSTILLINGSSTOENAD -> foedselsdato?.let { YearMonth.from(it.plusYears(67).plusMonths(1)) }
         }
     }
 

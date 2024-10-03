@@ -38,9 +38,9 @@ class AldersovergangServiceTest(
     }
 
     @Test
-    fun `Mottaker av omstillingstoenad henter måned fyller 67 år`() {
+    fun `Mottaker av omstillingstoenad henter måned etter fyller 67 år`() {
         lagSakMedSoekerFoedtPaaGittDato(LocalDate.of(2000, 6, 15))
-        service.aldersovergangMaaned(1L, SakType.OMSTILLINGSSTOENAD) shouldBe YearMonth.of(2067, 6)
+        service.aldersovergangMaaned(1L, SakType.OMSTILLINGSSTOENAD) shouldBe YearMonth.of(2067, 7)
     }
 
     private fun lagSakMedSoekerFoedtPaaGittDato(foedselsdato: LocalDate) {

@@ -55,7 +55,7 @@ class BrevdataFacade(
             val personerISak =
                 PersonerISak(
                     innsender = grunnlag.mapInnsender(),
-                    soeker = grunnlag.mapSoeker(brevutfallDto),
+                    soeker = grunnlag.mapSoeker(brevutfallDto?.aldersgruppe),
                     avdoede = grunnlag.mapAvdoede(),
                     verge = verge,
                 )

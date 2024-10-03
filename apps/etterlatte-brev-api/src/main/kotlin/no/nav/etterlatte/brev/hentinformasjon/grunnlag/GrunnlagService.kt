@@ -48,7 +48,7 @@ class GrunnlagService(
         sakType: SakType?,
     ) = PersonerISak(
         innsender = grunnlag.mapInnsender(),
-        soeker = grunnlag.mapSoeker(brevutfallDto),
+        soeker = grunnlag.mapSoeker(brevutfallDto?.aldersgruppe),
         avdoede = grunnlag.mapAvdoede(),
         verge = sakType?.let { hentVergeForSak(it, brevutfallDto, grunnlag) },
     )
@@ -106,7 +106,7 @@ class GrunnlagService(
                 } i mapping av verge til brev.",
             )
             UkjentVergemaal()
-        } else if (sakType == SakType.BARNEPENSJON && !grunnlag.erOver18(brevutfallDto)) {
+        } else if (sakType == SakType.BARNEPENSJON && !grunnlag.erOver18(brevutfallDto?.aldersgruppe)) {
             grunnlag.hentForelderVerge()
         } else {
             null

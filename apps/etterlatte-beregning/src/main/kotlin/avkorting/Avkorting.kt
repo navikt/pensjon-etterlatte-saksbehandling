@@ -212,7 +212,7 @@ data class Avkorting(
                     aarsoppgjoer.inntektsavkorting.map { inntektsavkorting ->
                         val periode =
                             Periode(
-                                fom = aarsoppgjoer.foersteInnvilgedeMaaned(),
+                                fom = aarsoppgjoer.fom,
                                 tom = inntektsavkorting.grunnlag.periode.tom,
                             )
 
@@ -308,7 +308,7 @@ data class Avkorting(
                     0 -> null
                     else ->
                         AvkortingRegelkjoring.beregnRestanse(
-                            aarsoppgjoer.foersteInnvilgedeMaaned(),
+                            aarsoppgjoer.fom,
                             inntektsavkorting,
                             avkortetYtelseMedAllForventetInntekt,
                             kjenteSanksjonerForInntektsavkorting,
@@ -334,7 +334,7 @@ data class Avkorting(
         if (senesteSanksjonFom != null && senesteSanksjonFom >= senesteInntektsjusteringFom) {
             val restanse =
                 AvkortingRegelkjoring.beregnRestanse(
-                    aarsoppgjoer.foersteInnvilgedeMaaned(),
+                    aarsoppgjoer.fom,
                     reberegnetInntektsavkorting.last(),
                     avkortetYtelseMedAllForventetInntekt,
                     sorterteSanksjonerInnenforAarsoppgjoer,
@@ -456,8 +456,6 @@ data class Aarsoppgjoer(
             }
         }
     }
-
-    fun foersteInnvilgedeMaaned(): YearMonth = fom!! // TODO
 
     /**
      * Gir kun de sanksjonene som har en periode som overlapper med dette årsoppgjøret.

@@ -44,10 +44,17 @@ export const AvkortingInntekt = ({
   }
 
   const knappTekst = () => {
-    if (avkortingGrunnlagFrontend?.fraVirk != null) {
-      return 'Rediger'
+    if (erInnevaerendeAar) {
+      if (avkortingGrunnlagFrontend?.fraVirk != null) {
+        return 'Rediger'
+      }
+      return 'Legg til'
+    } else {
+      if (!!avkortingGrunnlagFrontend?.historikk?.length) {
+        return 'Rediger'
+      }
+      return 'Legg til for neste år'
     }
-    return erInnevaerendeAar ? 'Legg til' : 'Legg til for neste år'
   }
 
   return (

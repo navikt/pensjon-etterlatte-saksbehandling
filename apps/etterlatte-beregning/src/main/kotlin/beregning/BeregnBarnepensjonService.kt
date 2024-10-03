@@ -65,6 +65,9 @@ class BeregnBarnepensjonService(
         val beregningsGrunnlag =
             beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id, brukerTokenInfo)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
+        if (beregningsGrunnlag.behandlingId != behandling.id) {
+            throw BeregningsgrunnlagMangler(behandling.id)
+        }
 
         val trygdetidListe =
             try {
@@ -223,7 +226,7 @@ class BeregnBarnepensjonService(
                                 samletNorskTrygdetid = trygdetidForAvdoed?.samletTrygdetidNorge,
                                 samletTeoretiskTrygdetid = trygdetidForAvdoed?.samletTrygdetidTeoretisk,
                                 broek = trygdetidForAvdoed?.prorataBroek,
-                                avdodeForeldre = periodisertResultat.resultat.finnAvdodeForeldre(avdodeForeldre2024),
+                                avdoedeForeldre = periodisertResultat.resultat.finnAvdodeForeldre(avdodeForeldre2024),
                                 kunEnJuridiskForelder =
                                     beregningsgrunnlag.kunEnJuridiskForelder
                                         .finnGrunnlagForPeriode(

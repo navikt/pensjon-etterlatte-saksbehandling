@@ -1,8 +1,10 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -36,8 +38,12 @@ internal class OmregningsHendelserBehandlingRiver(
         context: MessageContext,
     ) {
         logger.info("Mottatt omregningshendelse")
-
         val omregningData: OmregningData = packet.omregningData
+
+        if (omregningData.revurderingaarsak != Revurderingaarsak.REGULERING) {
+            behandlinger.lagreKjoering(omregningData.sakId, KjoeringStatus.STARTA, omregningData.kjoering)
+        }
+
         val (behandlingId, forrigeBehandlingId, sakType) =
             behandlinger.opprettAutomatiskRevurdering(
                 AutomatiskRevurderingRequest(

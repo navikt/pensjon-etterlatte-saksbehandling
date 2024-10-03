@@ -97,6 +97,11 @@ class BehandlingDao(
     fun hentAlleRevurderingerISakMedAarsak(
         sakid: SakId,
         revurderingaarsak: Revurderingaarsak,
+    ): List<Revurdering> = hentAlleRevurderingerISakMedAarsak(sakid, listOf(revurderingaarsak))
+
+    fun hentAlleRevurderingerISakMedAarsak(
+        sakid: SakId,
+        revurderingaarsaker: List<Revurderingaarsak>,
     ): List<Revurdering> =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -107,12 +112,12 @@ class BehandlingDao(
                         FROM behandling b
                         INNER JOIN sak s ON b.sak_id = s.id
                         WHERE sak_id = ? AND behandlingstype = 'REVURDERING'
-                        AND revurdering_aarsak = ?
+                        AND revurdering_aarsak = ANY (?)
                         """.trimIndent(),
                     )
 
                 stmt.setLong(1, sakid)
-                stmt.setString(2, revurderingaarsak.name)
+                stmt.setArray(2, createArrayOf("text", revurderingaarsaker.toTypedArray()))
                 stmt.executeQuery().toList { asRevurdering(this) }
             }
         }
@@ -130,7 +135,10 @@ class BehandlingDao(
                         RETURNING id, sak_id
                         """.trimIndent(),
                     )
-                stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
+                stmt.setArray(
+                    1,
+                    createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()),
+                )
                 stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
 
                 stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) }

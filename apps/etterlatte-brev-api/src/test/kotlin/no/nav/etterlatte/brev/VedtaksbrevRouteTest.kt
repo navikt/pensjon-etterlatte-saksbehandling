@@ -213,6 +213,7 @@ internal class VedtaksbrevRouteTest {
             runServer(mockOAuth2Server, "api") {
                 vedtaksbrevRoute(
                     vedtaksbrevService,
+                    mockk(),
                     tilgangssjekker,
                 )
             }
@@ -256,6 +257,7 @@ internal class VedtaksbrevRouteTest {
         runServer(mockOAuth2Server, "api") {
             vedtaksbrevRoute(
                 vedtaksbrevService,
+                mockk(),
                 tilgangssjekker,
             )
         }

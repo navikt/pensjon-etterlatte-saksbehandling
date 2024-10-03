@@ -58,6 +58,30 @@ internal class BeregnOmstillingsstoenadServiceTest {
     }
 
     @Test
+    fun `skal kaste feil hvis beregningsgrunnlag hentet er på en annen behandling`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            omstillingstoenadBeregningsGrunnlag(
+                randomUUID(),
+            )
+        assertThrows<BeregningsgrunnlagMangler> {
+            runBlocking {
+                beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            }
+        }
+    }
+
+    @Test
     fun `skal beregne omstillingsstoenad foerstegangsbehandling - nasjonal`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()

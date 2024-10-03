@@ -116,6 +116,7 @@ class BehandlingFactoryTest {
             mockk(),
             mockk(),
             mockk(),
+            mockk(),
         )
     private val behandlingFactory =
         BehandlingFactory(

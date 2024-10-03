@@ -132,7 +132,7 @@ export const Barnepensjonberegningssammendrag = ({
   const datoPeriodeFom = parseISO(beregningsperiode.datoFOM)
   const erPaaNyttRegelverk = isAfter(datoPeriodeFom, SISTE_MAANED_GAMMELT_REGELVERK)
 
-  const flereAvdoede = beregningsperiode.avdoedeForeldre !== undefined && beregningsperiode.avdoedeForeldre.length > 0
+  const flereAvdoede = beregningsperiode.avdoedeForeldre !== undefined && beregningsperiode.avdoedeForeldre.length > 1
 
   return (
     <VStack gap="4">

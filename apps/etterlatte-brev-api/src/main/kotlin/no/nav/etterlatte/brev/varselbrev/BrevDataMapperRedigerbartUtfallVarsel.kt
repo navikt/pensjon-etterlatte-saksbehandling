@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.varselbrev
 
-import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarselRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarselUtfall
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak

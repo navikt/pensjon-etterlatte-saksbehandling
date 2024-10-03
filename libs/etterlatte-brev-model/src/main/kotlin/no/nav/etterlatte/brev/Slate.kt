@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.model
+package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue

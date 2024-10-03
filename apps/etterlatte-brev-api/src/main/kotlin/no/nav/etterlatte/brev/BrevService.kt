@@ -2,16 +2,16 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.rapidsandrivers.sakId
 import org.slf4j.LoggerFactory
 
 class BrevService(
@@ -26,9 +27,53 @@ class BrevService(
     private val brevoppretter: Brevoppretter,
     private val journalfoerBrevService: JournalfoerBrevService,
     private val pdfGenerator: PDFGenerator,
+    private val distribuerer: Brevdistribuerer,
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
+
+    suspend fun opprettJournalfoerOgDistribuerRiver(
+        bruker: BrukerTokenInfo,
+        req: OpprettJournalfoerOgDistribuerRequest,
+    ) {
+        val (brev, enhetsnummer) =
+            brevoppretter.opprettBrevSomHarInnhold(
+                sakId = req.sakId,
+                behandlingId = null,
+                bruker = bruker,
+                brevKode = req.brevKode,
+                brevData = req.brevDataRedigerbar,
+            )
+        val brevId = brev.id
+
+        try {
+            pdfGenerator.ferdigstillOgGenererPDF(
+                brevId,
+                bruker,
+                avsenderRequest = { _, _, _ ->
+                    AvsenderRequest(
+                        saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
+                        attestantIdent = req.avsenderRequest.attestantIdent,
+                        sakenhet = enhetsnummer,
+                    )
+                },
+                brevKodeMapping = { req.brevKode },
+                brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+            )
+
+            logger.info("Journalfører brev med id: $brevId")
+            journalfoerBrevService.journalfoer(brevId, bruker)
+
+            logger.info("Distribuerer brev med id: $brevId")
+            distribuerer.distribuer(brevId)
+
+            logger.info("Brevid: $brevId er distribuert")
+        } catch (e: Exception) {
+            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...", e)
+            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
+        }
+    }
 
     fun hentBrev(id: BrevID): Brev = db.hentBrev(id)
 

@@ -2,6 +2,8 @@ package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.BeregningsgrunnlagRyddeJob
+import no.nav.etterlatte.RyddeBeregningsgrunnlagDao
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
@@ -24,10 +26,14 @@ import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.sanksjon.SanksjonRepository
 import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 private fun featureToggleProperties(config: Config) =
     FeatureToggleProperties(
@@ -86,6 +92,20 @@ class ApplicationContext {
             trygdetidKlient = trygdetidKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
         )
+
+    val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], httpClient())
+    val ryddeBeregningsgrunnlagDao = RyddeBeregningsgrunnlagDao(dataSource)
+    val ryddeJob =
+        BeregningsgrunnlagRyddeJob(
+            beregningsGrunnlagRepository = beregningsGrunnlagRepository,
+            beregningRepository = beregningRepository,
+            behandlingKlient = behandlingKlient,
+            ryddeDao = ryddeBeregningsgrunnlagDao,
+            leaderElection = leaderElectionKlient,
+            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(3, ChronoUnit.MINUTES),
+        )
+
     val beregnOverstyrBeregningService =
         BeregnOverstyrBeregningService(
             beregningsGrunnlagService = beregningsGrunnlagService,
@@ -108,6 +128,7 @@ class ApplicationContext {
             avkortingRepository = avkortingRepository,
             beregningService = beregningService,
             sanksjonService = sanksjonService,
+            featureToggleService = featureToggleService,
         )
     val ytelseMedGrunnlagService =
         YtelseMedGrunnlagService(

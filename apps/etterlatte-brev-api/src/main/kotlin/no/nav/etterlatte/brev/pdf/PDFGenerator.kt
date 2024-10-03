@@ -1,9 +1,10 @@
 package no.nav.etterlatte.brev.pdf
 
+import no.nav.etterlatte.brev.AvsenderRequest
+import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.erForeldreloes
 import no.nav.etterlatte.brev.behandling.loependeIPesys
@@ -13,7 +14,6 @@ import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType

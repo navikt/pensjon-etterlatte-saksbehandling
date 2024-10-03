@@ -307,7 +307,14 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = oppgaveService,
                 grunnlagService = grunnlagService,
-                revurderingService = AutomatiskRevurderingService(revurderingService, mockk(), mockk(), mockk()),
+                revurderingService =
+                    AutomatiskRevurderingService(
+                        revurderingService,
+                        mockk(),
+                        mockk(),
+                        mockk(),
+                        mockk(),
+                    ),
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,

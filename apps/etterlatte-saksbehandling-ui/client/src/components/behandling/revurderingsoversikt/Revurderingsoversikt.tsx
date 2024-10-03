@@ -31,7 +31,6 @@ import {
 } from '~components/behandling/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
-import styled from 'styled-components'
 import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsoversikt/GrunnForSoeskenjustering'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderingsoversikt/GrunnlagForVirkningstidspunkt'
 import { RevurderingAnnen } from '~components/behandling/revurderingsoversikt/RevurderingAnnen'
@@ -122,7 +121,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           <BodyShort spacing>Revurdering på grunn av annen årsak (spesifiseres nedenfor).</BodyShort>
         ) : (
           <BodyShort spacing>
-            Revurdering på grunn av <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
+            Revurdering på grunn av {revurderingsaarsakTilTekst(revurderingsaarsak).toLowerCase()}.
           </BodyShort>
         )}
       </Box>
@@ -133,7 +132,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           enhetId={behandling.sakEnhetId}
         />
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
-        {behandling.begrunnelse !== null && (
+        {!!behandling.begrunnelse && (
           <>
             <Heading size="small">Begrunnelse</Heading>
             <BodyShort>{behandling.begrunnelse}</BodyShort>
@@ -185,7 +184,3 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
     </>
   )
 }
-
-const Lowercase = styled.span`
-  text-transform: lowercase;
-`

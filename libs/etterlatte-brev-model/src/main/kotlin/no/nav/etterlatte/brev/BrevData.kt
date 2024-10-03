@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.model
+package no.nav.etterlatte.brev
 
 /* Ikke utvid denne direkte,
 utvid heller BrevDataFerdigstilling eller BrevDataRedigerbar,

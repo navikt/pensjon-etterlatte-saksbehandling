@@ -87,6 +87,29 @@ internal class BeregnBarnepensjonServiceTest {
         )
 
     @Test
+    fun `skal kaste feil hvis beregningsgrunnlag hentet er på en annen behandling`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                randomUUID(),
+                emptyList(),
+            )
+
+        assertThrows<BeregningsgrunnlagMangler> {
+            runBlocking {
+                beregnBarnepensjonService().beregn(behandling, bruker)
+            }
+        }
+    }
+
+    @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - nasjonal`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -522,20 +545,20 @@ internal class BeregnBarnepensjonServiceTest {
             with(beregning.beregningsperioder[0]) {
                 datoFOM shouldBe YearMonth.of(2023, 1)
                 datoTOM shouldBe YearMonth.of(2023, 4)
-                avdodeForeldre shouldBe null
+                avdoedeForeldre shouldBe null
                 kunEnJuridiskForelder shouldBe false
             }
             with(beregning.beregningsperioder[1]) {
                 datoFOM shouldBe YearMonth.of(2023, 5)
                 datoTOM shouldBe YearMonth.of(2023, 12)
-                avdodeForeldre shouldBe null
+                avdoedeForeldre shouldBe null
                 kunEnJuridiskForelder shouldBe false
             }
             with(beregning.beregningsperioder[2]) {
                 datoFOM shouldBe YearMonth.of(2024, 1)
                 datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe forventetUtbetalt
-                avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value, AVDOED2_FOEDSELSNUMMER.value)
+                avdoedeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value, AVDOED2_FOEDSELSNUMMER.value)
                 kunEnJuridiskForelder shouldBe false
             }
         }
@@ -772,7 +795,7 @@ internal class BeregnBarnepensjonServiceTest {
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
-                    avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
+                    avdoedeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
                     kunEnJuridiskForelder shouldBe true
                 }
                 with(beregningsperioder[1]) {
@@ -784,7 +807,7 @@ internal class BeregnBarnepensjonServiceTest {
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
-                    avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
+                    avdoedeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
                     kunEnJuridiskForelder shouldBe false
                 }
                 beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()

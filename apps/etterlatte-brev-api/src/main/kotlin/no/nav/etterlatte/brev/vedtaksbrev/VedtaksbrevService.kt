@@ -238,7 +238,7 @@ class VedtaksbrevService(
     ): Boolean {
         logger.info("Fjerner status FERDIGSTILT på vedtaksbrev (id=$id)")
 
-        return db.fjernFerdigstiltStatusUnderkjentVedtak(id, vedtak)
+        return db.settBrevOppdatert(id, vedtak)
     }
 }
 

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.HarVedlegg
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.hentinformasjon.beregning.UgyldigBeregningsMetode

@@ -27,6 +27,7 @@ class Server(
         with(context) {
             initEmbeddedServer(
                 httpPort = properties.httpPort,
+                cronJobs = listOf(context.ryddeJob),
                 applicationConfig = context.config,
             ) {
                 beregning(beregningService, behandlingKlient)

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.BrevapiKlient
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
@@ -9,18 +8,22 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.behandling.fulltNavn
+import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
-import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
-import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
-import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
-import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
+import no.nav.etterlatte.klienter.BrevapiKlient
+import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
 import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -31,6 +34,7 @@ import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 
 class OpprettJournalfoerOgDistribuerRiverException(
@@ -40,6 +44,7 @@ class OpprettJournalfoerOgDistribuerRiverException(
 
 class OpprettJournalfoerOgDistribuerRiver(
     private val brevapiKlient: BrevapiKlient,
+    private val grunnlagKlient: GrunnlagKlient,
     rapidsConnection: RapidsConnection,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -61,8 +66,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     ) {
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
-            // TODO: prøver å finne fornavn etternavn for Systembruker.brev altså "brev"
-            packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, HardkodaSystembruker.river, packet)
+            packet.brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, packet)
             packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
             context.publish(packet.toJson())
         }
@@ -71,7 +75,6 @@ class OpprettJournalfoerOgDistribuerRiver(
     private suspend fun opprettJournalfoerOgDistribuer(
         sakId: SakId,
         brevKode: Brevkoder,
-        brukerTokenInfo: BrukerTokenInfo,
         packet: JsonMessage,
     ): BrevID {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
@@ -118,7 +121,7 @@ class OpprettJournalfoerOgDistribuerRiver(
             )
         }
 
-        return 1L
+        return 1L // TODO:
     }
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(
@@ -147,9 +150,23 @@ class OpprettJournalfoerOgDistribuerRiver(
         hentAvdoede(sakId),
     )
 
-    private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> =
-        grunnlagService.hentPersonerISak(grunnlagService.hentGrunnlagForSak(sakId, HardkodaSystembruker.river), null, null).avdoede
+    private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> = grunnlagKlient.hentGrunnlagForSak(sakId, null, null).mapAvdoede().avdoeode
 }
+
+fun Grunnlag.mapAvdoede(): List<Avdoed> =
+    with(this.familie) {
+        val avdoede = hentAvdoede()
+
+        return avdoede
+            .filter { it.hentDoedsdato() != null }
+            .map { avdoed ->
+                Avdoed(
+                    fnr = Foedselsnummer(avdoed.hentFoedselsnummer()!!.verdi.value),
+                    navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
+                    doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
+                )
+            }
+    }
 
 private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {
     val verdi = this[key].toString()

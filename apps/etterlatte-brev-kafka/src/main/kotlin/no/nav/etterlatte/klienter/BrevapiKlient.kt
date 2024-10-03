@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.klienter
 
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient

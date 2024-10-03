@@ -1,8 +1,8 @@
 package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.BrevapiKlient
 import no.nav.etterlatte.brev.BrevHendelseType
+import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY

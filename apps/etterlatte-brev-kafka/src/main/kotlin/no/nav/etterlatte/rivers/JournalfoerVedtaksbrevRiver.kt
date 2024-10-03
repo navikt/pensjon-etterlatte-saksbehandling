@@ -2,9 +2,9 @@ package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.BrevapiKlient
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV

@@ -1,8 +1,8 @@
 package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.BrevapiKlient
 import no.nav.etterlatte.brev.model.BrevOgVedtakDto
+import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage

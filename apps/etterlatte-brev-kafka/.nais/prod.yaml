@@ -65,11 +65,16 @@ spec:
       value: http://etterlatte-brev-api
     - name: BREV_API_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-brev-api/.default
+    - name: GRUNNLAG_URL
+      value: http://etterlatte-grunnlag
+    - name: GRUNNLAG_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-brev-api
+        - application: etterlatte-grunnlag
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

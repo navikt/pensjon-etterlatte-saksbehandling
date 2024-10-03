@@ -88,7 +88,10 @@ class BeregningsgrunnlagRyddeJob(
             }
             logger.info("Behandling med id=$behandlingId i sak $sakId mangler beregningsgrunnlag men har beregning")
 
-            val behandlingerISak = behandlingKlient.hentBehandlingerISak(sakId, HardkodaSystembruker.ryddeBeregning)
+            val behandlingerISak =
+                behandlingKlient
+                    .hentBehandlingerISak(sakId, HardkodaSystembruker.ryddeBeregning)
+                    .behandlinger
             val beregningerISak = behandlingerISak.mapNotNull { beregningRepository.hent(it.id) }
             val beregningUtenGrunnlag =
                 beregningerISak.find { it.behandlingId == behandlingId }

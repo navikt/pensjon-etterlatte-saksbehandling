@@ -8,7 +8,6 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.fulltNavn
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.BrevID
@@ -17,10 +16,6 @@ import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
-import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
-import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -34,7 +29,6 @@ import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 
 class OpprettJournalfoerOgDistribuerRiverException(
@@ -152,21 +146,6 @@ class OpprettJournalfoerOgDistribuerRiver(
 
     private suspend fun hentAvdoede(sakId: SakId): List<Avdoed> = grunnlagKlient.hentGrunnlagForSak(sakId, null, null).mapAvdoede().avdoeode
 }
-
-fun Grunnlag.mapAvdoede(): List<Avdoed> =
-    with(this.familie) {
-        val avdoede = hentAvdoede()
-
-        return avdoede
-            .filter { it.hentDoedsdato() != null }
-            .map { avdoed ->
-                Avdoed(
-                    fnr = Foedselsnummer(avdoed.hentFoedselsnummer()!!.verdi.value),
-                    navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
-                    doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
-                )
-            }
-    }
 
 private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {
     val verdi = this[key].toString()

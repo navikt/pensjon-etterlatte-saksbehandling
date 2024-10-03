@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
+import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -67,7 +68,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
     fun hentBehandlingerISak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<DetaljertBehandling>
+    ): SakMedBehandlinger
 }
 
 class BehandlingKlientException(
@@ -263,7 +264,7 @@ class BehandlingKlientImpl(
     override fun hentBehandlingerISak(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<DetaljertBehandling> {
+    ): SakMedBehandlinger {
         logger.info("Henter behandlinger i sak=$sakId")
         val resource = Resource(clientId = clientId, url = "$resourceUrl/saker/$sakId/behandlinger")
 
@@ -274,7 +275,7 @@ class BehandlingKlientImpl(
                     .mapBoth(
                         success = { resource ->
                             resource.response.let {
-                                objectMapper.readValue<List<DetaljertBehandling>>(
+                                objectMapper.readValue<SakMedBehandlinger>(
                                     it.toString(),
                                 )
                             }

@@ -63,7 +63,16 @@ data class OmstillingsstoenadInnvilgelse(
                 }
 
             val avdoed = avdoede.single()
-            val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
+            val sisteBeregningsperiode =
+                beregningsperioder
+                    .filter {
+                        it.datoFOM.year == beregningsperioder.first().datoFOM.year
+                    }.maxBy { it.datoFOM }
+            val sisteBeregningsperiodeNesteAar =
+                beregningsperioder
+                    .filter {
+                        it.datoFOM.year == beregningsperioder.first().datoFOM.year + 1
+                    }.maxBy { it.datoFOM }
 
             val omsRettUtenTidsbegrensning =
                 vilkaarsVurdering.vilkaar.single {
@@ -82,6 +91,7 @@ data class OmstillingsstoenadInnvilgelse(
                         virkningsdato = avkortingsinfo.virkningsdato,
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
+                        sisteBeregningsperiodeNesteAar = sisteBeregningsperiodeNesteAar,
                         trygdetid =
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,

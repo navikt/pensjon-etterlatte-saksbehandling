@@ -70,6 +70,7 @@ data class OmstillingsstoenadBeregning(
     val virkningsdato: LocalDate,
     val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
     val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
+    val sisteBeregningsperiodeNesteAar: OmstillingsstoenadBeregningsperiode?,
     val trygdetid: TrygdetidMedBeregningsmetode,
     val harInntektNesteAar: Boolean = false,
 ) : HarVedlegg

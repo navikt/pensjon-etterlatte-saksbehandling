@@ -98,7 +98,6 @@ data class OmstillingsstoenadInnvilgelse(
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = avdoed.navn,
                             ),
-                        harInntektNesteAar = avkortingsinfo.harInntektNesteAar,
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
                     avdoed.doedsdato

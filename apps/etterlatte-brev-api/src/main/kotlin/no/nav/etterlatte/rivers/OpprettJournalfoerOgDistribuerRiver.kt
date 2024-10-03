@@ -13,7 +13,7 @@ import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
-import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjustering
+import no.nav.etterlatte.brev.model.OmstillingsstoenadInntektsjustering
 import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType

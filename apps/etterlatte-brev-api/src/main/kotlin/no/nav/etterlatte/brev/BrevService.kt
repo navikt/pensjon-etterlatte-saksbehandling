@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevErdistribuert
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -36,7 +37,7 @@ class BrevService(
     suspend fun opprettJournalfoerOgDistribuerRiver(
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
-    ) {
+    ): BrevErdistribuert {
         val (brev, enhetsnummer) =
             brevoppretter.opprettBrevSomHarInnhold(
                 sakId = req.sakId,
@@ -69,9 +70,11 @@ class BrevService(
             distribuerer.distribuer(brevId)
 
             logger.info("Brevid: $brevId er distribuert")
+            return return BrevErdistribuert(brevId, true)
         } catch (e: Exception) {
             logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...", e)
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
+            return BrevErdistribuert(brevId, false)
         }
     }
 

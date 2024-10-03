@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.dokarkiv
 
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import org.slf4j.LoggerFactory
 

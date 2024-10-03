@@ -24,6 +24,10 @@ class DoedshendelseReminderService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    companion object {
+        private val fireMaaneder = 4L
+    }
+
     fun setupKontekstAndRun(context: Context) {
         Kontekst.set(context)
         run()
@@ -31,8 +35,8 @@ class DoedshendelseReminderService(
 
     private fun run() {
         val alleFerdigDoedsmeldingerMedBrevBp = inTransaction { hentAlleFerdigDoedsmeldingerMedBrevBp() }
-        val toMaanedGamlehendelser = hendelserErGamleNok(alleFerdigDoedsmeldingerMedBrevBp)
-        toMaanedGamlehendelser.forEach {
+        val gamleNokHendelser = hendelserErGamleNok(alleFerdigDoedsmeldingerMedBrevBp)
+        gamleNokHendelser.forEach {
             inTransaction { lagOppgaveOmIkkeSoekt(it) }
         }
     }
@@ -48,8 +52,8 @@ class DoedshendelseReminderService(
         val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId)
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }
         if (!harSoekt) {
-            val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId)
-            if (oppgaver.none { it.type == OppgaveType.MANGLER_SOEKNAD }) {
+            val oppgaveFinnes = oppgaveService.oppgaveMedTypeFinnes(hendelse.sakId, OppgaveType.MANGLER_SOEKNAD)
+            if (!oppgaveFinnes) {
                 oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = hendelse.sakId,
@@ -64,8 +68,7 @@ class DoedshendelseReminderService(
 
     private fun hendelserErGamleNok(hendelser: List<DoedshendelseReminder>): List<DoedshendelseReminder> {
         val idag = LocalDateTime.now(norskTidssone)
-        val toMaaneder = 2L
-        return hendelser.filter { ChronoUnit.MONTHS.between(it.endret.toLocalDatetimeNorskTid(), idag).absoluteValue >= toMaaneder }
+        return hendelser.filter { ChronoUnit.MONTHS.between(it.endret.toLocalDatetimeNorskTid(), idag).absoluteValue >= fireMaaneder }
     }
 
     private fun hentAlleFerdigDoedsmeldingerMedBrevBp() = doedshendelseDao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp()

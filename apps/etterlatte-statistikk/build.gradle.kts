@@ -18,4 +18,5 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

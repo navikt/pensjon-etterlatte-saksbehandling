@@ -1,8 +1,8 @@
 package no.nav.etterlatte.brev.brevbaker
 
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import org.slf4j.LoggerFactory
 import java.util.Base64

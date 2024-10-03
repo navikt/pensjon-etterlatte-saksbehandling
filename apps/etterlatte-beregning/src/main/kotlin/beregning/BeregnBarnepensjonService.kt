@@ -227,7 +227,7 @@ class BeregnBarnepensjonService(
                                 samletNorskTrygdetid = trygdetidForAvdoed?.samletTrygdetidNorge,
                                 samletTeoretiskTrygdetid = trygdetidForAvdoed?.samletTrygdetidTeoretisk,
                                 broek = trygdetidForAvdoed?.prorataBroek,
-                                avdodeForeldre = periodisertResultat.resultat.finnAvdodeForeldre(avdodeForeldre2024),
+                                avdoedeForeldre = periodisertResultat.resultat.finnAvdodeForeldre(avdodeForeldre2024),
                                 kunEnJuridiskForelder =
                                     beregningsgrunnlag.kunEnJuridiskForelder
                                         .finnGrunnlagForPeriode(

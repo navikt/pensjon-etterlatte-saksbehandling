@@ -8,6 +8,9 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.beregning.regler.STANDARDSAK
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.lagreSanksjon
@@ -46,7 +49,7 @@ internal class SanksjonServiceTest {
             behandlingKlient = behandlingKlient,
             featureToggleService = featureToggleService,
         )
-    private val sakId = 123L
+    private val sakId = STANDARDSAK
 
     @Nested
     inner class HentSanksjon {
@@ -132,7 +135,7 @@ internal class SanksjonServiceTest {
         @Test
         fun `Feil sak id skal gi feilmelding`() {
             val behandlingId = UUID.randomUUID()
-            val sanksjon = lagreSanksjon(sakId = 321)
+            val sanksjon = lagreSanksjon(sakId = randomSakId())
 
             val behandling =
                 behandling(
@@ -203,7 +206,7 @@ internal class SanksjonServiceTest {
         @Test
         fun `for revurderinger skal endringer av sanksjoner som starter før virk tillates kun hvis de er lik fram til virk`() {
             val behandlingId = UUID.randomUUID()
-            val sakId = 1L
+            val sakId = sakId1
             val behandling =
                 behandling(
                     id = behandlingId,

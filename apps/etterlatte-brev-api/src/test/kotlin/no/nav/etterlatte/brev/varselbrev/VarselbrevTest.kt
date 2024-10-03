@@ -4,11 +4,12 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.InnholdTilRedigerbartBrevHenter
-import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -18,15 +19,25 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tomMottaker
+import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
@@ -47,13 +58,27 @@ class VarselbrevTest(
 
     private val brevRepository = BrevRepository(datasource)
 
-    val sak = Sak("ident1", SakType.BARNEPENSJON, 1L, Enheter.STEINKJER.enhetNr)
+    val sak = Sak("ident1", SakType.BARNEPENSJON, sakId1, Enheter.STEINKJER.enhetNr)
 
     @BeforeEach
     fun start() {
         val adresseService =
             mockk<AdresseService>().also {
-                coEvery { it.hentMottakerAdresse(any(), any()) } returns tomMottaker(SOEKER_FOEDSELSNUMMER)
+                coEvery { it.hentMottakerAdresse(any(), any()) } returns
+                    Mottaker(
+                        navn = "Navn Navnesen",
+                        foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                        orgnummer = null,
+                        adresse =
+                            Adresse(
+                                adresseType = AdresseType.VEGADRESSE.name,
+                                adresselinje1 = "Adresse1",
+                                landkode = "NO",
+                                land = "Norge",
+                            ),
+                    )
+
+                tomMottaker(SOEKER_FOEDSELSNUMMER)
                 coEvery { it.hentAvsender(any()) } returns
                     Avsender(
                         kontor = "",
@@ -69,7 +94,7 @@ class VarselbrevTest(
                 } returns
                     mockk<GenerellBrevData>().also {
                         every { it.spraak } returns Spraak.NN
-                        every { it.sak } returns Sak("", SakType.BARNEPENSJON, 1L, Enheter.defaultEnhet.enhetNr)
+                        every { it.sak } returns Sak("", SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
                         every { it.forenkletVedtak } returns null
                         every { it.personerISak } returns
                             PersonerISak(
@@ -109,7 +134,20 @@ class VarselbrevTest(
                     )
                 } returns listOf()
             }
-        val behandlingService = mockk<BehandlingService>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
+        val behandlingService =
+            mockk<BehandlingService>().also {
+                coEvery { it.hentSak(sak.id, any()) } returns sak
+                coEvery { it.hentBehandling(any(), any()) } returns
+                    mockk<DetaljertBehandling> {
+                        every { utlandstilknytning } returns
+                            Utlandstilknytning(
+                                UtlandstilknytningType.NASJONAL,
+                                Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now()),
+                                "begrunnelse",
+                            )
+                        every { revurderingsaarsak } returns Revurderingaarsak.AKTIVITETSPLIKT
+                    }
+            }
 
         val innholdTilRedigerbartBrevHenter =
             InnholdTilRedigerbartBrevHenter(brevdataFacade, brevbaker, adresseService, redigerbartVedleggHenter)

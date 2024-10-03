@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -28,7 +29,7 @@ class SakLesDao(
         )
     }
 
-    fun finnSakerMedGraderingOgSkjerming(sakIder: List<Long>): List<SakMedGradering> =
+    fun finnSakerMedGraderingOgSkjerming(sakIder: List<SakId>): List<SakMedGradering> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement =
@@ -48,8 +49,8 @@ class SakLesDao(
     fun hentSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long>,
-        ekskluderteSaker: List<Long>,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
         sakType: SakType? = null,
         loependeFom: YearMonth? = null,
     ): List<Sak> =
@@ -107,7 +108,7 @@ class SakLesDao(
             }
         }
 
-    fun hentSak(id: Long): Sak? =
+    fun hentSak(id: SakId): Sak? =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak where id = ?")
@@ -118,7 +119,7 @@ class SakLesDao(
             }
         }
 
-    fun finnSakMedGraderingOgSkjerming(id: Long): SakMedGraderingOgSkjermet =
+    fun finnSakMedGraderingOgSkjerming(id: SakId): SakMedGraderingOgSkjermet =
         connectionAutoclosing.hentConnection { connection ->
             val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
             statement.setLong(1, id)
@@ -135,7 +136,7 @@ class SakLesDao(
             }
         }
 
-    fun finnFlyktningForSak(id: Long): Flyktning? =
+    fun finnFlyktningForSak(id: SakId): Flyktning? =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement = prepareStatement("SELECT flyktning from sak where id = ?")
@@ -170,7 +171,7 @@ class SakLesDao(
             }
         }
 
-    fun hentSakerMedIder(sakIder: List<Long>): List<Sak> =
+    fun hentSakerMedIder(sakIder: List<SakId>): List<Sak> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

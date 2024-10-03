@@ -90,7 +90,7 @@ class BehandlingFactoryTest {
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "behandling",
-            Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+            Sak("ident", SakType.BARNEPENSJON, sakId1, Enheter.AALESUND.enhetNr),
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
             null,
@@ -113,6 +113,8 @@ class BehandlingFactoryTest {
                 aktivitetspliktDao,
                 aktivitetspliktKopierService,
             ),
+            mockk(),
+            mockk(),
             mockk(),
             mockk(),
         )
@@ -166,7 +168,7 @@ class BehandlingFactoryTest {
                     Sak(
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
@@ -218,11 +220,11 @@ class BehandlingFactoryTest {
         val resultat =
             behandlingFactory
                 .opprettBehandling(
-                    1,
+                    sakId1,
                     persongalleri,
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
-                    behandlingFactory.hentDataForOpprettBehandling(1),
+                    behandlingFactory.hentDataForOpprettBehandling(sakId1),
                 )!!
                 .also { it.sendMeldingForHendelse() }
                 .behandling
@@ -231,7 +233,7 @@ class BehandlingFactoryTest {
         Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)
         Assertions.assertEquals(opprettetBehandling.id, resultat.id)
         Assertions.assertEquals(opprettetBehandling.behandlingOpprettet, resultat.behandlingOpprettet)
-        Assertions.assertEquals(1, behandlingOpprettes.captured.sakId)
+        Assertions.assertEquals(sakId1, behandlingOpprettes.captured.sakId)
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
 
         verify(exactly = 1) {
@@ -263,7 +265,7 @@ class BehandlingFactoryTest {
                     Sak(
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
@@ -312,11 +314,11 @@ class BehandlingFactoryTest {
         val foerstegangsbehandling =
             behandlingFactory
                 .opprettBehandling(
-                    1,
+                    sakId1,
                     persongalleri,
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
-                    behandlingFactory.hentDataForOpprettBehandling(1),
+                    behandlingFactory.hentDataForOpprettBehandling(sakId1),
                 )!!
                 .also { it.sendMeldingForHendelse() }
                 .behandling
@@ -349,7 +351,7 @@ class BehandlingFactoryTest {
                     Sak(
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
@@ -404,11 +406,11 @@ class BehandlingFactoryTest {
         val foerstegangsbehandling =
             behandlingFactory
                 .opprettBehandling(
-                    1,
+                    sakId1,
                     persongalleri,
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
-                    behandlingFactory.hentDataForOpprettBehandling(1),
+                    behandlingFactory.hentDataForOpprettBehandling(sakId1),
                 )!!
                 .also { it.sendMeldingForHendelse() }
                 .behandling
@@ -422,11 +424,11 @@ class BehandlingFactoryTest {
         val nyfoerstegangsbehandling =
             behandlingFactory
                 .opprettBehandling(
-                    1,
+                    sakId1,
                     persongalleri,
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
-                    behandlingFactory.hentDataForOpprettBehandling(1),
+                    behandlingFactory.hentDataForOpprettBehandling(sakId1),
                 )?.also { it.sendMeldingForHendelse() }
                 ?.behandling
         Assertions.assertTrue(nyfoerstegangsbehandling is Foerstegangsbehandling)
@@ -450,7 +452,7 @@ class BehandlingFactoryTest {
 
     @Test
     fun `skal ikke kunne opprette omgjøring førstegangsbehandling hvis det er innvilget førstegangsbehandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val iverksattBehandlingId = UUID.randomUUID()
         val saksbehandler = simpleSaksbehandler()
         val iverksattBehandling =
@@ -683,6 +685,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
+            behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
         }
         coVerify {
             grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
@@ -703,7 +706,7 @@ class BehandlingFactoryTest {
                     Sak(
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
@@ -761,11 +764,11 @@ class BehandlingFactoryTest {
         val foerstegangsbehandling =
             behandlingFactory
                 .opprettBehandling(
-                    1,
+                    sakId1,
                     persongalleri,
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
-                    behandlingFactory.hentDataForOpprettBehandling(1),
+                    behandlingFactory.hentDataForOpprettBehandling(sakId1),
                 )!!
                 .also { it.sendMeldingForHendelse() }
                 .behandling
@@ -780,7 +783,7 @@ class BehandlingFactoryTest {
                     Sak(
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
@@ -814,7 +817,7 @@ class BehandlingFactoryTest {
 
         every { behandlingDaoMock.hentBehandling(any()) } returns
             revurdering(
-                sakId = 1,
+                sakId = sakId1,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
@@ -822,11 +825,11 @@ class BehandlingFactoryTest {
         val revurderingsBehandling =
             behandlingFactory
                 .opprettBehandling(
-                    1,
+                    sakId1,
                     persongalleri,
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
-                    behandlingFactory.hentDataForOpprettBehandling(1),
+                    behandlingFactory.hentDataForOpprettBehandling(sakId1),
                 )?.also { it.sendMeldingForHendelse() }
                 ?.behandling
         Assertions.assertTrue(revurderingsBehandling is Revurdering)
@@ -858,7 +861,7 @@ class BehandlingFactoryTest {
                     Sak(
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
@@ -916,11 +919,11 @@ class BehandlingFactoryTest {
         val foerstegangsbehandling =
             behandlingFactory
                 .opprettBehandling(
-                    1,
+                    sakId1,
                     persongalleri,
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
-                    behandlingFactory.hentDataForOpprettBehandling(1),
+                    behandlingFactory.hentDataForOpprettBehandling(sakId1),
                 )!!
                 .also { it.sendMeldingForHendelse() }
                 .behandling
@@ -935,7 +938,7 @@ class BehandlingFactoryTest {
                     Sak(
                         ident = "Soeker",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = datoNaa,
@@ -970,7 +973,7 @@ class BehandlingFactoryTest {
 
         every { behandlingDaoMock.hentBehandling(any()) } returns
             revurdering(
-                sakId = 1,
+                sakId = sakId1,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
@@ -978,11 +981,11 @@ class BehandlingFactoryTest {
         val revurderingsBehandling =
             behandlingFactory
                 .opprettBehandling(
-                    1,
+                    sakId1,
                     persongalleri,
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
-                    behandlingFactory.hentDataForOpprettBehandling(1),
+                    behandlingFactory.hentDataForOpprettBehandling(sakId1),
                 )?.also { it.sendMeldingForHendelse() }
                 ?.behandling
         Assertions.assertTrue(revurderingsBehandling is Revurdering)
@@ -1016,7 +1019,13 @@ class BehandlingFactoryTest {
                 listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
+        val sak =
+            Sak(
+                persongalleri.soeker,
+                SakType.BARNEPENSJON,
+                sakId1,
+                Enheter.defaultEnhet.enhetNr,
+            )
 
         val opprettetBehandling =
             Foerstegangsbehandling(
@@ -1041,7 +1050,7 @@ class BehandlingFactoryTest {
             )
 
         every { sakServiceMock.finnEllerOpprettSakMedGrunnlag(any(), any()) } returns sak
-        every { sakServiceMock.finnSak(any<Long>()) } returns sak
+        every { sakServiceMock.finnSak(any<SakId>()) } returns sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } just Runs
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns emptyList()
@@ -1071,7 +1080,7 @@ class BehandlingFactoryTest {
         Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)
         Assertions.assertEquals(opprettetBehandling.id, resultat.id)
         Assertions.assertEquals(opprettetBehandling.behandlingOpprettet, resultat.behandlingOpprettet)
-        Assertions.assertEquals(1, behandlingOpprettes.captured.sakId)
+        Assertions.assertEquals(sakId1, behandlingOpprettes.captured.sakId)
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
 
         verify(exactly = 1) {
@@ -1095,7 +1104,7 @@ class BehandlingFactoryTest {
     }
 
     private fun sak(
-        sakId: SakId = 1L,
+        sakId: SakId = sakId1,
         sakType: SakType = SakType.BARNEPENSJON,
         enhet: Enhetsnummer = Enheter.defaultEnhet.enhetNr,
     ): Sak =

@@ -34,6 +34,7 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import BrevutfallModal from '~components/behandling/brevutfall/BrevutfallModal'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -55,6 +56,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [, fetchBehandling] = useApiCall(hentBehandling)
 
   const [visBrevutfall, setVisBrevutfall] = useState(true)
+
+  const [avbruttUtenBrev, setAvbruttUtenBrev] = useState(false)
 
   const sjekkliste = useSjekkliste()
   const valideringsfeil = useSjekklisteValideringsfeil()
@@ -92,10 +95,14 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       hentBrev(behandlingId, (brev, statusCode) => {
         if (statusCode === 200) {
           setVedtaksbrev(brev)
-        } else if (statusCode === 204) {
+        } else if (statusCode === 204 && redigerbar) {
           opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
             setVedtaksbrev(nyttBrev)
           })
+        } else {
+          if (behandling?.status === IBehandlingStatus.AVBRUTT) {
+            setAvbruttUtenBrev(true)
+          }
         }
       })
     }
@@ -129,6 +136,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     return <Spinner label="Henter brev ..." />
   } else if (isPending(opprettBrevStatus)) {
     return <Spinner label="Ingen brev funnet. Oppretter brev ..." />
+  }
+
+  if (avbruttUtenBrev) {
+    return <ApiErrorAlert>Behandlingen er avbrutt og ingen brev finnes</ApiErrorAlert>
   }
 
   const kanSendeTilAttestering = (): boolean => {

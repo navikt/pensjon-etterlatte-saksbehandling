@@ -117,6 +117,7 @@ enum class OppgaveType {
     AKTIVITETSPLIKT_REVURDERING,
     AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
     GENERELL_OPPGAVE,
+    MANUELL_UTSENDING_BREV,
     ;
 
     companion object {
@@ -164,7 +165,7 @@ data class VedtakEndringDTO(
 
 data class NyOppgaveBulkDto(
     val merknad: String,
-    val sakIds: List<Long>,
+    val sakIds: List<SakId>,
     val type: OppgaveType,
     val kilde: OppgaveKilde,
 )

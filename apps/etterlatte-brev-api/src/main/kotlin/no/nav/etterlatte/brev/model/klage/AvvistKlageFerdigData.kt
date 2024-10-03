@@ -1,9 +1,9 @@
 package no.nav.etterlatte.brev.model.klage
 
-import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
+import no.nav.etterlatte.brev.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.BrevDataRedigerbar
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate

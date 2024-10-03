@@ -1,5 +1,6 @@
 package no.nav.etterlatte.testdata.features.egendefinert
 
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -12,11 +13,14 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.producer
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.testdata.JsonMessage
 
 object EgendefinertMeldingFeature : TestDataFeature {
@@ -48,14 +52,25 @@ object EgendefinertMeldingFeature : TestDataFeature {
                                 "Nav ident mangler. Du må være innlogget for å sende søknad."
                             }
 
-                        val (partisjon, offset) =
-                            call.receiveParameters().let {
-                                producer.publiser(
-                                    requireNotNull(it["key"]),
-                                    JsonMessage(requireNotNull(it["json"])).toJson(),
-                                    mapOf("NavIdent" to navIdent.toByteArray()),
-                                )
+                        val params = call.receiveParameters()
+                        val key = requireNotNull(params["key"])
+                        val hendelseType = requireNotNull(params["hendelseType"])
+                        val json = requireNotNull(params["json"])
+
+                        if (hendelseType == "omregning") {
+                            val jsonNode = objectMapper.readTree(json)
+                            jsonNode.get(HENDELSE_DATA_KEY).let {
+                                val omregningData: OmregningData = objectMapper.treeToValue(it)
                             }
+                        }
+
+                        val (partisjon, offset) =
+                            producer.publiser(
+                                key,
+                                JsonMessage(json).toJson(),
+                                mapOf("NavIdent" to navIdent.toByteArray()),
+                            )
+
                         logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
                         call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")

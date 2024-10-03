@@ -31,7 +31,7 @@ internal class DistribuerBrevRiver(
     ) {
         val bestillingsId =
             brevdistribuerer.distribuer(
-                id = packet[BREV_ID_KEY].asLong(),
+                brevId = packet[BREV_ID_KEY].asLong(),
                 distribusjonsType = packet.distribusjonType(),
                 journalpostIdInn = packet["journalpostId"].asText(),
             )

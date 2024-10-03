@@ -1,11 +1,11 @@
 package no.nav.etterlatte.brev.vedtaksbrev
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -77,31 +78,39 @@ class VedtaksbrevService(
                 behandlingId = behandlingId,
                 bruker = brukerTokenInfo,
                 brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
-                brevtype = Brevtype.VEDTAK,
                 brevDataMapping = { brevDataMapperRedigerbartUtfallVedtak.brevData(it) },
             ).first
     }
 
-    suspend fun genererPdf(
+    fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
-    ): Pdf =
-        pdfGenerator.genererPdf(
-            id = id,
-            bruker = bruker,
-            avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
-            brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
-            brevDataMapping = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
-        ) { vedtakStatus, saksbehandler, brev, pdf ->
-            brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
-            lagrePdfHvisVedtakFattet(
-                brev.id,
-                pdf,
-                bruker,
-                vedtakStatus!!,
-                saksbehandler!!,
-            )
-        }
+    ): Pdf {
+        val pdf =
+            runBlocking {
+                pdfGenerator.genererPdf(
+                    id = id,
+                    bruker = bruker,
+                    avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
+                    brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
+                    brevDataMapping = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
+                )
+            }
+
+        val brev = db.hentBrev(id)
+        val vedtakDeferred = brev.behandlingId?.let { runBlocking { vedtaksvurderingService.hentVedtak(it, bruker) } }
+        val saksbehandlerident: String = vedtakDeferred?.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
+        brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
+        lagrePdfHvisVedtakFattet(
+            brev.id,
+            pdf,
+            bruker,
+            vedtakDeferred?.status!!,
+            saksbehandlerident,
+        )
+
+        return pdf
+    }
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
@@ -118,9 +127,9 @@ class VedtaksbrevService(
             return
         } else if (!brev.kanEndres()) {
             throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
-        } else if (!brev.mottaker.erGyldig()) {
+        } else if (brev.mottaker.erGyldig().isNotEmpty()) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottaker.erGyldig())
         }
 
         val (saksbehandlerIdent, vedtakStatus) =
@@ -229,7 +238,7 @@ class VedtaksbrevService(
     ): Boolean {
         logger.info("Fjerner status FERDIGSTILT på vedtaksbrev (id=$id)")
 
-        return db.fjernFerdigstiltStatusUnderkjentVedtak(id, vedtak)
+        return db.settBrevOppdatert(id, vedtak)
     }
 }
 
@@ -259,12 +268,13 @@ class VedtaksbrevKanIkkeSlettes(
     )
 
 class UgyldigMottakerKanIkkeFerdigstilles(
-    id: BrevID,
+    id: BrevID?,
+    sakId: SakId,
+    feil: List<String>,
 ) : UgyldigForespoerselException(
         code = "UGYLDIG_MOTTAKER_BREV",
-        detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse. BrevID: $id",
-        meta =
-            mapOf("id" to id),
+        detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse. BrevID: $id, sakId: $sakId. $feil",
+        meta = id?.let { mapOf("id" to it) },
     )
 
 class BrevManglerPDF(

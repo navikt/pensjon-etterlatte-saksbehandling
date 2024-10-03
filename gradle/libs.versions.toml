@@ -33,6 +33,8 @@ klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.6.10" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.0.0" }
 
+pdf-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.3" }
+
 ktor2-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor2-version" }
 ktor2-clientcore = { module = "io.ktor:ktor-client-core", version.ref = "ktor2-version" }
 ktor2-clientloggingjvm = { module = "io.ktor:ktor-client-logging-jvm", version.ref = "ktor2-version" }
@@ -62,7 +64,7 @@ logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.8" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.0" }
 
-metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.13.3" }
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.13.4" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 

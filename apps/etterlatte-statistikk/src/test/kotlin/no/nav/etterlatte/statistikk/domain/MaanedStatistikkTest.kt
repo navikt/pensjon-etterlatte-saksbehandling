@@ -1,6 +1,8 @@
 package no.nav.etterlatte.statistikk.domain
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -16,42 +18,47 @@ import java.util.UUID
 class MaanedStatistikkTest {
     @Test
     fun `se at alle saker som har vedtak blir med i maanedsstatistikk`() {
+        val sak1 = randomSakId()
+        val sak2 = randomSakId()
         val rader: List<StoenadRad> =
             listOf(
-                stoenadRad(sakId = 123),
-                stoenadRad(sakId = 123, vedtakType = VedtakType.ENDRING),
-                stoenadRad(sakId = 456),
+                stoenadRad(sakId = sak1),
+                stoenadRad(sakId = sak1, vedtakType = VedtakType.ENDRING),
+                stoenadRad(sakId = sak2),
             )
 
         val maaned = YearMonth.of(2023, 2)
         val statistikk = MaanedStatistikk(maaned, rader, emptyMap())
 
         Assertions.assertEquals(statistikk.rader.size, 2)
-        Assertions.assertEquals(statistikk.rader.map { it.sakId }.toSet(), setOf(123L, 456L))
+        Assertions.assertEquals(statistikk.rader.map { it.sakId }.toSet(), setOf(sak1, sak2))
     }
 
     @Test
     fun `sak som er vedtatt og opphørt i samme statistikkmåned er ignorert`() {
+        val sak1 = randomSakId()
+        val sak2 = randomSakId()
         val rader: List<StoenadRad> =
             listOf(
-                stoenadRad(sakId = 123, vedtakLoependeFom = LocalDate.of(2023, 2, 1)),
-                stoenadRad(sakId = 123, vedtakType = VedtakType.OPPHOER, vedtakLoependeFom = LocalDate.of(2023, 2, 1)),
-                stoenadRad(sakId = 456),
+                stoenadRad(sakId = sak1, vedtakLoependeFom = LocalDate.of(2023, 2, 1)),
+                stoenadRad(sakId = sak1, vedtakType = VedtakType.OPPHOER, vedtakLoependeFom = LocalDate.of(2023, 2, 1)),
+                stoenadRad(sakId = sak2),
             )
 
         val maaned = YearMonth.of(2023, 2)
         val statistikk = MaanedStatistikk(maaned, rader, emptyMap())
 
         Assertions.assertEquals(statistikk.rader.size, 1)
-        Assertions.assertEquals(statistikk.rader[0].sakId, 456L)
+        Assertions.assertEquals(statistikk.rader[0].sakId, sak2)
     }
 
     @Test
     fun `siste gjeldende vedtak er det som hentes data fra`() {
+        val sak1 = randomSakId()
         val rader: List<StoenadRad> =
             listOf(
-                stoenadRad(sakId = 123, vedtakLoependeFom = LocalDate.of(2022, 8, 1), nettoYtelse = "10"),
-                stoenadRad(sakId = 123, vedtakLoependeFom = LocalDate.of(2023, 1, 1), nettoYtelse = "20"),
+                stoenadRad(sakId = sak1, vedtakLoependeFom = LocalDate.of(2022, 8, 1), nettoYtelse = "10"),
+                stoenadRad(sakId = sak1, vedtakLoependeFom = LocalDate.of(2023, 1, 1), nettoYtelse = "20"),
             )
         val maaned = YearMonth.of(2023, 2)
         val statistikk = MaanedStatistikk(maaned, rader, emptyMap())
@@ -121,7 +128,7 @@ fun stoenadRad(
     beregningType: String = "papir",
     anvendtSats: String = "123123",
     behandlingId: UUID = UUID.randomUUID(),
-    sakId: SakId = -1L,
+    sakId: SakId = sakId3,
     sakNummer: Long = -1L,
     tekniskTid: Tidspunkt = Tidspunkt.now(),
     sakYtelse: String = "",

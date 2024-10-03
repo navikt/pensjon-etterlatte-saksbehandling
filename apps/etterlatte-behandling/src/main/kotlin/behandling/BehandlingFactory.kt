@@ -122,13 +122,13 @@ class BehandlingFactory(
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService
-                            .hentOppgaverForSak(sak.id)
-                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG && !it.erAvsluttet() }
+                            .hentOppgaverForSak(sak.id, OppgaveType.GJENOPPRETTING_ALDERSOVERGANG)
+                            .find { !it.erAvsluttet() }
                             ?.let {
                                 oppgaveService.ferdigstillOppgave(it.id, brukerTokenInfo)
                             }
                     }
-                } ?: throw IllegalStateException("Kunne ikke opprette behandling")
+                }
             }.also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -284,19 +284,27 @@ class BehandlingFactory(
                 val foerstegangsbehandlingViOmgjoerer =
                     foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
                 val nyFoerstegangsbehandling =
-                    checkNotNull(
-                        opprettFoerstegangsbehandling(
-                            behandlingerUnderBehandling = emptyList(),
-                            sak = sak,
-                            mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
-                            kilde = Vedtaksloesning.GJENNY,
-                            prosessType = Prosesstype.MANUELL,
-                        ),
-                    ) {
-                        "Behandlingen vi akkurat opprettet fins ikke :("
-                    }
+                    opprettFoerstegangsbehandling(
+                        behandlingerUnderBehandling = emptyList(),
+                        sak = sak,
+                        mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
+                        kilde = Vedtaksloesning.GJENNY,
+                        prosessType = Prosesstype.MANUELL,
+                    )
 
-                kopierFoerstegangsbehandlingOversikt(skalKopiere, sisteAvslaatteBehandling, nyFoerstegangsbehandling.id)
+                if (skalKopiere && sisteAvslaatteBehandling != null) {
+                    kopierFoerstegangsbehandlingOversikt(sisteAvslaatteBehandling, nyFoerstegangsbehandling.id)
+                } else {
+                    val nyGyldighetsproeving =
+                        GyldighetsResultat(
+                            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+                            emptyList(),
+                            Tidspunkt.now().toLocalDatetimeUTC(),
+                        )
+
+                    behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandling.id, nyGyldighetsproeving)
+                }
+
                 val oppgave =
                     oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                         referanse = nyFoerstegangsbehandling.id.toString(),
@@ -339,30 +347,27 @@ class BehandlingFactory(
     }
 
     private fun kopierFoerstegangsbehandlingOversikt(
-        skalKopiere: Boolean,
-        sisteAvslaatteBehandling: Behandling?,
+        sisteAvslaatteBehandling: Behandling,
         nyFoerstegangsbehandlingId: UUID,
     ) {
-        if (skalKopiere && sisteAvslaatteBehandling != null) {
-            sisteAvslaatteBehandling.kommerBarnetTilgode?.let {
-                kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandlingId))
-            }
-            sisteAvslaatteBehandling.virkningstidspunkt?.let {
-                behandlingDao.lagreNyttVirkningstidspunkt(
-                    nyFoerstegangsbehandlingId,
-                    it,
-                )
-            }
-            sisteAvslaatteBehandling.utlandstilknytning?.let {
-                behandlingDao.lagreUtlandstilknytning(
-                    nyFoerstegangsbehandlingId,
-                    it,
-                )
-            }
-            sisteAvslaatteBehandling
-                .gyldighetsproeving()
-                ?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandlingId, it) }
+        sisteAvslaatteBehandling.kommerBarnetTilgode?.let {
+            kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandlingId))
         }
+        sisteAvslaatteBehandling.virkningstidspunkt?.let {
+            behandlingDao.lagreNyttVirkningstidspunkt(
+                nyFoerstegangsbehandlingId,
+                it,
+            )
+        }
+        sisteAvslaatteBehandling.utlandstilknytning?.let {
+            behandlingDao.lagreUtlandstilknytning(
+                nyFoerstegangsbehandlingId,
+                it,
+            )
+        }
+        sisteAvslaatteBehandling
+            .gyldighetsproeving()
+            ?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandlingId, it) }
     }
 
     internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {

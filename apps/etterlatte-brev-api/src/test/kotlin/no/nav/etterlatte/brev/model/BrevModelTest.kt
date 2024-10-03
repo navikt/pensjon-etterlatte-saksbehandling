@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.Test
@@ -8,36 +9,36 @@ import org.junit.jupiter.api.Test
 internal class BrevModelTest {
     @Test
     fun `Validering av mottaker og adresse`() {
-        opprettMottaker(navn = "").erGyldig() shouldBe false
+        opprettMottaker(navn = "").erGyldig() shouldNotBe emptyList<String>()
 
-        opprettMottaker(foedselsnummer = null).erGyldig() shouldBe false
-        opprettMottaker(foedselsnummer = MottakerFoedselsnummer("")).erGyldig() shouldBe false
+        opprettMottaker(foedselsnummer = null).erGyldig() shouldNotBe emptyList<String>()
+        opprettMottaker(foedselsnummer = MottakerFoedselsnummer("")).erGyldig() shouldNotBe emptyList<String>()
 
-        opprettMottaker(orgnummer = null).erGyldig() shouldBe false
-        opprettMottaker(orgnummer = "").erGyldig() shouldBe false
+        opprettMottaker(orgnummer = null).erGyldig() shouldNotBe emptyList<String>()
+        opprettMottaker(orgnummer = "").erGyldig() shouldNotBe emptyList<String>()
 
-        opprettMottaker(adresseType = "").erGyldig() shouldBe false
+        opprettMottaker(adresseType = "").erGyldig() shouldNotBe emptyList<String>()
 
-        opprettMottaker(adresseType = "NORSKPOSTADRESSE", poststed = null).erGyldig() shouldBe false
-        opprettMottaker(adresseType = "NORSKPOSTADRESSE", poststed = "").erGyldig() shouldBe false
+        opprettMottaker(adresseType = "NORSKPOSTADRESSE", poststed = null).erGyldig() shouldNotBe emptyList<String>()
+        opprettMottaker(adresseType = "NORSKPOSTADRESSE", poststed = "").erGyldig() shouldNotBe emptyList<String>()
 
-        opprettMottaker(adresseType = "NORSKPOSTADRESSE", postnummer = null).erGyldig() shouldBe false
-        opprettMottaker(adresseType = "NORSKPOSTADRESSE", postnummer = "").erGyldig() shouldBe false
+        opprettMottaker(adresseType = "NORSKPOSTADRESSE", postnummer = null).erGyldig() shouldNotBe emptyList<String>()
+        opprettMottaker(adresseType = "NORSKPOSTADRESSE", postnummer = "").erGyldig() shouldNotBe emptyList<String>()
 
         opprettMottaker(
             adresseType = "UTENLANDSKPOSTADRESSE",
             adresselinje1 = null,
-        ).erGyldig() shouldBe false
+        ).erGyldig() shouldNotBe emptyList<String>()
 
-        opprettMottaker(landkode = "").erGyldig() shouldBe false
-        opprettMottaker(land = "").erGyldig() shouldBe false
+        opprettMottaker(landkode = "").erGyldig() shouldNotBe emptyList<String>()
+        opprettMottaker(land = "").erGyldig() shouldNotBe emptyList<String>()
 
         opprettMottaker(
             adresseType = "UTENLANDSKPOSTADRESSE",
             adresselinje1 = "adresselinje1",
             postnummer = null,
             poststed = null,
-        ).erGyldig() shouldBe true
+        ).erGyldig() shouldBe emptyList()
     }
 
     private fun opprettMottaker(

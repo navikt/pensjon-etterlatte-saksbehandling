@@ -6,14 +6,14 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 data class Sak(
     val ident: String,
     val sakType: SakType,
-    val id: Long,
+    val id: SakId,
     val enhet: Enhetsnummer,
 )
 
 data class VedtakSak(
     val ident: String,
     val sakType: SakType,
-    val id: Long,
+    val id: SakId,
 )
 
 data class Saker(

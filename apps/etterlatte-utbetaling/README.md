@@ -32,6 +32,11 @@ Simulere mot økonomiløsningen for å se informasjon rundt ikke bare beregnede 
 etterbetaling og potensiell tilbakekreving.
 
 
+## Vi får kjøpreplan fra økonomi årlig enten i slack kanalen eller fra po-utbetaling
+slack: po-utbetaling-etterlatte
+Se kjoereplanKonsistensavstemming
+
+
 ## Testing
 
 ### Kjøre lokalt

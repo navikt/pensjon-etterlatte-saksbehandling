@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
@@ -325,5 +326,5 @@ data class EnhetRequest(
 )
 
 data class SakerDto(
-    val saker: Map<Long, Sak>,
+    val saker: Map<SakId, Sak>,
 )

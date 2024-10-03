@@ -20,6 +20,7 @@ import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -212,6 +213,7 @@ internal class VedtaksbrevRouteTest {
             runServer(mockOAuth2Server, "api") {
                 vedtaksbrevRoute(
                     vedtaksbrevService,
+                    mockk(),
                     tilgangssjekker,
                 )
             }
@@ -232,7 +234,7 @@ internal class VedtaksbrevRouteTest {
     private fun opprettBrev() =
         Brev(
             1,
-            41,
+            randomSakId(),
             BEHANDLING_ID,
             "tittel",
             Spraak.NB,
@@ -255,6 +257,7 @@ internal class VedtaksbrevRouteTest {
         runServer(mockOAuth2Server, "api") {
             vedtaksbrevRoute(
                 vedtaksbrevService,
+                mockk(),
                 tilgangssjekker,
             )
         }
@@ -262,6 +265,6 @@ internal class VedtaksbrevRouteTest {
     companion object {
         private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
         private val BEHANDLING_ID = UUID.randomUUID()
-        private val SAK_ID = Random.nextLong(1000)
+        private val SAK_ID = randomSakId()
     }
 }

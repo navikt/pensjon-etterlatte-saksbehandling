@@ -10,7 +10,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { OverstyrBeregning } from '~shared/types/Beregning'
 import React, { useEffect, useState } from 'react'
 import OverstyrBeregningGrunnlag from './overstyrGrunnlagsBeregning/OverstyrBeregningGrunnlag'
-import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
+import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
@@ -67,7 +67,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         <Heading spacing size="large" level="1">
           Beregningsgrunnlag
         </Heading>
-        <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
+        <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       <VStack gap="12" paddingInline="16">
         {(isSuccess(overstyrtBeregningResponse) || isSuccess(overstyrtBeregningGrunnlagResponse)) && (

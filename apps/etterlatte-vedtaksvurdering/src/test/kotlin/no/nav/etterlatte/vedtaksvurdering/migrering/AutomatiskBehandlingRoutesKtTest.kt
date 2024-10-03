@@ -17,6 +17,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
@@ -143,7 +144,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
             coVerify(exactly = 1) {
                 vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
-                behandlingKlient.hentOppgaverForSak(1, any())
+                behandlingKlient.hentOppgaverForSak(sakId1, any())
                 vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
                 behandlingKlient.tildelSaksbehandler(any(), any())
                 vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
@@ -221,7 +222,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
-                    behandlingKlient.hentOppgaverForSak(1, any())
+                    behandlingKlient.hentOppgaverForSak(sakId1, any())
                     vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
                     behandlingKlient.tildelSaksbehandler(any(), any())
                     vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
@@ -275,7 +276,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
-                    behandlingKlient.hentOppgaverForSak(1, any())
+                    behandlingKlient.hentOppgaverForSak(sakId1, any())
                     vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
                     behandlingKlient.tildelSaksbehandler(any(), any())
                 }
@@ -349,7 +350,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         id = UUID.randomUUID(),
         status = status,
         enhet = Enheter.defaultEnhet.enhetNr,
-        sakId = 1,
+        sakId = sakId1,
         kilde = null,
         type = OppgaveType.FOERSTEGANGSBEHANDLING,
         saksbehandler = null,

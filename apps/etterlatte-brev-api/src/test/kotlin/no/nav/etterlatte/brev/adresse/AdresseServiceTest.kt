@@ -7,6 +7,8 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.adresse.navansatt.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
@@ -15,7 +17,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.random.Random
 
 internal class AdresseServiceTest {
     private val norg2Mock = mockk<Norg2Klient>()
@@ -71,7 +72,7 @@ internal class AdresseServiceTest {
         coEvery { navansattMock.hentSaksbehandlerInfo(any()) }
             .returns(opprettSaksbehandlerInfo(zIdent, "saks", "behandler"))
 
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
         val faktiskAvsender =

@@ -13,6 +13,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -66,12 +67,12 @@ class GrunnlagsendringsHendelseFilterTest {
         val sakId = 1L
         val foerstegangsbehandlinger =
             listOf(
-                foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.VILKAARSVURDERT),
+                foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.VILKAARSVURDERT),
             )
         every { behandlingService.hentBehandlingerForSak(any()) } returns foerstegangsbehandlinger
-        assertTrue(service.hendelseErRelevantForSak(sakId, grunnlagendringType))
-        verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId) }
-        coVerify(exactly = 0) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId, any(), any()) }
+        assertTrue(service.hendelseErRelevantForSak(sakId1, grunnlagendringType))
+        verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId1) }
+        coVerify(exactly = 0) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
     }
 
     @ParameterizedTest
@@ -81,10 +82,9 @@ class GrunnlagsendringsHendelseFilterTest {
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `Skal slippe gjennom relevante hendelser for sak med løpende vedtak ytelse`(grunnlagendringType: GrunnlagsendringsType) {
-        val sakId = 1L
-        assertTrue(service.hendelseErRelevantForSak(sakId, grunnlagendringType))
-        verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId) }
-        coVerify(exactly = 1) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId, any(), any()) }
+        assertTrue(service.hendelseErRelevantForSak(sakId1, grunnlagendringType))
+        verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId1) }
+        coVerify(exactly = 1) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
     }
 
     @ParameterizedTest
@@ -96,12 +96,11 @@ class GrunnlagsendringsHendelseFilterTest {
     fun `Skal ikke slippe gjennom gyldige hendelser hvis sak ikke har en åpen behandling eller løpende vedtak`(
         grunnlagendringType: GrunnlagsendringsType,
     ) {
-        val sakId = 1L
         coEvery { vedtakklient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns LoependeYtelseDTO(false, false, LocalDate.now())
         every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
-        assertFalse(service.hendelseErRelevantForSak(sakId, grunnlagendringType))
-        verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId) }
-        coVerify(exactly = 1) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId, any(), any()) }
+        assertFalse(service.hendelseErRelevantForSak(sakId1, grunnlagendringType))
+        verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId1) }
+        coVerify(exactly = 1) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
     }
 
     @ParameterizedTest
@@ -111,16 +110,15 @@ class GrunnlagsendringsHendelseFilterTest {
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `Ikke løpende ytelse men ikke åpen behandling`(grunnlagendringType: GrunnlagsendringsType) {
-        val sakId = 1L
         coEvery { vedtakklient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns LoependeYtelseDTO(false, false, LocalDate.now())
 
         val foerstegangsbehandlinger =
             listOf(
-                foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.AVBRUTT),
+                foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.AVBRUTT),
             )
         every { behandlingService.hentBehandlingerForSak(any()) } returns foerstegangsbehandlinger
-        assertFalse(service.hendelseErRelevantForSak(sakId, grunnlagendringType))
-        verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId) }
-        coVerify(exactly = 1) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId, any(), any()) }
+        assertFalse(service.hendelseErRelevantForSak(sakId1, grunnlagendringType))
+        verify(exactly = 1) { behandlingService.hentBehandlingerForSak(sakId1) }
+        coVerify(exactly = 1) { vedtakklient.sakHarLopendeVedtakPaaDato(sakId1, any(), any()) }
     }
 }

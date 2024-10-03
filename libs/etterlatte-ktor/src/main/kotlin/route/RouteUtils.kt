@@ -111,7 +111,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
 suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     sakTilgangsSjekk: SakTilgangsSjekk,
     skrivetilgang: Boolean = false,
-    onSuccess: (id: Long) -> Unit,
+    onSuccess: (id: SakId) -> Unit,
 ) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
@@ -167,7 +167,7 @@ suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody
     onSuccess(body)
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: (systemBruker: Systembruker) -> Unit) {
+inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: (systemBruker: Systembruker) -> Unit) {
     when (val bruker = brukerTokenInfo) {
         is Systembruker -> {
             onSuccess(bruker)

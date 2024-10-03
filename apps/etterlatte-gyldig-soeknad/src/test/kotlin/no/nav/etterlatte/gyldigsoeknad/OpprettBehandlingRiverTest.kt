@@ -7,6 +7,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -22,7 +24,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.UUID
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OpprettBehandlingRiverTest {
@@ -36,7 +37,7 @@ internal class OpprettBehandlingRiverTest {
     @Test
     fun `OMSTILLINGSSTOENAD - Skal opprette sak og behandling`() {
         val soeker = "13848599411"
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
 
         every {
@@ -53,7 +54,7 @@ internal class OpprettBehandlingRiverTest {
             SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
             message.get(EVENT_NAME_KEY).asText(),
         )
-        assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asText())
 
         coVerify(exactly = 1) { behandlingClientMock.finnEllerOpprettSak(soeker, SakType.OMSTILLINGSSTOENAD) }
@@ -63,7 +64,7 @@ internal class OpprettBehandlingRiverTest {
     @Test
     fun `BARNEPENSJON - Skal opprette sak og behandling`() {
         val soeker = "24111258054"
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
 
         every {
@@ -79,7 +80,7 @@ internal class OpprettBehandlingRiverTest {
             SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
             message.get(EVENT_NAME_KEY).asText(),
         )
-        assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals(sakId, message.get(GyldigSoeknadVurdert.sakIdKey).tilSakId())
         assertEquals(behandlingId.toString(), message.get(GyldigSoeknadVurdert.behandlingIdKey).asText())
 
         assertEquals(1, inspector.size)

@@ -2,7 +2,9 @@ package no.nav.etterlatte.brev.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.BrevDataRedigerbarRequest
+import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService

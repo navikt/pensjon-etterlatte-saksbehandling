@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.testdata.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.grunnlag.GenerellKilde
 import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
@@ -116,7 +117,7 @@ data class GrunnlagTestData(
                     halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
                 ) + opplysningsmapAvdoedeOverrides,
             sak = sak,
-            metadata = Metadata(1, 15),
+            metadata = Metadata(sakId1, 15),
         )
 
     fun hentGrunnlagMedEgneAvdoedesBarn(): Grunnlag =
@@ -131,7 +132,7 @@ data class GrunnlagTestData(
                     halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
                 ) + opplysningsmapAvdoedeOverrides,
             sak = sak,
-            metadata = Metadata(1, 15),
+            metadata = Metadata(sakId1, 15),
         )
 
     fun hentPersonGalleri(): Persongalleri =
@@ -152,7 +153,7 @@ data class GrunnlagTestData(
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                 ),
             sak = sak,
-            metadata = Metadata(1, 1),
+            metadata = Metadata(sakId1, 1),
         )
 
     fun hentPersonopplysninger(): PersonopplysningerResponse =

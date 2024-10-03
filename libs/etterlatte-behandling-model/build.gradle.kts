@@ -9,4 +9,5 @@ dependencies {
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.jupiter.params)
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

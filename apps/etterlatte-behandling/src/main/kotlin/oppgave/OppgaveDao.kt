@@ -3,6 +3,7 @@ package no.nav.etterlatte.oppgave
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
@@ -35,7 +37,15 @@ interface OppgaveDao {
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
 
-    fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern>
+    fun oppgaveMedTypeFinnes(
+        sakId: SakId,
+        type: OppgaveType,
+    ): Boolean
+
+    fun hentOppgaverForSakMedType(
+        sakId: SakId,
+        typer: List<OppgaveType>,
+    ): List<OppgaveIntern>
 
     fun hentOppgaver(
         enheter: List<Enhetsnummer>,
@@ -80,7 +90,9 @@ interface OppgaveDao {
     )
 
     fun oppdaterPaaVent(
-        paavent: PaaVent,
+        oppgaveId: UUID,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
         oppgaveStatus: Status,
     )
 
@@ -104,7 +116,7 @@ interface OppgaveDao {
     ): List<VentefristGaarUt>
 
     fun hentOppgaverTilSaker(
-        saker: List<Long>,
+        saker: List<SakId>,
         oppgaveStatuser: List<String>,
     ): List<OppgaveIntern>
 }
@@ -217,7 +229,36 @@ class OppgaveDaoImpl(
             }
         }
 
-    override fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> =
+    override fun oppgaveMedTypeFinnes(
+        sakId: SakId,
+        type: OppgaveType,
+    ): Boolean {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT EXISTS(
+                            SELECT id
+                            FROM oppgave
+                            WHERE sak_id = ? AND type = ?
+                        )
+                        """.trimIndent(),
+                    )
+                statement.setLong(1, sakId)
+                statement.setString(2, type.name)
+                statement.executeQuery().single {
+                    val trueOrFalsePostgresFormat = getString("exists")
+                    return@single trueOrFalsePostgresFormat == "t"
+                }
+            }
+        }
+    }
+
+    override fun hentOppgaverForSakMedType(
+        sakId: SakId,
+        typer: List<OppgaveType>,
+    ): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -225,10 +266,11 @@ class OppgaveDaoImpl(
                         """
                         SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
-                        WHERE o.sak_id = ?
+                        WHERE o.sak_id = ? and o.type = ANY(?)
                         """.trimIndent(),
                     )
                 statement.setLong(1, sakId)
+                statement.setArray(2, createArrayOf("text", typer.map { t -> t.name }.toTypedArray()))
                 statement
                     .executeQuery()
                     .toList {
@@ -280,7 +322,7 @@ class OppgaveDaoImpl(
         }
 
     override fun hentOppgaverTilSaker(
-        saker: List<Long>,
+        saker: List<SakId>,
         oppgaveStatuser: List<String>,
     ): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {
@@ -529,7 +571,9 @@ class OppgaveDaoImpl(
     }
 
     override fun oppdaterPaaVent(
-        paavent: PaaVent,
+        oppgaveId: UUID,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
         oppgaveStatus: Status,
     ) {
         connectionAutoclosing.hentConnection {
@@ -542,10 +586,10 @@ class OppgaveDaoImpl(
                         where id = ?::UUID
                         """.trimIndent(),
                     )
-                statement.setString(1, paavent.merknad)
+                statement.setString(1, merknad)
                 statement.setString(2, oppgaveStatus.name)
-                statement.setString(3, paavent.aarsak?.name)
-                statement.setObject(4, paavent.oppgaveId)
+                statement.setString(3, aarsak?.name)
+                statement.setObject(4, oppgaveId)
 
                 statement.executeUpdate()
             }

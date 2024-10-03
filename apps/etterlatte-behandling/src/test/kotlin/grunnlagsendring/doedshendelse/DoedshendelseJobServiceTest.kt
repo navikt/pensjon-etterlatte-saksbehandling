@@ -12,6 +12,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -53,7 +54,7 @@ class DoedshendelseJobServiceTest {
                 Sak(
                     ident = "12345678901",
                     sakType = SakType.BARNEPENSJON,
-                    id = 1L,
+                    id = sakId1,
                     enhet = Enheter.AALESUND.enhetNr,
                 )
         }

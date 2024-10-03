@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.klienter
 
+import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -15,6 +16,11 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun harOverstyrt(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
 }
 
 class BeregningKlientImpl(
@@ -40,5 +46,20 @@ class BeregningKlientImpl(
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = "",
             ).mapError { error -> throw error }
+    }
+
+    override suspend fun harOverstyrt(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        logger.info("Henter overstyrt beregning for behandling id=$behandlingId")
+        return downstreamResourceClient
+            .get(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/$behandlingId/overstyrt"),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { resource -> resource.response != null },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
     }
 }

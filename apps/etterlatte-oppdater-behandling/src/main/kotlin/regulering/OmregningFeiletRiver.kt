@@ -6,10 +6,8 @@ import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.kjoering
-import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
+import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -23,9 +21,10 @@ internal class OmregningFeiletRiver(
 
     init {
         initialiserRiver(rapidsConnection, FEILA) {
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireValue(KONTEKST_KEY, Kontekst.REGULERING.name) }
-            validate { it.requireKey(KJOERING) }
+            validate { it.requireKey(OmregningDataPacket.KEY) }
+            validate { it.requireKey(OmregningDataPacket.SAK_ID) }
+            validate { it.requireKey(OmregningDataPacket.KJOERING) }
+            validate { it.requireAny(KONTEKST_KEY, listOf(Kontekst.REGULERING.name, Kontekst.OMREGNING.name)) }
         }
     }
 
@@ -33,10 +32,12 @@ internal class OmregningFeiletRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        logger.error("Omregning har feilet for sak ${packet.sakId}")
+        val omregningData = packet.omregningData
+        val kontekst = packet[KONTEKST_KEY].asText()
+        logger.error("$kontekst har feilet for sak ${omregningData.sakId}")
         behandlingService.lagreKjoering(
-            kjoering = packet.kjoering,
-            sakId = packet.sakId,
+            kjoering = omregningData.kjoering,
+            sakId = omregningData.sakId,
             status = KjoeringStatus.FEILA,
         )
     }

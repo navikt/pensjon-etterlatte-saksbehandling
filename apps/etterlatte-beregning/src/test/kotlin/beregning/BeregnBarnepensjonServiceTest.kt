@@ -9,6 +9,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -523,20 +524,20 @@ internal class BeregnBarnepensjonServiceTest {
             with(beregning.beregningsperioder[0]) {
                 datoFOM shouldBe YearMonth.of(2023, 1)
                 datoTOM shouldBe YearMonth.of(2023, 4)
-                avdodeForeldre shouldBe null
+                avdoedeForeldre shouldBe null
                 kunEnJuridiskForelder shouldBe false
             }
             with(beregning.beregningsperioder[1]) {
                 datoFOM shouldBe YearMonth.of(2023, 5)
                 datoTOM shouldBe YearMonth.of(2023, 12)
-                avdodeForeldre shouldBe null
+                avdoedeForeldre shouldBe null
                 kunEnJuridiskForelder shouldBe false
             }
             with(beregning.beregningsperioder[2]) {
                 datoFOM shouldBe YearMonth.of(2024, 1)
                 datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe forventetUtbetalt
-                avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value, AVDOED2_FOEDSELSNUMMER.value)
+                avdoedeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value, AVDOED2_FOEDSELSNUMMER.value)
                 kunEnJuridiskForelder shouldBe false
             }
         }
@@ -775,7 +776,7 @@ internal class BeregnBarnepensjonServiceTest {
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
-                    avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
+                    avdoedeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
                     kunEnJuridiskForelder shouldBe true
                 }
                 with(beregningsperioder[1]) {
@@ -787,7 +788,7 @@ internal class BeregnBarnepensjonServiceTest {
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
-                    avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
+                    avdoedeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
                     kunEnJuridiskForelder shouldBe false
                 }
                 beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
@@ -974,7 +975,7 @@ internal class BeregnBarnepensjonServiceTest {
     ): DetaljertBehandling =
         mockk<DetaljertBehandling> {
             every { id } returns randomUUID()
-            every { sak } returns 1
+            every { sak } returns sakId1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
             every { kilde } returns vedtaksloesning

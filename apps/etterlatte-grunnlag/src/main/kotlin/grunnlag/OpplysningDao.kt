@@ -249,7 +249,7 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<Long> =
+    fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<SakId> =
         connection.use {
             it
                 .prepareStatement(

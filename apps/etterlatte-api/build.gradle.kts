@@ -23,4 +23,5 @@ dependencies {
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

@@ -42,7 +42,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.oppgave.PaaVent
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterEach
@@ -106,7 +105,7 @@ internal class BehandlingStatusServiceTest {
         ],
     )
     fun `Fattet vedtak til attestering`(status: BehandlingStatus) {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -154,7 +153,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `iverksettNasjonal behandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.ATTESTERT)
         val behandlingId = behandling.id
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
@@ -176,7 +175,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `underkjent behandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.FATTET_VEDTAK)
         val behandlingId = behandling.id
 
@@ -199,7 +198,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `iverksett utlandstilsnitt behandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -242,7 +241,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `utlandstilsnitt avslag behandling ikke oppfylt vilkårsvurdering`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -291,7 +290,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `attestert vedtak som ikke er avslag skal ikke ha kravpakke(utland)`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -333,7 +332,7 @@ internal class BehandlingStatusServiceTest {
     @ParameterizedTest()
     @EnumSource(FeilutbetalingValg::class, names = ["JA_VARSEL", "JA_INGEN_TK"], mode = EnumSource.Mode.INCLUDE)
     fun `skal opprette tilbakekrevingsoppgave naar behandling med feilutbetaling blir iverksatt`(feilutbetalingValg: FeilutbetalingValg) {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             revurdering(
                 sakId = sakId,
@@ -345,7 +344,7 @@ internal class BehandlingStatusServiceTest {
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
-        every { oppgaveService.hentOppgaverForSak(sakId) } returns
+        every { oppgaveService.hentOppgaverForSak(sakId, any()) } returns
             listOf(
                 oppgave(UUID.randomUUID(), sakId, Status.FERDIGSTILT),
                 oppgave(UUID.randomUUID(), sakId, Status.FEILREGISTRERT),
@@ -363,7 +362,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
-            oppgaveService.hentOppgaverForSak(sakId)
+            oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING)
             oppgaveService.opprettOppgave(
                 referanse = sakId.toString(),
                 sakId = sakId,
@@ -381,7 +380,7 @@ internal class BehandlingStatusServiceTest {
         feilutbetalingValg: FeilutbetalingValg,
     ) {
         val oppgaveId = UUID.randomUUID()
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             revurdering(
                 sakId = sakId,
@@ -393,8 +392,8 @@ internal class BehandlingStatusServiceTest {
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
-        every { oppgaveService.hentOppgaverForSak(sakId) } returns listOf(oppgave(oppgaveId, sakId))
-        every { oppgaveService.endrePaaVent(any()) } returns oppgave(oppgaveId, sakId, Status.PAA_VENT)
+        every { oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING) } returns listOf(oppgave(oppgaveId, sakId))
+        every { oppgaveService.endrePaaVent(any(), any(), any(), any()) } returns oppgave(oppgaveId, sakId, Status.PAA_VENT)
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
 
         inTransaction {
@@ -406,8 +405,8 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
-            oppgaveService.hentOppgaverForSak(sakId)
-            oppgaveService.endrePaaVent(PaaVent(oppgaveId, PaaVentAarsak.KRAVGRUNNLAG_SPERRET, "Venter på oppdatert kravgrunnlag", true))
+            oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING)
+            oppgaveService.endrePaaVent(oppgaveId, true, "Venter på oppdatert kravgrunnlag", PaaVentAarsak.KRAVGRUNNLAG_SPERRET)
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
     }

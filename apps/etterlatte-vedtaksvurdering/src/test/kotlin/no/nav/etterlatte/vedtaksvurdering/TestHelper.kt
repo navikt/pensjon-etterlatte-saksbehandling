@@ -1,6 +1,8 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -37,7 +39,7 @@ val attestant = simpleAttestant(ident = SAKSBEHANDLER_2)
 fun opprettVedtak(
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
     soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
-    sakId: SakId = 1L,
+    sakId: SakId = sakId1,
     type: VedtakType = VedtakType.INNVILGELSE,
     behandlingId: UUID = UUID.randomUUID(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,
@@ -77,7 +79,7 @@ fun opprettVedtak(
 
 fun opprettVedtakTilbakekreving(
     soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
-    sakId: SakId = 1L,
+    sakId: SakId = sakId1,
     behandlingId: UUID = UUID.randomUUID(),
     tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
 ) = OpprettVedtak(
@@ -91,7 +93,7 @@ fun opprettVedtakTilbakekreving(
 
 fun opprettVedtakKlage(
     soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
-    sakId: SakId = 1L,
+    sakId: SakId = sakId1,
     behandlingId: UUID = UUID.randomUUID(),
     klage: ObjectNode = objectMapper.createObjectNode(),
 ) = OpprettVedtak(
@@ -106,7 +108,7 @@ fun opprettVedtakKlage(
 fun vedtak(
     id: Long = 1L,
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
-    sakId: SakId = 1L,
+    sakId: SakId = sakId1,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
@@ -147,7 +149,7 @@ fun vedtak(
 )
 
 fun vedtakTilbakekreving(
-    sakId: SakId = 1L,
+    sakId: SakId = sakId1,
     behandlingId: UUID = UUID.randomUUID(),
     tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,
@@ -168,7 +170,7 @@ fun vedtakTilbakekreving(
 )
 
 fun vedtakKlage(
-    sakId: SakId = 142L,
+    sakId: SakId = randomSakId(),
     behandlingId: UUID = UUID.randomUUID(),
     klage: ObjectNode = objectMapper.createObjectNode(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,

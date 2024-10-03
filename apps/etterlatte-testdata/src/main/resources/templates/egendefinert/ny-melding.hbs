@@ -19,6 +19,14 @@
                 <input type="text" name="key" id="key" class="form-control" required>
             </div>
 
+            <div>
+                <label for="hendelseType">Hendelsetype</label>
+                 <select name="hendelseType" id="hendelseType" onchange="prefill()">
+                  <option value="udefinert" selcted >Udefinert</option>
+                  <option value="omregning">Omregning</option>
+                </select>
+            </div>
+
             <div class="mb-3">
                 <label for="json" class="form-label">Melding:</label>
                 <textarea name="json"
@@ -38,6 +46,17 @@
 </div>
 
 <script>
+
+    function prefill() {
+        const hendelseType = document.getElementById('hendelseType').value
+        if (hendelseType === 'omregning') {
+            document.getElementById('json').value = '{"@event_name":"OMREGNING:KLAR_FOR_OMREGNING","hendelse_data":{"sakId":"","fradato":"","revurderingaarsak":""}}'
+            prettify()
+        } else {
+        document.getElementById('json').value = ''
+        }
+    }
+
     function prettify() {
         const errorDiv = document.getElementById('error')
 

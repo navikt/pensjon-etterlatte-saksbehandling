@@ -28,6 +28,7 @@ export interface IDetaljertBehandling {
   kilde: Vedtaksloesning
   sendeBrev: boolean
   viderefoertOpphoer: ViderefoertOpphoer | null
+  tidligereFamiliepleier: ITidligereFamiliepleier | null
 }
 
 export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {
@@ -95,6 +96,14 @@ export interface IGyldighetResultat {
   resultat: VurderingsResultat | undefined
   vurderinger: IGyldighetproving[]
   vurdertDato: string
+}
+
+export interface ITidligereFamiliepleier {
+  svar: boolean
+  kilde: KildeSaksbehandler
+  foedselsnummer?: string
+  opphoertPleieforhold?: string
+  begrunnelse: string
 }
 
 export enum GyldigFramsattType {

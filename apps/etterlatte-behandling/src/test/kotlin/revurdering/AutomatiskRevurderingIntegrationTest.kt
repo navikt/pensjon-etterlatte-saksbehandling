@@ -9,8 +9,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.coEvery
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.gyldighetsresultatVurdering
 import no.nav.etterlatte.inTransaction
@@ -27,6 +29,7 @@ import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.module
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -52,7 +55,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    private var sakId: SakId = 0L
+    private var sakId: SakId = randomSakId()
 
     fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> =
         inTransaction {
@@ -117,8 +120,23 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                 }
 
             for (i in 1..100) {
+                val dato = LocalDate.now()
                 val (sak, behandling) = opprettSakMedFoerstegangsbehandling(i.toString())
                 iverksettFoerstegangsbehandling(sak, behandling)
+                coEvery {
+                    applicationContext.vedtakKlient.sakHarLopendeVedtakPaaDato(
+                        any(),
+                        any(),
+                        any(),
+                    )
+                } returns
+                    LoependeYtelseDTO(
+                        erLoepende = true,
+                        underSamordning = false,
+                        dato = dato,
+                        sisteLoependeBehandlingId = behandling!!.id,
+                    )
+
                 val (revurdering) =
                     client
                         .post("/automatisk-revurdering") {
@@ -127,7 +145,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                             setBody(
                                 AutomatiskRevurderingRequest(
                                     sakId,
-                                    LocalDate.now(),
+                                    dato,
                                     Revurderingaarsak.REGULERING,
                                 ),
                             )

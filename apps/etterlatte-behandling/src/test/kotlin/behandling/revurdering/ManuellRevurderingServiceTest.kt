@@ -27,6 +27,7 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
@@ -306,7 +307,14 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = oppgaveService,
                 grunnlagService = grunnlagService,
-                revurderingService = AutomatiskRevurderingService(revurderingService, mockk(), mockk()),
+                revurderingService =
+                    AutomatiskRevurderingService(
+                        revurderingService,
+                        mockk(),
+                        mockk(),
+                        mockk(),
+                        mockk(),
+                    ),
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,
@@ -858,7 +866,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                                 every { it.sak } returns
                                     Sak(
                                         sakType = SakType.BARNEPENSJON,
-                                        id = 1L,
+                                        id = sakId1,
                                         enhet = Enheter.defaultEnhet.enhetNr,
                                         ident = "",
                                     )
@@ -871,7 +879,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 grunnlagService = mockk<GrunnlagService>().also { coEvery { it.hentPersongalleri(any()) } returns mockk() },
             )
         service.opprettManuellRevurderingWrapper(
-            sakId = 1L,
+            sakId = sakId1,
             aarsak = Revurderingaarsak.REVURDERE_ETTER_OPPHOER,
             paaGrunnAvHendelseId = null,
             paaGrunnAvOppgaveId = null,

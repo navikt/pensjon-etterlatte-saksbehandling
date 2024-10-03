@@ -3,8 +3,8 @@ package no.nav.etterlatte.klienter
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
-import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -20,12 +20,12 @@ class GrunnlagKlient(
     internal suspend fun hentGrunnlagForSak(sakid: SakId): Grunnlag {
         try {
             logger.info("Henter grunnlag for sak med sakId=$sakid")
-            return httpClient.get("$baseUrl/api/brev/sak/$sakid/opprett-journalfoer-og-distribuer").body<Grunnlag>()
-        } catch (e: Exception) {
+            return httpClient.get("$baseUrl/api/grunnlag/sak/$sakid").body<Grunnlag>()
+        } catch (e: ResponseException) {
             logger.error("Henter grunnlag for sak med sakId=$sakid feilet", e)
 
             throw ForespoerselException(
-                status = HttpStatusCode.InternalServerError.value,
+                status = e.response.status.value,
                 code = "KAN_IKKE_HENTE_GRUNNLAG_FOR_SAK",
                 detail = "Kunne ikke hente grunnlag for sak: $sakid",
             )

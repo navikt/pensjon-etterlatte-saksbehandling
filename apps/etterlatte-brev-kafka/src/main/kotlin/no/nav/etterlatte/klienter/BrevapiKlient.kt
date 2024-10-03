@@ -3,11 +3,11 @@ package no.nav.etterlatte.klienter
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
 import no.nav.etterlatte.brev.model.Brev
@@ -42,11 +42,11 @@ class BrevapiKlient(
                     contentType(ContentType.Application.Json)
                     setBody(opprett.toJson())
                 }.body<BrevErdistribuert>()
-        } catch (e: Exception) {
+        } catch (e: ResponseException) {
             logger.error("Henting av grunnlag for sak med sakId=$sakid feilet", e)
 
             throw ForespoerselException(
-                status = HttpStatusCode.InternalServerError.value,
+                status = e.response.status.value,
                 code = "UKJENT_FEIL_OPPRETTELSE_AV_BREV",
                 detail = "Kunne ikke opprette brev for sak: $sakid",
             )
@@ -66,11 +66,11 @@ class BrevapiKlient(
                 ) {
                     contentType(ContentType.Application.Json)
                 }.body<BestillingsIdDto>()
-        } catch (e: Exception) {
+        } catch (e: ResponseException) {
             logger.error("Henting av grunnlag for sak med brevId=$brevId feilet", e)
 
             throw ForespoerselException(
-                status = HttpStatusCode.InternalServerError.value,
+                status = e.response.status.value,
                 code = "UKJENT_FEIL_KAN_IKKE_DISTRIBUERE_BREV",
                 detail = "Kunne ikke opprette brev brev emd id: $brevId",
             )
@@ -87,11 +87,11 @@ class BrevapiKlient(
                     contentType(ContentType.Application.Json)
                     setBody(vedtakjournalfoering.toJson())
                 }.body<JournalfoerVedtaksbrevResponseOgBrevid?>()
-        } catch (e: Exception) {
+        } catch (e: ResponseException) {
             logger.error("Journalføring for brev med sakid=$sakId feilet", e)
 
             throw ForespoerselException(
-                status = HttpStatusCode.InternalServerError.value,
+                status = e.response.status.value,
                 code = "UKJENT_FEIL_JOURNALFOERING_AV_BREV",
                 detail = "Kunne ikke journalføre brev for sakidid: $sakId",
             )
@@ -108,11 +108,11 @@ class BrevapiKlient(
                 contentType(ContentType.Application.Json)
                 setBody(samordningManueltBehandletRequest.toJson())
             }
-        } catch (e: Exception) {
+        } catch (e: ResponseException) {
             logger.error("Opprettelse og journalføring for notat med sakid=$sakId feilet", e)
 
             throw ForespoerselException(
-                status = HttpStatusCode.InternalServerError.value,
+                status = e.response.status.value,
                 code = "UKJENT_FEIL_OPPRETT_OG_JOURNALFOERING_AV_NOTAT",
                 detail = "Kunne ikke opprettet og journalføre notat for sakidid: $sakId",
             )
@@ -123,11 +123,11 @@ class BrevapiKlient(
         try {
             logger.info("Henter vedtaksbrev for behandlingid $behandlingId")
             return httpClient.get("$baseUrl/api/brev/behandling/$behandlingId/vedtak").body<Brev?>()
-        } catch (e: Exception) {
+        } catch (e: ResponseException) {
             logger.error("Kunne ikke hente vedtaksbrev for behandling $behandlingId", e)
 
             throw ForespoerselException(
-                status = HttpStatusCode.InternalServerError.value,
+                status = e.response.status.value,
                 code = "UKJENT_FEIL_HENT_VEDTAKSBREV",
                 detail = "Kunne ikke hente vedtaksbrev for behandlingid: $behandlingId",
             )
@@ -144,11 +144,11 @@ class BrevapiKlient(
                 contentType(ContentType.Application.Json)
                 setBody(brevOgVedtakDto.toJson())
             }
-        } catch (e: Exception) {
+        } catch (e: ResponseException) {
             logger.error("Kunne ikke hente vedtaksbrev for behandling $behandlingId", e)
 
             throw ForespoerselException(
-                status = HttpStatusCode.InternalServerError.value,
+                status = e.response.status.value,
                 code = "UKJENT_FEIL_HENT_VEDTAKSBREV",
                 detail = "Kunne ikke hente vedtaksbrev for behandlingid: $behandlingId",
             )

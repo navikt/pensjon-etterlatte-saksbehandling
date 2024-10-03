@@ -222,7 +222,15 @@ class BeregningsGrunnlagService(
                     behandling.sak,
                     brukerTokenInfo,
                 )
-            beregningsGrunnlagRepository.finnBeregningsGrunnlag(sisteIverksatteBehandling.id)
+            beregningsGrunnlagRepository
+                .finnBeregningsGrunnlag(sisteIverksatteBehandling.id)
+                ?.also {
+                    logger.info(
+                        "Ga ut forrige beregningsgrunnlag for $behandlingId, funnet i " +
+                            "${sisteIverksatteBehandling.id}. Dette grunnlaget er kopiert inn til $behandlingId.",
+                    )
+                    beregningsGrunnlagRepository.lagreBeregningsGrunnlag(it.copy(behandlingId = behandling.id))
+                }
         } else {
             null
         }

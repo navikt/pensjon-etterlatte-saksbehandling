@@ -4,12 +4,14 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -61,6 +63,11 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         brukerTokenInfo: BrukerTokenInfo,
         commit: Boolean,
     ): Boolean
+
+    fun hentBehandlingerISak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<DetaljertBehandling>
 }
 
 class BehandlingKlientException(
@@ -209,7 +216,8 @@ class BehandlingKlientImpl(
         commit: Boolean,
     ): Boolean {
         logger.info("Sjekker om behandling med behandlingId=$behandlingId kan sette status ${BehandlingStatus.TRYGDETID_OPPDATERT}")
-        val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid")
+        val resource =
+            Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid")
 
         val response =
             when (commit) {
@@ -250,6 +258,36 @@ class BehandlingKlientImpl(
                 false
             },
         )
+    }
+
+    override fun hentBehandlingerISak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<DetaljertBehandling> {
+        logger.info("Henter behandlinger i sak=$sakId")
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/saker/$sakId/behandlinger")
+
+        val response =
+            runBlocking {
+                downstreamResourceClient
+                    .get(resource, brukerTokenInfo)
+                    .mapBoth(
+                        success = { resource ->
+                            resource.response.let {
+                                objectMapper.readValue<List<DetaljertBehandling>>(
+                                    it.toString(),
+                                )
+                            }
+                        },
+                        failure = {
+                            throw InternfeilException(
+                                "Kunne ikke hente behandlinger i sak med id=$sakId på grunn av feil",
+                                it,
+                            )
+                        },
+                    )
+            }
+        return response
     }
 
     override suspend fun harTilgangTilBehandling(

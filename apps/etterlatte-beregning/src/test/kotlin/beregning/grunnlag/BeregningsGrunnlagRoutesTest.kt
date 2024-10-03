@@ -10,6 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -17,6 +18,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.BeregningRepository
@@ -46,6 +48,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -71,6 +74,11 @@ internal class BeregningsGrunnlagRoutesTest {
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        clearAllMocks()
     }
 
     @AfterAll
@@ -119,7 +127,7 @@ internal class BeregningsGrunnlagRoutesTest {
     }
 
     @Test
-    fun `skal hente beregningsgrunnlag for sist iverksatte hvis ikke noe finnes og det er revurdering`() {
+    fun `skal hente og lagre beregningsgrunnlag for sist iverksatte hvis ikke noe finnes og det er revurdering`() {
         val idRevurdering = randomUUID()
         val idForrigeIverksatt = randomUUID()
         val sakId = randomSakId()
@@ -169,6 +177,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 institusjonsopphold = emptyList(),
                 beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
             )
+        every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
             runServer(mockOAuth2Server) {
@@ -185,9 +194,12 @@ internal class BeregningsGrunnlagRoutesTest {
         }
 
         coVerify(exactly = 1) {
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
+        }
+        verify(exactly = 1) {
+            repository.lagreBeregningsGrunnlag(any())
             repository.finnBeregningsGrunnlag(idRevurdering)
             repository.finnBeregningsGrunnlag(idForrigeIverksatt)
-            behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
         }
     }
 
@@ -593,7 +605,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 }.let { response ->
                     response.status shouldBe HttpStatusCode.OK
 
-                    val grunnlag = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlagDTO::class.java)
+                    val grunnlag =
+                        objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlagDTO::class.java)
 
                     grunnlag.perioder.let { perioder ->
                         perioder.size shouldBe 2
@@ -643,6 +656,9 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         every { repository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, capture(slot)) } just runs
+
+        coEvery { behandlingKlient.kanSetteStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
 
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(

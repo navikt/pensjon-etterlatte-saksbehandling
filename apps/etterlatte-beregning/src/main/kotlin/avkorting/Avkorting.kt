@@ -419,14 +419,38 @@ data class Aarsoppgjoer(
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
     init {
-        if (!ytelseFoerAvkorting.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
-            throw InternfeilException("fom for ytelseFoerAvkorting i feil rekkefølge")
+
+        fun validerPeriode(
+            periode: Periode,
+            feilMelding: String,
+        ) {
+            if (periode.fom.year != aar || (periode.tom?.year?.let { it != aar } == true)) {
+                throw InternfeilException(feilMelding)
+            }
         }
-        if (!inntektsavkorting.zipWithNext().all { it.first.grunnlag.periode.fom < it.second.grunnlag.periode.fom }) {
-            throw InternfeilException("fom for inntektsavkorting.grunnlag er i feil rekkefølge")
+
+        with(ytelseFoerAvkorting) {
+            if (!zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+                throw InternfeilException("YtelseFoerAvkorting: fom for ytelseFoerAvkorting er ikke i år")
+            }
         }
-        if (!avkortetYtelseAar.zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
-            throw InternfeilException("fom for avkortetYtelseAar er i feil rekkefølge")
+
+        with(inntektsavkorting) {
+            if (!zipWithNext().all { it.first.grunnlag.periode.fom < it.second.grunnlag.periode.fom }) {
+                throw InternfeilException("Inntektsavkorting: fom for inntektsavkorting.grunnlag er ikke i år")
+            }
+            forEach {
+                validerPeriode(it.grunnlag.periode, "Inntektsavkorting: Perioder må være innenfor årsoppgjøret sitt år")
+            }
+        }
+
+        with(avkortetYtelseAar) {
+            if (!zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
+                throw InternfeilException("AvkortetYtelseAar: fom for avkortetYtelseAar er ikke i år")
+            }
+            forEach {
+                validerPeriode(it.periode, "AvkortetYtelseAar: Perioder må være innenfor årsoppgjøret sitt år")
+            }
         }
     }
 

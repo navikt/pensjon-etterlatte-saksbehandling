@@ -92,7 +92,7 @@ internal class AvkortingTest {
                                             avkortinggrunnlag(
                                                 periode =
                                                     Periode(
-                                                        fom = YearMonth.of(2024, Month.JANUARY),
+                                                        fom = YearMonth.of(2025, Month.JANUARY),
                                                         tom = null,
                                                     ),
                                                 aarsinntekt = 400000,

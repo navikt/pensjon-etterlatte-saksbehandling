@@ -70,7 +70,7 @@ class BeregnAvkortingMedToInntektsTest {
         val foerstegangsbehandlingNesteInntekt =
             `Avkorting førstegangsbehandling neste år`(foerstegangsbehandlingInnevaerendeInnekt)
         val revurderingInnevaerendeInnekt = `Avkorting revurdering inneværende år`(foerstegangsbehandlingNesteInntekt)
-        val revurderingNesteInntekt = `Avkorting revurdering neste år`(revurderingInnevaerendeInnekt)
+        `Avkorting revurdering neste år`(revurderingInnevaerendeInnekt)
     }
 
     private fun `Avkorting førstegangsbehandling inneværende år`() =
@@ -128,7 +128,7 @@ class BeregnAvkortingMedToInntektsTest {
                     avkortinggrunnlagLagre(
                         aarsinntekt = 350000,
                         fratrekkInnAar = 150000,
-                        fom = YearMonth.of(2024, Month.OCTOBER),
+                        fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar, Month.OCTOBER),
                     ),
                 bruker = bruker,
                 beregning =
@@ -136,7 +136,7 @@ class BeregnAvkortingMedToInntektsTest {
                         beregninger =
                             listOf(
                                 beregningsperiode(
-                                    datoFOM = YearMonth.of(2024, Month.OCTOBER),
+                                    datoFOM = YearMonth.of(eksisterende.aarsoppgjoer.last().aar, Month.OCTOBER),
                                     utbetaltBeloep = 16682,
                                 ),
                             ),
@@ -151,12 +151,14 @@ class BeregnAvkortingMedToInntektsTest {
                 nyttGrunnlag =
                     avkortinggrunnlagLagre(
                         id =
-                            eksisterende.aarsoppgjoer[1]
-                                .inntektsavkorting[0]
+                            eksisterende.aarsoppgjoer
+                                .last()
+                                .inntektsavkorting
+                                .first()
                                 .grunnlag.id,
                         aarsinntekt = 375000,
                         fratrekkInnAar = 0,
-                        fom = YearMonth.of(2025, Month.JANUARY),
+                        fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar + 1, Month.JANUARY),
                     ),
                 bruker = bruker,
                 beregning =
@@ -164,7 +166,7 @@ class BeregnAvkortingMedToInntektsTest {
                         beregninger =
                             listOf(
                                 beregningsperiode(
-                                    datoFOM = YearMonth.of(2025, Month.JANUARY),
+                                    datoFOM = YearMonth.of(eksisterende.aarsoppgjoer.last().aar + 1, Month.JANUARY),
                                     utbetaltBeloep = 16682,
                                 ),
                             ),

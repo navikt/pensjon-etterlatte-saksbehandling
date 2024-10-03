@@ -158,7 +158,7 @@ internal class AvkortingRepositoryTest(
             id = UUID.randomUUID(),
             aar = aar,
             forventaInnvilgaMaaneder = forventaInnvilgaMaaneder,
-            ytelseFoerAvkorting = listOf(ytelseFoerAvkorting()),
+            ytelseFoerAvkorting = listOf(ytelseFoerAvkorting(periode = Periode(fom = YearMonth.of(aar, 1), tom = null))),
             inntektsavkorting =
                 listOf(
                     inntektsavkortingEn,

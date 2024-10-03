@@ -2,8 +2,10 @@ package no.nav.etterlatte.behandling
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -11,6 +13,7 @@ import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -28,6 +31,7 @@ import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -290,6 +294,39 @@ internal class BehandlingRoutesTest {
                     setBody(UtlandstilknytningRequest(UtlandstilknytningType.BOSATT_UTLAND, "Test"))
                 }
 
+            assertEquals(200, response.status.value)
+        }
+    }
+
+    @Test
+    fun `kan lagre annen forelder`() {
+        withTestApplication { client ->
+            val request =
+                AnnenForelder(
+                    vurdering = AnnenForelder.AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER,
+                    begrunnelse = "",
+                    navn = "",
+                    foedselsdato = LocalDate.now(),
+                )
+            val response =
+                client.put("/api/behandling/$behandlingId/annen-forelder") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }
+            coVerify(exactly = 1) { behandlingService.lagreAnnenForelder(behandlingId, any(), request) }
+            assertEquals(200, response.status.value)
+        }
+    }
+
+    @Test
+    fun `kan slette annen forelder`() {
+        withTestApplication { client ->
+            val response =
+                client.delete("/api/behandling/$behandlingId/annen-forelder") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                }
+            coVerify(exactly = 1) { behandlingService.lagreAnnenForelder(behandlingId, any(), null) }
             assertEquals(200, response.status.value)
         }
     }

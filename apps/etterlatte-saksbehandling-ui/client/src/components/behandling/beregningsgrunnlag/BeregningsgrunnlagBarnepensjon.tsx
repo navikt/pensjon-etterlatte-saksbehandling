@@ -109,6 +109,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
   const oppdaterBeregningsgrunnlag = (beregningsMetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
       ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
+      beregningsMetodeFlereAvdoede: undefined,
       beregningsMetode: beregningsMetodeForm,
       kunEnJuridiskForelder: harKunEnJuridiskForelder
         ? periodisertBeregningsgrunnlagTilDto({

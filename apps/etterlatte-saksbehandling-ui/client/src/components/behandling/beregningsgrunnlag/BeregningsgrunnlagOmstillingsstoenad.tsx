@@ -70,6 +70,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
   const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlagForm) => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
       ...toLagreBeregningsGrunnlagDto(behandling?.beregningsGrunnlag),
+      beregningsMetodeFlereAvdoede: undefined,
       beregningsMetode: beregningsMetode,
     }
     lagreBeregningsGrunnlagRequest(

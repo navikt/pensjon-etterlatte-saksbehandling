@@ -217,7 +217,11 @@ export const redigerAnnenForelder = async (args: {
   behandlingId: string
   annenForelder: AnnenForelder
 }): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/rediger-annen-forelder`, {
+  return apiClient.put(`/behandling/${args.behandlingId}/annen-forelder`, {
     ...args.annenForelder,
   })
+}
+
+export const slettAnnenForelder = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
+  return apiClient.delete(`/behandling/${args.behandlingId}/annen-forelder`)
 }

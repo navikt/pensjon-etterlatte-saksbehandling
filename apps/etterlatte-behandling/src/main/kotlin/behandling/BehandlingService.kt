@@ -219,7 +219,7 @@ interface BehandlingService {
     suspend fun lagreAnnenForelder(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        annenForelder: AnnenForelder,
+        annenForelder: AnnenForelder?,
     )
 
     fun endreSkalSendeBrev(
@@ -570,7 +570,7 @@ internal class BehandlingServiceImpl(
     override suspend fun lagreAnnenForelder(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        annenForelder: AnnenForelder,
+        annenForelder: AnnenForelder?,
     ) = endrePersongalleriOgOppdaterGrunnlag(
         behandlingId,
         brukerTokenInfo,

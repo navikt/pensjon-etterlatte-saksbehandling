@@ -26,6 +26,8 @@ import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder.AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -755,7 +757,9 @@ internal class BeregnBarnepensjonServiceTest {
         val virk = YearMonth.of(2024, Month.JANUARY)
         val datoAdopsjon = YearMonth.of(2024, Month.MARCH).atEndOfMonth()
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virk)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val grunnlag =
+            GrunnlagTestData(annenForelder = AnnenForelder(KUN_EN_REGISTRERT_JURIDISK_FORELDER))
+                .hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
@@ -811,6 +815,67 @@ internal class BeregnBarnepensjonServiceTest {
                     kunEnJuridiskForelder shouldBe false
                 }
                 beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
+            }
+        }
+    }
+
+    @Test
+    fun `skal ikke tillate kun en juridisk forelder hvis ikke registrert i persongalleri`() {
+        val virk = YearMonth.of(2024, Month.JANUARY)
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virk)
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                behandlingId = behandling.id,
+                soesken = emptyList(),
+                kunEnJuridiskForelder =
+                    GrunnlagMedPeriode(
+                        TomVerdi,
+                        virk.atDay(1),
+                        LocalDate.of(2025, 6, 1),
+                    ),
+            )
+        assertThrows<BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri> {
+            runBlocking {
+                beregnBarnepensjonService().beregn(behandling, bruker)
+            }
+        }
+    }
+
+    @Test
+    fun `skal ikke tillate kun en juridisk forelder med startdato forskjellig fra virk`() {
+        val virk = YearMonth.of(2024, Month.JANUARY)
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = virk)
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
+            GrunnlagTestData(
+                annenForelder = AnnenForelder(KUN_EN_REGISTRERT_JURIDISK_FORELDER),
+            ).hentOpplysningsgrunnlag()
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                behandlingId = behandling.id,
+                soesken = emptyList(),
+                kunEnJuridiskForelder =
+                    GrunnlagMedPeriode(
+                        TomVerdi,
+                        virk.plusMonths(2).atDay(1),
+                        LocalDate.of(2025, 6, 1),
+                    ),
+            )
+        assertThrows<BPKunEnJuridiskForelderMaaGjeldeFraVirkningstidspunkt> {
+            runBlocking {
+                beregnBarnepensjonService().beregn(behandling, bruker)
             }
         }
     }

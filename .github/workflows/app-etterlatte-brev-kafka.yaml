@@ -15,7 +15,7 @@ on:
     branches:
       - main
     paths:
-      - apps/etterlatte-brev-api/**
+      - apps/etterlatte-brev-kafka/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
@@ -34,8 +34,8 @@ on:
     branches:
       - main
     paths:
-      - apps/etterlatte-brev-api/**
-      - "!apps/etterlatte-brev-api/.nais/*"
+      - apps/etterlatte-brev-kafka/**
+      - "!apps/etterlatte-brev-kafka/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**

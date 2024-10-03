@@ -39,15 +39,12 @@ data class Avkorting(
      *
      * avkortetYtelseForrigeVedtak - brukes til å sammenligne med beløper til nye beregna perioder i frontend
      */
-    fun toDto(
-        fraVirkningstidspunkt: YearMonth? = null,
-        forrigeAvkorting: Avkorting? = null, // TODO fjern - egen commit..
-    ): AvkortingDto =
+    fun toDto(fraVirkningstidspunkt: YearMonth? = null): AvkortingDto =
         AvkortingDto(
             avkortingGrunnlag =
                 aarsoppgjoer.flatMap { aarsoppgjoer ->
                     aarsoppgjoer.inntektsavkorting.map {
-                        it.grunnlag.toDto(aarsoppgjoer.forventaInnvilgaMaaneder)
+                        it.grunnlag.toDto()
                     }
                 },
             avkortetYtelse = utflatetLoependeYtelseEtterAvkorting(fraVirkningstidspunkt),
@@ -63,7 +60,7 @@ data class Avkorting(
                 aarsoppgjoer.map { etAarsoppgjoer ->
                     val avkortingGrunnlag =
                         etAarsoppgjoer.inntektsavkorting
-                            .map { inntektsavkorting -> inntektsavkorting.grunnlag.toDto(etAarsoppgjoer.forventaInnvilgaMaaneder) }
+                            .map { inntektsavkorting -> inntektsavkorting.grunnlag.toDto() }
                             .sortedByDescending { inntektsavkorting -> inntektsavkorting.fom }
 
                     val fraVirk = avkortingGrunnlag.singleOrNull { it.fom == fraVirkningstidspunkt }
@@ -176,12 +173,7 @@ data class Avkorting(
                                 inntektUtland = nyttGrunnlag.inntektUtland,
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
                                 fratrekkUtAarUtlang = 0,
-                                innvilgaMaaneder =
-                                    (aarsoppgjoer.fom!!.monthValue - 1).let { antallMaanederFoerFom ->
-                                        // TODO trekk ut og unittest!!!
-                                        val antallMaanederEtterVirk = opphoerFom?.monthValue?.let { it - 1 } ?: 0
-                                        12 - antallMaanederFoerFom - antallMaanederEtterVirk
-                                    },
+                                innvilgaMaaneder = finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, opphoerFom),
                                 spesifikasjon = nyttGrunnlag.spesifikasjon,
                                 kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
                             ),
@@ -228,7 +220,6 @@ data class Avkorting(
                             AvkortingRegelkjoring.beregnInntektsavkorting(
                                 periode = periode,
                                 avkortingGrunnlag = inntektsavkorting.grunnlag.copy(periode = periode),
-                                aarsoppgjoer.forventaInnvilgaMaaneder,
                             )
 
                         val avkortetYtelseForventetInntekt =
@@ -392,7 +383,8 @@ data class Avkorting(
         return funnet ?: Aarsoppgjoer(
             id = UUID.randomUUID(),
             aar = fom.year,
-            forventaInnvilgaMaaneder = 12 - fom.monthValue + 1, // TODO fjern?...
+            fom = fom,
+            // forventaInnvilgaMaaneder = 12 - fom.monthValue + 1, // TODO fjern?...
         )
     }
 
@@ -412,11 +404,11 @@ data class AvkortingGrunnlag(
     val periode: Periode,
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
-    val fratrekkUtAar: Int? = null,
+    val fratrekkUtAar: Int? = null, // TODO
     val inntektUtland: Int,
     val fratrekkInnAarUtland: Int,
     val fratrekkUtAarUtlang: Int? = null,
-    val innvilgaMaaneder: Int? = null,
+    val innvilgaMaaneder: Int,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler,
 )
@@ -424,8 +416,7 @@ data class AvkortingGrunnlag(
 data class Aarsoppgjoer(
     val id: UUID,
     val aar: Int,
-    val forventaInnvilgaMaaneder: Int,
-    val fom: YearMonth? = null,
+    val fom: YearMonth,
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
@@ -466,7 +457,7 @@ data class Aarsoppgjoer(
         }
     }
 
-    fun foersteInnvilgedeMaaned(): YearMonth = YearMonth.of(aar, 12 - forventaInnvilgaMaaneder + 1)
+    fun foersteInnvilgedeMaaned(): YearMonth = fom!! // TODO
 
     /**
      * Gir kun de sanksjonene som har en periode som overlapper med dette årsoppgjøret.
@@ -640,4 +631,13 @@ private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning
         }
 
     return eksisterendeAvrundetPerioder + nyYtelseFoerAvkorting
+}
+
+fun finnAntallInnvilgaMaanederForAar(
+    aarsoppgjoerFom: YearMonth,
+    opphoerFom: YearMonth?,
+): Int {
+    val antallMaanederFoerFom = aarsoppgjoerFom.monthValue - 1
+    val antallMaanederEtterVirk = opphoerFom?.monthValue?.let { it - 1 } ?: 0
+    return 12 - antallMaanederFoerFom - antallMaanederEtterVirk
 }

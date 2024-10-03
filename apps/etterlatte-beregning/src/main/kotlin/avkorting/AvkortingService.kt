@@ -93,7 +93,7 @@ class AvkortingService(
         val avkorting =
             avkortingRepository.hentAvkorting(behandlingId)
                 ?: throw AvkortingFinnesIkkeException(behandlingId)
-        return avkorting.toDto(behandling.virkningstidspunkt().dato, null)
+        return avkorting.toDto(behandling.virkningstidspunkt().dato)
     }
 
     suspend fun beregnAvkortingMedNyttGrunnlag(

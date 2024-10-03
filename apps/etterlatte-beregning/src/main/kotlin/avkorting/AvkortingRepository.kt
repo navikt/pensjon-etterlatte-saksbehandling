@@ -32,7 +32,7 @@ class AvkortingRepository(
                                 Aarsoppgjoer(
                                     id = row.uuid("id"),
                                     aar = row.int("aar"),
-                                    forventaInnvilgaMaaneder = row.string("innvilga_maaneder").toInt(),
+                                    fom = YearMonth.now(), // TODO
                                 )
                             }.asList,
                     )
@@ -227,7 +227,7 @@ class AvkortingRepository(
                 "behandling_id" to behandlingId,
                 "sak_id" to sakId,
                 "aar" to aarsoppgjoer.aar,
-                "innvilga_maaneder" to aarsoppgjoer.forventaInnvilgaMaaneder,
+                "innvilga_maaneder" to 0, // TODO
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -241,10 +241,10 @@ class AvkortingRepository(
             """
             INSERT INTO avkortingsgrunnlag(
                 id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, inntekt_utland, fratrekk_inn_aar_utland,
-                spesifikasjon, kilde, aarsoppgjoer_id
+                spesifikasjon, kilde, aarsoppgjoer_id, relevante_maaneder
             ) VALUES (
                 :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :inntektUtland, :fratrekkInnAarUtland,
-                :spesifikasjon, :kilde, :aarsoppgjoerId
+                :spesifikasjon, :kilde, :aarsoppgjoerId, :relevanteMaaneder
             )
             """.trimIndent(),
         paramMap =
@@ -258,6 +258,7 @@ class AvkortingRepository(
                 "fratrekkInnAar" to avkortingsgrunnlag.fratrekkInnAar,
                 "inntektUtland" to avkortingsgrunnlag.inntektUtland,
                 "fratrekkInnAarUtland" to avkortingsgrunnlag.fratrekkInnAarUtland,
+                "relevanteMaaneder" to avkortingsgrunnlag.innvilgaMaaneder,
                 "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
             ),
@@ -403,6 +404,7 @@ class AvkortingRepository(
             fratrekkInnAar = int("fratrekk_inn_ut"),
             inntektUtland = int("inntekt_utland"),
             fratrekkInnAarUtland = int("fratrekk_inn_aar_utland"),
+            innvilgaMaaneder = int("relevante_maaneder"),
             spesifikasjon = string("spesifikasjon"),
             kilde = string("kilde").let { objectMapper.readValue(it) },
         )

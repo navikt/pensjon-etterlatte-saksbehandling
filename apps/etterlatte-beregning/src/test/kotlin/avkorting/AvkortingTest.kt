@@ -34,7 +34,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2024,
-                            forventaInnvilgaMaaneder = 10,
+                            fom = YearMonth.of(2024, Month.MARCH),
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(
@@ -84,7 +84,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2025,
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2025, Month.JANUARY),
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(
@@ -122,17 +122,17 @@ internal class AvkortingTest {
                     avkorting.aarsoppgjoer[0]
                         .inntektsavkorting[0]
                         .grunnlag
-                        .toDto(10)
+                        .toDto()
                 it.avkortingGrunnlag[1] shouldBe
                     avkorting.aarsoppgjoer[0]
                         .inntektsavkorting[1]
                         .grunnlag
-                        .toDto(10)
+                        .toDto()
                 it.avkortingGrunnlag[2] shouldBe
                     avkorting.aarsoppgjoer[1]
                         .inntektsavkorting[0]
                         .grunnlag
-                        .toDto(12)
+                        .toDto()
             }
         }
 
@@ -227,6 +227,7 @@ internal class AvkortingTest {
     inner class AvkortingTilFrontend {
         val inntektFraMars24 =
             avkortinggrunnlag(
+                innvilgaMaaneder = 10,
                 periode =
                     Periode(
                         fom = YearMonth.of(2024, Month.MARCH),
@@ -236,6 +237,7 @@ internal class AvkortingTest {
             )
         val inntektFraAug24 =
             avkortinggrunnlag(
+                innvilgaMaaneder = 10,
                 periode =
                     Periode(
                         fom = YearMonth.of(2024, Month.AUGUST),
@@ -245,6 +247,7 @@ internal class AvkortingTest {
             )
         val inntektFraJan25 =
             avkortinggrunnlag(
+                innvilgaMaaneder = 12,
                 periode =
                     Periode(
                         fom = YearMonth.of(2025, Month.JANUARY),
@@ -259,7 +262,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2024,
-                            forventaInnvilgaMaaneder = 10,
+                            fom = YearMonth.of(2024, Month.MARCH),
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(grunnlag = inntektFraMars24),
@@ -289,7 +292,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2025,
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2025, Month.JANUARY),
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(
@@ -494,7 +497,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2024,
-                            forventaInnvilgaMaaneder = 6,
+                            fom = YearMonth.of(2024, 1),
                             ytelseFoerAvkorting =
                                 listOf(
                                     YtelseFoerAvkorting(
@@ -586,7 +589,7 @@ internal class AvkortingTest {
                 opprettaAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
                     aarsoppgjoer(
                         aar = 2024,
-                        forventaInnvilgaMaaneder = 10,
+                        fom = YearMonth.of(2024, 3),
                     ),
                     Aarsoppgjoer::id,
                     Aarsoppgjoer::inntektsavkorting,
@@ -731,7 +734,7 @@ internal class AvkortingTest {
                     shouldBeEqualToIgnoringFields(
                         aarsoppgjoer(
                             aar = 2025,
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2025, 1),
                         ),
                         Aarsoppgjoer::inntektsavkorting,
                         Aarsoppgjoer::id,
@@ -758,8 +761,8 @@ internal class AvkortingTest {
             assertThrows<InternfeilException> {
                 Avkorting(
                     listOf(
-                        Aarsoppgjoer(aar = 2025, id = UUID.randomUUID(), forventaInnvilgaMaaneder = 12),
-                        Aarsoppgjoer(aar = 2024, id = UUID.randomUUID(), forventaInnvilgaMaaneder = 12),
+                        Aarsoppgjoer(aar = 2025, id = UUID.randomUUID(), fom = YearMonth.of(2025, 1)),
+                        Aarsoppgjoer(aar = 2024, id = UUID.randomUUID(), fom = YearMonth.of(2024, 1)),
                     ),
                 )
             }
@@ -779,7 +782,7 @@ internal class AvkortingTest {
                             ytelseFoerAvkorting = ytelseFoerAvkorting,
                             aar = 2024,
                             id = UUID.randomUUID(),
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2024, 1),
                         ),
                     ),
                 )
@@ -816,7 +819,7 @@ internal class AvkortingTest {
                             inntektsavkorting = inntektsavkorting,
                             aar = 2024,
                             id = UUID.randomUUID(),
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2024, 1),
                         ),
                     ),
                 )
@@ -837,7 +840,7 @@ internal class AvkortingTest {
                             avkortetYtelseAar = avkortetYtelseAar,
                             aar = 2024,
                             id = UUID.randomUUID(),
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2024, 1),
                         ),
                     ),
                 )
@@ -873,5 +876,12 @@ internal class AvkortingTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun `utledning av innvilga måneder`() {
+        val aarsoppgjoerFom = YearMonth.of(2024, 3)
+        val opphoerFom = YearMonth.of(2024, 7)
+        finnAntallInnvilgaMaanederForAar(aarsoppgjoerFom, opphoerFom) shouldBe 4
     }
 }

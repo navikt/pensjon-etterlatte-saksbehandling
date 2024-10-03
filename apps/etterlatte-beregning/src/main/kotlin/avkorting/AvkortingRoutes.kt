@@ -77,7 +77,7 @@ fun Route.avkorting(
     }
 }
 
-fun AvkortingGrunnlag.toDto(forventaInnvilgaMaaneder: Int) =
+fun AvkortingGrunnlag.toDto() =
     AvkortingGrunnlagDto(
         id = id,
         fom = periode.fom,
@@ -86,7 +86,7 @@ fun AvkortingGrunnlag.toDto(forventaInnvilgaMaaneder: Int) =
         fratrekkInnAar = fratrekkInnAar,
         inntektUtland = inntektUtland,
         fratrekkInnAarUtland = fratrekkInnAarUtland,
-        relevanteMaanederInnAar = forventaInnvilgaMaaneder,
+        relevanteMaanederInnAar = innvilgaMaaneder!!,
         spesifikasjon = spesifikasjon,
         kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
     )

@@ -45,13 +45,13 @@ class ApplicationBuilder {
     private val connection =
         initRogR(
             applikasjonsnavn = "brev-kafka",
+            kafkaConsumerGroupName = "etterlattebrevapi", // TODO; bruke samme offset som brev-api appen
             configFromEnvironment = { configFromEnvironment(it) },
         ) { rapidsConnection, _ ->
 
             rapidsConnection.register(
                 object : RapidsConnection.StatusListener {
                     override fun onStartup(rapidsConnection: RapidsConnection) {
-                        // TODO: empty?
                     }
                 },
             )

@@ -881,6 +881,12 @@ internal class AvkortingTest {
     @Test
     fun `utledning av innvilga måneder`() {
         val aarsoppgjoerFom = YearMonth.of(2024, 3)
+        finnAntallInnvilgaMaanederForAar(aarsoppgjoerFom, null) shouldBe 10
+    }
+
+    @Test
+    fun `utledning av innvilga måneder med opphør`() {
+        val aarsoppgjoerFom = YearMonth.of(2024, 3)
         val opphoerFom = YearMonth.of(2024, 7)
         finnAntallInnvilgaMaanederForAar(aarsoppgjoerFom, opphoerFom) shouldBe 4
     }

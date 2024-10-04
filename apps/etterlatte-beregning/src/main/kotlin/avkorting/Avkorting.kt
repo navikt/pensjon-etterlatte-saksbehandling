@@ -666,7 +666,6 @@ fun finnAntallInnvilgaMaanederForAar(
     aarsoppgjoerFom: YearMonth,
     opphoerFom: YearMonth?,
 ): Int {
-    val antallMaanederFoerFom = aarsoppgjoerFom.monthValue - 1
-    val antallMaanederEtterVirk = opphoerFom?.monthValue?.let { it - 1 } ?: 0
-    return 12 - antallMaanederFoerFom - antallMaanederEtterVirk
+    val tom = opphoerFom?.monthValue?.let { it - 1 } ?: 12
+    return tom - (aarsoppgjoerFom.monthValue - 1)
 }

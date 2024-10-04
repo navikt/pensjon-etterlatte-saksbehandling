@@ -93,7 +93,7 @@ class GrunnlagKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/grunnlag/aldersovergang/$sakId/${sakType.name}",
+                            url = "$resourceUrl/api/grunnlag/aldersovergang/sak/$sakId/${sakType.name}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(

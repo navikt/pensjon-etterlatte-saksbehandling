@@ -1679,8 +1679,8 @@ class BeregnAvkortingTest {
     }
 
     @Test
-    fun `Revurdering enda en inntektsendring nytt år`() {
-        val avkorting = `Revurdering enda en ny inntekt nytt år`()
+    fun `Revurdering inntektsendring nytt år med opphør`() {
+        val avkorting = `Revurdering ny inntekt nytt år med opphør`()
         with(avkorting.aarsoppgjoer[0].avkortetYtelseAar) {
             size shouldBe 6
             get(0).asClue {
@@ -1884,11 +1884,11 @@ class BeregnAvkortingTest {
                         periode =
                             Periode(
                                 fom = YearMonth.of(2026, Month.JANUARY),
-                                tom = null,
+                                tom = YearMonth.of(2026, Month.JUNE),
                             ),
-                        ytelseEtterAvkorting = 2879,
-                        ytelseEtterAvkortingFoerRestanse = 2879,
-                        avkortingsbeloep = 17362,
+                        ytelseEtterAvkorting = 2917,
+                        ytelseEtterAvkortingFoerRestanse = 2917,
+                        avkortingsbeloep = 17324,
                         ytelseFoerAvkorting = 20241,
                         inntektsgrunnlag = null,
                     ),
@@ -2261,15 +2261,16 @@ class BeregnAvkortingTest {
                 sanksjoner = emptyList(),
             )
 
-    private fun `Revurdering enda en ny inntekt nytt år`() =
+    private fun `Revurdering ny inntekt nytt år med opphør`() =
         `Revurdering med virk tilbake i tidligere år`()
             .kopierAvkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
                     avkortinggrunnlagLagre(
                         id = UUID.randomUUID(),
-                        aarsinntekt = 525000,
+                        aarsinntekt = 262500,
                         fratrekkInnAar = 0,
+                        // TODO Legge til fratrekk ut år når det kommer
                         fom = YearMonth.of(2026, Month.JANUARY),
                     ),
                 bruker = bruker,
@@ -2284,6 +2285,6 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
-                opphoerFom = null,
+                opphoerFom = YearMonth.of(2026, Month.JULY),
             )
 }

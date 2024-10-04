@@ -91,6 +91,7 @@ spec:
           namespace: aura
           cluster: dev-gcp
         - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-brev-kafka
         - application: etterlatte-trygdetid
         - application: etterlatte-brev-api
         - application: etterlatte-beregning

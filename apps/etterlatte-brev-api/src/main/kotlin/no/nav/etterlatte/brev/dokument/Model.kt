@@ -35,6 +35,32 @@ data class DokumentoversiktBruker(
 
 data class Journalposter(
     val journalposter: List<Journalpost>,
+    val sideInfo: SideInfo,
+)
+
+/*
+* Metadata for å paginere mellom journalposter.
+*
+* Verdt å merke seg at denne gir utrolig forvirrende og lite intuitive verdier.
+* Eks. totaltAntall er ikke totalen du har filtrert på, men totalen som er registrert på bruker.
+*
+* Pagineringen vil også oppføre seg merkelig siden den også teller med de som er filtrert ut.
+* Eks. du søker på tema EYO, foerste=10 (antallet du henter). Du kan da få totaltAntall=30
+* i retur, hvorav 10 av de har tema PEN.
+* Det kan da se slik ut i bolker på 10:
+*   [9 EYO, 1 PEN], [5 EYO, 5 PEN], [6 EYO, 4 PEN]
+* I tilfellet over vil da første side kun inneholde 9 journalposter, selv om du har bedt om 10 stk.
+* Neste side vil så ha 5 journalposter, og siste side vil ha 6... ikke det minste forvirrende.
+*/
+data class SideInfo(
+    // 	Når man paginerer forover, pekeren for å fortsette.
+    val sluttpeker: String,
+    // 	True/False verdi for om neste side eksisterer, når man paginerer forover.
+    val finnesNesteSide: Boolean,
+    // 	Antall journalposter på denne siden.
+    val antall: Int,
+    // 	Totalt antall journalposter på alle sider.
+    val totaltAntall: Int,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -75,6 +101,7 @@ data class DokumentOversiktBrukerVariables(
     val journalposttyper: List<Journalposttype>,
     val journalstatuser: List<Journalstatus>,
     val foerste: Int,
+    val etter: String? = null,
 ) : GraphqlVariables
 
 data class JournalpostVariables(

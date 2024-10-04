@@ -11,25 +11,6 @@ on:
         options:
           - true
           - false
-  push:
-    branches:
-      - main
-    paths:
-      - apps/etterlatte-brev-kafka/**
-      - libs/saksbehandling-common/**
-      - libs/etterlatte-ktor/**
-      - libs/etterlatte-behandling-model/**
-      - libs/etterlatte-beregning-model/**
-      - libs/etterlatte-database/**
-      - libs/etterlatte-migrering-model/**
-      - libs/etterlatte-trygdetid-model/**
-      - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/etterlatte-vilkaarsvurdering-model/**
-      - libs/etterlatte-brev-model/**
-      - libs/etterlatte-oppgave-model/**
-      - libs/etterlatte-tilbakekreving-model/**
-      - gradle/libs.versions.toml
-      - "!**/test/**"
   pull_request:
     branches:
       - main

@@ -158,6 +158,7 @@ spec:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling
         - application: etterlatte-testdata-behandler
+        - application: etterlatte-brev-kafka
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp

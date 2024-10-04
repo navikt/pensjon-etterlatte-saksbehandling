@@ -1,0 +1,74 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-brev-kafka
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+  annotations:
+    reloader.stakater.com/match: "true"
+spec:
+  image: "{{image}}"
+  port: 8080
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+  secureLogs:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+  kafka:
+    pool: nav-dev
+  resources:
+    limits:
+      memory: 640Mi
+    requests:
+      cpu: 20m
+      memory: 512Mi
+  replicas:
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: BREV_API_URL
+      value: http://etterlatte-brev-api
+    - name: BREV_API_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-brev-api/.default
+    - name: GRUNNLAG_URL
+      value: http://etterlatte-grunnlag
+    - name: GRUNNLAG_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
+  envFrom:
+    - secret: my-application-unleash-api-token
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-brev-api
+        - application: etterlatte-grunnlag
+      external:
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
+    inbound:
+      rules:
+        - application: etterlatte-testdata-behandler
+        - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
+          namespace: aura
+          cluster: dev-gcp

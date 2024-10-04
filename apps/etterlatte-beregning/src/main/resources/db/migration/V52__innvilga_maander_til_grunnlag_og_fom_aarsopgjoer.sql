@@ -9,7 +9,8 @@ ALTER TABLE avkorting_aarsoppgjoer
 -- Finner første fom ved å finne antall IKKE innvilga måneder og plusse fra januer
 UPDATE avkorting_aarsoppgjoer
 SET fom = (date('2024-01-01') + ((12 - subquery.innvilga_maaneder::int8)::text || ' month')::interval)::date
-FROM (SELECT innvilga_maaneder FROM avkorting_aarsoppgjoer) subquery;
+FROM (SELECT id, innvilga_maaneder FROM avkorting_aarsoppgjoer) subquery
+WHERE avkorting_aarsoppgjoer.id = subquery.id;
 
 ALTER TABLE avkorting_aarsoppgjoer
     ALTER COLUMN fom SET NOT NULL;

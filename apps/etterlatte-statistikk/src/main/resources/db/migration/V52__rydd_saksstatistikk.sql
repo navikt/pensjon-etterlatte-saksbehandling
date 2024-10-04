@@ -34,4 +34,4 @@ where behandling_id = fasit.behandling_id
 and sak_utland is null;
 
 -- Fjerner en duplisert hendelse på grunn av en bug i ferdigstilling
-delete from sak where id = 144748
+delete from sak where id = 144748;

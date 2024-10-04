@@ -274,9 +274,27 @@ internal class UtbetalingDaoIntegrationTest(
         val periode = Periode(YearMonth.now(), null)
         val utbetalingslinjeIder =
             listOf(
-                Utbetalingsperiode(1L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
-                Utbetalingsperiode(2L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
-                Utbetalingsperiode(3L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
+                Utbetalingsperiode(
+                    1L,
+                    periode,
+                    BigDecimal(1000),
+                    UtbetalingsperiodeType.UTBETALING,
+                    Regelverk.fraDato(periode.fom.atDay(1)),
+                ),
+                Utbetalingsperiode(
+                    2L,
+                    periode,
+                    BigDecimal(1000),
+                    UtbetalingsperiodeType.UTBETALING,
+                    Regelverk.fraDato(periode.fom.atDay(1)),
+                ),
+                Utbetalingsperiode(
+                    3L,
+                    periode,
+                    BigDecimal(1000),
+                    UtbetalingsperiodeType.UTBETALING,
+                    Regelverk.fraDato(periode.fom.atDay(1)),
+                ),
             )
         val utbetalingslinjer =
             utbetalingDao.hentDupliserteUtbetalingslinjer(

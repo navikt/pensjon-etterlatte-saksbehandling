@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import Regelverk
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
@@ -75,11 +76,7 @@ class UtbetalingMapper(
                         UtbetalingsperiodeType.UTBETALING -> Utbetalingslinjetype.UTBETALING
                     },
                 erstatterId = finnErstatterId(utbetalingslinjeId = it.id),
-                klassifikasjonskode =
-                    when (saktype) {
-                        Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
-                        Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP
-                    },
+                klassifikasjonskode = klassifikasjonskode(saktype, it),
                 kjoereplan =
                     when (vedtak.behandling.revurderingsaarsak) {
                         Revurderingaarsak.REGULERING -> Kjoereplan.NESTE_PLANLAGTE_UTBETALING
@@ -87,6 +84,23 @@ class UtbetalingMapper(
                     },
             )
         }
+
+    private fun klassifikasjonskode(
+        saktype: Saktype,
+        utbetalingsperiode: Utbetalingsperiode,
+    ) = when (saktype) {
+        Saktype.OMSTILLINGSSTOENAD -> {
+            OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP
+        }
+        Saktype.BARNEPENSJON -> {
+            // TODO i en overgangsperiode vil det finnes en del vedtak uten regelverk satt - kompenserer for dette her
+            val regelverk = utbetalingsperiode.regelverk ?: Regelverk.fraDato(utbetalingsperiode.periode.fom.atDay(1))
+            when (regelverk) {
+                Regelverk.REGELVERK_TOM_DES_2023 -> OppdragKlassifikasjonskode.BARNEPEFOER2024_OPTP
+                Regelverk.REGELVERK_FOM_JAN_2024 -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
+            }
+        }
+    }
 
     private fun finnErstatterId(utbetalingslinjeId: Long): UtbetalingslinjeId? =
         if (indeksForUtbetalingslinje(utbetalingslinjeId) == 0) {
@@ -115,3 +129,7 @@ class UtbetalingMapper(
 }
 
 class IngenEksisterendeUtbetalingException : RuntimeException()
+
+class PeriodeManglerRegelverk(
+    override val message: String,
+) : RuntimeException(message)

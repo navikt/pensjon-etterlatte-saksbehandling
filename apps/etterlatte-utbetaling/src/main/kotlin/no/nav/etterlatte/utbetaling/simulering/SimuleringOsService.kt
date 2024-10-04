@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeFagomraade
-import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeklassifikasjon
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
@@ -177,7 +176,7 @@ class SimuleringOsService(
             )
 
             kodeEndringLinje = "NY"
-            kodeKlassifik = utbetaling.sakType.tilKodeklassifikasjon()
+            kodeKlassifik = utbetalingslinje.klassifikasjonskode.toString()
             sats = utbetalingslinje.beloep
             typeSats = "MND"
             fradragTillegg = FradragTillegg.T

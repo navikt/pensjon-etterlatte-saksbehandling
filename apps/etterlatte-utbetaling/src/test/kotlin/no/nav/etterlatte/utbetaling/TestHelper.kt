@@ -61,8 +61,10 @@ fun utbetalingsvedtak(
                 periode = Periode(fom = YearMonth.of(2022, 1), null),
                 beloep = BigDecimal.valueOf(2000),
                 type = UtbetalingsperiodeType.UTBETALING,
+                regelverk = Regelverk.REGELVERK_TOM_DES_2023,
             ),
         ),
+    sakType: Saktype = Saktype.BARNEPENSJON,
 ) = Utbetalingsvedtak(
     vedtakId = vedtakId,
     behandling =
@@ -75,7 +77,7 @@ fun utbetalingsvedtak(
         Sak(
             id = 1,
             ident = "12345678913",
-            sakType = Saktype.BARNEPENSJON,
+            sakType = sakType,
         ),
     vedtakFattet =
         VedtakFattet(

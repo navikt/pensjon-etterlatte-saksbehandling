@@ -182,6 +182,7 @@ class VedtaksverifisererTest(
                             periode = Periode(fom = it.fra, tom = it.til),
                             beloep = it.beloep,
                             type = UtbetalingsperiodeType.UTBETALING,
+                            regelverk = Regelverk.fraDato(it.fra.atDay(1)),
                         )
                     },
                 vedtakFattet =

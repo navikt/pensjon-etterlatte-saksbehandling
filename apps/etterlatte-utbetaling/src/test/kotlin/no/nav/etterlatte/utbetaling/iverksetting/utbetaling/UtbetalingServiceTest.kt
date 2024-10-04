@@ -369,6 +369,7 @@ internal class UtbetalingServiceTest {
                         periode = Periode(fom = YearMonth.of(2022, 10), tom = null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
+                        regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                     ),
                 ),
         )
@@ -383,6 +384,7 @@ internal class UtbetalingServiceTest {
                         periode = Periode(fom = startPeriode, tom = null),
                         beloep = BigDecimal.valueOf(3000),
                         type = UtbetalingsperiodeType.UTBETALING,
+                        regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                     ),
                 ),
         )
@@ -397,18 +399,21 @@ internal class UtbetalingServiceTest {
                         periode = Periode(fom = YearMonth.of(2021, 4), tom = YearMonth.of(2021, 8)),
                         beloep = BigDecimal.valueOf(4000),
                         type = UtbetalingsperiodeType.UTBETALING,
+                        regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                     ),
                     Utbetalingsperiode(
                         id = 3L,
                         periode = Periode(fom = YearMonth.of(2021, 9), tom = YearMonth.of(2021, 12)),
                         beloep = BigDecimal.valueOf(5000),
                         type = UtbetalingsperiodeType.UTBETALING,
+                        regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                     ),
                     Utbetalingsperiode(
                         id = 4L,
                         periode = Periode(fom = YearMonth.of(2022, 1), tom = null),
                         beloep = BigDecimal.valueOf(3000),
                         type = UtbetalingsperiodeType.UTBETALING,
+                        regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                     ),
                 ),
         )
@@ -423,12 +428,14 @@ internal class UtbetalingServiceTest {
                         periode = Periode(fom = YearMonth.of(2022, 2), tom = YearMonth.of(2022, 8)),
                         beloep = BigDecimal.valueOf(4000),
                         type = UtbetalingsperiodeType.UTBETALING,
+                        regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                     ),
                     Utbetalingsperiode(
                         id = 3L,
                         periode = Periode(fom = YearMonth.of(2022, 9), tom = null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
+                        regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                     ),
                 ),
         )

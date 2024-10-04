@@ -5,7 +5,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
-import no.nav.etterlatte.libs.common.appIsInGCP
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
@@ -56,7 +56,7 @@ class ApplicationBuilder {
                 },
             )
             // TODO: start med å merge inn uten å aktivere rivers
-            if (!appIsInGCP()) {
+            if (isDev()) {
                 OpprettJournalfoerOgDistribuerRiver(
                     brevapiKlient,
                     grunnlagKlient,

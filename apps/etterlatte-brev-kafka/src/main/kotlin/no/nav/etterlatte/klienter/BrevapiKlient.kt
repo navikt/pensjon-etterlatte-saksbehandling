@@ -12,7 +12,7 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevErdistribuert
+import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevOgVedtakDto
 import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
@@ -35,14 +35,14 @@ class BrevapiKlient(
     internal suspend fun opprettJournalFoerOgDistribuer(
         sakid: SakId,
         opprett: OpprettJournalfoerOgDistribuerRequest,
-    ): BrevErdistribuert {
+    ): BrevDistribusjonResponse {
         try {
             logger.info("Oppretter brev for sak med sakId=$sakid")
             return httpClient
                 .post("$baseUrl/api/brev/sak/$sakid/opprett-journalfoer-og-distribuer") {
                     contentType(ContentType.Application.Json)
                     setBody(opprett.toJson())
-                }.body<BrevErdistribuert>()
+                }.body<BrevDistribusjonResponse>()
         } catch (e: ResponseException) {
             logger.error("Henting av grunnlag for sak med sakId=$sakid feilet", e)
 

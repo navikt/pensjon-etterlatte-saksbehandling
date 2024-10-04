@@ -11,7 +11,7 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
-import no.nav.etterlatte.brev.model.BrevErdistribuert
+import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.OmstillingsstoenadInntektsjustering
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
@@ -79,7 +79,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         sakId: SakId,
         brevKode: Brevkoder,
         packet: JsonMessage,
-    ): BrevErdistribuert {
+    ): BrevDistribusjonResponse {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
         val brevdata =
             when (brevKode) {
@@ -114,8 +114,8 @@ class OpprettJournalfoerOgDistribuerRiver(
                     avsenderRequest = SaksbehandlerOgAttestant(Fagsaksystem.EY.navn, Fagsaksystem.EY.navn),
                     sakId = sakId,
                 )
-            val brevErdistribuert = brevapiKlient.opprettJournalFoerOgDistribuer(sakId, req)
-            return brevErdistribuert
+            val brevDistribusjonResponse = brevapiKlient.opprettJournalFoerOgDistribuer(sakId, req)
+            return brevDistribusjonResponse
         } catch (e: Exception) {
             val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"
             logger.error(feilMelding, e)

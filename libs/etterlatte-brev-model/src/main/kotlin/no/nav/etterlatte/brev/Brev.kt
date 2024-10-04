@@ -138,7 +138,7 @@ data class BrevOgVedtakDto(
     val vedtak: JsonNode,
 )
 
-data class BrevErdistribuert(
+data class BrevDistribusjonResponse(
     val brevId: BrevID,
     val erDistribuert: Boolean,
 )

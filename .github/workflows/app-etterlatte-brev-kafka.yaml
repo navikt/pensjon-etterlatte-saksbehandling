@@ -1,4 +1,4 @@
-name: etterlatte-brev-api
+name: etterlatte-brev-kafka
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run

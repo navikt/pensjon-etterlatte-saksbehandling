@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlag.aldersovergang
 
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -16,7 +17,10 @@ class AldersovergangService(
     ): YearMonth? {
         val foedselsdato = dao.hentFoedselsdato(sakId, Opplysningstype.SOEKER_PDL_V1)
         return when (sakType) {
-            SakType.BARNEPENSJON -> TODO()
+            SakType.BARNEPENSJON -> throw UgyldigForespoerselException(
+                "SAKTYPE_IKKE_STØTTET",
+                "Uthenting av måned for opphør grunnet aldersovergang støttes ikke for barnepensjon",
+            )
             // Mottaker av Omstillingstønad opphører måned etter fylt 67 (§ 22-12 sjette ledd)
             SakType.OMSTILLINGSSTOENAD -> foedselsdato?.let { YearMonth.from(it.plusYears(67).plusMonths(1)) }
         }

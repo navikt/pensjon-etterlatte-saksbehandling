@@ -3,6 +3,7 @@ package no.nav.etterlatte.rivers
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevHendelseType
+import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -55,12 +56,16 @@ internal class JournalfoerVedtaksbrevRiver(
                     saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText(),
                 )
 
-            val journalfoervedtaksbrevResponse = runBlocking { brevapiKlient.journalfoerVedtaksbrev(vedtak) } ?: return
-            rapidsConnection.svarSuksess(
-                packet,
-                journalfoervedtaksbrevResponse.brevId,
-                journalfoervedtaksbrevResponse.opprettetJournalpost.journalpostId,
-            )
+            val journalfoervedtaksbrevResponse = runBlocking { brevapiKlient.journalfoerVedtaksbrev(vedtak) }
+            if (journalfoervedtaksbrevResponse == null) {
+                logger.warn("Jorunalføring ble ikke journalført, kan være pga status eller migrering, ")
+            } else {
+                rapidsConnection.svarSuksess(
+                    packet,
+                    journalfoervedtaksbrevResponse.brevId,
+                    journalfoervedtaksbrevResponse.opprettetJournalpost.journalpostId,
+                )
+            }
         } catch (e: Exception) {
             logger.error("Feil ved journalføring av vedtaksbrev: ", e)
             throw e
@@ -78,7 +83,8 @@ internal class JournalfoerVedtaksbrevRiver(
         packet.setEventNameForHendelseType(BrevHendelseType.JOURNALFOERT)
         packet[BREV_ID_KEY] = brevId
         packet["journalpostId"] = journalpostId
-        packet["distribusjonType"] = "VEDTAK" // DistribusjonsType.VEDTAK.toString() Må flyttes over til brev-model
+        packet["distribusjonType"] =
+            DistribusjonsType.VEDTAK.name
 
         publish(packet.toJson())
     }

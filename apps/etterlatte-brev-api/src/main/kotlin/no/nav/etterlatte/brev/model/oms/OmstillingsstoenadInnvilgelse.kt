@@ -72,7 +72,7 @@ data class OmstillingsstoenadInnvilgelse(
                 beregningsperioder
                     .filter {
                         it.datoFOM.year == beregningsperioder.first().datoFOM.year + 1
-                    }.maxBy { it.datoFOM }
+                    }.maxByOrNull { it.datoFOM }
 
             val omsRettUtenTidsbegrensning =
                 vilkaarsVurdering.vilkaar.single {

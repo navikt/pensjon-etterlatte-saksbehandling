@@ -394,14 +394,18 @@ class StatistikkService(
             } ?: statistikkKlage.klage.opprettet,
         registrertTidspunkt = statistikkKlage.klage.opprettet,
         type = "KLAGE",
-        status = hendelse.name,
+        status = klageStatus(statistikkKlage, hendelse),
         resultat = resultatKlage(statistikkKlage),
         saksbehandler = statistikkKlage.saksbehandler,
         ansvarligEnhet = statistikkKlage.klage.sak.enhet,
         ansvarligBeslutter =
-            statistikkKlage.klage.formkrav
-                ?.saksbehandler
-                ?.ident,
+            when (val utfall = statistikkKlage.klage.utfall) {
+                null ->
+                    statistikkKlage.klage.formkrav
+                        ?.saksbehandler
+                        ?.ident
+                else -> utfall.saksbehandler.ident
+            },
         aktorId = statistikkKlage.klage.sak.ident,
         tekniskTid = tekniskTid.toTidspunkt(),
         sakYtelse = statistikkKlage.klage.sak.sakType.name,
@@ -421,7 +425,10 @@ class StatistikkService(
         datoFoersteUtbetaling = null,
         opprettetAv = null,
         pesysId = null,
-        resultatBegrunnelse = null,
+        resultatBegrunnelse =
+            statistikkKlage.klage.aarsakTilAvbrytelse
+                ?.name
+                ?.takeIf { statistikkKlage.klage.status == KlageStatus.AVBRUTT },
         sakUtland = statistikkKlage.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
         soeknadFormat = null,
         vedtakLoependeTom = null,
@@ -431,6 +438,19 @@ class StatistikkService(
                 ?.vedtaketKlagenGjelder
                 ?.behandlingId,
     )
+
+    private fun klageStatus(
+        statistikkKlage: StatistikkKlage,
+        hendelse: KlageHendelseType,
+    ): String {
+        if (statistikkKlage.klage.status == KlageStatus.FERDIGSTILT) {
+            return when (statistikkKlage.klage.utfall) {
+                is KlageUtfallMedData.StadfesteVedtak, is KlageUtfallMedData.DelvisOmgjoering -> "OVERSENDT_KA"
+                else -> hendelse.name
+            }
+        }
+        return hendelse.name
+    }
 
     private fun resultatKlage(statistikkKlage: StatistikkKlage): String? {
         if (statistikkKlage.klage.status == KlageStatus.AVBRUTT) {

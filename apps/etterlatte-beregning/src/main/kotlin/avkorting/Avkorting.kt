@@ -255,8 +255,14 @@ data class Avkorting(
                         )
                     } else {
                         reberegnetInntektsavkorting.first().let {
+                            val tomDesember = tomHvisInntektNesteAar(aarsoppgjoer)
+                            val sistePeriode =
+                                when (it.grunnlag.periode.tom) {
+                                    null -> Periode(fom = it.grunnlag.periode.fom, tom = tomDesember)
+                                    else -> it.grunnlag.periode
+                                }
                             AvkortingRegelkjoring.beregnAvkortetYtelse(
-                                periode = it.grunnlag.periode,
+                                periode = sistePeriode,
                                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                                 avkortingsperioder = it.avkortingsperioder,
                                 type = AARSOPPGJOER,
@@ -293,6 +299,9 @@ data class Avkorting(
                 .sanksjonerInnenforAarsoppjoer(sanksjoner)
                 .sortedBy { it.fom }
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
+
+        val tomDesember = tomHvisInntektNesteAar(aarsoppgjoer)
+
         reberegnetInntektsavkorting.forEachIndexed { i, inntektsavkorting ->
             // Kun de sanksjonene som er lagt inn fom < denne inntektsavkortingen er tidligere beregnet med
             // så hvis vi ikke ekskluderer senere sanksjoner endrer vi restanseutregning tilbake i tid og
@@ -314,9 +323,23 @@ data class Avkorting(
                             kjenteSanksjonerForInntektsavkorting,
                         )
                 }
+
+            val erSistePeriodeUtenOpphoer =
+                reberegnetInntektsavkorting
+                    .maxBy {
+                        it.grunnlag.periode.fom
+                    }.grunnlag.periode
+                    .let {
+                        it.fom == inntektsavkorting.grunnlag.periode.fom && it.tom == null
+                    }
+
             val ytelse =
                 AvkortingRegelkjoring.beregnAvkortetYtelse(
-                    periode = inntektsavkorting.grunnlag.periode,
+                    periode =
+                        when (erSistePeriodeUtenOpphoer) {
+                            true -> Periode(inntektsavkorting.grunnlag.periode.fom, tomDesember)
+                            false -> inntektsavkorting.grunnlag.periode
+                        },
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
                     avkortingsperioder = inntektsavkorting.avkortingsperioder,
                     type = AARSOPPGJOER,
@@ -346,7 +369,7 @@ data class Avkorting(
                 }
             val ytelseMedAlleSanksjoner =
                 AvkortingRegelkjoring.beregnAvkortetYtelse(
-                    periode = Periode(fom = tidligsteFomIkkeBeregnetSanksjon, tom = null),
+                    periode = Periode(fom = tidligsteFomIkkeBeregnetSanksjon, tom = tomDesember),
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
                     avkortingsperioder = reberegnetInntektsavkorting.last().avkortingsperioder,
                     type = AARSOPPGJOER,
@@ -371,6 +394,15 @@ data class Avkorting(
         return avkortetYtelseMedAllForventetInntekt
     }
 
+    private fun tomHvisInntektNesteAar(aarsoppgjoer: Aarsoppgjoer): YearMonth? {
+        val harAaroppgjoerNesteAaar =
+            this.aarsoppgjoer.any { it.aar == aarsoppgjoer.aar + 1 }
+        return when (harAaroppgjoerNesteAaar) {
+            true -> YearMonth.of(aarsoppgjoer.aar, 12)
+            false -> null
+        }
+    }
+
     /*
      * Hvilket årsoppgjør som er relevant basers på virkningstidspunkt.
      * Hvis det ikke finnes et fra før på virkningstidspunkt opprettes et nytt.
@@ -384,7 +416,6 @@ data class Avkorting(
             id = UUID.randomUUID(),
             aar = fom.year,
             fom = fom,
-            // forventaInnvilgaMaaneder = 12 - fom.monthValue + 1, // TODO fjern?...
         )
     }
 

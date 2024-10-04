@@ -1426,7 +1426,11 @@ class BeregnAvkortingTest {
                 it.shouldBeEqualToIgnoringFields(
                     avkortetYtelse(
                         type = AvkortetYtelseType.AARSOPPGJOER,
-                        periode = Periode(fom = YearMonth.of(2024, Month.SEPTEMBER), tom = null),
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.SEPTEMBER),
+                                tom = YearMonth.of(2024, Month.DECEMBER),
+                            ),
                         ytelseEtterAvkorting = 3005,
                         ytelseEtterAvkortingFoerRestanse = 7692,
                         avkortingsbeloep = 14549,
@@ -1624,7 +1628,7 @@ class BeregnAvkortingTest {
                         periode =
                             Periode(
                                 fom = YearMonth.of(2024, Month.NOVEMBER),
-                                tom = null,
+                                tom = YearMonth.of(2024, Month.DECEMBER),
                             ),
                         ytelseEtterAvkorting = 1005,
                         ytelseEtterAvkortingFoerRestanse = 5692,
@@ -1823,7 +1827,7 @@ class BeregnAvkortingTest {
                         periode =
                             Periode(
                                 fom = YearMonth.of(2024, Month.NOVEMBER),
-                                tom = null,
+                                tom = YearMonth.of(2024, Month.DECEMBER),
                             ),
                         ytelseEtterAvkorting = 1005,
                         ytelseEtterAvkortingFoerRestanse = 5692,
@@ -1858,7 +1862,7 @@ class BeregnAvkortingTest {
                         periode =
                             Periode(
                                 fom = YearMonth.of(2025, Month.JANUARY),
-                                tom = null,
+                                tom = YearMonth.of(2025, Month.DECEMBER),
                             ),
                         ytelseEtterAvkorting = 3817,
                         ytelseEtterAvkortingFoerRestanse = 3817,
@@ -1902,6 +1906,8 @@ class BeregnAvkortingTest {
             }
         }
     }
+
+    // TODO Revurdering opphør midt i et år
 
     private fun `Avkorting foerstegangsbehandling`() =
         Avkorting()

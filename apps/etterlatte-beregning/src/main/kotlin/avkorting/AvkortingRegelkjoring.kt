@@ -55,7 +55,7 @@ object AvkortingRegelkjoring {
                                             fratrekkInnAar = Beregningstall(it.fratrekkInnAar),
                                             inntektUtland = Beregningstall(it.inntektUtland),
                                             fratrekkInnAarUtland = Beregningstall(it.fratrekkInnAarUtland),
-                                            relevanteMaaneder = Beregningstall(it.innvilgaMaaneder!!),
+                                            relevanteMaaneder = Beregningstall(it.innvilgaMaaneder),
                                             it.id,
                                         ),
                                     kilde = it.kilde,

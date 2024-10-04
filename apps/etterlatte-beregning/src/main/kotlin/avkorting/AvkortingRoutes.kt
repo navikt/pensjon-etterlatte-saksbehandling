@@ -86,7 +86,7 @@ fun AvkortingGrunnlag.toDto() =
         fratrekkInnAar = fratrekkInnAar,
         inntektUtland = inntektUtland,
         fratrekkInnAarUtland = fratrekkInnAarUtland,
-        relevanteMaanederInnAar = innvilgaMaaneder!!,
+        relevanteMaanederInnAar = innvilgaMaaneder,
         spesifikasjon = spesifikasjon,
         kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
     )

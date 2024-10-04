@@ -62,7 +62,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
                 I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
                 revurdering ikke er nødvendig.
               </BodyShort>
-              <Textarea label="Begrunnelse" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
+              <Textarea label="Kommentar" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
 
               {isFailureHandler({
                 apiResult: arkiverHendelseResult,

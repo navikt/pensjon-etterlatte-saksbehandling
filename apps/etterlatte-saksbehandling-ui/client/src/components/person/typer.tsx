@@ -56,19 +56,6 @@ export enum GrunnlagsendringsType {
   ADRESSE = 'ADRESSE',
 }
 
-export const GRUNNLAGSENDRING_STATUS = [
-  'VENTER_PAA_JOBB',
-  'SJEKKET_AV_JOBB',
-  'TATT_MED_I_BEHANDLING',
-  'VURDERT_SOM_IKKE_RELEVANT',
-  'FORKASTET',
-  'HISTORISK',
-] as const
-
-export const STATUS_IRRELEVANT: GrunnlagsendringStatus = 'VURDERT_SOM_IKKE_RELEVANT'
-export const TATT_MED_I_BEHANDLING: GrunnlagsendringStatus = 'TATT_MED_I_BEHANDLING'
-export const HISTORISK_REVURDERING: GrunnlagsendringStatus = 'HISTORISK'
-
 export interface DoedsdatoSamsvar {
   type: 'DOEDSDATO'
   samsvar: boolean
@@ -171,7 +158,14 @@ export type SamsvarMellomKildeOgGrunnlag =
   | InstitusjonsoppholdSamsvar
   | AdresseSamsvar
 
-export type GrunnlagsendringStatus = (typeof GRUNNLAGSENDRING_STATUS)[number]
+export enum GrunnlagsendringStatus {
+  VENTER_PAA_JOBB = 'VENTER_PAA_JOBB',
+  SJEKKET_AV_JOBB = 'SJEKKET_AV_JOBB',
+  TATT_MED_I_BEHANDLING = 'TATT_MED_I_BEHANDLING',
+  VURDERT_SOM_IKKE_RELEVANT = 'VURDERT_SOM_IKKE_RELEVANT',
+  FORKASTET = 'FORKASTET',
+  HISTORISK = 'HISTORISK',
+}
 
 const SAKSROLLER = ['SOEKER', 'INNSENDER', 'SOESKEN', 'AVDOED', 'GJENLEVENDE', 'UKJENT'] as const
 

@@ -23,8 +23,8 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspli
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.common.Enheter
@@ -37,8 +37,10 @@ import no.nav.etterlatte.libs.common.behandling.JobbType
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -46,6 +48,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
@@ -63,7 +66,7 @@ class AktivitetspliktServiceTest {
     private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao = mockk()
     private val behandlingService: BehandlingService = mockk()
     private val grunnlagKlient: GrunnlagKlient = mockk()
-    private val automatiskRevurderingService: AutomatiskRevurderingService = mockk()
+    private val revurderingService: RevurderingService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val statistikkProduer: BehandlingHendelserKafkaProducer = mockk()
     private val featureToggleService: FeatureToggleService = DummyFeatureToggleService()
@@ -74,12 +77,13 @@ class AktivitetspliktServiceTest {
             aktivitetspliktUnntakDao,
             behandlingService,
             grunnlagKlient,
-            automatiskRevurderingService,
+            revurderingService,
             statistikkProduer,
             oppgaveService,
             featureToggleService,
         )
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
+    private val user =
+        mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
     private val brukerTokenInfo =
         mockk<BrukerTokenInfo> {
             every { ident() } returns "Z999999"
@@ -635,6 +639,9 @@ class AktivitetspliktServiceTest {
             mockk {
                 every { id } returns UUID.randomUUID()
                 every { status } returns BehandlingStatus.IVERKSATT
+                every { utlandstilknytning } returns null
+                every { boddEllerArbeidetUtlandet } returns null
+                every { opphoerFraOgMed } returns null
             }
         private val frist = Tidspunkt.now()
         private val request =
@@ -662,15 +669,25 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
             coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
             every {
-                automatiskRevurderingService.opprettAutomatiskRevurdering(
+                revurderingService.opprettRevurdering(
                     sakId = sakId,
-                    forrigeBehandling = forrigeBehandling,
-                    revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
-                    virkningstidspunkt = request.behandlingsmaaned.atDay(1).plusMonths(1),
+                    persongalleri = persongalleriOpplysning.opplysning,
+                    forrigeBehandling = forrigeBehandling.id,
+                    prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
-                    persongalleri = persongalleri,
-                    frist = frist,
+                    revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                    virkningstidspunkt =
+                        request.behandlingsmaaned
+                            .atDay(1)
+                            .plusMonths(1)
+                            .tilVirkningstidspunkt("Aktivitetsplikt"),
+                    utlandstilknytning = null,
+                    boddEllerArbeidetUtlandet = null,
                     begrunnelse = request.jobbType.beskrivelse,
+                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    frist = frist,
+                    opphoerFraOgMed = null,
+                    mottattDato = null,
                 )
             } returns
                 mockk { every { oppdater() } returns revurdering }
@@ -730,7 +747,7 @@ class AktivitetspliktServiceTest {
                 nyBehandlingId shouldBe null
                 forrigeBehandlingId shouldBe forrigeBehandling.id // ??
             }
-            verify { automatiskRevurderingService wasNot Called }
+            verify { revurderingService wasNot Called }
         }
 
         @Test
@@ -759,7 +776,7 @@ class AktivitetspliktServiceTest {
                 nyBehandlingId shouldBe null
                 forrigeBehandlingId shouldBe forrigeBehandling.id
             }
-            verify { automatiskRevurderingService wasNot Called }
+            verify { revurderingService wasNot Called }
             verify { oppgaveService wasNot Called }
         }
     }

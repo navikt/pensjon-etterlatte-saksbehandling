@@ -576,7 +576,7 @@ internal class ApplicationContext(
         BehandlingFactory(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
-            revurderingService = automatiskRevurderingService,
+            revurderingService = revurderingService,
             gyldighetsproevingService = gyldighetsproevingService,
             sakService = sakService,
             behandlingDao = behandlingDao,

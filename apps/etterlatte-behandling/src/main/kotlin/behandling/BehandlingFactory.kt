@@ -9,7 +9,7 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -54,7 +55,7 @@ import java.util.UUID
 class BehandlingFactory(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagServiceImpl,
-    private val revurderingService: AutomatiskRevurderingService,
+    private val revurderingService: RevurderingService,
     private val gyldighetsproevingService: GyldighetsproevingService,
     private val sakService: SakService,
     private val behandlingDao: BehandlingDao,
@@ -190,13 +191,21 @@ class BehandlingFactory(
             }
             val forrigeBehandling = request.iverkSattebehandlinger().maxBy { it.behandlingOpprettet }
             revurderingService
-                .opprettAutomatiskRevurdering(
+                .opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleri,
-                    forrigeBehandling = forrigeBehandling,
+                    forrigeBehandling = forrigeBehandling.id,
                     mottattDato = mottattDato,
+                    prosessType = Prosesstype.MANUELL,
                     kilde = kilde,
                     revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                    virkningstidspunkt = null,
+                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
+                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
+                    begrunnelse = null,
+                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    frist = null,
+                    opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
                 ).oppdater()
                 .let { BehandlingOgOppgave(it, null) }
         } else {

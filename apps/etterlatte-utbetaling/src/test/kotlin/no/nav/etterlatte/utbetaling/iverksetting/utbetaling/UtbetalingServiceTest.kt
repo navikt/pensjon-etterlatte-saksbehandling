@@ -5,6 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden

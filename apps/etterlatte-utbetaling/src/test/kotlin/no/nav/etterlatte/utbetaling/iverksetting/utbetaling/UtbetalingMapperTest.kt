@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import Regelverk
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.utbetaling.utbetalingsvedtak
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

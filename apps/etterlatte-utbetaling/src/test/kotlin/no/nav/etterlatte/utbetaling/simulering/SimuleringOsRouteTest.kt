@@ -15,6 +15,7 @@ import io.mockk.slot
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.Periode

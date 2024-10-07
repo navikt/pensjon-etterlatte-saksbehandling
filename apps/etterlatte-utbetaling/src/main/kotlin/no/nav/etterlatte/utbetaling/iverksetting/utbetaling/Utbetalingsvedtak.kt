@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import Regelverk
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto

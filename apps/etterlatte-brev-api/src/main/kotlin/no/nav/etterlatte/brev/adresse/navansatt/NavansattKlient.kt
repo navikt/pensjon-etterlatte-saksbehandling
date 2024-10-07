@@ -49,14 +49,19 @@ class NavansattKlient(
                     .get("$url/navansatt/$ident")
                     .body<SaksbehandlerInfo>()
                     .also {
-                        cache.put(ident, it)
-                        logger.info("Info funnet og cachet for saksbehandler med ident $ident")
+                        try {
+                            cache.put(ident, it)
+                            logger.info("Info funnet og cachet for saksbehandler med ident $ident")
+                        } catch (e: Exception) {
+                            logger.warn("Feil ved caching av saksbehandler med ident $ident", e)
+                        }
                     }
             }
         } catch (re: ResponseException) {
             logger.warn("Fikk ResponseException ved kall mot navansattklient", re)
             throw re
         } catch (exception: Exception) {
+            logger.warn("Feil i kall mot navansatt")
             throw RuntimeException("Feil i kall mot navansatt med ident: $ident", exception)
         }
 }

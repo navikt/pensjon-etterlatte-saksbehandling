@@ -129,7 +129,3 @@ class UtbetalingMapper(
 }
 
 class IngenEksisterendeUtbetalingException : RuntimeException()
-
-class PeriodeManglerRegelverk(
-    override val message: String,
-) : RuntimeException(message)

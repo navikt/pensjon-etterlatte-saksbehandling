@@ -78,6 +78,7 @@ import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.EnvEnum
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -277,24 +278,26 @@ class ApplicationBuilder {
                     }
                 },
             )
-            val ferdigstillJournalfoerOgDistribuerBrev =
-                FerdigstillJournalfoerOgDistribuerBrev(
-                    pdfGenerator,
-                    journalfoerBrevService,
-                    brevdistribuerer,
+            if (isProd()) {
+                val ferdigstillJournalfoerOgDistribuerBrev =
+                    FerdigstillJournalfoerOgDistribuerBrev(
+                        pdfGenerator,
+                        journalfoerBrevService,
+                        brevdistribuerer,
+                    )
+                OpprettJournalfoerOgDistribuerRiver(
+                    rapidsConnection,
+                    grunnlagService,
+                    oppgaveService,
+                    brevoppretter,
+                    ferdigstillJournalfoerOgDistribuerBrev,
                 )
-            OpprettJournalfoerOgDistribuerRiver(
-                rapidsConnection,
-                grunnlagService,
-                oppgaveService,
-                brevoppretter,
-                ferdigstillJournalfoerOgDistribuerBrev,
-            )
 
-            JournalfoerVedtaksbrevRiver(rapidsConnection, journalfoerBrevService)
-            VedtaksbrevUnderkjentRiver(rapidsConnection, vedtaksbrevService)
-            DistribuerBrevRiver(rapidsConnection, brevdistribuerer)
-            SamordningsnotatRiver(rapidsConnection, nyNotatService)
+                JournalfoerVedtaksbrevRiver(rapidsConnection, journalfoerBrevService)
+                VedtaksbrevUnderkjentRiver(rapidsConnection, vedtaksbrevService)
+                DistribuerBrevRiver(rapidsConnection, brevdistribuerer)
+                SamordningsnotatRiver(rapidsConnection, nyNotatService)
+            }
         }
 
     private fun httpClient(

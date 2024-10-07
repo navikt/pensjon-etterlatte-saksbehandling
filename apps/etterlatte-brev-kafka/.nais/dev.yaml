@@ -47,6 +47,8 @@ spec:
     max: 1
     min: 1
   env:
+    - name: KAFKA_RESET_POLICY
+      value: latest
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: BREV_API_URL

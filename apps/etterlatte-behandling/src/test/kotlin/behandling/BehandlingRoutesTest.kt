@@ -230,7 +230,7 @@ internal class BehandlingRoutesTest {
                 client.post("/api/behandling/$behandlingId/tidligere-familiepleier") {
                     header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
                     contentType(ContentType.Application.Json)
-                    setBody(TidligereFamiliepleierRequest(true, "Test", LocalDate.now(), "test"))
+                    setBody(TidligereFamiliepleierRequest(true, "Test", LocalDate.of(1970, 1, 1), LocalDate.now(), "test"))
                 }
 
             assertEquals(200, response.status.value)

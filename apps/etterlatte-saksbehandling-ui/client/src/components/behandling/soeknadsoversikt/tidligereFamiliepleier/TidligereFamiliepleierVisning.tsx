@@ -17,7 +17,13 @@ const TidligereFamiliepleierVisning = (props: { tidligereFamiliepleier: ITidlige
               <BodyShort size="small">{tidligereFamiliepleier.foedselsnummer}</BodyShort>
             </div>
             <div>
-              <Label>Pleieforholdet opphørte </Label>
+              <Label>Pleieforholdet startet</Label>
+              <BodyShort size="small">
+                {formaterDatoMedFallback(tidligereFamiliepleier.startPleieforhold!!, '-')}
+              </BodyShort>
+            </div>
+            <div>
+              <Label>Pleieforholdet opphørte</Label>
               <BodyShort size="small">
                 {formaterDatoMedFallback(tidligereFamiliepleier.opphoertPleieforhold!!, '-')}
               </BodyShort>

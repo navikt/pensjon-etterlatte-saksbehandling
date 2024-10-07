@@ -265,7 +265,7 @@ internal class VedtaksbrevServiceTest {
                 }
             if (sakType == SakType.OMSTILLINGSSTOENAD) {
                 coEvery { beregningService.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns
-                    Avkortingsinfo(LocalDate.now(), listOf(), false)
+                    Avkortingsinfo(LocalDate.now(), listOf())
             }
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(

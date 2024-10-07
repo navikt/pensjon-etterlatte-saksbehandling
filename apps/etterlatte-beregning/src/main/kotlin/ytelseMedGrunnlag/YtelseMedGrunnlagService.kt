@@ -1,10 +1,8 @@
 package no.nav.etterlatte.ytelseMedGrunnlag
 
-import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagPeriodisertDto
@@ -59,19 +57,8 @@ class YtelseMedGrunnlagService(
 
         return YtelseMedGrunnlagDto(
             perioder = avkortinger,
-            inntektForNesteAar = harInntektForNesteAar(avkortingUtenLoependeYtelse, virkningstidspunkt),
         )
     }
-
-    // validerer at det eksisterer et årsoppgjør for neste år
-    // og at det er året etter virkningstidspunktet
-    fun harInntektForNesteAar(
-        avkortingUtenLoependeYtelse: Avkorting,
-        virkningstidspunkt: Virkningstidspunkt,
-    ): Boolean =
-        avkortingUtenLoependeYtelse.aarsoppgjoer.any {
-            it.aar == virkningstidspunkt.dato.year + 1
-        }
 }
 
 class BeregningFinnesIkkeException(

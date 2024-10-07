@@ -5,11 +5,9 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.BeregningRepository
-import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
@@ -43,39 +41,6 @@ internal class YtelseMedGrunnlagServiceTest {
         runBlocking {
             service.hentYtelseMedGrunnlag(UUID.randomUUID(), bruker) shouldBe null
         }
-    }
-
-    @Test
-    fun `inntekt for neste aar skal vaere False hvis kun ett aarsoppgjoer`() {
-        val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1))
-        val avvkorting =
-            Avkorting(
-                listOf(
-                    aarsoppgjoer(
-                        aar = 2024,
-                    ),
-                ),
-            )
-
-        service.harInntektForNesteAar(avvkorting, virkningstidspunkt) shouldBe false
-    }
-
-    @Test
-    fun `inntekt for neste aar skal vaere True hvis mer en ett aarsoppgjoer`() {
-        val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1))
-        val avvkorting =
-            Avkorting(
-                listOf(
-                    aarsoppgjoer(
-                        aar = 2024,
-                    ),
-                    aarsoppgjoer(
-                        aar = 2025,
-                    ),
-                ),
-            )
-
-        service.harInntektForNesteAar(avvkorting, virkningstidspunkt) shouldBe true
     }
 
     @Test
@@ -159,11 +124,7 @@ internal class YtelseMedGrunnlagServiceTest {
                 service.hentYtelseMedGrunnlag(behandlingsId, bruker)
             }
 
-        with(ytelse!!) {
-            inntektForNesteAar shouldBe false
-        }
-
-        with(ytelse.perioder[0]) {
+        with(ytelse!!.perioder[0]) {
             periode shouldBe Periode(fom = YearMonth.of(2024, 2), tom = YearMonth.of(2024, 3))
             ytelseEtterAvkorting shouldBe 15000
             ytelseFoerAvkorting shouldBe 20000

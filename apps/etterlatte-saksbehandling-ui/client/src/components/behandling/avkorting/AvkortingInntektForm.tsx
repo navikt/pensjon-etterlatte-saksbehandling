@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { BodyShort, Button, HStack, Label, ReadMore, Textarea, TextField, VStack } from '@navikt/ds-react'
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { IAvkortingGrunnlagFrontend, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -10,6 +10,8 @@ import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '@reduxjs/toolkit'
+import OverstyrInnvilgaMaander from '~components/behandling/avkorting/OverstyrInnvilgaMaaneder'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const AvkortingInntektForm = ({
   behandling,
@@ -22,6 +24,8 @@ export const AvkortingInntektForm = ({
   erInnevaerendeAar: boolean
   setVisForm: (visForm: boolean) => void
 }) => {
+  const skalKunneOverstyreInnvilgaMaaneder = useFeatureEnabledMedDefault('avkorting-overstyre-innvilga-maaneder', false)
+
   const dispatch = useAppDispatch()
 
   const [lagreAvkortingGrunnlagResult, lagreAvkortingGrunnlagRequest] = useApiCall(lagreAvkortingGrunnlag)
@@ -81,15 +85,16 @@ export const AvkortingInntektForm = ({
     }
   }
 
+  const methods = useForm<IAvkortingGrunnlagLagre>({
+    defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
+  })
   const {
     register,
     reset,
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<IAvkortingGrunnlagLagre>({
-    defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
-  })
+  } = methods
 
   const onSubmit = (data: IAvkortingGrunnlagLagre) => {
     lagreAvkortingGrunnlagRequest(
@@ -113,7 +118,7 @@ export const AvkortingInntektForm = ({
   }
 
   return (
-    <>
+    <FormProvider {...methods}>
       <VStack>
         <HStack marginBlock="8" gap="2" align="start" wrap={false}>
           <TekstFelt
@@ -190,6 +195,7 @@ export const AvkortingInntektForm = ({
             </>
           }
         />
+        {skalKunneOverstyreInnvilgaMaaneder && <OverstyrInnvilgaMaander />}
         <HStack gap="1" marginBlock="4">
           <Button size="small" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
             Lagre
@@ -209,7 +215,7 @@ export const AvkortingInntektForm = ({
         apiResult: lagreAvkortingGrunnlagResult,
         errorMessage: 'En feil har oppstått',
       })}
-    </>
+    </FormProvider>
   )
 }
 

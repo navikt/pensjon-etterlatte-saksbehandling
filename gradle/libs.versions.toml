@@ -4,20 +4,20 @@ versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
 [versions]
-jackson-version = "2.17.2"
-jupiter-version = "5.11.0"
+jackson-version = "2.18.0"
+jupiter-version = "5.11.1"
 ktor2-version = "2.3.12"
 navfelles-token-version = "5.0.5"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.20.1"
+testcontainer-version = "1.20.2"
 tjenestespesifikasjoner-version = "1.1436e29"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
-database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.17.3" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.17.3" }
+database-hikaricp = { module = "com.zaxxer:HikariCP", version = "6.0.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.18.2" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.18.2" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.4" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -92,7 +92,7 @@ test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = 
 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.27.1" }
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.4" }
-openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.3.1" }
+openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.4.0" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

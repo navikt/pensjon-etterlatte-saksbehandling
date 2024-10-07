@@ -27,7 +27,7 @@ class BeregnAvkortingMedToInntektsTest {
             size shouldBe 1
             get(0).shouldBeEqualToIgnoringFields(
                 avkortetYtelse(
-                    periode = Periode(fom = YearMonth.of(2024, Month.JULY), tom = null),
+                    periode = Periode(fom = YearMonth.of(2024, Month.JULY), tom = YearMonth.of(2024, Month.DECEMBER)),
                     ytelseEtterAvkorting = 7758,
                     ytelseEtterAvkortingFoerRestanse = 7758,
                     restanse = null,

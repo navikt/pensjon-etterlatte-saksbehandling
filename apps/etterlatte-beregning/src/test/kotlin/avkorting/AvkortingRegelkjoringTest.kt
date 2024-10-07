@@ -26,7 +26,6 @@ class AvkortingRegelkjoringTest {
             AvkortingRegelkjoring.beregnInntektsavkorting(
                 Periode(fom = virkningstidspunkt.dato, tom = null),
                 avkortingGrunnlag,
-                12,
             )
 
         with(avkortingsperioder[0]) {

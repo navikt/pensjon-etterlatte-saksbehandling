@@ -5,14 +5,17 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 interface GrunnlagKlient {
@@ -20,6 +23,12 @@ interface GrunnlagKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag
+
+    suspend fun aldersovergangMaaned(
+        sakId: SakId,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): YearMonth
 }
 
 class GrunnlagKlientException(
@@ -64,6 +73,39 @@ class GrunnlagKlientImpl(
                 is RetryResult.Failure -> {
                     throw GrunnlagKlientException(
                         "Klarte ikke hente grunnlag for behandling med id=$behandlingId",
+                        it.samlaExceptions(),
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun aldersovergangMaaned(
+        sakId: SakId,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): YearMonth {
+        logger.info("Henter måned for aldersovergang for sak=$sakId saktype=${sakType.name}")
+
+        return retry<YearMonth> {
+            downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/grunnlag/aldersovergang/sak/$sakId/${sakType.name}",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw GrunnlagKlientException(
+                        "Klarte ikke hente måned for aldersovergang for sak=$sakId saktype=${sakType.name}",
                         it.samlaExceptions(),
                     )
                 }

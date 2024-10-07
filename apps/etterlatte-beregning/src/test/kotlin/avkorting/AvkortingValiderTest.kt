@@ -25,12 +25,14 @@ class AvkortingValiderTest {
                 aarsoppgjoer =
                     listOf(
                         aarsoppgjoer(
-                            forventaInnvilgaMaaneder = 11,
                             aar = 2024,
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(
-                                        avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),
+                                        avkortinggrunnlag(
+                                            innvilgaMaaneder = 11,
+                                            periode = Periode(fom = YearMonth.of(2024, 2), tom = null),
+                                        ),
                                     ),
                                 ),
                         ),
@@ -58,15 +60,20 @@ class AvkortingValiderTest {
                 aarsoppgjoer =
                     listOf(
                         aarsoppgjoer(
-                            forventaInnvilgaMaaneder = 12,
                             aar = 2024,
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(
-                                        avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 1), tom = null)),
+                                        avkortinggrunnlag(
+                                            innvilgaMaaneder = 11,
+                                            periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
+                                        ),
                                     ),
                                     Inntektsavkorting(
-                                        avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 2), tom = null)),
+                                        avkortinggrunnlag(
+                                            innvilgaMaaneder = 11,
+                                            periode = Periode(fom = YearMonth.of(2024, 2), tom = null),
+                                        ),
                                     ),
                                 ),
                         ),
@@ -130,12 +137,12 @@ class AvkortingValiderTest {
                     aarsoppgjoer =
                         listOf(
                             aarsoppgjoer(
-                                forventaInnvilgaMaaneder = 12,
                                 aar = 2024,
                                 inntektsavkorting =
                                     listOf(
                                         Inntektsavkorting(
                                             avkortinggrunnlag(
+                                                innvilgaMaaneder = 12,
                                                 periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
                                                 fratrekkInnAar = 100000,
                                                 fratrekkInnAarUtland = 50000,
@@ -182,7 +189,6 @@ class AvkortingValiderTest {
                     aarsoppgjoer =
                         listOf(
                             aarsoppgjoer(
-                                forventaInnvilgaMaaneder = 12,
                                 aar = 2025,
                                 inntektsavkorting = listOf(),
                             ),

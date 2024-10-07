@@ -5,6 +5,7 @@ import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -34,6 +35,7 @@ class AvkortingService(
     private val avkortingRepository: AvkortingRepository,
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
+    private val grunnlagKlient: GrunnlagKlient,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -92,7 +94,7 @@ class AvkortingService(
         val avkorting =
             avkortingRepository.hentAvkorting(behandlingId)
                 ?: throw AvkortingFinnesIkkeException(behandlingId)
-        return avkorting.toDto(behandling.virkningstidspunkt().dato, null)
+        return avkorting.toDto(behandling.virkningstidspunkt().dato)
     }
 
     suspend fun beregnAvkortingMedNyttGrunnlag(
@@ -111,13 +113,21 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
 
+        val aldersovergangMaaned =
+            grunnlagKlient.aldersovergangMaaned(behandling.sak, behandling.sakType, brukerTokenInfo)
+        val opphoerFom =
+            when (aldersovergangMaaned.year) {
+                lagreGrunnlag.fom.year -> aldersovergangMaaned
+                else -> behandling.opphoerFraOgMed
+            }
+
         val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
                 lagreGrunnlag,
                 brukerTokenInfo,
                 beregning,
                 sanksjoner,
-                behandling.opphoerFraOgMed,
+                opphoerFom,
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)

@@ -124,11 +124,21 @@ internal class AvkortingRepositoryTest(
         aar: Int,
         forventaInnvilgaMaaneder: Int = 12,
     ): Aarsoppgjoer {
-        val inntektEn = avkortinggrunnlag(periode = Periode(fom = YearMonth.of(aar, 1), tom = YearMonth.of(aar, 3)))
+        val inntektEn =
+            avkortinggrunnlag(
+                innvilgaMaaneder = forventaInnvilgaMaaneder,
+                periode = Periode(fom = YearMonth.of(aar, 1), tom = YearMonth.of(aar, 3)),
+            )
         val inntektsavkortingEn =
             Inntektsavkorting(
                 grunnlag = inntektEn,
-                avkortingsperioder = listOf(avkortingsperiode(inntektsgrunnlag = inntektEn.id, fom = YearMonth.of(aar, 1))),
+                avkortingsperioder =
+                    listOf(
+                        avkortingsperiode(
+                            inntektsgrunnlag = inntektEn.id,
+                            fom = YearMonth.of(aar, 1),
+                        ),
+                    ),
                 avkortetYtelseForventetInntekt =
                     listOf(
                         avkortetYtelse(
@@ -139,11 +149,21 @@ internal class AvkortingRepositoryTest(
                     ),
             )
 
-        val inntektTo = avkortinggrunnlag(periode = Periode(fom = YearMonth.of(aar, 4), tom = null))
+        val inntektTo =
+            avkortinggrunnlag(
+                innvilgaMaaneder = forventaInnvilgaMaaneder,
+                periode = Periode(fom = YearMonth.of(aar, 4), tom = null),
+            )
         val inntektsavkortingTo =
             Inntektsavkorting(
                 grunnlag = inntektTo,
-                avkortingsperioder = listOf(avkortingsperiode(inntektsgrunnlag = inntektTo.id, fom = YearMonth.of(aar, 4))),
+                avkortingsperioder =
+                    listOf(
+                        avkortingsperiode(
+                            inntektsgrunnlag = inntektTo.id,
+                            fom = YearMonth.of(aar, 4),
+                        ),
+                    ),
                 avkortetYtelseForventetInntekt =
                     listOf(
                         avkortetYtelse(
@@ -157,8 +177,17 @@ internal class AvkortingRepositoryTest(
         return Aarsoppgjoer(
             id = UUID.randomUUID(),
             aar = aar,
-            forventaInnvilgaMaaneder = forventaInnvilgaMaaneder,
-            ytelseFoerAvkorting = listOf(ytelseFoerAvkorting(periode = Periode(fom = YearMonth.of(aar, 1), tom = null))),
+            fom = YearMonth.of(aar, 12),
+            ytelseFoerAvkorting =
+                listOf(
+                    ytelseFoerAvkorting(
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(aar, 1),
+                                tom = null,
+                            ),
+                    ),
+                ),
             inntektsavkorting =
                 listOf(
                     inntektsavkortingEn,

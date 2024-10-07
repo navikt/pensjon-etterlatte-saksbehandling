@@ -1,3 +1,8 @@
+export interface Journalposter {
+  journalposter: Journalpost[]
+  sideInfo: SideInfo
+}
+
 export interface Journalpost {
   journalpostId: string
   tittel: string
@@ -11,6 +16,13 @@ export interface Journalpost {
   sak?: JournalpostSak
   datoOpprettet: string
   utsendingsinfo?: object
+}
+
+export interface SideInfo {
+  sluttpeker: string
+  finnesNesteSide: boolean
+  antall: number
+  totaltAntall: number
 }
 
 export interface JournalpostUtsendingsinfo {

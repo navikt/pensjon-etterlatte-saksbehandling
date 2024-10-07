@@ -105,5 +105,6 @@ data class HentDokumenterRequest(
     val journalstatuser: List<Journalstatus> = emptyList(),
     val journalposttyper: List<Journalposttype> = emptyList(),
     val tema: List<String> = emptyList(),
-    val foerste: Int = 50,
+    val foerste: Int = 10,
+    val etter: String? = null,
 )

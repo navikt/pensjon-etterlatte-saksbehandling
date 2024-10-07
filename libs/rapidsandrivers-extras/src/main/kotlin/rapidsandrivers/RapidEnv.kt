@@ -13,10 +13,10 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import java.util.Properties
 
-fun getRapidEnv(kafkaConsumerGroupName: String = Miljoevariabler.systemEnv()[NAIS_APP_NAME]!!.replace("-", "")): Miljoevariabler =
+fun getRapidEnv(): Miljoevariabler =
     Miljoevariabler
         .systemEnv()
-        .append(RapidKey.KAFKA_CONSUMER_GROUP_ID) { kafkaConsumerGroupName }
+        .append(RapidKey.KAFKA_CONSUMER_GROUP_ID) { it[NAIS_APP_NAME]!!.replace("-", "") }
 
 fun configFromEnvironment(env: Miljoevariabler) =
     if (appIsInGCP()) {

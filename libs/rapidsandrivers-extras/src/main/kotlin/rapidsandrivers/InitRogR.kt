@@ -11,19 +11,13 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 
 fun initRogR(
     applikasjonsnavn: String,
-    kafkaConsumerGroupName: String? = null,
     restModule: (Application.() -> Unit)? = null,
     configFromEnvironment: (Miljoevariabler) -> Config = { AivenConfig.default },
     settOppRivers: (RapidsConnection, rapidEnv: Miljoevariabler) -> Unit,
 ) {
     sikkerLoggOppstartOgAvslutning("etterlatte-$applikasjonsnavn")
 
-    val rapidEnv =
-        if (kafkaConsumerGroupName != null) {
-            getRapidEnv(kafkaConsumerGroupName)
-        } else {
-            getRapidEnv()
-        }
+    val rapidEnv = getRapidEnv()
 
     var builder =
         RapidApplication.Builder(

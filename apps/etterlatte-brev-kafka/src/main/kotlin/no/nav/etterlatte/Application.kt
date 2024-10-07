@@ -46,7 +46,6 @@ class ApplicationBuilder {
     private val connection =
         initRogR(
             applikasjonsnavn = "brev-kafka",
-            kafkaConsumerGroupName = "etterlattebrevapi", // TODO; bruke samme offset som brev-api appen
             configFromEnvironment = { configFromEnvironment(it) },
         ) { rapidsConnection, _ ->
 

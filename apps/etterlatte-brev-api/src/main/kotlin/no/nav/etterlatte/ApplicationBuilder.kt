@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
-import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
@@ -16,7 +15,6 @@ import no.nav.etterlatte.BrevKey.SAF_BASE_URL
 import no.nav.etterlatte.BrevKey.SAF_SCOPE
 import no.nav.etterlatte.EnvKey.DOKARKIV_SCOPE
 import no.nav.etterlatte.EnvKey.DOKARKIV_URL
-import no.nav.etterlatte.EnvKey.NAVANSATT_URL
 import no.nav.etterlatte.EnvKey.NORG2_URL
 import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.brev.BrevService
@@ -30,7 +28,7 @@ import no.nav.etterlatte.brev.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
-import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
+import no.nav.etterlatte.brev.adresse.saksbehandler.SaksbehandlerKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.OppgaveKlient
 import no.nav.etterlatte.brev.brevRoute
@@ -84,7 +82,6 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
 import no.nav.etterlatte.libs.ktor.httpClient
-import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
@@ -108,16 +105,6 @@ class ApplicationBuilder {
 
     private val env = getRapidEnv()
 
-    private val navansattHttpKlient: HttpClient by lazy {
-        val clientCredentialsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
-        httpClientClientCredentials(
-            azureAppClientId = clientCredentialsConfig.getString("clientId"),
-            azureAppJwk = clientCredentialsConfig.getString("clientJwk"),
-            azureAppWellKnownUrl = clientCredentialsConfig.getString("wellKnownUrl"),
-            azureAppScope = config.getString("navansatt.outbound"),
-        )
-    }
-
     private val brevbaker =
         BrevbakerKlient(
             httpClient(BREVBAKER_SCOPE),
@@ -126,7 +113,7 @@ class ApplicationBuilder {
 
     private val regoppslagKlient =
         RegoppslagKlient(httpClient(REGOPPSLAG_SCOPE), env.requireEnvValue(REGOPPSLAG_URL))
-    private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue(NAVANSATT_URL))
+    private val saksbehandlerKlient = SaksbehandlerKlient(config, httpClient())
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     private val beregningKlient = BeregningKlient(config, httpClient())
@@ -141,7 +128,7 @@ class ApplicationBuilder {
 
     private val beregningService = BeregningService(beregningKlient)
     private val norg2Klient = Norg2Klient(env.requireEnvValue(NORG2_URL), httpClient())
-    private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
+    private val adresseService = AdresseService(norg2Klient, saksbehandlerKlient, regoppslagKlient)
 
     private val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)

@@ -117,8 +117,10 @@ class DownstreamResourceClient(
                     response.status.isSuccess() -> {
                         if (response.harContentType(ContentType.Application.Json)) {
                             Ok(response.body<JsonNode>())
+                        } else if (response.harContentType(ContentType.Text.Plain)) {
+                            Ok(response.body<String>())
                         } else {
-                            logger.info("Mottok content-type: ${response.contentType()} som ikke var JSON")
+                            logger.info("Mottok uhåndtert content-type: ${response.contentType()}")
                             Ok(response.status)
                         }
                     }

@@ -83,7 +83,11 @@ class PDFGenerator(
 
         val generellBrevData =
             retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, behandlingId, brev.spraak, bruker) }
-        val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet))
+        val avsender =
+            adresseService.hentAvsender(
+                avsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
+                bruker,
+            )
 
         val brevkodePar =
             brevKodeMapping(

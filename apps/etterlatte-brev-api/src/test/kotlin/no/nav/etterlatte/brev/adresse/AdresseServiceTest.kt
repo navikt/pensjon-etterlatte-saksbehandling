@@ -9,8 +9,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.AvsenderRequest
-import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
-import no.nav.etterlatte.brev.adresse.navansatt.SaksbehandlerInfo
+import no.nav.etterlatte.brev.adresse.saksbehandler.SaksbehandlerKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -20,10 +19,10 @@ import org.junit.jupiter.api.Test
 
 internal class AdresseServiceTest {
     private val norg2Mock = mockk<Norg2Klient>()
-    private val navansattMock = mockk<NavansattKlient>()
+    private val saksbehandlerKlient = mockk<SaksbehandlerKlient>()
     private val regoppslagMock = mockk<RegoppslagKlient>()
 
-    private val adresseService = AdresseService(norg2Mock, navansattMock, regoppslagMock)
+    private val adresseService = AdresseService(norg2Mock, saksbehandlerKlient, regoppslagMock)
 
     @BeforeEach
     fun before() {
@@ -32,16 +31,14 @@ internal class AdresseServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(norg2Mock, navansattMock, regoppslagMock)
+        confirmVerified(norg2Mock, saksbehandlerKlient, regoppslagMock)
     }
 
     @Test
     fun `Hent avsender og attestant fungerer`() {
         coEvery { norg2Mock.hentEnhet(any()) } returns opprettEnhet()
-        coEvery { navansattMock.hentSaksbehandlerInfo(SAKSBEHANDLER) }
-            .returns(opprettSaksbehandlerInfo(SAKSBEHANDLER, "saks", "behandler"))
-        coEvery { navansattMock.hentSaksbehandlerInfo(ATTESTANT) }
-            .returns(opprettSaksbehandlerInfo(ATTESTANT, "att", "estant"))
+        coEvery { saksbehandlerKlient.hentSaksbehandlerNavn(SAKSBEHANDLER, any()) } returns "saks behandler"
+        coEvery { saksbehandlerKlient.hentSaksbehandlerNavn(ATTESTANT, any()) } returns "att estant"
 
         val avsenderRequest =
             AvsenderRequest(
@@ -51,7 +48,7 @@ internal class AdresseServiceTest {
             )
         val faktiskAvsender =
             runBlocking {
-                adresseService.hentAvsender(avsenderRequest)
+                adresseService.hentAvsender(avsenderRequest, mockk())
             }
 
         faktiskAvsender.saksbehandler shouldBe "saks behandler"
@@ -59,8 +56,8 @@ internal class AdresseServiceTest {
 
         coVerify(exactly = 1) {
             norg2Mock.hentEnhet(avsenderRequest.sakenhet)
-            navansattMock.hentSaksbehandlerInfo(avsenderRequest.saksbehandlerIdent)
-            navansattMock.hentSaksbehandlerInfo(avsenderRequest.attestantIdent!!)
+            saksbehandlerKlient.hentSaksbehandlerNavn(avsenderRequest.saksbehandlerIdent, any())
+            saksbehandlerKlient.hentSaksbehandlerNavn(avsenderRequest.attestantIdent!!, any())
         }
     }
 
@@ -69,22 +66,21 @@ internal class AdresseServiceTest {
         val zIdent = "Z123456"
 
         coEvery { norg2Mock.hentEnhet(any()) } returns opprettEnhet()
-        coEvery { navansattMock.hentSaksbehandlerInfo(any()) }
-            .returns(opprettSaksbehandlerInfo(zIdent, "saks", "behandler"))
+        coEvery { saksbehandlerKlient.hentSaksbehandlerNavn(any(), any()) } returns "saks behandler"
 
         val sakId = randomSakId()
         val sak = Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
         val faktiskAvsender =
             runBlocking {
-                adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = zIdent, sakenhet = sak.enhet))
+                adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = zIdent, sakenhet = sak.enhet), mockk())
             }
 
         faktiskAvsender.saksbehandler shouldBe "saks behandler"
 
         coVerify(exactly = 1) {
             norg2Mock.hentEnhet(sak.enhet)
-            navansattMock.hentSaksbehandlerInfo(zIdent)
+            saksbehandlerKlient.hentSaksbehandlerNavn(zIdent, any())
         }
     }
 
@@ -107,12 +103,6 @@ internal class AdresseServiceTest {
                         ),
                 ),
         )
-
-    private fun opprettSaksbehandlerInfo(
-        ident: String,
-        fornavn: String,
-        etternavn: String,
-    ) = SaksbehandlerInfo(ident, "navn", fornavn, etternavn, "epost@nav.no")
 
     companion object {
         private val ANSVARLIG_ENHET = Enheter.defaultEnhet.enhetNr

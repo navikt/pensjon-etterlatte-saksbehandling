@@ -79,7 +79,7 @@ class VarselbrevTest(
                     )
 
                 tomMottaker(SOEKER_FOEDSELSNUMMER)
-                coEvery { it.hentAvsender(any()) } returns
+                coEvery { it.hentAvsender(any(), any()) } returns
                     Avsender(
                         kontor = "",
                         telefonnummer = Telefonnummer("12345678"),

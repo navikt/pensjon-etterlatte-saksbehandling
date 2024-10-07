@@ -101,16 +101,12 @@ spec:
       value: https://dokdistfordeling.prod-fss-pub.nais.io/rest/v1
     - name: DOKDIST_SCOPE
       value: api://prod-fss.teamdokumenthandtering.saf/.default
-    - name: NAVANSATT_URL
-      value: https://navansatt.prod-fss-pub.nais.io
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
     - name: REGOPPSLAG_SCOPE
       value: api://prod-fss.teamdokumenthandtering.regoppslag/.default
     - name: REGOPPSLAG_URL
       value: https://regoppslag.prod-fss-pub.nais.io
-    - name: NAVANSATT_OUTBOUND_SCOPE
-      value: api://prod-fss.pensjondeployer.navansatt/.default
     - name: CLAMAV_ENDPOINT_URL
       value: http://clamav.nais-system.svc.cluster.local
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
@@ -158,7 +154,6 @@ spec:
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: dokdistfordeling.prod-fss-pub.nais.io
         - host: data.brreg.no
-        - host: navansatt.prod-fss-pub.nais.io
         - host: pensjon-brevbaker.intern.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:

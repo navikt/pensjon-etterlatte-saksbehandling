@@ -651,7 +651,15 @@ class VedtakBehandlingService(
                         periode = Periode(opphoerFraOgMed, null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
-                        regelverk = Regelverk.fraDato(opphoerFraOgMed.atDay(1)),
+                        regelverk =
+                            if (perioderMedUtbetaling.any { it.regelverk != null }) {
+                                // Regelverk er satt på periodene - for at det skal bli konsistent mot utbetaling
+                                Regelverk.fraDato(
+                                    opphoerFraOgMed.atDay(1),
+                                )
+                            } else {
+                                null
+                            },
                     ),
                 )
             } else {
@@ -667,8 +675,10 @@ class VedtakBehandlingService(
     ): Regelverk? =
         beregning.beregningsperioder
             .sortedBy { it.datoFOM }
-            .first { fom.isAfter(it.datoFOM) || fom == it.datoFOM }
-            .regelverk
+            .first {
+                (fom.isAfter(it.datoFOM) || fom == it.datoFOM) &&
+                    (it.datoTOM == null || (fom.isBefore(it.datoTOM) || fom == it.datoFOM))
+            }.regelverk
 
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,

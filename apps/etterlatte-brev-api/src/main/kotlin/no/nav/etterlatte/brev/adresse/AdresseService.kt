@@ -11,12 +11,15 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
+import org.slf4j.LoggerFactory
 
 class AdresseService(
     private val norg2Klient: Norg2Klient,
     private val navansattKlient: NavansattKlient,
     private val regoppslagKlient: RegoppslagKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun hentMottakerAdresse(
         sakType: SakType,
         ident: String,
@@ -34,6 +37,8 @@ class AdresseService(
 
     suspend fun hentAvsender(request: AvsenderRequest): Avsender =
         coroutineScope {
+            logger.info("Henter avsendere og enhet: $request")
+
             val saksbehandlerNavn = async { hentSaksbehandlerNavn(request.saksbehandlerIdent) }
 
             val saksbehandlerEnhet =

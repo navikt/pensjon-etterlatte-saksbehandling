@@ -36,8 +36,12 @@ export interface IAvkortingGrunnlagLagre {
   fratrekkInnAarUtland?: number
   spesifikasjon: string
   fom?: string
-  overstyrtInnvilgaMaaneder?: number
-  overstyrtInnvilgaMaanederBegrunnelse?: string
+  overstyrtInnvilgaMaaneder?: IOverstyrtInnvilgaMaaneder
+}
+
+export interface IOverstyrtInnvilgaMaaneder {
+  antall: number
+  begrunnelse: string
 }
 
 export interface IAvkortetYtelse {

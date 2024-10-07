@@ -15,7 +15,6 @@ export default function OverstyrInnvilgaMaander() {
   const toggle = () => {
     if (skalOverstyre) {
       setValue('overstyrtInnvilgaMaaneder', undefined)
-      setValue('overstyrtInnvilgaMaanederBegrunnelse', undefined)
     }
     setSkalOverstyre(!skalOverstyre)
   }
@@ -27,24 +26,24 @@ export default function OverstyrInnvilgaMaander() {
           <VStack>
             <HStack marginBlock="2" gap="2" align="start" wrap={false}>
               <TextField
-                {...register('overstyrtInnvilgaMaaneder', {
+                {...register('overstyrtInnvilgaMaaneder.antall', {
                   pattern: { value: /^\d+$/, message: 'Kun tall' },
                   required: { value: true, message: 'Må fylles ut' },
                 })}
                 label="Antall innvilga måneder"
                 size="medium"
                 inputMode="numeric"
-                error={errors?.overstyrtInnvilgaMaaneder?.message}
+                error={errors?.overstyrtInnvilgaMaaneder?.antall?.message}
               />
               <Box width="17.5rem">
                 <TextField
-                  {...register('overstyrtInnvilgaMaanederBegrunnelse', {
+                  {...register('overstyrtInnvilgaMaaneder.begrunnelse', {
                     required: { value: true, message: 'Må fylles ut' },
                   })}
                   label="Begrunnelse"
                   size="medium"
                   inputMode="text"
-                  error={errors?.overstyrtInnvilgaMaanederBegrunnelse?.message}
+                  error={errors?.overstyrtInnvilgaMaaneder?.begrunnelse?.message}
                 />
               </Box>
             </HStack>

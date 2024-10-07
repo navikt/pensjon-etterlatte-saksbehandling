@@ -33,6 +33,8 @@ export interface DokumentFilter {
   tema: Tema[]
   type: Journalposttype[]
   status: Journalstatus[]
+  foerste?: number
+  etter?: string
 }
 
 export const DokumentFilter = ({

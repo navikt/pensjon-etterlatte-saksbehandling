@@ -4,7 +4,7 @@ import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevErdistribuert
+import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.rapidsandrivers.sakId
 import org.slf4j.LoggerFactory
 
 class BrevService(
@@ -37,7 +36,7 @@ class BrevService(
     suspend fun opprettJournalfoerOgDistribuerRiver(
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
-    ): BrevErdistribuert {
+    ): BrevDistribusjonResponse {
         val (brev, enhetsnummer) =
             brevoppretter.opprettBrevSomHarInnhold(
                 sakId = req.sakId,
@@ -70,11 +69,11 @@ class BrevService(
             distribuerer.distribuer(brevId)
 
             logger.info("Brevid: $brevId er distribuert")
-            return return BrevErdistribuert(brevId, true)
+            return BrevDistribusjonResponse(brevId, true)
         } catch (e: Exception) {
             logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...", e)
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
-            return BrevErdistribuert(brevId, false)
+            return BrevDistribusjonResponse(brevId, false)
         }
     }
 

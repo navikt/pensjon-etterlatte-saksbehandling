@@ -33,7 +33,6 @@ object AvkortingRegelkjoring {
     fun beregnInntektsavkorting(
         periode: Periode,
         avkortingGrunnlag: AvkortingGrunnlag,
-        innvilgaMaaneder: Int,
     ): List<Avkortingsperiode> {
         logger.info("Beregner inntektsavkorting")
 
@@ -56,7 +55,7 @@ object AvkortingRegelkjoring {
                                             fratrekkInnAar = Beregningstall(it.fratrekkInnAar),
                                             inntektUtland = Beregningstall(it.inntektUtland),
                                             fratrekkInnAarUtland = Beregningstall(it.fratrekkInnAarUtland),
-                                            relevanteMaaneder = Beregningstall(innvilgaMaaneder),
+                                            relevanteMaaneder = Beregningstall(it.innvilgaMaaneder),
                                             it.id,
                                         ),
                                     kilde = it.kilde,

@@ -1,0 +1,47 @@
+name: etterlatte-brev-kafka
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+    inputs:
+      deploy-prod:
+        description: 'Deploy til produksjon'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
+  pull_request: # TODO: her mangler vi push som vanligvis deployer ved merge til main
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-brev-kafka/**
+      - "!apps/etterlatte-brev-kafka/.nais/*"
+      - libs/saksbehandling-common/**
+      - libs/etterlatte-ktor/**
+      - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-beregning-model/**
+      - libs/etterlatte-database/**
+      - libs/etterlatte-migrering-model/**
+      - libs/etterlatte-trygdetid-model/**
+      - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-brev-model/**
+      - libs/etterlatte-oppgave-model/**
+      - libs/etterlatte-tilbakekreving-model/**
+      - gradle/libs.versions.toml
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.test.yaml
+    secrets: inherit
+
+  build-and-deploy:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/.build-and-deploy.yaml
+    secrets: inherit

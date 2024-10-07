@@ -15,8 +15,8 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspli
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
@@ -28,7 +28,9 @@ import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetsplikt
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -39,6 +41,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
@@ -50,7 +53,7 @@ class AktivitetspliktService(
     private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao,
     private val behandlingService: BehandlingService,
     private val grunnlagKlient: GrunnlagKlient,
-    private val automatiskRevurderingService: AutomatiskRevurderingService,
+    private val revurderingService: RevurderingService,
     private val statistikkKafkaProducer: BehandlingHendelserKafkaProducer,
     private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
@@ -487,16 +490,22 @@ class AktivitetspliktService(
         persongalleri: Persongalleri,
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter behandling for revurdering av aktivitetsplikt for sak ${request.sakId}")
-        return automatiskRevurderingService
-            .opprettAutomatiskRevurdering(
+        return revurderingService
+            .opprettRevurdering(
                 sakId = request.sakId,
-                forrigeBehandling = forrigeBehandling,
-                revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
-                virkningstidspunkt = aktivitetspliktDato,
-                kilde = Vedtaksloesning.GJENNY,
                 persongalleri = persongalleri,
-                frist = request.frist,
+                forrigeBehandling = forrigeBehandling.id,
+                mottattDato = null,
+                prosessType = Prosesstype.MANUELL,
+                kilde = Vedtaksloesning.GJENNY,
+                revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                virkningstidspunkt = aktivitetspliktDato?.tilVirkningstidspunkt("Aktivitetsplikt"),
+                utlandstilknytning = forrigeBehandling.utlandstilknytning,
+                boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                 begrunnelse = request.jobbType.beskrivelse,
+                saksbehandlerIdent = Fagsaksystem.EY.navn,
+                frist = request.frist,
+                opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
             ).oppdater()
             .let { revurdering ->
                 fjernSaksbehandlerFraRevurderingsOppgave(revurdering)

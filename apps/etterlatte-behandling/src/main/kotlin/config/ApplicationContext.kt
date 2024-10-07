@@ -444,7 +444,7 @@ internal class ApplicationContext(
             aktivitetspliktUnntakDao = aktivitetspliktUnntakDao,
             behandlingService = behandlingService,
             grunnlagKlient = grunnlagKlientImpl,
-            automatiskRevurderingService = automatiskRevurderingService,
+            revurderingService = revurderingService,
             oppgaveService = oppgaveService,
             statistikkKafkaProducer = behandlingsHendelser,
             featureToggleService = featureToggleService,
@@ -576,7 +576,7 @@ internal class ApplicationContext(
         BehandlingFactory(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
-            revurderingService = automatiskRevurderingService,
+            revurderingService = revurderingService,
             gyldighetsproevingService = gyldighetsproevingService,
             sakService = sakService,
             behandlingDao = behandlingDao,

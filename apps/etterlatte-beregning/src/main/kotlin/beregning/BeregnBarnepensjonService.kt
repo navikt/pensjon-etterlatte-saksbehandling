@@ -13,6 +13,7 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.sats.avdodeForeldre2024
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
+import no.nav.etterlatte.beregning.regler.finnAnvendtRegelverkBarnepensjon
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.finnAvdodeForeldre
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
@@ -25,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -181,6 +183,10 @@ class BeregnBarnepensjonService(
                                 periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)
                                     ?: throw AnvendtGrunnbeloepIkkeFunnet()
 
+                            val regelverk =
+                                periodisertResultat.resultat.finnAnvendtRegelverkBarnepensjon()
+                                    ?: throw InternfeilException("Kunne ikke finne anvendt regelverk for barnepensjon")
+
                             val anvendtTrygdetid =
                                 periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)
                                     ?: throw AnvendtTrygdetidIkkeFunnet(
@@ -238,6 +244,7 @@ class BeregnBarnepensjonService(
                                         ).verdi,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
+                                regelverk = regelverk,
                             )
                         },
                 )

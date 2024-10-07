@@ -179,8 +179,8 @@ class VedtaksvurderingRepository(
     ) = utbetalingsperioder.forEach {
         queryOf(
             statement = """
-                    INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) 
-                    VALUES (:vedtakid, :datofom, :datotom, :type, :beloep)
+                    INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep, regelverk) 
+                    VALUES (:vedtakid, :datofom, :datotom, :type, :beloep, :regelverk)
                     """,
             paramMap =
                 mapOf(
@@ -195,6 +195,7 @@ class VedtaksvurderingRepository(
                             ?.let(Date::valueOf),
                     "type" to it.type.name,
                     "beloep" to it.beloep,
+                    "regelverk" to it.regelverk?.name,
                 ),
         ).let { query -> tx.run(query.asUpdate) }
     }
@@ -543,6 +544,7 @@ class VedtaksvurderingRepository(
                 ),
             beloep = bigDecimalOrNull("beloep"),
             type = UtbetalingsperiodeType.valueOf(string("type")),
+            regelverk = stringOrNull("regelverk")?.let { Regelverk.valueOf(it) },
         )
 
     private fun Row.toAvkortetYtelsePeriode() =

@@ -86,6 +86,7 @@ class SimuleringOsRouteTest {
                 periode = Periode(of(2024, FEBRUARY), of(2024, APRIL)),
                 beloep = BigDecimal(2500),
                 type = UtbetalingsperiodeType.UTBETALING,
+                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
             )
         val utbetalingsperiodeMai2024 =
             Utbetalingsperiode(
@@ -93,6 +94,7 @@ class SimuleringOsRouteTest {
                 periode = Periode(of(2024, Month.MAY), null),
                 beloep = BigDecimal(3233),
                 type = UtbetalingsperiodeType.UTBETALING,
+                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
             )
         val vedtak =
             vedtak(

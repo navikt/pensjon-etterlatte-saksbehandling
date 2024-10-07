@@ -144,6 +144,7 @@ internal class BeregnBarnepensjonServiceTest {
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                 }
                 with(beregningsperioder[1]) {
                     datoFOM shouldBe YearMonth.of(2023, Month.MAY)
@@ -203,6 +204,7 @@ internal class BeregnBarnepensjonServiceTest {
                     trygdetid shouldBe PRORATA_TRYGDETID_30_AAR / 2
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                 }
                 beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
             }
@@ -242,6 +244,7 @@ internal class BeregnBarnepensjonServiceTest {
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                 }
                 beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
             }
@@ -466,18 +469,22 @@ internal class BeregnBarnepensjonServiceTest {
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                 }
                 with(beregningsperioder.single { p -> YearMonth.of(2023, 4).equals(p.datoFOM) }) {
                     utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_JAN_23
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                 }
                 with(beregningsperioder.single { p -> YearMonth.of(2023, 5).equals(p.datoFOM) }) {
                     utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_MAI_23
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                 }
                 with(beregningsperioder.single { p -> YearMonth.of(2024, 1).equals(p.datoFOM) }) {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
+                    regelverk shouldBe Regelverk.REGELVERK_FOM_JAN_2024
                 }
             }
         }

@@ -1,0 +1,1 @@
+ALTER TABLE utbetalingsperiode ADD COLUMN regelverk TEXT;

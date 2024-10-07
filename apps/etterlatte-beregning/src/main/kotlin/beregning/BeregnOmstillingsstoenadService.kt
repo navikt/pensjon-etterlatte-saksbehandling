@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import Regelverk
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
@@ -149,6 +150,8 @@ class BeregnOmstillingsstoenadService(
                                 periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)
                                     ?: throw AnvendtGrunnbeloepIkkeFunnet()
 
+                            val regelverk = Regelverk.REGELVERK_FOM_JAN_2024
+
                             val trygdetid =
                                 periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)
                                     ?: throw AnvendtTrygdetidIkkeFunnet(
@@ -180,6 +183,7 @@ class BeregnOmstillingsstoenadService(
                                 broek = trygdetidGrunnlagForPeriode.prorataBroek,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
+                                regelverk = regelverk,
                                 trygdetidForIdent = trygdetidGrunnlagForPeriode.ident,
                                 kilde =
                                     Grunnlagsopplysning.RegelKilde(

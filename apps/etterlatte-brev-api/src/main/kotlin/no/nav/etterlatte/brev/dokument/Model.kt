@@ -54,7 +54,7 @@ data class Journalposter(
 */
 data class SideInfo(
     // 	Når man paginerer forover, pekeren for å fortsette.
-    val sluttpeker: String,
+    val sluttpeker: String? = null,
     // 	True/False verdi for om neste side eksisterer, når man paginerer forover.
     val finnesNesteSide: Boolean,
     // 	Antall journalposter på denne siden.

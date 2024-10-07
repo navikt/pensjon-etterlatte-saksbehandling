@@ -41,7 +41,25 @@ export interface IAvkortingGrunnlagLagre {
 
 export interface IOverstyrtInnvilgaMaaneder {
   antall: number
+  aarsak: IOverstyrtInnvilaMaanederAarsak
   begrunnelse: string
+}
+
+export enum IOverstyrtInnvilaMaanederAarsak {
+  TAR_UT_PENSJON_TIDLIG = 'TAR_UT_PENSJON_TIDLIG',
+  BLIR_67 = 'BLIR_67',
+  ANNEN = 'ANNEN',
+}
+
+export function innvilgaMaanederType(type: IOverstyrtInnvilaMaanederAarsak) {
+  switch (type) {
+    case IOverstyrtInnvilaMaanederAarsak.TAR_UT_PENSJON_TIDLIG:
+      return 'Tar ut pensjon tidlig'
+    case IOverstyrtInnvilaMaanederAarsak.BLIR_67:
+      return 'Blir 67'
+    case IOverstyrtInnvilaMaanederAarsak.ANNEN:
+      return 'Annen'
+  }
 }
 
 export interface IAvkortetYtelse {

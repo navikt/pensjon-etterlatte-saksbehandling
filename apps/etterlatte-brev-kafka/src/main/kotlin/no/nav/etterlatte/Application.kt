@@ -55,16 +55,14 @@ class ApplicationBuilder {
                 },
             )
             // TODO: start med å merge inn uten å aktivere rivers
-            if (false) {
-                OpprettJournalfoerOgDistribuerRiver(
-                    brevapiKlient,
-                    grunnlagKlient,
-                    rapidsConnection,
-                )
-                JournalfoerVedtaksbrevRiver(rapidsConnection, brevapiKlient)
-                VedtaksbrevUnderkjentRiver(rapidsConnection, brevapiKlient)
-                DistribuerBrevRiver(rapidsConnection, brevapiKlient)
-                SamordningsnotatRiver(rapidsConnection, brevapiKlient)
-            }
+            OpprettJournalfoerOgDistribuerRiver(
+                brevapiKlient,
+                grunnlagKlient,
+                rapidsConnection,
+            )
+            JournalfoerVedtaksbrevRiver(rapidsConnection, brevapiKlient)
+            VedtaksbrevUnderkjentRiver(rapidsConnection, brevapiKlient)
+            DistribuerBrevRiver(rapidsConnection, brevapiKlient)
+            SamordningsnotatRiver(rapidsConnection, brevapiKlient)
         }
 }

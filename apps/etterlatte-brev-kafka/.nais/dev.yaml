@@ -41,12 +41,14 @@ spec:
       cpu: 20m
       memory: 512Mi
   replicas:
-    scalingStrategy:
+    scalinguuStrategy:
       cpu:
         thresholdPercentage: 90
     max: 1
     min: 1
   env:
+    - name: KAFKA_RESET_POLICY
+      value: latest
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: BREV_API_URL

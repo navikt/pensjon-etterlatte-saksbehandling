@@ -21,17 +21,9 @@ on:
       - apps/etterlatte-brev-kafka/**
       - "!apps/etterlatte-brev-kafka/.nais/*"
       - libs/saksbehandling-common/**
-      - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
-      - libs/etterlatte-beregning-model/**
-      - libs/etterlatte-database/**
-      - libs/etterlatte-migrering-model/**
-      - libs/etterlatte-trygdetid-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-brev-model/**
-      - libs/etterlatte-oppgave-model/**
-      - libs/etterlatte-tilbakekreving-model/**
       - gradle/libs.versions.toml
 
 permissions:

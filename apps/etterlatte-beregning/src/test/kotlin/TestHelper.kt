@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -148,6 +149,7 @@ fun avkortinggrunnlagLagre(
     aarsinntekt: Int = 100000,
     fratrekkInnAar: Int = 10000,
     fom: YearMonth,
+    overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
 ) = AvkortingGrunnlagLagreDto(
     id = id,
     aarsinntekt = aarsinntekt,
@@ -156,6 +158,7 @@ fun avkortinggrunnlagLagre(
     fratrekkInnAarUtland = 0,
     spesifikasjon = "Spesifikasjon",
     fom = fom,
+    overstyrtInnvilgaMaaneder = overstyrtInnvilgaMaaneder,
 )
 
 fun inntektAvkortingGrunnlag(

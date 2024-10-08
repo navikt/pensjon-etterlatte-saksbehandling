@@ -173,7 +173,14 @@ data class Avkorting(
                                 inntektUtland = nyttGrunnlag.inntektUtland,
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
                                 fratrekkUtAarUtlang = 0,
-                                innvilgaMaaneder = finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, opphoerFom),
+                                innvilgaMaaneder =
+                                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
+                                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, opphoerFom),
+                                overstyrtInnvilgaMaanederAarsak =
+                                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
+                                        OverstyrtInnvilgaMaanederAarsak.valueOf(it)
+                                    },
+                                overstyrtInnvilgaMaanederBegrunnelse = nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse,
                                 spesifikasjon = nyttGrunnlag.spesifikasjon,
                                 kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
                             ),
@@ -442,7 +449,15 @@ data class AvkortingGrunnlag(
     val innvilgaMaaneder: Int,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler,
+    val overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
+    val overstyrtInnvilgaMaanederBegrunnelse: String? = null,
 )
+
+enum class OverstyrtInnvilgaMaanederAarsak {
+    TAR_UT_PENSJON_TIDLIG,
+    BLIR_67,
+    ANNEN,
+}
 
 data class Aarsoppgjoer(
     val id: UUID,

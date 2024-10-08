@@ -258,28 +258,6 @@ class ApplicationBuilder {
                     }
                 },
             )
-            /*
-                val ferdigstillJournalfoerOgDistribuerBrev =
-                    FerdigstillJournalfoerOgDistribuerBrev(
-                        pdfGenerator,
-                        journalfoerBrevService,
-                        brevdistribuerer,
-                    )
-                OpprettJournalfoerOgDistribuerRiver(
-                    rapidsConnection,
-                    grunnlagService,
-                    oppgaveService,
-                    brevoppretter,
-                    ferdigstillJournalfoerOgDistribuerBrev,
-                )
-
-                JournalfoerVedtaksbrevRiver(rapidsConnection, journalfoerBrevService)
-                VedtaksbrevUnderkjentRiver(rapidsConnection, vedtaksbrevService)
-                DistribuerBrevRiver(rapidsConnection, brevdistribuerer)
-                SamordningsnotatRiver(rapidsConnection, nyNotatService)
-            }
-
-             */
         }
 
     private fun httpClient(

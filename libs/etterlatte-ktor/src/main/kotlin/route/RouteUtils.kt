@@ -112,10 +112,20 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     sakTilgangsSjekk: SakTilgangsSjekk,
     skrivetilgang: Boolean = false,
     onSuccess: (id: SakId) -> Unit,
-) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
-    when (brukerTokenInfo) {
+) {
+    val sakId =
+        try {
+            call.parameters[SAKID_CALL_PARAMETER]?.toLong()
+        } catch (e: Exception) {
+            throw UgyldigForespoerselException("SAKID_IKKE_TALL", "Kunne ikke lese ut sakId-parameter")
+        }
+    if (sakId == null) {
+        throw UgyldigForespoerselException("SAKID_MANGLER", "Mangler påkrevd sakId som parameter")
+    }
+    when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
-            val harTilgangTilSak = sakTilgangsSjekk.harTilgangTilSak(sakId, skrivetilgang, brukerTokenInfo as Saksbehandler)
+            val harTilgangTilSak =
+                sakTilgangsSjekk.harTilgangTilSak(sakId, skrivetilgang, token)
             if (harTilgangTilSak) {
                 onSuccess(sakId)
             } else {
@@ -124,7 +134,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
             }
         }
 
-        else -> onSuccess(sakId)
+        is Systembruker -> onSuccess(sakId)
     }
 }
 

@@ -88,6 +88,13 @@ data class AvkortingGrunnlagLagreDto(
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
     val fom: YearMonth,
+    val overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
+)
+
+data class AvkortingOverstyrtInnvilgaMaanederDto(
+    val antall: Int,
+    val aarsak: String,
+    val begrunnelse: String,
 )
 
 data class AvkortingGrunnlagKildeDto(

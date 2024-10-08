@@ -57,9 +57,6 @@ spec:
       cpu: 20m
       memory: 320Mi
   replicas:
-    scalingStrategy:
-      cpu:
-        thresholdPercentage: 90
     max: 1
     min: 1
   env:

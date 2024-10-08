@@ -74,7 +74,7 @@ class BrevapiKlient(
             throw ForespoerselException(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_KAN_IKKE_DISTRIBUERE_BREV",
-                detail = "Kunne ikke opprette brev brev med id: $brevId",
+                detail = "Kunne ikke distribuere brev med id: $brevId",
             )
         }
     }

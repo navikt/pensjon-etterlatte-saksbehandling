@@ -27,11 +27,15 @@ where behandling_type = 'KLAGE'
 -- gamle saker som ligger i databasen
 update sak s
 set sak_utland = fasit.sak_utland
-from (select distinct on (behandling_id) behandling_id, sak_utland from sak
-    where sak_utland is not null order by behandling_id, teknisk_tid desc
-) as fasit
+from (select distinct on (behandling_id) behandling_id, sak_utland
+      from sak
+      where sak_utland is not null
+      order by behandling_id, teknisk_tid desc) as fasit
 where s.behandling_id = fasit.behandling_id
-and s.sak_utland is null;
+  and s.behandling_type = 'REVURDERING'
+  and s.sak_utland is null;
 
--- Fjerner en duplisert hendelse på grunn av en bug i ferdigstilling
-delete from sak where id = 144748;
+-- Fjerner en duplisert hendelse på grunn av en bug i ferdigstilling klage
+delete
+from sak
+where id = 144748;

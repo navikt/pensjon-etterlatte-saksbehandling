@@ -17,6 +17,7 @@ import no.nav.etterlatte.beregning.regler.sanksjon
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.periode.Periode
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.Month
 import java.time.YearMonth
@@ -1179,6 +1180,56 @@ class BeregnAvkortingTest {
         }
     }
 
+    /**
+     * Hvis du får en sanksjon på grunn av at du ikke jobber en måned (du tar permisjon), så vil den sammenhengende
+     * inntektsendringen (minus en måned inntekt) gjøre at du kommer bedre ut av det (slik det ser ut nå).
+     *
+     * Vi må verifisere om det er slik i beregningen vår, og i så fall må vi korrigere. Problemet er nok at vi
+     * avkorter mot en måned (der vi har sanksjon), men den måneden kan vi ikke avkorte noe mot.
+     *
+     * Konkret i eksempelet her har man en årsinntekt på 400 000, da med 33 333 kroner i måneden. Hvis bruker tar
+     * permisjon en måned bryter de aktivitetskravet den måneden (hypotetisk), så vi setter inn en stans.
+     *
+     * Når vi starter ytelsen igjen tar vi med en oppdatert årsinntekt på 400 000 - 33 333 ~= 366 667, siden de
+     * mister inntekten for den måneden de tok permisjon. Nå kompanserer vi for den avkortingen vi gjorde for mye
+     * tidligere, og bruker ender opp med mer utbetalt fra oss enn hvis de ikke tok en måned permisjon (når testen
+     * feiler).
+     *
+     * Problemet stammer nok fra at man får "credit" for å ha avkortet en del i måneden der man har sanksjon, men
+     * det har man i praksis ikke. Dermed må den avkortingen fordeles på de andre månedene med ytelse.
+     */
+    @Test
+    fun `stans en måned på grunn av manglende aktivitet + reduksjon av årsinntekt med en måned skal ikke lønne seg`() {
+        val foersteberegning =
+            `Avkorting førstegang 400000 årsinntekt`()
+                .aarsoppgjoer
+                .single()
+                .avkortetYtelseAar
+        val andreBeregning =
+            `Revurdering lukker sanksjon en måned + redusert inntekt`()
+                .aarsoppgjoer
+                .single()
+                .avkortetYtelseAar
+
+        val mapUtbetaltFoerst = mutableMapOf<YearMonth, Int>()
+        val mapUtbetaltSenere = mutableMapOf<YearMonth, Int>()
+
+        for (i in 1..12) {
+            val maaned = YearMonth.of(2024, i)
+            val foerst =
+                foersteberegning.find { it.periode.fom <= maaned && (it.periode.tom ?: maaned) >= maaned }?.ytelseEtterAvkorting ?: 0
+            val senere =
+                andreBeregning.find { it.periode.fom <= maaned && (it.periode.tom ?: maaned) >= maaned }?.ytelseEtterAvkorting ?: foerst
+            mapUtbetaltFoerst[maaned] = foerst
+            mapUtbetaltSenere[maaned] = senere
+        }
+
+        val total1 = mapUtbetaltFoerst.map { it.value }.sum()
+        val total2 = mapUtbetaltSenere.map { it.value }.sum()
+
+        Assertions.assertTrue(total1 >= total2)
+    }
+
     @Test
     fun `Skal kunne reberegne avkorting uten endring for en revurdering med virk i mellom inntektsperioder`() {
         val avkorting = `Revurdering med virk mellom inntektsperioder`()
@@ -2292,5 +2343,98 @@ class BeregnAvkortingTest {
                     ),
                 sanksjoner = emptyList(),
                 opphoerFom = YearMonth.of(2026, Month.JULY),
+            )
+
+    private fun `Avkorting førstegang 400000 årsinntekt`() =
+        Avkorting()
+            .beregnAvkortingMedNyttGrunnlag(
+                nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 400_000,
+                        fratrekkInnAar = 0,
+                        fom = YearMonth.of(2024, Month.JANUARY),
+                    ),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.JANUARY),
+                                    datoTOM = null,
+                                    utbetaltBeloep = 23_255,
+                                ),
+                            ),
+                    ),
+                sanksjoner = emptyList(),
+                opphoerFom = null,
+            )
+
+    private fun `Revurdering sanksjon stans start`() =
+        `Avkorting førstegang 400000 årsinntekt`()
+            .kopierAvkorting()
+            .beregnAvkortingMedNyttGrunnlag(
+                nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 400_000,
+                        fratrekkInnAar = 0,
+                        fom = YearMonth.of(2024, Month.MARCH),
+                    ),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MARCH),
+                                    datoTOM = null,
+                                    utbetaltBeloep = 23_255,
+                                ),
+                            ),
+                    ),
+                sanksjoner =
+                    listOf(
+                        sanksjon(
+                            fom = YearMonth.of(2024, Month.MARCH),
+                            tom = null,
+                            type = SanksjonType.STANS,
+                            beskrivelse = "",
+                        ),
+                    ),
+                opphoerFom = null,
+            )
+
+    private fun `Revurdering lukker sanksjon en måned + redusert inntekt`() =
+        `Revurdering sanksjon stans start`()
+            .kopierAvkorting()
+            .beregnAvkortingMedNyttGrunnlag(
+                nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 366_667,
+                        fratrekkInnAar = 0,
+                        fom = YearMonth.of(2024, Month.APRIL),
+                    ),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.APRIL),
+                                    datoTOM = null,
+                                    utbetaltBeloep = 23_255,
+                                ),
+                            ),
+                    ),
+                sanksjoner =
+                    listOf(
+                        sanksjon(
+                            fom = YearMonth.of(2024, Month.MARCH),
+                            tom = YearMonth.of(2024, Month.MARCH),
+                            type = SanksjonType.STANS,
+                            beskrivelse = "",
+                        ),
+                    ),
+                opphoerFom = null,
             )
 }

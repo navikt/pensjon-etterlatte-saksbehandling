@@ -45,7 +45,8 @@ export const BeregningsMetodeBrukt = ({
   const personopplysninger = usePersonopplysninger()
 
   const eksisterendeMetode = behandling.beregningsGrunnlag?.beregningsMetode
-  const kunEnJuridiskForelder =
+  const kunEnJuridiskForelder = !!behandling.beregningsGrunnlag?.kunEnJuridiskForelder
+  const kunEnJuridiskForelderPersongalleri =
     personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 
   const toFormData = (
@@ -111,7 +112,7 @@ export const BeregningsMetodeBrukt = ({
                   <>
                     <form onSubmit={handleSubmit(lagreBeregningsMetode)}>
                       <VStack gap="4">
-                        {kunEnJuridiskForelder && (
+                        {kunEnJuridiskForelderPersongalleri && (
                           <ControlledMaanedVelger
                             name="datoTilKunEnJuridiskForelder"
                             label="Til og med dato for kun én juridisk forelder(Valgfritt)"

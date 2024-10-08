@@ -46,24 +46,24 @@ import { ControlledRadioGruppe } from '~shared/components/radioGruppe/Controlled
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { tagTekstForKunEnJuridiskForelder } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
+import { AnnenForelderVurdering } from '~shared/types/grunnlag'
 
 interface Props {
   behandling: IBehandlingReducer
   trygdetid: ITrygdetid
   redigerbar: boolean
-  erEnesteJuridiskeForelder: boolean
+  erTidligsteAvdoede: boolean
 }
 
-export const BeregningsMetodeRadForAvdoed = ({
-  behandling,
-  trygdetid,
-  redigerbar,
-  erEnesteJuridiskeForelder,
-}: Props) => {
+export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar, erTidligsteAvdoede }: Props) => {
   const dispatch = useAppDispatch()
   const [redigerModus, setRedigerModus] = useState<boolean>(false)
   const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
   const personopplysninger = usePersonopplysninger()
+
+  const erEnesteJuridiskeForelder = erTidligsteAvdoede && !!behandling.beregningsGrunnlag?.kunEnJuridiskForelder
+  const kunEnJuridiskForelderPersongalleri =
+    personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 
   const avdoedesNavn = (): string => {
     const opplysning = personopplysninger?.avdoede?.find(
@@ -97,15 +97,14 @@ export const BeregningsMetodeRadForAvdoed = ({
       avdoed: trygdetid.ident,
     },
     datoTilKunEnJuridiskForelder:
-      erEnesteJuridiskeForelder && !!behandling?.beregningsGrunnlag?.kunEnJuridiskForelder
+      erTidligsteAvdoede && !!behandling?.beregningsGrunnlag?.kunEnJuridiskForelder
         ? periodisertBeregningsgrunnlagFraDto(behandling.beregningsGrunnlag.kunEnJuridiskForelder).tom
         : undefined,
   })
 
-  const beregningsmetodeFormdataForAvdoed = (
-    beregningsMetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined
-  ): BeregningsmetodeForAvdoedForm => {
-    return defaultBeregningsMetodeFormData(beregningsMetode)
+  const beregningsmetodeFormdataForAvdoed = () => {
+    const metode = finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)
+    return defaultBeregningsMetodeFormData(metode)
   }
 
   const finnPeriodisertBeregningsmetodeForAvdoed = (
@@ -154,13 +153,14 @@ export const BeregningsMetodeRadForAvdoed = ({
             .filter((metode) => metode.data.avdoed !== nyMetode.data.avdoed)
             .concat(mapListeTilDto([nyMetode]))
         : mapListeTilDto([nyMetode]),
-      kunEnJuridiskForelder: erEnesteJuridiskeForelder
-        ? periodisertBeregningsgrunnlagTilDto({
-            fom: nyMetode.fom,
-            tom: beregningsmetodeFormData.datoTilKunEnJuridiskForelder,
-            data: {},
-          })
-        : undefined,
+      kunEnJuridiskForelder:
+        erTidligsteAvdoede && kunEnJuridiskForelderPersongalleri
+          ? periodisertBeregningsgrunnlagTilDto({
+              fom: nyMetode.fom,
+              tom: beregningsmetodeFormData.datoTilKunEnJuridiskForelder,
+              data: {},
+            })
+          : behandling.beregningsGrunnlag?.kunEnJuridiskForelder,
     })
   }
 
@@ -172,9 +172,7 @@ export const BeregningsMetodeRadForAvdoed = ({
             (metode) => metode.data.avdoed !== trygdetid.ident
           )
         : [],
-      kunEnJuridiskForelder: erEnesteJuridiskeForelder
-        ? undefined
-        : behandling?.beregningsGrunnlag?.kunEnJuridiskForelder,
+      kunEnJuridiskForelder: erTidligsteAvdoede ? undefined : behandling?.beregningsGrunnlag?.kunEnJuridiskForelder,
     })
   }
 
@@ -182,7 +180,7 @@ export const BeregningsMetodeRadForAvdoed = ({
     finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)
 
   const { register, control, getValues, handleSubmit, reset } = useForm<BeregningsmetodeForAvdoedForm>({
-    defaultValues: beregningsmetodeFormdataForAvdoed(finnPeriodisertBeregningsmetodeForAvdoed(trygdetid.ident)),
+    defaultValues: beregningsmetodeFormdataForAvdoed(),
   })
 
   useEffect(() => {
@@ -214,7 +212,7 @@ export const BeregningsMetodeRadForAvdoed = ({
           <>
             <form onSubmit={handleSubmit(oppdaterBeregningsMetodeForAvdoed)}>
               <VStack gap="4">
-                {erEnesteJuridiskeForelder && (
+                {erTidligsteAvdoede && kunEnJuridiskForelderPersongalleri && (
                   <ControlledMaanedVelger
                     name="datoTilKunEnJuridiskForelder"
                     label="Til og med dato for kun én juridisk forelder(Valgfritt)"

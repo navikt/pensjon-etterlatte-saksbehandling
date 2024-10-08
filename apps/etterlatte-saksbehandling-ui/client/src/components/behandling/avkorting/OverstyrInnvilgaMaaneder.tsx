@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import { Box, Button, Heading, HStack, Select, TextField, VStack } from '@navikt/ds-react'
 import { useFormContext } from 'react-hook-form'
 import {
+  hentLesbarTekstForInnvilgaMaanederType,
   IAvkortingGrunnlagLagre,
-  innvilgaMaanederType,
-  IOverstyrtInnvilaMaanederAarsak,
+  OverstyrtInnvilaMaanederAarsak,
 } from '~shared/types/IAvkorting'
 
 export default function OverstyrInnvilgaMaander() {
@@ -12,13 +12,13 @@ export default function OverstyrInnvilgaMaander() {
 
   const {
     register,
-    setValue,
+    reset,
     formState: { errors },
   } = useFormContext<IAvkortingGrunnlagLagre>()
 
-  const toggle = () => {
+  const toggleOverstyrtInnvilgaMaaneder = () => {
     if (skalOverstyre) {
-      setValue('overstyrtInnvilgaMaaneder', undefined)
+      reset({ overstyrtInnvilgaMaaneder: undefined })
     }
     setSkalOverstyre(!skalOverstyre)
   }
@@ -48,9 +48,9 @@ export default function OverstyrInnvilgaMaander() {
                 error={errors?.overstyrtInnvilgaMaaneder?.aarsak?.message}
               >
                 <option value="">Velg årsak</option>
-                {Object.values(IOverstyrtInnvilaMaanederAarsak).map((type) => (
+                {Object.values(OverstyrtInnvilaMaanederAarsak).map((type) => (
                   <option key={type} value={type}>
-                    {innvilgaMaanederType(type as IOverstyrtInnvilaMaanederAarsak)}
+                    {hentLesbarTekstForInnvilgaMaanederType(type as OverstyrtInnvilaMaanederAarsak)}
                   </option>
                 ))}
               </Select>
@@ -67,14 +67,14 @@ export default function OverstyrInnvilgaMaander() {
               </Box>
             </HStack>
             <HStack>
-              <Button size="small" variant="secondary" onClick={toggle}>
+              <Button size="small" variant="secondary" onClick={toggleOverstyrtInnvilgaMaaneder}>
                 Fjern overstyrt innvilga måneder
               </Button>
             </HStack>
           </VStack>
         </>
       ) : (
-        <Button size="small" variant="danger" onClick={toggle}>
+        <Button size="small" variant="danger" onClick={toggleOverstyrtInnvilgaMaaneder}>
           Overstyr innvilga måneder
         </Button>
       )}

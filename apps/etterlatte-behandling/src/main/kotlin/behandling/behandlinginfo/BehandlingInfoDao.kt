@@ -13,7 +13,7 @@ import java.util.UUID
 class BehandlingInfoDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun lagreOmgjoeringSluttbehandlingUtland(
+    fun lagreErOmgjoeringSluttbehandlingUtland(
         id: UUID,
         sluttbehandlingUtland: Boolean,
     ) {
@@ -28,7 +28,7 @@ class BehandlingInfoDao(
                     """.trimIndent(),
                 ).apply {
                     setObject(1, id)
-                    setJsonb(2, sluttbehandlingUtland)
+                    setBoolean(2, sluttbehandlingUtland)
                 }.run { executeUpdate() }
             }
         }
@@ -49,7 +49,7 @@ class BehandlingInfoDao(
                         if (next()) {
                             getBoolean("omgjoering_sluttbehandling_utland")
                         } else {
-                            throw InternfeilException("Fant ingen data for OmgjoeringSluttbehandlingUtland for behandlingId: $behandlingId")
+                            false // TODO: returnere false eller kaste exception?
                         }
                     }
             }

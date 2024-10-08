@@ -37,11 +37,11 @@ class BehandlingInfoService(
         return Pair(lagretBrevutfall, lagretEtterbetaling)
     }
 
-    fun lagreOmgjoeringSluttbehandlingUtland(
+    fun lagreErOmgjoeringSluttbehandlingUtland(
         behandling: Behandling,
         sluttbehandlingUtland: Boolean,
     ) {
-        behandlingInfoDao.lagreOmgjoeringSluttbehandlingUtland(behandling.id, sluttbehandlingUtland)
+        behandlingInfoDao.lagreErOmgjoeringSluttbehandlingUtland(behandling.id, sluttbehandlingUtland)
     }
 
     fun hentErOmgjoeringSluttbehandlingUtland(behandlingId: UUID) {

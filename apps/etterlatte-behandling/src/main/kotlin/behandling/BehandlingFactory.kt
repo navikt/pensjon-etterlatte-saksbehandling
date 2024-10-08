@@ -304,7 +304,7 @@ class BehandlingFactory(
                     )
 
                 if (omgjoeringRequest.sluttbehandlingUtland) {
-                    behandlingInfoService.lagreOmgjoeringSluttbehandlingUtland(
+                    behandlingInfoService.lagreErOmgjoeringSluttbehandlingUtland(
                         nyFoerstegangsbehandling,
                         true,
                     )

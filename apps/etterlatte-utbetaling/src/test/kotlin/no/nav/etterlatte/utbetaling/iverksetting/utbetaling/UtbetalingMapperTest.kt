@@ -13,23 +13,25 @@ class UtbetalingMapperTest {
     fun `skal gi riktig klassifikasjonskode for barnepensjon foer og etter regelverksendring fra 2024`() {
         val mapper =
             UtbetalingMapper(
-                emptyList(),
-                utbetalingsvedtak(
-                    utbetalingsperioder =
-                        listOf(
-                            utbetalingsperiode(
-                                YearMonth.of(2023, Month.JANUARY),
-                                YearMonth.of(2023, Month.DECEMBER),
-                                Regelverk.REGELVERK_TOM_DES_2023,
+                tidligereUtbetalinger = emptyList(),
+                vedtak =
+                    utbetalingsvedtak(
+                        utbetalingsperioder =
+                            listOf(
+                                utbetalingsperiode(
+                                    YearMonth.of(2023, Month.JANUARY),
+                                    YearMonth.of(2023, Month.DECEMBER),
+                                    Regelverk.REGELVERK_TOM_DES_2023,
+                                ),
+                                utbetalingsperiode(
+                                    YearMonth.of(2024, Month.JANUARY),
+                                    null,
+                                    Regelverk.REGELVERK_FOM_JAN_2024,
+                                ),
                             ),
-                            utbetalingsperiode(
-                                YearMonth.of(2024, Month.JANUARY),
-                                null,
-                                Regelverk.REGELVERK_FOM_JAN_2024,
-                            ),
-                        ),
-                    sakType = Saktype.BARNEPENSJON,
-                ),
+                        sakType = Saktype.BARNEPENSJON,
+                    ),
+                skalBrukeRegelverk = true,
             )
 
         val utbetaling = mapper.opprettUtbetaling()
@@ -43,20 +45,22 @@ class UtbetalingMapperTest {
     fun `skal gi riktig klassifikasjonskode for barnepensjon foer og etter regelverksendring fra 2024 uten regelverk satt`() {
         val mapper =
             UtbetalingMapper(
-                emptyList(),
-                utbetalingsvedtak(
-                    utbetalingsperioder =
-                        listOf(
-                            utbetalingsperiode(
-                                YearMonth.of(2023, Month.JANUARY),
-                                YearMonth.of(2023, Month.DECEMBER),
+                tidligereUtbetalinger = emptyList(),
+                vedtak =
+                    utbetalingsvedtak(
+                        utbetalingsperioder =
+                            listOf(
+                                utbetalingsperiode(
+                                    YearMonth.of(2023, Month.JANUARY),
+                                    YearMonth.of(2023, Month.DECEMBER),
+                                ),
+                                utbetalingsperiode(
+                                    YearMonth.of(2024, Month.JANUARY),
+                                ),
                             ),
-                            utbetalingsperiode(
-                                YearMonth.of(2024, Month.JANUARY),
-                            ),
-                        ),
-                    sakType = Saktype.BARNEPENSJON,
-                ),
+                        sakType = Saktype.BARNEPENSJON,
+                    ),
+                skalBrukeRegelverk = true,
             )
 
         val utbetaling = mapper.opprettUtbetaling()
@@ -70,18 +74,20 @@ class UtbetalingMapperTest {
     fun `skal gi riktig klassifikasjonskode for omstillingsstoenad fra 2024`() {
         val mapper =
             UtbetalingMapper(
-                emptyList(),
-                utbetalingsvedtak(
-                    utbetalingsperioder =
-                        listOf(
-                            utbetalingsperiode(
-                                YearMonth.of(2024, Month.JANUARY),
-                                null,
-                                Regelverk.REGELVERK_FOM_JAN_2024,
+                tidligereUtbetalinger = emptyList(),
+                vedtak =
+                    utbetalingsvedtak(
+                        utbetalingsperioder =
+                            listOf(
+                                utbetalingsperiode(
+                                    YearMonth.of(2024, Month.JANUARY),
+                                    null,
+                                    Regelverk.REGELVERK_FOM_JAN_2024,
+                                ),
                             ),
-                        ),
-                    sakType = Saktype.OMSTILLINGSSTOENAD,
-                ),
+                        sakType = Saktype.OMSTILLINGSSTOENAD,
+                    ),
+                skalBrukeRegelverk = true,
             )
 
         val utbetaling = mapper.opprettUtbetaling()

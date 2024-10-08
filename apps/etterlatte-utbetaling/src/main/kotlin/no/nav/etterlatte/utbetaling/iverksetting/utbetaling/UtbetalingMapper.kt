@@ -13,6 +13,7 @@ class UtbetalingMapper(
     val vedtak: Utbetalingsvedtak,
     val utbetalingId: UUID = UUID.randomUUID(),
     val opprettet: Tidspunkt = Tidspunkt.now(),
+    val skalBrukeRegelverk: Boolean = false,
 ) {
     private val utbetalingsperioder = vedtak.pensjonTilUtbetaling.sortedBy { it.periode.fom }
 
@@ -93,11 +94,15 @@ class UtbetalingMapper(
             OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP
         }
         Saktype.BARNEPENSJON -> {
-            // TODO i en overgangsperiode vil det finnes en del vedtak uten regelverk satt - kompenserer for dette her
-            val regelverk = utbetalingsperiode.regelverk ?: Regelverk.fraDato(utbetalingsperiode.periode.fom.atDay(1))
-            when (regelverk) {
-                Regelverk.REGELVERK_TOM_DES_2023 -> OppdragKlassifikasjonskode.BARNEPEFOER2024_OPTP
-                Regelverk.REGELVERK_FOM_JAN_2024 -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
+            if (skalBrukeRegelverk) {
+                // TODO i en overgangsperiode vil det finnes en del vedtak uten regelverk satt - kompenserer for dette her
+                val regelverk = utbetalingsperiode.regelverk ?: Regelverk.fraDato(utbetalingsperiode.periode.fom.atDay(1))
+                when (regelverk) {
+                    Regelverk.REGELVERK_TOM_DES_2023 -> OppdragKlassifikasjonskode.BARNEPEFOER2024_OPTP
+                    Regelverk.REGELVERK_FOM_JAN_2024 -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
+                }
+            } else {
+                OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
             }
         }
     }

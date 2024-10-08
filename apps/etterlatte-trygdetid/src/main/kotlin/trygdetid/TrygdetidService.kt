@@ -526,6 +526,18 @@ class TrygdetidServiceImpl(
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        // Merk: vi kan ikke bruke den vanlige sjekken på kanOppdatereTrygdetid, siden dette kallet skjer typisk
+        // når behandlingen akkurat er opprettet. Men det er viktig at vi ikke tillater endringer hvis behandlingen
+        // ikke kan endres.
+        if (behandling.status !in BehandlingStatus.kanEndres()) {
+            throw IkkeTillattException(
+                "BEHANLDING_KAN_IKKE_ENDRES",
+                "Kan ikke opprette overstyrt trygdetid i en behandling som ikke kan endres",
+            )
+        }
+
         val trygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
 
         if (trygdetider.isNotEmpty()) {
@@ -536,7 +548,6 @@ class TrygdetidServiceImpl(
                 throw TrygdetidAlleredeOpprettetException()
             }
         }
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
 
         val avdoede =

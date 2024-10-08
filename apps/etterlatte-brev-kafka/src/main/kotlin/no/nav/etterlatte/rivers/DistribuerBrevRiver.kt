@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -23,7 +22,7 @@ internal class DistribuerBrevRiver(
 
     init {
         initialiserRiver(rapidsConnection, BrevHendelseType.JOURNALFOERT) {
-            validate { it.requireKey(BREV_ID_KEY, "journalpostId", "distribusjonType", SAK_ID_KEY) }
+            validate { it.requireKey(BREV_ID_KEY, "journalpostId", "distribusjonType") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.rejectKey("bestillingsId") }
         }

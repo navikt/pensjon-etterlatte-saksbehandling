@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -65,7 +64,6 @@ internal class JournalfoerVedtaksbrevRiver(
                     packet,
                     journalfoervedtaksbrevResponse.brevId,
                     journalfoervedtaksbrevResponse.opprettetJournalpost.journalpostId,
-                    vedtak,
                 )
             }
         } catch (e: Exception) {
@@ -80,12 +78,10 @@ internal class JournalfoerVedtaksbrevRiver(
         packet: JsonMessage,
         brevId: BrevID,
         journalpostId: String,
-        vedtakTilJournalfoering: VedtakTilJournalfoering,
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
         packet.setEventNameForHendelseType(BrevHendelseType.JOURNALFOERT)
         packet[BREV_ID_KEY] = brevId
-        packet[SAK_ID_KEY] = vedtakTilJournalfoering.sak.id
         packet["journalpostId"] = journalpostId
         packet["distribusjonType"] =
             DistribusjonsType.VEDTAK.name

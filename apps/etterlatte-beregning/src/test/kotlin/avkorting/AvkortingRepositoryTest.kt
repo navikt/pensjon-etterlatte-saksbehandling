@@ -128,6 +128,8 @@ internal class AvkortingRepositoryTest(
             avkortinggrunnlag(
                 innvilgaMaaneder = forventaInnvilgaMaaneder,
                 periode = Periode(fom = YearMonth.of(aar, 1), tom = YearMonth.of(aar, 3)),
+                overstyrtInnvilgaMaanederAarsak = OverstyrtInnvilgaMaanederAarsak.ANNEN,
+                overstyrtInnvilgaMaanederBegrunnelse = "overstyrtInnvilgaMaanederBegrunnelse",
             )
         val inntektsavkortingEn =
             Inntektsavkorting(

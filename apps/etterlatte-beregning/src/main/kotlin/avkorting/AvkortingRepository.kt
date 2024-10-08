@@ -241,10 +241,12 @@ class AvkortingRepository(
             """
             INSERT INTO avkortingsgrunnlag(
                 id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, inntekt_utland, fratrekk_inn_aar_utland,
-                spesifikasjon, kilde, aarsoppgjoer_id, relevante_maaneder
+                spesifikasjon, kilde, aarsoppgjoer_id, relevante_maaneder,
+                overstyrt_innvilga_maaneder_aarsak, overstyrt_innvilga_maaneder_begrunnelse
             ) VALUES (
                 :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :inntektUtland, :fratrekkInnAarUtland,
-                :spesifikasjon, :kilde, :aarsoppgjoerId, :relevanteMaaneder
+                :spesifikasjon, :kilde, :aarsoppgjoerId, :relevanteMaaneder,
+                :overstyrtInnvilgaMaanederAarsak, :overstyrtInnvilgaMaanederBegrunnelse
             )
             """.trimIndent(),
         paramMap =
@@ -261,6 +263,8 @@ class AvkortingRepository(
                 "relevanteMaaneder" to avkortingsgrunnlag.innvilgaMaaneder,
                 "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
+                "overstyrtInnvilgaMaanederAarsak" to avkortingsgrunnlag.overstyrtInnvilgaMaanederAarsak?.name,
+                "overstyrtInnvilgaMaanederBegrunnelse" to avkortingsgrunnlag.overstyrtInnvilgaMaanederBegrunnelse,
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -407,6 +411,11 @@ class AvkortingRepository(
             innvilgaMaaneder = int("relevante_maaneder"),
             spesifikasjon = string("spesifikasjon"),
             kilde = string("kilde").let { objectMapper.readValue(it) },
+            overstyrtInnvilgaMaanederAarsak =
+                stringOrNull("overstyrt_innvilga_maaneder_aarsak")?.let {
+                    OverstyrtInnvilgaMaanederAarsak.valueOf(it)
+                },
+            overstyrtInnvilgaMaanederBegrunnelse = stringOrNull("overstyrt_innvilga_maaneder_begrunnelse"),
         )
 
     private fun Row.toYtelseFoerAvkorting() =

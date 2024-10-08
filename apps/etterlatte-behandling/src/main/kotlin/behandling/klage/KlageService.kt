@@ -449,6 +449,17 @@ class KlageServiceImpl(
         klageDao.lagreKlage(oppdatertKlage)
 
         opprettVedtakHendelse(klage, vedtak, HendelseType.FATTET, saksbehandler)
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)
+        klageHendelser.sendKlageHendelseRapids(
+            statistikkKlage =
+                StatistikkKlage(
+                    id = oppdatertKlage.id,
+                    klage = oppdatertKlage,
+                    tidspunkt = Tidspunkt.now(),
+                    utlandstilknytningType = utlandstilknytningType?.type,
+                ),
+            klageHendelseType = KlageHendelseType.FATTET_VEDTAK,
+        )
 
         oppgaveService.tilAttestering(
             referanse = klageId.toString(),
@@ -484,7 +495,17 @@ class KlageServiceImpl(
         klageDao.lagreKlage(oppdatertKlage)
 
         opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.ATTESTERT, saksbehandler, kommentar)
-
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)
+        klageHendelser.sendKlageHendelseRapids(
+            statistikkKlage =
+                StatistikkKlage(
+                    id = oppdatertKlage.id,
+                    klage = oppdatertKlage,
+                    tidspunkt = Tidspunkt.now(),
+                    utlandstilknytningType = utlandstilknytningType?.type,
+                ),
+            klageHendelseType = KlageHendelseType.ATTESTERT,
+        )
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             referanse = klageId.toString(),
             type = OppgaveType.KLAGE,
@@ -517,7 +538,17 @@ class KlageServiceImpl(
         klageDao.lagreKlage(oppdatertKlage)
 
         opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.UNDERKJENT, saksbehandler, kommentar)
-
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)
+        klageHendelser.sendKlageHendelseRapids(
+            statistikkKlage =
+                StatistikkKlage(
+                    id = oppdatertKlage.id,
+                    klage = oppdatertKlage,
+                    tidspunkt = Tidspunkt.now(),
+                    utlandstilknytningType = utlandstilknytningType?.type,
+                ),
+            klageHendelseType = KlageHendelseType.UNDERKJENT,
+        )
         oppgaveService.tilUnderkjent(
             referanse = klageId.toString(),
             type = OppgaveType.KLAGE,

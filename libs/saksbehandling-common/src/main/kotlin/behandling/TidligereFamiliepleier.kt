@@ -7,6 +7,7 @@ data class TidligereFamiliepleier(
     val svar: Boolean,
     val kilde: Grunnlagsopplysning.Kilde,
     val foedselsnummer: String?,
+    val startPleieforhold: LocalDate?,
     val opphoertPleieforhold: LocalDate?,
     val begrunnelse: String,
 )
@@ -14,6 +15,7 @@ data class TidligereFamiliepleier(
 data class TidligereFamiliepleierRequest(
     val svar: Boolean,
     val foedselsnummer: String?,
+    val startPleieforhold: LocalDate?,
     val opphoertPleieforhold: LocalDate?,
     val begrunnelse: String,
 )

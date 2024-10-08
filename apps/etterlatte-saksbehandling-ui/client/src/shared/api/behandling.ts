@@ -154,12 +154,14 @@ export const lagreTidligereFamiliepleier = async (args: {
   behandlingId: string
   svar: boolean
   foedselsnummer?: string
+  startPleieforhold?: Date | null
   opphoertPleieforhold?: Date | null
   begrunnelse: string
 }): Promise<ApiResponse<ITidligereFamiliepleier>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/tidligere-familiepleier`, {
     svar: args.svar,
     foedselsnummer: args.foedselsnummer,
+    startPleieforhold: args.startPleieforhold,
     opphoertPleieforhold: args.opphoertPleieforhold,
     begrunnelse: args.begrunnelse,
   })

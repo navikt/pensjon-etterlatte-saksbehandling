@@ -331,6 +331,7 @@ internal fun Route.behandlingRoutes(
                         svar = body.svar,
                         kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
                         foedselsnummer = body.foedselsnummer,
+                        startPleieforhold = body.startPleieforhold,
                         opphoertPleieforhold = body.opphoertPleieforhold,
                         begrunnelse = body.begrunnelse,
                     )

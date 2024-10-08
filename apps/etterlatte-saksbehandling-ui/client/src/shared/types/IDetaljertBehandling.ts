@@ -102,6 +102,7 @@ export interface ITidligereFamiliepleier {
   svar: boolean
   kilde: KildeSaksbehandler
   foedselsnummer?: string
+  startPleieforhold?: string
   opphoertPleieforhold?: string
   begrunnelse: string
 }

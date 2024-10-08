@@ -13,6 +13,48 @@ import java.util.UUID
 class BehandlingInfoDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
+    fun lagreOmgjoeringSluttbehandlingUtland(
+        id: UUID,
+        sluttbehandlingUtland: Boolean,
+    ) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    INSERT INTO behandling_info(behandling_id, omgjoering_sluttbehandling_utland)
+                    VALUES (?, ?)
+                    ON CONFLICT (behandling_id) DO 
+                    UPDATE SET omgjoering_sluttbehandling_utland = excluded.omgjoering_sluttbehandling_utland
+                    """.trimIndent(),
+                ).apply {
+                    setObject(1, id)
+                    setJsonb(2, sluttbehandlingUtland)
+                }.run { executeUpdate() }
+            }
+        }
+    }
+
+    fun hentErOmgjoeringSluttbehandlingUtland(behandlingId: UUID): Boolean =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                SELECT omgjoering_sluttbehandling_utland 
+                FROM behandling_info 
+                WHERE behandling_id = ?
+                """,
+                ).apply { setObject(1, behandlingId) }
+                    .executeQuery()
+                    .run {
+                        if (next()) {
+                            getBoolean("omgjoering_sluttbehandling_utland")
+                        } else {
+                            throw InternfeilException("Fant ingen data for OmgjoeringSluttbehandlingUtland for behandlingId: $behandlingId")
+                        }
+                    }
+            }
+        }
+
     fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {

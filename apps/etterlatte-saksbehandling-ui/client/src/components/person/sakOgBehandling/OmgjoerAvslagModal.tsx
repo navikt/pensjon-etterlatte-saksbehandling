@@ -10,10 +10,11 @@ export function OmgjoerAvslagModal(props: { sakId: number; harAapenBehandling: b
   const { sakId, harAapenBehandling } = props
   const [open, setOpen] = useState(false)
   const [skalKopiere, setSkalkopiereGrunnlag] = useState(false)
+  const [erSluttbehandlingUtland, settErSluttbehandlingUtland] = useState(false)
   const [opprettOmgjoeringStatus, opprettOmgjoering] = useApiCall(opprettOmgjoeringFoerstegangsbehandling)
   const navigate = useNavigate()
   function opprett() {
-    opprettOmgjoering({ sakId, skalKopiere })
+    opprettOmgjoering({ sakId, skalKopiere, erSluttbehandlingUtland })
   }
 
   function lukkModal() {
@@ -38,6 +39,12 @@ export function OmgjoerAvslagModal(props: { sakId: number; harAapenBehandling: b
           </BodyShort>
           <Checkbox checked={skalKopiere} onChange={() => setSkalkopiereGrunnlag(!skalKopiere)}>
             Kopier vurdering og vilkårsvurdering fra forrige avslag
+          </Checkbox>
+          <Checkbox
+            checked={erSluttbehandlingUtland}
+            onChange={() => settErSluttbehandlingUtland(!erSluttbehandlingUtland)}
+          >
+            Gjelder omgjøring Sluttbehandling utland?
           </Checkbox>
           {harAapenBehandling && (
             <Alert variant="warning">

@@ -71,7 +71,12 @@ export const opprettOmgjoeringKlage = async (args: {
 export const opprettOmgjoeringFoerstegangsbehandling = async (args: {
   sakId: number
   skalKopiere: boolean
+  erSluttbehandlingUtland: boolean
 }): Promise<ApiResponse<IBehandlingsammendrag>> => {
   const skalKopiere = args.skalKopiere
-  return apiClient.post(`/behandling/omgjoer-avslag-avbrudd/${args.sakId}`, { skalKopiere })
+  const omgjoeringSluttbehandlingUtland = args.erSluttbehandlingUtland
+  return apiClient.post(`/behandling/omgjoer-avslag-avbrudd/${args.sakId}`, {
+    skalKopiere,
+    omgjoeringSluttbehandlingUtland,
+  })
 }

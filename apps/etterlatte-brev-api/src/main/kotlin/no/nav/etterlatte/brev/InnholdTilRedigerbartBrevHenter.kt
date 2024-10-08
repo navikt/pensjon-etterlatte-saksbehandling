@@ -103,6 +103,7 @@ class InnholdTilRedigerbartBrevHenter(
                             avsender =
                                 adresseService.hentAvsender(
                                     opprettAvsenderRequest(bruker, generellBrevData.forenkletVedtak, generellBrevData.sak.enhet),
+                                    bruker,
                                 ),
                             soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                             sakId = generellBrevData.sak.id,

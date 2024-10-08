@@ -857,6 +857,41 @@ internal class BehandlingServiceImplTest {
     }
 
     @Test
+    fun `start dato må være før opphørsdato tidligere familiepleier`() {
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
+
+        val uuid = UUID.randomUUID()
+
+        val slot = slot<TidligereFamiliepleier>()
+
+        every { behandlingDaoMock.hentBehandling(any()) } returns
+            foerstegangsbehandling(
+                id = uuid,
+                sakId = 1,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
+
+        every { behandlingDaoMock.lagreTidligereFamiliepleier(any(), capture(slot)) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
+
+        shouldThrow<PleieforholdMaaStarteFoerDetOpphoerer> {
+            inTransaction {
+                behandlingService.oppdaterTidligereFamiliepleier(
+                    uuid,
+                    TidligereFamiliepleier(
+                        true,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "123",
+                        LocalDate.now(),
+                        LocalDate.now(),
+                        "Test",
+                    ),
+                )
+            }
+        }
+    }
+
+    @Test
     fun `kan oppdatere tidligere familiepleier`() {
         nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
 
@@ -881,6 +916,7 @@ internal class BehandlingServiceImplTest {
                     true,
                     Grunnlagsopplysning.Saksbehandler.create("ident"),
                     "123",
+                    LocalDate.of(1970, 1, 1),
                     LocalDate.now(),
                     "Test",
                 ),

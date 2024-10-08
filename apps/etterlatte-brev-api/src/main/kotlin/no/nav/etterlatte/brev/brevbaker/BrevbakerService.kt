@@ -16,6 +16,8 @@ class BrevbakerService(
         brevID: BrevID?,
         brevRequest: BrevbakerRequest,
     ): Pdf {
+        logger.info("Genererer PDF med Brevbakeren")
+
         val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererPdf(brevRequest) }
 
         return Base64

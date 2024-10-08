@@ -11,7 +11,10 @@ on:
         options:
           - true
           - false
-  pull_request: # TODO: her mangler vi push som vanligvis deployer ved merge til main
+  push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
     paths:

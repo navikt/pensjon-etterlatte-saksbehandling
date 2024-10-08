@@ -298,6 +298,7 @@ internal class BehandlingDaoTest(
                 true,
                 Grunnlagsopplysning.Saksbehandler.create("ident"),
                 "123",
+                LocalDate.of(1970, 1, 1),
                 LocalDate.now(),
                 "Test",
             ),

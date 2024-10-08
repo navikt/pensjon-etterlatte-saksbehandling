@@ -16,7 +16,6 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
-  leaderElection: true
   prometheus:
     enabled: true
     path: /metrics
@@ -39,7 +38,7 @@ spec:
       cpu:
         thresholdPercentage: 90
     max: 2
-    min: 2
+    min: 1
   azure:
     application:
       enabled: true

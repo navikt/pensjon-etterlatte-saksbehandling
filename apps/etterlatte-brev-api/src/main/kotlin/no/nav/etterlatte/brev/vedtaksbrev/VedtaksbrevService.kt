@@ -97,6 +97,8 @@ class VedtaksbrevService(
                 )
             }
 
+        logger.info("PDF generert ok. Sjekker om den skal lagres og ferdigstilles")
+
         val brev = db.hentBrev(id)
         val vedtakDeferred = brev.behandlingId?.let { runBlocking { vedtaksvurderingService.hentVedtak(it, bruker) } }
         val saksbehandlerident: String = vedtakDeferred?.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()

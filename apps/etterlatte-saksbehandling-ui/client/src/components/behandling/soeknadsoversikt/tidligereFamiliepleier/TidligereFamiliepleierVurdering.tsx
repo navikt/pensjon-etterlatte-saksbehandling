@@ -17,6 +17,7 @@ import { IBehandlingStatus, ITidligereFamiliepleier } from '~shared/types/IDetal
 export interface TidligereFamiliepleierValues {
   svar: JaNei | null
   foedselsnummer?: string | null
+  startPleieforhold?: Date | null
   opphoertPleieforhold?: Date | null
   begrunnelse: string
 }
@@ -24,6 +25,7 @@ export interface TidligereFamiliepleierValues {
 export const TidligereFamiliepleierValuesDefault: TidligereFamiliepleierValues = {
   svar: null,
   foedselsnummer: null,
+  startPleieforhold: undefined,
   opphoertPleieforhold: undefined,
   begrunnelse: '',
 }
@@ -33,6 +35,9 @@ const tidligereFamiliepleierValuesDefault = (tidligereFamiliepleier: ITidligereF
     ? {
         svar: tidligereFamiliepleier.svar ? JaNei.JA : JaNei.NEI,
         foedselsnummer: tidligereFamiliepleier.foedselsnummer ?? null,
+        startPleieforhold: tidligereFamiliepleier.startPleieforhold
+          ? new Date(tidligereFamiliepleier.startPleieforhold)
+          : undefined,
         opphoertPleieforhold: tidligereFamiliepleier.opphoertPleieforhold
           ? new Date(tidligereFamiliepleier.opphoertPleieforhold)
           : undefined,
@@ -77,6 +82,7 @@ export const TidligereFamiliepleierVurdering = ({
         behandlingId,
         svar: erTidligereFamiliepleier,
         foedselsnummer: erTidligereFamiliepleier ? data.foedselsnummer!! : undefined,
+        startPleieforhold: erTidligereFamiliepleier ? data.startPleieforhold!! : undefined,
         opphoertPleieforhold: erTidligereFamiliepleier ? data.opphoertPleieforhold!! : undefined,
         begrunnelse: data.begrunnelse,
       },
@@ -96,6 +102,8 @@ export const TidligereFamiliepleierVurdering = ({
   }
 
   const svar = watch('svar')
+  const startPleieforhold = watch('startPleieforhold')
+  const opphoertPleieforhold = watch('opphoertPleieforhold')
 
   return (
     <VurderingsboksWrapper
@@ -153,9 +161,18 @@ export const TidligereFamiliepleierVurdering = ({
                   error={errors.foedselsnummer?.message}
                 />
                 <ControlledDatoVelger
+                  name="startPleieforhold"
+                  label="Pleieforholdet startet"
+                  control={control}
+                  fromDate={new Date(1950, 0, 1)}
+                  toDate={opphoertPleieforhold ?? new Date()}
+                  dropdownCaption
+                />
+                <ControlledDatoVelger
                   name="opphoertPleieforhold"
                   label="Pleieforholdet opphørte"
                   control={control}
+                  fromDate={startPleieforhold ?? new Date(1950, 0, 1)}
                   toDate={new Date()}
                 />
               </>

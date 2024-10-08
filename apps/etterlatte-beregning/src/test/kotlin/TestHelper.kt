@@ -7,6 +7,7 @@ import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.AvkortingGrunnlag
 import no.nav.etterlatte.avkorting.Avkortingsperiode
 import no.nav.etterlatte.avkorting.Inntektsavkorting
+import no.nav.etterlatte.avkorting.OverstyrtInnvilgaMaanederAarsak
 import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
@@ -27,6 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -131,6 +133,8 @@ fun avkortinggrunnlag(
     innvilgaMaaneder: Int = 12,
     periode: Periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+    overstyrtInnvilgaMaanederAarsak: OverstyrtInnvilgaMaanederAarsak? = null,
+    overstyrtInnvilgaMaanederBegrunnelse: String? = null,
 ) = AvkortingGrunnlag(
     id = id,
     periode = periode,
@@ -141,6 +145,8 @@ fun avkortinggrunnlag(
     innvilgaMaaneder = innvilgaMaaneder,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde,
+    overstyrtInnvilgaMaanederAarsak = overstyrtInnvilgaMaanederAarsak,
+    overstyrtInnvilgaMaanederBegrunnelse = overstyrtInnvilgaMaanederBegrunnelse,
 )
 
 fun avkortinggrunnlagLagre(
@@ -148,6 +154,7 @@ fun avkortinggrunnlagLagre(
     aarsinntekt: Int = 100000,
     fratrekkInnAar: Int = 10000,
     fom: YearMonth,
+    overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
 ) = AvkortingGrunnlagLagreDto(
     id = id,
     aarsinntekt = aarsinntekt,
@@ -156,6 +163,7 @@ fun avkortinggrunnlagLagre(
     fratrekkInnAarUtland = 0,
     spesifikasjon = "Spesifikasjon",
     fom = fom,
+    overstyrtInnvilgaMaaneder = overstyrtInnvilgaMaaneder,
 )
 
 fun inntektAvkortingGrunnlag(

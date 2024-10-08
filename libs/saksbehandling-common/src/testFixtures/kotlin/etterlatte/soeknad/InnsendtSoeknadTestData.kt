@@ -276,7 +276,6 @@ object InnsendtSoeknadTestData {
                                 ),
                             spoersmaal = null,
                         ),
-                    naeringsInntekt = null,
                     militaertjeneste = null,
                 ),
             barn = listOf(),

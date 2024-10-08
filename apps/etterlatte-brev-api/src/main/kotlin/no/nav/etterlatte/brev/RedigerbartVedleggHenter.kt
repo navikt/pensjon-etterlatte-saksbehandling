@@ -61,6 +61,7 @@ class RedigerbartVedleggHenter(
                                 avsender =
                                     adresseService.hentAvsender(
                                         opprettAvsenderRequest(bruker, forenkletVedtak, enhet),
+                                        bruker,
                                     ),
                                 soekerOgEventuellVerge = soekerOgEventuellVerge,
                                 sakId = sakId,

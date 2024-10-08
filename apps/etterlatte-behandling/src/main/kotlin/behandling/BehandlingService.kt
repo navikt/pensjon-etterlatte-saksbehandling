@@ -128,6 +128,18 @@ class VilkaarMaaFinnesHvisViderefoertOpphoer :
         "Vilkår må angis hvis opphør skal videreføres",
     )
 
+class PleieforholdMaaStarteFoerDetOpphoerer :
+    UgyldigForespoerselException(
+        code = "PLEIEFORHOLD_MAA_STARTE_FOER_DET_OPPHOERER",
+        detail = "Pleieforholdet må ha startdato som er før opphørsdato",
+    )
+
+class PleieforholdMaaHaStartOgOpphoer :
+    UgyldigForespoerselException(
+        code = "PLEIEFORHOLD_MAA_HA_START_OG_OPPHOER",
+        detail = "Pleieforholdet må ha både startdato og opphørsdato",
+    )
+
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
@@ -828,6 +840,14 @@ internal class BehandlingServiceImpl(
         val behandling =
             hentBehandling(behandlingId)
                 ?: throw InternfeilException("Kunne ikke oppdatere tidligere familiepleier fordi behandlingen ikke finnes")
+
+        if (tidligereFamiliepleier.svar) {
+            if (tidligereFamiliepleier.startPleieforhold == null || tidligereFamiliepleier.opphoertPleieforhold == null) {
+                throw PleieforholdMaaHaStartOgOpphoer()
+            } else if (!tidligereFamiliepleier.startPleieforhold!!.isBefore(tidligereFamiliepleier.opphoertPleieforhold)) {
+                throw PleieforholdMaaStarteFoerDetOpphoerer()
+            }
+        }
 
         behandling.oppdaterTidligereFamiliepleier(tidligereFamiliepleier).also {
             behandlingDao.lagreTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)

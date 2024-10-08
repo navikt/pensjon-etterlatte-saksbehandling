@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
@@ -385,9 +386,10 @@ internal class BeregnOverstyrServiceTest {
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns UUID.randomUUID()
-            every { sak } returns 1
+            every { sak } returns sakId1
             every { behandlingType } returns type
             every { sakType } returns saksType
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
+            every { opphoerFraOgMed } returns null
         }
 }

@@ -14,6 +14,7 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.KnyttTilAnnenSakRequest
 import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -53,7 +54,7 @@ fun Route.dokumentRoute(
 
             put {
                 val forsoekFerdigstill = call.request.queryParameters["forsoekFerdigstill"].toBoolean()
-                val journalfoerendeEnhet = call.request.queryParameters["journalfoerendeEnhet"]
+                val journalfoerendeEnhet = call.request.queryParameters["journalfoerendeEnhet"]?.let { Enhetsnummer(it) }
 
                 val request = call.receive<OppdaterJournalpostRequest>()
 
@@ -104,5 +105,6 @@ data class HentDokumenterRequest(
     val journalstatuser: List<Journalstatus> = emptyList(),
     val journalposttyper: List<Journalposttype> = emptyList(),
     val tema: List<String> = emptyList(),
-    val foerste: Int = 50,
+    val foerste: Int = 10,
+    val etter: String? = null,
 )

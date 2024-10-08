@@ -1,5 +1,7 @@
 package no.nav.etterlatte.rapidsandrivers
 
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -10,16 +12,18 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RetryOgFeilhaandteringKtTest {
+    private val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
     @Test
     fun `feilhaandtering kaster ikke feilen videre, men publiserer på feilkø`() {
         val packet =
-            JsonMessage("{}", MessageProblems(""))
+            JsonMessage("{}", MessageProblems(""), prometheusMeterRegistry)
         val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
         var antallForsoek = 0
         withRetryOgFeilhaandtering(
             packet = packet,
             context = context,
-            feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
+            feilendeSteg = OmregningHendelseType.BEREGNA.lagEventnameForType(),
             kontekst = Kontekst.REGULERING,
         ) {
             antallForsoek++
@@ -31,13 +35,13 @@ internal class RetryOgFeilhaandteringKtTest {
 
     @Test
     fun `feilhaandtering gjoer ingenting hvis ingenting feiler`() {
-        val packet = JsonMessage("{}", MessageProblems(""))
+        val packet = JsonMessage("{}", MessageProblems(""), prometheusMeterRegistry)
         val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
         var antallForsoek = 0
         withRetryOgFeilhaandtering(
             packet = packet,
             context = context,
-            feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
+            feilendeSteg = OmregningHendelseType.BEREGNA.lagEventnameForType(),
             kontekst = Kontekst.REGULERING,
         ) {
             antallForsoek++
@@ -49,13 +53,13 @@ internal class RetryOgFeilhaandteringKtTest {
     @Test
     fun `Feilhaandtering skal kjoere ny retry hvis feiler for doedshendelse`() {
         val packet =
-            JsonMessage("{}", MessageProblems(""))
+            JsonMessage("{}", MessageProblems(""), prometheusMeterRegistry)
         val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
         var antallForsoek = 0
         withRetryOgFeilhaandtering(
             packet = packet,
             context = context,
-            feilendeSteg = ReguleringHendelseType.BEREGNA.lagEventnameForType(),
+            feilendeSteg = OmregningHendelseType.BEREGNA.lagEventnameForType(),
             kontekst = Kontekst.DOEDSHENDELSE,
         ) {
             antallForsoek++

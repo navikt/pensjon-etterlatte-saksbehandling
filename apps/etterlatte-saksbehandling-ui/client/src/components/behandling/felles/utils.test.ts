@@ -186,6 +186,7 @@ const opprettBehandling = (
     kilde: Vedtaksloesning.GJENNY,
     sendeBrev: true,
     viderefoertOpphoer: null,
+    tidligereFamiliepleier: null,
   }
 }
 

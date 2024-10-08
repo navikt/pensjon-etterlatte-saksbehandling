@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -35,6 +36,7 @@ data class ManuellRevurdering(
     override val relatertBehandlingId: String?,
     override val sendeBrev: Boolean,
     override val opphoerFraOgMed: YearMonth? = null,
+    override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
 ) : Revurdering(
         id = id,
         sak = sak,
@@ -51,6 +53,7 @@ data class ManuellRevurdering(
         begrunnelse = begrunnelse,
         relatertBehandlingId = relatertBehandlingId,
         opphoerFraOgMed = opphoerFraOgMed,
+        tidligereFamiliepleier = tidligereFamiliepleier,
     ) {
     private fun erFyltUt(): Boolean =
         when (sak.sakType) {
@@ -63,7 +66,7 @@ data class ManuellRevurdering(
     override fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt) =
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(virkningstidspunkt = virkningstidspunkt) }
 
-    override fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) =
+    override fun oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet)
         }
@@ -73,7 +76,7 @@ data class ManuellRevurdering(
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(utlandstilknytning = utlandstilknytning)
         }
 
-    override fun oppdaterVidereførtOpphoer(viderefoertOpphoer: ViderefoertOpphoer) =
+    override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer) =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer.dato)
         }
@@ -82,8 +85,10 @@ data class ManuellRevurdering(
 
     override fun tilVilkaarsvurdert(): Revurdering {
         if (!erFyltUt()) {
-            logger.info("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert")
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha satt virkningstidspunkt " +
+                    "for å settes til vilkårsvurdert",
+            )
         }
 
         return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
@@ -127,8 +132,10 @@ data class ManuellRevurdering(
      */
     fun tilFattetVedtakUtvidet(): Revurdering {
         if (!erFyltUt()) {
-            logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha satt virkningstidspunkt " +
+                    "for å settes til fattet vedtak",
+            )
         }
 
         return hvisTilstandEr(
@@ -146,8 +153,10 @@ data class ManuellRevurdering(
 
     override fun tilFattetVedtak(): Revurdering {
         if (!erFyltUt()) {
-            logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha satt virkningstidspunkt " +
+                    "for å settes til fattet vedtak",
+            )
         }
 
         return hvisTilstandEr(
@@ -183,7 +192,10 @@ data class ManuellRevurdering(
         }
 
     override fun tilSamordnet() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING), BehandlingStatus.SAMORDNET) {
+        hvisTilstandEr(
+            listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING),
+            BehandlingStatus.SAMORDNET,
+        ) {
             endreTilStatus(it)
         }
 

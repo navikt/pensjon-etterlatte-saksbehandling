@@ -9,6 +9,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.ktor.route.GENERELLBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -17,6 +19,7 @@ import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.sak.SakIkkeFunnetException
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 
@@ -29,10 +32,9 @@ internal fun Route.generellbehandlingRoutes(
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             val request = call.receive<OpprettGenerellBehandlingRequest>()
-            val finnSak = inTransaction { sakService.finnSak(sakId) }
-            if (finnSak == null) {
-                call.respond(HttpStatusCode.NotFound, "Saken finnes ikke")
-            }
+            val sak =
+                inTransaction { sakService.finnSak(sakId) }
+                    ?: throw SakIkkeFunnetException("Sak med id=$sakId finnes ikke")
             inTransaction {
                 generellBehandlingService.opprettBehandling(
                     GenerellBehandling.opprettFraType(request.type, sakId),
@@ -40,7 +42,7 @@ internal fun Route.generellbehandlingRoutes(
                 )
             }
             logger.info(
-                "Opprettet generell behandling for sak $sakId av typen ${request.type}",
+                "Opprettet generell behandling for sak ${sak.id} av typen ${request.type}",
             )
             call.respond(HttpStatusCode.OK)
         }
@@ -49,11 +51,16 @@ internal fun Route.generellbehandlingRoutes(
     put("/api/generellbehandling/sendtilattestering/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             val request = call.receive<GenerellBehandling>()
+            if (request.sakId != sakId) {
+                throw SakParameterStemmerIkkeException(
+                    "Innsendt sak har id=${request.sakId}, men sak i url er $sakId",
+                )
+            }
             inTransaction {
                 generellBehandlingService.sendTilAttestering(request, saksbehandler)
             }
             logger.info(
-                "Opprettet generell behandling for sak $sakId av typen ${request.type}",
+                "Sender generell behandling med id=${request.id} til attestering i sak $sakId av typen ${request.type}",
             )
             call.respond(HttpStatusCode.OK)
         }
@@ -73,7 +80,7 @@ internal fun Route.generellbehandlingRoutes(
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             val kommentar = call.receive<Kommentar>()
             inTransaction {
-                generellBehandlingService.underkjenn(generellBehandlingId, saksbehandler, kommentar)
+                generellBehandlingService.underkjenn(generellBehandlingId, saksbehandler, kommentar, sakId)
             }
             logger.info("underkjent generell behandling med id $generellBehandlingId")
             call.respond(HttpStatusCode.OK)
@@ -86,6 +93,7 @@ internal fun Route.generellbehandlingRoutes(
             inTransaction {
                 generellBehandlingService.lagreNyeOpplysninger(
                     request,
+                    sakId,
                 )
             }
             logger.info(
@@ -98,7 +106,7 @@ internal fun Route.generellbehandlingRoutes(
     put("/api/generellbehandling/avbryt/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
         kunSaksbehandlerMedSkrivetilgang {
             inTransaction {
-                generellBehandlingService.avbrytBehandling(generellBehandlingId, brukerTokenInfo)
+                generellBehandlingService.avbrytBehandling(generellBehandlingId, sakId, brukerTokenInfo)
             }
             logger.info(
                 "Setter generell behandling med behandlingid $generellBehandlingId til avbrutt",
@@ -110,8 +118,10 @@ internal fun Route.generellbehandlingRoutes(
     get("/api/generellbehandling/hent/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
         kunSaksbehandler {
             val generellBehandlingId = generellBehandlingId
-            val hentetBehandling = inTransaction { generellBehandlingService.hentBehandlingMedId(generellBehandlingId) }
-            call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
+            val hentetBehandling =
+                inTransaction { generellBehandlingService.hentBehandlingMedId(generellBehandlingId) }
+                    ?: throw GenerellIkkeFunnetException()
+            call.respond(hentetBehandling)
         }
     }
 
@@ -131,3 +141,7 @@ internal fun Route.generellbehandlingRoutes(
 data class OpprettGenerellBehandlingRequest(
     val type: GenerellBehandling.GenerellBehandlingType,
 )
+
+class SakParameterStemmerIkkeException(
+    override val detail: String,
+) : UgyldigForespoerselException("SAK_PARAMETER_STEMER_IKKE", detail)

@@ -1,15 +1,15 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.BrevDataRedigerbar
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
-import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
@@ -62,6 +62,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
+    val frivilligSkattetrekk: Boolean?,
     val erUnder18Aar: Boolean,
     val erBosattUtlandet: Boolean,
 ) : BrevDataFerdigstilling {
@@ -96,6 +97,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         trygdetid,
                     ),
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
+                frivilligSkattetrekk = etterbetaling?.frivilligSkattetrekk ?: false,
                 erBosattUtlandet =
                     (
                         requireNotNull(utlandstilknytning)

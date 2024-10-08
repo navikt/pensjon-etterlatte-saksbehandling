@@ -1,4 +1,5 @@
 import { KildeSaksbehandler } from '~shared/types/kilde'
+import { JaNei } from '~shared/types/ISvar'
 
 export interface AktivitetspliktOppfolging {
   behandlingId: string
@@ -73,6 +74,11 @@ export interface IAktivitetspliktVurdering {
   unntak?: IAktivitetspliktUnntak
 }
 
+export interface IAktivitetspliktVurderingNy {
+  aktivitet?: IAktivitetspliktAktivitetsgrad[]
+  unntak?: IAktivitetspliktUnntak[]
+}
+
 export interface IAktivitetspliktAktivitetsgrad {
   id: string
   sakId: number
@@ -80,6 +86,7 @@ export interface IAktivitetspliktAktivitetsgrad {
   oppgaveId: string
   aktivitetsgrad: AktivitetspliktVurderingType
   fom: string
+  tom: string
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler
   beskrivelse: string
@@ -91,6 +98,7 @@ export interface IAktivitetspliktUnntak {
   behandlingId: string | undefined
   oppgaveId: string
   unntak: AktivitetspliktUnntakType
+  fom: string
   tom: string
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler
@@ -101,13 +109,34 @@ export interface IOpprettAktivitetspliktAktivitetsgrad {
   id: string | undefined
   aktivitetsgrad: AktivitetspliktVurderingType
   fom: string
+  tom?: string
   beskrivelse: string
 }
 
 export interface IOpprettAktivitetspliktUnntak {
   id: string | undefined
   unntak: AktivitetspliktUnntakType
-  fom?: string
+  fom: string
   tom?: string
   beskrivelse: string
+}
+
+export interface AktivitetspliktVurderingValues {
+  aktivitetsplikt: JaNei | null
+  aktivitetsgrad: AktivitetspliktVurderingType | ''
+  unntak: JaNei | null
+  midlertidigUnntak: AktivitetspliktUnntakType | ''
+  fom?: Date | null
+  tom?: Date | null
+  beskrivelse: string
+}
+
+export const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
+  aktivitetsplikt: null,
+  aktivitetsgrad: '',
+  unntak: null,
+  midlertidigUnntak: '',
+  fom: new Date(),
+  tom: undefined,
+  beskrivelse: '',
 }

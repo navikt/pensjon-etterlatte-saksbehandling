@@ -15,9 +15,9 @@ import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.core.instrument.binder.system.UptimeMetrics
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
-import io.prometheus.client.CollectorRegistry
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import io.prometheus.metrics.model.registry.PrometheusRegistry
 
 fun Application.metricsRoute(additionalMetrics: List<MeterBinder> = emptyList()) {
     install(MicrometerMetrics) {
@@ -40,7 +40,7 @@ fun Application.metricsRoute(additionalMetrics: List<MeterBinder> = emptyList())
 }
 
 object Metrikker {
-    private val collectorRegistry = CollectorRegistry.defaultRegistry
+    private val collectorRegistry = PrometheusRegistry.defaultRegistry
 
     val registrySaksbehandling =
         PrometheusMeterRegistry(

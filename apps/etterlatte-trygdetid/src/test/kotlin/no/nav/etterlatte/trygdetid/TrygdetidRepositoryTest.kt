@@ -5,10 +5,12 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -384,6 +386,6 @@ internal class TrygdetidRepositoryTest(
     private fun behandlingMock() =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns 123L
+            every { sak } returns tilSakId(123L)
         }
 }

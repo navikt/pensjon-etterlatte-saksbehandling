@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.revurdering
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -11,6 +12,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -26,6 +28,7 @@ internal fun Route.revurderingRoutes(
     revurderingService: RevurderingService,
     manuellRevurderingService: ManuellRevurderingService,
     omgjoeringKlageRevurderingService: OmgjoeringKlageRevurderingService,
+    automatiskRevurderingService: AutomatiskRevurderingService,
 ) {
     val logger = routeLogger
 
@@ -55,7 +58,7 @@ internal fun Route.revurderingRoutes(
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
-
+                        // TODO: er feil i denne flyten da vi ikke kan gjøre tilgangssjekk for grunnlag da behandlingen ikke finnes enda
                         val revurdering =
                             inTransaction {
                                 manuellRevurderingService.opprettManuellRevurderingWrapper(
@@ -94,7 +97,14 @@ internal fun Route.revurderingRoutes(
                 val revurderingsaarsak =
                     call.parameters["revurderingsaarsak"]?.let { Revurderingaarsak.valueOf(it) }
                         ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig revurderingsårsak")
-                call.respond(inTransaction { revurderingService.hentRevurderingsinfoForSakMedAarsak(sakId, revurderingsaarsak) })
+                call.respond(
+                    inTransaction {
+                        revurderingService.hentRevurderingsinfoForSakMedAarsak(
+                            sakId,
+                            revurderingsaarsak,
+                        )
+                    },
+                )
             }
         }
     }
@@ -108,6 +118,14 @@ internal fun Route.revurderingRoutes(
             val stoettedeRevurderinger = hentRevurderingaarsaker(sakType)
 
             call.respond(stoettedeRevurderinger)
+        }
+    }
+
+    route("/automatisk-revurdering") {
+        post {
+            val request = call.receive<AutomatiskRevurderingRequest>()
+            val response = automatiskRevurderingService.oppprettRevurderingOgOppfoelging(request)
+            call.respond(response)
         }
     }
 }

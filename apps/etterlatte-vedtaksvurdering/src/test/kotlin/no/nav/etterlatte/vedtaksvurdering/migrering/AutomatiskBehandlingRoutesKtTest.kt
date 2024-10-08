@@ -17,7 +17,10 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
@@ -52,7 +55,7 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AutomatiskBehandlingRoutesKtTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtakService: VedtakBehandlingService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
@@ -60,7 +63,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -76,7 +79,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -118,7 +121,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 )
             coEvery { rapidService.sendToRapid(any()) } just runs
 
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 automatiskBehandlingRoutes(
                     automatiskBehandlingService,
                     behandlingKlient,
@@ -141,7 +144,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
             coVerify(exactly = 1) {
                 vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
-                behandlingKlient.hentOppgaverForSak(1, any())
+                behandlingKlient.hentOppgaverForSak(sakId1, any())
                 vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
                 behandlingKlient.tildelSaksbehandler(any(), any())
                 vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
@@ -195,7 +198,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
                 coEvery { rapidService.sendToRapid(any()) } just runs
 
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     automatiskBehandlingRoutes(
                         automatiskBehandlingService,
                         behandlingKlient,
@@ -219,7 +222,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
-                    behandlingKlient.hentOppgaverForSak(1, any())
+                    behandlingKlient.hentOppgaverForSak(sakId1, any())
                     vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
                     behandlingKlient.tildelSaksbehandler(any(), any())
                     vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
@@ -251,7 +254,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     listOf(lagOppgave(behandlingId, Status.ATTESTERING))
                 coEvery { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
 
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     automatiskBehandlingRoutes(
                         automatiskBehandlingService,
                         behandlingKlient,
@@ -273,7 +276,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
-                    behandlingKlient.hentOppgaverForSak(1, any())
+                    behandlingKlient.hentOppgaverForSak(sakId1, any())
                     vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
                     behandlingKlient.tildelSaksbehandler(any(), any())
                 }
@@ -308,7 +311,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         ),
                     )
 
-                runServer(server) {
+                runServer(mockOAuth2Server) {
                     automatiskBehandlingRoutes(
                         automatiskBehandlingService,
                         behandlingKlient,
@@ -338,7 +341,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         }
     }
 
-    private val token: String by lazy { server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
 
     private fun lagOppgave(
         referanse: UUID,
@@ -346,8 +349,8 @@ internal class AutomatiskBehandlingRoutesKtTest {
     ) = OppgaveIntern(
         id = UUID.randomUUID(),
         status = status,
-        enhet = "",
-        sakId = 1,
+        enhet = Enheter.defaultEnhet.enhetNr,
+        sakId = sakId1,
         kilde = null,
         type = OppgaveType.FOERSTEGANGSBEHANDLING,
         saksbehandler = null,

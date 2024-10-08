@@ -9,6 +9,7 @@ import {
 import { SakType } from '~shared/types/sak'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterMaanedDato } from '~utils/formatering/dato'
+import { hasValue } from '~components/behandling/felles/utils'
 
 function aldersgruppeToString(aldersgruppe?: Aldersgruppe | null) {
   switch (aldersgruppe) {
@@ -27,6 +28,8 @@ export function feilutbetalingToString(feilutbetaling?: FeilutbetalingValg | nul
       return 'Nei'
     case FeilutbetalingValg.JA_VARSEL:
       return 'Ja, det skal sendes varsel'
+    case FeilutbetalingValg.JA_INGEN_VARSEL_MOTREGNES:
+      return 'Ja, men motregnes mot annen ytelse fra NAV, så avventer varsel om feilutbetaling til ev. tilbakekrevingssak'
     case FeilutbetalingValg.JA_INGEN_TK:
       return 'Ja, men under 4 rettsgebyr, så ingen tilbakekreving'
     default:
@@ -74,33 +77,37 @@ export const BrevutfallVisning = (props: {
                   <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
                 </VStack>
               </HStack>
-              {sakType == SakType.BARNEPENSJON && !!brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav && (
+              {sakType === SakType.BARNEPENSJON && (
                 <>
-                  <VStack gap="2">
-                    <Label>Er det krav i etterbetalingen?</Label>
-                    <BodyShort>{brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav ? 'Ja' : 'Nei'}</BodyShort>
-                  </VStack>
-                  <VStack gap="2">
-                    <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
-                    <BodyShort>
-                      {brevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk ? 'Ja' : 'Nei'}
-                    </BodyShort>
-                  </VStack>
-                  <VStack gap="2">
-                    <Label>Hvor mange måneder etterbetales det for?</Label>
-                    <BodyShort>
-                      {etterbetalingPeriodeValgToString(
-                        brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg
-                      )}
-                    </BodyShort>
-                  </VStack>
+                  {hasValue(brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav) && (
+                    <VStack gap="2">
+                      <Label>Er det krav i etterbetalingen?</Label>
+                      <BodyShort>{brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav ? 'Ja' : 'Nei'}</BodyShort>
+                    </VStack>
+                  )}
+                  {hasValue(brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg) && (
+                    <VStack gap="2">
+                      <Label>Hvor mange måneder etterbetales det for?</Label>
+                      <BodyShort>
+                        {etterbetalingPeriodeValgToString(
+                          brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg
+                        )}
+                      </BodyShort>
+                    </VStack>
+                  )}
                 </>
               )}
             </>
           )}
+          {sakType === SakType.BARNEPENSJON && hasValue(brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk) && (
+            <VStack gap="2">
+              <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
+              <BodyShort>{brevutfallOgEtterbetaling.brevutfall.frivilligSkattetrekk ? 'Ja' : 'Nei'}</BodyShort>
+            </VStack>
+          )}
         </VStack>
       )}
-      {sakType == SakType.BARNEPENSJON && (
+      {sakType === SakType.BARNEPENSJON && (
         <VStack gap="2">
           <Label>Gjelder brevet under eller over 18 år?</Label>
           <BodyShort>{aldersgruppeToString(brevutfallOgEtterbetaling.brevutfall.aldersgruppe)}</BodyShort>

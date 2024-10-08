@@ -1,11 +1,13 @@
 package no.nav.etterlatte.beregning
 
+import Regelverk
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -57,6 +59,30 @@ internal class BeregnOmstillingsstoenadServiceTest {
     }
 
     @Test
+    fun `skal kaste feil hvis beregningsgrunnlag hentet er på en annen behandling`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            omstillingstoenadBeregningsGrunnlag(
+                randomUUID(),
+            )
+        assertThrows<BeregningsgrunnlagMangler> {
+            runBlocking {
+                beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            }
+        }
+    }
+
+    @Test
     fun `skal beregne omstillingsstoenad foerstegangsbehandling - nasjonal`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -90,6 +116,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_FOM_JAN_2024
                 }
             }
         }
@@ -303,7 +330,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns 1
+            every { sak } returns sakId1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         }
@@ -352,7 +379,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
             every { tidspunkt } returns Tidspunkt.now()
             every { type } returns ""
         },
-        institusjonsoppholdBeregningsgrunnlag =
+        institusjonsopphold =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),

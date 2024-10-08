@@ -17,6 +17,7 @@ import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.OppdaterSamordningsmelding
 import no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
@@ -53,7 +54,7 @@ class SamordningsKlientImpl(
     config: Config,
     private val httpClient: HttpClient,
 ) : SamordningsKlient {
-    private val logger = LoggerFactory.getLogger(SamordningsKlient::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val resourceUrl = config.getString("samordnevedtak.resource.url")
 
@@ -158,7 +159,7 @@ internal fun Vedtak.tilSamordneRequest(etterbetaling: Boolean): SamordneVedtakRe
 internal data class SamordneVedtakRequest(
     val pid: Folkeregisteridentifikator,
     val vedtakId: Long,
-    val sakId: Long,
+    val sakId: SakId,
     val virkFom: LocalDate?,
     val virkTom: LocalDate?,
     val fagomrade: String,

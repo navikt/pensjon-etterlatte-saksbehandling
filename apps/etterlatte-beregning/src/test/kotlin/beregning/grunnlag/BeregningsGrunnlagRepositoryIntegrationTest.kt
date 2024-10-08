@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning.grunnlag
 
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -67,6 +68,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                 ),
             )
         val beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag()
+        val kunEnJuridiskForelder = GrunnlagMedPeriode(TomVerdi, LocalDate.of(2022, 8, 1), null)
 
         repository.lagreBeregningsGrunnlag(
             BeregningsGrunnlag(
@@ -85,6 +87,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                     ),
                 ),
                 soeskenMedIBeregning,
+                kunEnJuridiskForelder,
             ),
         )
 
@@ -93,8 +96,9 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
         assertNotNull(result)
 
         assertEquals(soeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals(beregningsMetode, result?.beregningsMetode)
+        assertEquals(kunEnJuridiskForelder, result?.kunEnJuridiskForelder)
     }
 
     @Test
@@ -127,7 +131,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
 
         assertNotNull(result)
 
-        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals(beregningsMetode, result?.beregningsMetode)
     }
 
@@ -207,7 +211,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
         assertNotNull(result)
 
         assertEquals(oppdatertSoeskenMedIBeregning, result?.soeskenMedIBeregning)
-        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals("Z654321", result?.kilde?.ident)
         assertEquals(oppdatertBeregningsMetode, result?.beregningsMetode)
     }
@@ -263,7 +267,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
 
         assertNotNull(result)
 
-        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsopphold)
         assertEquals("Z654321", result?.kilde?.ident)
         assertEquals(oppdatertBeregningsMetode, result?.beregningsMetode)
     }
@@ -321,7 +325,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 1",
                     aarsak = aarsak,
                     kilde =
@@ -340,7 +344,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                     trygdetidForIdent = null,
                     prorataBroekTeller = 10,
                     prorataBroekNevner = 20,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 2",
                     aarsak = aarsak,
                     kilde =
@@ -387,7 +391,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 1",
                     aarsak = "ANNET",
                     kilde =
@@ -406,7 +410,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 2",
                     aarsak = "ANNET",
                     kilde =
@@ -431,7 +435,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 3",
                     aarsak = "ANNET",
                     kilde =
@@ -450,7 +454,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
-                    sakId = 1L,
+                    sakId = sakId1,
                     beskrivelse = "test periode 4",
                     aarsak = "ANNET",
                     kilde =

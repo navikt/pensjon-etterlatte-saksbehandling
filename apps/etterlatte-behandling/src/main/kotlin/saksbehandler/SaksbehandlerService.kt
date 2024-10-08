@@ -6,25 +6,26 @@ import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
 
 data class Saksbehandler(
     val ident: String,
     val navn: String,
-    val enheter: List<String>,
+    val enheter: List<Enhetsnummer>,
     val kanAttestere: Boolean,
-    val skriveEnheter: List<String>,
+    val skriveEnheter: List<Enhetsnummer>,
     val kanSeOppgaveliste: Boolean,
 )
 
 data class SaksbehandlerEnhet(
-    val enhetsNummer: String,
+    val enhetsNummer: Enhetsnummer,
     val navn: String,
 )
 
 interface SaksbehandlerService {
     fun hentKomplettSaksbehandler(ident: String): Saksbehandler
 
-    fun hentSaksbehandlereForEnhet(enhet: List<String>): Set<SaksbehandlerInfo>
+    fun hentSaksbehandlereForEnhet(enhet: List<Enhetsnummer>): Set<SaksbehandlerInfo>
 
     fun hentEnheterForSaksbehandlerIdentWrapper(ident: String): List<SaksbehandlerEnhet>
 
@@ -69,7 +70,7 @@ class SaksbehandlerServiceImpl(
         }
     }
 
-    override fun hentSaksbehandlereForEnhet(enhet: List<String>): Set<SaksbehandlerInfo> =
+    override fun hentSaksbehandlereForEnhet(enhet: List<Enhetsnummer>): Set<SaksbehandlerInfo> =
         enhet.flatMap { dao.hentSaksbehandlereForEnhet(it) }.toSet()
 
     override fun hentEnheterForSaksbehandlerIdentWrapper(ident: String): List<SaksbehandlerEnhet> {

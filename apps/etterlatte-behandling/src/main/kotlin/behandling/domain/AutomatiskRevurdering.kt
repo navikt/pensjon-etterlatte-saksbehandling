@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -7,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -33,6 +35,7 @@ data class AutomatiskRevurdering(
     override val relatertBehandlingId: String?,
     override val sendeBrev: Boolean,
     override val opphoerFraOgMed: YearMonth? = null,
+    override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
 ) : Revurdering(
         id = id,
         sak = sak,
@@ -49,11 +52,17 @@ data class AutomatiskRevurdering(
         begrunnelse = begrunnelse,
         relatertBehandlingId = relatertBehandlingId,
         opphoerFraOgMed = opphoerFraOgMed,
+        tidligereFamiliepleier = tidligereFamiliepleier,
     ) {
     override fun kopier() = this.copy()
 
     override fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt) =
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(virkningstidspunkt = virkningstidspunkt) }
+
+    override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer.dato)
+        }
 
     override fun tilOpprettet() = endreTilStatus(BehandlingStatus.OPPRETTET)
 

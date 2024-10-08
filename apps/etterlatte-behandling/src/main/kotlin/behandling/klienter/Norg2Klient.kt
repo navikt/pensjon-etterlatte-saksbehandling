@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -50,8 +51,7 @@ class Norg2KlientImpl(
             if (response.status.isSuccess()) {
                 response.body<Navkontor>().also { cacheNavkontor.put(omraade, it) }
             } else if (omraade == "0301" && response.status == HttpStatusCode.NotFound) {
-                // Person som ikke får bydel på geografisk område men kommunenr for Oslo(0301) som betyr ingen tilknytning mot noe lokalt navkontor
-                Navkontor("Ingen", "0000")
+                Navkontor("Ingen", Enhetsnummer.ingenTilknytning)
             } else {
                 throw ResponseException(response, "Ukjent feil fra norg2 api")
             }

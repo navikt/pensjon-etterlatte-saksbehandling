@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.klage.VurdertUtfallDto
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.kafka.TestProdusent
@@ -106,7 +107,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 
@@ -145,7 +146,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody(
                             BehandlingsBehov(
-                                1,
+                                sakId1,
                                 Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
@@ -230,13 +231,13 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(
-                        mapOf("dato" to "2022-02-01T01:00:00.000Z", "begrunnelse" to "En begrunnelse"),
+                        mapOf("dato" to "2022-09-01T01:00:00.000Z", "begrunnelse" to "En begrunnelse"),
                     )
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                     val expected =
                         FastsettVirkningstidspunktResponse(
-                            YearMonth.of(2022, 2),
+                            YearMonth.of(2022, 9),
                             Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
                             "En begrunnelse",
                             null,
@@ -580,7 +581,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody(
                             BehandlingsBehov(
-                                1,
+                                sakId1,
                                 Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),

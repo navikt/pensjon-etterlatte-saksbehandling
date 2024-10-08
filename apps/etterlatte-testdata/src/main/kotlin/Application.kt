@@ -84,7 +84,7 @@ val producer =
         LocalKafkaConfig(env[KAFKA_BROKERS]!!).standardProducer(env[KAFKA_TARGET_TOPIC]!!)
     } else {
         val systemEnv = Miljoevariabler.systemEnv()
-        GcpKafkaConfig.fromEnv(systemEnv).standardProducer(systemEnv.getValue(KAFKA_TARGET_TOPIC))
+        GcpKafkaConfig.fromEnv(systemEnv).standardProducer(systemEnv.requireEnvValue(KAFKA_TARGET_TOPIC))
     }
 
 interface TestDataFeature {
@@ -149,8 +149,8 @@ fun main() {
                     }
 
                     routing {
-                        get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
-                        get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
+                        get("/health/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
+                        get("/health/isready") { call.respondText("READY", ContentType.Text.Plain) }
 
                         staticResources("/static", "static")
 

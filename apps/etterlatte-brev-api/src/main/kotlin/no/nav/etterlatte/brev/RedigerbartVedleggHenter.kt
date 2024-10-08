@@ -11,11 +11,12 @@ import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
-import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
@@ -33,9 +34,9 @@ class RedigerbartVedleggHenter(
         behandlingId: UUID?,
         revurderingaarsak: Revurderingaarsak?,
         soekerOgEventuellVerge: SoekerOgEventuellVerge,
-        sakId: Long,
+        sakId: SakId,
         forenkletVedtak: ForenkletVedtak?,
-        enhet: String,
+        enhet: Enhetsnummer,
         spraak: Spraak,
     ): List<BrevInnholdVedlegg> {
         val vedlegg =
@@ -50,7 +51,7 @@ class RedigerbartVedleggHenter(
         return vedlegg
             .map {
                 BrevInnholdVedlegg(
-                    tittel = it.first.tittel!!,
+                    tittel = it.first.tittel,
                     key = it.second,
                     payload =
                         brevbakerService.hentRedigerbarTekstFraBrevbakeren(
@@ -60,6 +61,7 @@ class RedigerbartVedleggHenter(
                                 avsender =
                                     adresseService.hentAvsender(
                                         opprettAvsenderRequest(bruker, forenkletVedtak, enhet),
+                                        bruker,
                                     ),
                                 soekerOgEventuellVerge = soekerOgEventuellVerge,
                                 sakId = sakId,
@@ -84,7 +86,7 @@ class RedigerbartVedleggHenter(
                 VedtakType.INNVILGELSE ->
                     listOf(
                         Pair(
-                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                            Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
                             BrevVedleggKey.OMS_BEREGNING,
                         ),
                     )
@@ -93,7 +95,7 @@ class RedigerbartVedleggHenter(
                     if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                         listOf(
                             Pair(
-                                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
                                 BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
                             ),
                         )
@@ -108,18 +110,18 @@ class RedigerbartVedleggHenter(
                         if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                             listOf(
                                 Pair(
-                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                    Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
                                     BrevVedleggKey.OMS_BEREGNING,
                                 ),
                                 Pair(
-                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                    Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
                                     BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
                                 ),
                             )
                         } else {
                             listOf(
                                 Pair(
-                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                    Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
                                     BrevVedleggKey.OMS_BEREGNING,
                                 ),
                             )
@@ -131,7 +133,7 @@ class RedigerbartVedleggHenter(
                     if (brevtype == Brevtype.VARSEL) {
                         listOf(
                             Pair(
-                                EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
+                                Vedlegg.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
                                 BrevVedleggKey.OMS_BEREGNING,
                             ),
                         )
@@ -147,7 +149,7 @@ class RedigerbartVedleggHenter(
                 VedtakType.INNVILGELSE ->
                     listOf(
                         Pair(
-                            EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                            Vedlegg.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
                             BrevVedleggKey.BP_BEREGNING_TRYGDETID,
                         ),
                     )
@@ -156,7 +158,7 @@ class RedigerbartVedleggHenter(
                     if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                         listOf(
                             Pair(
-                                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                Vedlegg.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
                                 BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
                             ),
                         )
@@ -168,18 +170,18 @@ class RedigerbartVedleggHenter(
                     if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                         listOf(
                             Pair(
-                                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                Vedlegg.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
                                 BrevVedleggKey.BP_BEREGNING_TRYGDETID,
                             ),
                             Pair(
-                                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+                                Vedlegg.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
                                 BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
                             ),
                         )
                     } else {
                         listOf(
                             Pair(
-                                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                Vedlegg.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
                                 BrevVedleggKey.BP_BEREGNING_TRYGDETID,
                             ),
                         )
@@ -189,7 +191,7 @@ class RedigerbartVedleggHenter(
                     if (brevtype == Brevtype.VARSEL) {
                         listOf(
                             Pair(
-                                EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
+                                Vedlegg.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
                                 BrevVedleggKey.BP_BEREGNING_TRYGDETID,
                             ),
                         )

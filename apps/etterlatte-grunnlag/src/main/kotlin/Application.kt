@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import org.slf4j.Logger
@@ -71,12 +70,11 @@ class ApplicationBuilder {
                         sakGrunnlagRoute(grunnlagService, behandlingKlient)
                         behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
                         personRoute(grunnlagService, behandlingKlient)
-                        aldersovergangRoutes(aldersovergangService)
+                        aldersovergangRoutes(behandlingKlient, aldersovergangService)
                     }
                 }
             },
             configFromEnvironment = { configFromEnvironment(it) },
-            setReady = { setReady() },
         ) { rapidsConnection, _ ->
             GrunnlagsversjoneringRiver(rapidsConnection, grunnlagService)
             GrunnlagHendelserRiver(rapidsConnection, grunnlagService)

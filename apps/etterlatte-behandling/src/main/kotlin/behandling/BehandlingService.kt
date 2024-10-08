@@ -20,7 +20,9 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -31,8 +33,10 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -46,12 +50,14 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakMedUtlandstilknytning
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.PersonManglerSak
-import no.nav.etterlatte.sak.SakMedUtlandstilknytning
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -122,14 +128,26 @@ class VilkaarMaaFinnesHvisViderefoertOpphoer :
         "Vilkår må angis hvis opphør skal videreføres",
     )
 
+class PleieforholdMaaStarteFoerDetOpphoerer :
+    UgyldigForespoerselException(
+        code = "PLEIEFORHOLD_MAA_STARTE_FOER_DET_OPPHOERER",
+        detail = "Pleieforholdet må ha startdato som er før opphørsdato",
+    )
+
+class PleieforholdMaaHaStartOgOpphoer :
+    UgyldigForespoerselException(
+        code = "PLEIEFORHOLD_MAA_HA_START_OG_OPPHOER",
+        detail = "Pleieforholdet må ha både startdato og opphørsdato",
+    )
+
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
-    fun hentBehandlingerForSak(sakId: Long): List<Behandling>
+    fun hentBehandlingerForSak(sakId: SakId): List<Behandling>
 
     fun hentSakMedBehandlinger(saker: List<Sak>): SakMedBehandlinger
 
-    fun hentSisteIverksatte(sakId: Long): Behandling?
+    fun hentSisteIverksatte(sakId: SakId): Behandling?
 
     fun avbrytBehandling(
         behandlingId: UUID,
@@ -175,7 +193,7 @@ interface BehandlingService {
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
     )
 
-    suspend fun hentDetaljertBehandling(
+    fun hentDetaljertBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling?
@@ -197,7 +215,7 @@ interface BehandlingService {
         overstyr: Boolean,
     ): Boolean
 
-    fun hentFoersteVirk(sakId: Long): YearMonth?
+    fun hentFoersteVirk(sakId: SakId): YearMonth?
 
     fun oppdaterGrunnlagOgStatus(
         behandlingId: UUID,
@@ -210,19 +228,30 @@ interface BehandlingService {
         redigertFamilieforhold: RedigertFamilieforhold,
     )
 
+    suspend fun lagreAnnenForelder(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        annenForelder: AnnenForelder?,
+    )
+
     fun endreSkalSendeBrev(
         behandlingId: UUID,
         skalSendeBrev: Boolean,
     )
 
-    fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
+    fun hentUtlandstilknytningForSak(sakId: SakId): Utlandstilknytning?
 
     fun lagreOpphoerFom(
         behandlingId: UUID,
         opphoerFraOgMed: YearMonth,
     )
 
-    fun hentAapenRegulering(sakId: Long): UUID?
+    fun hentAapenOmregning(sakId: SakId): UUID?
+
+    fun oppdaterTidligereFamiliepleier(
+        behandlingId: UUID,
+        tidligereFamiliepleier: TidligereFamiliepleier,
+    )
 }
 
 internal class BehandlingServiceImpl(
@@ -244,11 +273,11 @@ internal class BehandlingServiceImpl(
             listOf(behandling).filterForEnheter().firstOrNull()
         }
 
-    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.hentBehandlingerForSak(sakId).filterForEnheter()
+    private fun hentBehandlingerForSakId(sakId: SakId) = behandlingDao.hentBehandlingerForSak(sakId).filterForEnheter()
 
     override fun hentBehandling(behandlingId: UUID): Behandling? = hentBehandlingForId(behandlingId)
 
-    override fun hentBehandlingerForSak(sakId: Long): List<Behandling> = hentBehandlingerForSakId(sakId)
+    override fun hentBehandlingerForSak(sakId: SakId): List<Behandling> = hentBehandlingerForSakId(sakId)
 
     /**
      * Funksjon for uthenting av [SakMedUtlandstilknytning] og tilknyttede [Behandling]er.
@@ -282,7 +311,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentSisteIverksatte(sakId: Long): Behandling? =
+    override fun hentSisteIverksatte(sakId: SakId): Behandling? =
         hentBehandlingerForSakId(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
@@ -316,8 +345,8 @@ internal class BehandlingServiceImpl(
             if (behandling is Revurdering && behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
                 val omgjoeringsoppgaveForKlage =
                     oppgaveService
-                        .hentOppgaverForSak(behandling.sak.id)
-                        .find { it.type == OppgaveType.OMGJOERING && it.referanse == behandling.relatertBehandlingId }
+                        .hentOppgaverForSak(behandling.sak.id, OppgaveType.OMGJOERING)
+                        .find { it.referanse == behandling.relatertBehandlingId }
                         ?: throw InternfeilException(
                             "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
                                 "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
@@ -359,15 +388,16 @@ internal class BehandlingServiceImpl(
             it.toStatistikkBehandling(persongalleri)
         }
 
-    override suspend fun hentDetaljertBehandling(
+    override fun hentDetaljertBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling? =
-        inTransaction { hentBehandling(behandlingId) }?.let {
+        hentBehandling(behandlingId)?.let {
             val persongalleri: Persongalleri =
-                grunnlagKlient
-                    .hentPersongalleri(behandlingId, brukerTokenInfo)
-                    ?.opplysning
+                runBlocking {
+                    grunnlagKlient
+                        .hentPersongalleri(behandlingId, brukerTokenInfo)
+                }?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
             it.toDetaljertBehandlingWithPersongalleri(persongalleri)
@@ -432,10 +462,11 @@ internal class BehandlingServiceImpl(
             return true
         }
 
-        val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
+        val foersteDoedsdato =
+            hentFoersteDoedsdato(behandling.id, brukerTokenInfo, behandling.sak.sakType)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
-        if (doedsdato == null) {
+        if (foersteDoedsdato == null) {
             // Mangler dødsfall når avdød er ukjent
             return true
         }
@@ -455,7 +486,7 @@ internal class BehandlingServiceImpl(
             makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
         }
 
-        val virkErEtterDoedsdato = virkningstidspunkt.isAfter(doedsdato)
+        val virkErEtterDoedsdato = virkningstidspunkt.isAfter(foersteDoedsdato)
         val virkErEtterMakstidspunktForSoeknad =
             when (behandling.sak.sakType) {
                 SakType.OMSTILLINGSSTOENAD ->
@@ -498,20 +529,19 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    private suspend fun hentDoedsdato(
+    private suspend fun hentFoersteDoedsdato(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): LocalDate? =
-        grunnlagKlient
-            .finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
-            .also {
-                it?.fnr?.let { fnr ->
-                    behandlingRequestLogger.loggRequest(brukerTokenInfo, fnr, "behandling")
-                }
-            }?.opplysning
-            ?.doedsdato
+        sakType: SakType,
+    ): LocalDate? {
+        val personopplysninger =
+            grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo, sakType)
+        return personopplysninger.avdoede
+            .mapNotNull { it.opplysning.doedsdato }
+            .minOrNull()
+    }
 
-    override fun hentFoersteVirk(sakId: Long): YearMonth? {
+    override fun hentFoersteVirk(sakId: SakId): YearMonth? {
         val behandlinger = hentBehandlingerForSak(sakId)
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
@@ -523,7 +553,13 @@ internal class BehandlingServiceImpl(
         hentBehandlingOrThrow(behandlingId)
             .tilOpprettet()
             .let { behandling ->
-                runBlocking { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType) }
+                runBlocking {
+                    grunnlagService.oppdaterGrunnlag(
+                        behandling.id,
+                        behandling.sak.id,
+                        behandling.sak.sakType,
+                    )
+                }
                 behandlingDao.lagreStatus(behandling)
                 hendelseDao.opppdatertGrunnlagHendelse(behandlingId, behandling.sak.id, brukerTokenInfo.ident())
             }
@@ -533,39 +569,27 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         redigertFamilieforhold: RedigertFamilieforhold,
-    ) {
-        val forrigePersonGalleri =
-            grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)?.opplysning
-                ?: throw PersongalleriFinnesIkkeException()
-        inTransaction {
-            hentBehandlingOrThrow(behandlingId)
-                .tilOpprettet()
-                .let { behandling ->
-                    val nyeOpplysinger =
-                        listOf(
-                            lagOpplysning(
-                                opplysningsType = Opplysningstype.PERSONGALLERI_V1,
-                                kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
-                                opplysning =
-                                    forrigePersonGalleri
-                                        .copy(
-                                            avdoed = redigertFamilieforhold.avdoede,
-                                            gjenlevende = redigertFamilieforhold.gjenlevende,
-                                        ).toJsonNode(),
-                                periode = null,
-                            ),
-                        )
-                    runBlocking {
-                        grunnlagService.leggTilNyeOpplysninger(
-                            behandlingId,
-                            NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
-                        )
-                    }
+    ) = endrePersongalleriOgOppdaterGrunnlag(
+        behandlingId,
+        brukerTokenInfo,
+    ) { galleri ->
+        galleri.copy(
+            avdoed = redigertFamilieforhold.avdoede,
+            gjenlevende = redigertFamilieforhold.gjenlevende,
+        )
+    }
 
-                    runBlocking { grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType) }
-                    behandlingDao.lagreStatus(behandling)
-                }
-        }
+    override suspend fun lagreAnnenForelder(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        annenForelder: AnnenForelder?,
+    ) = endrePersongalleriOgOppdaterGrunnlag(
+        behandlingId,
+        brukerTokenInfo,
+    ) { galleri ->
+        galleri.copy(
+            annenForelder = annenForelder,
+        )
     }
 
     override fun endreSkalSendeBrev(
@@ -586,7 +610,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning? = hentBehandlingerForSakId(sakId).hentUtlandstilknytning()
+    override fun hentUtlandstilknytningForSak(sakId: SakId): Utlandstilknytning? = hentBehandlingerForSakId(sakId).hentUtlandstilknytning()
 
     override fun lagreOpphoerFom(
         behandlingId: UUID,
@@ -646,6 +670,7 @@ internal class BehandlingServiceImpl(
             kilde = behandling.kilde,
             sendeBrev = behandling.sendeBrev,
             viderefoertOpphoer = viderefoertOpphoer,
+            tidligereFamiliepleier = behandling.tidligereFamiliepleier,
         )
     }
 
@@ -738,7 +763,7 @@ internal class BehandlingServiceImpl(
 
         try {
             behandling
-                .oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet)
+                .oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet)
                 .also {
                     behandlingDao.lagreBoddEllerArbeidetUtlandet(behandlingId, boddEllerArbeidetUtlandet)
                     behandlingDao.lagreStatus(it)
@@ -787,7 +812,7 @@ internal class BehandlingServiceImpl(
         }
 
         behandling
-            .oppdaterVidereførtOpphoer(viderefoertOpphoer)
+            .oppdaterViderefoertOpphoer(viderefoertOpphoer)
             .also {
                 behandlingDao.lagreViderefoertOpphoer(behandlingId, viderefoertOpphoer)
                 behandlingDao.lagreStatus(it)
@@ -799,19 +824,43 @@ internal class BehandlingServiceImpl(
         kilde: Grunnlagsopplysning.Kilde,
     ) = behandlingDao.fjernViderefoertOpphoer(behandlingId, kilde)
 
-    override fun hentAapenRegulering(sakId: Long): UUID? =
+    override fun hentAapenOmregning(sakId: SakId): UUID? =
         behandlingDao
-            .hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING)
-            .singleOrNull {
+            .hentAlleRevurderingerISakMedAarsak(
+                sakId,
+                listOf(Revurderingaarsak.REGULERING, Revurderingaarsak.OMREGNING),
+            ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
             }?.id
+
+    override fun oppdaterTidligereFamiliepleier(
+        behandlingId: UUID,
+        tidligereFamiliepleier: TidligereFamiliepleier,
+    ) {
+        val behandling =
+            hentBehandling(behandlingId)
+                ?: throw InternfeilException("Kunne ikke oppdatere tidligere familiepleier fordi behandlingen ikke finnes")
+
+        if (tidligereFamiliepleier.svar) {
+            if (tidligereFamiliepleier.startPleieforhold == null || tidligereFamiliepleier.opphoertPleieforhold == null) {
+                throw PleieforholdMaaHaStartOgOpphoer()
+            } else if (!tidligereFamiliepleier.startPleieforhold!!.isBefore(tidligereFamiliepleier.opphoertPleieforhold)) {
+                throw PleieforholdMaaStarteFoerDetOpphoerer()
+            }
+        }
+
+        behandling.oppdaterTidligereFamiliepleier(tidligereFamiliepleier).also {
+            behandlingDao.lagreTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
+            behandlingDao.lagreStatus(it)
+        }
+    }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)
             ?: throw BehandlingNotFoundException(behandlingId)
 
     private fun List<Behandling>.filterForEnheter(): List<Behandling> {
-        val enheterSomSkalFiltreresBort = ArrayList<String>()
+        val enheterSomSkalFiltreresBort = ArrayList<Enhetsnummer>()
         val appUser = Kontekst.get().AppUser
         if (appUser is SaksbehandlerMedEnheterOgRoller) {
             val bruker = appUser.saksbehandlerMedRoller
@@ -827,7 +876,7 @@ internal class BehandlingServiceImpl(
     }
 
     private fun filterBehandlingerForEnheter(
-        enheterSomSkalFiltreres: List<String>,
+        enheterSomSkalFiltreres: List<Enhetsnummer>,
         behandlinger: List<Behandling>,
     ): List<Behandling> = behandlinger.filter { it.sak.enhet !in enheterSomSkalFiltreres }
 
@@ -837,4 +886,46 @@ internal class BehandlingServiceImpl(
     ) = opphoerFraOgMed != null &&
         virkningstidspunkt != null &&
         virkningstidspunkt.isAfter(opphoerFraOgMed)
+
+    private suspend fun endrePersongalleriOgOppdaterGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        transform: (Persongalleri) -> Persongalleri,
+    ) {
+        val forrigePersonGalleri =
+            grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)?.opplysning
+                ?: throw PersongalleriFinnesIkkeException()
+        inTransaction {
+            hentBehandlingOrThrow(behandlingId)
+                .tilOpprettet()
+                .let { behandling ->
+                    val nyeOpplysinger =
+                        listOf(
+                            lagOpplysning(
+                                opplysningsType = Opplysningstype.PERSONGALLERI_V1,
+                                kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                                opplysning =
+                                    transform(forrigePersonGalleri).toJsonNode(),
+                                periode = null,
+                            ),
+                        )
+                    runBlocking {
+                        grunnlagService.leggTilNyeOpplysninger(
+                            behandlingId,
+                            NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
+                            HardkodaSystembruker.opprettGrunnlag,
+                        )
+                    }
+
+                    runBlocking {
+                        grunnlagService.oppdaterGrunnlag(
+                            behandling.id,
+                            behandling.sak.id,
+                            behandling.sak.sakType,
+                        )
+                    }
+                    behandlingDao.lagreStatus(behandling)
+                }
+        }
+    }
 }

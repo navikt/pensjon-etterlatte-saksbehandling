@@ -1,10 +1,13 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
@@ -26,6 +29,7 @@ fun mottakerFraAdresse(
             landkode = regoppslag.adresse.landkode,
             land = regoppslag.adresse.land,
         ),
+    tvingSentralPrint = false,
 )
 
 fun tomMottaker(fnr: Folkeregisteridentifikator) =
@@ -56,6 +60,7 @@ fun opprettBrevFra(
     mottaker = opprettNyttBrev.mottaker,
     opprettet = opprettNyttBrev.opprettet,
     brevtype = opprettNyttBrev.brevtype,
+    brevkoder = opprettNyttBrev.brevkoder,
 )
 
 class Pdf(
@@ -82,7 +87,7 @@ enum class BrevVedleggKey {
 }
 
 data class OpprettNyttBrev(
-    val sakId: Long,
+    val sakId: SakId,
     val behandlingId: UUID?,
     val soekerFnr: String,
     val prosessType: BrevProsessType,
@@ -91,6 +96,7 @@ data class OpprettNyttBrev(
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
     val brevtype: Brevtype,
+    val brevkoder: Brevkoder,
 ) {
     val status: Status = Status.OPPRETTET
 }

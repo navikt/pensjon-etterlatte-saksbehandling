@@ -1,5 +1,8 @@
 package no.nav.etterlatte.beregning.regler
 
+import Regelverk
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel1967
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel2024
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.regler.Node
 import no.nav.etterlatte.libs.regler.Regel
@@ -65,4 +68,25 @@ fun SubsumsjonsNode<*>.finnAvdodeForeldre(avdodeForeldre2024Regel: Regel<*, *>):
     with(FinnAvdodeForeldre2024Visitor(avdodeForeldre2024Regel)) {
         accept(this)
         avdodeForeldre
+    }
+
+class FinnAnvendtRegelverkVisitor : Visitor {
+    var regelverk: Regelverk? = null
+
+    override fun visit(node: Node<*>) {}
+
+    override fun visit(node: SubsumsjonsNode<*>) {
+        if (node.regel === barnepensjonSatsRegel1967) {
+            regelverk = Regelverk.REGELVERK_TOM_DES_2023
+        }
+        if (node.regel === barnepensjonSatsRegel2024) {
+            regelverk = Regelverk.REGELVERK_FOM_JAN_2024
+        }
+    }
+}
+
+fun SubsumsjonsNode<*>.finnAnvendtRegelverkBarnepensjon(): Regelverk? =
+    with(FinnAnvendtRegelverkVisitor()) {
+        accept(this)
+        regelverk
     }

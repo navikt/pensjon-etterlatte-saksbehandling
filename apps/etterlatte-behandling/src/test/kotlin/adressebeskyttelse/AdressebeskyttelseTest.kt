@@ -61,7 +61,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 
@@ -151,7 +151,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
         testApplication {
             val httpClient =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 
@@ -212,7 +212,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
         testApplication {
             val client =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 
@@ -292,7 +292,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
         testApplication {
             val httpClient =
-                runServerWithModule(server) {
+                runServerWithModule(mockOAuth2Server) {
                     module(applicationContext)
                 }
 

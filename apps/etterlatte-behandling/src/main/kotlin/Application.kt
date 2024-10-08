@@ -35,13 +35,15 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
+import no.nav.etterlatte.kodeverk.kodeverk
+import no.nav.etterlatte.krr.krrRoute
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
+import no.nav.etterlatte.libs.ktor.initialisering.run
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
@@ -50,6 +52,8 @@ import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
+import no.nav.etterlatte.vilkaarsvurdering.aldersovergang
+import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import org.slf4j.Logger
 import javax.sql.DataSource
 
@@ -79,7 +83,7 @@ private class Server(
     fun run() =
         with(context) {
             dataSource.migrate()
-            setReady().also { engine.start(true) }
+            engine.run()
         }
 }
 
@@ -90,8 +94,6 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
         context.oppgaveFristGaarUtJobb,
-        context.opprettDoedshendelseJob,
-        context.behandleDoedshendelseJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -126,6 +128,7 @@ private fun Route.attachContekst(
                     ),
                 databasecontxt = DatabaseContext(ds),
                 sakTilgangDao = context.sakTilgangDao,
+                brukerTokenInfo = brukerTokenInfo,
             )
 
         withContext(
@@ -166,9 +169,10 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         gyldighetsproevingService = applicationContext.gyldighetsproevingService,
         kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         behandlingFactory = applicationContext.behandlingFactory,
-        featureToggleService = applicationContext.featureToggleService,
     )
-    aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivitetspliktService)
+    aktivitetspliktRoutes(
+        aktivitetspliktService = applicationContext.aktivitetspliktService,
+    )
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
     generellbehandlingRoutes(
@@ -180,6 +184,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         revurderingService = applicationContext.revurderingService,
         manuellRevurderingService = applicationContext.manuellRevurderingService,
         omgjoeringKlageRevurderingService = applicationContext.omgjoeringKlageRevurderingService,
+        automatiskRevurderingService = applicationContext.automatiskRevurderingService,
     )
     omregningRoutes(omregningService = applicationContext.omregningService)
     migreringRoutes(migreringService = applicationContext.migreringService)
@@ -210,6 +215,10 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     saksbehandlerRoutes(saksbehandlerService = applicationContext.saksbehandlerService)
 
     tilgangRoutes(applicationContext.tilgangService)
+    kodeverk(applicationContext.kodeverkService)
+    krrRoute(applicationContext.tilgangService, applicationContext.krrKlient)
+    vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+    aldersovergang(applicationContext.aldersovergangService)
 }
 
 private fun Route.settOppTilganger(

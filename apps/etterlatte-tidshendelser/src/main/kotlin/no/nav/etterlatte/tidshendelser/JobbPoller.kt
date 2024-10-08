@@ -15,7 +15,7 @@ class JobbPollerTask(
     private val openingHours: OpeningHours,
     private val jobbPoller: JobbPoller,
 ) : TimerJob {
-    private val logger = LoggerFactory.getLogger(JobbPollerTask::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun schedule(): Timer {
         logger.info("Starter polling av jobber pr $periode")
@@ -44,20 +44,40 @@ class JobbPoller(
         logger.info("Sjekker for jobber å starte...")
 
         hendelseDao.finnAktuellJobb().forEach {
-            logger.info("Fant jobb ${it.id}, type=${it.type}, status=${it.status}")
-            hendelseDao.oppdaterJobbstatusStartet(it)
+            try {
+                logger.info("Fant jobb ${it.id}, type=${it.type}, status=${it.status}")
+                hendelseDao.oppdaterJobbstatusStartet(it)
 
-            val saker =
-                when (it.type.kategori) {
-                    JobbKategori.ALDERSOVERGANG -> aldersovergangerService.execute(it)
-                    JobbKategori.OMS_DOEDSDATO -> omstillingsstoenadService.execute(it)
-                    JobbKategori.REGULERING -> reguleringService.execute(it)
+                val saker =
+                    when (it.type.kategori) {
+                        JobbKategori.ALDERSOVERGANG -> aldersovergangerService.execute(it)
+                        JobbKategori.OMS_DOEDSDATO -> omstillingsstoenadService.execute(it)
+                        JobbKategori.REGULERING -> reguleringService.execute(it)
+                    }
+
+                if (saker.isEmpty()) {
+                    // Nuttin' to do
+                    val jobbRefreshed = hendelseDao.hentJobb(it.id)
+                    hendelseDao.oppdaterJobbstatusFerdig(jobbRefreshed)
                 }
-
-            if (saker.isEmpty()) {
-                // Nuttin' to do
-                val jobbRefreshed = hendelseDao.hentJobb(it.id)
-                hendelseDao.oppdaterJobbstatusFerdig(jobbRefreshed)
+            } catch (outer: Exception) {
+                try {
+                    hendelseDao.tilbakestillJobSomIkkeStartetSkikkelig(it.id)
+                    logger.error(
+                        "Kjøring av jobb=${it.type} med id=${it.id} feilet. Statusen er tilbakestilt og vil " +
+                            "bli forsøkt på nytt, men hvis denne ikke går igjennom i løpet av dagen må ny kjøring " +
+                            "settes opp for denne jobben",
+                        outer,
+                    )
+                } catch (inner: Exception) {
+                    logger.error("Kunne ikke tilbakestille kjøringen av jobb ${it.type}.", inner)
+                    logger.error(
+                        "Kjøring av jobb=${it.type} med id=${it.id} feilet. Vi kunne heller " +
+                            "ikke tilbakestille kjøringen av jobben (se feil over). Dette betyr at denne jobben " +
+                            "MÅ manuelt legges inn på nytt / oppdateres for å få kjørt den.",
+                        outer,
+                    )
+                }
             }
         }
     }

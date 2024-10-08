@@ -6,6 +6,7 @@ fun Map<String, String>.requireEnvValue(key: String) =
         else -> value
     }
 
+@ConsistentCopyVisibility
 data class Miljoevariabler private constructor(
     val props: Map<String, String>,
 ) {
@@ -13,9 +14,7 @@ data class Miljoevariabler private constructor(
 
     operator fun get(key: EnvEnum) = props[key.key()]
 
-    fun getValue(key: EnvEnum): String = props.getValue(key.key())
-
-    fun getOrDefault(
+    fun getOrDefault( // TODO: Denne bør vi kunne fase ut
         key: EnvEnum,
         value: String,
     ) = props.getOrDefault(key.key(), value)
@@ -24,16 +23,6 @@ data class Miljoevariabler private constructor(
         key: EnvEnum,
         value: (Miljoevariabler) -> String,
     ) = Miljoevariabler(props + (key.key() to value(this)))
-
-    fun append(props: Map<EnvEnum, String>): Miljoevariabler {
-        val toMutableMap = this.props.toMutableMap()
-        toMutableMap.putAll(
-            props.entries.associate { it.key.key() to it.value },
-        )
-        return Miljoevariabler(toMutableMap)
-    }
-
-    fun containsKey(key: EnvEnum) = props.containsKey(key.key())
 
     companion object {
         fun systemEnv(): Miljoevariabler = Miljoevariabler(System.getenv())

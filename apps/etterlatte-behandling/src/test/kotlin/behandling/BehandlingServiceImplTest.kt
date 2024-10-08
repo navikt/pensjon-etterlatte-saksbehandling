@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -18,11 +19,14 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
-import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
+import no.nav.etterlatte.grunnlag.GenerellKilde
+import no.nav.etterlatte.grunnlag.Personopplysning
+import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -30,14 +34,18 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -55,7 +63,9 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.MethodSource
 import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 import java.time.LocalDate
@@ -63,7 +73,6 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingServiceImplTest {
@@ -73,6 +82,7 @@ internal class BehandlingServiceImplTest {
     private val hendelseDaoMock = mockk<HendelseDao>()
     private val grunnlagKlientMock = mockk<GrunnlagKlient>()
     private val oppgaveServiceMock = mockk<OppgaveService>()
+    private val grunnlagServiceMock = mockk<GrunnlagServiceImpl>()
 
     private val behandlingService =
         BehandlingServiceImpl(
@@ -84,7 +94,7 @@ internal class BehandlingServiceImplTest {
             behandlingRequestLogger = mockk(),
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveServiceMock,
-            grunnlagService = mockk(),
+            grunnlagService = grunnlagServiceMock,
             beregningKlient = mockk(),
         )
 
@@ -97,17 +107,17 @@ internal class BehandlingServiceImplTest {
     fun `Kan hente egne ansatte behandlínger som egen ansatt saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler(harRolleEgenAnsatt = true))
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.EGNE_ANSATTE.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -121,17 +131,17 @@ internal class BehandlingServiceImplTest {
     fun `Kan hente strengt fortrolig behandlínger som streng fortrolig saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler("ident", harRolleStrengtFortrolig = true))
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -145,17 +155,17 @@ internal class BehandlingServiceImplTest {
     fun `Kan ikke hente strengt fortrolig behandlínger som vanlig saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -169,17 +179,17 @@ internal class BehandlingServiceImplTest {
     fun `Kan ikke hente egne ansatte behandlínger som vanlig saksbehandler`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.EGNE_ANSATTE.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -193,13 +203,13 @@ internal class BehandlingServiceImplTest {
     fun `skal hente behandlinger i sak`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
-                revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING),
-                foerstegangsbehandling(sakId = 1),
+                revurdering(sakId = sakId1, revurderingAarsak = Revurderingaarsak.REGULERING),
+                foerstegangsbehandling(sakId = sakId1),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -213,11 +223,10 @@ internal class BehandlingServiceImplTest {
     fun `avbrytBehandling sjekker om behandlingsstatusen er gyldig for avbrudd`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sakId = 1L
-        val avbruttBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.AVBRUTT)
-        val attestertBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.ATTESTERT)
-        val iverksattBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.IVERKSATT)
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val avbruttBehandling = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.AVBRUTT)
+        val attestertBehandling = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.ATTESTERT)
+        val iverksattBehandling = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.IVERKSATT)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(avbruttBehandling.id) } returns avbruttBehandling
         every { behandlingDaoMock.hentBehandling(attestertBehandling.id) } returns attestertBehandling
@@ -257,8 +266,7 @@ internal class BehandlingServiceImplTest {
     fun `avbrytBehandling registrerer en avbruddshendelse`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
@@ -297,8 +305,7 @@ internal class BehandlingServiceImplTest {
             },
         )
 
-        val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
@@ -329,8 +336,7 @@ internal class BehandlingServiceImplTest {
     fun `avbrytBehandling sender en kafka-melding`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
@@ -360,8 +366,7 @@ internal class BehandlingServiceImplTest {
     fun `avbryt behandling setter koblede grunnlagsendringshendelser tilbake til ingen kobling`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sakId = 1L
-        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId1)
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
@@ -392,7 +397,7 @@ internal class BehandlingServiceImplTest {
                 utlandstilknytningType = null,
                 virkningstidspunkt = Tidspunkt.parse("2015-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00"),
-                doedsdato = LocalDate.parse("2014-01-01"),
+                doedsdato = listOf(LocalDate.parse("2014-01-01")),
             )
         }
     }
@@ -406,7 +411,7 @@ internal class BehandlingServiceImplTest {
                 utlandstilknytningType = UtlandstilknytningType.BOSATT_UTLAND,
                 virkningstidspunkt = Tidspunkt.parse("2015-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00"),
-                doedsdato = LocalDate.parse("2014-01-01"),
+                doedsdato = listOf(LocalDate.parse("2014-01-01")),
             )
         }
     }
@@ -422,7 +427,7 @@ internal class BehandlingServiceImplTest {
                 kravdato = Tidspunkt.parse("2017-02-01T00:00:00Z"),
                 // brukes denne vil ikke virk være innenfor 3 år
                 soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00"),
-                doedsdato = LocalDate.parse("2014-01-01"),
+                doedsdato = listOf(LocalDate.parse("2014-01-01")),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -436,7 +441,7 @@ internal class BehandlingServiceImplTest {
                 sakType = sakType,
                 virkningstidspunkt = Tidspunkt.parse("2020-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
-                doedsdato = LocalDate.parse("2020-01-01"),
+                doedsdato = listOf(LocalDate.parse("2020-01-01")),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -450,7 +455,7 @@ internal class BehandlingServiceImplTest {
                 sakType = sakType,
                 virkningstidspunkt = Tidspunkt.parse("2020-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
-                doedsdato = null,
+                doedsdato = emptyList(),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -464,10 +469,73 @@ internal class BehandlingServiceImplTest {
                 sakType = sakType,
                 virkningstidspunkt = Tidspunkt.parse("2020-01-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
-                doedsdato = LocalDate.parse("2020-01-01"),
+                doedsdato = listOf(LocalDate.parse("2020-01-01")),
             )
 
         gyldigVirkningstidspunkt shouldBe false
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("flereAvdoedeVirkningstidspunktTestdata")
+    fun `skal gi gyldig virkningstidspunkt med to avdoede hvis tidspunkt er foer siste doedsfall`(
+        beskrivelse: String,
+        virkningstidspunkt: Tidspunkt,
+        doedsdatoer: List<LocalDate>,
+        forventetGyldig: Boolean,
+    ) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                virkningstidspunkt = virkningstidspunkt,
+                doedsdato = doedsdatoer,
+                sakType = SakType.BARNEPENSJON,
+                soeknadMottatt = LocalDateTime.parse("2020-03-01T00:00:00"),
+            )
+
+        gyldigVirkningstidspunkt shouldBe forventetGyldig
+    }
+
+    /**
+     * Gitt virk og dødsdatoer, er virk gyldig eller ikke?
+     */
+    private fun flereAvdoedeVirkningstidspunktTestdata() =
+        listOf(
+            Arguments.of(
+                "Virk er før første dødsdato og er ugyldig",
+                Tidspunkt.parse("2019-08-01T00:00:00Z"),
+                listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+                false,
+            ),
+            Arguments.of(
+                "Virk er i samme måned som første dødsdato og er ugyldig",
+                Tidspunkt.parse("2019-10-01T00:00:00Z"),
+                listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+                false,
+            ),
+            Arguments.of(
+                "Virk er etter første dødsdato, før siste dødsdato og er gyldig",
+                Tidspunkt.parse("2019-11-01T00:00:00Z"),
+                listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+                true,
+            ),
+            Arguments.of(
+                "Virk er etter siste dødsdato og er gyldig",
+                Tidspunkt.parse("2020-02-01T00:00:00Z"),
+                listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+                true,
+            ),
+        )
+
+    @Test
+    fun `skal gi ugyldig virkningstidspunkt med to avdoede hvis tidspunkt er foer siste doedsfall`() {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = SakType.BARNEPENSJON,
+                virkningstidspunkt = Tidspunkt.parse("2019-11-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
+                doedsdato = listOf(LocalDate.parse("2019-10-15"), LocalDate.parse("2020-01-15")),
+            )
+
+        gyldigVirkningstidspunkt shouldBe true
     }
 
     @Test
@@ -477,7 +545,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.BARNEPENSJON,
                 virkningstidspunkt = Tidspunkt.parse("2017-01-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -490,7 +558,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 virkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
             )
 
         gyldigVirkningstidspunkt shouldBe true
@@ -503,7 +571,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.BARNEPENSJON,
                 virkningstidspunkt = Tidspunkt.parse("2016-12-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
             )
 
         gyldigVirkningstidspunkt shouldBe false
@@ -516,7 +584,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 virkningstidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
             )
 
         gyldigVirkningstidspunkt shouldBe false
@@ -529,7 +597,7 @@ internal class BehandlingServiceImplTest {
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 virkningstidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
                 soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
-                doedsdato = LocalDate.parse("2016-11-30"),
+                doedsdato = listOf(LocalDate.parse("2016-11-30")),
                 kilde = Vedtaksloesning.PESYS,
             )
 
@@ -655,7 +723,7 @@ internal class BehandlingServiceImplTest {
         virkningstidspunkt: Tidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
         begrunnelse: String = "en begrunnelse",
         soeknadMottatt: LocalDateTime = LocalDateTime.parse("2020-01-15T00:00:00"),
-        doedsdato: LocalDate? = LocalDate.parse("2016-11-30"),
+        doedsdato: List<LocalDate> = listOf(LocalDate.parse("2016-11-30")),
         kravdato: Tidspunkt? = null,
         foersteVirk: YearMonth? = null,
         kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
@@ -690,33 +758,33 @@ internal class BehandlingServiceImplTest {
     fun `hentSenestIverksatteBehandling() returnerer seneste iverksatte behandlingen`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val behandling1 = foerstegangsbehandling(sakId = 1, status = BehandlingStatus.IVERKSATT)
+        val behandling1 = foerstegangsbehandling(sakId = sakId1, status = BehandlingStatus.IVERKSATT)
         val behandling2 =
             revurdering(
-                sakId = 1,
+                sakId = sakId1,
                 status = BehandlingStatus.BEREGNET,
                 revurderingAarsak = Revurderingaarsak.REGULERING,
             )
 
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
 
-        assertEquals(behandling1, behandlingService.hentSisteIverksatte(1))
+        assertEquals(behandling1, behandlingService.hentSisteIverksatte(sakId1))
     }
 
     @Test
     fun `skal hente behandlinger i sak hvor sak har enhet og brukeren har enhet`() {
         nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
-        every { behandlingDaoMock.hentBehandlingerForSak(1) } returns
+        every { behandlingDaoMock.hentBehandlingerForSak(sakId1) } returns
             listOf(
                 revurdering(
-                    sakId = 1,
+                    sakId = sakId1,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
                     enhet = Enheter.PORSGRUNN.enhetNr,
                 ),
-                foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr),
+                foerstegangsbehandling(sakId = sakId1, enhet = Enheter.PORSGRUNN.enhetNr),
             )
 
-        val behandlinger = behandlingService.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(sakId1)
 
         assertAll(
             "skal hente behandlinger",
@@ -737,7 +805,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(any()) } returns
             foerstegangsbehandling(
                 id = uuid,
-                sakId = 1,
+                sakId = sakId1,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
@@ -764,8 +832,8 @@ internal class BehandlingServiceImplTest {
     fun `hentSakMedBehandlinger - flere saker prioriteres korrekt`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = Random.nextLong(), "4808")
-        val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
+        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = randomSakId(), Enheter.PORSGRUNN.enhetNr)
+        val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = randomSakId(), Enheter.PORSGRUNN.enhetNr)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak1.id) } returns
             listOf(
@@ -789,10 +857,83 @@ internal class BehandlingServiceImplTest {
     }
 
     @Test
+    fun `start dato må være før opphørsdato tidligere familiepleier`() {
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
+
+        val uuid = UUID.randomUUID()
+
+        val slot = slot<TidligereFamiliepleier>()
+
+        every { behandlingDaoMock.hentBehandling(any()) } returns
+            foerstegangsbehandling(
+                id = uuid,
+                sakId = 1,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
+
+        every { behandlingDaoMock.lagreTidligereFamiliepleier(any(), capture(slot)) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
+
+        shouldThrow<PleieforholdMaaStarteFoerDetOpphoerer> {
+            inTransaction {
+                behandlingService.oppdaterTidligereFamiliepleier(
+                    uuid,
+                    TidligereFamiliepleier(
+                        true,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "123",
+                        LocalDate.now(),
+                        LocalDate.now(),
+                        "Test",
+                    ),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `kan oppdatere tidligere familiepleier`() {
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
+
+        val uuid = UUID.randomUUID()
+
+        val slot = slot<TidligereFamiliepleier>()
+
+        every { behandlingDaoMock.hentBehandling(any()) } returns
+            foerstegangsbehandling(
+                id = uuid,
+                sakId = 1,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
+
+        every { behandlingDaoMock.lagreTidligereFamiliepleier(any(), capture(slot)) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
+
+        inTransaction {
+            behandlingService.oppdaterTidligereFamiliepleier(
+                uuid,
+                TidligereFamiliepleier(
+                    true,
+                    Grunnlagsopplysning.Saksbehandler.create("ident"),
+                    "123",
+                    LocalDate.of(1970, 1, 1),
+                    LocalDate.now(),
+                    "Test",
+                ),
+            )
+        }
+
+        assertEquals(true, slot.captured.svar)
+        assertEquals("123", slot.captured.foedselsnummer)
+        assertEquals("Test", slot.captured.begrunnelse)
+        assertEquals("ident", (slot.captured.kilde as Grunnlagsopplysning.Saksbehandler).ident)
+    }
+
+    @Test
     fun `hentSakMedBehandlinger - kun én sak`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
-        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
+        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = randomSakId(), Enheter.PORSGRUNN.enhetNr)
 
         every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns
             listOf(
@@ -817,7 +958,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
         every {
             behandlingDaoMock.hentBehandling(behandlingId)
-        } returns revurdering(sakId = 1L, revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING)
+        } returns revurdering(sakId = sakId1, revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING)
         behandlingService.endreSkalSendeBrev(behandlingId, true)
         verify(exactly = 1) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
     }
@@ -827,7 +968,7 @@ internal class BehandlingServiceImplTest {
         nyKontekstMedBruker(mockSaksbehandler())
         val behandlingId = UUID.randomUUID()
         every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
-        every { behandlingDaoMock.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = 1L)
+        every { behandlingDaoMock.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = sakId1)
         assertThrows<KanIkkeEndreSendeBrevForFoerstegangsbehandling> {
             behandlingService.endreSkalSendeBrev(behandlingId, true)
         }
@@ -835,10 +976,47 @@ internal class BehandlingServiceImplTest {
         verify(exactly = 0) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
     }
 
+    @Test
+    fun `Kan lagre annen forelder`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+        val behandling = foerstegangsbehandling(sakId = 1L, id = UUID.randomUUID())
+        every { behandlingDaoMock.hentBehandling(behandling.id) } returns behandling
+        coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, TOKEN) } returns mockPersongalleri()
+        coEvery { grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, any(), any()) } just runs
+        coEvery { grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any()) } just runs
+        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
+
+        val annenForelderInRequest =
+            AnnenForelder(
+                vurdering = AnnenForelder.AnnenForelderVurdering.FORELDER_UTEN_IDENT_I_PDL,
+                foedselsdato = LocalDate.now(),
+            )
+        runBlocking {
+            behandlingService.lagreAnnenForelder(
+                behandling.id,
+                TOKEN,
+                annenForelderInRequest,
+            )
+        }
+        val slot = slot<NyeSaksopplysninger>()
+        coVerify {
+            grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, capture(slot), any())
+            grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any())
+        }
+        assertEquals(behandling.sak.id, slot.captured.sakId)
+
+        val grunnlagsopplysning = slot.captured.opplysninger.single()
+        assertEquals(Opplysningstype.PERSONGALLERI_V1, grunnlagsopplysning.opplysningType)
+
+        val persongalleri = objectMapper.readValue(grunnlagsopplysning.opplysning.toJson(), Persongalleri::class.java)
+        assertEquals(annenForelderInRequest, persongalleri.annenForelder)
+    }
+
     private fun initFellesMocks(
         sakType: SakType = SakType.BARNEPENSJON,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        doedsdato: LocalDate?,
+        doedsdato: List<LocalDate>,
         soeknadMottatt: LocalDateTime,
         foersteVirk: YearMonth?,
         utlandstilknytning: Utlandstilknytning? = null,
@@ -895,12 +1073,24 @@ internal class BehandlingServiceImplTest {
                     )
             }
 
-        val personopplysning = personOpplysning(doedsdato = doedsdato)
-        val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
-
         coEvery {
-            grunnlagKlientMock.finnPersonOpplysning(behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
-        } returns grunnlagsopplysningMedPersonopplysning
+            grunnlagKlientMock.hentPersonopplysningerForBehandling(behandling.id, TOKEN, sakType)
+        } returns
+            PersonopplysningerResponse(
+                avdoede =
+                    doedsdato.map { datoDoed ->
+                        Personopplysning(
+                            Opplysningstype.AVDOED_PDL_V1,
+                            UUID.randomUUID(),
+                            GenerellKilde("", Tidspunkt.now(), ""),
+                            personOpplysning(doedsdato = datoDoed),
+                        )
+                    },
+                gjenlevende = emptyList(),
+                innsender = null,
+                soeker = null,
+                annenForelder = null,
+            )
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
 
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling
@@ -924,7 +1114,7 @@ internal class BehandlingServiceImplTest {
         )
 
     companion object {
-        const val SAK_ID = 1L
+        val SAK_ID = sakId1
         val BEHANDLINGS_ID: UUID = UUID.randomUUID()
         val TOKEN = simpleSaksbehandler()
     }

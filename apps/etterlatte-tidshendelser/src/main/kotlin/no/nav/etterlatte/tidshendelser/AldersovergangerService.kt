@@ -2,6 +2,7 @@ package no.nav.etterlatte.tidshendelser
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.slf4j.LoggerFactory
@@ -11,9 +12,9 @@ class AldersovergangerService(
     private val grunnlagKlient: GrunnlagKlient,
     private val behandlingKlient: BehandlingKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(AldersovergangerService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun execute(jobb: HendelserJobb): List<Long> {
+    fun execute(jobb: HendelserJobb): List<SakId> {
         logger.info("Handling jobb ${jobb.id}, type=${jobb.type} (${jobb.type.beskrivelse})")
 
         val yearsToSubtract =

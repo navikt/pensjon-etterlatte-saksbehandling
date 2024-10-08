@@ -7,12 +7,13 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
-import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
+import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -30,6 +32,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -52,9 +55,9 @@ class GrunnlagsendringshendelseService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentGyldigeHendelserForSak(sakId: Long) = grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId)
+    fun hentGyldigeHendelserForSak(sakId: SakId) = grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId)
 
-    fun hentAlleHendelserForSak(sakId: Long): List<Grunnlagsendringshendelse> {
+    fun hentAlleHendelserForSak(sakId: SakId): List<Grunnlagsendringshendelse> {
         logger.info("Henter alle relevante hendelser for sak $sakId")
         return grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
@@ -63,7 +66,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun hentAlleHendelserForSakAvType(
-        sakId: Long,
+        sakId: SakId,
         type: GrunnlagsendringsType,
     ) = inTransaction {
         logger.info("Henter alle relevante hendelser for sak $sakId")
@@ -100,18 +103,8 @@ class GrunnlagsendringshendelseService(
             opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED)
         }
 
-    fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl): List<Grunnlagsendringshendelse> {
-        if (doedshendelseService.kanBrukeDeodshendelserJob()) {
-            doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
-        }
-
-        if (!doedshendelseService.kanSendeBrevOgOppretteOppgave()) {
-            return inTransaction {
-                opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
-            }
-        }
-
-        return emptyList()
+    fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl) {
+        doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
     }
 
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> =
@@ -148,6 +141,14 @@ class GrunnlagsendringshendelseService(
             )
         }
 
+    fun opprettFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse): List<Grunnlagsendringshendelse> =
+        inTransaction {
+            opprettHendelseAvTypeForPerson(
+                hendelse.fnr,
+                GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR,
+            )
+        }
+
     fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> =
         opprettHendelseInstitusjonsoppholdForPerson(
             fnr = oppholdsHendelse.norskident,
@@ -159,7 +160,7 @@ class GrunnlagsendringshendelseService(
                 ),
         )
 
-    fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> =
+    fun opprettEndretGrunnbeloepHendelse(sakId: SakId): List<Grunnlagsendringshendelse> =
         inTransaction {
             opprettHendelseAvTypeForSak(
                 sakId,
@@ -222,7 +223,7 @@ class GrunnlagsendringshendelseService(
         fnr: String,
         gradering: AdressebeskyttelseGradering,
         sakType: SakType,
-    ): String =
+    ): Enhetsnummer =
         when (gradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
@@ -331,7 +332,7 @@ class GrunnlagsendringshendelseService(
     }
 
     private fun opprettHendelseAvTypeForSak(
-        sakId: Long,
+        sakId: SakId,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
         val hendelseId = UUID.randomUUID()
@@ -445,7 +446,7 @@ class GrunnlagsendringshendelseService(
     }
 
     internal fun erDuplikatHendelse(
-        sakId: Long,
+        sakId: SakId,
         grunnlagsendringshendelse: Grunnlagsendringshendelse,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ): Boolean {

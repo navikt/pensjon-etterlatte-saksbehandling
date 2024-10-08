@@ -8,10 +8,11 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 import styled from 'styled-components'
 import { RedigerFamilieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforhold'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentAlleLand, ILand } from '~shared/api/trygdetid'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
+import { hentAlleLand } from '~shared/api/behandling'
+import { ILand } from '~utils/kodeverk'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -38,7 +39,11 @@ export const Familieforhold = ({ behandling, personopplysninger, redigerbar }: P
 
       <FamilieforholdWrapper>
         {behandling.sakType === SakType.BARNEPENSJON ? (
-          <FamilieforholdBarnepensjon personopplysninger={personopplysninger} landListeResult={landListeResult} />
+          <FamilieforholdBarnepensjon
+            personopplysninger={personopplysninger}
+            landListeResult={landListeResult}
+            behandlingId={behandling.id}
+          />
         ) : (
           <FamilieforholdOmstillingsstoenad personopplysninger={personopplysninger} landListeResult={landListeResult} />
         )}

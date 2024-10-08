@@ -19,7 +19,10 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-ktor/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main
@@ -29,10 +32,12 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-ktor/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:

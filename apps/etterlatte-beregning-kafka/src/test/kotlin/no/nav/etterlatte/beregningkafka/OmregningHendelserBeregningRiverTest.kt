@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -34,18 +33,28 @@ class OmregningHendelserBeregningRiverTest {
         val nyBehandling = UUID.randomUUID()
         val gammelBehandling = UUID.randomUUID()
 
-        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every {
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
+                nyBehandling,
+                gammelBehandling,
+            )
+        } returns mockk()
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 500, 1000)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 600, 1100)
-        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
+        coEvery { beregningService.hentGrunnbeloep() } returns
+            Grunnbeloep(
+                YearMonth.now(),
+                1000,
+                100,
+                BigDecimal("1.2"),
+            )
 
         runBlocking {
             river.beregn(
                 SakType.BARNEPENSJON,
                 behandlingId = nyBehandling,
                 behandlingViOmregnerFra = gammelBehandling,
-                LocalDate.of(2024, Month.APRIL, 10),
             )
         }
     }
@@ -57,11 +66,22 @@ class OmregningHendelserBeregningRiverTest {
         val nyBehandling = UUID.randomUUID()
         val gammelBehandling = UUID.randomUUID()
 
-        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every {
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
+                nyBehandling,
+                gammelBehandling,
+            )
+        } returns mockk()
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000, 1000)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 500, 1100)
-        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
+        coEvery { beregningService.hentGrunnbeloep() } returns
+            Grunnbeloep(
+                YearMonth.now(),
+                1000,
+                100,
+                BigDecimal("1.2"),
+            )
 
         runBlocking {
             assertThrows<MindreEnnForrigeBehandling> {
@@ -69,7 +89,6 @@ class OmregningHendelserBeregningRiverTest {
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
-                    LocalDate.of(2024, Month.MAY, 10),
                 )
             }
         }
@@ -82,20 +101,30 @@ class OmregningHendelserBeregningRiverTest {
         val nyBehandling = UUID.randomUUID()
         val gammelBehandling = UUID.randomUUID()
 
-        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every {
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
+                nyBehandling,
+                gammelBehandling,
+            )
+        } returns mockk()
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every {
             beregningService.hentBeregning(gammelBehandling)
         } returns beregningDTO(gammelBehandling, 500, 1000, beregningsperiodeFom = YearMonth.of(2024, Month.JULY))
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 600, 1100)
-        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
+        coEvery { beregningService.hentGrunnbeloep() } returns
+            Grunnbeloep(
+                YearMonth.now(),
+                1000,
+                100,
+                BigDecimal("1.2"),
+            )
 
         runBlocking {
             river.beregn(
                 SakType.BARNEPENSJON,
                 behandlingId = nyBehandling,
                 behandlingViOmregnerFra = gammelBehandling,
-                LocalDate.of(2024, Month.APRIL, 10),
             )
         }
     }
@@ -107,11 +136,22 @@ class OmregningHendelserBeregningRiverTest {
         val nyBehandling = UUID.randomUUID()
         val gammelBehandling = UUID.randomUUID()
 
-        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every {
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
+                nyBehandling,
+                gammelBehandling,
+            )
+        } returns mockk()
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000, 1000)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1500, 1100)
-        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
+        coEvery { beregningService.hentGrunnbeloep() } returns
+            Grunnbeloep(
+                YearMonth.now(),
+                1000,
+                100,
+                BigDecimal("1.2"),
+            )
 
         runBlocking {
             assertThrows<ForStorOekning> {
@@ -119,7 +159,6 @@ class OmregningHendelserBeregningRiverTest {
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
-                    LocalDate.of(2024, Month.MAY, 10),
                 )
             }
         }
@@ -132,11 +171,22 @@ class OmregningHendelserBeregningRiverTest {
         val nyBehandling = UUID.randomUUID()
         val gammelBehandling = UUID.randomUUID()
 
-        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every {
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
+                nyBehandling,
+                gammelBehandling,
+            )
+        } returns mockk()
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 7784, 1000)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 7875, 1100)
-        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.01169"))
+        coEvery { beregningService.hentGrunnbeloep() } returns
+            Grunnbeloep(
+                YearMonth.now(),
+                1000,
+                100,
+                BigDecimal("1.01169"),
+            )
 
         runBlocking {
             val resultat =
@@ -144,7 +194,6 @@ class OmregningHendelserBeregningRiverTest {
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
-                    LocalDate.of(2024, Month.MAY, 10),
                 )
 
             assertNotNull(resultat)
@@ -179,7 +228,7 @@ class OmregningHendelserBeregningRiverTest {
                         },
                     ),
                 beregnetDato = Tidspunkt.now(),
-                grunnlagMetadata = Metadata(sakId = 1L, versjon = 1L),
+                grunnlagMetadata = Metadata(sakId = 123L, versjon = 1L),
                 overstyrBeregning = null,
             )
     }

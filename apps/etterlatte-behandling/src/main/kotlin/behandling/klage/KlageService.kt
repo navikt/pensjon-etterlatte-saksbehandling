@@ -39,31 +39,39 @@ import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.route.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 interface KlageService {
     fun opprettKlage(
-        sakId: Long,
+        sakId: SakId,
         innkommendeKlage: InnkommendeKlage,
         saksbehandler: Saksbehandler,
     ): Klage
 
     fun hentKlage(id: UUID): Klage?
 
-    fun hentKlagerISak(sakId: Long): List<Klage>
+    fun hentKlagerISak(sakId: SakId): List<Klage>
 
     fun lagreFormkravIKlage(
         klageId: UUID,
         formkrav: Formkrav,
+        saksbehandler: Saksbehandler,
+    ): Klage
+
+    fun oppdaterMottattDato(
+        klageId: UUID,
+        nyMottattDato: LocalDate,
         saksbehandler: Saksbehandler,
     ): Klage
 
@@ -124,7 +132,7 @@ class ManglerSaksbehandlerException(
 
 class KlageServiceImpl(
     private val klageDao: KlageDao,
-    private val sakDao: SakDao,
+    private val sakDao: SakLesDao,
     private val hendelseDao: HendelseDao,
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
@@ -137,7 +145,7 @@ class KlageServiceImpl(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun opprettKlage(
-        sakId: Long,
+        sakId: SakId,
         innkommendeKlage: InnkommendeKlage,
         saksbehandler: Saksbehandler,
     ): Klage {
@@ -168,7 +176,7 @@ class KlageServiceImpl(
 
     override fun hentKlage(id: UUID): Klage? = klageDao.hentKlage(id)
 
-    override fun hentKlagerISak(sakId: Long): List<Klage> = klageDao.hentKlagerISak(sakId)
+    override fun hentKlagerISak(sakId: SakId): List<Klage> = klageDao.hentKlagerISak(sakId)
 
     override fun lagreFormkravIKlage(
         klageId: UUID,
@@ -189,6 +197,37 @@ class KlageServiceImpl(
         val oppdatertKlage = klage.oppdaterFormkrav(formkrav, saksbehandler.ident)
         klageDao.lagreKlage(oppdatertKlage)
 
+        return oppdatertKlage
+    }
+
+    override fun oppdaterMottattDato(
+        klageId: UUID,
+        nyMottattDato: LocalDate,
+        saksbehandler: Saksbehandler,
+    ): Klage {
+        logger.info("Oppdaterer klage mottatt dato for klagen med id=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Fant ikke klage med id=$klageId")
+        if (nyMottattDato.isAfter(LocalDate.now())) {
+            throw UgyldigForespoerselException("DATO_FRAM_I_TID", "Klagedatoen kan ikke være fram i tid.")
+        }
+
+        val oppdatertKlage = klage.oppdaterMottattDato(nyMottattDato)
+        klageDao.lagreKlage(oppdatertKlage)
+
+        val kommentar =
+            "Gammel mottatt dato i klagen var ${klage.innkommendeDokument?.mottattDato}, " +
+                "endret til ${oppdatertKlage.innkommendeDokument?.mottattDato}."
+        hendelseDao.klageHendelse(
+            klageId = klageId,
+            sakId = klage.sak.id,
+            hendelse = KlageHendelseType.OPPDATERT_MOTTATT_DATO,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = saksbehandler.ident,
+            kommentar = kommentar,
+            begrunnelse = null,
+        )
+
+        logger.info("Oppdaterte klage mottatt dato for klagen med id=$klageId. $kommentar")
         return oppdatertKlage
     }
 
@@ -339,7 +378,13 @@ class KlageServiceImpl(
         opprettKlageHendelse(klageMedResultat, KlageHendelseType.FERDIGSTILT, saksbehandler)
         val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)?.type
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(klageMedResultat.id, klageMedResultat, Tidspunkt.now(), utlandstilknytningType, saksbehandler.ident),
+            StatistikkKlage(
+                klageMedResultat.id,
+                klageMedResultat,
+                Tidspunkt.now(),
+                utlandstilknytningType,
+                saksbehandler.ident,
+            ),
             KlageHendelseType.FERDIGSTILT,
         )
         klageBrevService.slettUferdigeBrev(klageMedResultat.id, saksbehandler)
@@ -377,7 +422,13 @@ class KlageServiceImpl(
         val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(avbruttKlage.sak.id)?.type
 
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), utlandstilknytningType, saksbehandler.ident),
+            StatistikkKlage(
+                avbruttKlage.id,
+                avbruttKlage,
+                Tidspunkt.now(),
+                utlandstilknytningType,
+                saksbehandler.ident,
+            ),
             KlageHendelseType.AVBRUTT,
         )
     }
@@ -398,6 +449,17 @@ class KlageServiceImpl(
         klageDao.lagreKlage(oppdatertKlage)
 
         opprettVedtakHendelse(klage, vedtak, HendelseType.FATTET, saksbehandler)
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)
+        klageHendelser.sendKlageHendelseRapids(
+            statistikkKlage =
+                StatistikkKlage(
+                    id = oppdatertKlage.id,
+                    klage = oppdatertKlage,
+                    tidspunkt = Tidspunkt.now(),
+                    utlandstilknytningType = utlandstilknytningType?.type,
+                ),
+            klageHendelseType = KlageHendelseType.FATTET_VEDTAK,
+        )
 
         oppgaveService.tilAttestering(
             referanse = klageId.toString(),
@@ -433,7 +495,17 @@ class KlageServiceImpl(
         klageDao.lagreKlage(oppdatertKlage)
 
         opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.ATTESTERT, saksbehandler, kommentar)
-
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)
+        klageHendelser.sendKlageHendelseRapids(
+            statistikkKlage =
+                StatistikkKlage(
+                    id = oppdatertKlage.id,
+                    klage = oppdatertKlage,
+                    tidspunkt = Tidspunkt.now(),
+                    utlandstilknytningType = utlandstilknytningType?.type,
+                ),
+            klageHendelseType = KlageHendelseType.ATTESTERT,
+        )
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             referanse = klageId.toString(),
             type = OppgaveType.KLAGE,
@@ -466,7 +538,17 @@ class KlageServiceImpl(
         klageDao.lagreKlage(oppdatertKlage)
 
         opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.UNDERKJENT, saksbehandler, kommentar)
-
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)
+        klageHendelser.sendKlageHendelseRapids(
+            statistikkKlage =
+                StatistikkKlage(
+                    id = oppdatertKlage.id,
+                    klage = oppdatertKlage,
+                    tidspunkt = Tidspunkt.now(),
+                    utlandstilknytningType = utlandstilknytningType?.type,
+                ),
+            klageHendelseType = KlageHendelseType.UNDERKJENT,
+        )
         oppgaveService.tilUnderkjent(
             referanse = klageId.toString(),
             type = OppgaveType.KLAGE,

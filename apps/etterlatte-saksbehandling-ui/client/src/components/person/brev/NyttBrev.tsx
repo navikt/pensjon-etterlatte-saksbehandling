@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
-import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
@@ -26,6 +26,7 @@ export default function NyttBrev() {
 
   const { brevId, sakId } = useParams()
   const [kanRedigeres, setKanRedigeres] = useState(false)
+  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
 
@@ -37,13 +38,13 @@ export default function NyttBrev() {
         setKanRedigeres(false)
       }
     })
-  }, [brevId, sakId])
+  }, [brevId, sakId, tilbakestilt])
 
   return (
     <>
       {mapSuccess(brevStatus, (brev) => (
         <>
-          <StatusBarPersonHenter ident={brev.soekerFnr} />
+          <StatusBar ident={brev.soekerFnr} />
           <NavigerTilbakeMeny to="/person?fane=BREV" state={{ fnr: brev.soekerFnr }}>
             Tilbake til brevoversikt
           </NavigerTilbakeMeny>
@@ -75,7 +76,11 @@ export default function NyttBrev() {
                   <ForhaandsvisningBrev brev={brev} />
                 </PanelWrapper>
               ) : (
-                <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} />
+                <RedigerbartBrev
+                  brev={brev}
+                  kanRedigeres={kanRedigeres}
+                  tilbakestillingsaction={() => setTilbakestilt(true)}
+                />
               )}
             </Column>
             <Column>

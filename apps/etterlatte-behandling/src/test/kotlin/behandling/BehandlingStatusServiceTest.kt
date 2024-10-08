@@ -11,6 +11,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -36,11 +37,11 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.oppgave.PaaVent
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterEach
@@ -56,7 +57,6 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingStatusServiceTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val behandlingInfoDao = mockk<BehandlingInfoDao>(relaxUnitFun = true)
@@ -78,6 +78,7 @@ internal class BehandlingStatusServiceTest {
 
     @BeforeEach
     fun before() {
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
         nyKontekstMedBruker(user)
     }
 
@@ -104,7 +105,7 @@ internal class BehandlingStatusServiceTest {
         ],
     )
     fun `Fattet vedtak til attestering`(status: BehandlingStatus) {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -146,14 +147,13 @@ internal class BehandlingStatusServiceTest {
                 behandlingId.toString(),
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 any<String>(),
-                null,
             )
         }
     }
 
     @Test
     fun `iverksettNasjonal behandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.ATTESTERT)
         val behandlingId = behandling.id
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
@@ -175,7 +175,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `underkjent behandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.FATTET_VEDTAK)
         val behandlingId = behandling.id
 
@@ -198,7 +198,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `iverksett utlandstilsnitt behandling`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -241,7 +241,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `utlandstilsnitt avslag behandling ikke oppfylt vilkårsvurdering`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -290,7 +290,7 @@ internal class BehandlingStatusServiceTest {
 
     @Test
     fun `attestert vedtak som ikke er avslag skal ikke ha kravpakke(utland)`() {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             foerstegangsbehandling(
                 sakId = sakId,
@@ -332,7 +332,7 @@ internal class BehandlingStatusServiceTest {
     @ParameterizedTest()
     @EnumSource(FeilutbetalingValg::class, names = ["JA_VARSEL", "JA_INGEN_TK"], mode = EnumSource.Mode.INCLUDE)
     fun `skal opprette tilbakekrevingsoppgave naar behandling med feilutbetaling blir iverksatt`(feilutbetalingValg: FeilutbetalingValg) {
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             revurdering(
                 sakId = sakId,
@@ -344,7 +344,7 @@ internal class BehandlingStatusServiceTest {
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
-        every { oppgaveService.hentOppgaverForSak(sakId) } returns
+        every { oppgaveService.hentOppgaverForSak(sakId, any()) } returns
             listOf(
                 oppgave(UUID.randomUUID(), sakId, Status.FERDIGSTILT),
                 oppgave(UUID.randomUUID(), sakId, Status.FEILREGISTRERT),
@@ -362,7 +362,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
-            oppgaveService.hentOppgaverForSak(sakId)
+            oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING)
             oppgaveService.opprettOppgave(
                 referanse = sakId.toString(),
                 sakId = sakId,
@@ -380,7 +380,7 @@ internal class BehandlingStatusServiceTest {
         feilutbetalingValg: FeilutbetalingValg,
     ) {
         val oppgaveId = UUID.randomUUID()
-        val sakId = 1L
+        val sakId = sakId1
         val behandling =
             revurdering(
                 sakId = sakId,
@@ -392,8 +392,8 @@ internal class BehandlingStatusServiceTest {
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
-        every { oppgaveService.hentOppgaverForSak(sakId) } returns listOf(oppgave(oppgaveId, sakId))
-        every { oppgaveService.endrePaaVent(any()) } returns oppgave(oppgaveId, sakId, Status.PAA_VENT)
+        every { oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING) } returns listOf(oppgave(oppgaveId, sakId))
+        every { oppgaveService.endrePaaVent(any(), any(), any(), any()) } returns oppgave(oppgaveId, sakId, Status.PAA_VENT)
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
 
         inTransaction {
@@ -405,20 +405,20 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
-            oppgaveService.hentOppgaverForSak(sakId)
-            oppgaveService.endrePaaVent(PaaVent(oppgaveId, PaaVentAarsak.KRAVGRUNNLAG_SPERRET, "Venter på oppdatert kravgrunnlag", true))
+            oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING)
+            oppgaveService.endrePaaVent(oppgaveId, true, "Venter på oppdatert kravgrunnlag", PaaVentAarsak.KRAVGRUNNLAG_SPERRET)
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
     }
 
     private fun oppgave(
         oppgaveId: UUID = UUID.randomUUID(),
-        sakId: Long,
+        sakId: SakId,
         status: Status = Status.UNDER_BEHANDLING,
     ) = OppgaveIntern(
         id = oppgaveId,
         status = status,
-        enhet = "enhet",
+        enhet = Enheter.defaultEnhet.enhetNr,
         sakId = sakId,
         kilde = OppgaveKilde.TILBAKEKREVING,
         type = OppgaveType.TILBAKEKREVING,
@@ -439,5 +439,6 @@ internal class BehandlingStatusServiceTest {
         aldersgruppe = null,
         feilutbetaling = Feilutbetaling(feilutbetalingValg, "kommentar"),
         kilde = Grunnlagsopplysning.Saksbehandler("123456", Tidspunkt.now()),
+        frivilligSkattetrekk = true,
     )
 }

@@ -11,12 +11,7 @@ import {
   sisteBehandlingHendelse,
   statusErRedigerbar,
 } from '~components/behandling/felles/utils'
-import {
-  IBehandlingStatus,
-  IBehandlingsType,
-  IDetaljertBehandling,
-  Vedtaksloesning,
-} from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
 import { BrevProsessType, IBrev } from '~shared/types/Brev'
@@ -39,6 +34,7 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import BrevutfallModal from '~components/behandling/brevutfall/BrevutfallModal'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -61,9 +57,12 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const [visBrevutfall, setVisBrevutfall] = useState(true)
 
+  const [avbruttUtenBrev, setAvbruttUtenBrev] = useState(false)
+
   const sjekkliste = useSjekkliste()
   const valideringsfeil = useSjekklisteValideringsfeil()
   const behandling = useBehandling()
+  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
     if (!redigerbar) {
@@ -96,10 +95,14 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       hentBrev(behandlingId, (brev, statusCode) => {
         if (statusCode === 200) {
           setVedtaksbrev(brev)
-        } else if (statusCode === 204) {
+        } else if (statusCode === 204 && redigerbar) {
           opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
             setVedtaksbrev(nyttBrev)
           })
+        } else {
+          if (behandling?.status === IBehandlingStatus.AVBRUTT) {
+            setAvbruttUtenBrev(true)
+          }
         }
       })
     }
@@ -115,7 +118,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       return
 
     hentBrevPaaNytt()
-  }, [behandlingId, sakId])
+  }, [behandlingId, sakId, tilbakestilt])
 
   const [, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
 
@@ -135,21 +138,20 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     return <Spinner label="Ingen brev funnet. Oppretter brev ..." />
   }
 
+  if (avbruttUtenBrev) {
+    return <ApiErrorAlert>Behandlingen er avbrutt og ingen brev finnes</ApiErrorAlert>
+  }
+
   const kanSendeTilAttestering = (): boolean => {
-    const erForestegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-    if (erForestegangsbehandling) {
-      const sjekklisteErBekreftet = sjekkliste !== null && sjekkliste.bekreftet
-      if (!sjekklisteErBekreftet) {
-        const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
-        if (!fant) {
-          dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
-        }
-        dispatch(visSjekkliste())
+    const sjekklisteErBekreftet = sjekkliste !== null && sjekkliste.bekreftet
+    if (!sjekklisteErBekreftet) {
+      const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
+      if (!fant) {
+        dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
       }
-      return sjekklisteErBekreftet
-    } else {
-      return true
+      dispatch(visSjekkliste())
     }
+    return sjekklisteErBekreftet
   }
 
   return (
@@ -205,6 +207,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
               brev={vedtaksbrev!!}
               kanRedigeres={redigerbar}
               lukkAdvarselBehandlingEndret={lukkAdvarselBehandlingEndret}
+              tilbakestillingsaction={() => {
+                setTilbakestilt(true)
+              }}
             />
           ))}
 

@@ -17,10 +17,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
@@ -31,8 +30,12 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.SendBrev
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleierRequest
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -54,15 +57,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-enum class BehandlingFeatures(
-    private val key: String,
-) : FeatureToggle {
-    OMGJOERE_AVSLAG("omgjoer-avslag"),
-    ;
-
-    override fun key(): String = key
-}
-
 data class OmgjoeringRequest(
     val skalKopiere: Boolean,
 )
@@ -72,7 +66,6 @@ internal fun Route.behandlingRoutes(
     gyldighetsproevingService: GyldighetsproevingService,
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     behandlingFactory: BehandlingFactory,
-    featureToggleService: FeatureToggleService,
 ) {
     val logger = routeLogger
 
@@ -80,7 +73,8 @@ internal fun Route.behandlingRoutes(
         val request = call.receive<NyBehandlingRequest>()
         request.validerPersongalleri()
 
-        val gjeldendeEnhet = inTransaction { behandlingFactory.finnGjeldendeEnhet(request.persongalleri, request.sakType) }
+        val gjeldendeEnhet =
+            inTransaction { behandlingFactory.finnGjeldendeEnhet(request.persongalleri, request.sakType) }
 
         kunSkrivetilgang(enhetNr = gjeldendeEnhet) {
             val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
@@ -89,12 +83,10 @@ internal fun Route.behandlingRoutes(
     }
 
     post("/api/behandling/omgjoer-avslag-avbrudd/{$SAKID_CALL_PARAMETER}") {
-        if (!featureToggleService.isEnabled(BehandlingFeatures.OMGJOERE_AVSLAG, false)) {
-            throw IkkeTillattException("NOT_SUPPORTED", "Omgjøring av førstegangsbehandling er ikke støttet")
-        }
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             val skalKopiereRequest = call.receive<OmgjoeringRequest>()
-            val behandlingOgOppgave = behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler, skalKopiereRequest.skalKopiere)
+            val behandlingOgOppgave =
+                behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler, skalKopiereRequest.skalKopiere)
             call.respond(behandlingOgOppgave.toBehandlingSammendrag())
         }
     }
@@ -126,7 +118,7 @@ internal fun Route.behandlingRoutes(
                             )
                         }
                 ) {
-                    null -> call.respond(HttpStatusCode.NotFound)
+                    null -> throw GenerellIkkeFunnetException()
                     else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
                 }
             }
@@ -147,8 +139,11 @@ internal fun Route.behandlingRoutes(
                     inTransaction { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
                     call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
                 } catch (e: TilstandException.UgyldigTilstand) {
-                    logger.warn("Ugyldig tilstand for lagre kommer barnet til gode", e)
-                    call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
+                    throw UgyldigForespoerselException(
+                        "UGYLDIG_TILSTAND_BEHANDLING",
+                        "Ugyldig tilstand i behandling for å lagre kommer barnet til gode",
+                        cause = e,
+                    )
                 }
             }
         }
@@ -255,7 +250,7 @@ internal fun Route.behandlingRoutes(
                             behandlingId = behandlingId,
                             dato = body.dato,
                             begrunnelse = body.begrunnelse,
-                            vilkaar = body.vilkaar,
+                            vilkaar = body.vilkaarType,
                             kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
                             kravdato = body.kravdato,
                             aktiv = true,
@@ -328,6 +323,27 @@ internal fun Route.behandlingRoutes(
             }
         }
 
+        post("/tidligere-familiepleier") {
+            kunSkrivetilgang {
+                val body = call.receive<TidligereFamiliepleierRequest>()
+                val tidligereFamiliepleier =
+                    TidligereFamiliepleier(
+                        svar = body.svar,
+                        kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
+                        foedselsnummer = body.foedselsnummer,
+                        startPleieforhold = body.startPleieforhold,
+                        opphoertPleieforhold = body.opphoertPleieforhold,
+                        begrunnelse = body.begrunnelse,
+                    )
+
+                inTransaction {
+                    behandlingService.oppdaterTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
+                }
+
+                call.respond(tidligereFamiliepleier)
+            }
+        }
+
         post("/oppdater-grunnlag") {
             kunSkrivetilgang {
                 inTransaction {
@@ -345,6 +361,21 @@ internal fun Route.behandlingRoutes(
             }
         }
 
+        put("/annen-forelder") {
+            kunSkrivetilgang {
+                val annenForelder = call.receive<AnnenForelder>()
+                behandlingService.lagreAnnenForelder(behandlingId, brukerTokenInfo, annenForelder)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        delete("/annen-forelder") {
+            kunSkrivetilgang {
+                behandlingService.lagreAnnenForelder(behandlingId, brukerTokenInfo, null)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         put("/skal-sende-brev") {
             kunSkrivetilgang {
                 val request = call.receive<SendBrev>()
@@ -358,9 +389,12 @@ internal fun Route.behandlingRoutes(
         route("/{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
                 logger.info("Henter detaljert behandling for behandling med id=$behandlingId")
-                when (val behandling = behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)) {
+                when (val behandling = inTransaction { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }) {
                     is DetaljertBehandling -> call.respond(behandling)
-                    else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingId")
+                    else -> throw IkkeFunnetException(
+                        "FANT_IKKE_BEHANDLING",
+                        "Fant ikke behandling med id=$behandlingId",
+                    )
                 }
             }
 
@@ -382,22 +416,18 @@ internal fun Route.behandlingRoutes(
                         inTransaction {
                             behandlingFactory.hentDataForOpprettBehandling(behandlingsBehov.sakId)
                         }
-                    when (
-                        val behandling =
-                            inTransaction {
-                                behandlingFactory.opprettBehandling(
-                                    behandlingsBehov.sakId,
-                                    behandlingsBehov.persongalleri,
-                                    behandlingsBehov.mottattDato,
-                                    Vedtaksloesning.GJENNY,
-                                    request = request,
-                                )
-                            }?.also { it.sendMeldingForHendelse() }
-                                ?.behandling
-                    ) {
-                        null -> call.respond(HttpStatusCode.NotFound)
-                        else -> call.respondText(behandling.id.toString())
-                    }
+                    val behandlingOgOppgave =
+                        inTransaction {
+                            behandlingFactory.opprettBehandling(
+                                behandlingsBehov.sakId,
+                                behandlingsBehov.persongalleri,
+                                behandlingsBehov.mottattDato,
+                                Vedtaksloesning.GJENNY,
+                                request = request,
+                            )
+                        }
+                    behandlingOgOppgave.sendMeldingForHendelse()
+                    call.respondText(behandlingOgOppgave.behandling.id.toString())
                 }
             }
         }
@@ -405,19 +435,19 @@ internal fun Route.behandlingRoutes(
 }
 
 data class ViderefoertOpphoerRequest(
-    @JsonProperty("dato") private val _dato: String,
+    @JsonProperty("dato") private val _dato: String?,
     val skalViderefoere: JaNei,
     val begrunnelse: String?,
     val kravdato: LocalDate? = null,
-    val vilkaar: VilkaarType?,
+    val vilkaarType: VilkaarType?,
 ) {
-    val dato: YearMonth = _dato.tilYearMonth()
+    val dato: YearMonth? = _dato?.tilYearMonth()
 }
 
 data class ViderefoertOpphoer(
     val skalViderefoere: JaNei,
     val behandlingId: UUID,
-    val dato: YearMonth,
+    val dato: YearMonth?,
     val vilkaar: VilkaarType?,
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,

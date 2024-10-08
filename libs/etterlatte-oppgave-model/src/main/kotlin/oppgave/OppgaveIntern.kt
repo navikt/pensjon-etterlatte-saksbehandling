@@ -1,8 +1,10 @@
 package no.nav.etterlatte.libs.common.oppgave
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -19,8 +21,8 @@ data class OppgaveSaksbehandler(
 data class OppgaveIntern(
     val id: UUID,
     val status: Status,
-    val enhet: String,
-    val sakId: Long,
+    val enhet: Enhetsnummer,
+    val sakId: SakId,
     val kilde: OppgaveKilde? = null,
     val type: OppgaveType,
     val saksbehandler: OppgaveSaksbehandler? = null,
@@ -88,12 +90,14 @@ enum class Status {
 
 enum class OppgaveKilde {
     HENDELSE,
+    DOEDSHENDELSE,
     BEHANDLING,
     GENERELL_BEHANDLING,
     EKSTERN,
     TILBAKEKREVING,
     GJENOPPRETTING,
     SAKSBEHANDLER,
+    BRUKERDIALOG,
 }
 
 enum class OppgaveType {
@@ -106,11 +110,14 @@ enum class OppgaveType {
     TILBAKEKREVING,
     OMGJOERING,
     JOURNALFOERING,
+    TILLEGGSINFORMASJON,
     GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
+    MANGLER_SOEKNAD,
     AKTIVITETSPLIKT,
     AKTIVITETSPLIKT_REVURDERING,
     AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
     GENERELL_OPPGAVE,
+    MANUELL_UTSENDING_BREV,
     ;
 
     companion object {
@@ -145,7 +152,7 @@ data class RedigerFristGosysRequest(
 )
 
 data class SakIdOgReferanse(
-    val sakId: Long,
+    val sakId: SakId,
     val referanse: String,
 )
 
@@ -154,6 +161,13 @@ data class VedtakEndringDTO(
     val vedtakHendelse: VedtakHendelse,
     val vedtakType: VedtakType,
     val opphoerFraOgMed: YearMonth? = null,
+)
+
+data class NyOppgaveBulkDto(
+    val merknad: String,
+    val sakIds: List<SakId>,
+    val type: OppgaveType,
+    val kilde: OppgaveKilde,
 )
 
 data class NyOppgaveDto(

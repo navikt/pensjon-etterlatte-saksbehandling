@@ -85,8 +85,10 @@ spec:
       value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-grunnlag
-    - name: KODEVERK_URL
-      value: "https://kodeverk-api.nav.no/api/v1/kodeverk"
+    - name: PEN_URL
+      value: https://pensjon-pen.prod-fss-pub.nais.io/pen/springapi
+    - name: PEN_CLIENT_ID
+      value: 53eaf67f-d7b2-46e9-8ffe-3da7cf0ac955
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -102,5 +104,5 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-grunnlag
       external:
-        - host: kodeverk-api.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: pensjon-pen.prod-fss-pub.nais.io

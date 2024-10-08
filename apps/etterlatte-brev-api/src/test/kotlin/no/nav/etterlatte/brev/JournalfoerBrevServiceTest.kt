@@ -11,13 +11,14 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.JournalPostType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
 import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
@@ -25,9 +26,10 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.ktor.token.systembruker
@@ -63,8 +65,8 @@ class JournalfoerBrevServiceTest {
 
     @Test
     fun `Journalfoering fungerer som forventet`() {
-        val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.MANUELL)
-        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, "1234")
+        val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.REDIGERBAR)
+        val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, Enheter.defaultEnhet.enhetNr)
         val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
@@ -100,14 +102,14 @@ class JournalfoerBrevServiceTest {
         names = ["FERDIGSTILT"],
     )
     fun `Journalfoering feiler hvis status er feil`(status: Status) {
-        val brev = opprettBrev(status, BrevProsessType.MANUELL)
+        val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
         every { db.hentBrev(any()) } returns brev
         coEvery {
             behandlingService.hentSak(
                 any(),
                 any(),
             )
-        } returns Sak(brev.soekerFnr, SakType.BARNEPENSJON, Random.nextLong(), Enheter.UTLAND.enhetNr)
+        } returns Sak(brev.soekerFnr, SakType.BARNEPENSJON, randomSakId(), Enheter.UTLAND.enhetNr)
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
@@ -144,7 +146,7 @@ class JournalfoerBrevServiceTest {
         val brev =
             Brev(
                 1,
-                41,
+                randomSakId(),
                 BEHANDLING_ID,
                 "tittel",
                 spraak = Spraak.NB,
@@ -155,6 +157,7 @@ class JournalfoerBrevServiceTest {
                 Tidspunkt.now(),
                 mottaker = mockk(),
                 brevtype = Brevtype.MANUELT,
+                brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
@@ -174,7 +177,7 @@ class JournalfoerBrevServiceTest {
         val behandlingId = UUID.randomUUID()
         val forventetBrevMottakerFnr = SOEKER_FOEDSELSNUMMER.value
 
-        val sak = Sak(forventetBrevMottakerFnr, type, Random.nextLong(), Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(forventetBrevMottakerFnr, type, randomSakId(), Enheter.defaultEnhet.enhetNr)
 
         val forventetBrev =
             Brev(
@@ -190,6 +193,7 @@ class JournalfoerBrevServiceTest {
                 opprettet = Tidspunkt.now(),
                 mottaker = opprettMottaker(forventetBrevMottakerFnr),
                 brevtype = Brevtype.INFORMASJON,
+                brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
 
         coEvery { behandlingService.hentSak(forventetBrev.sakId, any()) } returns sak
@@ -261,7 +265,7 @@ class JournalfoerBrevServiceTest {
         val forventetBrev =
             Brev(
                 id = 123,
-                sakId = 41,
+                sakId = randomSakId(),
                 behandlingId = null,
                 tittel = null,
                 spraak = Spraak.NB,
@@ -272,6 +276,7 @@ class JournalfoerBrevServiceTest {
                 opprettet = Tidspunkt.now(),
                 mottaker = opprettMottaker(forventetBrevMottakerFnr),
                 brevtype = Brevtype.MANUELT,
+                brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
 
         every { db.hentBrev(any()) } returns forventetBrev
@@ -333,7 +338,7 @@ class JournalfoerBrevServiceTest {
         prosessType: BrevProsessType,
     ) = Brev(
         id = Random.nextLong(10000),
-        sakId = Random.nextLong(10000),
+        sakId = randomSakId(),
         behandlingId = null,
         tittel = null,
         spraak = Spraak.NB,
@@ -344,6 +349,7 @@ class JournalfoerBrevServiceTest {
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(SOEKER_FOEDSELSNUMMER.value),
         brevtype = Brevtype.INFORMASJON,
+        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
     private fun opprettMottaker(fnr: String) =
@@ -365,9 +371,9 @@ class JournalfoerBrevServiceTest {
     private fun opprettVedtak(): VedtakTilJournalfoering =
         VedtakTilJournalfoering(
             vedtakId = 1L,
-            sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
+            sak = VedtakSak("Z123456", SakType.BARNEPENSJON, sakId2),
             behandlingId = UUID.randomUUID(),
-            ansvarligEnhet = "1234",
+            ansvarligEnhet = Enheter.defaultEnhet.enhetNr,
             saksbehandler = "EY",
         )
 

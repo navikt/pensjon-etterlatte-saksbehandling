@@ -6,7 +6,6 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -30,18 +29,21 @@ class OppgaveFristGaarUtJobService(
                 oppgaver = listOf(),
             )
         inTransaction {
-            service.hentFristGaarUt(request).forEach {
-                logger.info("Frist er gått ut for ${it.oppgaveId}, tar av vent")
+            service.hentFristGaarUt(request).forEach { oppgave ->
+                logger.info("Frist er gått ut for ${oppgave.oppgaveId}, tar av vent")
                 try {
-                    service.oppdaterStatusOgMerknad(
-                        it.oppgaveId,
-                        it.merknad ?: "",
-                        Status.UNDER_BEHANDLING,
+                    service.endrePaaVent(
+                        oppgaveId = oppgave.oppgaveId,
+                        aarsak = null,
+                        merknad =
+                            oppgave.merknad?.let { "$it - Oppgave tatt av vent siden frist har gått ut." }
+                                ?: "Oppgave tatt av vent siden frist har gått ut.",
+                        paavent = false,
                     )
                 } catch (e: ForespoerselException) {
-                    logger.warn("Klarte ikke ta oppgave ${it.oppgaveId} av vent. Fortsetter med neste", e)
+                    logger.warn("Klarte ikke ta oppgave ${oppgave.oppgaveId} av vent. Fortsetter med neste", e)
                 }
-                logger.info("Tok ${it.oppgaveId} av vent")
+                logger.info("Tok ${oppgave.oppgaveId} av vent")
             }
         }
         logger.info("Ferdig med å ta oppgaver av vent")

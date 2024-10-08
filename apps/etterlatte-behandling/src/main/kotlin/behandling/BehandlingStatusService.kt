@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.oppgave.PaaVent
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -301,25 +300,28 @@ class BehandlingStatusServiceImpl(
 
     private fun haandterFeilutbetaling(behandling: Behandling) {
         val brevutfall = behandlingInfoDao.hentBrevutfall(behandling.id)
-        if (brevutfall?.feilutbetaling?.valg in listOf(FeilutbetalingValg.JA_VARSEL, FeilutbetalingValg.JA_INGEN_TK)) {
+        if (brevutfall?.feilutbetaling?.valg in
+            listOf(
+                FeilutbetalingValg.JA_VARSEL,
+                FeilutbetalingValg.JA_INGEN_TK,
+                FeilutbetalingValg.JA_INGEN_VARSEL_MOTREGNES,
+            )
+        ) {
             logger.info("Oppretter oppgave av type ${OppgaveType.TILBAKEKREVING} for behandling ${behandling.id}")
 
             val oppgaveFraBehandlingMedFeilutbetaling =
                 oppgaveService
-                    .hentOppgaverForSak(behandling.sak.id)
-                    .filter { it.type == OppgaveType.TILBAKEKREVING }
+                    .hentOppgaverForSak(behandling.sak.id, OppgaveType.TILBAKEKREVING)
                     .filter { !it.erAvsluttet() }
                     .maxByOrNull { it.opprettet }
 
             if (oppgaveFraBehandlingMedFeilutbetaling != null) {
                 logger.info("Det finnes allerede en oppgave under behandling på tilbakekreving for sak ${behandling.sak.id}")
                 oppgaveService.endrePaaVent(
-                    PaaVent(
-                        oppgaveId = oppgaveFraBehandlingMedFeilutbetaling.id,
-                        aarsak = PaaVentAarsak.KRAVGRUNNLAG_SPERRET,
-                        merknad = "Venter på oppdatert kravgrunnlag",
-                        paavent = true,
-                    ),
+                    oppgaveId = oppgaveFraBehandlingMedFeilutbetaling.id,
+                    aarsak = PaaVentAarsak.KRAVGRUNNLAG_SPERRET,
+                    merknad = "Venter på oppdatert kravgrunnlag",
+                    paavent = true,
                 )
             } else {
                 oppgaveService.opprettOppgave(

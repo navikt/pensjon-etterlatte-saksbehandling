@@ -1,15 +1,18 @@
 import { Button } from '@navikt/ds-react'
-import { EnvelopeClosedIcon, EyeIcon } from '@navikt/aksel-icons'
+import { EyeIcon } from '@navikt/aksel-icons'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
 import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
+import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
-import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
-import { GenerellOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GenerellOppgaveModal'
+import { AktivitetspliktRevurderingModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktRevurderingModal'
+import { GeneriskOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GeneriskOppgaveModal'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
+import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfo6MndVarigUnntakModal'
+import { BrevOppgaveModal } from '~components/oppgavebenk/oppgaveModal/BrevOppgaveModal'
+import { TilleggsinformasjonOppgaveModal } from '~components/oppgavebenk/oppgaveModal/TilleggsinformasjonOppgaveModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -62,6 +65,8 @@ export const HandlingerForOppgave = ({
           Se hendelse
         </PersonButtonLink>
       )
+    case Oppgavetype.MANGLER_SOEKNAD:
+      return <GeneriskOppgaveModal heading="Mangler søknad" oppdaterStatus={oppdaterStatus} oppgave={oppgave} />
     case Oppgavetype.FOERSTEGANGSBEHANDLING:
       return (
         erInnloggetSaksbehandlerOppgave && (
@@ -112,6 +117,12 @@ export const HandlingerForOppgave = ({
           </Button>
         )
       )
+    case Oppgavetype.TILLEGGSINFORMASJON:
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <TilleggsinformasjonOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
+      )
     case Oppgavetype.OMGJOERING:
       return erInnloggetSaksbehandlerOppgave && <OmgjoerVedtakModal oppgave={oppgave} />
     case Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG:
@@ -135,23 +146,13 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.GENERELL_OPPGAVE:
-      return (
-        oppgave.status !== Oppgavestatus.FERDIGSTILT && (
-          <GenerellOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
-        )
-      )
+      return <GeneriskOppgaveModal heading="Generell oppgave" oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+    case Oppgavetype.MANUELL_UTSENDING_BREV:
+      return <BrevOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <PersonButtonLink
-            size="small"
-            icon={<EnvelopeClosedIcon />}
-            fnr={fnr || '-'}
-            fane={PersonOversiktFane.BREV}
-            disabled={!fnr}
-          >
-            Gå til brev
-          </PersonButtonLink>
+          <AktivitetspliktInfo6MndVarigUnntakModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
     default:

@@ -3,8 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
-import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.vilkaarsvurdering.aldersovergang
+import no.nav.etterlatte.libs.ktor.initialisering.run
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 
@@ -25,15 +24,13 @@ class Server(
                 httpPort = properties.httpPort,
                 applicationConfig = context.config,
             ) {
-                vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
-                aldersovergang(behandlingKlient, aldersovergangService)
+                vilkaarsvurdering(vilkaarsvurderingService)
             }
         }
 
     fun run() =
         with(context) {
             dataSource.migrate()
-            setReady()
-            engine.start(true)
+            engine.run()
         }
 }

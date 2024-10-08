@@ -1,17 +1,18 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.BrevDataRedigerbar
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
-import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.ManglerFrivilligSkattetrekk
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
@@ -30,6 +31,7 @@ data class BarnepensjonRevurdering(
     val datoVedtakOmgjoering: LocalDate?,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
+    val frivilligSkattetrekk: Boolean,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
@@ -56,18 +58,12 @@ data class BarnepensjonRevurdering(
         ): BarnepensjonRevurdering {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
+            val frivilligSkattetrekk =
+                brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
+                    ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
 
             return BarnepensjonRevurdering(
                 innhold = innhold.innhold(),
-                innholdForhaandsvarsel =
-                    vedleggHvisFeilutbetaling(
-                        feilutbetaling,
-                        innhold,
-                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
-                    ),
-                erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
-                erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                datoVedtakOmgjoering = datoVedtakOmgjoering,
                 beregning =
                     barnepensjonBeregning(
                         innhold,
@@ -78,11 +74,23 @@ data class BarnepensjonRevurdering(
                         trygdetid,
                         erForeldreloes,
                     ),
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
-                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
+                datoVedtakOmgjoering = datoVedtakOmgjoering,
+                erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
+                erMigrertYrkesskade = erMigrertYrkesskade,
+                erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
+                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
+                feilutbetaling = feilutbetaling,
+                frivilligSkattetrekk = frivilligSkattetrekk,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                innholdForhaandsvarsel =
+                    vedleggHvisFeilutbetaling(
+                        feilutbetaling,
+                        innhold,
+                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                    ),
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(BarnepensjonInnvilgelse.tidspunktNyttRegelverk) ||
@@ -90,8 +98,6 @@ data class BarnepensjonRevurdering(
                                 BarnepensjonInnvilgelse.tidspunktNyttRegelverk,
                             )
                     },
-                feilutbetaling = feilutbetaling,
-                erMigrertYrkesskade = erMigrertYrkesskade,
             )
         }
     }

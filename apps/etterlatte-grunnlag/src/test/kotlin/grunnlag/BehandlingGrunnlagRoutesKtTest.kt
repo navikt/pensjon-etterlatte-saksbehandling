@@ -25,8 +25,10 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import lagGrunnlagsopplysning
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -50,17 +52,16 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.util.UUID
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingGrunnlagRoutesKtTest {
     private val grunnlagService = mockk<GrunnlagService>()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
 
     @BeforeAll
     fun before() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -71,7 +72,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
     @AfterAll
     fun after() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -95,7 +96,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
-            runServer(server, "api/grunnlag") {
+            runServer(mockOAuth2Server, "api/grunnlag") {
                 behandlingGrunnlagRoute(
                     grunnlagService,
                     behandlingKlient,
@@ -106,7 +107,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 client.get("api/grunnlag/behandling/$behandlingId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -130,7 +131,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/behandling/$behandlingId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -164,7 +165,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/behandling/$behandlingId/$type") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -199,7 +200,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 ) {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -213,7 +214,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
     @Test
     fun `Teste endepunkt for lagring av nye saksopplysninger`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
         val opplysninger =
             listOf(
@@ -233,7 +234,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                     contentType(ContentType.Application.Json)
                     setBody(NyeSaksopplysninger(sakId, opplysninger))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -252,7 +253,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
     @Test
     fun `Teste endepunkt for oppretting av grunnlag`() {
-        val sakId = 12345L
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
         val persongalleri = GrunnlagTestData().hentPersonGalleri()
         val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, persongalleri)
@@ -265,7 +266,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                     contentType(ContentType.Application.Json)
                     setBody(opplysningsbehov)
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSystembrukerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSystembrukerToken()}")
                     }
                 }
 
@@ -286,7 +287,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
     @Test
     fun `Teste endepunkt for oppdatering av grunnlag`() {
-        val sakId = 12345L
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
 
         coEvery { grunnlagService.oppdaterGrunnlag(any(), any(), any()) } just Runs
@@ -298,7 +299,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSystembrukerToken()}")
+                        append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSystembrukerToken()}")
                     }
                 }
 
@@ -316,7 +317,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient =
-        runServer(server, "api/grunnlag") {
+        runServer(mockOAuth2Server, "api/grunnlag") {
             behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
         }
 }

@@ -12,10 +12,10 @@ spec:
     - https://etterlatte-testdata-behandler.intern.dev.nav.no
   liveness:
     initialDelay: 20
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
   prometheus:
     enabled: true
     path: /metrics
@@ -56,8 +56,6 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-brev-api/.default
     - name: TRYGDETID_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
-    - name: VILKAARSVURDERING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default
     - name: VEDTAKSVURDERING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
@@ -72,8 +70,6 @@ spec:
       value: dev-gcp.etterlatte.etterlatte-trygdetid
     - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
   accessPolicy:
     outbound:
       rules:
@@ -81,7 +77,6 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-trygdetid
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-brev-api
     inbound:

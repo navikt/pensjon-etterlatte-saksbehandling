@@ -37,7 +37,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Assemble
-        run: ./gradlew assemble -Dorg.gradle.jvmargs="-Dkotlin.daemon.jvmargs=-Xmx16g"
+        run: ./gradlew assemble -Dorg.gradle.jvmargs="-Dkotlin.daemon.jvmargs=-Xmx16g" --configuration-cache
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

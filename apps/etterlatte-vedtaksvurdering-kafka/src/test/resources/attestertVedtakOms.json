@@ -12,12 +12,12 @@
     "type": "INNVILGELSE",
     "vedtakFattet": {
       "ansvarligSaksbehandler": "12345678",
-      "ansvarligEnhet": "123",
+      "ansvarligEnhet": "1234",
       "tidspunkt": "2023-10-23T12:25:43.667223+02:00"
     },
     "attestasjon": {
       "attestant": "87654321",
-      "attesterendeEnhet": "123",
+      "attesterendeEnhet": "1234",
       "tidspunkt": "2023-10-24T12:25:43.669844+02:00"
     },
     "innhold": {

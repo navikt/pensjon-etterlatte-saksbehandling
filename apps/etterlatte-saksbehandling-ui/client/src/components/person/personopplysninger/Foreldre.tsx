@@ -61,37 +61,24 @@ export const Foreldre = ({
               </Table.DataCell>
             </Table.Row>
           )}
-          {!!gjenlevende?.length ? (
-            <>
-              {gjenlevende.map((levende: Familiemedlem, index: number) => (
-                <Table.Row key={index}>
-                  <Table.DataCell>
-                    <HStack gap="4">
-                      {levende.fornavn} {levende.etternavn}
-                    </HStack>
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    <HStack gap="4">
-                      <KopierbarVerdi value={levende.foedselsnummer} iconPosition="right" />
-                      {!!levende.foedselsdato && <AlderTag foedselsdato={levende.foedselsdato} />}
-                    </HStack>
-                  </Table.DataCell>
-                  {!!levende.bostedsadresse ? (
-                    <BostedsadresseDataCell bostedsadresse={levende.bostedsadresse} index={0} />
-                  ) : (
-                    <Table.DataCell>Ingen bostedsadresse tilgjengelig</Table.DataCell>
-                  )}
-                  <Table.DataCell>{harForeldreansvar(levende.foedselsnummer) ? 'Ja' : 'Nei'}</Table.DataCell>
-                </Table.Row>
-              ))}
-            </>
-          ) : (
-            <Table.Row>
-              <Table.DataCell colSpan={4}>
-                <Heading size="small">Ingen gjenlevende</Heading>
+
+          {gjenlevende?.map((levende: Familiemedlem, index: number) => (
+            <Table.Row key={index}>
+              <Table.DataCell>
+                <HStack gap="4">
+                  {levende.fornavn} {levende.etternavn}
+                </HStack>
               </Table.DataCell>
+              <Table.DataCell>
+                <HStack gap="4">
+                  <KopierbarVerdi value={levende.foedselsnummer} iconPosition="right" />
+                  {!!levende.foedselsdato && <AlderTag foedselsdato={levende.foedselsdato} />}
+                </HStack>
+              </Table.DataCell>
+              <BostedsadresseDataCell bostedsadresse={levende.bostedsadresse} index={0} />
+              <Table.DataCell>{harForeldreansvar(levende.foedselsnummer) ? 'Ja' : 'Nei'}</Table.DataCell>
             </Table.Row>
-          )}
+          ))}
         </Table.Body>
       </Table>
     </Personopplysning>

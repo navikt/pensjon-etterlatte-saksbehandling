@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -29,7 +30,7 @@ internal class RevurderingTest {
                     Sak(
                         ident = "",
                         sakType = SakType.BARNEPENSJON,
-                        id = 1,
+                        id = sakId1,
                         enhet = Enheter.defaultEnhet.enhetNr,
                     ),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
@@ -214,7 +215,7 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
             Sak(
                 ident = "",
                 sakType = SakType.BARNEPENSJON,
-                id = 1,
+                id = sakId1,
                 enhet = Enheter.defaultEnhet.enhetNr,
             ),
         behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),

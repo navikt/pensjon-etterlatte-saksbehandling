@@ -74,8 +74,6 @@ spec:
   env:
     - name: BREV_API_URL
       value: http://etterlatte-brev-api
-    - name: VILKAARSVURDERING_API_URL
-      value: http://etterlatte-vilkaarsvurdering
     - name: BEHANDLING_API_URL
       value: http://etterlatte-behandling
     - name: VEDTAK_API_URL
@@ -92,8 +90,6 @@ spec:
       value: http://etterlatte-utbetaling
     - name: BREV_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-brev-api/.default
-    - name: VILKAARSVURDERING_API_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default
     - name: BEHANDLING_API_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: VEDTAK_API_SCOPE
@@ -114,8 +110,6 @@ spec:
       value: https://pensjon-utland-q2.intern.dev.nav.no/gjenny
     - name: RINA_URL
       value: https://rina-ss3-q.adeo.no
-    - name: KODEVERK_URL
-      value: https://kodeverk-api.nav.no
     - name: MODIAPERSONOVERSIKT_URL
       value: https://navikt.github.io/modiapersonoversikt/#
     - name: BISYS_URL
@@ -133,7 +127,6 @@ spec:
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: kodeverk-api.nav.no
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
@@ -141,7 +134,6 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-pdltjenester
-        - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-utbetaling
     inbound:

@@ -16,11 +16,14 @@ import io.mockk.mockk
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -36,19 +39,19 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AvkortingRoutesTest {
-    private val server = MockOAuth2Server()
+    private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val avkortingService = mockk<AvkortingService>()
 
     @BeforeAll
     fun beforeAll() {
-        server.start()
+        mockOAuth2Server.startRandomPort()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
     fun afterAll() {
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     @Test
@@ -59,7 +62,7 @@ class AvkortingRoutesTest {
             val response =
                 client.get("/api/beregning/avkorting/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                 }
 
             response.status shouldBe HttpStatusCode.NoContent
@@ -80,24 +83,29 @@ class AvkortingRoutesTest {
             )
         val avkortetYtelseId = UUID.randomUUID()
         val avkorting =
-            AvkortingDto(
+            AvkortingFrontend(
                 avkortingGrunnlag =
                     listOf(
-                        AvkortingGrunnlagDto(
-                            id = avkortingsgrunnlagId,
-                            fom = dato,
-                            tom = dato,
-                            aarsinntekt = 100000,
-                            fratrekkInnAar = 10000,
-                            spesifikasjon = "Spesifikasjon",
-                            inntektUtland = 0,
-                            fratrekkInnAarUtland = 0,
-                            relevanteMaanederInnAar = 12,
-                            kilde =
-                                AvkortingGrunnlagKildeDto(
-                                    tidspunkt = tidspunkt.toString(),
-                                    ident = "Saksbehandler01",
+                        AvkortingGrunnlagFrontend(
+                            aar = 2024,
+                            fraVirk =
+                                AvkortingGrunnlagDto(
+                                    id = avkortingsgrunnlagId,
+                                    fom = dato,
+                                    tom = dato,
+                                    aarsinntekt = 100000,
+                                    fratrekkInnAar = 10000,
+                                    spesifikasjon = "Spesifikasjon",
+                                    inntektUtland = 0,
+                                    fratrekkInnAarUtland = 0,
+                                    relevanteMaanederInnAar = 12,
+                                    kilde =
+                                        AvkortingGrunnlagKildeDto(
+                                            tidspunkt = tidspunkt.toString(),
+                                            ident = "Saksbehandler01",
+                                        ),
                                 ),
+                            historikk = emptyList(),
                         ),
                     ),
                 avkortetYtelse =
@@ -134,13 +142,25 @@ class AvkortingRoutesTest {
         testApplication {
             val response =
                 client.post("/api/beregning/avkorting/$behandlingsId") {
-                    setBody(avkorting.avkortingGrunnlag[0].toJson())
+                    val request =
+                        avkorting.avkortingGrunnlag[0].let {
+                            AvkortingGrunnlagLagreDto(
+                                id = it.fraVirk!!.id,
+                                aarsinntekt = it.fraVirk!!.aarsinntekt,
+                                fratrekkInnAar = it.fraVirk!!.fratrekkInnAar,
+                                inntektUtland = it.fraVirk!!.inntektUtland,
+                                fratrekkInnAarUtland = it.fraVirk!!.fratrekkInnAarUtland,
+                                spesifikasjon = it.fraVirk!!.spesifikasjon,
+                                fom = dato,
+                            )
+                        }
+                    setBody(request.toJson())
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                    header(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
                 }
 
             response.status shouldBe HttpStatusCode.OK
-            val result = objectMapper.readValue(response.bodyAsText(), AvkortingDto::class.java)
+            val result = objectMapper.readValue(response.bodyAsText(), AvkortingFrontend::class.java)
             result shouldBe avkorting
             coVerify {
                 avkortingService.beregnAvkortingMedNyttGrunnlag(
@@ -158,7 +178,7 @@ class AvkortingRoutesTest {
 
     private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
         io.ktor.server.testing.testApplication {
-            runServer(server) {
+            runServer(mockOAuth2Server) {
                 avkorting(avkortingService, behandlingKlient)
             }
             block(this)

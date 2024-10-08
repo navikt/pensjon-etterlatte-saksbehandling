@@ -54,16 +54,19 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
   REVURDERING: 'Revurdering',
   VURDER_KONSEKVENS: 'Hendelse',
+  MANGLER_SOEKNAD: 'Mangler søknad',
   KRAVPAKKE_UTLAND: 'Kravpakke utland',
   KLAGE: 'Klage',
   TILBAKEKREVING: 'Tilbakekreving',
   OMGJOERING: 'Omgjøring',
   JOURNALFOERING: 'Journalføring',
+  TILLEGGSINFORMASJON: 'Tilleggsinformasjon',
   GJENOPPRETTING_ALDERSOVERGANG: 'Gjenoppretting',
   AKTIVITETSPLIKT: 'Aktivitetsplikt oppfølging',
   AKTIVITETSPLIKT_REVURDERING: 'Aktivitetsplikt revurdering',
   AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK: 'Aktivitetsplikt informasjon - varig unntak',
   GENERELL_OPPGAVE: 'Generell oppgave',
+  MANUELL_UTSENDING_BREV: 'Manuell brevutsending',
 } as const
 
 export const FRISTFILTER = {

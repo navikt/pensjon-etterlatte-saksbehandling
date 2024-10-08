@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest-8-cores
     timeout-minutes: 10
     permissions:
-      contents: read
+      contents: write
       id-token: write
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
@@ -29,11 +29,14 @@ jobs:
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.gradlekey }}
+          dependency-graph: generate-and-submit
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :apps:${{ github.workflow }}:build
+        run: ./gradlew :apps:${{ github.workflow }}:build --configuration-cache
 
       - name: Build and publish docker image
         uses: nais/docker-build-push@v0
@@ -93,6 +96,9 @@ jobs:
       - name: Generate SBOM, attest and sign image
         id: attest-sign
         uses: nais/attest-sign@v1
+        env:
+          TRIVY_JAVA_DB_REPOSITORY: "public.ecr.aws/aquasecurity/trivy-java-db:1"
+          ACTIONS_RUNTIME_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           image_ref: ${{ env.IMAGE_WITH_DIGEST }}
   deploy-to-dev-gcp:

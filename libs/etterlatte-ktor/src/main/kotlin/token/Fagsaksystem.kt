@@ -1,9 +1,11 @@
 package no.nav.etterlatte.libs.ktor.token
 
+import no.nav.etterlatte.libs.common.Enhetsnummer
+
 enum class Fagsaksystem(
     val navn: String,
-    val enhet: String,
+    val enhet: Enhetsnummer,
     val systemnavn: String,
 ) {
-    EY("EY", "0000", "Gjenny"),
+    EY("EY", Enhetsnummer.ingenTilknytning, "Gjenny"),
 }

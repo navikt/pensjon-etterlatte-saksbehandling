@@ -76,7 +76,7 @@ enum class VilkaarType(
     BP_FORTSATT_MEDLEMSKAP_UNNTAK_AVDOED_MINDRE_20_AAR_BOTID_TRE_POENGAAR_2024(
         402,
         """
-        Ja. Den avdøde har mindre enn 20 års botid, men har minimum tre poengår. Trygdetid beregnes bare etter faktiske poengår
+        Ja. Den avdøde har mindre enn 20 års botid, men har minimum fem poengår. Trygdetid beregnes bare etter faktiske poengår
         """.trimIndent(),
     ),
     BP_FORTSATT_MEDLEMSKAP_UNNTAK_YRKESSKADE_2024(403, "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom"),

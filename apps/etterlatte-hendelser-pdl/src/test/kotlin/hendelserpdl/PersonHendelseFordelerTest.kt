@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
+import no.nav.etterlatte.pdl.hendelse.LeesahOpplysningstype
 import no.nav.person.identhendelse.v1.common.Personnavn
 import no.nav.person.identhendelse.v1.common.RelatertBiPerson
 import no.nav.person.pdl.leesah.Endringstype

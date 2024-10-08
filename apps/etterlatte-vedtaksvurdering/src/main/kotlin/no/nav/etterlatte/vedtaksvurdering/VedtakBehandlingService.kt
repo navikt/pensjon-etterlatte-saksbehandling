@@ -1,20 +1,21 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import Regelverk
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -43,17 +44,16 @@ import java.util.UUID
 
 class VedtakBehandlingService(
     private val repository: VedtaksvurderingRepository,
-    private val featureToggleService: FeatureToggleService,
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun sjekkOmVedtakErLoependePaaDato(
-        sakId: Long,
+        sakId: SakId,
         dato: LocalDate,
     ): LoependeYtelse {
         logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
@@ -147,10 +147,8 @@ class VedtakBehandlingService(
                 }
             }
 
-        if (featureToggleService.isEnabled(VedtakFeatureToggle.VerifiserPerioder, false)) {
-            beregningOgAvkorting?.let {
-                VedtakOgBeregningSammenligner.sammenlign(it, fattetVedtak)
-            }
+        beregningOgAvkorting?.let {
+            VedtakOgBeregningSammenligner.sammenlign(it, fattetVedtak)
         }
 
         return VedtakOgRapid(
@@ -374,7 +372,7 @@ class VedtakBehandlingService(
         return null
     }
 
-    suspend fun samordningsinfo(sakId: Long): List<SamordningsvedtakWrapper> {
+    suspend fun samordningsinfo(sakId: SakId): List<SamordningsvedtakWrapper> {
         val vedtaksliste = repository.hentVedtakForSak(sakId)
         return vedtaksliste.firstOrNull()?.let { vedtak ->
             return samordningsKlient
@@ -417,7 +415,7 @@ class VedtakBehandlingService(
         }
     }
 
-    suspend fun iverksattVedtak(
+    fun iverksattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
@@ -613,6 +611,7 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.utbetaltBeloep.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
+                                    regelverk = it.regelverk,
                                 )
                             }
                         }
@@ -631,6 +630,7 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.ytelseEtterAvkorting.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
+                                    regelverk = hentRegelverkFraBeregningForPeriode(beregningOgAvkorting.beregning, it.fom),
                                 )
                             }
                         }
@@ -651,6 +651,15 @@ class VedtakBehandlingService(
                         periode = Periode(opphoerFraOgMed, null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
+                        regelverk =
+                            if (perioderMedUtbetaling.any { it.regelverk != null }) {
+                                // Regelverk er satt på periodene - for at det skal bli konsistent mot utbetaling
+                                Regelverk.fraDato(
+                                    opphoerFraOgMed.atDay(1),
+                                )
+                            } else {
+                                null
+                            },
                     ),
                 )
             } else {
@@ -659,6 +668,17 @@ class VedtakBehandlingService(
 
         return perioderMedUtbetaling + perioderMedOpphoer
     }
+
+    private fun hentRegelverkFraBeregningForPeriode(
+        beregning: BeregningDTO,
+        fom: YearMonth,
+    ): Regelverk? =
+        beregning.beregningsperioder
+            .sortedBy { it.datoFOM }
+            .first {
+                (fom.isAfter(it.datoFOM) || fom == it.datoFOM) &&
+                    (it.datoTOM == null || (fom.isBefore(it.datoTOM) || fom == it.datoFOM))
+            }.regelverk
 
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,
@@ -695,7 +715,7 @@ class VedtakBehandlingService(
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
-    fun hentIverksatteVedtakISak(sakId: Long): List<Vedtak> =
+    fun hentIverksatteVedtakISak(sakId: SakId): List<Vedtak> =
         repository
             .hentVedtakForSak(sakId)
             .filter { it.status == VedtakStatus.IVERKSATT }
@@ -720,12 +740,3 @@ class ManglerAvkortetYtelse :
         detail =
             "Det må legges til inntektsavkorting selv om mottaker ikke har inntekt. Legg inn \"0\" kr i alle felter.",
     )
-
-enum class VedtakFeatureToggle(
-    private val key: String,
-) : FeatureToggle {
-    VerifiserPerioder("verifiser-perioder"),
-    ;
-
-    override fun key() = key
-}

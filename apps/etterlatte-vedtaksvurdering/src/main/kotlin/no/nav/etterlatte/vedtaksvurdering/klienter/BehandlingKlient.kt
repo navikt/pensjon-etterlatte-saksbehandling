@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -37,7 +38,7 @@ interface BehandlingKlient :
     ): DetaljertBehandling
 
     suspend fun hentSak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Sak
 
@@ -92,7 +93,7 @@ interface BehandlingKlient :
     ): Boolean
 
     suspend fun hentOppgaverForSak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<OppgaveIntern>
 
@@ -150,7 +151,7 @@ class BehandlingKlientImpl(
     }
 
     override suspend fun hentSak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Sak {
         logger.info("Henter sak med id $sakId")
@@ -173,7 +174,7 @@ class BehandlingKlientImpl(
     }
 
     override suspend fun hentOppgaverForSak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<OppgaveIntern> {
         logger.info("Henter oppgaver for sak med id $sakId")
@@ -274,8 +275,8 @@ class BehandlingKlientImpl(
             response.isOk -> true
             else -> {
                 logger.error(
-                    "Kan ikke underkjenne oppgaver og commite vedtak av type for behandling " +
-                        vedtakEndringDTO.sakIdOgReferanse.referanse,
+                    "Kan ikke underkjenne oppgaver og commite vedtak av type ${vedtakEndringDTO.vedtakType} " +
+                        "for behandling ${vedtakEndringDTO.sakIdOgReferanse.referanse}",
                 )
                 throw response.error
             }
@@ -376,7 +377,7 @@ class BehandlingKlientImpl(
     ): Boolean = tilgangssjekker.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker)
 
     override suspend fun harTilgangTilSak(
-        sakId: Long,
+        sakId: SakId,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean = tilgangssjekker.harTilgangTilSak(sakId, skrivetilgang, bruker)
@@ -432,7 +433,10 @@ class BehandlingKlientImpl(
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
-            throw BehandlingKlientException("Henting av tilbakekreving med tilbakekrevingId=$tilbakekrevingId feilet", e)
+            throw BehandlingKlientException(
+                "Henting av tilbakekreving med tilbakekrevingId=$tilbakekrevingId feilet",
+                e,
+            )
         }
     }
 }

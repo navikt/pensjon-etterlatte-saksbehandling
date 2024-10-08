@@ -7,6 +7,7 @@ data class Brevutfall(
     val behandlingId: UUID,
     val aldersgruppe: Aldersgruppe?,
     val feilutbetaling: Feilutbetaling?,
+    val frivilligSkattetrekk: Boolean?,
     val kilde: Grunnlagsopplysning.Kilde,
 )
 
@@ -23,6 +24,7 @@ data class Feilutbetaling(
 enum class FeilutbetalingValg {
     NEI,
     JA_VARSEL,
+    JA_INGEN_VARSEL_MOTREGNES,
     JA_INGEN_TK,
 }
 

@@ -25,6 +25,7 @@ export interface BrevutfallOgEtterbetaling {
 export interface Brevutfall {
   aldersgruppe?: Aldersgruppe | null
   feilutbetaling?: Feilutbetaling | null
+  frivilligSkattetrekk?: boolean | null
 }
 
 export enum EtterbetalingPeriodeValg {
@@ -46,6 +47,7 @@ export interface Feilutbetaling {
 export enum FeilutbetalingValg {
   NEI = 'NEI',
   JA_VARSEL = 'JA_VARSEL',
+  JA_INGEN_VARSEL_MOTREGNES = 'JA_INGEN_VARSEL_MOTREGNES',
   JA_INGEN_TK = 'JA_INGEN_TK',
 }
 
@@ -53,7 +55,7 @@ export interface Etterbetaling {
   datoFom?: string | null
   datoTom?: string | null
   inneholderKrav: boolean | null
-  frivilligSkattetrekk: boolean | null
+  frivilligSkattetrekk?: boolean | null
   etterbetalingPeriodeValg: EtterbetalingPeriodeValg | null
 }
 

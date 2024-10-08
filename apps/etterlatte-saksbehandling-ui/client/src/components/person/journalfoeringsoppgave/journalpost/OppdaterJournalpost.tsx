@@ -56,7 +56,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
       </Box>
 
       <FormWrapper $column={true}>
-        <EndreTema journalpost={journalpost} oppdater={(kode) => setJournalpost({ ...journalpost, tema: kode.navn })} />
+        <EndreTema journalpost={journalpost} oppdater={(kode) => setJournalpost({ ...journalpost, tema: kode.term })} />
 
         <EndreBruker
           bruker={journalpost.bruker}

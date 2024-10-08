@@ -12,10 +12,10 @@ spec:
     - "https://etterlatte-migrering.intern.dev.nav.no"
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
   kafka:
     pool: nav-dev
   prometheus:
@@ -33,6 +33,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_14
         name: etterlatte-migrering
+        tier: db-f1-micro
         databases:
           - name: migrering
             envVarPrefix: DB

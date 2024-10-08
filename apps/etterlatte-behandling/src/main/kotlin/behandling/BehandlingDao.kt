@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -20,12 +21,14 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -75,7 +78,7 @@ class BehandlingDao(
             }
         }
 
-    fun hentBehandlingerForSak(sakid: Long): List<Behandling> =
+    fun hentBehandlingerForSak(sakid: SakId): List<Behandling> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -92,8 +95,13 @@ class BehandlingDao(
         }
 
     fun hentAlleRevurderingerISakMedAarsak(
-        sakid: Long,
+        sakid: SakId,
         revurderingaarsak: Revurderingaarsak,
+    ): List<Revurdering> = hentAlleRevurderingerISakMedAarsak(sakid, listOf(revurderingaarsak))
+
+    fun hentAlleRevurderingerISakMedAarsak(
+        sakid: SakId,
+        revurderingaarsaker: List<Revurderingaarsak>,
     ): List<Revurdering> =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -104,12 +112,12 @@ class BehandlingDao(
                         FROM behandling b
                         INNER JOIN sak s ON b.sak_id = s.id
                         WHERE sak_id = ? AND behandlingstype = 'REVURDERING'
-                        AND revurdering_aarsak = ?
+                        AND revurdering_aarsak = ANY (?)
                         """.trimIndent(),
                     )
 
                 stmt.setLong(1, sakid)
-                stmt.setString(2, revurderingaarsak.name)
+                stmt.setArray(2, createArrayOf("text", revurderingaarsaker.toTypedArray()))
                 stmt.executeQuery().toList { asRevurdering(this) }
             }
         }
@@ -127,7 +135,10 @@ class BehandlingDao(
                         RETURNING id, sak_id
                         """.trimIndent(),
                     )
-                stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
+                stmt.setArray(
+                    1,
+                    createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()),
+                )
                 stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
 
                 stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) }
@@ -176,6 +187,10 @@ class BehandlingDao(
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
             sendeBrev = rs.getBoolean("sende_brev"),
             opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
+            tidligereFamiliepleier =
+                rs
+                    .getString("tidligere_familiepleier")
+                    ?.let { objectMapper.readValue(it) },
         )
     }
 
@@ -190,7 +205,7 @@ class BehandlingDao(
             id = rs.getLong("sak_id"),
             sakType = enumValueOf(rs.getString("saktype")),
             ident = rs.getString("fnr"),
-            enhet = rs.getString("enhet"),
+            enhet = Enhetsnummer(rs.getString("enhet")),
         )
 
     fun opprettBehandling(behandling: OpprettBehandling) =
@@ -202,8 +217,8 @@ class BehandlingDao(
                         INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                         soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
                         revurdering_aarsak, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
-                        sende_brev, opphoer_fom)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        sende_brev, opphoer_fom, tidligere_familiepleier)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -226,6 +241,7 @@ class BehandlingDao(
                     stmt.setString(16, relatertBehandlingId)
                     stmt.setBoolean(17, sendeBrev)
                     stmt.setString(18, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
+                    stmt.setJsonb(19, tidligereFamiliepleier)
                 }
                 require(stmt.executeUpdate() == 1)
             }
@@ -294,6 +310,29 @@ class BehandlingDao(
             require(statement.executeUpdate() == 1)
         }
     }
+
+    fun lagreTidligereFamiliepleier(
+        behandlingId: UUID,
+        tidligereFamiliepleier: TidligereFamiliepleier,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling set tidligere_familiepleier = ? where id = ?")
+            statement.setJsonb(1, tidligereFamiliepleier)
+            statement.setObject(2, behandlingId)
+            require(statement.executeUpdate() == 1)
+        }
+    }
+
+    fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement = prepareStatement("SELECT tidligere_familiepleier FROM behandling where id = ?")
+                statement.setObject(1, behandlingId)
+                statement.executeQuery().singleOrNull {
+                    toTidligereFamiliepleier()
+                }
+            }
+        }
 
     fun lagreViderefoertOpphoer(
         behandlingId: UUID,
@@ -437,6 +476,11 @@ class BehandlingDao(
 }
 
 fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLocalDatetimeUTC()
+
+private fun ResultSet.toTidligereFamiliepleier(): TidligereFamiliepleier =
+    this.getString("tidligere_familiepleier").let {
+        objectMapper.readValue(it)
+    }
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

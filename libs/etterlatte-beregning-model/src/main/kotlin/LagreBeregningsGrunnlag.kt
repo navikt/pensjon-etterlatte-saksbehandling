@@ -10,5 +10,6 @@ data class LagreBeregningsGrunnlag(
     val institusjonsopphold: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>>? =
         emptyList(),
     val beregningsMetode: BeregningsMetodeBeregningsgrunnlag = BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
-    val begegningsmetodeFlereAvdoede: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>>? = emptyList(),
+    val beregningsMetodeFlereAvdoede: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>>? = emptyList(),
+    val kunEnJuridiskForelder: GrunnlagMedPeriode<TomVerdi>? = null,
 )

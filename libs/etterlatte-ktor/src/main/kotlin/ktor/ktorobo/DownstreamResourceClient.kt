@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -18,6 +19,7 @@ import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.ktor.navConsumerId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -35,6 +37,14 @@ class DownstreamResourceClient(
             bearerAuth(token.accessToken)
             resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
         }
+    }
+
+    internal suspend fun getUtenToken(
+        url: String,
+        konsument: String,
+    ) = httpClient.get(url) {
+        accept(ContentType.Application.Json)
+        navConsumerId(konsument)
     }
 
     suspend fun post(
@@ -64,7 +74,7 @@ class DownstreamResourceClient(
     suspend fun delete(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-        postBody: String,
+        postBody: String? = "",
     ) = medToken(resource, brukerTokenInfo) { token ->
         httpClient.delete(resource.url) {
             bearerAuth(token.accessToken)
@@ -107,8 +117,10 @@ class DownstreamResourceClient(
                     response.status.isSuccess() -> {
                         if (response.harContentType(ContentType.Application.Json)) {
                             Ok(response.body<JsonNode>())
+                        } else if (response.harContentType(ContentType.Text.Plain)) {
+                            Ok(response.body<String>())
                         } else {
-                            logger.info("Mottok content-type: ${response.contentType()} som ikke var JSON")
+                            logger.info("Mottok uhåndtert content-type: ${response.contentType()}")
                             Ok(response.status)
                         }
                     }

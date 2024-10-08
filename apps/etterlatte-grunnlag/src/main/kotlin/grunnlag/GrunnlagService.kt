@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -46,24 +47,24 @@ interface GrunnlagService {
     ): Grunnlagsopplysning<JsonNode>?
 
     fun lagreNyeSaksopplysninger(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     )
 
     fun lagreNyeSaksopplysningerBareSak(
-        sakId: Long,
+        sakId: SakId,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     )
 
     fun lagreNyePersonopplysninger(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         fnr: Folkeregisteridentifikator,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     )
 
-    fun hentOpplysningsgrunnlagForSak(sakId: Long): Grunnlag?
+    fun hentOpplysningsgrunnlagForSak(sakId: SakId): Grunnlag?
 
     fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
 
@@ -76,9 +77,9 @@ interface GrunnlagService {
 
     fun laasVersjonForBehandling(behandlingId: UUID)
 
-    fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long>
+    fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<SakId>
 
-    fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>?
+    fun hentPersonerISak(sakId: SakId): Map<Folkeregisteridentifikator, PersonMedNavn>?
 
     suspend fun opprettGrunnlag(
         behandlingId: UUID,
@@ -88,13 +89,13 @@ interface GrunnlagService {
     suspend fun oppdaterGrunnlagForSak(oppdaterGrunnlagRequest: OppdaterGrunnlagRequest)
 
     suspend fun opprettEllerOppdaterGrunnlagForSak(
-        sakId: Long,
+        sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
     )
 
     suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         sakType: SakType,
     )
 
@@ -115,7 +116,7 @@ class RealGrunnlagService(
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
-    override fun hentOpplysningsgrunnlagForSak(sakId: Long): Grunnlag? {
+    override fun hentOpplysningsgrunnlagForSak(sakId: SakId): Grunnlag? {
         val persongalleriJsonNode =
             opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
 
@@ -192,6 +193,7 @@ class RealGrunnlagService(
             soeker = soker?.opplysning?.asPersonopplysning(),
             avdoede = avdode.map { it.opplysning.asPersonopplysning() },
             gjenlevende = gjenlevende.map { it.opplysning.asPersonopplysning() },
+            annenForelder = persongalleri.annenForelder,
         )
     }
 
@@ -218,9 +220,9 @@ class RealGrunnlagService(
         return result
     }
 
-    override fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long> = opplysningDao.finnAlleSakerForPerson(fnr)
+    override fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<SakId> = opplysningDao.finnAlleSakerForPerson(fnr)
 
-    override fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>? {
+    override fun hentPersonerISak(sakId: SakId): Map<Folkeregisteridentifikator, PersonMedNavn>? {
         val grunnlag = hentOpplysningsgrunnlagForSak(sakId) ?: return null
 
         val personer = listOf(grunnlag.soeker) + grunnlag.familie
@@ -262,7 +264,7 @@ class RealGrunnlagService(
 
     override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         sakType: SakType,
     ) {
         val persongalleriJsonNode = opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
@@ -432,7 +434,7 @@ class RealGrunnlagService(
     ): Grunnlagsopplysning<JsonNode>? = opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, opplysningstype)?.opplysning
 
     override fun lagreNyePersonopplysninger(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         fnr: Folkeregisteridentifikator,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
@@ -442,7 +444,7 @@ class RealGrunnlagService(
     }
 
     override fun lagreNyeSaksopplysninger(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
@@ -451,7 +453,7 @@ class RealGrunnlagService(
     }
 
     override fun lagreNyeSaksopplysningerBareSak(
-        sakId: Long,
+        sakId: SakId,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
         logger.info("Oppretter et grunnlag for saksopplysninger $sakId")
@@ -474,7 +476,7 @@ class RealGrunnlagService(
     }
 
     override suspend fun opprettEllerOppdaterGrunnlagForSak(
-        sakId: Long,
+        sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
     ) {
         val grunnlag = grunnlagHenter.hentGrunnlagsdata(opplysningsbehov)
@@ -492,7 +494,7 @@ class RealGrunnlagService(
     }
 
     private fun oppdaterGrunnlagForSak(
-        sakId: Long,
+        sakId: SakId,
         fnr: Folkeregisteridentifikator?,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
@@ -515,7 +517,7 @@ class RealGrunnlagService(
     }
 
     private fun oppdaterGrunnlagOgVersjon(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
         fnr: Folkeregisteridentifikator?,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
@@ -625,24 +627,11 @@ class LaastGrunnlagKanIkkeEndres(
             """,
     )
 
-data class PersonopplysningerResponse(
-    val innsender: Personopplysning?,
-    val soeker: Personopplysning?,
-    val avdoede: List<Personopplysning>,
-    val gjenlevende: List<Personopplysning>,
-)
-
 data class Personopplysning(
     val opplysningType: Opplysningstype,
     val id: UUID,
     val kilde: GenerellKilde,
     val opplysning: Person,
-)
-
-data class GenerellKilde(
-    val type: String,
-    val tidspunkt: Tidspunkt,
-    val detalj: String? = null,
 )
 
 data class ForskjellMellomPersoner(

@@ -23,7 +23,7 @@ internal class OpprettBehandlingRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingClient: BehandlingClient,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(OpprettBehandlingRiver::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV) {

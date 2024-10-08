@@ -2,7 +2,9 @@ package no.nav.etterlatte.brev.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.BrevDataRedigerbarRequest
+import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -203,6 +205,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             BarnepensjonForeldreloesRedigerbar.fra(
                 etterbetaling.await(),
                 utbetalingsinfo = utbetalingsinfo.await(),
+                avdoede = avdoede,
                 systemkilde,
                 loependeIPesys,
             )
@@ -223,7 +226,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         BarnepensjonOpphoerRedigerbarUtfall.fra(
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
     }
 
@@ -248,7 +251,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         BarnepensjonRevurderingRedigerbartUtfall.fra(
             etterbetaling.await(),
             utbetalingsinfo.await(),
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
     }
 
@@ -312,7 +315,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
     }
 
@@ -323,7 +326,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
-            requireNotNull(brevutfall.await()),
+            brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
     }
 }

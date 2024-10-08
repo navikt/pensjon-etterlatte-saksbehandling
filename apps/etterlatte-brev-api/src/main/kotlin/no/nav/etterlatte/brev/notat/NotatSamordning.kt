@@ -1,10 +1,11 @@
 package no.nav.etterlatte.brev.notat
 
 import no.nav.etterlatte.brev.NotatParametre
-import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.Slate
+import no.nav.etterlatte.libs.common.sak.SakId
 
 class SamordningsnotatParametre(
-    val sakId: Long,
+    val sakId: SakId,
     val vedtakId: Long,
     val samordningsmeldingId: Long,
     val kommentar: String,

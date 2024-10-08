@@ -9,16 +9,18 @@ import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilLoggerException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.isProd
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import no.nav.etterlatte.libs.ktor.feilhaandtering.EscapeUtils.escape
 import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.skjulAllePotensielleFnr
 import org.slf4j.Logger
 
 class StatusPagesKonfigurasjon(
@@ -52,9 +54,18 @@ class StatusPagesKonfigurasjon(
                 }
 
                 else -> {
-                    val mappetFeil = InternfeilException("En feil har skjedd.", cause)
+                    val mappetFeil =
+                        UkjentInternfeilException(
+                            "En feil har skjedd: ${cause::class.java.canonicalName} Tidspunkt: ${Tidspunkt.now()}. Korrelasjonsid: ${getCorrelationId()}",
+                            cause,
+                        )
                     call.application.log.loggInternfeilException(mappetFeil, call)
-                    call.respond(mappetFeil)
+                    call.respond(
+                        UkjentInternfeilException(
+                            "En ukjent feil har skjedd. Tidspunkt: ${Tidspunkt.now()}. Korrelasjonsid: ${getCorrelationId()}",
+                            mappetFeil,
+                        ),
+                    )
                 }
             }
         }
@@ -62,7 +73,19 @@ class StatusPagesKonfigurasjon(
         status(*statusCodes4xx) { call, code ->
             routeLogger.debug("Fikk kode {}", code)
             when (code) {
-                HttpStatusCode.NotFound -> call.respond(GenerellIkkeFunnetException())
+                HttpStatusCode.NotFound -> {
+                    call.application.log.warn(
+                        "Forespurt URI (${skjulAllePotensielleFnr(call.request.uri)}) " +
+                            "returnerte kode 404, ruten er enten ikke satt opp eller den returnerer 404 direkte.",
+                    )
+
+                    call.respond(
+                        IkkeFunnetException(
+                            code = "ROUTE_NOT_CONFIGURED",
+                            detail = "Du ba om en rute / url som ikke er konfigurert opp. Dobbeltsjekk forespørselen.",
+                        ),
+                    )
+                }
 
                 HttpStatusCode.BadRequest ->
                     call.respond(
@@ -133,11 +156,13 @@ class StatusPagesKonfigurasjon(
             this.error(
                 "En feil har oppstått ved deserialisering. Se sikkerlogg for mer detaljer.",
             )
-        } else {
+        } else if (internfeil is UkjentInternfeilException) {
             this.error(
-                internfeil.cause?.message ?: "En intern feil oppstod i et endepunkt. Svarer frontend med 500-feil",
-                internfeil.cause ?: internfeil,
+                internfeil.cause.message ?: internfeil.detail,
+                internfeil.cause,
             )
+        } else {
+            this.error(internfeil.detail, internfeil)
         }
     }
 
@@ -146,14 +171,21 @@ class StatusPagesKonfigurasjon(
         call: ApplicationCall,
     ) {
         if (internfeil.erDeserialiseringsException() && isProd()) {
-            sikkerLogg.info("En feil har oppstått ved deserialisering. Requestobjektet var {}", escape(hentRequestobjekt(call)), internfeil)
+            sikkerLogg.info(
+                "En feil har oppstått ved deserialisering. Requestobjektet var {}",
+                escape(hentRequestobjekt(call)),
+                internfeil,
+            )
             this.info(
                 "En feil har oppstått ved deserialisering i et endepunkt. Se sikkerlogg for mer detaljer. " +
                     "Feilen fikk status ${internfeil.status} til frontend.",
             )
         }
 
-        this.info("En forespørselsfeil oppstod i et endepunkt, detaljer: ${internfeil.detail}", internfeil.cause ?: internfeil)
+        this.info(
+            "En forespørselsfeil oppstod i et endepunkt, detaljer: ${internfeil.detail}",
+            internfeil.cause ?: internfeil,
+        )
     }
 
     private suspend fun ApplicationCall.respond(feil: ForespoerselException) {
@@ -181,3 +213,8 @@ class StatusPagesKonfigurasjon(
         return requestobjekt
     }
 }
+
+private class UkjentInternfeilException(
+    override val detail: String,
+    override val cause: Throwable,
+) : InternfeilException(detail, cause)

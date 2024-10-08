@@ -3,66 +3,69 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.Vergemaal
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import java.util.UUID
 
 class Brevoppretter(
     private val adresseService: AdresseService,
     private val db: BrevRepository,
-    private val behandlingService: BehandlingService,
     private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
-    suspend fun opprettVedtaksbrev(
-        sakId: Long,
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
-    ): Brev {
-        require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
-            "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
-        }
+    suspend fun opprettBrevSomHarInnhold(
+        sakId: SakId,
+        behandlingId: UUID?,
+        bruker: BrukerTokenInfo,
+        brevKode: Brevkoder,
+        brevData: BrevDataRedigerbar,
+    ): Pair<Brev, Enhetsnummer> {
+        with(
+            innholdTilRedigerbartBrevHenter.hentInnDataForBrevMedData(
+                sakId,
+                behandlingId,
+                bruker,
+                brevKode,
+                brevData,
+            ),
+        ) {
+            val nyttBrev =
+                OpprettNyttBrev(
+                    sakId = sakId,
+                    behandlingId = behandlingId,
+                    prosessType = BrevProsessType.REDIGERBAR,
+                    soekerFnr = soekerFnr,
+                    mottaker = finnMottaker(sakType, personerISak),
+                    opprettet = Tidspunkt.now(),
+                    innhold = innhold,
+                    innholdVedlegg = innholdVedlegg,
+                    brevtype = brevKode.brevtype,
+                    brevkoder = brevkode,
+                )
 
-        if (brukerTokenInfo is Saksbehandler) {
-            val kanRedigeres = behandlingService.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
-            if (!kanRedigeres) {
-                throw KanIkkeOppretteVedtaksbrev(behandlingId)
-            }
+            return Pair(db.opprettBrev(nyttBrev), enhet)
         }
-
-        return opprettBrev(
-            sakId = sakId,
-            behandlingId = behandlingId,
-            bruker = brukerTokenInfo,
-            brevKodeMapping = brevKodeMapping,
-            brevtype = Brevtype.VEDTAK,
-            brevDataMapping = brevDataMapping,
-        ).first
     }
 
     suspend fun opprettBrev(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevtype: Brevtype,
+        brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
-    ): Pair<Brev, String> =
+    ): Pair<Brev, Enhetsnummer> =
         with(
             innholdTilRedigerbartBrevHenter.hentInnData(
                 sakId,
@@ -82,20 +85,22 @@ class Brevoppretter(
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
-                    brevtype = brevtype,
+                    brevtype = brevkode.brevtype,
+                    brevkoder = brevkode,
                 )
             return Pair(db.opprettBrev(nyttBrev), enhet)
         }
 
     suspend fun hentNyttInnhold(
-        sakId: Long,
+        sakId: SakId,
         brevId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKodeMapping: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevKodeMapping: (b: BrevkodeRequest) -> Brevkoder,
         brevDataMapping: suspend (BrevDataRedigerbarRequest) -> BrevDataRedigerbar,
     ): BrevService.BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
+        val opprinneligBrevkoder = db.hentBrevkoder(brevId)
 
         with(
             innholdTilRedigerbartBrevHenter.hentInnData(
@@ -115,6 +120,11 @@ class Brevoppretter(
                 db.oppdaterPayloadVedlegg(brevId, innholdVedlegg)
             }
 
+            if (opprinneligBrevkoder != brevkode) {
+                db.oppdaterBrevkoder(brevId, brevkode)
+                db.oppdaterTittel(brevId, innhold.tittel)
+            }
+
             return BrevService.BrevPayload(
                 innhold.payload ?: db.hentBrevPayload(brevId),
                 innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId),
@@ -127,19 +137,16 @@ class Brevoppretter(
         personerISak: PersonerISak,
     ): Mottaker =
         with(personerISak) {
-            val mottakerFnr: String? =
-                when (verge) {
-                    is Vergemaal -> verge.foedselsnummer.value
-                    is UkjentVergemaal -> null
+            when (verge) {
+                is Vergemaal -> tomMottaker().copy(foedselsnummer = MottakerFoedselsnummer(verge.foedselsnummer.value))
+                is UkjentVergemaal -> tomMottaker()
 
-                    else ->
+                else ->
+                    adresseService.hentMottakerAdresse(
+                        sakType,
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
-                            ?: soeker.fnr.value
-                }
-            if (mottakerFnr != null) {
-                adresseService.hentMottakerAdresse(sakType, mottakerFnr)
-            } else {
-                tomMottaker()
+                            ?: soeker.fnr.value,
+                    )
             }
         }
 
@@ -151,11 +158,3 @@ class Brevoppretter(
             adresse = Adresse(adresseType = "", landkode = "", land = ""),
         )
 }
-
-class KanIkkeOppretteVedtaksbrev(
-    behandlingId: UUID,
-) : UgyldigForespoerselException(
-        code = "KAN_IKKE_ENDRE_VEDTAKSBREV",
-        detail = "Statusen til behandlingen tillater ikke at det opprettes vedtaksbrev",
-        meta = mapOf("behandlingId" to behandlingId),
-    )

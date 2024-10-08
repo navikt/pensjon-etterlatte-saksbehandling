@@ -15,32 +15,36 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.JobbType
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
+import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
+import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
@@ -61,25 +65,28 @@ interface BehandlingService {
 
     fun sendSivilstandHendelse(sivilstandHendelse: SivilstandHendelse)
 
+    fun sendFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse): HttpResponse
+
     fun hentAlleSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long> = listOf(),
-        ekskluderteSaker: List<Long> = listOf(),
+        spesifikkeSaker: List<SakId> = listOf(),
+        ekskluderteSaker: List<SakId> = listOf(),
         sakType: SakType? = null,
+        loependeFom: YearMonth? = null,
     ): Saker
 
-    fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
+    fun opprettAutomatiskRevurdering(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse
 
     fun opprettRevurderingAktivitetsplikt(
-        sakId: Long,
+        sakId: SakId,
         frist: Tidspunkt,
         behandlingsmaaned: YearMonth,
         jobbType: JobbType,
     ): OpprettRevurderingForAktivitetspliktResponse
 
     fun opprettOppgaveAktivitetspliktVarigUnntak(
-        sakId: Long,
+        sakId: SakId,
         frist: Tidspunkt,
         referanse: String? = null,
         jobbType: JobbType,
@@ -96,8 +103,10 @@ interface BehandlingService {
 
     fun hentBehandling(behandlingId: UUID): DetaljertBehandling
 
+    fun hentBehandlingerForSak(foedselsNummerDTO: FoedselsnummerDTO): SakMedBehandlinger
+
     fun opprettOppgave(
-        sakId: Long,
+        sakId: SakId,
         oppgaveType: OppgaveType,
         referanse: String? = null,
         merknad: String? = null,
@@ -107,7 +116,7 @@ interface BehandlingService {
     fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto)
 
     fun lagreKjoering(
-        sakId: Long,
+        sakId: SakId,
         status: KjoeringStatus,
         kjoering: String,
     )
@@ -119,6 +128,8 @@ class BehandlingServiceImpl(
     private val behandlingKlient: HttpClient,
     private val url: String,
 ) : BehandlingService {
+    private val logger = LoggerFactory.getLogger(BehandlingServiceImpl::class.java)
+
     override fun sendDoedshendelse(doedshendelse: DoedshendelsePdl) {
         runBlocking {
             behandlingKlient.post("$url/grunnlagsendringshendelse/doedshendelse") {
@@ -191,12 +202,20 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse =
+    override fun sendFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse) =
+        runBlocking {
+            behandlingKlient.post("$url/grunnlagsendringshendelse/folkeregisteridentifikatorhendelse") {
+                contentType(ContentType.Application.Json)
+                setBody(hendelse)
+            }
+        }
+
+    override fun opprettAutomatiskRevurdering(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse =
         runBlocking {
             behandlingKlient
-                .post("$url/omregning") {
+                .post("$url/automatisk-revurdering") {
                     contentType(ContentType.Application.Json)
-                    setBody(omregningshendelse)
+                    setBody(request)
                 }.body()
         }
 
@@ -212,15 +231,16 @@ class BehandlingServiceImpl(
     override fun hentAlleSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long>,
-        ekskluderteSaker: List<Long>,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
         sakType: SakType?,
+        loependeFom: YearMonth?,
     ): Saker =
         runBlocking {
             behandlingKlient
                 .post("$url/saker/$kjoering/$antall") {
                     contentType(ContentType.Application.Json)
-                    setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType))
+                    setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType, loependeFom))
                 }.body()
         }
 
@@ -247,8 +267,17 @@ class BehandlingServiceImpl(
             behandlingKlient.get("$url/behandlinger/$behandlingId").body()
         }
 
+    override fun hentBehandlingerForSak(foedselsNummerDTO: FoedselsnummerDTO): SakMedBehandlinger =
+        runBlocking {
+            behandlingKlient
+                .post("$url/personer/behandlingerforsak") {
+                    contentType(ContentType.Application.Json)
+                    setBody(foedselsNummerDTO)
+                }.body()
+        }
+
     override fun opprettOppgave(
-        sakId: Long,
+        sakId: SakId,
         oppgaveType: OppgaveType,
         referanse: String?,
         merknad: String?,
@@ -274,7 +303,7 @@ class BehandlingServiceImpl(
         }
 
     override fun opprettRevurderingAktivitetsplikt(
-        sakId: Long,
+        sakId: SakId,
         frist: Tidspunkt,
         behandlingsmaaned: YearMonth,
         jobbType: JobbType,
@@ -295,7 +324,7 @@ class BehandlingServiceImpl(
         }
 
     override fun opprettOppgaveAktivitetspliktVarigUnntak(
-        sakId: Long,
+        sakId: SakId,
         frist: Tidspunkt,
         referanse: String?,
         jobbType: JobbType,
@@ -325,7 +354,7 @@ class BehandlingServiceImpl(
     }
 
     override fun lagreKjoering(
-        sakId: Long,
+        sakId: SakId,
         status: KjoeringStatus,
         kjoering: String,
     ) {
@@ -340,6 +369,7 @@ class BehandlingServiceImpl(
                     ),
                 )
             }
+            logger.debug("$kjoering: kjoeringStatus for sak {} er oppdatert til: {}", sakId, status)
         }
     }
 

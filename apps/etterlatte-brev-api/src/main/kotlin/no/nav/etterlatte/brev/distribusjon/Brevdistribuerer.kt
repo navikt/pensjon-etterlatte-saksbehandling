@@ -13,13 +13,13 @@ class Brevdistribuerer(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun distribuer(
-        id: BrevID,
+        brevId: BrevID,
         distribusjonsType: DistribusjonsType = DistribusjonsType.ANNET,
         journalpostIdInn: String? = null,
     ): BestillingsID {
-        logger.info("Starter distribuering av brev $id.")
+        logger.info("Starter distribuering av brev $brevId.")
 
-        val brev = db.hentBrev(id)
+        val brev = db.hentBrev(brevId)
 
         if (brev.status != Status.JOURNALFOERT) {
             throw FeilStatusForDistribusjon(brev.id, brev.status)
@@ -27,13 +27,13 @@ class Brevdistribuerer(
 
         val journalpostId =
             journalpostIdInn
-                ?: requireNotNull(db.hentJournalpostId(id)) {
+                ?: requireNotNull(db.hentJournalpostId(brevId)) {
                     "JournalpostID mangler på brev (id=${brev.id}, status=${brev.status})"
                 }
 
         val mottaker =
             requireNotNull(brev.mottaker) {
-                "Mottaker må være satt for å kunne distribuere brevet (id: $id)"
+                "Mottaker må være satt for å kunne distribuere brevet (id: $brevId)"
             }
 
         return distribusjonService
@@ -43,7 +43,8 @@ class Brevdistribuerer(
                 type = distribusjonsType,
                 tidspunkt = DistribusjonsTidspunktType.KJERNETID,
                 adresse = mottaker.adresse,
-            ).also { logger.info("Distribuerte brev $id") }
+                tvingSentralPrint = mottaker.tvingSentralPrint,
+            ).also { logger.info("Distribuerte brev $brevId") }
     }
 }
 

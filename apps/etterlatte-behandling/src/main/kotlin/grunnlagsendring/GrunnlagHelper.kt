@@ -141,7 +141,7 @@ fun Grunnlag.sivilstand(saksrolle: Saksrolle) =
         Saksrolle.AVDOED -> {
             // first er helt ok her, siden vi kun er interessert når vi er i OMS land og skal da ha kun
             // en avdød per behandling.
-            hentAvdoede().first().hentSivilstand()?.verdi
+            hentAvdoede().firstOrNull()?.hentSivilstand()?.verdi
         }
         else -> throw GrunnlagRolleException(
             "Prøvde å finne sivilstand for $saksrolle, men det er ikke relevant for denne rollen",

@@ -14,6 +14,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_14
         name: etterlatte-grunnlag
+        tier: db-g1-small
         databases:
           - name: grunnlag
             envVarPrefix: DB
@@ -90,6 +91,7 @@ spec:
           namespace: aura
           cluster: dev-gcp
         - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-brev-kafka
         - application: etterlatte-trygdetid
         - application: etterlatte-brev-api
         - application: etterlatte-beregning

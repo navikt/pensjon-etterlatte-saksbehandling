@@ -1,0 +1,2 @@
+ALTER TABLE mottaker
+    ADD COLUMN tving_sentral_print BOOLEAN NOT NULL DEFAULT FALSE;

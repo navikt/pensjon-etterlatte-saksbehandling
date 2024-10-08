@@ -1,70 +1,68 @@
 package no.nav.etterlatte.brev
 
-enum class EtterlatteBrevKode(
-    val brevtype: Brevtype,
-    val tittel: String? = null,
-) {
-    BARNEPENSJON_AVSLAG(Brevtype.VEDTAK, "Vedtak om avslått barnepensjon"),
-    BARNEPENSJON_AVSLAG_UTFALL(Brevtype.VEDTAK, "Vedtak om avslått barnepensjon"),
-    BARNEPENSJON_INNVILGELSE(Brevtype.VEDTAK, "Vedtak om innvilget barnepensjon"),
-    BARNEPENSJON_INNVILGELSE_UTFALL(Brevtype.VEDTAK, "Vedtak om innvilget barnepensjon"),
-    BARNEPENSJON_INNVILGELSE_FORELDRELOES(Brevtype.VEDTAK, "Vedtak om innvilget barnepensjon"),
-    BARNEPENSJON_INNVILGELSE_UTFALL_FORELDRELOES(Brevtype.VEDTAK, "Vedtak om innvilget barnepensjon"),
-    BARNEPENSJON_OPPHOER(Brevtype.VEDTAK, "Opphør av barnepensjon"),
-    BARNEPENSJON_OPPHOER_UTFALL(Brevtype.VEDTAK, "Opphør av barnepensjon"),
-    BARNEPENSJON_REVURDERING(Brevtype.VEDTAK),
-    BARNEPENSJON_REVURDERING_UTFALL(Brevtype.VEDTAK),
-    BARNEPENSJON_FORHAANDSVARSEL_OMREGNING(Brevtype.VEDTAK),
-    BARNEPENSJON_VARSEL(Brevtype.VARSEL, "Forhåndsvarsel om ny barnepensjon fra 1. januar 2024"),
-    BARNEPENSJON_VARSEL_UTFALL(Brevtype.VARSEL, "Forhåndsvarsel om ny barnepensjon fra 1. januar 2024"),
-    BARNEPENSJON_VEDTAK_OMREGNING(Brevtype.VEDTAK, "Vedtak - endring av barnepensjon"),
-    BARNEPENSJON_VEDTAK_OMREGNING_FERDIG(Brevtype.VEDTAK, "Vedtak - endring av barnepensjon"),
-    BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL(Brevtype.VEDLEGG, "Trygdetid i vedlegg beregning av barnepensjon"),
-    BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL(Brevtype.VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
-    BARNEPENSJON_INFORMASJON_DOEDSFALL(Brevtype.INFORMASJON, "Informasjon om barnepensjon"),
-    BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT(Brevtype.INFORMASJON, "Informasjon om barnepensjon"),
-    BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD(Brevtype.INFORMASJON, "Vi har mottatt søknaden din om barnepensjon"),
-    BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(Brevtype.INFORMASJON, "Du må sende oss flere opplysninger"),
+interface Brevbakerkode
 
-    OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL(Brevtype.INFORMASJON, "Informasjon om omstillingsstønad"),
-    OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD(Brevtype.INFORMASJON, "Vi har mottatt søknaden din om omstillingsstønad"),
-    OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(Brevtype.INFORMASJON, "Du må sende oss flere opplysninger"),
-    OMSTILLINGSSTOENAD_AVSLAG(Brevtype.VEDTAK, "Vedtak om avslått omstillingsstønad"),
-    OMSTILLINGSSTOENAD_AVSLAG_UTFALL(Brevtype.VEDTAK, "Vedtak om avslått omstillingsstønad"),
-    OMSTILLINGSSTOENAD_INNVILGELSE(Brevtype.VEDTAK, "Vedtak om innvilget omstillingsstønad"),
-    OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL(Brevtype.VEDTAK, "Vedtak om innvilget omstillingsstønad"),
-    OMSTILLINGSSTOENAD_OPPHOER(Brevtype.VEDTAK, "Opphør av omstillingsstønad"),
-    OMSTILLINGSSTOENAD_OPPHOER_UTFALL(Brevtype.VEDTAK, "Opphør av omstillingsstønad"),
-    OMSTILLINGSSTOENAD_REVURDERING(Brevtype.VEDTAK),
-    OMSTILLINGSSTOENAD_REVURDERING_UTFALL(Brevtype.VEDTAK),
-    OMSTILLINGSSTOENAD_VARSEL(Brevtype.VARSEL, "Varsel - omstillingsstønad"),
-    OMSTILLINGSSTOENAD_VARSEL_UTFALL(Brevtype.VARSEL, "Varsel - omstillingsstønad"),
-    OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT(Brevtype.VARSEL, "Varselbrev - stans om ikke akt.plikt oppfylt"),
-    OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT_UTFALL(Brevtype.VARSEL, "Varselbrev - stans om ikke akt.plikt oppfylt"),
-    OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(Brevtype.VEDLEGG, "Utfall ved beregning av omstillingsstønad"),
-    OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL(Brevtype.VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
-    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV_INNHOLD(Brevtype.MANUELT, "Varsel om aktivitetsplikt for omstillingsstønad"),
-    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
-        Brevtype.INFORMASJON,
-        "Informasjon om aktivitetsplikt for omstillingsstønad",
-    ),
-    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
-        Brevtype.INFORMASJON,
-        "Informasjon om aktivitetsplikt for omstillingsstønad",
-    ),
-    TILBAKEKREVING_INNHOLD(Brevtype.VEDTAK),
-    TILBAKEKREVING_FERDIG(Brevtype.VEDTAK),
+/*
+Denne enumen brukes primært for kommunikasjonen mot brevbakeren.
 
-    AVVIST_KLAGE_INNHOLD(Brevtype.VEDTAK),
-    AVVIST_KLAGE_FERDIG(Brevtype.VEDTAK),
+Denne enumen henger tett sammen med Brevkoder-enumen.
+Vurdér om du heller bør bruke den, hvis du er utenfor rein brevbaker-kontekst.
+ */
+enum class EtterlatteBrevKode : Brevbakerkode {
+    BARNEPENSJON_AVSLAG,
+    BARNEPENSJON_AVSLAG_UTFALL,
+    BARNEPENSJON_INNVILGELSE,
+    BARNEPENSJON_INNVILGELSE_UTFALL,
+    BARNEPENSJON_INNVILGELSE_FORELDRELOES,
+    BARNEPENSJON_INNVILGELSE_UTFALL_FORELDRELOES,
+    BARNEPENSJON_OPPHOER,
+    BARNEPENSJON_OPPHOER_UTFALL,
+    BARNEPENSJON_REVURDERING,
+    BARNEPENSJON_REVURDERING_UTFALL,
+    BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+    BARNEPENSJON_VARSEL,
+    BARNEPENSJON_VARSEL_UTFALL,
+    BARNEPENSJON_VEDTAK_OMREGNING,
+    BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
+    BARNEPENSJON_INFORMASJON_DOEDSFALL,
+    BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT,
+    BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD,
+    BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
 
-    TOM_DELMAL(Brevtype.MANUELT),
-    TOM_MAL_INFORMASJONSBREV(Brevtype.INFORMASJON, "Informasjonsbrev"),
-    TOM_MAL(Brevtype.MANUELT),
-    UTSATT_KLAGEFRIST(Brevtype.INFORMASJON, "Informasjon om barnepensjon fra 1. januar 2024"),
+    OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL,
+    OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD,
+    OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+    OMSTILLINGSSTOENAD_AVSLAG,
+    OMSTILLINGSSTOENAD_AVSLAG_UTFALL,
+    OMSTILLINGSSTOENAD_INNVILGELSE,
+    OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL,
+    OMSTILLINGSSTOENAD_OPPHOER,
+    OMSTILLINGSSTOENAD_OPPHOER_UTFALL,
+    OMSTILLINGSSTOENAD_REVURDERING,
+    OMSTILLINGSSTOENAD_REVURDERING_UTFALL,
+    OMSTILLINGSSTOENAD_VARSEL,
+    OMSTILLINGSSTOENAD_VARSEL_UTFALL,
+    OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT,
+    OMSTILLINGSSTOENAD_VARSEL_AKTIVITETSPLIKT_UTFALL,
+    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
+    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
+    OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VARSEL,
 
-    KLAGE_OVERSENDELSE_BRUKER(Brevtype.OVERSENDELSE_KLAGE, "Klagen er oversendt til NAV Klageinstans Vest"),
-    KLAGE_OVERSENDELSE_BLANKETT(Brevtype.NOTAT, "Oversendelse til KA"),
+    TILBAKEKREVING_INNHOLD,
+    TILBAKEKREVING_FERDIG,
+
+    AVVIST_KLAGE_INNHOLD,
+    AVVIST_KLAGE_FERDIG,
+
+    TOM_DELMAL,
+    TOM_MAL_INFORMASJONSBREV,
+    UTSATT_KLAGEFRIST,
+
+    KLAGE_OVERSENDELSE_BRUKER,
+    KLAGE_OVERSENDELSE_BLANKETT,
+
+    OPPLASTET_PDF,
+    INGEN_REDIGERBAR_DEL,
 }
 
 enum class Brevtype {
@@ -77,7 +75,17 @@ enum class Brevtype {
     NOTAT,
     OVERSENDELSE_KLAGE,
     SLETTET_VARSEL,
+    INGEN, // Til bruk for å modellere at brevet ikke har en redigerbar del
     ;
 
     fun erKobletTilEnBehandling(): Boolean = this in listOf(VEDTAK, VARSEL, VEDLEGG)
+}
+
+enum class Vedlegg(
+    val tittel: String,
+) : Brevbakerkode {
+    BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL("Trygdetid i vedlegg beregning av barnepensjon"),
+    BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL("Utfall ved forhåndsvarsel av feilutbetaling"),
+    OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL("Utfall ved beregning av omstillingsstønad"),
+    OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL("Utfall ved forhåndsvarsel av feilutbetaling"),
 }

@@ -7,12 +7,17 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -26,8 +31,13 @@ interface GosysOppgaveService {
     suspend fun hentOppgaver(
         saksbehandler: String?,
         tema: String?,
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         harTildeling: Boolean?,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<GosysOppgave>
+
+    suspend fun hentOppgaverForPerson(
+        foedselsnummer: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave>
 
@@ -43,7 +53,7 @@ interface GosysOppgaveService {
 
     suspend fun flyttTilGjenny(
         oppgaveId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): OppgaveIntern
 
@@ -79,6 +89,7 @@ class GosysOppgaveServiceImpl(
     private val oppgaveService: OppgaveService,
     private val saksbehandlerService: SaksbehandlerService,
     private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
+    private val pdltjeneserKlient: PdlTjenesterKlient,
 ) : GosysOppgaveService {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val cache =
@@ -91,12 +102,16 @@ class GosysOppgaveServiceImpl(
         Caffeine
             .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
-            .build<String, Map<String, String>> { _ -> saksbehandlerInfoDao.hentAlleSaksbehandlere().associate { it.ident to it.navn } }
+            .build<String, Map<String, String>> { _ ->
+                saksbehandlerInfoDao.hentAlleSaksbehandlere().associate {
+                    it.ident to it.navn
+                }
+            }
 
     private fun hentEnheterForSaksbehandler(
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         ident: String,
-    ): List<String> {
+    ): List<Enhetsnummer> {
         val saksbehandler = inTransaction { saksbehandlerService.hentKomplettSaksbehandler(ident) }
         return if (saksbehandler.kanSeOppgaveliste) {
             if (enhetsnr == null) {
@@ -112,7 +127,7 @@ class GosysOppgaveServiceImpl(
     override suspend fun hentOppgaver(
         saksbehandler: String?,
         tema: String?,
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave> {
@@ -134,6 +149,7 @@ class GosysOppgaveServiceImpl(
                     .map {
                         async {
                             gosysOppgaveKlient.hentOppgaver(
+                                aktoerId = null,
                                 saksbehandler = saksbehandler,
                                 tema = temaListe,
                                 enhetsnr = it,
@@ -149,9 +165,38 @@ class GosysOppgaveServiceImpl(
 
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $temaListe")
 
-        return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave() }
-            .filterForEnheter(Kontekst.get().AppUser)
+        return inTransaction {
+            gosysOppgaver.oppgaver
+                .map { it.tilGosysOppgave() }
+                .filterForEnheter(Kontekst.get().AppUser)
+        }
+    }
+
+    override suspend fun hentOppgaverForPerson(
+        foedselsnummer: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<GosysOppgave> {
+        val aktoerId =
+            pdltjeneserKlient.hentAktoerId(foedselsnummer)?.aktoerId
+                ?: throw IkkeFunnetException("AKTOER_ID_ER_NULL", "Klarte ikke hente aktørid for person")
+
+        val gosysOppgaver =
+            gosysOppgaveKlient.hentOppgaver(
+                aktoerId = aktoerId,
+                saksbehandler = null,
+                tema = emptyList(), // hent alle oppgaver, uavhengig av tema
+                enhetsnr = null,
+                harTildeling = null,
+                brukerTokenInfo = brukerTokenInfo,
+            )
+
+        logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) på person ${foedselsnummer.maskerFnr()}")
+
+        return inTransaction {
+            gosysOppgaver.oppgaver
+                .map { it.tilGosysOppgave() }
+                .filterForEnheter(Kontekst.get().AppUser)
+        }
     }
 
     override suspend fun hentJournalfoeringsoppgave(
@@ -160,9 +205,11 @@ class GosysOppgaveServiceImpl(
     ): List<GosysOppgave> {
         val gosysOppgaver = gosysOppgaveKlient.hentJournalfoeringsoppgave(journalpostId, brukerTokenInfo)
 
-        return gosysOppgaver.oppgaver
-            .map { it.tilGosysOppgave() }
-            .filterForEnheter(Kontekst.get().AppUser)
+        return inTransaction {
+            gosysOppgaver.oppgaver
+                .map { it.tilGosysOppgave() }
+                .filterForEnheter(Kontekst.get().AppUser)
+        }
     }
 
     private fun List<GosysOppgave>.filterForEnheter(user: User) =
@@ -182,12 +229,12 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         cache.getIfPresent(id) ?: gosysOppgaveKlient
             .hentOppgave(id, brukerTokenInfo)
-            .tilGosysOppgave()
+            .run { inTransaction { tilGosysOppgave() } }
             .also { cache.put(id, it) }
 
     override suspend fun flyttTilGjenny(
         oppgaveId: Long,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): OppgaveIntern {
         logger.info("Starter flytting av gosys-oppgave (id=$oppgaveId) til Gjenny")
@@ -204,15 +251,17 @@ class GosysOppgaveServiceImpl(
         }
 
         val nyOppgave =
-            oppgaveService.opprettOppgave(
-                referanse = gosysOppgave.journalpostId,
-                sakId = sakId,
-                kilde = OppgaveKilde.SAKSBEHANDLER,
-                type = OppgaveType.JOURNALFOERING,
-                merknad = gosysOppgave.beskrivelse,
-                frist = gosysOppgave.frist,
-                saksbehandler = brukerTokenInfo.ident(),
-            )
+            inTransaction {
+                oppgaveService.opprettOppgave(
+                    referanse = gosysOppgave.journalpostId,
+                    sakId = sakId,
+                    kilde = OppgaveKilde.SAKSBEHANDLER,
+                    type = OppgaveType.JOURNALFOERING,
+                    merknad = gosysOppgave.beskrivelse,
+                    frist = gosysOppgave.frist,
+                    saksbehandler = brukerTokenInfo.ident(),
+                )
+            }
 
         val feilregistrertOppgaveId =
             feilregistrer(
@@ -257,7 +306,7 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         gosysOppgaveKlient
             .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
-            .tilGosysOppgave()
+            .run { inTransaction { tilGosysOppgave() } }
 
     override suspend fun feilregistrer(
         oppgaveId: String,

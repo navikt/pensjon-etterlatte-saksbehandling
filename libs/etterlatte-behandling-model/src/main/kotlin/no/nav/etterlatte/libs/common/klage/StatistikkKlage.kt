@@ -19,6 +19,10 @@ enum class KlageHendelseType : EventnameHendelseType {
     FERDIGSTILT,
     KABAL_HENDELSE,
     AVBRUTT,
+    OPPDATERT_MOTTATT_DATO,
+    FATTET_VEDTAK,
+    UNDERKJENT,
+    ATTESTERT,
     ;
 
     override fun lagEventnameForType(): String = "KLAGE:${this.name}"

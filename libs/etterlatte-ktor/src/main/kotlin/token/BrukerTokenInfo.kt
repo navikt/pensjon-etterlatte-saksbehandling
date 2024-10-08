@@ -56,11 +56,13 @@ sealed class Systembruker(
     override fun kanEndreOppgaverFor(ident: String?) = true
 }
 
+@ConsistentCopyVisibility
 data class VanligSystembruker internal constructor(
     override val ident: String,
     override val jwtTokenClaims: JwtTokenClaims? = null,
 ) : Systembruker(ident, jwtTokenClaims)
 
+@ConsistentCopyVisibility
 data class HardkodaSystembruker private constructor(
     val omraade: Systembrukere,
 ) : Systembruker(ident = omraade.appName, jwtTokenClaims = tokenMedClaims(mapOf(Claims.idtyp to APP))) {
@@ -73,17 +75,24 @@ data class HardkodaSystembruker private constructor(
         val river = HardkodaSystembruker(Systembrukere.RIVER)
         val doedshendelse = HardkodaSystembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
+        val oppgave = HardkodaSystembruker(Systembrukere.OPPGAVE)
+        val opprettGrunnlag = HardkodaSystembruker(Systembrukere.OPPRETT_GRUNNLAG) // skal bort på sikt
+        val ryddeBeregning = HardkodaSystembruker(Systembrukere.BEREGNING)
     }
 
     enum class Systembrukere(
         val appName: String,
     ) {
+        OPPRETT_GRUNNLAG("opprettgrunnlag"),
         RIVER("river"),
         DOEDSHENDELSE("doedshendelse"),
         TESTDATA("testdata"),
+        OPPGAVE("oppgave"),
+        BEREGNING("beregning"),
     }
 }
 
+@ConsistentCopyVisibility
 data class Saksbehandler internal constructor(
     val accessToken: String,
     val ident: String,

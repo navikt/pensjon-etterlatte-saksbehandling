@@ -13,6 +13,7 @@ interface DistribusjonService {
         type: DistribusjonsType,
         tidspunkt: DistribusjonsTidspunktType,
         adresse: Adresse,
+        tvingSentralPrint: Boolean,
     ): BestillingsID
 }
 
@@ -26,6 +27,7 @@ internal class DistribusjonServiceImpl(
         type: DistribusjonsType,
         tidspunkt: DistribusjonsTidspunktType,
         adresse: Adresse,
+        tvingSentralPrint: Boolean,
     ): BestillingsID =
         runBlocking {
             val request =
@@ -45,6 +47,7 @@ internal class DistribusjonServiceImpl(
                         ),
                     distribusjonstidspunkt = tidspunkt,
                     dokumentProdApp = "etterlatte-brev-api",
+                    tvingSentralPrint = tvingSentralPrint,
                 )
 
             klient

@@ -3,6 +3,7 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  ITidligereFamiliepleier,
   IUtlandstilknytning,
   NyBehandlingRequest,
   ViderefoertOpphoer,
@@ -14,10 +15,12 @@ import { FoersteVirk, ISak } from '~shared/types/sak'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formatering/dato'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
-import { RedigertFamilieforhold } from '~shared/types/grunnlag'
+import { AnnenForelder, RedigertFamilieforhold } from '~shared/types/grunnlag'
 import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 import { JaNei } from '~shared/types/ISvar'
+
+import { ILand } from '~utils/kodeverk'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -103,20 +106,20 @@ export const lagreViderefoertOpphoer = async ({
   skalViderefoere,
   behandlingId,
   begrunnelse,
-  vilkaar,
+  vilkaarType,
   kravdato,
   opphoerstidspunkt,
 }: {
   skalViderefoere: JaNei | undefined
   behandlingId: string
   begrunnelse: string
-  vilkaar: string | undefined
+  vilkaarType: string | undefined
   kravdato: string | null | undefined
   opphoerstidspunkt: Date | null
 }): Promise<ApiResponse<ViderefoertOpphoer>> => {
   return apiClient.post(`/behandling/${behandlingId}/viderefoert-opphoer`, {
     skalViderefoere: skalViderefoere,
-    vilkaar: vilkaar,
+    vilkaarType: vilkaarType,
     begrunnelse: begrunnelse,
     kravdato: kravdato,
     dato: opphoerstidspunkt,
@@ -144,6 +147,23 @@ export const lagreBoddEllerArbeidetUtlandet = async (args: {
     boddArbeidetAvtaleland: args.boddArbeidetAvtaleland,
     vurdereAvoededsTrygdeavtale: args.vurdereAvoededsTrygdeavtale,
     skalSendeKravpakke: args.skalSendeKravpakke,
+  })
+}
+
+export const lagreTidligereFamiliepleier = async (args: {
+  behandlingId: string
+  svar: boolean
+  foedselsnummer?: string
+  startPleieforhold?: Date | null
+  opphoertPleieforhold?: Date | null
+  begrunnelse: string
+}): Promise<ApiResponse<ITidligereFamiliepleier>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/tidligere-familiepleier`, {
+    svar: args.svar,
+    foedselsnummer: args.foedselsnummer,
+    startPleieforhold: args.startPleieforhold,
+    opphoertPleieforhold: args.opphoertPleieforhold,
+    begrunnelse: args.begrunnelse,
   })
 }
 
@@ -192,4 +212,18 @@ export const hentBrevutfallOgEtterbetalingApi = async (
   behandlingId: string
 ): Promise<ApiResponse<BrevutfallOgEtterbetaling | null>> => {
   return apiClient.get(`/behandling/${behandlingId}/info/brevutfallogetterbetaling`)
+}
+export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> => apiClient.get<ILand[]>('/kodeverk/land') //TODO: verify path
+
+export const redigerAnnenForelder = async (args: {
+  behandlingId: string
+  annenForelder: AnnenForelder
+}): Promise<ApiResponse<void>> => {
+  return apiClient.put(`/behandling/${args.behandlingId}/annen-forelder`, {
+    ...args.annenForelder,
+  })
+}
+
+export const slettAnnenForelder = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
+  return apiClient.delete(`/behandling/${args.behandlingId}/annen-forelder`)
 }

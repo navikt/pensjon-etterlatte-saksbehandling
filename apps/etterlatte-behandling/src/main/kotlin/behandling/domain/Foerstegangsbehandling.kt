@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -34,6 +35,7 @@ data class Foerstegangsbehandling(
     override val kilde: Vedtaksloesning,
     override val sendeBrev: Boolean,
     override val opphoerFraOgMed: YearMonth? = null,
+    override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 
@@ -59,22 +61,29 @@ data class Foerstegangsbehandling(
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(utlandstilknytning = utlandstilknytning)
         }
 
-    override fun oppdaterVidereførtOpphoer(viderefoertOpphoer: ViderefoertOpphoer) =
+    override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer) =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer.dato)
         }
 
-    override fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) =
+    override fun oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet)
+        }
+
+    override fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(tidligereFamiliepleier = tidligereFamiliepleier)
         }
 
     override fun tilOpprettet(): Foerstegangsbehandling = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
 
     override fun tilVilkaarsvurdert(): Foerstegangsbehandling {
         if (!erFyltUt()) {
-            logger.info("Behandling ($id) må være fylt ut for å settes til vilkårsvurdert")
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha vurdert gyldig framsatt, " +
+                    "virkningstidspunkt og kommer bruker til gode for å settes til fattet vedtak",
+            )
         }
 
         return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
@@ -115,8 +124,10 @@ data class Foerstegangsbehandling(
 
     override fun tilFattetVedtak(): Foerstegangsbehandling {
         if (!erFyltUt()) {
-            logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
-            throw TilstandException.IkkeFyltUt
+            throw TilstandException.IkkeFyltUt(
+                "Behandling ($id) må ha vurdert gyldig framsatt, " +
+                    "virkningstidspunkt og kommer bruker til gode for å settes til fattet vedtak",
+            )
         }
 
         return hvisTilstandEr(
@@ -155,7 +166,10 @@ data class Foerstegangsbehandling(
         }
 
     override fun tilSamordnet() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING), BehandlingStatus.SAMORDNET) {
+        hvisTilstandEr(
+            listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING),
+            BehandlingStatus.SAMORDNET,
+        ) {
             endreTilStatus(it)
         }
 

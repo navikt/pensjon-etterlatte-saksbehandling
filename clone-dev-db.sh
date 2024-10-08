@@ -77,7 +77,6 @@ elif [[ -z "$LOCAL_PORT" ]]; then
     error "Local db port (-p) is required -- \n  Try \"$NAME --help\" for more information"
 fi
 
-
 NOW=$(date +%s)
 DUMP_FILE="${PROXY_DB}_$(date +%s).dump"
 DOCKER_HOST="host.docker.internal"
@@ -117,9 +116,13 @@ pg_dump \
   --dbname=$PROXY_DB \
    > $DUMP_FILE &
 
+# Wait for the background process to finish and capture its exit status
+wait $!
+PG_DUMP_EXIT_STATUS=$?
+
 ps_loader
 
-if [ $? -eq 0 ]; then
+if [ $PG_DUMP_EXIT_STATUS -eq 0 ]; then
   info "pg_dump was successful!"
 else
   rm $DUMP_FILE 2> /dev/null
@@ -142,9 +145,13 @@ pg_restore \
   --dbname=postgres \
   $DUMP_FILE &
 
+# Wait for the background process to finish and capture its exit status
+wait $!
+PG_RESTORE_EXIT_STATUS=$?
+
 ps_loader
 
-if [ $? -eq 0 ]; then
+if [ $PG_RESTORE_EXIT_STATUS -eq 0 ]; then
   info "pg_restore was successful!"
   info "Database cloning from dev-gcp completed!"
 else

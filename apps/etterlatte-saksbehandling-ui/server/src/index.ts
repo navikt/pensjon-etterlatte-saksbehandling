@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import path from 'path'
 import { ApiConfig, appConf, ClientConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
@@ -7,12 +7,12 @@ import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
 import prometheus from './monitoring/prometheus'
-import { kodeverkRouter } from './routers/kodeverkRouter'
 import { githubRouter } from './routers/githubRouter'
 import { unleashRouter } from './routers/unleashRouter'
 import { requestLoggerMiddleware } from './middleware/logging'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 import { selftestRouter } from './routers/selftestRouter'
+import { randomUUID } from 'crypto'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -31,6 +31,11 @@ app.use(['/health/isAlive', '/health/isReady'], (_: Request, res: Response) => {
 app.get('/metrics', async (_: Request, res: Response) => {
   res.set('Content-Type', prometheus.register.contentType)
   res.end(await prometheus.register.metrics())
+})
+
+app.get('/api*', (req: Request, _: Response, next: NextFunction) => {
+  req.headers['X-Correlation-ID'] = randomUUID()
+  next()
 })
 
 app.use('/api/logg', loggerRouter)
@@ -60,14 +65,7 @@ app.get(
 )
 
 app.use(authenticateUser) // Alle ruter etter denne er authenticated
-app.use('/api/kodeverk', kodeverkRouter)
 app.use('/api/github', githubRouter)
-
-app.use(
-  '/api/vilkaarsvurdering',
-  tokenMiddleware(ApiConfig.vilkaarsvurdering.scope),
-  proxy(ApiConfig.vilkaarsvurdering.url)
-)
 
 app.use(
   [
@@ -85,6 +83,9 @@ app.use(
     '/api/generellbehandling',
     '/api/sjekkliste',
     '/api/bosattutland',
+    '/api/kodeverk',
+    '/api/krr',
+    '/api/vilkaarsvurdering',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)

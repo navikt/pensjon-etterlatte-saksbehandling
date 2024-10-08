@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-behandling-model"))
+    implementation(project(":libs:etterlatte-oppgave-model"))
     implementation(libs.etterlatte.common)
 
     implementation(project(":libs:etterlatte-ktor"))
@@ -17,4 +18,5 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(testFixtures((project(":libs:saksbehandling-common"))))
 }

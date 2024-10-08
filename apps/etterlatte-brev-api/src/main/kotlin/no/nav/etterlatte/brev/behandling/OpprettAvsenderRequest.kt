@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.behandling
 
-import no.nav.etterlatte.brev.adresse.AvsenderRequest
+import no.nav.etterlatte.brev.AvsenderRequest
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -10,7 +11,7 @@ import no.nav.etterlatte.libs.ktor.token.VanligSystembruker
 fun opprettAvsenderRequest(
     bruker: BrukerTokenInfo,
     forenkletVedtak: ForenkletVedtak?,
-    enhet: String,
+    enhet: Enhetsnummer,
 ) = forenkletVedtak?.let {
     AvsenderRequest(
         saksbehandlerIdent = it.saksbehandlerIdent,

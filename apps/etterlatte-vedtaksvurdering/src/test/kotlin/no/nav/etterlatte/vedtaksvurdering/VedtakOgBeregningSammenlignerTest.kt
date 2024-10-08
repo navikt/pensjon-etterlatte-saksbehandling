@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
@@ -134,7 +135,7 @@ class VedtakOgBeregningSammenlignerTest {
         Vedtak(
             id = 1L,
             soeker = SOEKER_FOEDSELSNUMMER,
-            sakId = 1L,
+            sakId = sakId1,
             sakType = SakType.BARNEPENSJON,
             behandlingId = UUID.randomUUID(),
             status = VedtakStatus.FATTET_VEDTAK,
@@ -157,6 +158,7 @@ class VedtakOgBeregningSammenlignerTest {
                                     ),
                                 beloep = BigDecimal(1000),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                             Utbetalingsperiode(
                                 periode =
@@ -166,6 +168,7 @@ class VedtakOgBeregningSammenlignerTest {
                                     ),
                                 beloep = BigDecimal(2000),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                 ),

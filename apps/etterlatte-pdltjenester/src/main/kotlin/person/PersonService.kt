@@ -343,6 +343,24 @@ class PersonService(
         }
     }
 
+    suspend fun hentAktoerId(request: HentPdlIdentRequest): PdlIdentifikator.AktoerId =
+        pdlKlient.hentAktoerId(request).let { res ->
+            if (res.data?.hentIdenter?.identer == null) {
+                val pdlFeil = res.errors?.asFormatertFeil()
+                if (res.errors?.personIkkeFunnet() == true) {
+                    throw FantIkkePersonException("Fant ikke personen ${request.ident}")
+                } else {
+                    throw PdlForesporselFeilet(
+                        "Kunne ikke hente aktørid for ${request.ident} fra PDL: $pdlFeil",
+                    )
+                }
+            } else {
+                res.data.hentIdenter.identer
+                    .first { it.gruppe == PDLIdentGruppeTyper.AKTORID.navn && !it.historisk }
+                    .let { PdlIdentifikator.AktoerId(it.ident) }
+            }
+        }
+
     fun List<PdlResponseError>.asFormatertFeil() = this.joinToString(", ")
 
     fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }

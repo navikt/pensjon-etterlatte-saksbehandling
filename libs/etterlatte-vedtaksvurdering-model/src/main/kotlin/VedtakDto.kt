@@ -1,13 +1,16 @@
 package no.nav.etterlatte.libs.common.vedtak
 
+import Regelverk
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
@@ -83,19 +86,21 @@ data class Periode(
     val tom: YearMonth?,
 ) {
     init {
-        require(isNull(tom) || fom == tom || fom.isBefore(tom))
+        require(isNull(tom) || fom == tom || fom.isBefore(tom)) {
+            "Fom må vera før eller lik tom, men fom er $fom og tom er $tom"
+        }
     }
 }
 
 data class VedtakFattet(
     val ansvarligSaksbehandler: String,
-    val ansvarligEnhet: String,
+    val ansvarligEnhet: Enhetsnummer,
     val tidspunkt: Tidspunkt,
 )
 
 data class Attestasjon(
     val attestant: String,
-    val attesterendeEnhet: String,
+    val attesterendeEnhet: Enhetsnummer,
     val tidspunkt: Tidspunkt,
 )
 
@@ -108,6 +113,7 @@ data class Utbetalingsperiode(
     val periode: Periode,
     val beloep: BigDecimal?,
     val type: UtbetalingsperiodeType,
+    val regelverk: Regelverk?,
 )
 
 enum class UtbetalingsperiodeType {
@@ -148,7 +154,7 @@ data class VedtakSamordningPeriode(
 
 data class TilbakekrevingVedtakDto(
     val tilbakekrevingId: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val sakType: SakType,
     val soeker: Folkeregisteridentifikator,
     val tilbakekreving: ObjectNode,
@@ -156,12 +162,12 @@ data class TilbakekrevingVedtakDto(
 
 data class TilbakekrevingFattEllerAttesterVedtakDto(
     val tilbakekrevingId: UUID,
-    val enhet: String,
+    val enhet: Enhetsnummer,
 )
 
 data class TilbakekrevingVedtakLagretDto(
     val id: Long,
     val fattetAv: String,
-    val enhet: String,
+    val enhet: Enhetsnummer,
     val dato: LocalDate,
 )

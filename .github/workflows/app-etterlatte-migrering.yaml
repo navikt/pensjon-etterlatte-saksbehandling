@@ -26,6 +26,7 @@ on:
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-brev-model/**
       - gradle/libs.versions.toml
+      - "!**/test/**"
   pull_request:
     branches:
       - main
@@ -44,7 +45,7 @@ on:
       - gradle/libs.versions.toml
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:

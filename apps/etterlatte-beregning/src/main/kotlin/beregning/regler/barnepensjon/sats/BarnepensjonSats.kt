@@ -68,6 +68,23 @@ val harToAvdodeForeldre2024 =
         avdoedeForeldre.all { it == UKJENT_AVDOED || Folkeregisteridentifikator.isValid(it) } && avdoedeForeldre.size >= 2
     }
 
+val kunEnJuridiskForelder2024: Regel<BarnepensjonGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Finner om søker har kun en registrert juridisk forelder",
+        finnFaktum = BarnepensjonGrunnlag::kunEnJuridiskForelder,
+        finnFelt = { kunEnRegistrert -> kunEnRegistrert },
+    )
+
+val skalHaForeldreloesSats2024 =
+    RegelMeta(
+        gjelderFra = BP_2024_DATO,
+        beskrivelse = "Finner om barnet skal ha foreldreløssats",
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-SKAL-HA-FORELDRELOES-SATS"),
+    ) benytter harToAvdodeForeldre2024 og kunEnJuridiskForelder2024 med { harToAvdodeForeldre, kunEnJuridiskForelder ->
+        harToAvdodeForeldre || kunEnJuridiskForelder
+    }
+
 val prosentsatsFoersteBarnKonstant1967 =
     definerKonstant<BarnepensjonGrunnlag, Beregningstall>(
         gjelderFra = BP_1967_DATO,
@@ -155,13 +172,13 @@ val barnepensjonSatsRegel2024 =
     RegelMeta(
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Beregn barnepensjon etter 2024-regelverk",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET"),
-    ) benytter harToAvdodeForeldre2024 og beloepHvertBarnEnForelderAvdoed2024 og beloepHvertBarnToForeldreAvdoed2024 med {
-            harToAvdodeForeldre2024,
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET", versjon = "2"),
+    ) benytter skalHaForeldreloesSats2024 og beloepHvertBarnEnForelderAvdoed2024 og beloepHvertBarnToForeldreAvdoed2024 med {
+            skalHaForeldreloesSats,
             beloepEnAvdoedForelder,
             beloepToAvdoedeForeldre,
         ->
-        if (harToAvdodeForeldre2024) {
+        if (skalHaForeldreloesSats) {
             beloepToAvdoedeForeldre
         } else {
             beloepEnAvdoedForelder

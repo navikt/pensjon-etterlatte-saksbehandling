@@ -3,6 +3,8 @@ package no.nav.etterlatte.statistikk.database
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.behandling.tilSakId
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -135,7 +137,7 @@ class SakRepositoryTest(
         ) = SakRad(
             id = -2,
             referanseId = referanseId,
-            sakId = 1337,
+            sakId = tilSakId(1337),
             mottattTidspunkt = Tidspunkt.now(),
             registrertTidspunkt = Tidspunkt.now(),
             ferdigbehandletTidspunkt = null,
@@ -154,7 +156,7 @@ class SakRepositoryTest(
             vedtakLoependeFom = LocalDate.now(),
             vedtakLoependeTom = LocalDate.now().plusYears(3),
             saksbehandler = "en saksbehandler",
-            ansvarligEnhet = "en enhet",
+            ansvarligEnhet = Enheter.defaultEnhet.enhetNr,
             soeknadFormat = null,
             sakUtland = SakUtland.NASJONAL,
             beregning = beregning,

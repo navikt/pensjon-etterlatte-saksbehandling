@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -72,11 +73,9 @@ internal fun Route.klageRoutes(
                 val klage =
                     inTransaction {
                         klageService.hentKlage(klageId)
-                    }
-                when (klage) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(klage)
-                }
+                    } ?: throw GenerellIkkeFunnetException()
+
+                call.respond(klage)
             }
 
             put("formkrav") {
@@ -141,6 +140,18 @@ internal fun Route.klageRoutes(
                 }
             }
 
+            put("mottattdato") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<OppdaterMottattDatoRequest> {
+                        val klage =
+                            inTransaction {
+                                klageService.oppdaterMottattDato(klageId, it.parseMottattDato(), saksbehandler)
+                            }
+                        call.respond(klage)
+                    }
+                }
+            }
+
             post("avbryt") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     medBody<AvbrytKlageDto> { avbrytKlageDto ->
@@ -200,6 +211,12 @@ internal fun Route.klageRoutes(
             call.respond(klager)
         }
     }
+}
+
+data class OppdaterMottattDatoRequest(
+    val mottattDato: String,
+) {
+    fun parseMottattDato(): LocalDate = Tidspunkt(OffsetDateTime.parse(mottattDato).toInstant()).toNorskLocalDate()
 }
 
 private fun sjekkStoetterUtfallHvisAvvist(

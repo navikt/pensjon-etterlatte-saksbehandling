@@ -8,6 +8,8 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceTest
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
@@ -18,8 +20,6 @@ import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
-import no.nav.etterlatte.config.BeregningFeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository.hentGjeldendeGrunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -57,21 +57,21 @@ class ReguleringTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val anvendtTrygdetidRepository =
+        mockk<AnvendtTrygdetidRepository>().also {
+            every { it.lagreAnvendtTrygdetid(any(), any()) } returns 1
+        }
     private lateinit var beregnBarnepensjonService: BeregnBarnepensjonService
 
     @BeforeEach
     fun setup() {
-        val featureToggleService = DummyFeatureToggleService()
-
-        featureToggleService.settBryter(BeregningFeatureToggle.Foreldreloes, false)
-
         beregnBarnepensjonService =
             BeregnBarnepensjonService(
                 grunnlagKlient = grunnlagKlient,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlient,
                 beregningsGrunnlagService = beregningsGrunnlagService,
                 trygdetidKlient = trygdetidKlient,
-                featureToggleService = featureToggleService,
+                anvendtTrygdetidRepository = anvendtTrygdetidRepository,
             )
     }
 
@@ -192,7 +192,7 @@ class ReguleringTest {
                         },
                 ),
             ),
-        institusjonsoppholdBeregningsgrunnlag =
+        institusjonsopphold =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
@@ -201,7 +201,7 @@ class ReguleringTest {
                 ),
             ),
         beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
-        begegningsmetodeFlereAvdoede =
+        beregningsMetodeFlereAvdoede =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 1, 1),
@@ -223,7 +223,7 @@ class ReguleringTest {
         vedtaksloesning: Vedtaksloesning = Vedtaksloesning.GJENNY,
     ) = mockk<DetaljertBehandling>().apply {
         every { id } returns UUID.randomUUID()
-        every { sak } returns 1
+        every { sak } returns sakId1
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         every { kilde } returns vedtaksloesning

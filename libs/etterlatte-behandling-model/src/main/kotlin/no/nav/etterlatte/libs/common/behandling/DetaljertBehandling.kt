@@ -1,12 +1,13 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.YearMonth
 import java.util.UUID
 
 data class DetaljertBehandling(
     val id: UUID,
-    val sak: Long,
+    val sak: SakId,
     val sakType: SakType,
     val soeker: String,
     val status: BehandlingStatus,
@@ -20,6 +21,7 @@ data class DetaljertBehandling(
     val kilde: Vedtaksloesning,
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth?,
+    val relatertBehandlingId: String?,
 )
 
 fun DetaljertBehandling.virkningstidspunkt() =

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.firstOrNull
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -23,7 +24,7 @@ class OpplysningDao(
 
     data class GrunnlagHendelse(
         val opplysning: Grunnlagsopplysning<JsonNode>,
-        val sakId: Long,
+        val sakId: SakId,
         val hendelseNummer: Long,
     )
 
@@ -51,7 +52,7 @@ class OpplysningDao(
             hendelseNummer = getLong("hendelsenummer"),
         )
 
-    fun hentAlleGrunnlagForSak(sakId: Long): List<GrunnlagHendelse> =
+    fun hentAlleGrunnlagForSak(sakId: SakId): List<GrunnlagHendelse> =
         connection.use {
             it
                 .prepareStatement(
@@ -106,7 +107,7 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> =
+    fun finnHendelserIGrunnlag(sakId: SakId): List<GrunnlagHendelse> =
         connection.use {
             it
                 .prepareStatement(
@@ -128,7 +129,7 @@ class OpplysningDao(
         }
 
     fun finnNyesteGrunnlagForSak(
-        sakId: Long,
+        sakId: SakId,
         opplysningType: Opplysningstype,
     ): GrunnlagHendelse? =
         connection.use {
@@ -178,7 +179,7 @@ class OpplysningDao(
         }
 
     fun leggOpplysningTilGrunnlag(
-        sakId: Long,
+        sakId: SakId,
         behandlingsopplysning: Grunnlagsopplysning<JsonNode>,
         fnr: Folkeregisteridentifikator? = null,
     ): Long =
@@ -205,7 +206,7 @@ class OpplysningDao(
 
     fun oppdaterVersjonForBehandling(
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         hendelsenummer: Long,
     ) = connection.use {
         it
@@ -248,7 +249,7 @@ class OpplysningDao(
                 .toList { asGrunnlagshendelse() }
         }
 
-    fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<Long> =
+    fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<SakId> =
         connection.use {
             it
                 .prepareStatement(
@@ -285,7 +286,7 @@ class OpplysningDao(
 
 data class BehandlingGrunnlagVersjon(
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val hendelsenummer: Long,
     val laast: Boolean,
 )

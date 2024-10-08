@@ -12,15 +12,16 @@ spec:
     sqlInstances:
       - type: POSTGRES_14
         name: etterlatte-tidshendelser
+        tier: db-g1-small
         databases:
           - name: tidshendelser
             envVarPrefix: DB
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
   prometheus:
     enabled: true
     path: /metrics

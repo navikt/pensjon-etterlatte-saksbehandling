@@ -34,6 +34,7 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14
+        tier: db-g1-small
         databases:
           - name: etterlatte-brev
             envVarPrefix: DB
@@ -91,16 +92,12 @@ spec:
       value: https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1
     - name: DOKDIST_SCOPE
       value: api://dev-fss.teamdokumenthandtering.saf/.default
-    - name: NAVANSATT_URL
-      value: https://navansatt.dev-fss-pub.nais.io
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: REGOPPSLAG_SCOPE
       value: api://dev-fss.teamdokumenthandtering.regoppslag/.default
     - name: REGOPPSLAG_URL
       value: https://regoppslag.dev-fss-pub.nais.io
-    - name: NAVANSATT_OUTBOUND_SCOPE
-      value: api://dev-fss.teampensjon.navansatt/.default
     - name: CLAMAV_ENDPOINT_URL
       value: http://clamav.nais-system.svc.cluster.local
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
@@ -148,7 +145,6 @@ spec:
         - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: dokdistfordeling.dev-fss-pub.nais.io
         - host: data.brreg.no
-        - host: navansatt.dev-fss-pub.nais.io
         - host: pensjon-brevbaker.intern.dev.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
@@ -157,6 +153,7 @@ spec:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling
         - application: etterlatte-testdata-behandler
+        - application: etterlatte-brev-kafka
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp

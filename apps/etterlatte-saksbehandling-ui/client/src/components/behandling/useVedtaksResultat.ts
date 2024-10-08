@@ -37,6 +37,6 @@ export function formaterVedtaksResultat(
     case 'endring':
       return `Endring fra ${virkningsdatoFormatert}`
     case null:
-      return null
+      return 'Mangler vedtak resultat'
   }
 }

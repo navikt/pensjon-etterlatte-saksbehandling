@@ -11,6 +11,8 @@ export interface IBrev {
   mottaker: Mottaker
   opprettet: string
   brevtype: Brevtype
+  journalpostId?: string
+  bestillingId?: string
 }
 
 export interface Mottaker {
@@ -20,6 +22,7 @@ export interface Mottaker {
   }
   orgnummer?: string
   adresse: Adresse
+  tvingSentralPrint: boolean
 }
 
 export interface Adresse {

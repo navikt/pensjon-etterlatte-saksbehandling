@@ -9,10 +9,12 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -53,7 +55,7 @@ inline val PipelineContext<*, ApplicationCall>.behandlingId: UUID
             "BehandlingId er ikke i path params",
         )
 
-inline val PipelineContext<*, ApplicationCall>.sakId: Long
+inline val PipelineContext<*, ApplicationCall>.sakId: SakId
     get() =
         call.parameters[SAKID_CALL_PARAMETER]?.toLong() ?: throw NullPointerException(
             "SakId er ikke i path params",
@@ -89,7 +91,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     skrivetilgang: Boolean = false,
     onSuccess: (id: UUID) -> Unit,
-) = withParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
+) = withUuidParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilBehandling =
@@ -98,7 +100,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
                 onSuccess(behandlingId)
             } else {
                 logger.info("Har ikke tilgang til behandling")
-                call.respond(HttpStatusCode.NotFound)
+                throw GenerellIkkeFunnetException()
             }
         }
 
@@ -109,7 +111,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
 suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     sakTilgangsSjekk: SakTilgangsSjekk,
     skrivetilgang: Boolean = false,
-    onSuccess: (id: Long) -> Unit,
+    onSuccess: (id: SakId) -> Unit,
 ) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
@@ -118,7 +120,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
                 onSuccess(sakId)
             } else {
                 logger.info("Har ikke tilgang til sak")
-                call.respond(HttpStatusCode.NotFound)
+                throw GenerellIkkeFunnetException()
             }
         }
 
@@ -145,7 +147,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
                 onSuccess(foedselsnummer)
             } else {
                 logger.info("Har ikke tilgang til person")
-                call.respond(HttpStatusCode.NotFound)
+                throw GenerellIkkeFunnetException()
             }
         }
 
@@ -165,15 +167,15 @@ suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody
     onSuccess(body)
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: () -> Unit) {
-    when (brukerTokenInfo) {
+inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: (systemBruker: Systembruker) -> Unit) {
+    when (val bruker = brukerTokenInfo) {
         is Systembruker -> {
-            onSuccess()
+            onSuccess(bruker)
         }
 
         else -> {
             logger.debug("Endepunktet er ikke tilgjengeliggjort for saksbehandler, avviser forespørselen")
-            call.respond(HttpStatusCode.NotFound)
+            throw GenerellIkkeFunnetException()
         }
     }
 }
@@ -191,7 +193,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(onSucces
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
+suspend inline fun PipelineContext<*, ApplicationCall>.withUuidParam(
     param: String,
     onSuccess: (value: UUID) -> Unit,
 ) {

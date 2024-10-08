@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
@@ -34,6 +35,7 @@ data class AvkortetBeregningsperiode(
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val sanksjon: SanksjonertYtelse?,
+    val institusjon: InstitusjonsoppholdBeregningsgrunnlag?,
 )
 
 data class Beregningsperiode(
@@ -48,6 +50,7 @@ data class Beregningsperiode(
     val institusjon: Boolean,
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
+    val avdoedeForeldre: List<String?>? = null,
 )
 
 fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {

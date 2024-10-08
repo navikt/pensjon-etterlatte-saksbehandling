@@ -17,8 +17,9 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { isPending } from '~shared/api/apiUtils'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { isValid, parse } from 'date-fns'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 const isValidDateOfDeath = (date?: Date) => {
   if (date) {
@@ -31,6 +32,13 @@ const isValidDateOfDeath = (date?: Date) => {
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const avdoede = usePersonopplysningerOmsAvdoede()
@@ -41,7 +49,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   const [hentet, hent] = useApiCall(hentAktivitetspliktOppfolging)
 
   const configContext = useContext(ConfigContext)
-  const visTidslinje = useFeatureEnabledMedDefault('aktivitetsplikt-tidslinje', false)
 
   useEffect(() => {
     hent({ behandlingId: behandling.id }, (aktivitetOppfolging) => {
@@ -87,15 +94,13 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </BodyLong>
         </TekstWrapper>
 
-        {visTidslinje && isValidDateOfDeath(avdoedesDoedsdato!!) && (
+        {isValidDateOfDeath(avdoedesDoedsdato!!) && (
           <AktivitetspliktTidslinje behandling={behandling} doedsdato={avdoedesDoedsdato!!} />
         )}
-        {visTidslinje && (
-          <AktivitetspliktVurdering
-            behandling={behandling}
-            resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
-          />
-        )}
+        <AktivitetspliktVurdering
+          behandling={behandling}
+          resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
+        />
 
         {aktivitetOppfolging && (
           <div>
@@ -139,6 +144,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </Box>
           <Button
             variant="secondary"
+            disabled={!redigerbar}
             size="small"
             as="a"
             href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
@@ -183,6 +189,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           <Button
             variant="secondary"
             size="small"
+            disabled={!redigerbar}
             as="a"
             href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
             target="_blank"

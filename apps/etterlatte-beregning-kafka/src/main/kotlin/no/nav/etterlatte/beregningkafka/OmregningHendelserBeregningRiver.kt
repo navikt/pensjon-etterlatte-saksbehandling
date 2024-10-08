@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregningkafka
 
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
@@ -11,26 +10,20 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
-import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
-import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
-import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
-import no.nav.etterlatte.rapidsandrivers.behandlingId
-import no.nav.etterlatte.rapidsandrivers.dato
+import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import tidspunkt.erEtter
 import tidspunkt.erFoerEllerPaa
@@ -47,32 +40,33 @@ internal class OmregningHendelserBeregningRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.TRYGDETID_KOPIERT) {
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
-            validate { it.requireKey(SAK_TYPE) }
+        initialiserRiver(rapidsConnection, OmregningHendelseType.TRYGDETID_KOPIERT) {
             validate { it.rejectKey(BEREGNING_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
-            validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
-            validate { it.requireKey(DATO_KEY) }
+            validate { it.requireKey(OmregningDataPacket.BEHANDLING_ID) }
+            validate { it.requireKey(OmregningDataPacket.FORRIGE_BEHANDLING_ID) }
+            validate { it.requireKey(OmregningDataPacket.SAK_TYPE) }
+            validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
         }
     }
 
-    override fun kontekst() = Kontekst.REGULERING
+    override fun kontekst() = Kontekst.OMREGNING
 
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
     ) {
         logger.info("Mottatt omregninghendelse")
-        val behandlingId = packet.behandlingId
-        val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
-        val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
+        val omregningData = packet.omregningData
+        val behandlingId = omregningData.hentBehandlingId()
+        val behandlingViOmregnerFra = omregningData.hentForrigeBehandlingid()
+        val sakType = omregningData.hentSakType()
         runBlocking {
-            val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra, packet.dato)
+            val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra)
             packet[BEREGNING_KEY] = beregning.beregning
             sendMedInformasjonTilKontrollsjekking(beregning, packet)
         }
-        packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
+        packet.setEventNameForHendelseType(OmregningHendelseType.BEREGNA)
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert omregningshendelse")
     }
@@ -81,7 +75,6 @@ internal class OmregningHendelserBeregningRiver(
         sakType: SakType,
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,
-        dato: LocalDate,
     ): BeregningOgAvkorting {
         val g = beregningService.hentGrunnbeloep()
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
@@ -100,7 +93,8 @@ internal class OmregningHendelserBeregningRiver(
                 beregningService
                     .hentAvkorting(behandlingViOmregnerFra)
                     .takeIf { it.status == HttpStatusCode.OK }
-                    ?.body<AvkortingDto>() ?: throw IllegalStateException("Forrige behandling $behandlingViOmregnerFra mangler avkorting")
+                    ?.body<AvkortingDto>()
+                    ?: throw IllegalStateException("Forrige behandling $behandlingViOmregnerFra mangler avkorting")
             BeregningOgAvkorting(
                 beregning = beregning,
                 forrigeBeregning = forrigeBeregning,
@@ -121,8 +115,9 @@ internal class OmregningHendelserBeregningRiver(
         beregning: BeregningOgAvkorting,
         packet: JsonMessage,
     ) {
+        val dato = packet.omregningData.hentFraDato()
         val forrige =
-            requireNotNull(beregning.forrigeBeregning.beregningsperioder.paaDato(packet.dato))
+            requireNotNull(beregning.forrigeBeregning.beregningsperioder.paaDato(dato))
                 .let {
                     Pair(it.utbetaltBeloep, it.grunnbelop)
                 }.also {
@@ -130,7 +125,7 @@ internal class OmregningHendelserBeregningRiver(
                     packet[ReguleringEvents.BEREGNING_G_FOER] = it.second
                 }
         val naavaerende =
-            requireNotNull(beregning.beregning.beregningsperioder.paaDato(packet.dato))
+            requireNotNull(beregning.beregning.beregningsperioder.paaDato(dato))
                 .let {
                     Pair(it.utbetaltBeloep, it.grunnbelop)
                 }.also {
@@ -140,10 +135,10 @@ internal class OmregningHendelserBeregningRiver(
         packet[ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR] =
             BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first))
 
-        beregning.forrigeAvkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
+        beregning.forrigeAvkorting?.avkortetYtelse?.paaDato(dato)?.let {
             packet[AVKORTING_FOER] = it.avkortingsbeloep
         }
-        beregning.avkorting?.avkortetYtelse?.paaDato(packet.dato)?.let {
+        beregning.avkorting?.avkortetYtelse?.paaDato(dato)?.let {
             packet[AVKORTING_ETTER] = it.avkortingsbeloep
         }
     }

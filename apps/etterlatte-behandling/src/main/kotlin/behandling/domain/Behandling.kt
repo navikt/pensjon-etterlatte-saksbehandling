@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.behandling.BehandlingSammendrag
 import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVKORTET
@@ -22,8 +22,11 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.Logger
@@ -32,10 +35,20 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-internal sealed class TilstandException : IllegalStateException() {
-    internal object UgyldigTilstand : TilstandException()
+internal sealed class TilstandException(
+    open val detail: String,
+) : Exception(detail) {
+    internal class UgyldigTilstand(
+        override val detail: String,
+    ) : InternfeilException(detail)
 
-    internal object IkkeFyltUt : TilstandException()
+    internal class IkkeFyltUt(
+        override val detail: String,
+    ) : UgyldigForespoerselException("BEHANDLING_ER_IKKE_FYLT_UT", detail)
+
+    internal class KanIkkeRedigere(
+        override val detail: String,
+    ) : UgyldigForespoerselException("BEHANDLING_KAN_IKKE_REDIGERES", detail)
 }
 
 sealed class Behandling {
@@ -52,6 +65,7 @@ sealed class Behandling {
     abstract val kilde: Vedtaksloesning
     abstract val sendeBrev: Boolean
     abstract val opphoerFraOgMed: YearMonth?
+    abstract val tidligereFamiliepleier: TidligereFamiliepleier?
 
     open val relatertBehandlingId: String? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
@@ -93,7 +107,7 @@ sealed class Behandling {
                 "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt.",
         )
 
-    open fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling =
+    open fun oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere bodd eller arbeidet utlandet på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av bodd eller arbeidet utlandet.",
@@ -105,18 +119,23 @@ sealed class Behandling {
                 "Denne behandlingstypen støtter ikke oppdatering av utlandstilknyting.",
         )
 
-    open fun oppdaterVidereførtOpphoer(viderefoertOpphoer: ViderefoertOpphoer): Behandling =
+    open fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere videreført opphør på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av videreført opphør.",
+        )
+
+    open fun oppdaterTidligereFamiliepleier(tidligereFamililiepleier: TidligereFamiliepleier): Behandling =
+        throw NotImplementedError(
+            "Kan ikke oppdatere tidligere famililiepleier på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av tidligere famililiepleier.",
         )
 
     protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {
         if (kanRedigeres) {
             return block()
         } else {
-            logger.info("behandling ($id) med status $status kan ikke redigeres")
-            throw TilstandException.UgyldigTilstand
+            throw TilstandException.KanIkkeRedigere("behandling ($id) med status $status kan ikke redigeres")
         }
     }
 
@@ -128,11 +147,10 @@ sealed class Behandling {
         if (status == behandlingStatus) {
             return block(endreTilStatus)
         } else {
-            logger.error(
+            throw TilstandException.UgyldigTilstand(
                 "Ugyldig operasjon på behandling ($id) med status $status, prøver å endre til status ${endreTilStatus.name}." +
                     " Forventet status er ${behandlingStatus.name}",
             )
-            throw TilstandException.UgyldigTilstand
         }
     }
 
@@ -144,11 +162,10 @@ sealed class Behandling {
         if (status in behandlingStatuser) {
             return block(endreTilStatus)
         } else {
-            logger.error(
+            throw TilstandException.UgyldigTilstand(
                 "Ugyldig operasjon på behandling ($id) med status $status, prøver å endre til status ${endreTilStatus.name}." +
                     " Forventet statuser er ${behandlingStatuser.joinToString(",")}",
             )
-            throw TilstandException.UgyldigTilstand
         }
     }
 
@@ -228,6 +245,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         kilde = kilde,
         sendeBrev = sendeBrev,
         opphoerFraOgMed = opphoerFraOgMed,
+        relatertBehandlingId = relatertBehandlingId,
     )
 
 fun Behandling.toBehandlingSammendrag() =

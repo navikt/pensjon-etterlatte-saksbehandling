@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
@@ -33,12 +34,12 @@ class BrevdistribuererTest {
 
     @Test
     fun `Distribusjon fungerer som forventet`() {
-        val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.MANUELL)
+        val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.REDIGERBAR)
         val journalpostId = "1"
 
         every { db.hentBrev(any()) } returns brev
         every { db.hentJournalpostId(any()) } returns journalpostId
-        every { distribusjonService.distribuerJournalpost(any(), any(), any(), any(), any()) } returns "123"
+        every { distribusjonService.distribuerJournalpost(any(), any(), any(), any(), any(), any()) } returns "123"
 
         val bestillingsID = brevdistribuerer.distribuer(brev.id)
         bestillingsID shouldBe "123"
@@ -52,13 +53,14 @@ class BrevdistribuererTest {
                 DistribusjonsType.ANNET,
                 DistribusjonsTidspunktType.KJERNETID,
                 brev.mottaker.adresse,
+                false,
             )
         }
     }
 
     @Test
     fun `Distribusjon avbrytes hvis journalpostId mangler`() {
-        val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.MANUELL)
+        val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.REDIGERBAR)
 
         every { db.hentBrev(any()) } returns brev
         every { db.hentJournalpostId(any()) } returns null
@@ -80,7 +82,7 @@ class BrevdistribuererTest {
         names = ["JOURNALFOERT"],
     )
     fun `Distribusjon avbrytes ved feil status`(status: Status) {
-        val brev = opprettBrev(status, BrevProsessType.MANUELL)
+        val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
 
         every { db.hentBrev(any()) } returns brev
 
@@ -98,7 +100,7 @@ class BrevdistribuererTest {
         prosessType: BrevProsessType,
     ) = Brev(
         id = Random.nextLong(10000),
-        sakId = Random.nextLong(10000),
+        sakId = randomSakId(),
         behandlingId = null,
         tittel = null,
         spraak = Spraak.NB,
@@ -109,6 +111,7 @@ class BrevdistribuererTest {
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
         brevtype = Brevtype.MANUELT,
+        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
     private fun opprettMottaker() =

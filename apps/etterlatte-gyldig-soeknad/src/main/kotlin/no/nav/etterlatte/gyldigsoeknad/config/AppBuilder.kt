@@ -10,6 +10,7 @@ import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.DokarkivKlient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
+import no.nav.etterlatte.inntektsjustering.JournalfoerInntektsjusteringService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
@@ -32,7 +33,17 @@ class AppBuilder(
                 httpClient(EnvKey.DOKARKIV_SCOPE),
                 env.requireEnvValue(DOKARKIV_URL),
             ),
-            PdfGeneratorKlient(httpClient(), env.requireEnvValue(PDFGEN_URL)),
+            PdfGeneratorKlient(httpClient(), "${env.requireEnvValue(PDFGEN_URL)}/eypdfgen"),
+        )
+    }
+
+    val journalfoerInntektsjusteringService: JournalfoerInntektsjusteringService by lazy {
+        JournalfoerInntektsjusteringService(
+            DokarkivKlient(
+                httpClient(EnvKey.DOKARKIV_SCOPE),
+                env.requireEnvValue(DOKARKIV_URL),
+            ),
+            PdfGeneratorKlient(httpClient(), "${env.requireEnvValue(PDFGEN_URL)}/inntektsjustering"),
         )
     }
 

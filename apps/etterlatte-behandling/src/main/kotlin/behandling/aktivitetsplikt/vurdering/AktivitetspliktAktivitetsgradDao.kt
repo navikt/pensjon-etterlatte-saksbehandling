@@ -8,7 +8,9 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.singleOrNull
+import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -19,17 +21,21 @@ class AktivitetspliktAktivitetsgradDao(
 ) {
     fun opprettAktivitetsgrad(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
-        sakId: Long,
+        sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
     ) = connectionAutoclosing.hentConnection {
+        check(oppgaveId != null || behandlingId != null) {
+            "Kan ikke opprette aktivitetsgrad som ikke er koblet på en behandling eller oppgave"
+        }
+
         with(it) {
             val stmt =
                 prepareStatement(
                     """
-                        INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimMargin(),
                 )
             stmt.setObject(1, UUID.randomUUID())
@@ -38,9 +44,10 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(4, oppgaveId)
             stmt.setString(5, aktivitetsgrad.aktivitetsgrad.name)
             stmt.setDate(6, Date.valueOf(aktivitetsgrad.fom))
-            stmt.setString(7, kilde.toJson())
+            stmt.setDate(7, aktivitetsgrad.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(8, kilde.toJson())
-            stmt.setString(9, aktivitetsgrad.beskrivelse)
+            stmt.setString(9, kilde.toJson())
+            stmt.setString(10, aktivitetsgrad.beskrivelse)
 
             stmt.executeUpdate()
         }
@@ -56,71 +63,86 @@ class AktivitetspliktAktivitetsgradDao(
                 prepareStatement(
                     """
                         UPDATE aktivitetsplikt_aktivitetsgrad
-                        SET  aktivitetsgrad = ?, fom = ?, endret = ?, beskrivelse = ? 
+                        SET  aktivitetsgrad = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ? 
                         WHERE id = ? AND behandling_id = ?
                     """.trimMargin(),
                 )
 
             stmt.setString(1, aktivitetsgrad.aktivitetsgrad.name)
             stmt.setDate(2, Date.valueOf(aktivitetsgrad.fom))
-            stmt.setString(3, kilde.toJson())
-            stmt.setString(4, aktivitetsgrad.beskrivelse)
-            stmt.setObject(5, requireNotNull(aktivitetsgrad.id))
-            stmt.setObject(6, behandlingId)
+            stmt.setDate(3, aktivitetsgrad.tom?.let { tom -> Date.valueOf(tom) })
+            stmt.setString(4, kilde.toJson())
+            stmt.setString(5, aktivitetsgrad.beskrivelse)
+            stmt.setObject(6, requireNotNull(aktivitetsgrad.id))
+            stmt.setObject(7, behandlingId)
 
             stmt.executeUpdate()
         }
     }
 
-    fun hentAktivitetsgradForOppgave(oppgaveId: UUID): AktivitetspliktAktivitetsgrad? =
+    fun hentAktivitetsgradForOppgave(oppgaveId: UUID): List<AktivitetspliktAktivitetsgrad> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse
+                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_aktivitetsgrad
                         WHERE oppgave_id = ?
+                        ORDER BY fom ASC NULLS FIRST
                         """.trimMargin(),
                     )
                 stmt.setObject(1, oppgaveId)
 
-                stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
+                stmt.executeQuery().toList { toAktivitetsgrad() }
             }
         }
 
-    fun hentNyesteAktivitetsgrad(sakId: Long): AktivitetspliktAktivitetsgrad? =
+    fun hentNyesteAktivitetsgrad(sakId: SakId): List<AktivitetspliktAktivitetsgrad> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse
-                        FROM aktivitetsplikt_aktivitetsgrad
+                        SELECT behandling_id, oppgave_id FROM aktivitetsplikt_aktivitetsgrad
                         WHERE sak_id = ?
-                        ORDER BY endret::jsonb->>'tidspunkt' DESC
+                        ORDER BY endret::jsonb ->> 'tidspunkt' DESC
                         LIMIT 1
-                        """.trimMargin(),
+                        """.trimIndent(),
                     )
                 stmt.setLong(1, sakId)
-                stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
+
+                val (behandlingId, oppgaveId) =
+                    stmt.executeQuery().singleOrNull {
+                        getString("behandling_id") to getString("oppgave_id")
+                    } ?: return@hentConnection emptyList()
+
+                if (behandlingId != null) {
+                    hentAktivitetsgradForBehandling(UUID.fromString(behandlingId))
+                } else {
+                    requireNotNull(oppgaveId) {
+                        "Har en vurdering av aktivitet som ikke er knyttet til en oppgave eller en behandling"
+                    }
+                    hentAktivitetsgradForOppgave(UUID.fromString(oppgaveId))
+                }
             }
         }
 
-    fun hentAktivitetsgradForBehandling(behandlingId: UUID): AktivitetspliktAktivitetsgrad? =
+    fun hentAktivitetsgradForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitetsgrad> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse
+                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_aktivitetsgrad
                         WHERE behandling_id = ?
+                        ORDER BY fom ASC NULLS FIRST
                         """.trimMargin(),
                     )
                 stmt.setObject(1, behandlingId)
 
-                stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
+                stmt.executeQuery().toList { toAktivitetsgrad() }
             }
         }
 
@@ -132,8 +154,8 @@ class AktivitetspliktAktivitetsgradDao(
             val stmt =
                 prepareStatement(
                     """
-                        INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse) 
-                        SELECT gen_random_uuid(), sak_id, ?, aktivitetsgrad, fom, opprettet, endret, beskrivelse
+                        INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse) 
+                        SELECT gen_random_uuid(), sak_id, ?, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_aktivitetsgrad
                         WHERE id = ?
                     """.trimMargin(),
@@ -172,6 +194,7 @@ class AktivitetspliktAktivitetsgradDao(
             oppgaveId = getString("oppgave_id")?.let { UUID.fromString(it) },
             aktivitetsgrad = AktivitetspliktAktivitetsgradType.valueOf(getString("aktivitetsgrad")),
             fom = getDate("fom").toLocalDate(),
+            tom = getDate("tom")?.toLocalDate(),
             opprettet = objectMapper.readValue(getString("opprettet")),
             endret = objectMapper.readValue(getString("endret")),
             beskrivelse = getString("beskrivelse"),
@@ -180,11 +203,12 @@ class AktivitetspliktAktivitetsgradDao(
 
 data class AktivitetspliktAktivitetsgrad(
     val id: UUID,
-    val sakId: Long,
+    val sakId: SakId,
     val behandlingId: UUID? = null,
     val oppgaveId: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,
     val fom: LocalDate,
+    val tom: LocalDate?,
     override val opprettet: Grunnlagsopplysning.Kilde,
     val endret: Grunnlagsopplysning.Kilde?,
     val beskrivelse: String,
@@ -198,7 +222,7 @@ data class AktivitetspliktAktivitetsgrad(
                     AktivitetspliktAktivitetsgradType.AKTIVITET_100 -> VurdertAktivitetsgrad.AKTIVITET_100
                 },
             fom = this.fom,
-            tom = null,
+            tom = this.tom,
         )
 }
 
@@ -206,6 +230,7 @@ data class LagreAktivitetspliktAktivitetsgrad(
     val id: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,
     val fom: LocalDate = LocalDate.now(),
+    val tom: LocalDate? = null,
     val beskrivelse: String,
 )
 

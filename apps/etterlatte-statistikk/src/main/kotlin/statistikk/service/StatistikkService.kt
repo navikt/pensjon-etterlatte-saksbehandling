@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -14,6 +15,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
@@ -44,6 +47,7 @@ import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.domain.tilStoenadUtbetalingsperiode
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -54,7 +58,7 @@ class StatistikkService(
     private val beregningKlient: BeregningKlient,
     private val aktivitetspliktService: AktivitetspliktService,
 ) {
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun registrerStatistikkForVedtak(
         vedtak: VedtakDto,
@@ -63,20 +67,36 @@ class StatistikkService(
     ): Pair<SakRad?, StoenadRad?> {
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid)
         if (vedtakKafkaHendelseType == VedtakKafkaHendelseHendelseType.IVERKSATT) {
+            val enhet = vedtak.attestasjon?.attesterendeEnhet
+            if (enhet in listOf(Enheter.STRENGT_FORTROLIG.enhetNr, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)) {
+                return sakRad to null
+            }
+            val gradering = runBlocking { behandlingKlient.hentGraderingForSak(vedtak.sak.id) }
+            when (gradering.adressebeskyttelseGradering) {
+                AdressebeskyttelseGradering.FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+                -> return sakRad to null
+
+                null, AdressebeskyttelseGradering.UGRADERT -> Unit
+            }
             val stoenadRad =
                 when (vedtak.type) {
                     VedtakType.INNVILGELSE,
                     VedtakType.ENDRING,
                     VedtakType.OPPHOER,
                     ->
-                        stoenadRepository.lagreStoenadsrad(
-                            vedtakTilStoenadsrad(
-                                vedtak,
-                                tekniskTid,
-                                sakRad!!.kilde,
-                                sakRad.pesysId,
-                            ),
-                        )
+                        stoenadRepository
+                            .lagreStoenadsrad(
+                                vedtakTilStoenadsrad(
+                                    vedtak,
+                                    tekniskTid,
+                                    sakRad!!.kilde,
+                                    sakRad.pesysId,
+                                ),
+                            ).also {
+                                hentSisteAktivitetspliktDto(vedtak)
+                            }
 
                     VedtakType.TILBAKEKREVING,
                     VedtakType.AVVIST_KLAGE,
@@ -86,6 +106,22 @@ class StatistikkService(
             return sakRad to stoenadRad
         }
         return sakRad to null
+    }
+
+    private fun hentSisteAktivitetspliktDto(vedtak: VedtakDto) {
+        try {
+            if (vedtak.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+                val aktivitetspliktDto =
+                    runBlocking { behandlingKlient.hentAktivitetspliktDto(vedtak.sak.id, vedtak.behandlingId) }
+                aktivitetspliktService.oppdaterVurderingAktivitetsplikt(aktivitetspliktDto)
+            }
+        } catch (e: Exception) {
+            logger.error(
+                "Kunne ikke hente og oppdatere aktivitetspliktstatusen for OMS-sak med id=${vedtak.sak.id}" +
+                    "Dette betyr at vi ikke kjenner til den oppdaterte aktivitetspliktstatusen for saken," +
+                    "og trenger å følges opp for å få de riktig med i statistikken.",
+            )
+        }
     }
 
     fun produserStoenadStatistikkForMaaned(maaned: YearMonth): MaanedStatistikk {
@@ -301,8 +337,10 @@ class StatistikkService(
         status = hendelse.name,
         ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet,
         resultat =
-            mapTilbakekrevingResultat(statistikkTilbakekreving.tilbakekreving.tilbakekreving)?.name?.takeIf {
-                statistikkTilbakekreving.tilbakekreving.status == TilbakekrevingStatus.ATTESTERT
+            when (statistikkTilbakekreving.tilbakekreving.status) {
+                TilbakekrevingStatus.ATTESTERT -> mapTilbakekrevingResultat(statistikkTilbakekreving.tilbakekreving.tilbakekreving)?.name
+                TilbakekrevingStatus.AVBRUTT -> "AVBRUTT"
+                else -> null
             },
         tekniskTid = tekniskTid.toTidspunkt(),
         sakYtelse = statistikkTilbakekreving.tilbakekreving.sak.sakType.name,
@@ -347,17 +385,27 @@ class StatistikkService(
         id = -1,
         referanseId = statistikkKlage.klage.id,
         sakId = statistikkKlage.klage.sak.id,
-        mottattTidspunkt = statistikkKlage.klage.opprettet,
-        registrertTidspunkt = statistikkKlage.tidspunkt,
+        mottattTidspunkt =
+            statistikkKlage.klage.innkommendeDokument?.mottattDato?.let {
+                Tidspunkt.ofNorskTidssone(
+                    it,
+                    LocalTime.NOON,
+                )
+            } ?: statistikkKlage.klage.opprettet,
+        registrertTidspunkt = statistikkKlage.klage.opprettet,
         type = "KLAGE",
-        status = hendelse.name,
+        status = klageStatus(statistikkKlage, hendelse),
         resultat = resultatKlage(statistikkKlage),
         saksbehandler = statistikkKlage.saksbehandler,
         ansvarligEnhet = statistikkKlage.klage.sak.enhet,
         ansvarligBeslutter =
-            statistikkKlage.klage.formkrav
-                ?.saksbehandler
-                ?.ident,
+            when (val utfall = statistikkKlage.klage.utfall) {
+                null ->
+                    statistikkKlage.klage.formkrav
+                        ?.saksbehandler
+                        ?.ident
+                else -> utfall.saksbehandler.ident
+            },
         aktorId = statistikkKlage.klage.sak.ident,
         tekniskTid = tekniskTid.toTidspunkt(),
         sakYtelse = statistikkKlage.klage.sak.sakType.name,
@@ -377,7 +425,10 @@ class StatistikkService(
         datoFoersteUtbetaling = null,
         opprettetAv = null,
         pesysId = null,
-        resultatBegrunnelse = null,
+        resultatBegrunnelse =
+            statistikkKlage.klage.aarsakTilAvbrytelse
+                ?.name
+                ?.takeIf { statistikkKlage.klage.status == KlageStatus.AVBRUTT },
         sakUtland = statistikkKlage.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
         soeknadFormat = null,
         vedtakLoependeTom = null,
@@ -387,6 +438,19 @@ class StatistikkService(
                 ?.vedtaketKlagenGjelder
                 ?.behandlingId,
     )
+
+    private fun klageStatus(
+        statistikkKlage: StatistikkKlage,
+        hendelse: KlageHendelseType,
+    ): String {
+        if (statistikkKlage.klage.status == KlageStatus.FERDIGSTILT) {
+            return when (statistikkKlage.klage.utfall) {
+                is KlageUtfallMedData.StadfesteVedtak, is KlageUtfallMedData.DelvisOmgjoering -> "OVERSENDT_KA"
+                else -> hendelse.name
+            }
+        }
+        return hendelse.name
+    }
 
     private fun resultatKlage(statistikkKlage: StatistikkKlage): String? {
         if (statistikkKlage.klage.status == KlageStatus.AVBRUTT) {

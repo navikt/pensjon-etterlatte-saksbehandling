@@ -2,8 +2,10 @@ package no.nav.etterlatte.behandling
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -11,6 +13,7 @@ import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -23,15 +26,17 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleierRequest
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -50,6 +55,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -61,11 +67,10 @@ internal class BehandlingRoutesTest {
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val behandlingFactory = mockk<BehandlingFactory>()
-    private val featureToggleService = DummyFeatureToggleService()
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start()
+        mockOAuth2Server.startRandomPort()
     }
 
     @AfterEach
@@ -89,7 +94,7 @@ internal class BehandlingRoutesTest {
                 listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
 
         every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
         val behandlingId = UUID.randomUUID()
@@ -97,7 +102,7 @@ internal class BehandlingRoutesTest {
             mockk<Behandling> {
                 every { id } returns behandlingId
             }
-        val systembruker = mockk<SystemUser>()
+        val systembruker = mockk<SystemUser>().also { every { it.name() } returns this::class.java.simpleName }
         withTestApplication(systembruker) { client ->
             val response =
                 client.post("/api/behandling") {
@@ -133,14 +138,14 @@ internal class BehandlingRoutesTest {
                 listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
-        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId1, Enheter.defaultEnhet.enhetNr)
 
         every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
         coEvery { behandlingFactory.opprettSakOgBehandlingForOppgave(any(), any()) } returns
             mockk<Behandling> {
                 every { id } returns behandlingId
             }
-        val systembruker = mockk<SystemUser>()
+        val systembruker = mockk<SystemUser>().also { every { it.name() } returns this::class.java.simpleName }
         withTestApplication(systembruker) { client ->
             val response =
                 client.post("/api/behandling") {
@@ -167,7 +172,7 @@ internal class BehandlingRoutesTest {
     }
 
     @Test
-    fun `kan oppdater bodd eller arbeidet i utlandet`() {
+    fun `kan oppdatere bodd eller arbeidet i utlandet`() {
         coEvery {
             behandlingService.oppdaterBoddEllerArbeidetUtlandet(any(), any())
         } just runs
@@ -208,6 +213,24 @@ internal class BehandlingRoutesTest {
                         }
                         """.trimIndent(),
                     )
+                }
+
+            assertEquals(200, response.status.value)
+        }
+    }
+
+    @Test
+    fun `kan oppdatere tidligere familiepleier`() {
+        coEvery {
+            behandlingService.oppdaterTidligereFamiliepleier(any(), any())
+        } just runs
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/behandling/$behandlingId/tidligere-familiepleier") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(TidligereFamiliepleierRequest(true, "Test", LocalDate.of(1970, 1, 1), LocalDate.now(), "test"))
                 }
 
             assertEquals(200, response.status.value)
@@ -275,6 +298,39 @@ internal class BehandlingRoutesTest {
         }
     }
 
+    @Test
+    fun `kan lagre annen forelder`() {
+        withTestApplication { client ->
+            val request =
+                AnnenForelder(
+                    vurdering = AnnenForelder.AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER,
+                    begrunnelse = "",
+                    navn = "",
+                    foedselsdato = LocalDate.now(),
+                )
+            val response =
+                client.put("/api/behandling/$behandlingId/annen-forelder") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }
+            coVerify(exactly = 1) { behandlingService.lagreAnnenForelder(behandlingId, any(), request) }
+            assertEquals(200, response.status.value)
+        }
+    }
+
+    @Test
+    fun `kan slette annen forelder`() {
+        withTestApplication { client ->
+            val response =
+                client.delete("/api/behandling/$behandlingId/annen-forelder") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                }
+            coVerify(exactly = 1) { behandlingService.lagreAnnenForelder(behandlingId, any(), null) }
+            assertEquals(200, response.status.value)
+        }
+    }
+
     private fun withTestApplication(
         testUser: User? = null,
         block: suspend (client: HttpClient) -> Unit,
@@ -282,6 +338,7 @@ internal class BehandlingRoutesTest {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+                every { name() } returns this::class.java.simpleName
             }
 
         testApplication {
@@ -293,7 +350,6 @@ internal class BehandlingRoutesTest {
                         gyldighetsproevingService,
                         kommerBarnetTilGodeService,
                         behandlingFactory,
-                        featureToggleService,
                     )
                 }
             block(client)

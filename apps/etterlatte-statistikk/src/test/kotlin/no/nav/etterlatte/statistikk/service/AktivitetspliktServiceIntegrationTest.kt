@@ -2,6 +2,10 @@ package no.nav.etterlatte.statistikk.service
 
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
@@ -9,6 +13,7 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.StatistikkDatabaseExtension
 import no.nav.etterlatte.statistikk.database.AktivitetsgradPeriode
@@ -35,8 +40,8 @@ class AktivitetspliktServiceIntegrationTest(
     fun `oppdaterVurderingAktivitetsplikt lagrer ned ny versjon av aktivitetsplikt`() {
         aktivitetspliktService.oppdaterVurderingAktivitetsplikt(aktivitetspliktDto())
 
-        val lagretAktivitet = aktivitetspliktService.hentAktivitet(1L, YearMonth.now())
-        lagretAktivitet?.sakId shouldBe 1L
+        val lagretAktivitet = aktivitetspliktService.hentAktivitet(sakId1, YearMonth.now())
+        lagretAktivitet?.sakId shouldBe sakId1
         lagretAktivitet?.harVarigUnntak shouldBe false
         lagretAktivitet?.aktivitetsgrad shouldBe emptyList()
 
@@ -53,7 +58,7 @@ class AktivitetspliktServiceIntegrationTest(
             ),
         )
 
-        val oppdatertLagretAktivitet = aktivitetspliktService.hentAktivitet(1L, YearMonth.now())
+        val oppdatertLagretAktivitet = aktivitetspliktService.hentAktivitet(sakId1, YearMonth.now())
         oppdatertLagretAktivitet?.aktivitetsgrad shouldBe
             listOf(
                 AktivitetsgradPeriode(
@@ -81,26 +86,26 @@ class AktivitetspliktServiceIntegrationTest(
             ),
         )
 
-        aktivitetspliktService.hentAktivitet(1L, YearMonth.now())?.avdoedDoedsmaaned shouldBe
+        aktivitetspliktService.hentAktivitet(sakId1, YearMonth.now())?.avdoedDoedsmaaned shouldBe
             YearMonth.of(
                 2024,
                 Month.FEBRUARY,
             )
         aktivitetspliktService
             .hentAktivitet(
-                1L,
+                sakId1,
                 YearMonth.now().minusMonths(1),
             )?.avdoedDoedsmaaned shouldBe YearMonth.of(2024, Month.JANUARY)
-        aktivitetspliktService.hentAktivitet(1L, YearMonth.now().minusMonths(2)) shouldBe null
+        aktivitetspliktService.hentAktivitet(sakId1, YearMonth.now().minusMonths(2)) shouldBe null
     }
 
     @Test
     fun `mapAktivitetForSaker returnerer mappet statistikk for riktig måned for angitte saker`() {
-        val sakMedVarigUnntakId = 1L
-        val sakMedIkkeOppfyltAktivitet = 2L
-        val sakMedOppfyltAktivitet = 3L
-        val sakMedMidlertidigUnntakId = 4L
-        val sakMedIngenRegistrertAktivitet = 5L
+        val sakMedVarigUnntakId = sakId1
+        val sakMedIkkeOppfyltAktivitet = sakId2
+        val sakMedOppfyltAktivitet = sakId3
+        val sakMedMidlertidigUnntakId = randomSakId()
+        val sakMedIngenRegistrertAktivitet = randomSakId()
 
         val alleSakene =
             listOf(
@@ -255,7 +260,7 @@ class AktivitetspliktServiceIntegrationTest(
 }
 
 fun aktivitetspliktDto(
-    sakId: Long = 1L,
+    sakId: SakId = sakId1,
     avdoedDoedsmaaned: YearMonth = YearMonth.now().minusMonths(6),
     aktivitetsgrad: List<AktivitetspliktAktivitetsgradDto> = emptyList(),
     unntak: List<UnntakFraAktivitetDto> = emptyList(),

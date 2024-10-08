@@ -1,6 +1,33 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { JaNei } from '~shared/types/ISvar'
 
+export const hentTrygdetidUfoeretrygdOgAlderspensjon = async (
+  fnr: string
+): Promise<ApiResponse<TrygdetidsperioderPesys>> =>
+  apiClient.post('trygdetid_v2/pesys/grunnlag', { foedselsnummer: fnr })
+
+export interface TrygdetidsperioderPesys {
+  ufoeretrygd: TrygdetidsperiodeListe
+  alderspensjon: TrygdetidsperiodeListe
+}
+
+export interface TrygdetidsperiodeListe {
+  trygdetidsGrunnlagListe?: TrygdetidPeriodePesys[]
+}
+
+export interface TrygdetidPeriodePesys {
+  isoCountryCode: String // ISO 3166-1 alpha-3 code feks: "NOR" "SWE"
+  fra: String //TODO: eller date? kommer i steg 2 da vi dette skal brukes i frontend
+  til: String
+  poengInnAar?: Boolean
+  poengUtAar?: Boolean
+  prorata?: Boolean
+  kilde: {
+    tidspunkt: string
+    type: string
+  }
+}
+
 export const hentTrygdetider = async (behandlingId: string): Promise<ApiResponse<ITrygdetid[]>> =>
   apiClient.get<ITrygdetid[]>(`/trygdetid_v2/${behandlingId}`)
 
@@ -31,9 +58,6 @@ export const slettTrygdetidsgrunnlag = async (args: {
     `/trygdetid_v2/${args.behandlingId}/${args.trygdetidId}/grunnlag/${args.trygdetidGrunnlagId}`
   )
 
-export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
-  apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
-
 export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
   apiClient.post(`/trygdetid_v2/${behandlingId}/oppdater-status`, {})
 
@@ -42,16 +66,6 @@ export const oppdaterOpplysningsgrunnlag = async (behandlingId: string): Promise
 
 export interface StatusOppdatert {
   statusOppdatert: boolean
-}
-
-export const sorterLand = (landListe: ILand[]): ILand[] => {
-  landListe.sort((a: ILand, b: ILand) => {
-    if (a.beskrivelse.tekst > b.beskrivelse.tekst) {
-      return 1
-    }
-    return -1
-  })
-  return landListe
 }
 
 export interface TrygdetidAvtaleOptions {
@@ -256,16 +270,6 @@ export interface IBeregnetTrygdetidGrunnlag {
 export enum ITrygdetidGrunnlagType {
   FAKTISK = 'FAKTISK',
   FREMTIDIG = 'FREMTIDIG',
-}
-
-export interface ILand {
-  gyldigFra: string
-  gyldigTil: string
-  isoLandkode: string
-  beskrivelse: {
-    term: string
-    tekst: string
-  }
 }
 
 export interface IOpplysningerDifferanse {

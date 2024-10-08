@@ -9,9 +9,10 @@ import java.util.UUID
 data class BeregningsGrunnlag(
     val behandlingId: UUID,
     val kilde: Grunnlagsopplysning.Saksbehandler,
-    val institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
+    val institusjonsopphold: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
         emptyList(),
     val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
-    val begegningsmetodeFlereAvdoede: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>> = emptyList(),
+    val beregningsMetodeFlereAvdoede: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>> = emptyList(),
     val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
+    val kunEnJuridiskForelder: GrunnlagMedPeriode<TomVerdi>? = null,
 )

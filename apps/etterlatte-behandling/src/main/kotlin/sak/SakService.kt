@@ -13,6 +13,7 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -26,20 +27,26 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 
 interface SakService {
     fun hentSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long>,
-        ekskluderteSaker: List<Long>,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
         sakType: SakType? = null,
+        loependeFom: YearMonth? = null,
     ): List<Sak>
 
     fun finnSaker(ident: String): List<Sak>
@@ -47,60 +54,61 @@ interface SakService {
     fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
         type: SakType,
-        overstyrendeEnhet: String? = null,
+        overstyrendeEnhet: Enhetsnummer? = null,
     ): Sak
 
     fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
-    ): String
+    ): Enhetsnummer
 
     fun finnSak(
         ident: String,
         type: SakType,
     ): Sak?
 
-    fun finnSak(id: Long): Sak?
+    fun finnSak(id: SakId): Sak?
 
-    fun finnFlyktningForSak(id: Long): Flyktning?
+    fun finnFlyktningForSak(id: SakId): Flyktning?
 
     fun markerSakerMedSkjerming(
-        sakIder: List<Long>,
+        sakIder: List<SakId>,
         skjermet: Boolean,
     )
 
     fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
 
-    fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
+    fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering>
 
     fun oppdaterAdressebeskyttelse(
-        sakId: Long,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
-
-    fun oppdaterFlyktning(
-        sakId: Long,
-        flyktning: Flyktning,
-    )
 
     fun hentEnkeltSakForPerson(fnr: String): Sak
 
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
 
-    fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak>
+    fun hentSakerMedIder(sakIder: List<SakId>): Map<SakId, Sak>
 
-    fun finnSakerOmsOgHvisAvdoed(ident: String): List<Long>
+    fun finnSakerOmsOgHvisAvdoed(ident: String): List<SakId>
+
+    fun hentGraderingForSak(
+        sakId: SakId,
+        bruker: Systembruker,
+    ): SakMedGraderingOgSkjermet
 }
 
 class ManglerTilgangTilEnhet(
-    enheter: List<String>,
+    enheter: List<Enhetsnummer>,
 ) : UgyldigForespoerselException(
         code = "MANGLER_TILGANG_TIL_ENHET",
         detail = "Mangler tilgang til enhet $enheter",
     )
 
 class SakServiceImpl(
-    private val dao: SakDao,
+    private val dao: SakSkrivDao,
+    private val lesDao: SakLesDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
     private val grunnlagService: GrunnlagService,
@@ -108,13 +116,6 @@ class SakServiceImpl(
     private val pdltjenesterKlient: PdlTjenesterKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    override fun oppdaterFlyktning(
-        sakId: Long,
-        flyktning: Flyktning,
-    ) {
-        dao.oppdaterFlyktning(sakId, flyktning)
-    }
 
     override fun hentEnkeltSakForPerson(fnr: String): Sak {
         val saker = finnSakerForPerson(fnr)
@@ -133,20 +134,21 @@ class SakServiceImpl(
         return brukerService.finnNavkontorForPerson(fnr, sak.sakType)
     }
 
-    override fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak> {
-        val saker = dao.hentSakerMedIder(sakIder)
+    override fun hentSakerMedIder(sakIder: List<SakId>): Map<SakId, Sak> {
+        val saker = lesDao.hentSakerMedIder(sakIder)
         return saker.associateBy { it.id }
     }
 
     override fun hentSaker(
         kjoering: String,
         antall: Int,
-        spesifikkeSaker: List<Long>,
-        ekskluderteSaker: List<Long>,
+        spesifikkeSaker: List<SakId>,
+        ekskluderteSaker: List<SakId>,
         sakType: SakType?,
+        loependeFom: YearMonth?,
     ): List<Sak> =
-        dao
-            .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType)
+        lesDao
+            .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType, loependeFom)
             .also { logger.info("Henta ${it.size} saker før filtrering") }
             .filterForEnheter()
             .also { logger.info("Henta ${it.size} saker etter filtrering") }
@@ -162,7 +164,7 @@ class SakServiceImpl(
         }
     }
 
-    override fun finnSakerOmsOgHvisAvdoed(ident: String): List<Long> {
+    override fun finnSakerOmsOgHvisAvdoed(ident: String): List<SakId> {
         val saker = finnSakerForPerson(ident, SakType.OMSTILLINGSSTOENAD).filterForEnheter()
         val sakerOgRollerForPerson = runBlocking { grunnlagService.hentAlleSakerForPerson(ident) }
         val sakerOgRollerGruppert = sakerOgRollerForPerson.sakiderOgRoller.distinct()
@@ -172,15 +174,23 @@ class SakServiceImpl(
         return saker.map { it.id } + sakerForAvdoed
     }
 
+    override fun hentGraderingForSak(
+        sakId: SakId,
+        bruker: Systembruker,
+    ): SakMedGraderingOgSkjermet {
+        val sak = lesDao.finnSakMedGraderingOgSkjerming(sakId)
+        return sak
+    }
+
     override fun finnSaker(ident: String): List<Sak> = finnSakerForPerson(ident).filterForEnheter()
 
     private fun finnSakerForPerson(
         ident: String,
         sakType: SakType? = null,
-    ) = dao.finnSaker(ident, sakType)
+    ) = lesDao.finnSaker(ident, sakType)
 
     override fun markerSakerMedSkjerming(
-        sakIder: List<Long>,
+        sakIder: List<SakId>,
         skjermet: Boolean,
     ) {
         dao.markerSakerMedSkjerming(sakIder, skjermet)
@@ -189,11 +199,11 @@ class SakServiceImpl(
     override fun finnEllerOpprettSakMedGrunnlag(
         fnr: String,
         type: SakType,
-        overstyrendeEnhet: String?,
+        overstyrendeEnhet: Enhetsnummer?,
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
-        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident)) }
+        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident), HardkodaSystembruker.opprettGrunnlag) }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
         val spraak = hentSpraak(sak.ident)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
@@ -201,6 +211,7 @@ class SakServiceImpl(
             grunnlagService.leggTilNyeOpplysningerBareSak(
                 sakId = sak.id,
                 opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
+                HardkodaSystembruker.opprettGrunnlag,
             )
         }
         return sak
@@ -228,7 +239,7 @@ class SakServiceImpl(
     private fun finnEllerOpprettSak(
         fnr: String,
         type: SakType,
-        overstyrendeEnhet: String?,
+        overstyrendeEnhet: Enhetsnummer?,
     ): Sak {
         var sak = finnSakForPerson(fnr, type)
         if (sak == null) {
@@ -248,7 +259,7 @@ class SakServiceImpl(
             }
         oppdaterAdressebeskyttelse(sak.id, hentetGradering)
         settEnhetOmAdresebeskyttet(sak, hentetGradering)
-        sjekkGraderingOgEnhetStemmer(dao.finnSakMedGraderingOgSkjerming(sak.id))
+        sjekkGraderingOgEnhetStemmer(lesDao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
     }
 
@@ -333,7 +344,7 @@ class SakServiceImpl(
     override fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
-    ): String {
+    ): Enhetsnummer {
         val sak = finnSakForPerson(fnr, type)
 
         return when (sak) {
@@ -345,8 +356,8 @@ class SakServiceImpl(
     private fun sjekkEnhetFraNorg(
         fnr: String,
         type: SakType,
-        enhet: String?,
-    ): String {
+        enhet: Enhetsnummer?,
+    ): Enhetsnummer {
         val enhetFraNorg = brukerService.finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
         if (enhet != null && enhet != enhetFraNorg) {
             logger.info("Finner/oppretter sak med enhet $enhet, selv om geografisk tilknytning tilsier $enhetFraNorg")
@@ -355,13 +366,13 @@ class SakServiceImpl(
     }
 
     override fun oppdaterAdressebeskyttelse(
-        sakId: Long,
+        sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
     private fun sjekkSkjerming(
         fnr: String,
-        sakId: Long,
+        sakId: SakId,
     ) {
         val erSkjermet =
             runBlocking {
@@ -379,16 +390,16 @@ class SakServiceImpl(
         dao.oppdaterEnheterPaaSaker(saker)
     }
 
-    override fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering> = dao.finnSakerMedGraderingOgSkjerming(sakIder)
+    override fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering> = lesDao.finnSakerMedGraderingOgSkjerming(sakIder)
 
     override fun finnSak(
         ident: String,
         type: SakType,
     ): Sak? = finnSakForPerson(ident, type).sjekkEnhet()
 
-    override fun finnSak(id: Long): Sak? = dao.hentSak(id).sjekkEnhet()
+    override fun finnSak(id: SakId): Sak? = lesDao.hentSak(id).sjekkEnhet()
 
-    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
+    override fun finnFlyktningForSak(id: SakId): Flyktning? = lesDao.hentSak(id).sjekkEnhet()?.let { lesDao.finnFlyktningForSak(id) }
 
     private fun Sak?.sjekkEnhet() =
         this?.let { sak ->
@@ -396,7 +407,7 @@ class SakServiceImpl(
         }
 
     private fun List<Sak>.filterForEnheter(): List<Sak> {
-        val enheterSomSkalFiltreresBort = ArrayList<String>()
+        val enheterSomSkalFiltreresBort = ArrayList<Enhetsnummer>()
         val appUser = Kontekst.get().AppUser
         if (appUser is SaksbehandlerMedEnheterOgRoller) {
             val bruker = appUser.saksbehandlerMedRoller
@@ -411,7 +422,7 @@ class SakServiceImpl(
     }
 
     private fun filterSakerForEnheter(
-        enheterSomSkalFiltreres: List<String>,
+        enheterSomSkalFiltreres: List<Enhetsnummer>,
         saker: List<Sak>,
     ): List<Sak> = saker.filter { it.enhet !in enheterSomSkalFiltreres }
 }

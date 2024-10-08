@@ -2,7 +2,7 @@ import React, { ReactNode, useState } from 'react'
 import { Button, Dropdown, HStack, Label, UNSAFE_Combobox, VStack } from '@navikt/ds-react'
 import { PersonCrossIcon, PersonIcon, PersonPencilIcon, PersonPlusIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { byttSaksbehandlerApi, fjernSaksbehandlerApi } from '~shared/api/oppgaver'
+import { tildelSaksbehandlerApi, fjernSaksbehandlerApi } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
@@ -37,7 +37,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
   const [valgtSaksbehandler, setValgtSaksbehandler] = useState<Saksbehandler | undefined>(saksbehandler)
 
   const [fjernSaksbehandlerResult, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
-  const [byttSaksbehandlerResult, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
+  const [byttSaksbehandlerResult, byttSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
   const onSaksbehandlerSelect = (saksbehandlerNavn: string, erValgt: boolean) => {
     if (erValgt) {

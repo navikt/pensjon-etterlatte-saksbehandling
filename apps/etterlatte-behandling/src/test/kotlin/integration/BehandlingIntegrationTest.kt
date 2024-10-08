@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DatabaseConfig
 import no.nav.etterlatte.tilgangsstyring.AzureKey
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.RegisterExtension
 
@@ -33,7 +34,7 @@ abstract class BehandlingIntegrationTest {
         private val dbExtension = DatabaseExtension()
     }
 
-    protected val server: MockOAuth2Server = MockOAuth2Server()
+    protected val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
 
     protected val saksbehandlerIdent = "Saksbehandler01"
@@ -48,41 +49,41 @@ abstract class BehandlingIntegrationTest {
         pdlTjenesterKlient: PdlTjenesterKlient? = null,
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
         testProdusent: TestProdusent<String, String>? = null,
+        vilkvurderingdao: VilkaarsvurderingRepository? = null,
     ) {
-        server.start()
+        mockOAuth2Server.start()
         val props = dbExtension.properties()
 
+        var systemEnv = Miljoevariabler.systemEnv()
+        mapOf(
+            KafkaKey.KAFKA_RAPID_TOPIC to "test",
+            DatabaseConfig.DB_HOST to props.host,
+            DatabaseConfig.DB_USERNAME to props.username,
+            DatabaseConfig.DB_PASSWORD to props.password,
+            DatabaseConfig.DB_PORT to props.firstMappedPort.toString(),
+            DatabaseConfig.DB_DATABASE to props.databaseName,
+            AzureKey.AZUREAD_ATTESTANT_GROUPID to azureAdAttestantClaim,
+            AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID to azureAdAttestantGjennyClaim,
+            AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID to azureAdSaksbehandlerClaim,
+            AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
+            AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
+            AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,
+            AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID to azureAdNasjonUtenLoggClaim,
+            AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID to azureAdNasjonMedLoggClaim,
+            EnvKey.NORG2_URL to "http://localhost",
+            EnvKey.NAVANSATT_URL to "http://localhost",
+            EnvKey.SKJERMING_URL to "http://localhost",
+            TestEnvKey.OPPGAVE_URL to "http://localhost",
+            TestEnvKey.PEN_URL to "http://localhost",
+            TestEnvKey.PEN_CLIENT_ID to "ddd52335-cfe8-4ee9-9e68-416a5ab26efa",
+            EnvKey.ETTERLATTE_KLAGE_API_URL to "http://localhost",
+            EnvKey.ETTERLATTE_TILBAKEKREVING_URL to "http://localhost",
+            EnvKey.ETTERLATTE_MIGRERING_URL to "http://localhost",
+            TestEnvKey.OPPGAVE_SCOPE to "scope",
+        ).forEach { i -> systemEnv = systemEnv.append(i.key, { i.value }) }
         applicationContext =
             ApplicationContext(
-                env =
-                    Miljoevariabler.systemEnv().append(
-                        mapOf(
-                            KafkaKey.KAFKA_RAPID_TOPIC to "test",
-                            DatabaseConfig.DB_HOST to props.host,
-                            DatabaseConfig.DB_USERNAME to props.username,
-                            DatabaseConfig.DB_PASSWORD to props.password,
-                            DatabaseConfig.DB_PORT to props.firstMappedPort.toString(),
-                            DatabaseConfig.DB_DATABASE to props.databaseName,
-                            AzureKey.AZUREAD_ATTESTANT_GROUPID to azureAdAttestantClaim,
-                            AzureKey.AZUREAD_ATTESTANT_GJENNY_GROUPID to azureAdAttestantGjennyClaim,
-                            AzureKey.AZUREAD_SAKSBEHANDLER_GROUPID to azureAdSaksbehandlerClaim,
-                            AzureKey.AZUREAD_STRENGT_FORTROLIG_GROUPID to azureAdStrengtFortroligClaim,
-                            AzureKey.AZUREAD_EGEN_ANSATT_GROUPID to azureAdEgenAnsattClaim,
-                            AzureKey.AZUREAD_FORTROLIG_GROUPID to azureAdFortroligClaim,
-                            AzureKey.AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID to azureAdNasjonUtenLoggClaim,
-                            AzureKey.AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID to azureAdNasjonMedLoggClaim,
-                            EnvKey.NORG2_URL to "http://localhost",
-                            EnvKey.NAVANSATT_URL to "http://localhost",
-                            EnvKey.SKJERMING_URL to "http://localhost",
-                            TestEnvKey.OPPGAVE_URL to "http://localhost",
-                            TestEnvKey.PEN_URL to "http://localhost",
-                            TestEnvKey.PEN_CLIENT_ID to "ddd52335-cfe8-4ee9-9e68-416a5ab26efa",
-                            EnvKey.ETTERLATTE_KLAGE_API_URL to "http://localhost",
-                            EnvKey.ETTERLATTE_TILBAKEKREVING_URL to "http://localhost",
-                            EnvKey.ETTERLATTE_MIGRERING_URL to "http://localhost",
-                            TestEnvKey.OPPGAVE_SCOPE to "scope",
-                        ),
-                    ),
+                env = systemEnv,
                 config =
                     ConfigFactory.parseMap(
                         mapOf(
@@ -90,16 +91,16 @@ abstract class BehandlingIntegrationTest {
                             "grunnlag.resource.url" to "http://localhost",
                             "vedtak.resource.url" to "http://localhost",
                             "krr.url" to "http://localhost",
+                            "azure.app.well.known.url" to "wellKnownUrl",
                         ),
                     ),
                 rapid = testProdusent ?: TestProdusent(),
                 featureToggleService = featureToggleService,
                 skjermingHttpKlient = skjermingHttpClient(),
-                grunnlagHttpClient = grunnlagHttpClient(),
                 leaderElectionHttpClient = leaderElection(),
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
-                grunnlagKlientObo = GrunnlagKlientTest(),
+                grunnlagKlientImpl = GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
@@ -111,7 +112,8 @@ abstract class BehandlingIntegrationTest {
                 krrKlient = KrrklientTest(),
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
-                vilkaarsvuderingKlient = VilkaarsvurderingTest(),
+                kodeverkKlient = KodeverkKlientTest(),
+                vilkaarsvurderingKlientDaoImpl = VilkaarsvurderingKlientDaoTest(),
             )
     }
 
@@ -134,7 +136,7 @@ abstract class BehandlingIntegrationTest {
 
     protected fun afterAll() {
         applicationContext.close()
-        server.shutdown()
+        mockOAuth2Server.shutdown()
     }
 
     protected fun HttpRequestBuilder.addAuthToken(token: String) {
@@ -142,7 +144,7 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandler: String by lazy {
-        server.issueSaksbehandlerToken(
+        mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = saksbehandlerIdent,
             groups = listOf(azureAdAttestantClaim),
@@ -150,7 +152,7 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenAttestant: String by lazy {
-        server.issueSaksbehandlerToken(
+        mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = attestantIdent,
             groups = listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim),
@@ -158,7 +160,7 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandlerMedStrengtFortrolig: String by lazy {
-        server.issueSaksbehandlerToken(
+        mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = saksbehandlerStrengtFortroligIdent,
             groups =
@@ -171,7 +173,7 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandlerMedEgenAnsattTilgang: String by lazy {
-        server.issueSaksbehandlerToken(
+        mockOAuth2Server.issueSaksbehandlerToken(
             navn = "John Doe",
             navIdent = saksbehandlerSkjermetIdent,
             groups =
@@ -183,7 +185,7 @@ abstract class BehandlingIntegrationTest {
         )
     }
 
-    protected val systemBruker: String by lazy { server.issueSystembrukerToken() }
+    protected val systemBruker: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
 }
 
 enum class TestEnvKey : EnvEnum {

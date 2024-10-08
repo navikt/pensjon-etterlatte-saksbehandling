@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.service
 
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.AktivitetspliktRepo
 import no.nav.etterlatte.statistikk.database.StatistikkAktivitet
@@ -19,14 +20,14 @@ class AktivitetspliktService(
     }
 
     fun hentAktivitet(
-        sakId: Long,
+        sakId: SakId,
         sisteMaaned: YearMonth,
     ): StatistikkAktivitet? = aktivitetspliktRepo.hentAktivitetspliktForMaaned(sakId, sisteMaaned)
 
     fun mapAktivitetForSaker(
-        sakIds: List<Long>,
+        sakIds: List<SakId>,
         maaned: YearMonth,
-    ): Map<Long, AktivitetForMaaned> {
+    ): Map<SakId, AktivitetForMaaned> {
         val aktiviteter = aktivitetspliktRepo.hentAktivitetspliktForMaaneder(sakIds, maaned)
         return aktiviteter.associate { it.sakId to AktivitetForMaaned.mapFraStatistikkAktivitet(it, maaned) }
     }

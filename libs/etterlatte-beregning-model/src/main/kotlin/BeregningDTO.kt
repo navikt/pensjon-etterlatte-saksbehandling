@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.beregning
 
+import Regelverk
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
@@ -35,9 +36,11 @@ data class Beregningsperiode(
     val samletNorskTrygdetid: Int? = null,
     val samletTeoretiskTrygdetid: Int? = null,
     val broek: IntBroek? = null,
-    val avdodeForeldre: List<String?>? = null,
+    val avdoedeForeldre: List<String?>? = null,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
+    val regelverk: Regelverk? = null,
+    val kunEnJuridiskForelder: Boolean = false,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
 )
 
@@ -46,10 +49,22 @@ data class OverstyrBeregningDTO(
     val kategori: OverstyrtBeregningKategori,
 )
 
-data class AvkortingDto(
-    val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
+data class AvkortingFrontend(
+    val avkortingGrunnlag: List<AvkortingGrunnlagFrontend>,
     val avkortetYtelse: List<AvkortetYtelseDto>,
     val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
+)
+
+data class AvkortingGrunnlagFrontend(
+    val aar: Int,
+    val fraVirk: AvkortingGrunnlagDto?,
+    val historikk: List<AvkortingGrunnlagDto>,
+)
+
+data class AvkortingDto(
+    val avkortingGrunnlag: List<AvkortingGrunnlagDto>, // TODO kan "flyttes" inn i avkortetYteleDto?
+    val avkortetYtelse: List<AvkortetYtelseDto>,
+    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(), // TODO Fjern
 )
 
 data class AvkortingGrunnlagDto(
@@ -72,6 +87,7 @@ data class AvkortingGrunnlagLagreDto(
     val inntektUtland: Int,
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
+    val fom: YearMonth,
 )
 
 data class AvkortingGrunnlagKildeDto(
@@ -109,6 +125,7 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val grunnbelopMnd: Int,
     val beregningsMetode: BeregningsMetode?,
     val sanksjon: SanksjonertYtelse?,
+    val institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag?,
 )
 
 enum class OverstyrtBeregningKategori {

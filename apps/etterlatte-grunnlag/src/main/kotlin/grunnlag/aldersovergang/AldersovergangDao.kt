@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag.aldersovergang
 
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.hentListe
@@ -91,12 +92,11 @@ class AldersovergangDao(
         }
     }
 
-    fun hentAlder(
-        sakId: Long,
+    fun hentFoedselsdato(
+        sakId: SakId,
         opplysningType: Opplysningstype,
-        paaDato: LocalDate,
         tx: TransactionalSession? = null,
-    ): Alder? {
+    ): LocalDate? {
         val sql =
             """
             select distinct TO_DATE(g.opplysning, '\"YYYY-MM-DD\"') as foedselsdato
@@ -114,7 +114,7 @@ class AldersovergangDao(
             """.trimIndent()
         return tx.session {
             hent(sql, mapOf("sak_id" to sakId, "opplysningType" to opplysningType.name)) {
-                it.localDate("foedselsdato").until(paaDato).years
+                it.localDate("foedselsdato")
             }
         }
     }

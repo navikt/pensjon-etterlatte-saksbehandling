@@ -4,11 +4,14 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -101,14 +104,30 @@ class OppgaveDaoMedEndringssporingImpl(
         oppgaveDao.opprettOppgave(oppgaveIntern)
     }
 
+    override fun opprettOppgaveBulk(oppgaveListe: List<OppgaveIntern>) {
+        oppgaveDao.opprettOppgaveBulk(oppgaveListe)
+    }
+
     override fun hentOppgave(oppgaveId: UUID): OppgaveIntern? = oppgaveDao.hentOppgave(oppgaveId)
 
     override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
-    override fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
+    override fun oppgaveMedTypeFinnes(
+        sakId: SakId,
+        type: OppgaveType,
+    ): Boolean = oppgaveDao.oppgaveMedTypeFinnes(sakId, type)
+
+    override fun hentOppgaverForSakMedType(
+        sakId: SakId,
+        typer: List<OppgaveType>,
+    ): List<OppgaveIntern> =
+        oppgaveDao.hentOppgaverForSakMedType(
+            sakId,
+            typer,
+        )
 
     override fun hentOppgaver(
-        enheter: List<String>,
+        enheter: List<Enhetsnummer>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> = oppgaveDao.hentOppgaver(enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
@@ -139,7 +158,7 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun endreEnhetPaaOppgave(
         oppgaveId: UUID,
-        enhet: String,
+        enhet: Enhetsnummer,
     ) {
         lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.endreEnhetPaaOppgave(oppgaveId, enhet)
@@ -184,11 +203,13 @@ class OppgaveDaoMedEndringssporingImpl(
     }
 
     override fun oppdaterPaaVent(
-        paavent: PaaVent,
+        oppgaveId: UUID,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
         oppgaveStatus: Status,
     ) {
-        lagreEndringerPaaOppgave(paavent.oppgaveId) {
-            oppgaveDao.oppdaterPaaVent(paavent, oppgaveStatus)
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.oppdaterPaaVent(oppgaveId, merknad, aarsak, oppgaveStatus)
         }
     }
 
@@ -220,7 +241,7 @@ class OppgaveDaoMedEndringssporingImpl(
     ) = oppgaveDao.hentFristGaarUt(dato, type, kilde, oppgaver, grense)
 
     override fun hentOppgaverTilSaker(
-        saker: List<Long>,
+        saker: List<SakId>,
         oppgaveStatuser: List<String>,
     ) = oppgaveDao.hentOppgaverTilSaker(saker, oppgaveStatuser)
 

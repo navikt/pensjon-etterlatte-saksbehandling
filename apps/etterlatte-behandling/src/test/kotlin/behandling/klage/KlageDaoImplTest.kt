@@ -2,6 +2,7 @@ package behandling.klage
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
@@ -18,7 +19,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakSkrivDao
+import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -34,12 +36,12 @@ import javax.sql.DataSource
 internal class KlageDaoImplTest(
     val dataSource: DataSource,
 ) {
-    private lateinit var sakRepo: SakDao
+    private lateinit var sakRepo: SakSkrivDao
     private lateinit var klageDao: KlageDaoImpl
 
     @BeforeAll
     fun setup() {
-        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
         klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
     }
 
@@ -52,9 +54,10 @@ internal class KlageDaoImplTest(
     }
 
     @Test
-    fun `lagreKlage oppdaterer status og formkrav hvis klagen allerede eksisterer`() {
-        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
-        val klage = Klage.ny(sak, null)
+    fun `lagreKlage oppdaterer status, innkommende klage og formkrav hvis klagen allerede eksisterer`() {
+        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enheter.defaultEnhet.enhetNr)
+        val foersteMottattDato = LocalDate.now()
+        val klage = Klage.ny(sak, InnkommendeKlage(foersteMottattDato, "", ""))
         klageDao.lagreKlage(klage)
 
         val foersteHentedeKlage = klageDao.hentKlage(klage.id)
@@ -79,10 +82,15 @@ internal class KlageDaoImplTest(
                 Grunnlagsopplysning.Saksbehandler.create("en saksbehandler"),
             )
 
+        val andreDato = foersteMottattDato.minusMonths(1)
         val oppdatertKlage =
             klage.copy(
                 status = KlageStatus.FORMKRAV_OPPFYLT,
                 formkrav = formkrav,
+                innkommendeDokument =
+                    klage.innkommendeDokument?.copy(
+                        mottattDato = andreDato,
+                    ),
             )
         klageDao.lagreKlage(oppdatertKlage)
 
@@ -90,12 +98,13 @@ internal class KlageDaoImplTest(
 
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, hentetKlage?.status)
         Assertions.assertEquals(formkrav, hentetKlage?.formkrav)
+        Assertions.assertEquals(andreDato, hentetKlage?.innkommendeDokument?.mottattDato)
     }
 
     @Test
     fun `lagreKlage oppdaterer ikke opprettet tidspunkt eller saken hvis klagen allerede eksisterer`() {
-        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
-        val sak2 = sakRepo.opprettSak(fnr = "en annen bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
+        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakRepo.opprettSak(fnr = "en annen bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = Enheter.STEINKJER.enhetNr)
         val klage = Klage.ny(sak, null)
         klageDao.lagreKlage(klage)
 
@@ -113,9 +122,9 @@ internal class KlageDaoImplTest(
 
     @Test
     fun `hentKlager henter alle klager på en sak`() {
-        val sak1 = sakRepo.opprettSak(fnr = "Tom", type = SakType.BARNEPENSJON, enhet = "1337")
-        val sak2 = sakRepo.opprettSak(fnr = "Mary", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
-        val sak3 = sakRepo.opprettSak(fnr = "Jill", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
+        val sak1 = sakRepo.opprettSak(fnr = "Tom", type = SakType.BARNEPENSJON, enhet = Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakRepo.opprettSak(fnr = "Mary", type = SakType.OMSTILLINGSSTOENAD, enhet = Enheter.STEINKJER.enhetNr)
+        val sak3 = sakRepo.opprettSak(fnr = "Jill", type = SakType.OMSTILLINGSSTOENAD, enhet = Enheter.STEINKJER.enhetNr)
         lagreKlage(sak1, InnkommendeKlage(LocalDate.now(), "JP-1", null))
         lagreKlage(sak1, InnkommendeKlage(LocalDate.now(), "JP-3", null))
         lagreKlage(sak2, InnkommendeKlage(LocalDate.now(), "JP-2", null))

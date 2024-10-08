@@ -10,6 +10,7 @@ import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
@@ -38,7 +39,7 @@ data class GosysApiOppgave(
     val oppgavetype: String,
     val journalpostId: String?,
     val opprettetTidspunkt: Tidspunkt,
-    val tildeltEnhetsnr: String,
+    val tildeltEnhetsnr: Enhetsnummer,
     val tilordnetRessurs: String?,
     val beskrivelse: String?,
     val status: String,
@@ -58,9 +59,10 @@ data class GosysEndreFristRequest(
 
 interface GosysOppgaveKlient {
     suspend fun hentOppgaver(
+        aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
-        enhetsnr: String? = null,
+        enhetsnr: Enhetsnummer? = null,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver
@@ -115,15 +117,16 @@ class GosysOppgaveKlientImpl(
     private val resourceUrl = config.getString("oppgave.resource.url")
 
     override suspend fun hentOppgaver(
+        aktoerId: String?,
         saksbehandler: String?,
         tema: List<String>,
-        enhetsnr: String?,
+        enhetsnr: Enhetsnummer?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver {
         try {
             logger.info("Henter oppgaver fra Gosys")
-            val temaFilter = tema.map { "&tema=$it" }.joinToString(separator = "")
+            val temaFilter = tema.joinToString(separator = "") { "&tema=$it" }
             val filters =
                 "statuskategori=AAPEN"
                     .plus(temaFilter)
@@ -131,6 +134,7 @@ class GosysOppgaveKlientImpl(
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
                     .plus(saksbehandler?.let { "&tilordnetRessurs=$it" } ?: "")
                     .plus(harTildeling?.let { "&tildeltRessurs=$it" } ?: "")
+                    .plus(aktoerId?.let { "&aktoerId=$it" } ?: "")
 
             return downstreamResourceClient
                 .get(

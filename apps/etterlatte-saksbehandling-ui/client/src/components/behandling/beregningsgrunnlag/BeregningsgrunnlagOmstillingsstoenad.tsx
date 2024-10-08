@@ -4,24 +4,24 @@ import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
-import {
-  hentBeregningsGrunnlagOMS,
-  lagreBeregningsGrunnlagOMS,
-  opprettEllerEndreBeregning,
-} from '~shared/api/beregning'
+import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
-  IBehandlingReducer,
   oppdaterBehandlingsstatus,
-  oppdaterBeregingsGrunnlagOMS,
   oppdaterBeregning,
+  oppdaterBeregningsGrunnlag,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
-import { Beregning, BeregningsGrunnlagOMSDto, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import {
+  Beregning,
+  BeregningsMetodeBeregningsgrunnlagForm,
+  LagreBeregningsGrunnlagDto,
+  toLagreBeregningsGrunnlagDto,
+} from '~shared/types/Beregning'
 import Spinner from '~shared/Spinner'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeBrukt'
@@ -29,25 +29,32 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
 import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
 import { SakType } from '~shared/types/sak'
+import { useBehandling } from '~components/behandling/useBehandling'
+import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
-const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
-  const { behandling } = props
+const BeregningsgrunnlagOmstillingsstoenad = () => {
+  const behandling = useBehandling()
+  const personopplysninger = usePersonopplysninger()
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [visManglendeBeregningsgrunnlag, setVisManglendeBeregningsgrunnlag] = useState(false)
+
+  const [hentBeregningsgrunnlagResult, hentBeregningsgrunnlagRequest] = useApiCall(hentBeregningsGrunnlag)
+  const [lagreBeregningsGrunnlagResult, lagreBeregningsGrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
+  const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
+
+  if (!behandling) return <ApiErrorAlert>Fant ikke behandling</ApiErrorAlert>
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
-  const [beregningsgrunnlagOMSResult, beregningsgrunnlagOMSRequest] = useApiCall(hentBeregningsGrunnlagOMS)
-  const [lagreBeregningsGrunnlagOMSResult, lagreBeregningsGrunnlagOMSRequest] = useApiCall(lagreBeregningsGrunnlagOMS)
-  const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
 
   const onSubmit = () => {
-    if (!behandling.beregningsGrunnlagOMS?.beregningsMetode) {
+    if (!behandling.beregningsGrunnlag?.beregningsMetode) {
       setVisManglendeBeregningsgrunnlag(true)
       return
     }
@@ -60,36 +67,29 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
     })
   }
 
-  const oppdaterBeregningsMetode = (
-    beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
-    beregningsgrunnlag: BeregningsGrunnlagOMSDto | null
-  ) => {
-    const grunnlag = {
-      ...beregningsgrunnlag,
-      beregningsMetode,
-      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
+  const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlagForm) => {
+    const grunnlag: LagreBeregningsGrunnlagDto = {
+      ...toLagreBeregningsGrunnlagDto(behandling?.beregningsGrunnlag),
+      beregningsMetodeFlereAvdoede: undefined,
+      beregningsMetode: beregningsMetode,
     }
-    lagreBeregningsGrunnlagOMSRequest(
+    lagreBeregningsGrunnlagRequest(
       {
         behandlingId: behandling.id,
-        grunnlag,
+        grunnlag: grunnlag,
       },
-      () => {
-        dispatch(oppdaterBeregingsGrunnlagOMS(grunnlag))
+      (result) => {
+        dispatch(oppdaterBeregningsGrunnlag(result))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
         setVisManglendeBeregningsgrunnlag(false)
       }
     )
   }
 
   useEffect(() => {
-    beregningsgrunnlagOMSRequest(behandling.id, (result) => {
+    hentBeregningsgrunnlagRequest(behandling.id, (result) => {
       if (result) {
-        dispatch(
-          oppdaterBeregingsGrunnlagOMS({
-            ...result,
-            institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
-          })
-        )
+        dispatch(oppdaterBeregningsGrunnlag(result))
       }
     })
   }, [])
@@ -97,30 +97,36 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   return (
     <>
       <>
-        {mapResult(beregningsgrunnlagOMSResult, {
+        {mapResult(hentBeregningsgrunnlagResult, {
           pending: <Spinner label="Henter beregningsgrunnlag..." />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente beregningsgrunnlag'}</ApiErrorAlert>,
-          success: (beregningsgrunnlag) => (
+          success: () => (
             <>
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
-                oppdaterBeregningsMetode={(beregningsMetode) =>
-                  oppdaterBeregningsMetode(beregningsMetode, beregningsgrunnlag)
+                navn={
+                  personopplysninger
+                    ? mapNavn(personopplysninger.avdoede[0].opplysning.foedselsnummer, personopplysninger)
+                    : ''
                 }
-                eksisterendeMetode={beregningsgrunnlag?.beregningsMetode}
-                lagreBeregrningsGrunnlagResult={lagreBeregningsGrunnlagOMSResult}
+                behandling={behandling}
+                oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
+                lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
               />
 
-              <Box maxWidth="70rem">
-                <InstitusjonsoppholdHendelser sakId={behandling.sakId} sakType={behandling.sakType} />
-              </Box>
+              {mapFailure(lagreBeregningsGrunnlagResult, (error) => (
+                <ApiErrorAlert>{error.detail}</ApiErrorAlert>
+              ))}
 
+              <Box maxWidth="70rem">
+                <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
+              </Box>
               <InstitusjonsoppholdBeregningsgrunnlag
                 redigerbar={redigerbar}
                 behandling={behandling}
                 sakType={SakType.OMSTILLINGSSTOENAD}
-                beregningsgrunnlag={behandling.beregningsGrunnlagOMS}
-                institusjonsopphold={behandling.beregningsGrunnlagOMS?.institusjonsopphold}
+                beregningsgrunnlag={behandling.beregningsGrunnlag}
+                institusjonsopphold={behandling.beregningsGrunnlag?.institusjonsopphold}
               />
             </>
           ),
@@ -140,7 +146,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             <Button
               variant="primary"
               onClick={onSubmit}
-              loading={isPending(lagreBeregningsGrunnlagOMSResult) || isPending(opprettEllerEndreBeregningResult)}
+              loading={isPending(lagreBeregningsGrunnlagResult) || isPending(opprettEllerEndreBeregningResult)}
             >
               {handlinger.NESTE.navn}
             </Button>

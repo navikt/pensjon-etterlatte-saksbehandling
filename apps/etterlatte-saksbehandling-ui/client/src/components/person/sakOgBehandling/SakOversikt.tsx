@@ -17,8 +17,9 @@ import { omgjoeringAvslagKanOpprettes, revurderingKanOpprettes } from '~componen
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { OmgjoerAvslagModal } from '~components/person/sakOgBehandling/OmgjoerAvslagModal'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
+import { hentGosysOppgaverForPerson } from '~shared/api/gosys'
+import { ForenkletGosysOppgaverTable } from '~components/person/sakOgBehandling/ForenkletGosysOppgaverTable'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -30,11 +31,12 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
 
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
-  const omgjoerAvslagEnabled = useFeatureEnabledMedDefault('omgjoer-avslag', false)
+  const [gosysOppgaverResult, gosysOppgaverFetch] = useApiCall(hentGosysOppgaverForPerson)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
       oppgaverFetch(sakResult.data.sak.id)
+      gosysOppgaverFetch(fnr)
     }
   }, [fnr, sakResult])
 
@@ -68,19 +70,37 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 })}
               </VStack>
 
+              <VStack gap="4">
+                <Box paddingBlock="8 0">
+                  <Heading size="medium">Gosys-oppgaver</Heading>
+                </Box>
+
+                {mapResult(gosysOppgaverResult, {
+                  pending: <Spinner label="Henter oppgaver fra Gosys" />,
+                  error: (error) => (
+                    <ApiErrorAlert>
+                      Feil oppsto ved henting av Gosys-oppgaver <br />
+                      {error.detail}
+                    </ApiErrorAlert>
+                  ),
+                  success: (oppgaver) => (
+                    <ForenkletGosysOppgaverTable oppgaver={oppgaver} oppgaveValg={OppgaveValg.AKTIVE} />
+                  ),
+                })}
+              </VStack>
+
               <VStack gap="4" align="start">
                 <Heading size="medium">Behandlinger</Heading>
                 <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
                 {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
                   <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} />
                 )}
-                {omgjoerAvslagEnabled &&
-                  omgjoeringAvslagKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
-                    <OmgjoerAvslagModal
-                      sakId={sak.id}
-                      harAapenBehandling={behandlinger.some((behandling) => statusErRedigerbar(behandling.status))}
-                    />
-                  )}
+                {omgjoeringAvslagKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
+                  <OmgjoerAvslagModal
+                    sakId={sak.id}
+                    harAapenBehandling={behandlinger.some((behandling) => statusErRedigerbar(behandling.status))}
+                  />
+                )}
               </VStack>
 
               <VStack gap="4">

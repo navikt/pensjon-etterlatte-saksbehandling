@@ -32,7 +32,7 @@ data class OppdaterSjekklisteItem(
     val versjon: Long,
 )
 
-internal val defaultSjekklisteItemsBP =
+internal val skjekklisteItemsFoerstegangsbehandlingBP =
     listOf(
         "Utbetalt bidragsforskudd som skal trekkes inn i etterbetaling - sendt oppgave til Bidrag",
         "Mulighet for, og ikke søkt om (utvidet) barnetrygd - sendt oppgave til barnetrygd",
@@ -47,7 +47,7 @@ internal val defaultSjekklisteItemsBP =
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
     )
 
-internal val defaultSjekklisteItemsOMS =
+internal val sjekklisteItemsFoerstegangsbehandlingOMS =
     listOf(
         "Behov for stønad til barnetilsyn og/eller utdanningsstønad. Oppfølgingsoppgave er opprettet.",
         "Ikke søkt om, men kan ha rett på stønad til barnetilsyn - informert søker",
@@ -60,7 +60,24 @@ internal val defaultSjekklisteItemsOMS =
         "Bosatt Norge: Opprettet oppfølgingsoppgave på sluttbehandling i Gosys",
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
         "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
+        "Sjekk om bruker har overgangsstønad",
     )
 
-internal val defaultFoerstegangsbehandlingItemsOms =
-    defaultSjekklisteItemsOMS + "Sjekk om bruker har overgangsstønad"
+internal val sjekklisteItemsRevurderingBP =
+    listOf(
+        "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
+        "Barnet mottar uføretrygd fra NAV - pensjonen er avkortet",
+        "Mottatt nye bankopplysninger - sendt oppgave til NØP",
+    )
+
+internal val sjekklisteItemsRevurderingOMS =
+    listOf(
+        "Behov for stønad til barnetilsyn og/eller utdanningsstønad. Oppfølgingsoppgave er opprettet.",
+        "Ikke søkt om, men kan ha rett på stønad til barnetilsyn - informert søker",
+        "Gjenlevende er innvilget gradert uføretrygd - oppgave til NAY om endring av OMS",
+        "Refusjonskrav (annen NAV-ytelse) i etterbetaling av OMS - opprettet oppgave til NØP",
+        "Gjenlevende er innvilget AAP/OMS - oppgave sendt til NAV lokal pga spesiell oppfølging for de med OMS",
+    )
+
+internal val sjekklisteItemsBosattNorgeSluttbehandling =
+    listOf("Har opprettet P7000 og P1. Attestant må huske å sende etter attestering.")

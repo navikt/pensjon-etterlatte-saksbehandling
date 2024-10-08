@@ -153,10 +153,10 @@ class PdlKlient(
 
     suspend fun hentPdlIdentifikator(request: HentPdlIdentRequest): PdlIdentResponse {
         val graphqlRequest =
-            PdlFolkeregisterIdentRequest(
-                query = getQuery("/pdl/hentFolkeregisterIdent.graphql"),
+            PdlIdentRequest(
+                query = getQuery("/pdl/hentIdent.graphql"),
                 variables =
-                    PdlFolkeregisterIdentVariables(
+                    PdlIdentVariables(
                         ident = request.ident.value,
                         grupper = listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn, PDLIdentGruppeTyper.NPID.navn),
                         historikk = true,
@@ -231,6 +231,34 @@ class PdlKlient(
                 .post(apiUrl) {
                     behandlingsnummer(SakType.BARNEPENSJON)
                     header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                    accept(Json)
+                    contentType(Json)
+                    setBody(graphqlRequest)
+                }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
+    suspend fun hentAktoerId(request: HentPdlIdentRequest): PdlIdentResponse {
+        val graphqlRequest =
+            PdlIdentRequest(
+                query = getQuery("/pdl/hentIdent.graphql"),
+                variables =
+                    PdlIdentVariables(
+                        ident = request.ident.value,
+                        grupper = listOf(PDLIdentGruppeTyper.AKTORID.navn),
+                        historikk = true,
+                    ),
+            )
+        logger.info("Henter AktørID for ident = ${request.ident} fra PDL")
+
+        return retry<PdlIdentResponse> {
+            httpClient
+                .post(apiUrl) {
                     accept(Json)
                     contentType(Json)
                     setBody(graphqlRequest)

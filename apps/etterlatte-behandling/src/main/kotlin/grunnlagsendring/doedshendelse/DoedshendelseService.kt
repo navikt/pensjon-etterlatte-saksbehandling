@@ -3,8 +3,6 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -20,36 +18,14 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshendelse
 
-enum class DoedshendelseFeatureToggle(
-    private val key: String,
-) : FeatureToggle {
-    KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse"),
-    KanLagreDoedshendelseForEPS("pensjon-etterlatte.kan-lage-doedhendelse-for-eps"),
-    KanSendeBrevOgOppretteOppgave("pensjon-etterlatte.kan-sende-brev-og-opprette-oppgave"),
-    ;
-
-    override fun key(): String = key
-}
-
 class DoedshendelseService(
     private val doedshendelseDao: DoedshendelseDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun settHendelseTilFerdigOgOppdaterBrevId(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) =
         doedshendelseDao.oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert)
-
-    fun kanBrukeDeodshendelserJob() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)
-
-    fun kanSendeBrevOgOppretteOppgave() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, false)
-
-    private fun kanLagreDoedshendelseForEPS() =
-        featureToggleService.isEnabled(
-            toggleId = DoedshendelseFeatureToggle.KanLagreDoedshendelseForEPS,
-            defaultValue = false,
-        )
 
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
@@ -72,8 +48,8 @@ class DoedshendelseService(
                 .filter { it.utfall !== Utfall.AVBRUTT }
 
         val barn = finnBeroerteBarn(avdoed)
-        val samboere = if (kanLagreDoedshendelseForEPS()) finnSamboereForAvdoedMedFellesBarn(avdoed) else emptyList()
-        val ektefeller = if (kanLagreDoedshendelseForEPS()) finnBeroerteEktefeller(avdoed, samboere) else emptyList()
+        val samboere = finnSamboereForAvdoedMedFellesBarn(avdoed)
+        val ektefeller = finnBeroerteEktefeller(avdoed, samboere)
         val alleBeroerte = barn + ektefeller + samboere
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {

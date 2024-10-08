@@ -5,7 +5,8 @@ import { Statsborgerskap as PdlStatsborgerskap } from '~shared/types/Person'
 import { Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { finnLandSomTekst } from '~components/person/personopplysninger/utils'
-import { ILand } from '~shared/api/trygdetid'
+
+import { ILand } from '~utils/kodeverk'
 
 export const Statsborgerskap = ({
   statsborgerskap,

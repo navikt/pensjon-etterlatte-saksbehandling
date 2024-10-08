@@ -1,9 +1,8 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.util.UUID
 
 class AktivitetspliktKopierService(
@@ -14,7 +13,7 @@ class AktivitetspliktKopierService(
         val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
         val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
 
-        if (aktivitetsgrad == null && unntak == null) {
+        if (aktivitetsgrad.isEmpty() && unntak.isEmpty()) {
             return null
         }
 
@@ -22,27 +21,22 @@ class AktivitetspliktKopierService(
     }
 
     fun kopierVurdering(
-        sakId: Long,
+        sakId: SakId,
         behandlingId: UUID,
     ) {
         val vurdering = hentVurderingForBehandling(behandlingId)
-        if (vurdering?.unntak != null || vurdering?.aktivitet != null) {
+        if (vurdering != null) {
             return
         }
+        val nyesteVurdering =
+            hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId)
 
-        val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
-        val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-        val nyesteVurdering = listOfNotNull(aktivitetsgrad, unntak).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
-
-        if (nyesteVurdering != null) {
-            when (nyesteVurdering) {
-                is AktivitetspliktAktivitetsgrad ->
-                    aktivitetspliktAktivitetsgradDao.kopierAktivitetsgrad(
-                        nyesteVurdering.id,
-                        behandlingId,
-                    )
-                is AktivitetspliktUnntak -> aktivitetspliktUnntakDao.kopierUnntak(nyesteVurdering.id, behandlingId)
-            }
+        nyesteVurdering.aktivitet.forEach {
+            aktivitetspliktAktivitetsgradDao.kopierAktivitetsgrad(
+                it.id,
+                behandlingId,
+            )
         }
+        nyesteVurdering.unntak.forEach { aktivitetspliktUnntakDao.kopierUnntak(it.id, behandlingId) }
     }
 }

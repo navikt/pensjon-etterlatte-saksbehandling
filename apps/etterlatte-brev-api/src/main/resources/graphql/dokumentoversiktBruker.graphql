@@ -4,13 +4,15 @@ query(
     $journalstatuser: [Journalstatus!],
     $journalposttyper: [Journalposttype!],
     $foerste: Int!,
+    $etter: String,
 ) {
     dokumentoversiktBruker(
         brukerId: $brukerId,
         tema: $tema,
         journalstatuser: $journalstatuser,
         journalposttyper: $journalposttyper,
-        foerste: $foerste
+        foerste: $foerste,
+        etter: $etter
     ) {
         journalposter {
             journalpostId
@@ -42,6 +44,12 @@ query(
             }
             kanal
             datoOpprettet
+        }
+        sideInfo {
+            sluttpeker
+            finnesNesteSide
+            antall
+            totaltAntall
         }
     }
 }

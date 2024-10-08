@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 interface VedtaksvurderingKlient {
     suspend fun hentIverksatteVedtak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto>
 }
@@ -30,7 +31,7 @@ class VedtaksvurderingKlientImpl(
     config: Config,
     httpClient: HttpClient,
 ) : VedtaksvurderingKlient {
-    private val logger = LoggerFactory.getLogger(VedtaksvurderingKlientImpl::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
@@ -38,7 +39,7 @@ class VedtaksvurderingKlientImpl(
     private val resourceUrl = config.getString("vedtaksvurdering.resource.url")
 
     override suspend fun hentIverksatteVedtak(
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<VedtakSammendragDto> {
         logger.info("Henter iverksatte vedtak for sak=$sakId")

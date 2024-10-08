@@ -1,8 +1,10 @@
 package no.nav.etterlatte.brev.model.oms
 
+import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.brev.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.BrevDataRedigerbar
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -11,12 +13,12 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -36,6 +38,15 @@ data class OmstillingsstoenadRevurdering(
     val omsRettUtenTidsbegrensning: Boolean,
     val feilutbetaling: FeilutbetalingType,
 ) : BrevDataFerdigstilling {
+    init {
+        if (erOmgjoering && datoVedtakOmgjoering == null) {
+            throw InternfeilException(
+                "Kunne ikke lage revurderingsbrevet for omstillingsstønad siden vi ikke" +
+                    " fikk dato vedtak for omgjøring, i en revurdering som er omgjøring.",
+            )
+        }
+    }
+
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
@@ -47,6 +58,7 @@ data class OmstillingsstoenadRevurdering(
             revurderingaarsak: Revurderingaarsak?,
             navnAvdoed: String,
             vilkaarsVurdering: VilkaarsvurderingDto,
+            datoVedtakOmgjoering: LocalDate?,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -65,6 +77,7 @@ data class OmstillingsstoenadRevurdering(
                         beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
                         beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
                         sanksjon = it.sanksjon != null,
+                        institusjon = it.institusjon != null && it.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
                     )
                 }
 
@@ -94,14 +107,14 @@ data class OmstillingsstoenadRevurdering(
                     ) ||
                         revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                // TODO klage kobler seg på her
-                datoVedtakOmgjoering = null,
+                datoVedtakOmgjoering = datoVedtakOmgjoering,
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         virkningsdato = avkortingsinfo.virkningsdato,
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
+                        sisteBeregningsperiodeNesteAar = null,
                         trygdetid =
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,

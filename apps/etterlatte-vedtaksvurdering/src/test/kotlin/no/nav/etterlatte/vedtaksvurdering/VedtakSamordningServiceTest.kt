@@ -7,6 +7,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -48,7 +49,6 @@ class VedtakSamordningServiceTest {
                         AvkortingDto(
                             avkortingGrunnlag = emptyList(),
                             avkortetYtelse = emptyList(),
-                            tidligereAvkortetYtelse = emptyList(),
                         ),
                     ),
             )
@@ -77,7 +77,7 @@ class VedtakSamordningServiceTest {
                     vedtakFattet =
                         VedtakFattet(
                             "SBH",
-                            "1014",
+                            Enheter.defaultEnhet.enhetNr,
                             Tidspunkt.parse("2023-12-05T14:20:50Z"),
                         ),
                     utbetalingsperioder =
@@ -86,6 +86,7 @@ class VedtakSamordningServiceTest {
                                 periode = Periode(virkFom2024Januar, null),
                                 beloep = BigDecimal(2500),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                     avkorting =
@@ -100,7 +101,7 @@ class VedtakSamordningServiceTest {
                     vedtakFattet =
                         VedtakFattet(
                             "SBH",
-                            "1014",
+                            Enheter.defaultEnhet.enhetNr,
                             Tidspunkt.parse("2024-01-11T09:43:04Z"),
                         ),
                     utbetalingsperioder =
@@ -109,6 +110,7 @@ class VedtakSamordningServiceTest {
                                 periode = Periode(virkFom2024Februar, null),
                                 beloep = BigDecimal(2500),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                     avkorting =
@@ -179,6 +181,5 @@ class VedtakSamordningServiceTest {
                     sanksjon = null,
                 ),
             ),
-        tidligereAvkortetYtelse = emptyList(),
     )
 }

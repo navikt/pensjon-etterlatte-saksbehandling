@@ -30,6 +30,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/GrunnlagForVirkningstidspunkt'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
+import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
@@ -44,6 +45,8 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   const personopplysninger = usePersonopplysninger()
   const erBosattUtland = behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
   const erForeldreloes = (personopplysninger?.avdoede || []).length >= 2
+
+  const toggleTidligereFamiliepleier = useFeatureEnabledMedDefault('tidligere-familiepleier', false)
 
   const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
     switch (sakType) {
@@ -75,8 +78,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
       : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
   }
-
-  const viderefoertOpphoerEnabled = useFeatureEnabledMedDefault('viderefoer-opphoer', false)
 
   return (
     <>
@@ -119,9 +120,12 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               beskrivelse={beskrivelseVirkningstidspunkt(behandling.sakType, erBosattUtland, erForeldreloes)}
             >
               {{ info: <GrunnlagForVirkningstidspunkt /> }}
-            </Virkningstidspunkt>{' '}
-            {viderefoertOpphoerEnabled && <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />}
+            </Virkningstidspunkt>
+            <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
+            {behandling.sakType == SakType.OMSTILLINGSSTOENAD && toggleTidligereFamiliepleier && (
+              <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
+            )}
           </>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />

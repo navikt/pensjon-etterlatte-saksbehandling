@@ -80,6 +80,10 @@ internal fun finnSamsvarForHendelse(
             }
         }
 
+        GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR -> {
+            SamsvarMellomKildeOgGrunnlag.Folkeregisteridentifikatorsamsvar(false) // TODO("Må finne ut av denne")
+        }
+
         GrunnlagsendringsType.BOSTED -> {
             val pdlBosted = pdlData.hentBostedsadresse()
             val grunnlagBosted = grunnlag?.bostedsadresse(rolle, fnr)?.verdi

@@ -1,6 +1,5 @@
 import express from 'express'
 import { ApiConfig } from '../config/config'
-import fetch from 'node-fetch'
 import { logger } from '../monitoring/logger'
 
 export const selftestRouter = express.Router()

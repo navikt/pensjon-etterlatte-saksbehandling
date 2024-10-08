@@ -1,5 +1,5 @@
 plugins {
-    id("etterlatte.libs")
+    kotlin("jvm")
     id("java-library")
     id("java-test-fixtures")
 }
@@ -11,6 +11,7 @@ dependencies {
     api(libs.bundles.jackson)
 
     implementation(libs.etterlatte.common)
+    testFixturesImplementation(libs.etterlatte.common)
     implementation(libs.logging.logbackclassic)
     compileOnly(libs.logging.slf4japi)
 

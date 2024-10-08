@@ -10,12 +10,12 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import java.util.UUID
 
@@ -26,10 +26,10 @@ fun Route.behandlingGrunnlagRoute(
     route("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(behandlingId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(opplysningsgrunnlag)
-                }
+                val opplysningsgrunnlag =
+                    grunnlagService.hentOpplysningsgrunnlag(behandlingId)
+                        ?: throw GenerellIkkeFunnetException()
+                call.respond(opplysningsgrunnlag)
             }
         }
 
@@ -43,17 +43,17 @@ fun Route.behandlingGrunnlagRoute(
                 } else if (opplysningstype == Opplysningstype.SOESKEN_I_BEREGNINGEN) {
                     call.respond(HttpStatusCode.NoContent)
                 } else {
-                    call.respond(HttpStatusCode.NotFound)
+                    throw GenerellIkkeFunnetException()
                 }
             }
         }
 
         get("revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                when (val historisk = grunnlagService.hentHistoriskForeldreansvar(behandlingId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(historisk)
-                }
+                val historisk =
+                    grunnlagService.hentHistoriskForeldreansvar(behandlingId)
+                        ?: throw GenerellIkkeFunnetException()
+                call.respond(historisk)
             }
         }
 
@@ -70,32 +70,26 @@ fun Route.behandlingGrunnlagRoute(
         }
 
         post("/laas-til-behandling/{behandlingIdLaasesTil}") {
-            kunSystembruker {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                    val idSomLaasesTil = UUID.fromString(call.parameters["behandlingIdLaasesTil"].toString())
-                    grunnlagService.laasTilVersjonForBehandling(skalLaasesId = behandlingId, idLaasesTil = idSomLaasesTil)
-                    call.respond(HttpStatusCode.OK)
-                }
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val idSomLaasesTil = UUID.fromString(call.parameters["behandlingIdLaasesTil"].toString())
+                grunnlagService.laasTilVersjonForBehandling(skalLaasesId = behandlingId, idLaasesTil = idSomLaasesTil)
+                call.respond(HttpStatusCode.OK)
             }
         }
 
         post("/opprett-grunnlag") {
-            kunSystembruker {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                    val opplysningsbehov = call.receive<Opplysningsbehov>()
-                    grunnlagService.opprettGrunnlag(behandlingId, opplysningsbehov)
-                    call.respond(HttpStatusCode.OK)
-                }
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val opplysningsbehov = call.receive<Opplysningsbehov>()
+                grunnlagService.opprettGrunnlag(behandlingId, opplysningsbehov)
+                call.respond(HttpStatusCode.OK)
             }
         }
 
         post("oppdater-grunnlag") {
-            kunSystembruker {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                    val request = call.receive<OppdaterGrunnlagRequest>()
-                    grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
-                    call.respond(HttpStatusCode.OK)
-                }
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val request = call.receive<OppdaterGrunnlagRequest>()
+                grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

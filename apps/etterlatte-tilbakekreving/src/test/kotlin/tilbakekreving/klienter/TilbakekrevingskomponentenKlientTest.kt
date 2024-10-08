@@ -13,6 +13,7 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
@@ -99,7 +100,7 @@ internal class TilbakekrevingskomponentenKlientTest {
 
         val httpClient = mockedHttpClient("/tilbakekreving/kravgrunnlag", HttpMethod.Post, response)
         val tilbakekrevingskomponentenKlient = TilbakekrevingskomponentenKlient("", httpClient, hendelseRepository)
-        val sakId = 1L
+        val sakId = sakId1
 
         val kravgrunnlagResponse = tilbakekrevingskomponentenKlient.hentKravgrunnlag(sakId, 123L)
 

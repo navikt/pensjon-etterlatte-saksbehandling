@@ -5,11 +5,13 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.automatiskSaksbehandler
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
@@ -28,6 +30,12 @@ class ManglerVirkningstidspunktBP :
         detail = "Mangler virkningstidspunkt for barnepensjon.",
     )
 
+class ManglerForrigeGrunnlag :
+    UgyldigForespoerselException(
+        code = "MANGLER_FORRIGE_GRUNNLAG",
+        detail = "Mangler forrige grunnlag for revurdering",
+    )
+
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val beregningRepository: BeregningRepository,
@@ -41,12 +49,18 @@ class BeregningsGrunnlagService(
         behandlingId: UUID,
         beregningsGrunnlag: LagreBeregningsGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean =
+    ): BeregningsGrunnlag? =
         when {
-            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
+            behandlingKlient.kanSetteStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+                val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
+
                 if (behandling.sakType == SakType.BARNEPENSJON) {
-                    validerSoeskenMedIBeregning(behandlingId, beregningsGrunnlag, brukerTokenInfo)
+                    validerSoeskenMedIBeregning(
+                        behandlingId,
+                        beregningsGrunnlag,
+                        grunnlag,
+                    )
                 }
                 val kanLagreDetteGrunnlaget =
                     if (behandling.behandlingType == BehandlingType.REVURDERING) {
@@ -98,24 +112,28 @@ class BeregningsGrunnlagService(
                             behandlingId = behandlingId,
                             kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                             soeskenMedIBeregning = soeskenMedIBeregning,
-                            institusjonsoppholdBeregningsgrunnlag =
+                            institusjonsopphold =
                                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
                             beregningsMetode = beregningsGrunnlag.beregningsMetode,
-                            begegningsmetodeFlereAvdoede = beregningsGrunnlag.begegningsmetodeFlereAvdoede ?: emptyList(),
+                            beregningsMetodeFlereAvdoede =
+                                beregningsGrunnlag.beregningsMetodeFlereAvdoede
+                                    ?: emptyList(),
+                            kunEnJuridiskForelder = beregningsGrunnlag.kunEnJuridiskForelder,
                         ),
                     )
+
+                behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
+                beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
             }
 
-            else -> false
+            else -> null
         }
 
     private suspend fun validerSoeskenMedIBeregning(
         behandlingId: UUID,
         barnepensjonBeregningsGrunnlag: LagreBeregningsGrunnlag,
-        brukerTokenInfo: BrukerTokenInfo,
+        grunnlag: Grunnlag,
     ) {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
-
         val soeskensFoedselsnummere =
             barnepensjonBeregningsGrunnlag.soeskenMedIBeregning
                 .flatMap { soeskenGrunnlag -> soeskenGrunnlag.data }
@@ -147,13 +165,29 @@ class BeregningsGrunnlagService(
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(
                 forrigeIverksatteBehandlingId,
             )
-        val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
 
+        // hvis forrigeGrunnlag er null, kan aarsaken være at tidligere behandling er manuelt overstyrt
+        if (forrigeGrunnlag == null) {
+            val overstyrtBeregningsGrunnlag =
+                beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
+                    forrigeIverksatteBehandlingId,
+                )
+            if (overstyrtBeregningsGrunnlag.isNotEmpty()) {
+                // i tilfelle hvor tidligere behandling er manuelt overstyrt  (mangler beregningsgrunnlag)
+                // kan vi returnere True ettersom vi ikke har noe å sammenligne med
+                return true
+            } else {
+                // i tilfelle hvor tidligere behandling ikke er overstyrt beregnet
+                throw ManglerForrigeGrunnlag()
+            }
+        }
+
+        val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
         val soeskenjusteringErLiktFoerVirk =
             if (revurdering.sakType == SakType.BARNEPENSJON) {
                 erGrunnlagLiktFoerEnDato(
                     beregningsGrunnlag.soeskenMedIBeregning,
-                    forrigeGrunnlag!!.soeskenMedIBeregning,
+                    forrigeGrunnlag.soeskenMedIBeregning,
                     revurderingVirk,
                 )
             } else {
@@ -163,7 +197,7 @@ class BeregningsGrunnlagService(
         val institusjonsoppholdErLiktFoerVirk =
             erGrunnlagLiktFoerEnDato(
                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                forrigeGrunnlag!!.institusjonsoppholdBeregningsgrunnlag,
+                forrigeGrunnlag.institusjonsopphold,
                 revurderingVirk,
             )
 
@@ -188,7 +222,15 @@ class BeregningsGrunnlagService(
                     behandling.sak,
                     brukerTokenInfo,
                 )
-            beregningsGrunnlagRepository.finnBeregningsGrunnlag(sisteIverksatteBehandling.id)
+            beregningsGrunnlagRepository
+                .finnBeregningsGrunnlag(sisteIverksatteBehandling.id)
+                ?.also {
+                    logger.info(
+                        "Ga ut forrige beregningsgrunnlag for $behandlingId, funnet i " +
+                            "${sisteIverksatteBehandling.id}. Dette grunnlaget er kopiert inn til $behandlingId.",
+                    )
+                    beregningsGrunnlagRepository.lagreBeregningsGrunnlag(it.copy(behandlingId = behandling.id))
+                }
         } else {
             null
         }
@@ -283,28 +325,32 @@ class BeregningsGrunnlagService(
 
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
-            behandlingId,
-            data.perioder.map {
-                OverstyrBeregningGrunnlagDao(
-                    id = UUID.randomUUID(),
-                    behandlingId = behandlingId,
-                    datoFOM = it.fom,
-                    datoTOM = it.tom,
-                    utbetaltBeloep = it.data.utbetaltBeloep,
-                    trygdetid = it.data.trygdetid,
-                    trygdetidForIdent = it.data.trygdetidForIdent,
-                    prorataBroekTeller = it.data.prorataBroekTeller,
-                    prorataBroekNevner = it.data.prorataBroekNevner,
-                    sakId = behandling.sak,
-                    beskrivelse = it.data.beskrivelse,
-                    aarsak = it.data.aarsak,
-                    kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
-                )
-            },
-        )
-
-        return hentOverstyrBeregningGrunnlag(behandlingId)
+        if (behandlingKlient.kanSetteStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)) {
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                behandlingId,
+                data.perioder.map {
+                    OverstyrBeregningGrunnlagDao(
+                        id = UUID.randomUUID(),
+                        behandlingId = behandlingId,
+                        datoFOM = it.fom,
+                        datoTOM = it.tom,
+                        utbetaltBeloep = it.data.utbetaltBeloep,
+                        trygdetid = it.data.trygdetid,
+                        trygdetidForIdent = it.data.trygdetidForIdent,
+                        prorataBroekTeller = it.data.prorataBroekTeller,
+                        prorataBroekNevner = it.data.prorataBroekNevner,
+                        sakId = behandling.sak,
+                        beskrivelse = it.data.beskrivelse,
+                        aarsak = it.data.aarsak,
+                        kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                    )
+                },
+            )
+            behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
+            return hentOverstyrBeregningGrunnlag(behandlingId)
+        } else {
+            throw OverstyrtBeregningFeilBehandlingStatusException(behandlingId, behandling.status)
+        }
     }
 
     fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
@@ -323,7 +369,8 @@ class BeregningsGrunnlagService(
                 val nyePerioder = mutableListOf<OverstyrBeregningGrunnlagDao>()
                 grunnlag.forEach {
                     val erFoerRegulering = it.datoTOM != null && it.datoTOM!! < reguleringsmaaned
-                    val erOverRegulering = it.datoFOM < reguleringsmaaned && (it.datoTOM == null || it.datoTOM!! > reguleringsmaaned)
+                    val erOverRegulering =
+                        it.datoFOM < reguleringsmaaned && (it.datoTOM == null || it.datoTOM!! > reguleringsmaaned)
 
                     if (erFoerRegulering) {
                         nyePerioder.add(it)
@@ -331,7 +378,12 @@ class BeregningsGrunnlagService(
                         val forrigeMaaned = reguleringsmaaned.minusMonths(1)
                         val eksisterende =
                             it.copy(
-                                datoTOM = LocalDate.of(reguleringsmaaned.year, forrigeMaaned.month, forrigeMaaned.lengthOfMonth()),
+                                datoTOM =
+                                    LocalDate.of(
+                                        reguleringsmaaned.year,
+                                        forrigeMaaned.month,
+                                        forrigeMaaned.lengthOfMonth(),
+                                    ),
                             )
                         val nyPeriode =
                             tilpassOverstyrtBeregningsgrunnlagForRegulering(
@@ -362,6 +414,15 @@ class BeregningsGrunnlagService(
         }
     }
 }
+
+class OverstyrtBeregningFeilBehandlingStatusException(
+    behandlingId: UUID,
+    behandlingStatus: BehandlingStatus,
+) : UgyldigForespoerselException(
+        code = "OVERSTYRT_BEREGNING_FEIL_BEHANDLINGSSTATUS",
+        detail = "Kunne ikke lagre overstyrt beregningsgrunnlag fordi behandlingen er i feil status",
+        meta = mapOf("behandlingId" to behandlingId, "behandlingStatus" to behandlingStatus),
+    )
 
 class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(
     behandlingId: UUID,

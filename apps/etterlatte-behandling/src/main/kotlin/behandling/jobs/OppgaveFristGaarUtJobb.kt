@@ -7,6 +7,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveFristGaarUtJobService
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
@@ -27,7 +28,12 @@ class OppgaveFristGaarUtJobb(
     private val jobbNavn = this::class.simpleName
 
     private var jobContext: Context =
-        Context(Self(oppgaveFristGaarUtJobService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
+        Context(
+            Self(oppgaveFristGaarUtJobService::class.java.simpleName),
+            DatabaseContext(dataSource),
+            sakTilgangDao,
+            HardkodaSystembruker.oppgave,
+        )
 
     override fun schedule(): Timer {
         logger.debug("{} er satt til å starte {} med periode {}", jobbNavn, starttidspunkt, periode)

@@ -1,10 +1,9 @@
-import { Alert, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, Heading, ReadMore, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
-import { opprettOverstyrBeregning } from '~shared/api/beregning'
 import {
   InputRow,
   NyBehandlingSkjema,
@@ -33,7 +32,6 @@ interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   enhet: EnhetFilterKeys
   foreldreloes: boolean
   ufoere: boolean
-  overstyrBeregning: boolean
   overstyrTrygdetid: boolean
   kategori: OverstyrtBeregningKategori
 }
@@ -43,7 +41,6 @@ export default function ManuellBehandling() {
 
   const [opprettBehandlingStatus, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
-  const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
 
   const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
@@ -94,13 +91,6 @@ export default function ManuellBehandling() {
         ufoere: data.ufoere,
       },
       (nyBehandlingRespons) => {
-        if (data.overstyrBeregning) {
-          opprettOverstyrtBeregningReq({
-            behandlingId: nyBehandlingRespons,
-            beskrivelse: 'Manuell migrering',
-            kategori: data.kategori,
-          })
-        }
         if (data.overstyrTrygdetid) {
           opprettOverstyrtTrygdetidReq({ behandlingId: nyBehandlingRespons })
         }
@@ -113,7 +103,6 @@ export default function ManuellBehandling() {
     register,
     handleSubmit,
     control,
-    watch,
     formState: { errors },
   } = methods
 
@@ -162,23 +151,9 @@ export default function ManuellBehandling() {
           ))}
         </Select>
 
-        <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
-
-        <Select
-          label="Årsak overstyrt beregning:"
-          {...register('kategori', {
-            required: { value: !!watch('overstyrBeregning'), message: 'Du må velge kategori' },
-          })}
-          disabled={!watch('overstyrBeregning')}
-          error={errors.kategori?.message}
-        >
-          <option value="">Velg kategori</option>
-          {Object.entries(OverstyrtBeregningKategori).map(([key, value]) => (
-            <option key={key} value={key}>
-              {value}
-            </option>
-          ))}
-        </Select>
+        <ReadMore header="Overstyrt beregning?">
+          Overstyrt beregning må registreres av en fagkoordinator i beregningsgrunnlag-steget underveis i behandlinga
+        </ReadMore>
 
         <Checkbox {...register('overstyrTrygdetid')}>Skal bruke manuell trygdetid</Checkbox>
 
@@ -213,11 +188,7 @@ export default function ManuellBehandling() {
           <Button
             variant="secondary"
             onClick={handleSubmit(ferdigstill)}
-            loading={
-              isPending(opprettBehandlingStatus) ||
-              isPending(overstyrBeregningStatus) ||
-              isPending(overstyrTrygdetidStatus)
-            }
+            loading={isPending(opprettBehandlingStatus) || isPending(overstyrTrygdetidStatus)}
           >
             Opprett behandling
           </Button>
@@ -237,17 +208,6 @@ export default function ManuellBehandling() {
           errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
         })}
 
-        {mapAllApiResult(
-          overstyrBeregningStatus,
-          <Alert variant="info">Oppretter overstyrt beregning.</Alert>,
-          null,
-          () => (
-            <ApiErrorAlert>Klarte ikke å overstyre beregning.</ApiErrorAlert>
-          ),
-          () => (
-            <Alert variant="success">Overstyrt beregning opprettet!</Alert>
-          )
-        )}
         {mapAllApiResult(
           overstyrTrygdetidStatus,
           <Alert variant="info">Oppretter overstyrt trygdetid.</Alert>,

@@ -1,8 +1,13 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.brev.BrevDataRedigerbar
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 
@@ -35,15 +40,23 @@ data class Adresse(
     val landkode: String,
     val land: String,
 ) {
-    fun erGyldig(): Boolean =
+    fun erGyldig(): List<String> =
         if (adresseType.isBlank() || landkode.isBlank() || land.isBlank()) {
-            false
+            listOf("Adressetype ($adresseType), landkode ($landkode) eller land ($land) er blank")
         } else if (adresseType == "NORSKPOSTADRESSE") {
-            !(postnummer.isNullOrBlank() || poststed.isNullOrBlank())
+            if (!(postnummer.isNullOrBlank() || poststed.isNullOrBlank())) {
+                listOf()
+            } else {
+                listOf("Postnummer eller poststed er null eller blank")
+            }
         } else if (adresseType == "UTENLANDSKPOSTADRESSE") {
-            !adresselinje1.isNullOrBlank()
+            if (!adresselinje1.isNullOrBlank()) {
+                listOf()
+            } else {
+                listOf("Adresselinje1 er null eller blank")
+            }
         } else {
-            true
+            listOf()
         }
 }
 
@@ -53,12 +66,13 @@ data class Mottaker(
     val foedselsnummer: MottakerFoedselsnummer? = null,
     val orgnummer: String? = null,
     val adresse: Adresse,
+    val tvingSentralPrint: Boolean = false,
 ) {
-    fun erGyldig(): Boolean =
+    fun erGyldig(): List<String> =
         if (navn.isBlank()) {
-            false
+            listOf("Navn er blank")
         } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
-            false
+            listOf("Fødselsnummer og orgnummer er null eller blank")
         } else {
             adresse.erGyldig()
         }
@@ -66,7 +80,7 @@ data class Mottaker(
 
 data class Brev(
     val id: BrevID,
-    val sakId: Long,
+    val sakId: SakId,
     val behandlingId: UUID?,
     val tittel: String?,
     val spraak: Spraak,
@@ -77,6 +91,7 @@ data class Brev(
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
     val brevtype: Brevtype,
+    val brevkoder: Brevkoder?,
     val journalpostId: String? = null,
     val bestillingId: String? = null,
 ) {
@@ -84,8 +99,46 @@ data class Brev(
 }
 
 enum class BrevProsessType {
+    @Deprecated(
+        "Bruk heller redigerbar. " +
+            "Det er noen brev i databasen som er oppretta med denne, så ikke slett statusen",
+    )
     MANUELL,
     REDIGERBAR,
     AUTOMATISK,
     OPPLASTET_PDF,
 }
+
+class OpprettJournalfoerOgDistribuerRequest(
+    val brevKode: Brevkoder,
+    val brevDataRedigerbar: BrevDataRedigerbar,
+    val avsenderRequest: SaksbehandlerOgAttestant,
+    val sakId: SakId,
+)
+
+class JournalfoerVedtaksbrevResponseOgBrevid(
+    val brevId: BrevID,
+    val opprettetJournalpost: OpprettJournalpostResponse,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class OpprettJournalpostResponse(
+    val journalpostId: String,
+    val journalpostferdigstilt: Boolean,
+    val dokumenter: List<DokumentInfo> = emptyList(),
+) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class DokumentInfo(
+        val dokumentInfoId: String,
+    )
+}
+
+data class BrevOgVedtakDto(
+    val vedtaksbrev: Brev,
+    val vedtak: JsonNode,
+)
+
+data class BrevDistribusjonResponse(
+    val brevId: BrevID,
+    val erDistribuert: Boolean,
+)

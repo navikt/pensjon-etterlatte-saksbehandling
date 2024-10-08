@@ -15,26 +15,33 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspli
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
@@ -46,9 +53,10 @@ class AktivitetspliktService(
     private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao,
     private val behandlingService: BehandlingService,
     private val grunnlagKlient: GrunnlagKlient,
-    private val automatiskRevurderingService: AutomatiskRevurderingService,
+    private val revurderingService: RevurderingService,
     private val statistikkKafkaProducer: BehandlingHendelserKafkaProducer,
     private val oppgaveService: OppgaveService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
         aktivitetspliktDao.finnSenesteAktivitetspliktOppfolging(behandlingId)
@@ -63,63 +71,71 @@ class AktivitetspliktService(
     }
 
     suspend fun hentAktivitetspliktDto(
-        sakId: Long,
+        sakId: SakId,
         bruker: BrukerTokenInfo,
-        behandlingId: UUID,
+        behandlingId: UUID?,
     ): AktivitetspliktDto {
-        val grunnlag = grunnlagKlient.hentGrunnlagForBehandling(behandlingId, bruker)
+        val faktiskBehandlingId =
+            behandlingId ?: behandlingService.hentSisteIverksatte(sakId)?.id ?: throw InternfeilException(
+                "Kunne ikke hente ut aktivitetspliktDto for sakId=$sakId, siden vi ikke mottok behandlingId " +
+                    "aktivitetspliktvurderingen er knyttet til, og det ligger heller ingen iverksatte " +
+                    "behandlinger i saken.",
+            )
+
+        val grunnlag = grunnlagKlient.hentGrunnlagForBehandling(faktiskBehandlingId, bruker)
         val avdoedDoedsdato =
-            requireNotNull(
-                grunnlag
-                    .hentAvdoede()
-                    .singleOrNull()
-                    ?.hentDoedsdato()
-                    ?.verdi,
-            ) {
-                "Kunne ikke hente ut avdødes dødsdato for behandling med id=$behandlingId"
+            grunnlag
+                .hentAvdoede()
+                .singleOrNull()
+                ?.hentDoedsdato()
+                ?.verdi
+
+        if (avdoedDoedsdato == null) {
+            val aktuellBehandling = behandlingService.hentBehandling(faktiskBehandlingId)
+            if (aktuellBehandling?.status in BehandlingStatus.iverksattEllerAttestert()) {
+                throw InternfeilException(
+                    "Mangler avdødes dødsdato i en behandling som er iverksatt/attestert, " +
+                        "med sakId=$sakId. Dette gjør at vi ikke får hentet ut riktig aktivitetsplikt for saken " +
+                        "og de vil kunne mangle fra statistikken. Årsaken til at vi ikke har en dødsdato og " +
+                        "dermed ikke får riktig? statistikk bør sees på, og en sending av dto for denne saken " +
+                        "til statistikk bør vurderes",
+                )
+            } else {
+                throw ManglerDoedsdatoUnderBehandlingException(sakId)
             }
+        }
 
-        val sisteBehandling = behandlingService.hentSisteIverksatte(sakId)
-        val aktiviteter = sisteBehandling?.id?.let { hentAktiviteter(it) } ?: emptyList()
+        val aktiviteter = hentAktiviteter(faktiskBehandlingId)
 
-        val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
-        val nyesteUnntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-        val sisteVurdering =
-            listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
-
-        val (unntak, aktivitetsgrad) =
-            when (sisteVurdering) {
-                is AktivitetspliktAktivitetsgrad -> emptyList<AktivitetspliktUnntak>() to listOf(sisteVurdering)
-                is AktivitetspliktUnntak -> listOf(sisteVurdering) to emptyList()
-                else -> emptyList<AktivitetspliktUnntak>() to emptyList()
-            }
+        val sisteVurdering = hentVurderingForSak(sakId)
 
         return AktivitetspliktDto(
             sakId = sakId,
             avdoedDoedsmaaned = YearMonth.from(avdoedDoedsdato),
-            aktivitetsgrad = aktivitetsgrad.map { it.toDto() },
-            unntak = unntak.map { it.toDto() },
+            aktivitetsgrad = sisteVurdering.aktivitet.map { it.toDto() },
+            unntak = sisteVurdering.unntak.map { it.toDto() },
             brukersAktivitet = aktiviteter.map { it.toDto() },
         )
     }
 
     fun oppfyllerAktivitetsplikt(
-        sakId: Long,
+        sakId: SakId,
         aktivitetspliktDato: LocalDate,
     ): Boolean {
-        val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
-        val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-        val nyesteVurdering =
-            listOfNotNull(aktivitetsgrad, unntak).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+        val nyesteVurdering = hentVurderingForSak(sakId)
 
-        return when (nyesteVurdering) {
-            is AktivitetspliktAktivitetsgrad -> oppfyllerAktivitet(nyesteVurdering)
-            is AktivitetspliktUnntak -> harUnntakPaaDato(nyesteVurdering, aktivitetspliktDato)
-            else -> {
-                logger.info("Det er ikke gjort en vurdering av bruker på over 50% aktivitet, og finner ingen unntak for sak $sakId")
-                false
+        // TODO("se på å heller ha en tom på vurderinger")
+        val relevantVurdering =
+            nyesteVurdering.aktivitet.filter { it.fom <= aktivitetspliktDato }.maxByOrNull { it.fom }
+        val relevantUnntak =
+            nyesteVurdering.unntak.find {
+                (it.fom ?: aktivitetspliktDato) >= aktivitetspliktDato &&
+                    (it.tom ?: aktivitetspliktDato) <= aktivitetspliktDato
             }
-        }
+
+        val oppfyllerAktivitet = relevantVurdering?.let { oppfyllerAktivitet(it) } ?: false
+        val harUnntak = relevantUnntak?.let { harUnntakPaaDato(it, aktivitetspliktDato) } ?: false
+        return oppfyllerAktivitet || harUnntak
     }
 
     private fun oppfyllerAktivitet(aktivitetsgrad: AktivitetspliktAktivitetsgrad) =
@@ -142,73 +158,100 @@ class AktivitetspliktService(
         }
     }
 
-    private fun harVarigUnntak(sakId: Long): Boolean {
-        val nyesteAktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
-        val nyesteUnntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
-        val sisteVurdering =
-            listOfNotNull(nyesteUnntak, nyesteAktivitetsgrad).sortedBy { it.opprettet.endretDatoOrNull() }.lastOrNull()
+    private fun harVarigUnntak(sakId: SakId): Boolean {
+        val varigUnntak =
+            hentVurderingForSak(sakId)
+                .unntak
+                .find { it.unntak == AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT }
 
-        return when (sisteVurdering) {
-            is AktivitetspliktUnntak -> sisteVurdering.unntak == AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
-            else -> false
-        }
+        return varigUnntak != null
     }
 
-    fun hentAktiviteter(behandlingId: UUID) = aktivitetspliktDao.hentAktiviteter(behandlingId)
+    fun hentAktiviteter(
+        behandlingId: UUID? = null,
+        sakId: SakId? = null,
+    ): List<AktivitetspliktAktivitet> =
+        (
+            if (behandlingId != null) {
+                aktivitetspliktDao.hentAktiviteterForBehandling(behandlingId)
+            } else if (sakId != null) {
+                aktivitetspliktDao.hentAktiviteterForSak(sakId)
+            } else {
+                throw ManglerSakEllerBehandlingIdException()
+            }
+        )
 
     fun upsertAktivitet(
-        behandlingId: UUID,
         aktivitet: LagreAktivitetspliktAktivitet,
         brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID? = null,
+        sakId: SakId? = null,
     ) {
-        val behandling =
-            requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
-
-        if (!behandling.status.kanEndres()) {
-            throw BehandlingKanIkkeEndres()
-        }
-
-        if (aktivitet.sakId != behandling.sak.id) {
-            throw SakidTilhoererIkkeBehandlingException()
-        }
-
         if (aktivitet.tom != null && aktivitet.tom < aktivitet.fom) {
             throw TomErFoerFomException()
         }
-
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        if (aktivitet.id != null) {
-            aktivitetspliktDao.oppdaterAktivitet(behandlingId, aktivitet, kilde)
+
+        if (behandlingId != null) {
+            val behandling =
+                requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            if (!behandling.status.kanEndres()) {
+                throw BehandlingKanIkkeEndres()
+            }
+            if (aktivitet.sakId != behandling.sak.id) {
+                throw SakidTilhoererIkkeBehandlingException()
+            }
+            if (aktivitet.id != null) {
+                aktivitetspliktDao.oppdaterAktivitet(behandlingId, aktivitet, kilde)
+            } else {
+                aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
+            }
+            runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo, behandlingId) }
+        } else if (sakId != null) {
+            if (aktivitet.sakId != sakId) {
+                throw SakidTilhoererIkkeBehandlingException()
+            }
+
+            if (aktivitet.id != null) {
+                aktivitetspliktDao.oppdaterAktivitetForSak(sakId, aktivitet, kilde)
+            } else {
+                aktivitetspliktDao.opprettAktivitetForSak(sakId, aktivitet, kilde)
+            }
         } else {
-            aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
+            throw ManglerSakEllerBehandlingIdException()
         }
-        runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo, behandlingId) }
     }
 
     fun slettAktivitet(
-        behandlingId: UUID,
         aktivitetId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID? = null,
+        sakId: SakId? = null,
     ) {
-        val behandling =
-            requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
-
-        if (!behandling.status.kanEndres()) {
-            throw BehandlingKanIkkeEndres()
+        if (behandlingId != null) {
+            val behandling =
+                requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            if (!behandling.status.kanEndres()) {
+                throw BehandlingKanIkkeEndres()
+            }
+            aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
+            runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo, behandlingId) }
+        } else if (sakId != null) {
+            aktivitetspliktDao.slettAktivitetForSak(aktivitetId, sakId)
+        } else {
+            throw ManglerSakEllerBehandlingIdException()
         }
-        aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
-        runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo, behandlingId) }
     }
 
     fun opprettAktivitetsgradForOppgave(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         oppgaveId: UUID,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         require(
-            aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) == null,
+            aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId).isEmpty(),
         ) { "Aktivitetsgrad finnes allerede for oppgave $oppgaveId" }
         aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
@@ -218,7 +261,7 @@ class AktivitetspliktService(
     fun upsertAktivitetsgradForBehandling(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
@@ -234,12 +277,13 @@ class AktivitetspliktService(
             aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgrad, kilde, behandlingId)
         } else {
             require(
-                aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) == null,
+                aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId).isEmpty(),
             ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
             val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
-            if (unntak != null) {
-                aktivitetspliktUnntakDao.slettUnntak(unntak.id, behandlingId)
+            unntak.forEach {
+                aktivitetspliktUnntakDao.slettUnntak(it.id, behandlingId)
             }
+
             aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
                 aktivitetsgrad,
                 sakId,
@@ -254,7 +298,7 @@ class AktivitetspliktService(
     fun opprettUnntakForOpppgave(
         unntak: LagreAktivitetspliktUnntak,
         oppgaveId: UUID,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         if (unntak.fom != null && unntak.tom != null && unntak.fom > unntak.tom) {
@@ -263,7 +307,7 @@ class AktivitetspliktService(
 
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         require(
-            aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) == null,
+            aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId).isEmpty(),
         ) { "Unntak finnes allerede for oppgave $oppgaveId" }
         aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, oppgaveId)
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
@@ -279,7 +323,7 @@ class AktivitetspliktService(
     fun upsertUnntakForBehandling(
         unntak: LagreAktivitetspliktUnntak,
         behandlingId: UUID,
-        sakId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
@@ -299,58 +343,61 @@ class AktivitetspliktService(
             aktivitetspliktUnntakDao.oppdaterUnntak(unntak, kilde, behandlingId)
         } else {
             require(
-                aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) == null,
+                aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId).isEmpty(),
             ) { "Unntak finnes allerede for behandling $behandlingId" }
 
-            val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
-            if (aktivitetsgrad != null) {
-                aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(aktivitetsgrad.id, behandlingId)
+            val aktivitetsgrad =
+                aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
+            aktivitetsgrad.forEach {
+                aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(it.id, behandlingId)
             }
+
             aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
         }
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
     }
 
-    private suspend fun sendDtoTilStatistikk(
-        sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID,
-    ) {
-        try {
-            val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId)
-            statistikkKafkaProducer.sendMeldingOmAktivitetsplikt(dto)
-        } catch (e: Exception) {
-            logger.error(
-                "Kunne ikke sende hendelse til statistikk om oppdatert aktivitetsplikt, for sak $sakId. " +
-                    "Dette betyr at vi kan mangle oppdatert informasjon om aktivitetsplikten i saken for bruker, og " +
-                    "bør sees på / vurdere en ekstra sending for akkurat denne saken.",
-                e,
-            )
-        }
-    }
-
     fun hentVurderingForOppgave(oppgaveId: UUID): AktivitetspliktVurdering? {
         val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId)
         val unntak = aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId)
 
-        if (aktivitetsgrad == null && unntak == null) {
+        if (aktivitetsgrad.isEmpty() && unntak.isEmpty()) {
             return null
         }
 
         return AktivitetspliktVurdering(aktivitetsgrad, unntak)
     }
+
+    fun hentVurderingForOppgaveGammel(oppgaveId: UUID): AktivitetspliktVurderingGammel? =
+        hentVurderingForOppgave(oppgaveId)?.let {
+            AktivitetspliktVurderingGammel(
+                aktivitet = it.aktivitet.firstOrNull(),
+                unntak = it.unntak.firstOrNull(),
+            )
+        }
 
     fun hentVurderingForBehandling(behandlingId: UUID): AktivitetspliktVurdering? {
         val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
         val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
 
-        if (aktivitetsgrad == null && unntak == null) {
+        if (aktivitetsgrad.isEmpty() && unntak.isEmpty()) {
             return null
         }
 
         return AktivitetspliktVurdering(aktivitetsgrad, unntak)
     }
+
+    fun hentVurderingForBehandlingGammel(behandlingId: UUID): AktivitetspliktVurderingGammel? =
+        hentVurderingForBehandling(behandlingId)?.let {
+            AktivitetspliktVurderingGammel(
+                aktivitet = it.aktivitet.firstOrNull(),
+                unntak = it.unntak.firstOrNull(),
+            )
+        }
+
+    fun hentVurderingForSak(sakId: SakId): AktivitetspliktVurdering =
+        hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId)
 
     fun opprettRevurderingHvisKravIkkeOppfylt(
         request: OpprettRevurderingForAktivitetspliktDto,
@@ -443,16 +490,22 @@ class AktivitetspliktService(
         persongalleri: Persongalleri,
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter behandling for revurdering av aktivitetsplikt for sak ${request.sakId}")
-        return automatiskRevurderingService
-            .opprettAutomatiskRevurdering(
+        return revurderingService
+            .opprettRevurdering(
                 sakId = request.sakId,
-                forrigeBehandling = forrigeBehandling,
-                revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
-                virkningstidspunkt = aktivitetspliktDato,
-                kilde = Vedtaksloesning.GJENNY,
                 persongalleri = persongalleri,
-                frist = request.frist,
+                forrigeBehandling = forrigeBehandling.id,
+                mottattDato = null,
+                prosessType = Prosesstype.MANUELL,
+                kilde = Vedtaksloesning.GJENNY,
+                revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                virkningstidspunkt = aktivitetspliktDato?.tilVirkningstidspunkt("Aktivitetsplikt"),
+                utlandstilknytning = forrigeBehandling.utlandstilknytning,
+                boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                 begrunnelse = request.jobbType.beskrivelse,
+                saksbehandlerIdent = Fagsaksystem.EY.navn,
+                frist = request.frist,
+                opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
             ).oppdater()
             .let { revurdering ->
                 fjernSaksbehandlerFraRevurderingsOppgave(revurdering)
@@ -476,6 +529,104 @@ class AktivitetspliktService(
             logger.warn("Fant ikke oppgave for revurdering av aktivitetsplikt for sak ${revurdering.sak.id}")
         }
     }
+
+    private suspend fun sendDtoTilStatistikk(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID,
+    ) {
+        try {
+            val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId)
+            statistikkKafkaProducer.sendMeldingOmAktivitetsplikt(dto)
+        } catch (e: ManglerDoedsdatoUnderBehandlingException) {
+            // Dette er ikke kritisk og vi vil bare logge en advarsel
+            logger.warn(e.detail, e)
+        } catch (e: Exception) {
+            logger.error(
+                "Kunne ikke sende hendelse til statistikk om oppdatert aktivitetsplikt, for sak $sakId. " +
+                    "Dette betyr at vi kan mangle oppdatert informasjon om aktivitetsplikten i saken for bruker, og " +
+                    "bør sees på / vurdere en ekstra sending for akkurat denne saken.",
+                e,
+            )
+        }
+    }
+}
+
+class ManglerDoedsdatoUnderBehandlingException(
+    sakId: SakId,
+) : UgyldigForespoerselException(
+        "MANGLER_DOEDSDATO_SAK",
+        "Mangler dødsdato avdød i sak $sakId. Dette er en sak under behandling, så statistikk skal " +
+            "plukke opp aktiviteten i vedtaket hvis det blir innvilgelse.",
+    )
+
+/**
+ * Henter det nyeste bildet på hva som er vurderingen av aktivitetsgrad og unntak fra aktivitet på sak.
+ *
+ * Grunnen til at man må hente ut både unntak og aktivitetgrad fra samme kilde, og gjøre sammenstilling for å
+ * sikre at det er samme kilde kan mse på følgende scenario:
+ *
+ * Man har følgende samling av vurderinger for det som er “riktig” for saken:
+ * |-------- Under 50 % ----|------ over 50 % ----|----- Unntak midlertidig sykdom --->
+ *
+ * Der unntaket er lagt inn nylig. La oss si at det ikke stemmer at det er et unntak allikevel i saken,
+ * og man korrigerer i en behandling:
+ * |-------- Under 50 % ----|------ over 50 % ------->
+ *
+ * Hvis vi nå skal se hva som er “riktig” i saken må man hente ut begge deler, fordi hvis vi henter ut
+ * siste vurdering og siste unntak får man med seg det slettede unntaket.
+ */
+fun hentVurderingForSakHelper(
+    aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao,
+    aktivitetspliktUnntakDao: AktivitetspliktUnntakDao,
+    sakId: SakId,
+): AktivitetspliktVurdering {
+    val aktivitet = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
+    val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
+
+    val idAktivitet = setOf(aktivitet.map { it.behandlingId to it.oppgaveId })
+    val idUnntak = setOf(unntak.map { it.behandlingId to it.oppgaveId })
+    if (aktivitet.isNotEmpty() && unntak.isNotEmpty() && idAktivitet != idUnntak) {
+        // Vi har hentet både fra vurdering og unntak, men vi har hentet fra forskjellige oppgaver / behandlinger.
+        // For å hente riktig i dette tilfellet må vi finne hvilken som er nyest, og bruke den id'en til å hente
+        // den andre
+        val nyesteEndringAktivitet = aktivitet.maxOf { it.endret?.endretDatoOrNull() ?: Tidspunkt.MIN }
+        val nyesteEndringUnntak = unntak.maxOf { it.endret?.endretDatoOrNull() ?: Tidspunkt.MIN }
+
+        if (nyesteEndringUnntak > nyesteEndringAktivitet) {
+            val foersteUnntak = unntak.first()
+            if (foersteUnntak.behandlingId != null) {
+                val aktivitetForBehandling =
+                    aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(foersteUnntak.behandlingId)
+                return AktivitetspliktVurdering(aktivitetForBehandling, unntak)
+            } else {
+                val oppgaveId =
+                    requireNotNull(foersteUnntak.oppgaveId) {
+                        "Har et unntak med id=${foersteUnntak.id} i sak=${foersteUnntak.sakId} som ikke " +
+                            "er koblet på hverken sak eller oppgave."
+                    }
+                val aktivitetForOppgave = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId)
+                return AktivitetspliktVurdering(aktivitetForOppgave, unntak)
+            }
+        } else {
+            val foersteVurdering = aktivitet.first()
+            if (foersteVurdering.behandlingId != null) {
+                val unntakForBehandling =
+                    aktivitetspliktUnntakDao.hentUnntakForBehandling(foersteVurdering.behandlingId)
+                return AktivitetspliktVurdering(aktivitet, unntakForBehandling)
+            } else {
+                val oppgaveId =
+                    requireNotNull(foersteVurdering.oppgaveId) {
+                        "Har en vurdering med id=${foersteVurdering.id} i sak=${foersteVurdering.sakId} som ikke " +
+                            "er koblet på hverken sak eller oppgave."
+                    }
+                val unntakForOppgave = aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId)
+                return AktivitetspliktVurdering(aktivitet, unntakForOppgave)
+            }
+        }
+    }
+
+    return AktivitetspliktVurdering(aktivitet, unntak)
 }
 
 class SakidTilhoererIkkeBehandlingException :
@@ -490,9 +641,20 @@ class TomErFoerFomException :
         detail = "Til og med dato er kan ikke være før fra og med dato",
     )
 
-data class AktivitetspliktVurdering(
+class ManglerSakEllerBehandlingIdException :
+    UgyldigForespoerselException(
+        code = "MANGLER_SAK_ELLER_BEHANDLING_ID",
+        detail = "Forespørsel mangler sak eller behandling id",
+    )
+
+data class AktivitetspliktVurderingGammel(
     val aktivitet: AktivitetspliktAktivitetsgrad?,
     val unntak: AktivitetspliktUnntak?,
+)
+
+data class AktivitetspliktVurdering(
+    val aktivitet: List<AktivitetspliktAktivitetsgrad>,
+    val unntak: List<AktivitetspliktUnntak>,
 )
 
 interface AktivitetspliktVurderingOpprettetDato {

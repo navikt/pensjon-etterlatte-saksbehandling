@@ -3,6 +3,7 @@ package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mq.DummyJmsConnectionFactory
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
@@ -113,7 +114,7 @@ class KravgrunnlagConsumerTest {
     ) = TilbakekrevingHendelse(
         id = UUID.randomUUID(),
         opprettet = Tidspunkt.now(),
-        sakId = 1,
+        sakId = sakId1,
         payload = "payload",
         status = status,
         type = type,

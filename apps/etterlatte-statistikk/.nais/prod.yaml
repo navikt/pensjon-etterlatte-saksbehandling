@@ -32,10 +32,10 @@ spec:
             value: "100"
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
   prometheus:
     enabled: true
     path: /metrics
@@ -53,7 +53,9 @@ spec:
   resources:
     requests:
       cpu: 25m
-      memory: 384Mi
+      memory: 800Mi
+    limits:
+      memory: 800Mi
   replicas:
     scalingStrategy:
       cpu:

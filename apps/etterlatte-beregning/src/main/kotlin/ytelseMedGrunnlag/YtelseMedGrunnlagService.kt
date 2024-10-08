@@ -23,9 +23,7 @@ class YtelseMedGrunnlagService(
         val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
         val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
         val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
-
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
-
         val avkortinger =
             avkorting.avkortetYtelse.map { avkortetYtelse ->
                 val beregningIPeriode =
@@ -53,6 +51,7 @@ class YtelseMedGrunnlagService(
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                     beregningsMetode = beregningIPeriode.beregningsMetode,
                     sanksjon = avkortetYtelse.sanksjon,
+                    institusjonsopphold = beregningIPeriode.institusjonsopphold,
                 )
             }
 

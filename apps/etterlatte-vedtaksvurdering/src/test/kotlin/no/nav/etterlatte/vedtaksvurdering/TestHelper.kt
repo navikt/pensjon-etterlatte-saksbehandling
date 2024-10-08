@@ -1,6 +1,9 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -8,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -26,8 +30,8 @@ const val FNR_1 = "28098208560"
 const val FNR_2 = "04417103428"
 const val SAKSBEHANDLER_1 = "saksbehandler1"
 const val SAKSBEHANDLER_2 = "saksbehandler2"
-const val ENHET_1 = "1234"
-const val ENHET_2 = "4321"
+val ENHET_1 = Enheter.STEINKJER.enhetNr
+val ENHET_2 = Enheter.PORSGRUNN.enhetNr
 
 val saksbehandler = simpleSaksbehandler(ident = SAKSBEHANDLER_1)
 val attestant = simpleAttestant(ident = SAKSBEHANDLER_2)
@@ -35,7 +39,7 @@ val attestant = simpleAttestant(ident = SAKSBEHANDLER_2)
 fun opprettVedtak(
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
     soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
-    sakId: Long = 1L,
+    sakId: SakId = sakId1,
     type: VedtakType = VedtakType.INNVILGELSE,
     behandlingId: UUID = UUID.randomUUID(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,
@@ -68,6 +72,7 @@ fun opprettVedtak(
                         periode = Periode(virkningstidspunkt, null),
                         beloep = BigDecimal.valueOf(100),
                         type = UtbetalingsperiodeType.UTBETALING,
+                        regelverk = Regelverk.fraDato(virkningstidspunkt.atDay(1)),
                     ),
                 ),
         ),
@@ -75,7 +80,7 @@ fun opprettVedtak(
 
 fun opprettVedtakTilbakekreving(
     soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
-    sakId: Long = 1L,
+    sakId: SakId = sakId1,
     behandlingId: UUID = UUID.randomUUID(),
     tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
 ) = OpprettVedtak(
@@ -89,7 +94,7 @@ fun opprettVedtakTilbakekreving(
 
 fun opprettVedtakKlage(
     soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
-    sakId: Long = 1L,
+    sakId: SakId = sakId1,
     behandlingId: UUID = UUID.randomUUID(),
     klage: ObjectNode = objectMapper.createObjectNode(),
 ) = OpprettVedtak(
@@ -104,7 +109,7 @@ fun opprettVedtakKlage(
 fun vedtak(
     id: Long = 1L,
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
-    sakId: Long = 1L,
+    sakId: SakId = sakId1,
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
@@ -138,6 +143,7 @@ fun vedtak(
                             periode = Periode(virkningstidspunkt, null),
                             beloep = BigDecimal.valueOf(100),
                             type = UtbetalingsperiodeType.UTBETALING,
+                            regelverk = Regelverk.fraDato(virkningstidspunkt.atDay(1)),
                         ),
                     ),
             revurderingAarsak = revurderingAarsak,
@@ -145,7 +151,7 @@ fun vedtak(
 )
 
 fun vedtakTilbakekreving(
-    sakId: Long = 1L,
+    sakId: SakId = sakId1,
     behandlingId: UUID = UUID.randomUUID(),
     tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,
@@ -166,7 +172,7 @@ fun vedtakTilbakekreving(
 )
 
 fun vedtakKlage(
-    sakId: Long = 142L,
+    sakId: SakId = randomSakId(),
     behandlingId: UUID = UUID.randomUUID(),
     klage: ObjectNode = objectMapper.createObjectNode(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,

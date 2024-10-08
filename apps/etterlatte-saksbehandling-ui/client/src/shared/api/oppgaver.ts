@@ -2,7 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavebenkStats } from '~components/oppgavebenk/state/oppgavebenkState'
-import { GenerellEndringshendelse, NyOppgaveDto, OppgaveDTO } from '~shared/types/oppgave'
+import { GenerellEndringshendelse, GenerellOppgaveDto, NyOppgaveDto, OppgaveDTO } from '~shared/types/oppgave'
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
@@ -41,6 +41,9 @@ export const hentOppgaverTilknyttetSak = async (sakId: number): Promise<ApiRespo
   return apiClient.get(`/oppgaver/sak/${sakId}/oppgaver`)
 }
 
+export const opprettGenerellOppgave = async (generellOppgave: GenerellOppgaveDto): Promise<ApiResponse<any>> =>
+  apiClient.post('/oppgaver/bulk/opprett', { ...generellOppgave })
+
 export const opprettOppgave = async (args: {
   sakId: number
   request: NyOppgaveDto
@@ -68,11 +71,11 @@ export const saksbehandlereIEnhetApi = async (args: {
   return apiClient.get(`/saksbehandlere?enheter=${args.enheter}`)
 }
 
-export const byttSaksbehandlerApi = async (args: {
+export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
   nysaksbehandler: SaksbehandlerEndringDto
 }): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  return apiClient.post(`/oppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
+  return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
 }
 
 export const fjernSaksbehandlerApi = async (args: {

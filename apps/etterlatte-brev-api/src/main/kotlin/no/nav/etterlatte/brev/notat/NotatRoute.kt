@@ -13,48 +13,30 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.NyNotatService
-import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.behandling.BrevbakerBlankettDTO
+import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed class StrukturertBrev {
-    abstract val brevkode: EtterlatteBrevKode
-    abstract val sak: Sak
-    abstract val soekerFnr: String
-    open val behandlingId: UUID? = null
-    open val spraak = Spraak.NB
-
-    abstract fun tilLetterdata(): Any
-
+sealed class StrukturertNotat {
     @JsonTypeName("KLAGE_BLANKETT")
     data class KlageBlankett(
         val klage: Klage,
-    ) : StrukturertBrev() {
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT
-        override val sak: Sak = klage.sak
-        override val soekerFnr: String = klage.sak.ident
-        override val behandlingId = klage.id
-
-        override fun tilLetterdata(): BrevbakerBlankettDTO = klage.tilBrevbakerBlankett()
-    }
+    ) : StrukturertNotat()
 }
 
 data class NotatRequest(
-    val data: StrukturertBrev,
+    val data: StrukturertNotat,
 )
 
 const val NOTAT_ID_CALL_PARAMETER = "notatId"
@@ -117,6 +99,15 @@ fun Route.notatRoute(
             }
         }
 
+        route("/referanse/{referanse}") {
+            get {
+                val referanse = checkNotNull(call.parameters["referanse"])
+
+                val notater = nyNotatService.hentForReferanse(referanse)
+                call.respond(notater)
+            }
+        }
+
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
                 withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
@@ -127,11 +118,13 @@ fun Route.notatRoute(
 
             post {
                 withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
+                    val referanse = call.request.queryParameters["referanse"]
                     val mal = NotatMal.valueOf(call.request.queryParameters["mal"]!!)
 
                     val notat =
                         nyNotatService.opprett(
                             sakId = sakId,
+                            referanse = referanse,
                             mal = mal,
                             bruker = brukerTokenInfo,
                         )
@@ -140,20 +133,63 @@ fun Route.notatRoute(
                 }
             }
 
-            post("/forhaandsvis") {
-                withSakId(tilgangsSjekk, skrivetilgang = false) { sakId ->
-                    logger.info("Forhåndsviser notatpdf i sak $sakId")
-                    medBody<NotatRequest> {
-                        call.respond(notatService.forhaandsvisNotat(it.data, brukerTokenInfo).bytes)
+            post("/manuellsamordning") {
+                kunSystembruker {
+                    withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
+
+                        val req = call.receive<SamordningManueltBehandletRequest>()
+
+                        val notat =
+                            nyNotatService.opprettOgJournalfoer(
+                                sakId = sakId,
+                                mal = NotatMal.MANUELL_SAMORDNING,
+                                bruker = brukerTokenInfo,
+                                tittel = req.tittel,
+                                params =
+                                    SamordningsnotatParametre(
+                                        sakId = sakId,
+                                        vedtakId = req.vedtakId,
+                                        samordningsmeldingId = req.samordningsmeldingId,
+                                        kommentar = req.kommentar,
+                                        saksbehandlerId = req.saksbehandlerId,
+                                    ),
+                            )
+                        call.respond(notat)
                     }
                 }
             }
 
+            /*
+             * Kun brukt av klage. Burde på sikt fjernes og flytte klage over på det generelle API-et over
+             */
+            post("/forhaandsvis") {
+                withSakId(tilgangsSjekk, skrivetilgang = false) { sakId ->
+                    logger.info("Forhåndsviser klageblankett i sak $sakId")
+                    medBody<NotatRequest> {
+                        call.respond(
+                            notatService.genererPdf(
+                                (it.data as StrukturertNotat.KlageBlankett),
+                                brukerTokenInfo,
+                            ),
+                        )
+                    }
+                }
+            }
+
+            /*
+             * Kun brukt av klage. Burde på sikt fjernes og flytte klage over på det generelle API-et over
+             */
             post("/journalfoer") {
                 withSakId(tilgangsSjekk, skrivetilgang = true) { sakId ->
-                    logger.info("Journalfører notat ")
+                    logger.info("Journalfører klageblankett i sak $sakId")
+
                     medBody<NotatRequest> {
-                        call.respond(notatService.journalfoerNotatISak(sakId, it.data, brukerTokenInfo))
+                        call.respond(
+                            notatService.journalfoerNotatISak(
+                                (it.data as StrukturertNotat.KlageBlankett),
+                                brukerTokenInfo,
+                            ),
+                        )
                     }
                 }
             }

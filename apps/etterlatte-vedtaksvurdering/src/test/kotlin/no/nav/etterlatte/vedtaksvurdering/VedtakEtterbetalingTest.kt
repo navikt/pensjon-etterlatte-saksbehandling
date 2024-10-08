@@ -161,7 +161,7 @@ class VedtakEtterbetalingTest {
         vedtakFattet =
             VedtakFattet(
                 "Z01",
-                "1234",
+                ENHET_1,
                 Tidspunkt.parse(fattetTidspunkt),
             ),
         utbetalingsperioder =
@@ -171,6 +171,7 @@ class VedtakEtterbetalingTest {
                     periode = Periode(virkningstidspunkt, null),
                     beloep = BigDecimal.valueOf(beloep),
                     type = UtbetalingsperiodeType.UTBETALING,
+                    regelverk = Regelverk.fraDato(virkningstidspunkt.atDay(1)),
                 ),
             ),
     )

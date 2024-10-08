@@ -49,7 +49,10 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         error: MessageProblems.MessageException,
         context: MessageContext,
     ) {
-        sikkerlogg.debug("Klarte ikke å håndtere meldinga i ${context.rapidName()} fordi ${error.problems.toExtendedReport()}", error)
+        sikkerlogg.debug(
+            "Klarte ikke å håndtere meldinga i ${context.rapidName()} fordi ${error.problems.toExtendedReport()}",
+            error,
+        )
         super.onSevere(error, context)
     }
 
@@ -59,7 +62,7 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         block: River.() -> Unit = {},
     ) {
         logger.info("Initialiserer river for ${this.javaClass.simpleName}")
-        require(kontekst() in setOf(Kontekst.MIGRERING, Kontekst.REGULERING, Kontekst.TEST)) {
+        require(kontekst() in setOf(Kontekst.MIGRERING, Kontekst.REGULERING, Kontekst.OMREGNING, Kontekst.TEST)) {
             "Bruk heller ${ListenerMedLogging::class.simpleName}, denne her svelger feilmeldinger"
         }
         River(rapidsConnection)

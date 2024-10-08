@@ -25,7 +25,13 @@ abstract class ListenerMedLogging : River.PacketListener {
         packet: JsonMessage,
         context: MessageContext,
     ) = withLogContext(packet.correlationId) {
-        haandterPakke(packet, context)
+        try {
+            haandterPakke(packet, context)
+        } catch (e: Exception) {
+            logger.warn("Fikk feil under handtering av melding. Se sikkerlogg for hele meldinga", e)
+            sikkerlogg.warn("Fikk feil under handtering av melding. Meldinga var ${packet.toJson()}", e)
+            throw e
+        }
     }
 
     override fun onError(
@@ -34,14 +40,6 @@ abstract class ListenerMedLogging : River.PacketListener {
     ) {
         sikkerlogg.debug("Plukka ikke opp meldinga i ${context.rapidName()} fordi ${problems.toExtendedReport()}")
         super.onError(problems, context)
-    }
-
-    override fun onSevere(
-        error: MessageProblems.MessageException,
-        context: MessageContext,
-    ) {
-        sikkerlogg.debug("Klarte ikke å håndtere meldinga i ${context.rapidName()} fordi ${error.problems.toExtendedReport()}", error)
-        super.onSevere(error, context)
     }
 
     protected fun initialiserRiver(

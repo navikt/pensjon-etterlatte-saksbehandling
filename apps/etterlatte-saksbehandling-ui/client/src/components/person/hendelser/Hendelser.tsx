@@ -2,12 +2,7 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import { Alert, BodyShort, Box, Heading, Loader, Table, ToggleGroup } from '@navikt/ds-react'
 import { ArchiveIcon, BellDotIcon } from '@navikt/aksel-icons'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
-import {
-  Grunnlagsendringshendelse,
-  HISTORISK_REVURDERING,
-  SakMedBehandlinger,
-  STATUS_IRRELEVANT,
-} from '~components/person/typer'
+import { Grunnlagsendringshendelse, GrunnlagsendringStatus, SakMedBehandlinger } from '~components/person/typer'
 import Spinner from '~shared/Spinner'
 import { SakIkkeFunnet } from '~components/person/sakOgBehandling/SakIkkeFunnet'
 import styled from 'styled-components'
@@ -23,21 +18,24 @@ enum HendelseValg {
   ARKIVERTE = 'ARKIVERTE',
 }
 
+const erArkivertHendelse = ({ status }: Grunnlagsendringshendelse) =>
+  [
+    GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT,
+    GrunnlagsendringStatus.HISTORISK,
+    GrunnlagsendringStatus.FORKASTET,
+  ].includes(status)
+
 export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }): ReactNode => {
   const [hendelseValg, setHendelseValg] = useState<HendelseValg>(HendelseValg.NYE)
 
   const [hendelserResult, hentHendelser] = useApiCall(hentGrunnlagsendringshendelserForSak)
   const [stoettedeRevurderingerResult, stoettedeRevurderingerFetch] = useApiCall(hentStoettedeRevurderinger)
 
-  const nyeHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] => {
-    return hendelser.filter((hendelse) => hendelse.status !== STATUS_IRRELEVANT)
-  }
+  const nyeHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] =>
+    hendelser.filter((hendelse) => hendelse.status !== GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT)
 
-  const arkiverteHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] => {
-    return hendelser.filter((hendelse) =>
-      [STATUS_IRRELEVANT, HISTORISK_REVURDERING, 'SJEKKET_AV_JOBB'].includes(hendelse.status)
-    )
-  }
+  const arkiverteHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] =>
+    hendelser.filter(erArkivertHendelse)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
@@ -47,7 +45,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
         stoettedeRevurderingerFetch({ sakType: sakResult.data.sak.sakType })
       }
     }
-  }, [])
+  }, [sakResult])
 
   return mapResult(sakResult, {
     pending: <Loader />,

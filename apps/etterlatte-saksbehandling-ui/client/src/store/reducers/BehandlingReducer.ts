@@ -1,17 +1,13 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import {
-  Beregning,
-  BeregningsGrunnlagOMSPostDto,
-  BeregningsGrunnlagPostDto,
-  OverstyrBeregningGrunnlagPostDTO,
-} from '~shared/types/Beregning'
+import { Beregning, BeregningsGrunnlagDto, OverstyrBeregningGrunnlagPostDTO } from '~shared/types/Beregning'
 import {
   IBehandlingStatus,
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  ITidligereFamiliepleier,
   IUtlandstilknytning,
   ViderefoertOpphoer,
   Virkningstidspunkt,
@@ -46,21 +42,20 @@ export const resetAvkorting = createAction('behandling/avkorting/reset')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterUtlandstilknytning = createAction<IUtlandstilknytning>('behandling/utlandstilknytning')
 export const oppdaterViderefoertOpphoer = createAction<ViderefoertOpphoer>('behandling/viderefoert-opphoer')
-export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
-export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(
-  'behandling/beregningsgrunnlagOMS'
-)
+export const oppdaterBeregningsGrunnlag = createAction<BeregningsGrunnlagDto>('behandling/beregningsgrunnlag')
 export const oppdaterOverstyrBeregningsGrunnlag =
   createAction<OverstyrBeregningGrunnlagPostDTO>('behandling/overstyrBeregning')
 export const oppdaterRevurderingInfo = createAction<RevurderingMedBegrunnelse>('behandling/revurderinginfo')
+export const oppdaterTidligereFamiliepleier = createAction<ITidligereFamiliepleier>(
+  'behandling/tidligere-familiepleier'
+)
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
 export const resetViderefoertOpphoer = createAction('behandling/viderefoert-opphoer/reset')
 
 export interface IBehandlingReducer extends IDetaljertBehandling {
-  beregningsGrunnlag?: BeregningsGrunnlagPostDto
-  beregningsGrunnlagOMS?: BeregningsGrunnlagOMSPostDto
+  beregningsGrunnlag?: BeregningsGrunnlagDto
   overstyrBeregning?: OverstyrBeregningGrunnlagPostDTO
   beregning?: Beregning
   vilkaarsvurdering?: IVilkaarsvurdering
@@ -109,7 +104,7 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(oppdaterBehandlingsstatus, (state, action) => {
     state.behandling!!.status = action.payload
   })
-  builder.addCase(oppdaterBeregingsGrunnlag, (state, action) => {
+  builder.addCase(oppdaterBeregningsGrunnlag, (state, action) => {
     state.behandling!!.beregningsGrunnlag = action.payload
   })
   builder.addCase(oppdaterUtlandstilknytning, (state, action) => {
@@ -117,9 +112,6 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterViderefoertOpphoer, (state, action) => {
     state.behandling!!.viderefoertOpphoer = action.payload
-  })
-  builder.addCase(oppdaterBeregingsGrunnlagOMS, (state, action) => {
-    state.behandling!!.beregningsGrunnlagOMS = action.payload
   })
   builder.addCase(oppdaterOverstyrBeregningsGrunnlag, (state, action) => {
     state.behandling!!.overstyrBeregning = action.payload
@@ -138,5 +130,8 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(resetViderefoertOpphoer, (state) => {
     state.behandling!!.viderefoertOpphoer = null
+  })
+  builder.addCase(oppdaterTidligereFamiliepleier, (state, action) => {
+    state.behandling!!.tidligereFamiliepleier = action.payload
   })
 })

@@ -5,6 +5,7 @@
 
 .gradle/
 .idea/
+.kotlin/
 
 build/
 dist/
@@ -17,3 +18,5 @@ yarn-error.log
 **/cypress/screenshots/
 **/coverage/
 /buildSrc/build/
+**/buildSrc/.kotlin/
+

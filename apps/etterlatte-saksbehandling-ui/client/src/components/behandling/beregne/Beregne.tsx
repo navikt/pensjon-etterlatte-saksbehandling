@@ -21,7 +21,7 @@ import { SakType } from '~shared/types/sak'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
+import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -29,6 +29,7 @@ import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -57,6 +58,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   const [manglerBrevutfall, setManglerbrevutfall] = useState(false)
   const [manglerAvkorting, setManglerAvkorting] = useState(false)
+  const skalHaInntektNesteAar = useFeatureEnabledMedDefault('validere_aarsintnekt_neste_aar', false)
 
   const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
@@ -108,7 +110,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         <Heading spacing size="large" level="1">
           Beregning og vedtak
         </Heading>
-        <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
+        <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       {erOpphoer ? (
         <Box paddingInline="18" paddingBlock="4">
@@ -157,8 +159,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                 )}
                 {manglerAvkorting && (
                   <Alert style={{ maxWidth: '16em' }} variant="error">
-                    Du må legge til inntektsavkorting, også når etterlatte ikke har inntekt. Legg da inn 0 i
-                    inntektsfeltene.
+                    {skalHaInntektNesteAar
+                      ? 'Du må legge til inntektsavkorting for inneværende og neste år, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'
+                      : 'Du må legge til inntektsavkorting, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'}
                   </Alert>
                 )}
               </Box>

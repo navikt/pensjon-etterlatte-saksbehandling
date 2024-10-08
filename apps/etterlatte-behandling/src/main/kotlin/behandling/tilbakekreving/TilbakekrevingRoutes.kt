@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
@@ -93,9 +94,10 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                         val tilbakekreving = service.opprettTilbakekreving(it)
                         call.respond(HttpStatusCode.OK, tilbakekreving)
                     } catch (e: TilbakekrevingHarMangelException) {
-                        call.respond(
-                            HttpStatusCode.NotFound,
+                        throw IkkeFunnetException(
+                            "MANGLER_SAK",
                             "Eksisterer ikke sak=${it.sakId.value} for kravgrunnlag=${it.kravgrunnlagId}",
+                            cause = e,
                         )
                     }
                 }
@@ -114,9 +116,11 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
 
         put("/avbryt") {
             kunSystembruker {
-                val sakId = requireNotNull(call.parameters["sakId"]).toLong()
-                service.avbrytTilbakekreving(sakId)
-                call.respond(HttpStatusCode.OK)
+                medBody<AvbrytRequest> {
+                    val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+                    service.avbrytTilbakekreving(sakId, it.merknad)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }
@@ -124,6 +128,10 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
 
 data class OppgaveStatusRequest(
     val paaVent: Boolean,
+)
+
+data class AvbrytRequest(
+    val merknad: String,
 )
 
 data class TilbakekrevingSendeBrevRequest(

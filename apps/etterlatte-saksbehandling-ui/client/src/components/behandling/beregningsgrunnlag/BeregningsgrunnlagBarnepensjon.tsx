@@ -8,20 +8,28 @@ import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBereg
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   oppdaterBehandlingsstatus,
-  oppdaterBeregingsGrunnlag,
   oppdaterBeregning,
+  oppdaterBeregningsGrunnlag,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import {
+  mapListeTilDto,
+  periodisertBeregningsgrunnlagTilDto,
+} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import React, { useEffect, useState } from 'react'
 import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
-import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
-import { Beregning, BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
+import {
+  Beregning,
+  BeregningsMetodeBeregningsgrunnlagForm,
+  LagreBeregningsGrunnlagDto,
+  toLagreBeregningsGrunnlagDto,
+} from '~shared/types/Beregning'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -33,8 +41,10 @@ import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag
 import { InstitusjonsoppholdHendelser } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdHendelser'
 import { InstitusjonsoppholdBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/institusjonsopphold/InstitusjonsoppholdBeregningsgrunnlag'
 import { SakType } from '~shared/types/sak'
-import { BeregningsgrunnlagFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsgrunnlagFlereAvdoede'
+import { BeregningsmetoderFlereAvdoede } from '~components/behandling/beregningsgrunnlag/flereAvdoede/BeregningsmetoderFlereAvdoede'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
+import { AnnenForelderVurdering } from '~shared/types/grunnlag'
 
 const BeregningsgrunnlagBarnepensjon = () => {
   const { next } = useBehandlingRoutes()
@@ -54,9 +64,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
   useEffect(() => {
     hentBeregningsgrunnlagRequest(behandling.id, (result) => {
       if (result) {
-        dispatch(
-          oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
-        )
+        dispatch(oppdaterBeregningsGrunnlag(result))
       }
       hentTrygdetiderRequest(behandling.id)
     })
@@ -67,6 +75,9 @@ const BeregningsgrunnlagBarnepensjon = () => {
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
+
+  const harKunEnJuridiskForelder =
+    personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 
   if (behandling.kommerBarnetTilgode == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
@@ -95,42 +106,55 @@ const BeregningsgrunnlagBarnepensjon = () => {
     }
   }
 
-  const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlag) => {
-    const grunnlag = {
-      ...behandling.beregningsGrunnlag,
-      beregningsMetode,
-      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
-      begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
-      soeskenMedIBeregning: behandling.beregningsGrunnlag?.soeskenMedIBeregning ?? [],
+  const oppdaterBeregningsgrunnlag = (beregningsMetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => {
+    const grunnlag: LagreBeregningsGrunnlagDto = {
+      ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
+      beregningsMetodeFlereAvdoede: undefined,
+      beregningsMetode: beregningsMetodeForm,
+      kunEnJuridiskForelder: harKunEnJuridiskForelder
+        ? periodisertBeregningsgrunnlagTilDto({
+            data: {},
+            fom: new Date(behandling.virkningstidspunkt!!.dato),
+            tom: beregningsMetodeForm.datoTilKunEnJuridiskForelder,
+          })
+        : undefined,
     }
     lagreBeregningsgrunnlagRequest(
       {
         behandlingId: behandling.id,
-        grunnlag,
+        grunnlag: grunnlag,
       },
-      () => dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+      (result) => {
+        dispatch(oppdaterBeregningsGrunnlag(result))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+      }
     )
   }
 
   const oppdaterSoeskenJustering = (soeskenGrunnlag: Soeskengrunnlag) => {
-    const grunnlag = {
-      ...behandling.beregningsGrunnlag,
+    const grunnlag: LagreBeregningsGrunnlagDto = {
+      ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
       soeskenMedIBeregning: mapListeTilDto(soeskenGrunnlag),
-      institusjonsopphold: behandling.beregningsGrunnlag?.institusjonsopphold,
-      begegningsmetodeFlereAvdoede: behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede,
-      beregningsMetode: behandling.beregningsGrunnlag?.beregningsMetode ?? {
-        beregningsMetode: BeregningsMetode.NASJONAL,
-      },
     }
 
     lagreBeregningsgrunnlagRequest(
       {
         behandlingId: behandling.id,
-        grunnlag,
+        grunnlag: grunnlag,
       },
-      () => dispatch(oppdaterBeregingsGrunnlag(grunnlag))
+      (result) => {
+        dispatch(oppdaterBeregningsGrunnlag(result))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+      }
     )
   }
+
+  const tidligsteAvdoede: IPdlPerson | null =
+    personopplysninger?.avdoede
+      .map((it) => it.opplysning)
+      .reduce((previous, current) => {
+        return current.doedsdato!! < previous.doedsdato!! ? current : previous
+      }) || null
 
   return (
     <>
@@ -144,20 +168,41 @@ const BeregningsgrunnlagBarnepensjon = () => {
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
               success: (trygdetider) => (
                 <>
-                  {trygdetider.length > 1 && (
-                    <BeregningsgrunnlagFlereAvdoede redigerbar={redigerbar} trygdetider={trygdetider} />
-                  )}
-                  {trygdetider.length <= 1 && (
-                    <BeregningsMetodeBrukt
-                      redigerbar={redigerbar}
-                      oppdaterBeregningsMetode={(beregningsMetode) => oppdaterBeregningsMetode(beregningsMetode)}
-                      eksisterendeMetode={behandling?.beregningsGrunnlag?.beregningsMetode}
-                      lagreBeregrningsGrunnlagResult={lagreBeregningsgrunnlagResult}
-                    />
+                  {trygdetider && (
+                    <>
+                      {trygdetider?.length &&
+                        trygdetider.length > 1 &&
+                        (!!tidligsteAvdoede ? (
+                          <BeregningsmetoderFlereAvdoede
+                            redigerbar={redigerbar}
+                            trygdetider={trygdetider}
+                            tidligsteAvdoede={tidligsteAvdoede}
+                          />
+                        ) : (
+                          <ApiErrorAlert>
+                            Fant ikke avdøde i persongalleriet. For å beregne barnepensjonen riktig må det være en eller
+                            flere avdøde i persongalleriet.
+                          </ApiErrorAlert>
+                        ))}
+                      {trygdetider.length === 1 && (
+                        <BeregningsMetodeBrukt
+                          redigerbar={redigerbar}
+                          navn={mapNavn(trygdetider[0].ident, personopplysninger)}
+                          behandling={behandling}
+                          oppdaterBeregningsgrunnlag={oppdaterBeregningsgrunnlag}
+                          lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
+                          datoTilKunEnJuridiskForelder={
+                            behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
+                              ? new Date(behandling.beregningsGrunnlag.kunEnJuridiskForelder.tom)
+                              : undefined
+                          }
+                        />
+                      )}
+                    </>
                   )}
 
                   <Box maxWidth="70rem">
-                    <InstitusjonsoppholdHendelser sakId={behandling.sakId} sakType={behandling.sakType} />
+                    <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
                   </Box>
 
                   <InstitusjonsoppholdBeregningsgrunnlag

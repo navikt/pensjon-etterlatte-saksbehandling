@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.gyldigsoeknad.NySoeknadRiver
 import no.nav.etterlatte.gyldigsoeknad.OpprettBehandlingRiver
 import no.nav.etterlatte.gyldigsoeknad.config.AppBuilder
+import no.nav.etterlatte.inntektsjustering.InntektsjusteringRiver
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import rapidsandrivers.initRogR
 
@@ -21,5 +22,11 @@ fun main() =
         OpprettBehandlingRiver(
             rapidsConnection,
             ab.behandlingKlient,
+        )
+
+        InntektsjusteringRiver(
+            rapidsConnection,
+            behandlingKlient = ab.behandlingKlient,
+            journalfoerInntektsjusteringService = ab.journalfoerInntektsjusteringService,
         )
     }

@@ -6,6 +6,9 @@ import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.beInstanceOf
+import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -75,7 +78,7 @@ internal class VedtaksvurderingRepositoryTest(
             id shouldNotBe null
             status shouldBe VedtakStatus.OPPRETTET
             soeker shouldBe SOEKER_FOEDSELSNUMMER
-            sakId shouldBe 1L
+            sakId shouldBe sakId1
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
             type shouldBe VedtakType.INNVILGELSE
@@ -106,7 +109,7 @@ internal class VedtaksvurderingRepositoryTest(
             id shouldNotBe null
             status shouldBe VedtakStatus.OPPRETTET
             soeker shouldBe SOEKER_FOEDSELSNUMMER
-            sakId shouldBe 1L
+            sakId shouldBe sakId1
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
             type shouldBe VedtakType.TILBAKEKREVING
@@ -125,7 +128,7 @@ internal class VedtaksvurderingRepositoryTest(
             id shouldNotBe null
             status shouldBe VedtakStatus.OPPRETTET
             soeker shouldBe SOEKER_FOEDSELSNUMMER
-            sakId shouldBe 1L
+            sakId shouldBe sakId1
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
             type shouldBe VedtakType.AVVIST_KLAGE
@@ -154,6 +157,7 @@ internal class VedtaksvurderingRepositoryTest(
                                         periode = Periode(nyttVirkningstidspunkt, null),
                                         beloep = null,
                                         type = UtbetalingsperiodeType.OPPHOER,
+                                        regelverk = Regelverk.fraDato(nyttVirkningstidspunkt.atDay(1)),
                                     ),
                                 ),
                         ),
@@ -330,11 +334,11 @@ internal class VedtaksvurderingRepositoryTest(
 
     @Test
     fun `skal hente vedtak for sak`() {
-        val sakId = 1L
+        val sakId = sakId1
         val nyeVedtak =
             listOf(
                 opprettVedtak(sakId = sakId),
-                opprettVedtak(sakId = 2),
+                opprettVedtak(sakId = sakId2),
                 opprettVedtak(sakId = sakId),
                 opprettVedtak(sakId = sakId),
             )
@@ -353,31 +357,31 @@ internal class VedtaksvurderingRepositoryTest(
 
         listOf(
             opprettVedtak(
-                sakId = 10,
+                sakId = tilSakId(10),
                 soeker = soeker1,
                 virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
                 status = VedtakStatus.IVERKSATT,
             ),
             opprettVedtak(
-                sakId = 20,
+                sakId = tilSakId(20),
                 soeker = soeker2,
                 virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
                 status = VedtakStatus.IVERKSATT,
             ),
             opprettVedtak(
-                sakId = 20,
+                sakId = tilSakId(20),
                 soeker = soeker2,
                 virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
                 status = VedtakStatus.SAMORDNET,
             ),
             opprettVedtak(
-                sakId = 10,
+                sakId = tilSakId(10),
                 soeker = soeker1,
                 virkningstidspunkt = YearMonth.of(2024, Month.APRIL),
                 status = VedtakStatus.IVERKSATT,
             ),
             opprettVedtak(
-                sakId = 20,
+                sakId = tilSakId(20),
                 soeker = soeker2,
                 virkningstidspunkt = YearMonth.of(2024, Month.JUNE),
                 status = VedtakStatus.TIL_SAMORDNING,

@@ -3,6 +3,7 @@ package no.nav.etterlatte.ktor
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.ktor.token.CLIENT_ID
+import no.nav.security.mock.oauth2.MockOAuth2Server
 
 internal fun buildTestApplicationConfigurationForOauth(
     port: Int,
@@ -22,3 +23,5 @@ internal fun buildTestApplicationConfigurationForOauth(
             ),
         ),
     )
+
+fun MockOAuth2Server.startRandomPort() = this.start()

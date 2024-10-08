@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -22,6 +23,7 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -50,7 +52,7 @@ import javax.sql.DataSource
 class OversendelseBrevServiceImplTest(
     dataSource: DataSource,
 ) {
-    val sakId = 148L
+    val sakId = randomSakId()
     private val behandlingId = UUID.randomUUID()
     private val saksbehandler = simpleSaksbehandler()
     private val brevdataFacade = mockk<BrevdataFacade>()
@@ -105,7 +107,7 @@ class OversendelseBrevServiceImplTest(
     private fun klage(): Klage =
         Klage(
             behandlingId,
-            Sak("ident", SakType.BARNEPENSJON, sakId, "einheit"),
+            Sak("ident", SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr),
             Tidspunkt.now(),
             KlageStatus.OPPRETTET,
             kabalResultat = null,
@@ -120,7 +122,7 @@ class OversendelseBrevServiceImplTest(
 
     private fun brevData() =
         GenerellBrevData(
-            sak = Sak("11057523044", SakType.OMSTILLINGSSTOENAD, sakId, "4808"),
+            sak = Sak("11057523044", SakType.OMSTILLINGSSTOENAD, sakId, Enheter.PORSGRUNN.enhetNr),
             personerISak =
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),
@@ -134,7 +136,7 @@ class OversendelseBrevServiceImplTest(
                     1,
                     VedtakStatus.FATTET_VEDTAK,
                     VedtakType.TILBAKEKREVING,
-                    "4808",
+                    Enheter.PORSGRUNN.enhetNr,
                     "saksbehandler",
                     attestantIdent = null,
                     vedtaksdato = null,

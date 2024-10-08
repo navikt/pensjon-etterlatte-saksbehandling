@@ -13,10 +13,14 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.azureAdAttestantClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
@@ -61,9 +65,17 @@ class GosysOppgaveServiceImplTest {
         mockk<SaksbehandlerInfoDao> {
             every { hentAlleSaksbehandlere() } returns emptyList()
         }
-    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService, saksbehandlerInfoDao)
+    private val pdltjenesterKlientMock = mockk<PdlTjenesterKlient>()
+    private val service =
+        GosysOppgaveServiceImpl(
+            gosysOppgaveKlient,
+            oppgaveService,
+            saksbehandlerService,
+            saksbehandlerInfoDao,
+            pdltjenesterKlientMock,
+        )
 
-    private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
     val azureGroupToGroupIDMap =
         mapOf(
@@ -106,7 +118,7 @@ class GosysOppgaveServiceImplTest {
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        coEvery { gosysOppgaveKlient.hentOppgaver(null, listOf("EYO", "EYB"), any(), null, brukerTokenInfo) } returns
+        coEvery { gosysOppgaveKlient.hentOppgaver(null, null, listOf("EYO", "EYB"), any(), null, brukerTokenInfo) } returns
             GosysOppgaver(
                 antallTreffTotalt = 3,
                 oppgaver =
@@ -165,7 +177,16 @@ class GosysOppgaveServiceImplTest {
             }
 
         verify(exactly = 1) { saksbehandlerService.hentKomplettSaksbehandler(sbident) }
-        coVerify(exactly = 1) { gosysOppgaveKlient.hentOppgaver(null, listOf("EYO", "EYB"), any(), null, brukerTokenInfo) }
+        coVerify(exactly = 1) {
+            gosysOppgaveKlient.hentOppgaver(
+                null,
+                null,
+                listOf("EYO", "EYB"),
+                any(),
+                null,
+                brukerTokenInfo,
+            )
+        }
         verify(exactly = 1) { saksbehandlerInfoDao.hentAlleSaksbehandlere() }
 
         resultat shouldHaveSize 3
@@ -174,7 +195,7 @@ class GosysOppgaveServiceImplTest {
     }
 
     fun enhetsfiltrererGosysOppgaver(
-        enhetsnr: String,
+        enhetsnr: Enhetsnummer,
         oppgaverFraGosys: List<GosysApiOppgave>,
     ): GosysOppgaver {
         val enhetsfiltrerteOppgaver = oppgaverFraGosys.filter { it.tildeltEnhetsnr == enhetsnr }
@@ -193,6 +214,7 @@ class GosysOppgaveServiceImplTest {
 
         coEvery {
             gosysOppgaveKlient.hentOppgaver(
+                null,
                 any(),
                 any(),
                 Enheter.STRENGT_FORTROLIG.enhetNr,
@@ -256,7 +278,16 @@ class GosysOppgaveServiceImplTest {
                 service.hentOppgaver(null, null, null, null, brukerTokenInfo)
             }
 
-        coVerify(exactly = 1) { gosysOppgaveKlient.hentOppgaver(any(), any(), Enheter.STRENGT_FORTROLIG.enhetNr, null, brukerTokenInfo) }
+        coVerify(exactly = 1) {
+            gosysOppgaveKlient.hentOppgaver(
+                null,
+                any(),
+                any(),
+                Enheter.STRENGT_FORTROLIG.enhetNr,
+                null,
+                brukerTokenInfo,
+            )
+        }
 
         resultat shouldHaveSize 1
         resultat.filter { it.bruker?.ident == "01010812345" } shouldHaveSize 0
@@ -285,7 +316,7 @@ class GosysOppgaveServiceImplTest {
 
     @Test
     fun `Flytt oppgave til Gjenny`() {
-        val sakId = Random.nextLong()
+        val sakId = randomSakId()
         val gosysOppgave = mockGosysOppgave("EYO", "JFR", Random.nextLong().toString())
         val brukerTokenInfo = simpleSaksbehandler("Z123456")
 
@@ -326,10 +357,34 @@ class GosysOppgaveServiceImplTest {
         verify(exactly = 1) { saksbehandlerInfoDao.hentAlleSaksbehandlere() }
     }
 
+    @Test
+    fun `Hent oppgaver for person`() {
+        val foedselsnummer = "ident"
+        val aktoerId = Random.nextLong().toString()
+
+        coEvery { pdltjenesterKlientMock.hentAktoerId(foedselsnummer) } returns PdlIdentifikator.AktoerId(aktoerId)
+        coEvery { gosysOppgaveKlient.hentOppgaver(aktoerId, any(), any(), any(), any(), any()) } returns
+            GosysOppgaver(
+                1,
+                listOf(mockGosysOppgave("EYB", "GEN", null, aktoerId)),
+            )
+
+        runBlocking {
+            service.hentOppgaverForPerson(foedselsnummer, brukerTokenInfo)
+        }
+
+        coVerify(exactly = 1) {
+            saksbehandlerInfoDao.hentAlleSaksbehandlere()
+            pdltjenesterKlientMock.hentAktoerId(foedselsnummer)
+            gosysOppgaveKlient.hentOppgaver(aktoerId, null, emptyList(), null, null, brukerTokenInfo)
+        }
+    }
+
     private fun mockGosysOppgave(
         tema: String,
         oppgavetype: String,
         journalpostId: String? = null,
+        aktoerId: String? = null,
     ) = GosysApiOppgave(
         id = Random.nextLong(),
         versjon = Random.nextLong(),
@@ -343,6 +398,6 @@ class GosysOppgaveServiceImplTest {
         beskrivelse = "Beskrivelse for oppgaven",
         status = "OPPRETTET",
         fristFerdigstillelse = LocalDate.now().plusDays(4),
-        bruker = null,
+        bruker = aktoerId?.let { GosysOppgaveBruker(aktoerId, GosysOppgaveBruker.Type.PERSON) },
     )
 }

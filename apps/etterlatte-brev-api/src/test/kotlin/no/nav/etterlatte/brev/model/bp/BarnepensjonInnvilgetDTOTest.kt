@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model.bp
 
 import io.mockk.mockk
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
@@ -9,7 +10,6 @@ import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -50,7 +50,8 @@ internal class BarnepensjonInnvilgetDTOTest {
                                 beregningsperiodeFebruar2022(),
                                 beregningsperiodeMarsApril2022(),
                                 beregningsperiodeAprilDesember2022(),
-                                beregningsperiode2023OgUtover(),
+                                beregningsperiodeHele2023(),
+                                beregningsperiode2024OgUtover(),
                             ),
                     ),
                 etterbetaling =
@@ -107,6 +108,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                             FeilutbetalingValg.NEI,
                             null,
                         ),
+                        frivilligSkattetrekk = true,
                         null,
                     ),
                 erGjenoppretting = false,
@@ -127,7 +129,8 @@ internal class BarnepensjonInnvilgetDTOTest {
                 beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiodeMarsApril2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiodeAprilDesember2022().toBarnepensjonBeregningsperiode(),
-                beregningsperiode2023OgUtover().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeHele2023().toBarnepensjonBeregningsperiode(),
+                beregningsperiode2024OgUtover().toBarnepensjonBeregningsperiode(),
             ),
             barnepensjonInnvilgelse.beregning.beregningsperioder,
         )
@@ -157,9 +160,15 @@ internal class BarnepensjonInnvilgetDTOTest {
             LocalDate.of(2022, Month.DECEMBER, 31),
         )
 
-    private fun beregningsperiode2023OgUtover() =
+    private fun beregningsperiodeHele2023() =
         beregningsperiode(
             datoFOM = LocalDate.of(2023, Month.JANUARY, 1),
+            datoTOM = LocalDate.of(2023, Month.DECEMBER, 31),
+        )
+
+    private fun beregningsperiode2024OgUtover() =
+        beregningsperiode(
+            datoFOM = LocalDate.of(2024, Month.JANUARY, 1),
             datoTOM = null,
         )
 
@@ -178,6 +187,7 @@ internal class BarnepensjonInnvilgetDTOTest {
         beregningsMetodeAnvendt = BeregningsMetode.NASJONAL,
         beregningsMetodeFraGrunnlag = BeregningsMetode.BEST,
         trygdetidForIdent = "123",
+        avdoedeForeldre = if (datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) null else listOf("123"),
     )
 
     private fun lagInnholdMedVedlegg() =
@@ -191,12 +201,5 @@ internal class BarnepensjonInnvilgetDTOTest {
             )
         })
 
-    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() =
-        BarnepensjonBeregningsperiode(
-            datoFOM = datoFOM,
-            datoTOM = datoTOM,
-            grunnbeloep = grunnbeloep,
-            antallBarn = 1,
-            utbetaltBeloep = utbetaltBeloep,
-        )
+    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() = BarnepensjonBeregningsperiode.fra(this)
 }

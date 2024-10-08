@@ -44,7 +44,7 @@ export function OmgjoerAvslagModal(props: { sakId: number; harAapenBehandling: b
             checked={erSluttbehandlingUtland}
             onChange={() => settErSluttbehandlingUtland(!erSluttbehandlingUtland)}
           >
-            Gjelder omgjøring Sluttbehandling utland?
+            Omgjøring gjelder sluttbehandling utland
           </Checkbox>
           {harAapenBehandling && (
             <Alert variant="warning">

@@ -32,14 +32,7 @@ internal class DistribuerBrevRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val sakid = {
-            val vedtakSakId = packet["vedtak.sak.id"].asLong()
-            if (vedtakSakId != 0L) {
-                vedtakSakId
-            } else {
-                packet.sakId
-            }
-        }
+        val sakid = packet["vedtak.sak.id"].asLong()
 
         val bestillingsId =
             runBlocking {
@@ -47,7 +40,7 @@ internal class DistribuerBrevRiver(
                     brevId = packet[BREV_ID_KEY].asLong(),
                     distribusjonsType = packet.distribusjonType(),
                     journalpostIdInn = packet["journalpostId"].asText(),
-                    sakId = sakid(),
+                    sakId = sakid,
                 )
             }
         rapidsConnection.svarSuksess(packet, bestillingsId)

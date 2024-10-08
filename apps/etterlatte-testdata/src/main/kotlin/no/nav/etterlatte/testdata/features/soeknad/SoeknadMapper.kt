@@ -213,7 +213,6 @@ object SoeknadMapper {
             statsborgerskap = Opplysning(FritekstSvar("NORGE")),
             utenlandsopphold = BetingetOpplysning(EnumSvar(JaNeiVetIkke.NEI, ""), null, emptyList()),
             doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = Opplysning(EnumSvar(JaNeiVetIkke.NEI, ""), null),
-            naeringsInntekt = null,
             militaertjeneste = null,
         )
 

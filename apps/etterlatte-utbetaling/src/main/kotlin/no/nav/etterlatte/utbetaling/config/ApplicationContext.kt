@@ -140,6 +140,7 @@ class ApplicationContext(
             vedtaksvurderingKlient,
             SimuleringDao(dataSource),
             simuleringOsKlient,
+            featureToggleService,
         )
 
     val leaderElection = LeaderElection(properties.leaderElectorPath)

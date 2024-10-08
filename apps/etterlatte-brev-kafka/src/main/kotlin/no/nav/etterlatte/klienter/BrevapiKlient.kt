@@ -57,23 +57,24 @@ class BrevapiKlient(
     internal suspend fun distribuer(
         brevId: BrevID,
         distribusjonsType: DistribusjonsType,
+        sakId: SakId,
         journalpostIdInn: String? = null,
     ): BestillingsIdDto {
         try {
             logger.info("Distribuerer brev med id $brevId")
             return httpClient
                 .post(
-                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}",
+                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}&sakId=$sakId",
                 ) {
                     contentType(ContentType.Application.Json)
                 }.body<BestillingsIdDto>()
         } catch (e: ResponseException) {
-            logger.error("Henting av grunnlag for sak med brevId=$brevId feilet", e)
+            logger.error("Distribuering av brev med brevId=$brevId feilet", e)
 
             throw ForespoerselException(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_KAN_IKKE_DISTRIBUERE_BREV",
-                detail = "Kunne ikke opprette brev brev med id: $brevId",
+                detail = "Kunne ikke distribuere brev med id: $brevId",
             )
         }
     }

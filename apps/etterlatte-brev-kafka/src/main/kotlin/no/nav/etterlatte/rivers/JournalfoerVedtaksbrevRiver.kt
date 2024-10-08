@@ -58,7 +58,7 @@ internal class JournalfoerVedtaksbrevRiver(
 
             val journalfoervedtaksbrevResponse = runBlocking { brevapiKlient.journalfoerVedtaksbrev(vedtak) }
             if (journalfoervedtaksbrevResponse == null) {
-                logger.warn("Jorunalføring ble ikke journalført, kan være pga status eller migrering, ")
+                logger.warn("Jorunalføring ble ikke journalført, kan være pga status eller migrering.")
             } else {
                 rapidsConnection.svarSuksess(
                     packet,

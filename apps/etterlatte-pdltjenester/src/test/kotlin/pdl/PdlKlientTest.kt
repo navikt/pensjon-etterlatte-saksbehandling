@@ -43,7 +43,6 @@ internal class PdlKlientTest {
             assertEquals(LocalDate.of(2007, 8, 29), hentPerson?.foedselsdato?.first()?.foedselsdato)
             assertEquals(2007, hentPerson?.foedselsdato?.first()?.foedselsaar)
             assertEquals("NOR", hentPerson?.foedested?.first()?.foedeland)
-            assertEquals("1875", hentPerson?.foedested?.first()?.foedekommune)
             assertEquals("OTTEID", hentPerson?.foedested?.first()?.foedested)
         }
     }
@@ -101,15 +100,6 @@ internal class PdlKlientTest {
                     ?.foedested
                     ?.first()
                     ?.foedeland,
-            )
-            assertEquals(
-                "Coconut Tree",
-                hentPerson
-                    ?.first()
-                    ?.person
-                    ?.foedested
-                    ?.first()
-                    ?.foedekommune,
             )
 
             assertEquals(

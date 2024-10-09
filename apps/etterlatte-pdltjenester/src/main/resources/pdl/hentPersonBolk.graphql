@@ -128,7 +128,6 @@ query(
             foedested {
                 foedeland
                 foedested
-                foedekommune
                 metadata {
                     ...metadata
                 }

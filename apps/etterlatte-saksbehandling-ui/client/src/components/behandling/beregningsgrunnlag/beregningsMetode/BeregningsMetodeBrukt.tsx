@@ -30,7 +30,6 @@ interface Props {
   oppdaterBeregningsgrunnlag: (beregningsmetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => void
   lagreBeregningsGrunnlagResult: Result<BeregningsGrunnlagDto>
   kunEnJuridiskForelder?: Boolean
-  datoTilKunEnJuridiskForelder?: Date | undefined
 }
 
 export const BeregningsMetodeBrukt = ({
@@ -39,7 +38,6 @@ export const BeregningsMetodeBrukt = ({
   behandling,
   oppdaterBeregningsgrunnlag,
   lagreBeregningsGrunnlagResult,
-  datoTilKunEnJuridiskForelder = undefined,
 }: Props) => {
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
   const personopplysninger = usePersonopplysninger()
@@ -48,21 +46,20 @@ export const BeregningsMetodeBrukt = ({
   const kunEnJuridiskForelder = !!behandling.beregningsGrunnlag?.kunEnJuridiskForelder
   const kunEnJuridiskForelderPersongalleri =
     personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
+  const datoTilKunEnJuridiskForelder = behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
+    ? new Date(behandling.beregningsGrunnlag.kunEnJuridiskForelder.tom)
+    : undefined
 
-  const toFormData = (
-    datoTilKun: Date | undefined,
+  const toBeregningsmetodeForm = (
     beregningsMetodeBeregningsgrunnlag: BeregningsMetodeBeregningsgrunnlag
   ): BeregningsMetodeBeregningsgrunnlagForm => ({
     beregningsMetode: beregningsMetodeBeregningsgrunnlag.beregningsMetode,
     begrunnelse: beregningsMetodeBeregningsgrunnlag.begrunnelse,
-    datoTilKunEnJuridiskForelder: datoTilKun,
+    datoTilKunEnJuridiskForelder: datoTilKunEnJuridiskForelder,
   })
 
   const { register, control, reset, handleSubmit } = useForm<BeregningsMetodeBeregningsgrunnlagForm>({
-    defaultValues: toFormData(
-      datoTilKunEnJuridiskForelder,
-      eksisterendeMetode ? eksisterendeMetode : defaultBeregningMetode
-    ),
+    defaultValues: toBeregningsmetodeForm(eksisterendeMetode ? eksisterendeMetode : defaultBeregningMetode),
   })
 
   const slettBeregningsMetode = () => {

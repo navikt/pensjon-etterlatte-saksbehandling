@@ -191,11 +191,6 @@ const BeregningsgrunnlagBarnepensjon = () => {
                           behandling={behandling}
                           oppdaterBeregningsgrunnlag={oppdaterBeregningsgrunnlag}
                           lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
-                          datoTilKunEnJuridiskForelder={
-                            behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
-                              ? new Date(behandling.beregningsGrunnlag.kunEnJuridiskForelder.tom)
-                              : undefined
-                          }
                         />
                       )}
                     </>

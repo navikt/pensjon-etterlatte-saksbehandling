@@ -6,6 +6,7 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Adresse
@@ -54,7 +55,7 @@ internal class DistribuerBrevRiverTest {
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
-        val sakId = 1L
+        val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
         val test =
             mockk<VedtakInnholdDto.VedtakBehandlingDto> {

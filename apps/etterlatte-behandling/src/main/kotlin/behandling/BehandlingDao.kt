@@ -137,7 +137,7 @@ class BehandlingDao(
                         """.trimIndent(),
                     )
 
-                stmt.setLong(1, sakid)
+                stmt.setSakId(1, sakid)
                 stmt.executeQuery().singleOrNull { asFoerstegangsbehandling(this) }
             }
         }

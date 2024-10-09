@@ -47,9 +47,7 @@ class PersonWebService(
                 val pdlFeil = it.errors?.joinToString()
 
                 if (it.errors?.fortroligAdresse() == true) {
-                    throw PdlForesporselFeilet(
-                        "Denne personen har adressebeskyttelse. Behandlingen skal derfor sendes til enhet Vikafossen som vil behandle saken videre.",
-                    )
+                    throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke person i PDL")
                 } else {
@@ -204,7 +202,9 @@ class PersonWebService(
         return pdlOboKlient.hentPerson(fnr, rolle, sakType, bruker).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString(", ")
-                if (it.errors?.personIkkeFunnet() == true) {
+                if (it.errors?.fortroligAdresse() == true) {
+                    throw pdlForesporselFeiletForAdressebeskyttelse()
+                } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen $fnr")
                 } else {
                     throw no.nav.etterlatte.person.PdlForesporselFeilet(
@@ -235,4 +235,9 @@ class PersonWebService(
                     ?.policy
                     ?.contains("adressebeskyttelse_fortrolig_adresse") == true
         }
+
+    private fun pdlForesporselFeiletForAdressebeskyttelse(): Throwable =
+        throw PdlForesporselFeilet(
+            "Denne personen har adressebeskyttelse. Behandlingen skal derfor sendes til enhet Vikafossen som vil behandle saken videre.",
+        )
 }

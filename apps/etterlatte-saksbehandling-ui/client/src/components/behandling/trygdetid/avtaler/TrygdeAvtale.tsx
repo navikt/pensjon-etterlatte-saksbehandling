@@ -224,7 +224,7 @@ function TrygdeAvtaleRedigering(props: {
   return (
     <form onSubmit={handleSubmit(lagreOgOppdater)}>
       <VStack gap="6">
-        <HStack gap="4">
+        <HStack gap="4" align="start">
           <Select
             {...register('avtaleKode', {
               required: {

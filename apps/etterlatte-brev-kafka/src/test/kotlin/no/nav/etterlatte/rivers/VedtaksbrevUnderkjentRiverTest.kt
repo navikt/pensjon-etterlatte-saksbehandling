@@ -2,10 +2,12 @@ package no.nav.etterlatte.rivers
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.runs
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.brev.Brevkoder
@@ -14,14 +16,16 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -39,51 +43,59 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class VedtaksbrevUnderkjentRiverTest {
-    private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val brevApiKlient = mockk<BrevapiKlient>()
 
-    private val testRapid = TestRapid().apply { VedtaksbrevUnderkjentRiver(this, vedtaksbrevService) }
+    private val testRapid = TestRapid().apply { VedtaksbrevUnderkjentRiver(this, brevApiKlient) }
 
     @BeforeEach
-    fun before() = clearMocks(vedtaksbrevService)
+    fun before() = clearMocks(brevApiKlient)
 
     @AfterEach
-    fun after() = confirmVerified(vedtaksbrevService)
+    fun after() = confirmVerified(brevApiKlient)
 
     @Test
     fun `Vedtaksbrev finnes ikke`() {
-        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns null
+        coEvery { brevApiKlient.hentVedtaksbrev(any()) } returns null
 
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
 
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
+        coVerify(exactly = 1) { brevApiKlient.hentVedtaksbrev(vedtak.behandlingId) }
     }
 
     @Test
     fun `Vedtaksbrev gjenåpnet ok`() {
         val brev = opprettBrev()
 
-        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-        every { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(any(), any()) } returns true
+        coEvery { brevApiKlient.hentVedtaksbrev(any()) } returns brev
+        coEvery { brevApiKlient.fjernFerdigstiltStatusUnderkjentVedtak(any(), any()) } just runs
 
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
 
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
-        verify(exactly = 1) { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, any()) }
+        coVerify(exactly = 1) { brevApiKlient.hentVedtaksbrev(vedtak.behandlingId) }
+        coVerify(exactly = 1) {
+            brevApiKlient.fjernFerdigstiltStatusUnderkjentVedtak(
+                match {
+                    it.vedtak == vedtak.toJsonNode()
+                    it.vedtaksbrev == brev
+                },
+                any(),
+            )
+        }
     }
 
     @Test
     fun `Feil ved gjenåpning av vedtaksbrev`() {
         val brev = opprettBrev()
 
-        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-        every { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(any(), any()) } returns false
-
+        coEvery { brevApiKlient.hentVedtaksbrev(any()) } returns brev
+        coEvery { brevApiKlient.fjernFerdigstiltStatusUnderkjentVedtak(any(), any()) } throws
+            ForespoerselException(500, "UKJENT_FEIL_HENT_VEDTAKSBREV", "Kunne ikke hente vedtaksbrev for behandlingid: xyz")
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
 
@@ -91,8 +103,16 @@ internal class VedtaksbrevUnderkjentRiverTest {
             testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
         }
 
-        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
-        verify(exactly = 1) { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, any()) }
+        coVerify(exactly = 1) { brevApiKlient.hentVedtaksbrev(vedtak.behandlingId) }
+        coVerify(exactly = 1) {
+            brevApiKlient.fjernFerdigstiltStatusUnderkjentVedtak(
+                match {
+                    it.vedtak == vedtak.toJsonNode()
+                    it.vedtaksbrev == brev
+                },
+                any(),
+            )
+        }
     }
 
     private fun opprettMelding(vedtak: VedtakDto): JsonMessage =

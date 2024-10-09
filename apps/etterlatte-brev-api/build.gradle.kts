@@ -17,7 +17,7 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
-    implementation(project(":libs:rapidsandrivers-extras"))
+    implementation(project(":libs:rapidsandrivers-extras")) // TODO: skal bort
     implementation(libs.etterlatte.common)
     implementation(libs.pdf.pdfbox)
 

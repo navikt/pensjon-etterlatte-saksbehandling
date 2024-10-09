@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 
+// TODO fjern
 fun List<Behandling>.tidligsteIverksatteVirkningstidspunkt(): Virkningstidspunkt? =
     this
         .filter { it.status == BehandlingStatus.IVERKSATT }

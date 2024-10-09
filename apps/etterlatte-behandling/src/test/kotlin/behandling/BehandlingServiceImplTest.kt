@@ -716,6 +716,20 @@ internal class BehandlingServiceImplTest {
         }
     }
 
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `saker innvilget i Pesys skal gi feimelding hvis virkningstidspunkt før januar`(sakType: SakType) {
+        shouldThrow<VirkFoerOmsKildePesys> {
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = Tidspunkt.parse("2023-12-01T00:00:00Z"),
+                foersteVirk = YearMonth.of(2024, 1),
+                kilde = Vedtaksloesning.PESYS,
+            )
+        }
+    }
+
     private fun sjekkOmVirkningstidspunktErGyldig(
         sakType: SakType,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -1025,19 +1039,25 @@ internal class BehandlingServiceImplTest {
     ) {
         nyKontekstMedBruker(mockSaksbehandler())
 
+        val foerstegangsbehandling =
+            foerstegangsbehandling(
+                id = BEHANDLINGS_ID,
+                sakId = SAK_ID,
+                sakType = sakType,
+                soeknadMottattDato = soeknadMottatt,
+                utlandstilknytning = utlandstilknytning,
+                kilde = kilde,
+                opphoerFraOgMed = opphoerFraOgMed,
+                virkningstidspunkt =
+                    foersteVirk?.let {
+                        Virkningstidspunkt(it, Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()), "")
+                    },
+            )
         val (behandling, tidligereBehandlinger) =
             when (behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
                     Pair(
-                        foerstegangsbehandling(
-                            id = BEHANDLINGS_ID,
-                            sakId = SAK_ID,
-                            sakType = sakType,
-                            soeknadMottattDato = soeknadMottatt,
-                            utlandstilknytning = utlandstilknytning,
-                            kilde = kilde,
-                            opphoerFraOgMed = opphoerFraOgMed,
-                        ),
+                        foerstegangsbehandling,
                         emptyList(),
                     )
 
@@ -1094,7 +1114,8 @@ internal class BehandlingServiceImplTest {
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
 
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling
-        every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns tidligereBehandlinger
+        every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns tidligereBehandlinger // TODO fjern?
+        every { behandlingDaoMock.hentFoerstegangsbehandling(behandling.sak.id) } returns foerstegangsbehandling
     }
 
     private fun mockPersongalleri() =

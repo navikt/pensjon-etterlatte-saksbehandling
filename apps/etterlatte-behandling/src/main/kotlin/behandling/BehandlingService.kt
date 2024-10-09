@@ -4,7 +4,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
@@ -17,7 +19,6 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -90,6 +91,14 @@ class VirkFoerIverksattVirk(
         detail = "Virkningstidspunktet du har satt ($virk) er før det første iverksatte virkningstidspunktet ($foersteVirk)",
     )
 
+class VirkFoerOmsKildePesys(
+    virk: YearMonth,
+    foersteVirk: YearMonth,
+) : UgyldigForespoerselException(
+        code = "VIRK_FOER_FOERSTE_IVERKSATT_VIRK", // TODO
+        detail = "Virkningstidspunktet du har satt ($virk) er før det første iverksatte virkningstidspunktet ($foersteVirk)",
+    )
+
 class BehandlingNotFoundException(
     behandlingId: UUID,
 ) : IkkeFunnetException(
@@ -144,6 +153,8 @@ interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
     fun hentBehandlingerForSak(sakId: SakId): List<Behandling>
+
+    fun hentFoerstegangsbehandling(sakId: SakId): Foerstegangsbehandling
 
     fun hentSakMedBehandlinger(saker: List<Sak>): SakMedBehandlinger
 
@@ -215,8 +226,6 @@ interface BehandlingService {
         overstyr: Boolean,
     ): Boolean
 
-    fun hentFoersteVirk(sakId: SakId): YearMonth?
-
     fun oppdaterGrunnlagOgStatus(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -278,6 +287,10 @@ internal class BehandlingServiceImpl(
     override fun hentBehandling(behandlingId: UUID): Behandling? = hentBehandlingForId(behandlingId)
 
     override fun hentBehandlingerForSak(sakId: SakId): List<Behandling> = hentBehandlingerForSakId(sakId)
+
+    override fun hentFoerstegangsbehandling(sakId: SakId): Foerstegangsbehandling =
+        behandlingDao.hentFoerstegangsbehandling(sakId)
+            ?: throw TilstandException.UgyldigTilstand("Førstegangsbehandling for $sakId finnes ikke.")
 
     /**
      * Funksjon for uthenting av [SakMedUtlandstilknytning] og tilknyttede [Behandling]er.
@@ -514,10 +527,15 @@ internal class BehandlingServiceImpl(
             throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
         }
 
-        val foersteVirkDato = hentFoersteVirk(behandling.sak.id)
-        return if (foersteVirkDato == null) {
-            throw KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling()
-        } else if (virkningstidspunkt.isBefore(foersteVirkDato)) {
+        val foerstegangsbehandling = hentFoerstegangsbehandling(behandling.sak.id)
+        val foersteVirkDato =
+            foerstegangsbehandling.virkningstidspunkt?.dato
+                ?: throw KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling()
+
+        return if (virkningstidspunkt.isBefore(foersteVirkDato)) {
+            if (foerstegangsbehandling.kilde == Vedtaksloesning.PESYS) {
+                throw VirkFoerOmsKildePesys(virkningstidspunkt, foersteVirkDato)
+            }
             // Vi tillater virkningstidspunkt før første virk dersom saksbehandler vil overstyre
             if (overstyr) {
                 true
@@ -539,11 +557,6 @@ internal class BehandlingServiceImpl(
         return personopplysninger.avdoede
             .mapNotNull { it.opplysning.doedsdato }
             .minOrNull()
-    }
-
-    override fun hentFoersteVirk(sakId: SakId): YearMonth? {
-        val behandlinger = hentBehandlingerForSak(sakId)
-        return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
 
     override fun oppdaterGrunnlagOgStatus(

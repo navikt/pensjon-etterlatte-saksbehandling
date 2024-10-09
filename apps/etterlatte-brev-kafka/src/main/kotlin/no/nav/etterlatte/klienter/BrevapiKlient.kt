@@ -116,7 +116,7 @@ class BrevapiKlient(
             throw ForespoerselException(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_OPPRETT_OG_JOURNALFOERING_AV_NOTAT",
-                detail = "Kunne ikke opprettet og journalføre notat for sakid: $sakId",
+                detail = "Kunne ikke opprette og journalføre notat for sakid: $sakId",
             )
         }
     }

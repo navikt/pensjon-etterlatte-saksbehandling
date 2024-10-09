@@ -6,9 +6,9 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -32,7 +32,7 @@ internal class DistribuerBrevRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val sakid = packet["vedtak.sak.id"].asLong()
+        val sakid = SakId(packet["vedtak.sak.id"].asLong())
 
         val bestillingsId =
             runBlocking {

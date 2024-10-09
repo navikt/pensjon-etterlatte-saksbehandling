@@ -2,16 +2,10 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import no.nav.etterlatte.brev.BrevParametereAutomatisk.BarnepensjonInformasjonDoedsfallRedigerbar
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.OmstillingsstoenadInntektsjustering
-import no.nav.etterlatte.libs.common.objectMapper
-
-fun main() {
-    println(objectMapper.writeValueAsString(BarnepensjonInformasjonDoedsfallRedigerbar(true, "avdoednavn", true)))
-}
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class BrevParametereAutomatisk {

@@ -112,7 +112,7 @@ object BarnepensjonVilkaar2024 {
                     type = VilkaarType.BP_VURDERING_AV_EKSPORT_2024,
                     beskrivelse =
                         """
-                        Barnepensjon kan eksporteres hvis en av foreldrene har minst 20 års samlet botid i Norge, hvis avdøde har mindre enn 20 års botid, men har minimum tre poengår eller hvis minst ett av barna i et foreldreløst barnekull er medlem i trygden.
+                        Barnepensjon kan eksporteres hvis en av foreldrene har minst 20 års samlet botid i Norge, hvis avdøde har mindre enn 20 års botid, men har minimum fem poengår eller hvis minst ett av barna i et foreldreløst barnekull er medlem i trygden.
 
                         Skyldes dødsfallet en godkjent yrkesskade kan barnepensjonen eksporteres i sin helhet, jf. folketrygdloven § 18-10. Barnepensjon kan også fritt eksporteres til EØS-land, og til noen land Norge har bilaterale trygdeavtaler med. 
 

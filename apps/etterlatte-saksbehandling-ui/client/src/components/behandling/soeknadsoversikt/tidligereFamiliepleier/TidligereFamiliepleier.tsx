@@ -48,7 +48,7 @@ export const TidligereFamiliepleier = ({
               ha vært ute av stand til å forsørge seg selv med eget arbeid på grunn av pleieforholdet
             </List.Item>
             <List.Item>ikke hatt mulighet for å forsørge seg selv etter at pleieforholdet opphørte</List.Item>
-            <List.Item>Ikke ha tilstrekkelige midler til livsopphold</List.Item>
+            <List.Item>ikke ha tilstrekkelige midler til livsopphold</List.Item>
           </List>
           <List as="ul" title="I tillegg er det et krav at:">
             <List.Item>pleieforholdet må ha vart i minst fem år</List.Item>

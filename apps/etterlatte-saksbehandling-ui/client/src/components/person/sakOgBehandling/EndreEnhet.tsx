@@ -58,7 +58,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
 
               {!harTilgangPaaNyEnhet && (
                 <Alert variant="warning">
-                  Du har ikke tilgang på enheten vi byttet til, og vil ikke lengre kunne se saken.
+                  Du har ikke lenger tilgang til saken, siden du ikke har tilgang til enheten saken er byttet til.
                 </Alert>
               )}
 

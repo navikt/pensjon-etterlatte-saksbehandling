@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import Regelverk
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
@@ -141,9 +142,10 @@ class BeregningRepository(
             "samletTeoretiskTrygdetid" to beregningsperiode.samletTeoretiskTrygdetid,
             "prorataBroekTeller" to beregningsperiode.broek?.teller,
             "prorataBroekNevner" to beregningsperiode.broek?.nevner,
-            "avdoedeForeldre" to beregningsperiode.avdodeForeldre?.toJson(),
+            "avdoedeForeldre" to beregningsperiode.avdoedeForeldre?.toJson(),
             "regelResultat" to beregningsperiode.regelResultat?.toJson(),
             "regelVersjon" to beregningsperiode.regelVersjon,
+            "regelverk" to beregningsperiode.regelverk?.name,
             "kilde" to beregningsperiode.kilde?.toJson(),
             "kunEnJuridiskForelder" to beregningsperiode.kunEnJuridiskForelder,
         )
@@ -208,8 +210,9 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
                     objectMapper.readTree(it)
                 },
             regelVersjon = stringOrNull(BeregningsperiodeDatabaseColumns.RegelVersjon.navn),
-            kilde = stringOrNull("kilde")?.let { objectMapper.readValue(it) },
-            kunEnJuridiskForelder = boolean("kun_en_juridisk_forelder"),
+            regelverk = stringOrNull(BeregningsperiodeDatabaseColumns.Regelverk.navn)?.let { Regelverk.valueOf(it) },
+            kilde = stringOrNull(BeregningsperiodeDatabaseColumns.Kilde.navn)?.let { objectMapper.readValue(it) },
+            kunEnJuridiskForelder = boolean(BeregningsperiodeDatabaseColumns.KunEnJuridiskForelder.navn),
         )
     }
 
@@ -256,9 +259,10 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                     samletNorskTrygdetid = it.samletNorskTrygdetid,
                     samletTeoretiskTrygdetid = it.samletTeoretiskTrygdetid,
                     broek = it.broek,
-                    avdodeForeldre = it.avdoedeForeldre,
+                    avdoedeForeldre = it.avdoedeForeldre,
                     regelResultat = it.regelResultat,
                     regelVersjon = it.regelVersjon,
+                    regelverk = it.regelverk,
                     kilde = it.kilde,
                     kunEnJuridiskForelder = it.kunEnJuridiskForelder,
                 )
@@ -293,6 +297,7 @@ private enum class BeregningsperiodeDatabaseColumns(
     AvdoedeForeldre("avdoede_foreldre"),
     RegelResultat("regelResultat"),
     RegelVersjon("regelVersjon"),
+    Regelverk("regelverk"),
     Kilde("kilde"),
     Institusjonsopphold("institusjonsopphold"),
     KunEnJuridiskForelder("kun_en_juridisk_forelder"),
@@ -330,6 +335,7 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.AvdoedeForeldre.navn},
             ${BeregningsperiodeDatabaseColumns.RegelResultat.navn}, 
             ${BeregningsperiodeDatabaseColumns.RegelVersjon.navn},
+            ${BeregningsperiodeDatabaseColumns.Regelverk.navn},
             ${BeregningsperiodeDatabaseColumns.Kilde.navn},
             ${BeregningsperiodeDatabaseColumns.Institusjonsopphold.navn},
             ${BeregningsperiodeDatabaseColumns.KunEnJuridiskForelder.navn}
@@ -338,8 +344,8 @@ private object Queries {
             :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
             :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :trygdetidForIdent::TEXT,
             :beregningsMetode::TEXT, :samletNorskTrygdetid::BIGINT, :samletTeoretiskTrygdetid::BIGINT,
-            :prorataBroekTeller::BIGINT, :prorataBroekNevner::BIGINT, :avdoedeForeldre::JSONB, :regelResultat::JSONB,
-             :regelVersjon::TEXT, :kilde::TEXT, :institusjonsopphold::JSONB, :kunEnJuridiskForelder) 
+            :prorataBroekTeller::BIGINT, :prorataBroekNevner::BIGINT, :avdoedeForeldre::JSONB, :regelResultat::JSONB, 
+            :regelVersjon::TEXT, :regelverk::TEXT, :kilde::TEXT, :institusjonsopphold::JSONB, :kunEnJuridiskForelder) 
     """
 
     val slettBeregningperioder = """
@@ -402,6 +408,7 @@ private data class BeregningsperiodeDAO(
     val avdoedeForeldre: List<String?>? = null,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
+    val regelverk: Regelverk? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
     val kunEnJuridiskForelder: Boolean = false,
 )

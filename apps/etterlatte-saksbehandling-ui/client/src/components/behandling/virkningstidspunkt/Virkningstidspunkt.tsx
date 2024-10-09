@@ -146,7 +146,7 @@ const Virkningstidspunkt = (props: {
       >
         <VStack gap="2">
           <Informasjon>{props.beskrivelse}</Informasjon>
-          <div>{props.children?.info}</div>
+          <HStack gap="4">{props.children?.info}</HStack>
         </VStack>
 
         <Vurdering>

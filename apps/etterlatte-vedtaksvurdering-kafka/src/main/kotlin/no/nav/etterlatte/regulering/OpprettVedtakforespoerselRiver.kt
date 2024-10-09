@@ -4,16 +4,13 @@ import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
-import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.behandlingId
-import no.nav.etterlatte.rapidsandrivers.dato
-import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.etterlatte.vedtaksvurdering.RapidUtsender
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -33,30 +30,33 @@ internal class OpprettVedtakforespoerselRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.BEREGNA) {
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(DATO_KEY) }
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
+        initialiserRiver(rapidsConnection, OmregningHendelseType.BEREGNA) {
+            validate { it.requireKey(HENDELSE_DATA_KEY) }
+            validate { it.requireKey(OmregningDataPacket.SAK_ID) }
+            validate { it.requireKey(OmregningDataPacket.BEHANDLING_ID) }
+            validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
         }
     }
 
-    override fun kontekst() = Kontekst.REGULERING
+    override fun kontekst() = Kontekst.OMREGNING
 
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val sakId = packet.sakId
+        val omregningData = packet.omregningData
+        val sakId = omregningData.sakId
         logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
-        val behandlingId = packet.behandlingId
+        val behandlingId = omregningData.hentBehandlingId()
+        val dato = omregningData.hentFraDato()
 
         val respons =
             if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
-                vedtak.opprettVedtakOgFatt(packet.sakId, behandlingId)
+                vedtak.opprettVedtakOgFatt(sakId, behandlingId)
             } else {
-                vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)
+                vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
             }
-        hentBeloep(respons, packet.dato)?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
+        hentBeloep(respons, dato)?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
         logger.info("Opprettet vedtak ${respons.vedtak.id} for sak: $sakId og behandling: $behandlingId")
         RapidUtsender.sendUt(respons, packet, context)
     }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.regulering
 
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -24,11 +25,12 @@ import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.AAPNE_BEHANDLINGER_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -137,9 +139,9 @@ internal class ReguleringsforespoerselRiverTest {
         val melding2 = inspector.inspektør.message(1)
         val melding3 = inspector.inspektør.message(2)
 
-        Assertions.assertEquals(sak1, melding1.get(SAK_ID_KEY).tilSakId())
-        Assertions.assertEquals(sak2, melding2.get(SAK_ID_KEY).tilSakId())
-        Assertions.assertEquals(sak3, melding3.get(SAK_ID_KEY).tilSakId())
+        melding1.get(HENDELSE_DATA_KEY).get(OmregningDataPacket::sakId.name).tilSakId() shouldBe sak1
+        melding2.get(HENDELSE_DATA_KEY).get(OmregningDataPacket::sakId.name).tilSakId() shouldBe sak2
+        melding3.get(HENDELSE_DATA_KEY).get(OmregningDataPacket::sakId.name).tilSakId() shouldBe sak3
     }
 
     @Test
@@ -157,7 +159,11 @@ internal class ReguleringsforespoerselRiverTest {
         val behandlingId2 = UUID.randomUUID()
         every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any()) } returns
             SakIDListe(
-                tilbakestileBehandlinger = listOf(BehandlingOgSak(behandlingId1, sakId), BehandlingOgSak(behandlingId2, sakId)),
+                tilbakestileBehandlinger =
+                    listOf(
+                        BehandlingOgSak(behandlingId1, sakId),
+                        BehandlingOgSak(behandlingId2, sakId),
+                    ),
                 aapneBehandlinger = listOf(BehandlingOgSak(behandlingId1, sakId)),
             )
         val inspector =
@@ -256,7 +262,12 @@ internal class ReguleringsforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
-            vedtakServiceMock.hentAlleSaker(any(), any(), any(), match { it.any { ekskludert -> ekskludert == randomSakId() } })
+            vedtakServiceMock.hentAlleSaker(
+                any(),
+                any(),
+                any(),
+                match { it.any { ekskludert -> ekskludert == randomSakId() } },
+            )
         }
     }
 }

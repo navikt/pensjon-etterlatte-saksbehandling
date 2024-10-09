@@ -11,6 +11,8 @@ export interface IBrev {
   mottaker: Mottaker
   opprettet: string
   brevtype: Brevtype
+  journalpostId?: string
+  bestillingId?: string
 }
 
 export interface Mottaker {

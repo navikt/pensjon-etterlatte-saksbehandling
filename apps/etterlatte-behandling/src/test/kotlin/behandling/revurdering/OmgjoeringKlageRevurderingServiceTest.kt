@@ -252,7 +252,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
         BehandlingFactory(
             oppgaveService = applicationContext.oppgaveService,
             grunnlagService = applicationContext.grunnlagsService,
-            revurderingService = applicationContext.automatiskRevurderingService,
+            revurderingService = applicationContext.revurderingService,
             gyldighetsproevingService = applicationContext.gyldighetsproevingService,
             sakService = applicationContext.sakService,
             behandlingDao = applicationContext.behandlingDao,

@@ -7,6 +7,7 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  ITidligereFamiliepleier,
   IUtlandstilknytning,
   ViderefoertOpphoer,
   Virkningstidspunkt,
@@ -45,6 +46,9 @@ export const oppdaterBeregningsGrunnlag = createAction<BeregningsGrunnlagDto>('b
 export const oppdaterOverstyrBeregningsGrunnlag =
   createAction<OverstyrBeregningGrunnlagPostDTO>('behandling/overstyrBeregning')
 export const oppdaterRevurderingInfo = createAction<RevurderingMedBegrunnelse>('behandling/revurderinginfo')
+export const oppdaterTidligereFamiliepleier = createAction<ITidligereFamiliepleier>(
+  'behandling/tidligere-familiepleier'
+)
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
@@ -126,5 +130,8 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(resetViderefoertOpphoer, (state) => {
     state.behandling!!.viderefoertOpphoer = null
+  })
+  builder.addCase(oppdaterTidligereFamiliepleier, (state, action) => {
+    state.behandling!!.tidligereFamiliepleier = action.payload
   })
 })

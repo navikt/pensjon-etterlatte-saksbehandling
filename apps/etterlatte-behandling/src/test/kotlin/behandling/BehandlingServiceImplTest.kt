@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -25,6 +26,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -32,14 +34,18 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -76,6 +82,7 @@ internal class BehandlingServiceImplTest {
     private val hendelseDaoMock = mockk<HendelseDao>()
     private val grunnlagKlientMock = mockk<GrunnlagKlient>()
     private val oppgaveServiceMock = mockk<OppgaveService>()
+    private val grunnlagServiceMock = mockk<GrunnlagServiceImpl>()
 
     private val behandlingService =
         BehandlingServiceImpl(
@@ -87,7 +94,7 @@ internal class BehandlingServiceImplTest {
             behandlingRequestLogger = mockk(),
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveServiceMock,
-            grunnlagService = mockk(),
+            grunnlagService = grunnlagServiceMock,
             beregningKlient = mockk(),
         )
 
@@ -850,6 +857,79 @@ internal class BehandlingServiceImplTest {
     }
 
     @Test
+    fun `start dato må være før opphørsdato tidligere familiepleier`() {
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
+
+        val uuid = UUID.randomUUID()
+
+        val slot = slot<TidligereFamiliepleier>()
+
+        every { behandlingDaoMock.hentBehandling(any()) } returns
+            foerstegangsbehandling(
+                id = uuid,
+                sakId = 1,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
+
+        every { behandlingDaoMock.lagreTidligereFamiliepleier(any(), capture(slot)) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
+
+        shouldThrow<PleieforholdMaaStarteFoerDetOpphoerer> {
+            inTransaction {
+                behandlingService.oppdaterTidligereFamiliepleier(
+                    uuid,
+                    TidligereFamiliepleier(
+                        true,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "123",
+                        LocalDate.now(),
+                        LocalDate.now(),
+                        "Test",
+                    ),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `kan oppdatere tidligere familiepleier`() {
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
+
+        val uuid = UUID.randomUUID()
+
+        val slot = slot<TidligereFamiliepleier>()
+
+        every { behandlingDaoMock.hentBehandling(any()) } returns
+            foerstegangsbehandling(
+                id = uuid,
+                sakId = 1,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
+
+        every { behandlingDaoMock.lagreTidligereFamiliepleier(any(), capture(slot)) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
+
+        inTransaction {
+            behandlingService.oppdaterTidligereFamiliepleier(
+                uuid,
+                TidligereFamiliepleier(
+                    true,
+                    Grunnlagsopplysning.Saksbehandler.create("ident"),
+                    "123",
+                    LocalDate.of(1970, 1, 1),
+                    LocalDate.now(),
+                    "Test",
+                ),
+            )
+        }
+
+        assertEquals(true, slot.captured.svar)
+        assertEquals("123", slot.captured.foedselsnummer)
+        assertEquals("Test", slot.captured.begrunnelse)
+        assertEquals("ident", (slot.captured.kilde as Grunnlagsopplysning.Saksbehandler).ident)
+    }
+
+    @Test
     fun `hentSakMedBehandlinger - kun én sak`() {
         nyKontekstMedBruker(mockSaksbehandler())
 
@@ -894,6 +974,43 @@ internal class BehandlingServiceImplTest {
         }
 
         verify(exactly = 0) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
+    }
+
+    @Test
+    fun `Kan lagre annen forelder`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+        val behandling = foerstegangsbehandling(sakId = 1L, id = UUID.randomUUID())
+        every { behandlingDaoMock.hentBehandling(behandling.id) } returns behandling
+        coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, TOKEN) } returns mockPersongalleri()
+        coEvery { grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, any(), any()) } just runs
+        coEvery { grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any()) } just runs
+        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
+
+        val annenForelderInRequest =
+            AnnenForelder(
+                vurdering = AnnenForelder.AnnenForelderVurdering.FORELDER_UTEN_IDENT_I_PDL,
+                foedselsdato = LocalDate.now(),
+            )
+        runBlocking {
+            behandlingService.lagreAnnenForelder(
+                behandling.id,
+                TOKEN,
+                annenForelderInRequest,
+            )
+        }
+        val slot = slot<NyeSaksopplysninger>()
+        coVerify {
+            grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, capture(slot), any())
+            grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any())
+        }
+        assertEquals(behandling.sak.id, slot.captured.sakId)
+
+        val grunnlagsopplysning = slot.captured.opplysninger.single()
+        assertEquals(Opplysningstype.PERSONGALLERI_V1, grunnlagsopplysning.opplysningType)
+
+        val persongalleri = objectMapper.readValue(grunnlagsopplysning.opplysning.toJson(), Persongalleri::class.java)
+        assertEquals(annenForelderInRequest, persongalleri.annenForelder)
     }
 
     private fun initFellesMocks(

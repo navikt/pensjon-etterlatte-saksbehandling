@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -152,6 +153,48 @@ internal class BehandlingDaoTest(
     }
 
     @Test
+    fun `Kan hente revurdering for sak med flere evurderingsårsaker`() {
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+                prosesstype = Prosesstype.MANUELL,
+            )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+        behandlingRepo.opprettBehandling(
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = Revurderingaarsak.OMREGNING,
+                prosesstype = Prosesstype.MANUELL,
+            ),
+        )
+
+        behandlingRepo.opprettBehandling(
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = Revurderingaarsak.UTLAND,
+                prosesstype = Prosesstype.MANUELL,
+            ),
+        )
+        val revurderingerForSakeMedAarsak =
+            behandlingRepo.hentAlleRevurderingerISakMedAarsak(
+                sak1,
+                listOf(Revurderingaarsak.REGULERING, Revurderingaarsak.OMREGNING),
+            )
+
+        assertEquals(2, revurderingerForSakeMedAarsak.size)
+        revurderingerForSakeMedAarsak.forExactly(2) { revurdering ->
+            revurdering.sak.id shouldBe sak1
+        }
+    }
+
+    @Test
     fun `Skal legge til gyldighetsproeving til en opprettet behandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
@@ -184,7 +227,10 @@ internal class BehandlingDaoTest(
                 status = BehandlingStatus.OPPRETTET,
             )
 
-        behandlingRepo.lagreGyldighetsproeving(gyldighetsproevingBehandling.id, gyldighetsproevingBehandling.gyldighetsproeving())
+        behandlingRepo.lagreGyldighetsproeving(
+            gyldighetsproevingBehandling.id,
+            gyldighetsproevingBehandling.gyldighetsproeving(),
+        )
         val lagretGyldighetsproving =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
@@ -228,6 +274,45 @@ internal class BehandlingDaoTest(
         assertEquals(
             "navIdent",
             (lagretBehandling.boddEllerArbeidetUtlandet?.kilde as Grunnlagsopplysning.Saksbehandler).ident,
+        )
+    }
+
+    @Test
+    fun `Skal legge til tidligere familiepleier i en opprettet behandling`() {
+        val sak1 = sakRepo.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr).id
+
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak1,
+            )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        val opprettetBehandling =
+            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
+
+        behandlingRepo.lagreTidligereFamiliepleier(
+            opprettetBehandling.id,
+            TidligereFamiliepleier(
+                true,
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "123",
+                LocalDate.of(1970, 1, 1),
+                LocalDate.now(),
+                "Test",
+            ),
+        )
+
+        val lagretBehandling =
+            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
+
+        assertEquals(true, lagretBehandling.tidligereFamiliepleier?.svar)
+        assertEquals("123", lagretBehandling.tidligereFamiliepleier?.foedselsnummer)
+        assertEquals("Test", lagretBehandling.tidligereFamiliepleier?.begrunnelse)
+        assertEquals(
+            "ident",
+            (lagretBehandling.tidligereFamiliepleier?.kilde as Grunnlagsopplysning.Saksbehandler).ident,
         )
     }
 

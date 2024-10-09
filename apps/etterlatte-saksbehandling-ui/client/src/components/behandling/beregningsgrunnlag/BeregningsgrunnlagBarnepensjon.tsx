@@ -109,6 +109,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
   const oppdaterBeregningsgrunnlag = (beregningsMetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
       ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
+      beregningsMetodeFlereAvdoede: undefined,
       beregningsMetode: beregningsMetodeForm,
       kunEnJuridiskForelder: harKunEnJuridiskForelder
         ? periodisertBeregningsgrunnlagTilDto({
@@ -167,32 +168,37 @@ const BeregningsgrunnlagBarnepensjon = () => {
               error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente trygdetider'}</ApiErrorAlert>,
               success: (trygdetider) => (
                 <>
-                  {trygdetider.length > 1 &&
-                    (!!tidligsteAvdoede ? (
-                      <BeregningsmetoderFlereAvdoede
-                        redigerbar={redigerbar}
-                        trygdetider={trygdetider}
-                        tidligsteAvdoede={tidligsteAvdoede}
-                      />
-                    ) : (
-                      <ApiErrorAlert>
-                        Fant ikke avdøde i persongalleriet. For å beregne barnepensjonen riktig må det være en eller
-                        flere avdøde i persongalleriet.
-                      </ApiErrorAlert>
-                    ))}
-                  {trygdetider.length === 1 && (
-                    <BeregningsMetodeBrukt
-                      redigerbar={redigerbar}
-                      navn={mapNavn(trygdetider[0].ident, personopplysninger)}
-                      behandling={behandling}
-                      oppdaterBeregningsgrunnlag={oppdaterBeregningsgrunnlag}
-                      lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
-                      datoTilKunEnJuridiskForelder={
-                        behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
-                          ? new Date(behandling.beregningsGrunnlag.kunEnJuridiskForelder.tom)
-                          : undefined
-                      }
-                    />
+                  {trygdetider && (
+                    <>
+                      {trygdetider?.length &&
+                        trygdetider.length > 1 &&
+                        (!!tidligsteAvdoede ? (
+                          <BeregningsmetoderFlereAvdoede
+                            redigerbar={redigerbar}
+                            trygdetider={trygdetider}
+                            tidligsteAvdoede={tidligsteAvdoede}
+                          />
+                        ) : (
+                          <ApiErrorAlert>
+                            Fant ikke avdøde i persongalleriet. For å beregne barnepensjonen riktig må det være en eller
+                            flere avdøde i persongalleriet.
+                          </ApiErrorAlert>
+                        ))}
+                      {trygdetider.length === 1 && (
+                        <BeregningsMetodeBrukt
+                          redigerbar={redigerbar}
+                          navn={mapNavn(trygdetider[0].ident, personopplysninger)}
+                          behandling={behandling}
+                          oppdaterBeregningsgrunnlag={oppdaterBeregningsgrunnlag}
+                          lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
+                          datoTilKunEnJuridiskForelder={
+                            behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
+                              ? new Date(behandling.beregningsGrunnlag.kunEnJuridiskForelder.tom)
+                              : undefined
+                          }
+                        />
+                      )}
+                    </>
                   )}
 
                   <Box maxWidth="70rem">

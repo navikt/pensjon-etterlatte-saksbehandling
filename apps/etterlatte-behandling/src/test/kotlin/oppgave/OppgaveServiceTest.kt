@@ -59,13 +59,15 @@ internal class OppgaveServiceTest(
     val dataSource: DataSource,
 ) {
     private val sakLesDao: SakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-    private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+    private val sakSkrivDao =
+        SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
     private val oppgaveDao: OppgaveDao = spyk(OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource)))
     private val hendelser: BehandlingHendelserKafkaProducer = mockk(relaxed = true)
     private val hendelseDao = mockk<HendelseDao>()
     private val oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing =
         OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
-    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakLesDao, hendelseDao, hendelser)
+    private val oppgaveService: OppgaveService =
+        OppgaveService(oppgaveDaoMedEndringssporing, sakLesDao, hendelseDao, hendelser)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     private val azureGroupToGroupIDMap =
@@ -304,7 +306,11 @@ internal class OppgaveServiceTest(
                 merknad = null,
             )
         oppgaveService.tildelSaksbehandler(oppgaveFerdigstilt.id, saksbehandler.ident)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(behandlingId, OppgaveType.FOERSTEGANGSBEHANDLING, saksbehandler)
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            behandlingId,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            saksbehandler,
+        )
 
         val annenbehandlingfoerstegangs =
             oppgaveService.opprettOppgave(
@@ -316,7 +322,11 @@ internal class OppgaveServiceTest(
             )
         val saksbehandlerforstegangs = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(annenbehandlingfoerstegangs.id, saksbehandlerforstegangs.ident)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(annenBehandlingId, OppgaveType.FOERSTEGANGSBEHANDLING, saksbehandlerforstegangs)
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            annenBehandlingId,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            saksbehandlerforstegangs,
+        )
         val oppgaveUnderBehandlingAnnenBehandling =
             oppgaveService.opprettOppgave(
                 referanse = annenBehandlingId,
@@ -484,7 +494,7 @@ internal class OppgaveServiceTest(
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
 
         assertThrows<UgyldigForespoerselException> {
-            oppgaveService.endrePaaVent(PaaVent(nyOppgave.id, merknad = "test", paavent = true, aarsak = null))
+            oppgaveService.endrePaaVent(oppgaveId = nyOppgave.id, merknad = "test", paavent = true, aarsak = null)
         }
     }
 
@@ -503,20 +513,18 @@ internal class OppgaveServiceTest(
                 null,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
-        val paaVent = PaaVent(nyOppgave.id, merknad = "test", paavent = true, aarsak = PaaVentAarsak.ANNET)
-        oppgaveService.endrePaaVent(paaVent)
+        oppgaveService.endrePaaVent(nyOppgave.id, merknad = "test", paavent = true, aarsak = PaaVentAarsak.ANNET)
         val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(Status.PAA_VENT, oppgavePaaVent.status)
         verify {
             hendelser.sendMeldingForHendelsePaaVent(
                 UUID.fromString(nyOppgave.referanse),
                 BehandlingHendelseType.PAA_VENT,
-                paaVent.aarsak!!,
+                PaaVentAarsak.ANNET,
             )
         }
 
-        val paavent = PaaVent(nyOppgave.id, merknad = "", paavent = false, aarsak = null)
-        oppgaveService.endrePaaVent(paavent)
+        oppgaveService.endrePaaVent(nyOppgave.id, merknad = "", paavent = false, aarsak = null)
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent.status)
         verify {
@@ -858,7 +866,12 @@ internal class OppgaveServiceTest(
         assertEquals(1, oppgaverUtenEndring.size)
         assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
         oppgaveService.tildelSaksbehandler(oppgaverUtenEndring[0].id, saksbehandlerMedRoller.saksbehandler.ident())
-        oppgaveService.endrePaaVent(PaaVent(oppgaverUtenEndring[0].id, merknad = "test", paavent = true, aarsak = PaaVentAarsak.ANNET))
+        oppgaveService.endrePaaVent(
+            oppgaverUtenEndring[0].id,
+            merknad = "test",
+            paavent = true,
+            aarsak = PaaVentAarsak.ANNET,
+        )
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(
                 SakMedEnhet(
@@ -986,7 +999,11 @@ internal class OppgaveServiceTest(
 
         val saksbehandler1 = simpleSaksbehandler()
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1.ident)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(behandlingsref, OppgaveType.FOERSTEGANGSBEHANDLING, saksbehandler1)
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            behandlingsref,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            saksbehandler1,
+        )
         val ferdigstiltOppgave = oppgaveService.hentOppgave(oppgave.id)
         assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave.status)
     }
@@ -1205,7 +1222,8 @@ internal class OppgaveServiceTest(
 
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident())
 
-        val attestertOppgave = oppgaveService.tilAttestering(behandlingId, OppgaveType.FOERSTEGANGSBEHANDLING, "innvilget")
+        val attestertOppgave =
+            oppgaveService.tilAttestering(behandlingId, OppgaveType.FOERSTEGANGSBEHANDLING, "innvilget")
         assertNull(attestertOppgave.saksbehandler)
 
         opprettAttestantKontekst(attestant.ident())
@@ -1257,7 +1275,13 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val oppdatertOppgave = oppgaveService.endrePaaVent(PaaVent(oppgave.id, PaaVentAarsak.ANNET, "merknad", true))
+        val oppdatertOppgave =
+            oppgaveService.endrePaaVent(
+                oppgaveId = oppgave.id,
+                aarsak = PaaVentAarsak.ANNET,
+                merknad = "merknad",
+                paavent = true,
+            )
         val forrigeStatus = oppgaveService.hentForrigeStatus(oppgave.id)
 
         oppdatertOppgave.status shouldBe Status.PAA_VENT
@@ -1276,7 +1300,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        oppgaveService.endrePaaVent(PaaVent(oppgave.id, PaaVentAarsak.ANNET, "merknad", true))
+        oppgaveService.endrePaaVent(oppgave.id, true, "merknad", PaaVentAarsak.ANNET)
         oppgaveService.oppdaterStatusOgMerknad(oppgave.id, "en ny merknad", Status.UNDER_BEHANDLING)
         oppgaveService.oppdaterStatusOgMerknad(oppgave.id, "enda en ny merknad", Status.FERDIGSTILT)
         val oppdatertOppgave = oppgaveService.hentOppgave(oppgave.id)

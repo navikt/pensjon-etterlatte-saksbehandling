@@ -1,12 +1,16 @@
 import React, { ReactNode } from 'react'
-import { Grunnlagsendringshendelse, IBehandlingsammendrag } from '~components/person/typer'
+import { Grunnlagsendringshendelse, GrunnlagsendringStatus, IBehandlingsammendrag } from '~components/person/typer'
 import { ISakMedUtlandstilknytning } from '~shared/types/sak'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { Alert, HStack, Link, Table, VStack } from '@navikt/ds-react'
 import { HendelseBeskrivelse } from '~components/person/hendelser/HendelseBeskrivelse'
-import { grunnlagsendringsTittel, stoetterRevurderingAvHendelse } from '~components/person/hendelser/utils'
+import {
+  grunnlagsendringsTittel,
+  harAapenRevurdering,
+  revurderingKanOpprettes,
+  stoetterRevurderingAvHendelse,
+} from '~components/person/hendelser/utils'
 import { formaterDato } from '~utils/formatering/dato'
-import { harAapenRevurdering, revurderingKanOpprettes } from '~components/person/hendelser/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ArkiverHendelseModal } from '~components/person/hendelser/ArkiverHendelseModal'
 import { useSearchParams } from 'react-router-dom'
@@ -24,15 +28,18 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
 
   const [search] = useSearchParams()
 
+  const erValgtHendelse = search.get('referanse') === hendelse.id
+
   return (
     <Table.ExpandableRow
-      defaultOpen={search.get('referanse') === hendelse.id}
+      defaultOpen={erValgtHendelse}
+      selected={erValgtHendelse}
       expandOnRowClick
       content={
         <VStack gap="4">
           <HendelseBeskrivelse sakType={sak.sakType} hendelse={hendelse} />
 
-          {hendelse.status === 'TATT_MED_I_BEHANDLING' ? (
+          {hendelse.status === GrunnlagsendringStatus.TATT_MED_I_BEHANDLING ? (
             <Alert variant="info" inline>
               Denne hendelsen har en revurdering knyttet til seg.{' '}
               <Link href={`/behandling/${hendelse.behandlingId}/revurderingsoversikt`}>Gå til revurdering</Link>
@@ -52,7 +59,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
           <HStack gap="4">
             <ArkiverHendelseModal hendelse={hendelse} />
 
-            {hendelse.status !== 'TATT_MED_I_BEHANDLING' &&
+            {hendelse.status !== GrunnlagsendringStatus.TATT_MED_I_BEHANDLING &&
               stoetterRevurderingAvHendelse(hendelse, revurderinger) &&
               revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
                 <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} hendelseId={hendelse.id} />

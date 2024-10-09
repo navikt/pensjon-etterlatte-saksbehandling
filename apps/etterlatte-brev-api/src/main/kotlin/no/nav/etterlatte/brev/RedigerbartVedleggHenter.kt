@@ -11,7 +11,6 @@ import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
-import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
@@ -62,6 +61,7 @@ class RedigerbartVedleggHenter(
                                 avsender =
                                     adresseService.hentAvsender(
                                         opprettAvsenderRequest(bruker, forenkletVedtak, enhet),
+                                        bruker,
                                     ),
                                 soekerOgEventuellVerge = soekerOgEventuellVerge,
                                 sakId = sakId,

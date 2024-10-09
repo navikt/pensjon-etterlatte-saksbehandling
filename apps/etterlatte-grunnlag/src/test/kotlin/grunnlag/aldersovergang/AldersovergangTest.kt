@@ -63,7 +63,12 @@ class AldersovergangTest(
         opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, TextNode("2018-01-01"), fnrInnenfor)
         opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, TextNode("2020-01-01"), fnrInnenfor)
         opplysningDao.leggTilOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, TextNode("hei, hallo"), fnrInnenfor)
-        opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, TextNode("1987-04-20"), AVDOED_FOEDSELSNUMMER)
+        opplysningDao.leggTilOpplysning(
+            sakId,
+            Opplysningstype.FOEDSELSDATO,
+            TextNode("1987-04-20"),
+            AVDOED_FOEDSELSNUMMER,
+        )
 
         val sakIdUtenfor = randomSakId()
         val fnrUtenfor = HELSOESKEN_FOEDSELSNUMMER
@@ -148,6 +153,6 @@ class AldersovergangTest(
 
     private fun ApplicationTestBuilder.createHttpClient(service: AldersovergangService): HttpClient =
         runServer(mockOAuth2Server, "api/grunnlag") {
-            aldersovergangRoutes(service)
+            aldersovergangRoutes(mockk(), service)
         }
 }

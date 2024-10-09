@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 class SamordningsnotatRiver(
     rapidsConnection: RapidsConnection,
-    private val notatService: NyNotatService,
+    private val nyNotatService: NyNotatService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(SamordningsnotatRiver::class.java)
 
@@ -44,7 +44,7 @@ class SamordningsnotatRiver(
 
             runBlocking {
                 val notat =
-                    notatService.opprett(
+                    nyNotatService.opprett(
                         sakId = sakId,
                         mal = NotatMal.MANUELL_SAMORDNING,
                         tittel = "Manuell samordning - vedtak $vedtakId",
@@ -59,7 +59,7 @@ class SamordningsnotatRiver(
                         bruker = HardkodaSystembruker.river,
                     )
 
-                notatService.journalfoer(
+                nyNotatService.journalfoer(
                     id = notat.id,
                     bruker = HardkodaSystembruker.river,
                 )

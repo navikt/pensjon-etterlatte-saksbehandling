@@ -158,6 +158,7 @@ class VedtakOgBeregningSammenlignerTest {
                                     ),
                                 beloep = BigDecimal(1000),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                             Utbetalingsperiode(
                                 periode =
@@ -167,6 +168,7 @@ class VedtakOgBeregningSammenlignerTest {
                                     ),
                                 beloep = BigDecimal(2000),
                                 type = UtbetalingsperiodeType.UTBETALING,
+                                regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                             ),
                         ),
                 ),

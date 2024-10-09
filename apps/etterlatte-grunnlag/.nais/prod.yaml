@@ -99,6 +99,7 @@ spec:
     inbound:
       rules:
         - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-brev-kafka
         - application: etterlatte-brev-api
         - application: etterlatte-beregning
         - application: etterlatte-behandling

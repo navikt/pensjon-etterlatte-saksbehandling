@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.dokarkiv
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import org.slf4j.LoggerFactory
@@ -77,18 +76,6 @@ data class OpprettNotatJournalpostRequest(
     override val tilleggsopplysninger = emptyMap<String, String>()
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class OpprettJournalpostResponse(
-    val journalpostId: String,
-    val journalpostferdigstilt: Boolean,
-    val dokumenter: List<DokumentInfo> = emptyList(),
-) {
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class DokumentInfo(
-        val dokumentInfoId: String,
-    )
-}
-
 data class OppdaterJournalpostResponse(
     val journalpostId: String,
 )
@@ -131,22 +118,7 @@ data class JournalpostSak(
     val fagsakId: String? = null,
     val tema: String? = null,
     val fagsaksystem: String? = null,
-) {
-    init {
-        if (sakstype == Sakstype.FAGSAK) {
-            check(!fagsakId.isNullOrBlank()) {
-                val error = "fagsakId må være satt når sakstype=${Sakstype.FAGSAK}"
-                logger.error(error)
-                error
-            }
-            check(!fagsaksystem.isNullOrBlank()) {
-                val error = "fagsaksystem må være satt når sakstype=${Sakstype.FAGSAK}"
-                logger.error(error)
-                error
-            }
-        }
-    }
-}
+)
 
 enum class Sakstype {
     FAGSAK,

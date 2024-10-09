@@ -78,3 +78,6 @@ internal val sjekklisteItemsRevurderingOMS =
         "Refusjonskrav (annen NAV-ytelse) i etterbetaling av OMS - opprettet oppgave til NØP",
         "Gjenlevende er innvilget AAP/OMS - oppgave sendt til NAV lokal pga spesiell oppfølging for de med OMS",
     )
+
+internal val sjekklisteItemsBosattNorgeSluttbehandling =
+    listOf("Har opprettet P7000 og P1. Attestant må huske å sende etter attestering.")

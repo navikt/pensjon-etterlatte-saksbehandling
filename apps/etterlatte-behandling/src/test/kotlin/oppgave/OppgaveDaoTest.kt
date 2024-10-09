@@ -309,6 +309,26 @@ internal class OppgaveDaoTest(
         val hentetOppgave = oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland()
         assertEquals(1, hentetOppgave.size)
     }
+
+    @Test
+    fun `Skal få false om oppgave med type ikke finnes`() {
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+
+        val oppgaveFinnesIkke = oppgaveDao.oppgaveMedTypeFinnes(sakAalesund.id, OppgaveType.MANGLER_SOEKNAD)
+        assertEquals(false, oppgaveFinnesIkke)
+    }
+
+    @Test
+    fun `Skal få true om oppgave med type finnes`() {
+        val sakAalesund = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund, oppgaveType = OppgaveType.MANGLER_SOEKNAD)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+
+        val oppgaveFinnesIkke = oppgaveDao.oppgaveMedTypeFinnes(sakAalesund.id, OppgaveType.MANGLER_SOEKNAD)
+        assertEquals(true, oppgaveFinnesIkke)
+    }
 }
 
 fun lagNyOppgave(

@@ -1426,7 +1426,11 @@ class BeregnAvkortingTest {
                 it.shouldBeEqualToIgnoringFields(
                     avkortetYtelse(
                         type = AvkortetYtelseType.AARSOPPGJOER,
-                        periode = Periode(fom = YearMonth.of(2024, Month.SEPTEMBER), tom = null),
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.SEPTEMBER),
+                                tom = YearMonth.of(2024, Month.DECEMBER),
+                            ),
                         ytelseEtterAvkorting = 3005,
                         ytelseEtterAvkortingFoerRestanse = 7692,
                         avkortingsbeloep = 14549,
@@ -1624,7 +1628,7 @@ class BeregnAvkortingTest {
                         periode =
                             Periode(
                                 fom = YearMonth.of(2024, Month.NOVEMBER),
-                                tom = null,
+                                tom = YearMonth.of(2024, Month.DECEMBER),
                             ),
                         ytelseEtterAvkorting = 1005,
                         ytelseEtterAvkortingFoerRestanse = 5692,
@@ -1679,8 +1683,8 @@ class BeregnAvkortingTest {
     }
 
     @Test
-    fun `Revurdering enda en inntektsendring nytt år`() {
-        val avkorting = `Revurdering enda en ny inntekt nytt år`()
+    fun `Revurdering inntektsendring nytt år med opphør`() {
+        val avkorting = `Revurdering ny inntekt nytt år med opphør`()
         with(avkorting.aarsoppgjoer[0].avkortetYtelseAar) {
             size shouldBe 6
             get(0).asClue {
@@ -1823,7 +1827,7 @@ class BeregnAvkortingTest {
                         periode =
                             Periode(
                                 fom = YearMonth.of(2024, Month.NOVEMBER),
-                                tom = null,
+                                tom = YearMonth.of(2024, Month.DECEMBER),
                             ),
                         ytelseEtterAvkorting = 1005,
                         ytelseEtterAvkortingFoerRestanse = 5692,
@@ -1858,7 +1862,7 @@ class BeregnAvkortingTest {
                         periode =
                             Periode(
                                 fom = YearMonth.of(2025, Month.JANUARY),
-                                tom = null,
+                                tom = YearMonth.of(2025, Month.DECEMBER),
                             ),
                         ytelseEtterAvkorting = 3817,
                         ytelseEtterAvkortingFoerRestanse = 3817,
@@ -1884,11 +1888,11 @@ class BeregnAvkortingTest {
                         periode =
                             Periode(
                                 fom = YearMonth.of(2026, Month.JANUARY),
-                                tom = null,
+                                tom = YearMonth.of(2026, Month.JUNE),
                             ),
-                        ytelseEtterAvkorting = 2879,
-                        ytelseEtterAvkortingFoerRestanse = 2879,
-                        avkortingsbeloep = 17362,
+                        ytelseEtterAvkorting = 2917,
+                        ytelseEtterAvkortingFoerRestanse = 2917,
+                        avkortingsbeloep = 17324,
                         ytelseFoerAvkorting = 20241,
                         inntektsgrunnlag = null,
                     ),
@@ -1902,6 +1906,8 @@ class BeregnAvkortingTest {
             }
         }
     }
+
+    // TODO Revurdering opphør midt i et år
 
     private fun `Avkorting foerstegangsbehandling`() =
         Avkorting()
@@ -2261,15 +2267,16 @@ class BeregnAvkortingTest {
                 sanksjoner = emptyList(),
             )
 
-    private fun `Revurdering enda en ny inntekt nytt år`() =
+    private fun `Revurdering ny inntekt nytt år med opphør`() =
         `Revurdering med virk tilbake i tidligere år`()
             .kopierAvkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
                     avkortinggrunnlagLagre(
                         id = UUID.randomUUID(),
-                        aarsinntekt = 525000,
+                        aarsinntekt = 262500,
                         fratrekkInnAar = 0,
+                        // TODO Legge til fratrekk ut år når det kommer
                         fom = YearMonth.of(2026, Month.JANUARY),
                     ),
                 bruker = bruker,
@@ -2284,6 +2291,6 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
-                opphoerFom = null,
+                opphoerFom = YearMonth.of(2026, Month.JULY),
             )
 }

@@ -31,7 +31,7 @@ internal class Server {
                 migreringRoute(pesysRepository)
             }
         }
-        initRogR("migrering", restModule) { rapidsConnection, _ ->
+        initRogR(applikasjonsnavn = "migrering", restModule = restModule) { rapidsConnection, _ ->
             LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository)
             LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
             FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)

@@ -15,6 +15,7 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Nested
@@ -34,7 +35,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2024,
-                            forventaInnvilgaMaaneder = 10,
+                            fom = YearMonth.of(2024, Month.MARCH),
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(
@@ -84,7 +85,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2025,
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2025, Month.JANUARY),
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(
@@ -92,7 +93,7 @@ internal class AvkortingTest {
                                             avkortinggrunnlag(
                                                 periode =
                                                     Periode(
-                                                        fom = YearMonth.of(2024, Month.JANUARY),
+                                                        fom = YearMonth.of(2025, Month.JANUARY),
                                                         tom = null,
                                                     ),
                                                 aarsinntekt = 400000,
@@ -122,17 +123,17 @@ internal class AvkortingTest {
                     avkorting.aarsoppgjoer[0]
                         .inntektsavkorting[0]
                         .grunnlag
-                        .toDto(10)
+                        .toDto()
                 it.avkortingGrunnlag[1] shouldBe
                     avkorting.aarsoppgjoer[0]
                         .inntektsavkorting[1]
                         .grunnlag
-                        .toDto(10)
+                        .toDto()
                 it.avkortingGrunnlag[2] shouldBe
                     avkorting.aarsoppgjoer[1]
                         .inntektsavkorting[0]
                         .grunnlag
-                        .toDto(12)
+                        .toDto()
             }
         }
 
@@ -227,6 +228,7 @@ internal class AvkortingTest {
     inner class AvkortingTilFrontend {
         val inntektFraMars24 =
             avkortinggrunnlag(
+                innvilgaMaaneder = 10,
                 periode =
                     Periode(
                         fom = YearMonth.of(2024, Month.MARCH),
@@ -236,6 +238,7 @@ internal class AvkortingTest {
             )
         val inntektFraAug24 =
             avkortinggrunnlag(
+                innvilgaMaaneder = 10,
                 periode =
                     Periode(
                         fom = YearMonth.of(2024, Month.AUGUST),
@@ -245,6 +248,7 @@ internal class AvkortingTest {
             )
         val inntektFraJan25 =
             avkortinggrunnlag(
+                innvilgaMaaneder = 12,
                 periode =
                     Periode(
                         fom = YearMonth.of(2025, Month.JANUARY),
@@ -259,7 +263,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2024,
-                            forventaInnvilgaMaaneder = 10,
+                            fom = YearMonth.of(2024, Month.MARCH),
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(grunnlag = inntektFraMars24),
@@ -289,7 +293,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2025,
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2025, Month.JANUARY),
                             inntektsavkorting =
                                 listOf(
                                     Inntektsavkorting(
@@ -494,7 +498,7 @@ internal class AvkortingTest {
                         Aarsoppgjoer(
                             id = UUID.randomUUID(),
                             aar = 2024,
-                            forventaInnvilgaMaaneder = 6,
+                            fom = YearMonth.of(2024, 1),
                             ytelseFoerAvkorting =
                                 listOf(
                                     YtelseFoerAvkorting(
@@ -586,7 +590,7 @@ internal class AvkortingTest {
                 opprettaAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
                     aarsoppgjoer(
                         aar = 2024,
-                        forventaInnvilgaMaaneder = 10,
+                        fom = YearMonth.of(2024, 3),
                     ),
                     Aarsoppgjoer::id,
                     Aarsoppgjoer::inntektsavkorting,
@@ -731,7 +735,7 @@ internal class AvkortingTest {
                     shouldBeEqualToIgnoringFields(
                         aarsoppgjoer(
                             aar = 2025,
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2025, 1),
                         ),
                         Aarsoppgjoer::inntektsavkorting,
                         Aarsoppgjoer::id,
@@ -758,8 +762,8 @@ internal class AvkortingTest {
             assertThrows<InternfeilException> {
                 Avkorting(
                     listOf(
-                        Aarsoppgjoer(aar = 2025, id = UUID.randomUUID(), forventaInnvilgaMaaneder = 12),
-                        Aarsoppgjoer(aar = 2024, id = UUID.randomUUID(), forventaInnvilgaMaaneder = 12),
+                        Aarsoppgjoer(aar = 2025, id = UUID.randomUUID(), fom = YearMonth.of(2025, 1)),
+                        Aarsoppgjoer(aar = 2024, id = UUID.randomUUID(), fom = YearMonth.of(2024, 1)),
                     ),
                 )
             }
@@ -779,7 +783,7 @@ internal class AvkortingTest {
                             ytelseFoerAvkorting = ytelseFoerAvkorting,
                             aar = 2024,
                             id = UUID.randomUUID(),
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2024, 1),
                         ),
                     ),
                 )
@@ -816,7 +820,7 @@ internal class AvkortingTest {
                             inntektsavkorting = inntektsavkorting,
                             aar = 2024,
                             id = UUID.randomUUID(),
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2024, 1),
                         ),
                     ),
                 )
@@ -837,7 +841,7 @@ internal class AvkortingTest {
                             avkortetYtelseAar = avkortetYtelseAar,
                             aar = 2024,
                             id = UUID.randomUUID(),
-                            forventaInnvilgaMaaneder = 12,
+                            fom = YearMonth.of(2024, 1),
                         ),
                     ),
                 )
@@ -871,6 +875,88 @@ internal class AvkortingTest {
                     grunnlag = avkortinggrunnlag(),
                     avkortetYtelseForventetInntekt = avkortetYtelseForventetInntekt,
                 )
+            }
+        }
+    }
+
+    @Nested
+    inner class InnvilgaMaaneder {
+        @Test
+        fun `utledning av innvilga måneder`() {
+            val grunnlag =
+                avkortinggrunnlagLagre(
+                    fom = YearMonth.of(2024, 3),
+                )
+            val opprettaAvkorting =
+                Avkorting().oppdaterMedInntektsgrunnlag(
+                    grunnlag,
+                    bruker,
+                )
+            with(
+                opprettaAvkorting.aarsoppgjoer
+                    .single()
+                    .inntektsavkorting
+                    .single()
+                    .grunnlag,
+            ) {
+                innvilgaMaaneder shouldBe 10
+                overstyrtInnvilgaMaanederAarsak shouldBe null
+                overstyrtInnvilgaMaanederBegrunnelse shouldBe null
+            }
+        }
+
+        @Test
+        fun `utledning av innvilga måneder med opphør`() {
+            val grunnlag =
+                avkortinggrunnlagLagre(
+                    fom = YearMonth.of(2024, 3),
+                )
+            val opprettaAvkorting =
+                Avkorting().oppdaterMedInntektsgrunnlag(
+                    nyttGrunnlag = grunnlag,
+                    bruker = bruker,
+                    opphoerFom = YearMonth.of(2024, 7),
+                )
+            with(
+                opprettaAvkorting.aarsoppgjoer
+                    .single()
+                    .inntektsavkorting
+                    .single()
+                    .grunnlag,
+            ) {
+                innvilgaMaaneder shouldBe 4
+                overstyrtInnvilgaMaanederAarsak shouldBe null
+                overstyrtInnvilgaMaanederBegrunnelse shouldBe null
+            }
+        }
+
+        @Test
+        fun `utledning av overstyrt innvilga måneder`() {
+            val grunnlag =
+                avkortinggrunnlagLagre(
+                    fom = YearMonth.of(2024, 3),
+                    overstyrtInnvilgaMaaneder =
+                        AvkortingOverstyrtInnvilgaMaanederDto(
+                            antall = 5,
+                            aarsak = OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG.name,
+                            begrunnelse = "Begrunnelse",
+                        ),
+                )
+            val opprettaAvkorting =
+                Avkorting().oppdaterMedInntektsgrunnlag(
+                    nyttGrunnlag = grunnlag,
+                    bruker = bruker,
+                )
+            with(
+                opprettaAvkorting.aarsoppgjoer
+                    .single()
+                    .inntektsavkorting
+                    .single()
+                    .grunnlag,
+            ) {
+                innvilgaMaaneder shouldBe 5
+                overstyrtInnvilgaMaanederAarsak shouldBe OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
+                overstyrtInnvilgaMaanederBegrunnelse shouldBe "Begrunnelse"
             }
         }
     }

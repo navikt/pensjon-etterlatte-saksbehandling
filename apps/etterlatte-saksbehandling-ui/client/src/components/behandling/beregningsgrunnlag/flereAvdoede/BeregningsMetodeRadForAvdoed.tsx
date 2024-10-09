@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { addMonths, format, startOfDay, startOfMonth } from 'date-fns'
 import {
   mapListeFraDto,
   mapListeTilDto,
@@ -26,7 +27,6 @@ import {
   Textarea,
   VStack,
 } from '@navikt/ds-react'
-import { format, startOfDay, startOfMonth } from 'date-fns'
 import { FloppydiskIcon, PencilIcon, TrashIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -65,23 +65,29 @@ export const BeregningsMetodeRadForAvdoed = ({
   const [lagreBeregningsgrunnlagResult, lagreBeregningsgrunnlagRequest] = useApiCall(lagreBeregningsGrunnlag)
   const personopplysninger = usePersonopplysninger()
 
-  const mapNavn = (fnr: string): string => {
-    if (!personopplysninger) return fnr
-
-    const opplysning = personopplysninger.avdoede.find(
-      (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
+  const avdoedesNavn = (): string => {
+    const opplysning = personopplysninger?.avdoede?.find(
+      (personOpplysning) => personOpplysning.opplysning.foedselsnummer === trygdetid.ident
     )?.opplysning
 
     if (!opplysning) {
-      return fnr
+      return trygdetid.ident
     }
-    return `${formaterNavn(opplysning)} (${fnr})`
+    return `${formaterNavn(opplysning)} (${trygdetid.ident})`
+  }
+
+  const maanedEtterDoedsfall = (): Date | undefined => {
+    const opplysning = personopplysninger?.avdoede?.find(
+      (personOpplysning) => personOpplysning.opplysning.foedselsnummer === trygdetid.ident
+    )?.opplysning
+
+    return opplysning?.doedsdato ? addMonths(startOfMonth(opplysning.doedsdato), 1) : undefined
   }
 
   const defaultBeregningsMetodeFormData = (
     beregningsmetode: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined
   ): BeregningsmetodeForAvdoedForm => ({
-    fom: beregningsmetode?.fom ?? new Date(),
+    fom: beregningsmetode?.fom ?? maanedEtterDoedsfall() ?? new Date(),
     tom: beregningsmetode?.tom ?? undefined,
     data: {
       beregningsMetode: beregningsmetode?.data.beregningsMetode ?? {
@@ -305,7 +311,7 @@ export const BeregningsMetodeRadForAvdoed = ({
       }
     >
       <Table.DataCell>
-        {mapNavn(trygdetid.ident)}{' '}
+        {avdoedesNavn()}{' '}
         {erEnesteJuridiskeForelder && (
           <Tag variant="alt1" size="small">
             {tagTekstForKunEnJuridiskForelder(behandling)}

@@ -68,6 +68,7 @@ export interface Beregningsperiode {
   samletTeoretiskTrygdetid: number | undefined
   broek: IProrataBroek | undefined
   avdoedeForeldre: string[] | undefined
+  kunEnJuridiskForelder: boolean
 }
 
 // TODO: Burde speile backend DTO-en

@@ -70,7 +70,7 @@ class ApplicationBuilder {
                         sakGrunnlagRoute(grunnlagService, behandlingKlient)
                         behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
                         personRoute(grunnlagService, behandlingKlient)
-                        aldersovergangRoutes(aldersovergangService)
+                        aldersovergangRoutes(behandlingKlient, aldersovergangService)
                     }
                 }
             },

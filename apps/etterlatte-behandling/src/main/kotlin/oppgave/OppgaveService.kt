@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -167,15 +168,27 @@ class OppgaveService(
         oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
     }
 
-    fun endrePaaVent(paavent: PaaVent): OppgaveIntern {
-        val oppgave = hentOppgave(paavent.oppgaveId)
-        if (paavent.paavent && oppgave.status == Status.PAA_VENT) return oppgave
-        if (!paavent.paavent && oppgave.status != Status.PAA_VENT) return oppgave
+    fun endrePaaVent(
+        oppgaveId: UUID,
+        paavent: Boolean,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
+    ): OppgaveIntern {
+        val oppgave = hentOppgave(oppgaveId)
+        if (paavent && oppgave.status == Status.PAA_VENT) return oppgave
+        if (!paavent && oppgave.status != Status.PAA_VENT) return oppgave
+
+        if (paavent && aarsak == null) {
+            throw UgyldigForespoerselException(
+                "MANGLER_AARSAK_PAA_VENT",
+                "Kan ikke sette en oppgave på vent uten en årsak.",
+            )
+        }
 
         sikreAktivOppgaveOgTildeltSaksbehandler(oppgave) {
-            val nyStatus = if (paavent.paavent) Status.PAA_VENT else hentForrigeStatus(paavent.oppgaveId)
+            val nyStatus = if (paavent) Status.PAA_VENT else hentForrigeStatus(oppgaveId)
 
-            oppgaveDao.oppdaterPaaVent(paavent, nyStatus)
+            oppgaveDao.oppdaterPaaVent(oppgaveId, merknad, aarsak, nyStatus)
 
             when (oppgave.type) {
                 OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -187,7 +200,7 @@ class OppgaveService(
                         hendelser.sendMeldingForHendelsePaaVent(
                             UUID.fromString(oppgave.referanse),
                             BehandlingHendelseType.PAA_VENT,
-                            paavent.aarsak!!,
+                            aarsak!!,
                         )
                     } else {
                         hendelser.sendMeldingForHendelseAvVent(
@@ -201,7 +214,7 @@ class OppgaveService(
             }
         }
 
-        return hentOppgave(paavent.oppgaveId)
+        return hentOppgave(oppgaveId)
     }
 
     private fun sikreAktivOppgaveOgTildeltSaksbehandler(
@@ -436,7 +449,7 @@ class OppgaveService(
         sakId: SakId,
         enhetsID: Enhetsnummer,
     ) {
-        val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId, OppgaveType.entries)
+        val oppgaverForSak = oppgaveDao.hentOppgaverForSakMedType(sakId, OppgaveType.entries)
         oppgaverForSak.forEach {
             if (it.erUnderBehandling()) {
                 oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
@@ -445,12 +458,17 @@ class OppgaveService(
         }
     }
 
-    fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId, OppgaveType.entries)
+    fun hentOppgaverForSak(sakId: SakId): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSakMedType(sakId, OppgaveType.entries)
 
     fun hentOppgaverForSak(
         sakId: SakId,
         type: OppgaveType,
-    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId, listOf(type))
+    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSakMedType(sakId, listOf(type))
+
+    fun oppgaveMedTypeFinnes(
+        sakId: SakId,
+        type: OppgaveType,
+    ): Boolean = oppgaveDao.oppgaveMedTypeFinnes(sakId, type)
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
@@ -639,10 +657,12 @@ class OppgaveService(
                         OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
                         ->
                             true
+
                         OppgaveType.KLAGE,
                         OppgaveType.KRAVPAKKE_UTLAND,
                         OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
+                        OppgaveType.MANUELL_UTSENDING_BREV,
                         -> {
                             logger.info(
                                 "Tilbakestiller ikke oppgave av type ${it.type} " +

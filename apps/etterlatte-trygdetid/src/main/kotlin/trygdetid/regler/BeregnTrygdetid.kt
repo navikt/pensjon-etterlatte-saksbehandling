@@ -92,21 +92,6 @@ val erYrkesskade: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean> =
         finnFelt = { it.yrkesskade },
     )
 
-/**
- * Opptjeningstid er fra 16 år frem til siste dag i den måned som er før dødsfall. Input er fødselsdato og dødsdato.
- */
-val finnDatoerForOpptjeningstid =
-    RegelMeta(
-        gjelderFra = TRYGDETID_DATO,
-        beskrivelse = "Konverter foedselsdato og doedsdato til opptjeningsdatoer",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-OPPTJENINGSDATOER"),
-    ) benytter opptjeningsDatoer med {
-        Pair(
-            it.first.plusYears(16),
-            it.second.withDayOfMonth(1).minusDays(1),
-        )
-    }
-
 val trygdetidGrunnlagListe: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, List<TrygdetidGrunnlag>> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
@@ -184,6 +169,45 @@ val fremtidigTrygdetid =
         trygdetidPerioder.firstOrNull { it.type == TrygdetidType.FREMTIDIG }?.let {
             listOf(it).summer(dagerPrMaaned)
         }
+    }
+
+/**
+ * Finn første dato for fremtidig trygdetid
+ */
+val fremtidigTrygdetidFra =
+    RegelMeta(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Henter ut periode for fremtidig trygdetid",
+        regelReferanse = RegelReferanse(id = "REGEL-FINN-START-FREMTIDIG-TRYGDETIDSPERIODE"),
+    ) benytter normalisertTrygdetidGrunnlagListe med { trygdetidPerioder ->
+        trygdetidPerioder.singleOrNull { it.type == TrygdetidType.FREMTIDIG }?.let {
+            it.periode.fra
+        }
+    }
+
+/**
+ * Opptjeningstid er fra 16 år frem til siste dag i den måned som er før dødsfall. Input er fødselsdato og dødsdato.
+ * Hvis fremtidig trygdetid er satt, skal opptjeningstid beregnes frem til fremtidig trygdetid
+ */
+val finnDatoerForOpptjeningstid =
+    RegelMeta(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Konverter foedselsdato og doedsdato eller start fremtidig trygdetid til opptjeningsdatoer",
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-OPPTJENINGSDATOER", versjon = "2"),
+    ) benytter opptjeningsDatoer og fremtidigTrygdetidFra med {
+            opptjeningsDatoer,
+            fremtidigFra,
+        ->
+        val opptjeningTil =
+            if (fremtidigFra != null) {
+                fremtidigFra.withDayOfMonth(1).minusDays(1)
+            } else {
+                opptjeningsDatoer.second.withDayOfMonth(1).minusDays(1)
+            }
+        Pair(
+            opptjeningsDatoer.first.plusYears(16),
+            opptjeningTil,
+        )
     }
 
 /**

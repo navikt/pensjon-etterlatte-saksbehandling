@@ -157,6 +157,7 @@ internal class VedtaksvurderingRepositoryTest(
                                         periode = Periode(nyttVirkningstidspunkt, null),
                                         beloep = null,
                                         type = UtbetalingsperiodeType.OPPHOER,
+                                        regelverk = Regelverk.fraDato(nyttVirkningstidspunkt.atDay(1)),
                                     ),
                                 ),
                         ),

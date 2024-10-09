@@ -60,8 +60,8 @@ internal class JournalfoerVedtaksbrevRiver(
             val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak, HardkodaSystembruker.river) } ?: return
             rapidsConnection.svarSuksess(
                 packet,
-                response.second,
-                response.first.journalpostId,
+                response.brevId,
+                response.opprettetJournalpost.journalpostId,
             )
         } catch (e: Exception) {
             logger.error("Feil ved journalføring av vedtaksbrev: ", e)

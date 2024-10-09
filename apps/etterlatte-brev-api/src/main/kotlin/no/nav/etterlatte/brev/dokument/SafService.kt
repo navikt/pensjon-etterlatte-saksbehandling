@@ -27,7 +27,7 @@ class SafService(
     suspend fun hentDokumenter(
         request: HentDokumenterRequest,
         bruker: BrukerTokenInfo,
-    ): List<Journalpost> {
+    ): Journalposter {
         logger.info("Henter journalposter for ident=${request.foedselsnummer}")
 
         val graphqlVariables =
@@ -37,12 +37,16 @@ class SafService(
                 journalposttyper = request.journalposttyper,
                 journalstatuser = request.journalstatuser,
                 foerste = request.foerste,
+                etter = request.etter,
             )
 
         val response = safKlient.hentDokumenter(graphqlVariables, bruker)
 
         return if (response.errors.isNullOrEmpty()) {
-            response.data?.dokumentoversiktBruker?.journalposter ?: emptyList()
+            response.data?.dokumentoversiktBruker ?: throw IkkeFunnetException(
+                code = "INGEN_JOURNALPOSTER_FUNNET",
+                detail = "Fant ingen journalposter på brukeren",
+            )
         } else {
             throw konverterTilForespoerselException(response.errors)
         }

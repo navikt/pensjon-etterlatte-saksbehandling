@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.beregning
 
+import Regelverk
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
@@ -35,9 +36,10 @@ data class Beregningsperiode(
     val samletNorskTrygdetid: Int? = null,
     val samletTeoretiskTrygdetid: Int? = null,
     val broek: IntBroek? = null,
-    val avdodeForeldre: List<String?>? = null,
+    val avdoedeForeldre: List<String?>? = null,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
+    val regelverk: Regelverk? = null,
     val kunEnJuridiskForelder: Boolean = false,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
 )
@@ -86,6 +88,13 @@ data class AvkortingGrunnlagLagreDto(
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
     val fom: YearMonth,
+    val overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
+)
+
+data class AvkortingOverstyrtInnvilgaMaanederDto(
+    val antall: Int,
+    val aarsak: String,
+    val begrunnelse: String,
 )
 
 data class AvkortingGrunnlagKildeDto(

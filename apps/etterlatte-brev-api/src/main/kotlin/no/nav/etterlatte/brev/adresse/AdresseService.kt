@@ -2,21 +2,25 @@ package no.nav.etterlatte.brev.adresse
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
+import no.nav.etterlatte.brev.AvsenderRequest
+import no.nav.etterlatte.brev.adresse.saksbehandler.SaksbehandlerKlient
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.mottakerFraAdresse
 import no.nav.etterlatte.brev.model.tomMottaker
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
+import org.slf4j.LoggerFactory
 
 class AdresseService(
     private val norg2Klient: Norg2Klient,
-    private val navansattKlient: NavansattKlient,
+    private val saksbehandlerKlient: SaksbehandlerKlient,
     private val regoppslagKlient: RegoppslagKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun hentMottakerAdresse(
         sakType: SakType,
         ident: String,
@@ -32,9 +36,14 @@ class AdresseService(
         }
     }
 
-    suspend fun hentAvsender(request: AvsenderRequest): Avsender =
+    suspend fun hentAvsender(
+        request: AvsenderRequest,
+        bruker: BrukerTokenInfo,
+    ): Avsender =
         coroutineScope {
-            val saksbehandlerNavn = async { hentSaksbehandlerNavn(request.saksbehandlerIdent) }
+            logger.info("Henter avsendere og enhet: $request")
+
+            val saksbehandlerNavn = async { hentSaksbehandlerNavn(request.saksbehandlerIdent, bruker) }
 
             val saksbehandlerEnhet =
                 async {
@@ -43,18 +52,20 @@ class AdresseService(
 
             val attestantNavn =
                 async {
-                    request.attestantIdent?.let { hentSaksbehandlerNavn(it) }
+                    request.attestantIdent?.let { hentSaksbehandlerNavn(it, bruker) }
                 }
 
             mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn.await())
         }
 
-    private suspend fun hentSaksbehandlerNavn(navn: String) =
-        if (navn == Fagsaksystem.EY.navn || navn.contains("gcp:etterlatte:")) {
-            null
-        } else {
-            navansattKlient.hentSaksbehandlerInfo(navn).fornavnEtternavn
-        }
+    private suspend fun hentSaksbehandlerNavn(
+        ident: String,
+        bruker: BrukerTokenInfo,
+    ) = if (ident == Fagsaksystem.EY.navn || ident.contains("gcp:etterlatte:")) {
+        null
+    } else {
+        saksbehandlerKlient.hentSaksbehandlerNavn(ident, bruker)
+    }
 
     private fun mapTilAvsender(
         enhet: Norg2Enhet,
@@ -72,9 +83,3 @@ class AdresseService(
         )
     }
 }
-
-data class AvsenderRequest(
-    val saksbehandlerIdent: String,
-    val sakenhet: Enhetsnummer,
-    val attestantIdent: String? = null,
-)

@@ -5,14 +5,9 @@ import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInnt
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
-import {
-  IBehandlingReducer,
-  oppdaterAvkorting,
-  oppdaterBehandlingsstatus,
-  resetAvkorting,
-} from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterAvkorting, resetAvkorting } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { mapResult } from '~shared/api/apiUtils'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
@@ -40,7 +35,7 @@ export const Avkorting = ({
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
 
-  const toggleAvkortinGrunnlagNesteAar = useFeatureEnabledMedDefault('oms-aarsinntekt-for-to-aar', false)
+  const skalHaInntektNesteAar = useFeatureEnabledMedDefault('validere_aarsintnekt_neste_aar', false)
 
   const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
 
@@ -54,10 +49,6 @@ export const Avkorting = ({
     if (!avkorting) {
       dispatch(resetAvkorting())
       hentAvkortingRequest(behandling.id, (res) => {
-        const avkortingFinnesOgErUnderBehandling = res && redigerbar
-        if (avkortingFinnesOgErUnderBehandling) {
-          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
-        }
         dispatch(oppdaterAvkorting(res))
       })
     }
@@ -105,16 +96,15 @@ export const Avkorting = ({
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
-              {toggleAvkortinGrunnlagNesteAar &&
-                behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-                  <AvkortingInntekt
-                    behandling={behandling}
-                    avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
-                    erInnevaerendeAar={false}
-                    redigerbar={redigerbar}
-                    resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-                  />
-                )}
+              {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+                <AvkortingInntekt
+                  behandling={behandling}
+                  avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
+                  erInnevaerendeAar={false}
+                  redigerbar={redigerbar}
+                  resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+                />
+              )}
             </>
           ),
         })}
@@ -122,7 +112,12 @@ export const Avkorting = ({
         {visSanksjon && <Sanksjon behandling={behandling} />}
         {avkorting && <YtelseEtterAvkorting />}
         {avkorting && <SimulerUtbetaling behandling={behandling} />}
-        {avkorting && <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />}
+        {!skalHaInntektNesteAar && avkorting && (
+          <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />
+        )}
+        {skalHaInntektNesteAar && avkorting && avkorting.avkortingGrunnlag.length === 2 && (
+          <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />
+        )}
       </VStack>
     </Box>
   )

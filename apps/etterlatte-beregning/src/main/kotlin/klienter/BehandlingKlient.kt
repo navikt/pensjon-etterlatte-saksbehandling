@@ -209,7 +209,8 @@ class BehandlingKlientImpl(
         commit: Boolean,
     ): Boolean {
         logger.info("Sjekker om behandling med behandlingId=$behandlingId kan sette status ${BehandlingStatus.TRYGDETID_OPPDATERT}")
-        val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid")
+        val resource =
+            Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid")
 
         val response =
             when (commit) {

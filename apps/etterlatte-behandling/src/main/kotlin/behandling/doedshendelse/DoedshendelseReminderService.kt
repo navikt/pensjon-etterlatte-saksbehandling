@@ -35,8 +35,8 @@ class DoedshendelseReminderService(
 
     private fun run() {
         val alleFerdigDoedsmeldingerMedBrevBp = inTransaction { hentAlleFerdigDoedsmeldingerMedBrevBp() }
-        val toMaanedGamlehendelser = hendelserErGamleNok(alleFerdigDoedsmeldingerMedBrevBp)
-        toMaanedGamlehendelser.forEach {
+        val gamleNokHendelser = hendelserErGamleNok(alleFerdigDoedsmeldingerMedBrevBp)
+        gamleNokHendelser.forEach {
             inTransaction { lagOppgaveOmIkkeSoekt(it) }
         }
     }
@@ -52,8 +52,8 @@ class DoedshendelseReminderService(
         val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId)
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }
         if (!harSoekt) {
-            val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId, OppgaveType.MANGLER_SOEKNAD)
-            if (oppgaver.isEmpty()) {
+            val oppgaveFinnes = oppgaveService.oppgaveMedTypeFinnes(hendelse.sakId, OppgaveType.MANGLER_SOEKNAD)
+            if (!oppgaveFinnes) {
                 oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = hendelse.sakId,

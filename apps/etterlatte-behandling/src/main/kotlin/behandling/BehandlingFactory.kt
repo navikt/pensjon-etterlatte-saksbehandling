@@ -9,7 +9,7 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -54,7 +55,7 @@ import java.util.UUID
 class BehandlingFactory(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagServiceImpl,
-    private val revurderingService: AutomatiskRevurderingService,
+    private val revurderingService: RevurderingService,
     private val gyldighetsproevingService: GyldighetsproevingService,
     private val sakService: SakService,
     private val behandlingDao: BehandlingDao,
@@ -128,7 +129,7 @@ class BehandlingFactory(
                                 oppgaveService.ferdigstillOppgave(it.id, brukerTokenInfo)
                             }
                     }
-                } ?: throw IllegalStateException("Kunne ikke opprette behandling")
+                }
             }.also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -190,13 +191,21 @@ class BehandlingFactory(
             }
             val forrigeBehandling = request.iverkSattebehandlinger().maxBy { it.behandlingOpprettet }
             revurderingService
-                .opprettAutomatiskRevurdering(
+                .opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleri,
-                    forrigeBehandling = forrigeBehandling,
+                    forrigeBehandling = forrigeBehandling.id,
                     mottattDato = mottattDato,
+                    prosessType = Prosesstype.MANUELL,
                     kilde = kilde,
                     revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                    virkningstidspunkt = null,
+                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
+                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
+                    begrunnelse = null,
+                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    frist = null,
+                    opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
                 ).oppdater()
                 .let { BehandlingOgOppgave(it, null) }
         } else {
@@ -284,19 +293,27 @@ class BehandlingFactory(
                 val foerstegangsbehandlingViOmgjoerer =
                     foerstegangsbehandlinger.maxBy { it.behandlingOpprettet }
                 val nyFoerstegangsbehandling =
-                    checkNotNull(
-                        opprettFoerstegangsbehandling(
-                            behandlingerUnderBehandling = emptyList(),
-                            sak = sak,
-                            mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
-                            kilde = Vedtaksloesning.GJENNY,
-                            prosessType = Prosesstype.MANUELL,
-                        ),
-                    ) {
-                        "Behandlingen vi akkurat opprettet fins ikke :("
-                    }
+                    opprettFoerstegangsbehandling(
+                        behandlingerUnderBehandling = emptyList(),
+                        sak = sak,
+                        mottattDato = foerstegangsbehandlingViOmgjoerer.mottattDato().toString(),
+                        kilde = Vedtaksloesning.GJENNY,
+                        prosessType = Prosesstype.MANUELL,
+                    )
 
-                kopierFoerstegangsbehandlingOversikt(skalKopiere, sisteAvslaatteBehandling, nyFoerstegangsbehandling.id)
+                if (skalKopiere && sisteAvslaatteBehandling != null) {
+                    kopierFoerstegangsbehandlingOversikt(sisteAvslaatteBehandling, nyFoerstegangsbehandling.id)
+                } else {
+                    val nyGyldighetsproeving =
+                        GyldighetsResultat(
+                            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+                            emptyList(),
+                            Tidspunkt.now().toLocalDatetimeUTC(),
+                        )
+
+                    behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandling.id, nyGyldighetsproeving)
+                }
+
                 val oppgave =
                     oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                         referanse = nyFoerstegangsbehandling.id.toString(),
@@ -339,30 +356,27 @@ class BehandlingFactory(
     }
 
     private fun kopierFoerstegangsbehandlingOversikt(
-        skalKopiere: Boolean,
-        sisteAvslaatteBehandling: Behandling?,
+        sisteAvslaatteBehandling: Behandling,
         nyFoerstegangsbehandlingId: UUID,
     ) {
-        if (skalKopiere && sisteAvslaatteBehandling != null) {
-            sisteAvslaatteBehandling.kommerBarnetTilgode?.let {
-                kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandlingId))
-            }
-            sisteAvslaatteBehandling.virkningstidspunkt?.let {
-                behandlingDao.lagreNyttVirkningstidspunkt(
-                    nyFoerstegangsbehandlingId,
-                    it,
-                )
-            }
-            sisteAvslaatteBehandling.utlandstilknytning?.let {
-                behandlingDao.lagreUtlandstilknytning(
-                    nyFoerstegangsbehandlingId,
-                    it,
-                )
-            }
-            sisteAvslaatteBehandling
-                .gyldighetsproeving()
-                ?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandlingId, it) }
+        sisteAvslaatteBehandling.kommerBarnetTilgode?.let {
+            kommerBarnetTilGodeService.lagreKommerBarnetTilgode(it.copy(behandlingId = nyFoerstegangsbehandlingId))
         }
+        sisteAvslaatteBehandling.virkningstidspunkt?.let {
+            behandlingDao.lagreNyttVirkningstidspunkt(
+                nyFoerstegangsbehandlingId,
+                it,
+            )
+        }
+        sisteAvslaatteBehandling.utlandstilknytning?.let {
+            behandlingDao.lagreUtlandstilknytning(
+                nyFoerstegangsbehandlingId,
+                it,
+            )
+        }
+        sisteAvslaatteBehandling
+            .gyldighetsproeving()
+            ?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandlingId, it) }
     }
 
     internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
-import no.nav.etterlatte.brev.adresse.AvsenderRequest
+import no.nav.etterlatte.brev.AvsenderRequest
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem

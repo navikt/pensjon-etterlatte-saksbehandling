@@ -1,11 +1,12 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.brev.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.BrevDataRedigerbar
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -13,8 +14,8 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
-import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.fromDto
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -62,7 +63,16 @@ data class OmstillingsstoenadInnvilgelse(
                 }
 
             val avdoed = avdoede.single()
-            val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
+            val sisteBeregningsperiode =
+                beregningsperioder
+                    .filter {
+                        it.datoFOM.year == beregningsperioder.first().datoFOM.year
+                    }.maxBy { it.datoFOM }
+            val sisteBeregningsperiodeNesteAar =
+                beregningsperioder
+                    .filter {
+                        it.datoFOM.year == beregningsperioder.first().datoFOM.year + 1
+                    }.maxByOrNull { it.datoFOM }
 
             val omsRettUtenTidsbegrensning =
                 vilkaarsVurdering.vilkaar.single {
@@ -81,6 +91,7 @@ data class OmstillingsstoenadInnvilgelse(
                         virkningsdato = avkortingsinfo.virkningsdato,
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
+                        sisteBeregningsperiodeNesteAar = sisteBeregningsperiodeNesteAar,
                         trygdetid =
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
@@ -118,7 +129,12 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
             OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
                 avdoed = avdoede.minBy { it.doedsdato },
-                utbetalingsbeloep = avkortingsinfo.beregningsperioder.first().utbetaltBeloep,
+                utbetalingsbeloep =
+                    avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
+                        ?: throw UgyldigForespoerselException(
+                            "MANGLER_BEREGNINGSPERIODER_AVKORTING",
+                            "Mangler beregningsperioder i avkorting",
+                        ),
                 etterbetaling = etterbetaling != null,
             )
     }

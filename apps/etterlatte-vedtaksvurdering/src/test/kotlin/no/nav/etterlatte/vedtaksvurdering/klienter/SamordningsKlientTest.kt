@@ -26,12 +26,14 @@ class SamordningsKlientTest {
                             periode = Periode(of(2024, FEBRUARY), of(2024, APRIL)),
                             beloep = BigDecimal.valueOf(70),
                             type = UTBETALING,
+                            regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                         ),
                         Utbetalingsperiode(
                             id = 2,
                             periode = Periode(of(2024, MAY), of(2024, NOVEMBER)),
                             beloep = BigDecimal.valueOf(100),
                             type = UTBETALING,
+                            regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                         ),
                     ),
             )
@@ -54,12 +56,14 @@ class SamordningsKlientTest {
                             periode = Periode(of(2024, FEBRUARY), of(2024, APRIL)),
                             beloep = BigDecimal.valueOf(70),
                             type = UTBETALING,
+                            regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                         ),
                         Utbetalingsperiode(
                             id = 2,
                             periode = Periode(of(2024, MAY), null),
                             beloep = BigDecimal.valueOf(100),
                             type = UTBETALING,
+                            regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                         ),
                     ),
             )

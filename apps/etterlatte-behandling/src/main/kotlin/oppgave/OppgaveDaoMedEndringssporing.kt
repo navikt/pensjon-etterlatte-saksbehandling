@@ -5,6 +5,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -111,11 +112,16 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
-    override fun hentOppgaverForSak(
+    override fun oppgaveMedTypeFinnes(
+        sakId: SakId,
+        type: OppgaveType,
+    ): Boolean = oppgaveDao.oppgaveMedTypeFinnes(sakId, type)
+
+    override fun hentOppgaverForSakMedType(
         sakId: SakId,
         typer: List<OppgaveType>,
     ): List<OppgaveIntern> =
-        oppgaveDao.hentOppgaverForSak(
+        oppgaveDao.hentOppgaverForSakMedType(
             sakId,
             typer,
         )
@@ -197,11 +203,13 @@ class OppgaveDaoMedEndringssporingImpl(
     }
 
     override fun oppdaterPaaVent(
-        paavent: PaaVent,
+        oppgaveId: UUID,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
         oppgaveStatus: Status,
     ) {
-        lagreEndringerPaaOppgave(paavent.oppgaveId) {
-            oppgaveDao.oppdaterPaaVent(paavent, oppgaveStatus)
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.oppdaterPaaVent(oppgaveId, merknad, aarsak, oppgaveStatus)
         }
     }
 

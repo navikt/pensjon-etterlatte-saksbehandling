@@ -45,8 +45,9 @@ internal fun Route.saksbehandlerRoutes(saksbehandlerService: SaksbehandlerServic
 
         get("/saksbehandlere/navnforident/{$IDENT}") {
             val ident = call.parameters[IDENT]!!
-            val navnForIdent = inTransaction { saksbehandlerService.hentNavnForIdent(ident) } ?: call.respond(HttpStatusCode.NoContent)
-            call.respond(navnForIdent)
+            val navnForIdent = inTransaction { saksbehandlerService.hentNavnForIdent(ident) }
+
+            call.respond(navnForIdent ?: HttpStatusCode.NoContent)
         }
     }
 }

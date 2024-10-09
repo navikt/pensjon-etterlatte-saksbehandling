@@ -19,6 +19,8 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-ktor/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -30,6 +32,8 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-ktor/**
+      - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 
 permissions:

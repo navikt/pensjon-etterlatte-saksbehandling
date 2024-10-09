@@ -194,10 +194,10 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
 
             post("sett-paa-vent") {
                 kunSkrivetilgang {
-                    val settPaaVentRequest = call.receive<EndrePaaVentRequest>()
+                    val req = call.receive<EndrePaaVentRequest>()
                     val oppgave =
                         inTransaction {
-                            service.endrePaaVent(settPaaVentRequest.toDomain(oppgaveId))
+                            service.endrePaaVent(oppgaveId, req.paaVent, req.merknad, req.aarsak)
                         }
                     call.respond(oppgave)
                 }

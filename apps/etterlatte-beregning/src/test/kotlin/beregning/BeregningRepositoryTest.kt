@@ -203,6 +203,7 @@ internal class BeregningRepositoryTest(
                     broek = broek,
                     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
                     regelVersjon = "1",
+                    regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
                     kunEnJuridiskForelder = true,
                 ),

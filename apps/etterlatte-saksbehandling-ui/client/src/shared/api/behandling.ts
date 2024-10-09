@@ -3,6 +3,7 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  ITidligereFamiliepleier,
   IUtlandstilknytning,
   NyBehandlingRequest,
   ViderefoertOpphoer,
@@ -149,6 +150,23 @@ export const lagreBoddEllerArbeidetUtlandet = async (args: {
   })
 }
 
+export const lagreTidligereFamiliepleier = async (args: {
+  behandlingId: string
+  svar: boolean
+  foedselsnummer?: string
+  startPleieforhold?: Date | null
+  opphoertPleieforhold?: Date | null
+  begrunnelse: string
+}): Promise<ApiResponse<ITidligereFamiliepleier>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/tidligere-familiepleier`, {
+    svar: args.svar,
+    foedselsnummer: args.foedselsnummer,
+    startPleieforhold: args.startPleieforhold,
+    opphoertPleieforhold: args.opphoertPleieforhold,
+    begrunnelse: args.begrunnelse,
+  })
+}
+
 export const hentGrunnlagsendringshendelserInstitusjonsoppholdForSak = async (
   sakid: number
 ): Promise<ApiResponse<Array<Grunnlagsendringshendelse>>> => {
@@ -201,7 +219,11 @@ export const redigerAnnenForelder = async (args: {
   behandlingId: string
   annenForelder: AnnenForelder
 }): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/rediger-annen-forelder`, {
+  return apiClient.put(`/behandling/${args.behandlingId}/annen-forelder`, {
     ...args.annenForelder,
   })
+}
+
+export const slettAnnenForelder = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
+  return apiClient.delete(`/behandling/${args.behandlingId}/annen-forelder`)
 }

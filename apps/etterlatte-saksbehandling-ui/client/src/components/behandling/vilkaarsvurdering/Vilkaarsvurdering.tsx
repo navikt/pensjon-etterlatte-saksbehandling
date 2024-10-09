@@ -21,7 +21,7 @@ import {
   vilkaarsvurderingErPaaNyttRegelverk,
 } from '~components/behandling/vilkaarsvurdering/utils'
 
-import { isFailure, isInitial, isPending } from '~shared/api/apiUtils'
+import { isFailure, isInitial, isPending, mapFailure } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
@@ -156,13 +156,15 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
       {isFailure(vilkaarsvurderingStatus) && isInitial(opprettNyVilkaarsvurderingStatus) && (
         <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
       )}
-      {isFailure(opprettNyVilkaarsvurderingStatus) && (
+      {mapFailure(opprettNyVilkaarsvurderingStatus, (error) => (
         <ApiErrorAlert>
-          {opprettNyVilkaarsvurderingStatus.error.status === 412
-            ? 'Virkningstidspunkt og kommer søker tilgode må avklares før vilkårsvurdering kan starte'
-            : 'En feil har oppstått'}
+          {error.status === 412
+            ? behandling.status === IBehandlingStatus.AVBRUTT
+              ? 'Behandlingen er avbrutt, vilkårsvurderingen finnes ikke.'
+              : 'Virkningstidspunkt og kommer søker tilgode må avklares før vilkårsvurdering kan starte'
+            : error.detail}
         </ApiErrorAlert>
-      )}
+      ))}
     </>
   )
 }

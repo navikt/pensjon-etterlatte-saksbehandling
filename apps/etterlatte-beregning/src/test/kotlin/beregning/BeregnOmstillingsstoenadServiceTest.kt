@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning
 
+import Regelverk
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
@@ -58,6 +59,30 @@ internal class BeregnOmstillingsstoenadServiceTest {
     }
 
     @Test
+    fun `skal kaste feil hvis beregningsgrunnlag hentet er på en annen behandling`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            omstillingstoenadBeregningsGrunnlag(
+                randomUUID(),
+            )
+        assertThrows<BeregningsgrunnlagMangler> {
+            runBlocking {
+                beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            }
+        }
+    }
+
+    @Test
     fun `skal beregne omstillingsstoenad foerstegangsbehandling - nasjonal`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -91,6 +116,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
+                    regelverk shouldBe Regelverk.REGELVERK_FOM_JAN_2024
                 }
             }
         }

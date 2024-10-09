@@ -1,5 +1,6 @@
 import {
   Journalpost,
+  Journalposter,
   JournalpostUtsendingsinfo,
   KnyttTilAnnenSakRequest,
   KnyttTilAnnenSakResponse,
@@ -12,14 +13,16 @@ export const hentDokumenter = async (args: {
   temaer?: string[]
   statuser?: string[]
   typer?: string[]
-  foerste?: number
-}): Promise<ApiResponse<Journalpost[]>> =>
+  foerste: number
+  etter?: string
+}): Promise<ApiResponse<Journalposter>> =>
   apiClient.post(`/dokumenter`, {
     foedselsnummer: args.fnr,
     tema: args.temaer,
     journalstatuser: args.statuser,
     journalposttyper: args.typer,
     foerste: args.foerste,
+    etter: args.etter,
   })
 
 export const feilregistrerSakstilknytning = async (journalpostId: string): Promise<ApiResponse<any>> =>

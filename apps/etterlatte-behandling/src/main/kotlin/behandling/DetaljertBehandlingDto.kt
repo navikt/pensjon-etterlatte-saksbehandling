@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -40,4 +41,5 @@ data class DetaljertBehandlingDto(
     val kilde: Vedtaksloesning,
     val sendeBrev: Boolean,
     val viderefoertOpphoer: ViderefoertOpphoer?,
+    val tidligereFamiliepleier: TidligereFamiliepleier?,
 )

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.MissingNode
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
@@ -11,8 +12,10 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
@@ -24,7 +27,6 @@ import no.nav.etterlatte.rapidsandrivers.antall
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
 import no.nav.etterlatte.rapidsandrivers.kjoering
-import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -82,6 +84,7 @@ internal class ReguleringsforespoerselRiver(
                 )
             },
             haandterSaker = { sakerTilOmregning ->
+
                 val sakListe = flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
                 sakerTilOmregning.saker.forEach {
                     publiserSak(it, kjoering, packet, sakListe, context)
@@ -119,7 +122,12 @@ internal class ReguleringsforespoerselRiver(
         packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
         packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(sak.id)
         packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(sak.id)
-        packet.sakId = sak.id
+        packet[HENDELSE_DATA_KEY] =
+            OmregningData(
+                kjoering = kjoering,
+                sakId = sak.id,
+                revurderingaarsak = Revurderingaarsak.REGULERING,
+            )
         logger.debug("Sender til omregning for sak ${sak.id}")
         context.publish(packet.toJson())
     }

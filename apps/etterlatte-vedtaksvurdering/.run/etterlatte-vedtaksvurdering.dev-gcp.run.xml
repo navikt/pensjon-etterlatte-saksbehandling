@@ -7,7 +7,7 @@
       <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />
       <env name="KAFKA_VEDTAKSHENDELSER_TOPIC" value="vedtakshendelser" />
       <env name="KAFKA_BOOTSTRAP_SERVERS" value="0.0.0.0:9092" />
-      <env name="DB_JDBC_URL" value="jdbc:postgresql://localhost:5433/postgres" />
+      <env name="DB_JDBC_URL" value="jdbc:postgresql://localhost:5499/postgres" />
       <env name="DB_USERNAME" value="postgres" />
       <env name="DB_PASSWORD" value="postgres" />
       <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-behandling" />

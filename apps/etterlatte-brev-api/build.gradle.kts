@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":libs:etterlatte-oppgave-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(libs.etterlatte.common)
+    implementation(libs.pdf.pdfbox)
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
 

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.vedtak
 
+import Regelverk
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -112,6 +113,7 @@ data class Utbetalingsperiode(
     val periode: Periode,
     val beloep: BigDecimal?,
     val type: UtbetalingsperiodeType,
+    val regelverk: Regelverk?,
 )
 
 enum class UtbetalingsperiodeType {

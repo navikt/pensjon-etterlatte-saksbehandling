@@ -1,6 +1,6 @@
 import { PersonIcon } from '@navikt/aksel-icons'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
-import { BodyShort, CopyButton, Detail, Heading, HStack, Label } from '@navikt/ds-react'
+import { BodyShort, CopyButton, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
@@ -45,25 +45,29 @@ export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props
         <Heading size="small" level="3">
           {avdoed ? 'Avdød' : 'Gjenlevende'}
         </Heading>
-        <BodyShort>
-          {person.fornavn} {person.etternavn}
+        <VStack>
+          <BodyShort>
+            {person.fornavn} {person.etternavn}
+          </BodyShort>
           <HStack>
             <PersonLink fnr={person.foedselsnummer} target="_blank" rel="noreferrer noopener">
               ({formaterFnr(person.foedselsnummer)})
             </PersonLink>
             <CopyButton copyText={person.foedselsnummer} size="small" />
           </HStack>
-        </BodyShort>
-        <div>
-          <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
-        </div>
+        </VStack>
+
+        <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
+
         {person.utland && <Utlandsopphold utland={person.utland} />}
+
         <StatsborgerskapVisning
           statsborgerskap={person.statsborgerskap}
           pdlStatsborgerskap={person.pdlStatsborgerskap}
           landListeResult={landListeResult}
         />
-        <Detail>
+
+        <Detail as="div">
           <Label size="small" as="p">
             Kilde
           </Label>

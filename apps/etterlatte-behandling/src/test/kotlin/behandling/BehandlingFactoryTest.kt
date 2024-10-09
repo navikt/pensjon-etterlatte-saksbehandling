@@ -21,7 +21,6 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
@@ -101,21 +100,18 @@ class BehandlingFactoryTest {
         }
     private val revurderingDao = mockk<RevurderingDao>()
     private val revurderingService =
-        AutomatiskRevurderingService(
-            RevurderingService(
-                oppgaveService,
-                grunnlagService,
-                behandlingHendelserKafkaProducerMock,
-                behandlingDaoMock,
-                hendelseDaoMock,
-                kommerBarnetTilGodeService,
-                revurderingDao,
-                aktivitetspliktDao,
-                aktivitetspliktKopierService,
-            ),
-            mockk(),
-            mockk(),
+        RevurderingService(
+            oppgaveService,
+            grunnlagService,
+            behandlingHendelserKafkaProducerMock,
+            behandlingDaoMock,
+            hendelseDaoMock,
+            kommerBarnetTilGodeService,
+            revurderingDao,
+            aktivitetspliktDao,
+            aktivitetspliktKopierService,
         )
+
     private val behandlingFactory =
         BehandlingFactory(
             oppgaveService,
@@ -223,8 +219,7 @@ class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
-                )!!
-                .also { it.sendMeldingForHendelse() }
+                ).also { it.sendMeldingForHendelse() }
                 .behandling
 
         Assertions.assertEquals(opprettetBehandling, resultat)
@@ -317,8 +312,7 @@ class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
-                )!!
-                .also { it.sendMeldingForHendelse() }
+                ).also { it.sendMeldingForHendelse() }
                 .behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
@@ -683,6 +677,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
+            behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
         }
         coVerify {
             grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)

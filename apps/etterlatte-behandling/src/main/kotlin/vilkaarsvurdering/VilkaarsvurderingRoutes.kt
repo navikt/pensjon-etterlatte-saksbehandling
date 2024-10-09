@@ -30,7 +30,6 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.service.BehandlingstilstandException
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
-import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingTilstandException
 import no.nav.etterlatte.vilkaarsvurdering.service.VirkningstidspunktIkkeSattException
 import java.util.UUID
 
@@ -175,15 +174,6 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                     e,
                 )
                 call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-            } catch (e: VilkaarsvurderingTilstandException) {
-                logger.error(e.message)
-                call.respond(
-                    HttpStatusCode.PreconditionFailed,
-                    "Kan ikke endre vurdering av vilkår på en vilkårsvurdering som har et resultat.",
-                )
-            } catch (e: Exception) {
-                logger.error(e.message)
-                call.respond(HttpStatusCode.InternalServerError)
             }
         }
 
@@ -212,12 +202,6 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                         e,
                     )
                     call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
-                } catch (e: VilkaarsvurderingTilstandException) {
-                    logger.error(e.message)
-                    call.respond(
-                        HttpStatusCode.PreconditionFailed,
-                        "Kan ikke slette vurdering av vilkår på en vilkårsvurdering som har et resultat.",
-                    )
                 }
             }
         }

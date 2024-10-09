@@ -3,6 +3,7 @@ package no.nav.etterlatte.oppgave
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -19,6 +20,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
@@ -36,7 +38,12 @@ interface OppgaveDao {
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
 
-    fun hentOppgaverForSak(
+    fun oppgaveMedTypeFinnes(
+        sakId: SakId,
+        type: OppgaveType,
+    ): Boolean
+
+    fun hentOppgaverForSakMedType(
         sakId: SakId,
         typer: List<OppgaveType>,
     ): List<OppgaveIntern>
@@ -84,7 +91,9 @@ interface OppgaveDao {
     )
 
     fun oppdaterPaaVent(
-        paavent: PaaVent,
+        oppgaveId: UUID,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
         oppgaveStatus: Status,
     )
 
@@ -221,7 +230,33 @@ class OppgaveDaoImpl(
             }
         }
 
-    override fun hentOppgaverForSak(
+    override fun oppgaveMedTypeFinnes(
+        sakId: SakId,
+        type: OppgaveType,
+    ): Boolean {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT EXISTS(
+                            SELECT id
+                            FROM oppgave
+                            WHERE sak_id = ? AND type = ?
+                        )
+                        """.trimIndent(),
+                    )
+                statement.setLong(1, sakId)
+                statement.setString(2, type.name)
+                statement.executeQuery().single {
+                    val trueOrFalsePostgresFormat = getString("exists")
+                    return@single trueOrFalsePostgresFormat == "t"
+                }
+            }
+        }
+    }
+
+    override fun hentOppgaverForSakMedType(
         sakId: SakId,
         typer: List<OppgaveType>,
     ): List<OppgaveIntern> =
@@ -537,7 +572,9 @@ class OppgaveDaoImpl(
     }
 
     override fun oppdaterPaaVent(
-        paavent: PaaVent,
+        oppgaveId: UUID,
+        merknad: String,
+        aarsak: PaaVentAarsak?,
         oppgaveStatus: Status,
     ) {
         connectionAutoclosing.hentConnection {
@@ -550,10 +587,10 @@ class OppgaveDaoImpl(
                         where id = ?::UUID
                         """.trimIndent(),
                     )
-                statement.setString(1, paavent.merknad)
+                statement.setString(1, merknad)
                 statement.setString(2, oppgaveStatus.name)
-                statement.setString(3, paavent.aarsak?.name)
-                statement.setObject(4, paavent.oppgaveId)
+                statement.setString(3, aarsak?.name)
+                statement.setObject(4, oppgaveId)
 
                 statement.executeUpdate()
             }

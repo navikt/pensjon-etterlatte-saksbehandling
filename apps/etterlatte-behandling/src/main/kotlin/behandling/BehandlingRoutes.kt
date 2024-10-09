@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -30,6 +29,8 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.SendBrev
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleierRequest
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -38,7 +39,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -195,11 +195,7 @@ internal fun Route.behandlingRoutes(
                             }
                         }
 
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson(),
-                    )
+                    call.respond(FastsettVirkningstidspunktResponse.from(virkningstidspunkt))
                 } catch (e: TilstandException.UgyldigTilstand) {
                     logger.warn("Ugyldig tilstand for lagre virkningstidspunkt", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
@@ -224,11 +220,7 @@ internal fun Route.behandlingRoutes(
                         behandlingService.oppdaterUtlandstilknytning(behandlingId, utlandstilknytning)
                     }
 
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = utlandstilknytning.toJson(),
-                    )
+                    call.respond(utlandstilknytning)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     logger.warn("Ugyldig tilstand for lagre utlandstilknytning", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
@@ -258,11 +250,7 @@ internal fun Route.behandlingRoutes(
                         behandlingService.oppdaterViderefoertOpphoer(behandlingId, viderefoertOpphoer)
                     }
 
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = viderefoertOpphoer.toJson(),
-                    )
+                    call.respond(viderefoertOpphoer)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     logger.warn("Ugyldig tilstand for lagre videreført opphør", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
@@ -309,15 +297,32 @@ internal fun Route.behandlingRoutes(
                         )
                     }
 
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = boddEllerArbeidetUtlandet.toJson(),
-                    )
+                    call.respond(boddEllerArbeidetUtlandet)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     logger.warn("Ugyldig tilstand for lagre boddellerarbeidetutlandet", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
+            }
+        }
+
+        post("/tidligere-familiepleier") {
+            kunSkrivetilgang {
+                val body = call.receive<TidligereFamiliepleierRequest>()
+                val tidligereFamiliepleier =
+                    TidligereFamiliepleier(
+                        svar = body.svar,
+                        kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
+                        foedselsnummer = body.foedselsnummer,
+                        startPleieforhold = body.startPleieforhold,
+                        opphoertPleieforhold = body.opphoertPleieforhold,
+                        begrunnelse = body.begrunnelse,
+                    )
+
+                inTransaction {
+                    behandlingService.oppdaterTidligereFamiliepleier(behandlingId, tidligereFamiliepleier)
+                }
+
+                call.respond(tidligereFamiliepleier)
             }
         }
 
@@ -338,10 +343,17 @@ internal fun Route.behandlingRoutes(
             }
         }
 
-        post("/rediger-annen-forelder") {
+        put("/annen-forelder") {
             kunSkrivetilgang {
                 val annenForelder = call.receive<AnnenForelder>()
                 behandlingService.lagreAnnenForelder(behandlingId, brukerTokenInfo, annenForelder)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        delete("/annen-forelder") {
+            kunSkrivetilgang {
+                behandlingService.lagreAnnenForelder(behandlingId, brukerTokenInfo, null)
                 call.respond(HttpStatusCode.OK)
             }
         }

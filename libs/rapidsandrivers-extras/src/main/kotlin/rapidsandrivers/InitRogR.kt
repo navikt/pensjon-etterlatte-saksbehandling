@@ -16,6 +16,7 @@ fun initRogR(
     settOppRivers: (RapidsConnection, rapidEnv: Miljoevariabler) -> Unit,
 ) {
     sikkerLoggOppstartOgAvslutning("etterlatte-$applikasjonsnavn")
+
     val rapidEnv = getRapidEnv()
 
     var builder =

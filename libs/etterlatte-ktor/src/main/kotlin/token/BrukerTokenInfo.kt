@@ -77,6 +77,7 @@ data class HardkodaSystembruker private constructor(
         val testdata = HardkodaSystembruker(Systembrukere.TESTDATA)
         val oppgave = HardkodaSystembruker(Systembrukere.OPPGAVE)
         val opprettGrunnlag = HardkodaSystembruker(Systembrukere.OPPRETT_GRUNNLAG) // skal bort på sikt
+        val ryddeBeregning = HardkodaSystembruker(Systembrukere.BEREGNING)
     }
 
     enum class Systembrukere(
@@ -87,6 +88,7 @@ data class HardkodaSystembruker private constructor(
         DOEDSHENDELSE("doedshendelse"),
         TESTDATA("testdata"),
         OPPGAVE("oppgave"),
+        BEREGNING("beregning"),
     }
 }
 

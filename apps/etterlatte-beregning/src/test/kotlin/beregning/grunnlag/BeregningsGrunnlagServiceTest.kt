@@ -1035,36 +1035,6 @@ internal class BeregningsGrunnlagServiceTest {
         }
     }
 
-    @Test
-    fun `skal ikke tillate kun en juridisk forelder hvis ikke registrert i persongalleri`() {
-        val behandlingId = randomUUID()
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
-            mockk {
-                coEvery { sakType } returns SakType.BARNEPENSJON
-                coEvery { behandlingType } returns BehandlingType.REVURDERING
-            }
-
-        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
-
-        assertThrows<BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri> {
-            runBlocking {
-                beregningsGrunnlagService.lagreBeregningsGrunnlag(
-                    behandlingId,
-                    LagreBeregningsGrunnlag(
-                        soeskenMedIBeregning = emptyList(),
-                        institusjonsopphold = emptyList(),
-                        beregningsMetode = BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
-                        beregningsMetodeFlereAvdoede = emptyList(),
-                        kunEnJuridiskForelder = GrunnlagMedPeriode(fom = LocalDate.now(), data = TomVerdi),
-                    ),
-                    brukerTokenInfo = mockk(relaxed = true),
-                )
-            }
-        }
-    }
-
     private fun mockBehandling(
         type: SakType,
         uuid: UUID,

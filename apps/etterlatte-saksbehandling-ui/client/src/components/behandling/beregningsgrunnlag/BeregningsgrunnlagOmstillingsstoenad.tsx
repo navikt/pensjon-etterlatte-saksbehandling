@@ -21,7 +21,7 @@ import {
 } from '~shared/types/Beregning'
 import Spinner from '~shared/Spinner'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { BeregningsMetodeBrukt } from '~components/behandling/beregningsgrunnlag/beregningsMetode/BeregningsMetodeBrukt'
@@ -70,6 +70,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
   const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlagForm) => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
       ...toLagreBeregningsGrunnlagDto(behandling?.beregningsGrunnlag),
+      beregningsMetodeFlereAvdoede: undefined,
       beregningsMetode: beregningsMetode,
     }
     lagreBeregningsGrunnlagRequest(
@@ -112,6 +113,11 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
                 oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
                 lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}
               />
+
+              {mapFailure(lagreBeregningsGrunnlagResult, (error) => (
+                <ApiErrorAlert>{error.detail}</ApiErrorAlert>
+              ))}
+
               <Box maxWidth="70rem">
                 <InstitusjonsoppholdHendelser sakId={behandling.sakId} />
               </Box>

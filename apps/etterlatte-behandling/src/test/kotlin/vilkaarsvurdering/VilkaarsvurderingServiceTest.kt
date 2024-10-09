@@ -28,6 +28,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -107,7 +108,12 @@ internal class VilkaarsvurderingServiceTest(
 
     @BeforeEach
     fun beforeEach() {
-        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery {
+            grunnlagKlient.hentGrunnlagForBehandling(
+                any(),
+                any(),
+            )
+        } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         every { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(any()) } returns
             mockk<Behandling>().apply {
@@ -115,6 +121,7 @@ internal class VilkaarsvurderingServiceTest(
                 every { sak.id } returns sakId1
                 every { sak.sakType } returns SakType.BARNEPENSJON
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { prosesstype } returns Prosesstype.MANUELL
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
                 every { revurderingsaarsak() } returns null
             }
@@ -453,6 +460,7 @@ internal class VilkaarsvurderingServiceTest(
                 every { sak.id } returns sakId1
                 every { sak.sakType } returns SakType.BARNEPENSJON
                 every { type } returns BehandlingType.REVURDERING
+                every { prosesstype } returns Prosesstype.MANUELL
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
                 every { revurderingsaarsak() } returns Revurderingaarsak.REGULERING
             }
@@ -489,7 +497,13 @@ internal class VilkaarsvurderingServiceTest(
                 vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!
             }
 
-        val (revurderingsvilkaar) = runBlocking { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo) }
+        val (revurderingsvilkaar) =
+            runBlocking {
+                vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(
+                    revurderingId,
+                    brukerTokenInfo,
+                )
+            }
         assertIsSimilar(foerstegangsvilkaar, revurderingsvilkaar)
         verify(exactly = 1) { behandlingStatus.settVilkaarsvurdert(revurderingId, brukerTokenInfo, false) }
     }
@@ -542,7 +556,14 @@ internal class VilkaarsvurderingServiceTest(
             vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!
         }
 
-        val (nyeVilkaar) = runBlocking { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo, false) }
+        val (nyeVilkaar) =
+            runBlocking {
+                vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(
+                    revurderingId,
+                    brukerTokenInfo,
+                    false,
+                )
+            }
 
         nyeVilkaar.resultat shouldBe null
         nyeVilkaar.vilkaar.forEach { it.vurdering shouldBe null }
@@ -576,7 +597,11 @@ internal class VilkaarsvurderingServiceTest(
 
         val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
             runBlocking {
-                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
+                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
+                    nyBehandlingId,
+                    opprinneligBehandlingId,
+                    brukerTokenInfo,
+                )
             }
 
         with(vilkaarsvurderingMedKopierteOppdaterteVilkaar.vilkaar.map { it.hovedvilkaar.type }) {
@@ -617,7 +642,11 @@ internal class VilkaarsvurderingServiceTest(
 
         val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
             runBlocking {
-                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
+                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
+                    nyBehandlingId,
+                    opprinneligBehandlingId,
+                    brukerTokenInfo,
+                )
             }
 
         with(vilkaarsvurderingMedKopierteOppdaterteVilkaar.vilkaar.map { it.hovedvilkaar.type }) {
@@ -650,7 +679,11 @@ internal class VilkaarsvurderingServiceTest(
 
         val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
             runBlocking {
-                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
+                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
+                    nyBehandlingId,
+                    opprinneligBehandlingId,
+                    brukerTokenInfo,
+                )
             }
 
         vilkaarsvurderingMedKopierteOppdaterteVilkaar.resultat shouldNotBe null
@@ -679,7 +712,8 @@ internal class VilkaarsvurderingServiceTest(
                 vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, brukerTokenInfo)
             }
 
-        val delvilkaar = vilkaarsvurdering.vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
+        val delvilkaar =
+            vilkaarsvurdering.vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
 
         runBlocking {
             vilkaarsvurderingServiceImpl.oppdaterVurderingPaaVilkaar(
@@ -829,6 +863,7 @@ internal class VilkaarsvurderingServiceTest(
         every { id } returns behandlingId
         every { sak.id } returns sakId1
         every { sak.sakType } returns SakType.BARNEPENSJON
+        every { prosesstype } returns Prosesstype.MANUELL
         every { status } returns behandlingStatus
         every { type } returns behandlingstype
         every { revurderingsaarsak() } returns revurderingaarsak

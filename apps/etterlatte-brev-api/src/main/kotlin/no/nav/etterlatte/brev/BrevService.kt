@@ -43,7 +43,7 @@ class BrevService(
                 behandlingId = null,
                 bruker = bruker,
                 brevKode = req.brevKode,
-                brevData = req.brevDataRedigerbar,
+                brevData = req.brevParametereAutomatisk.brevDataMapping(),
             )
         val brevId = brev.id
 

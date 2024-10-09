@@ -81,48 +81,6 @@
           }
         }
       ],
-      "foedsel_utgaar": [
-        {
-          "foedselsdato": "2007-08-29",
-          "foedeland": "NIC",
-          "foedested": "Fødested i/på NICARAGUA",
-          "foedselsaar": 2007,
-          "metadata": {
-            "master": "FREG",
-            "historisk": false,
-            "opplysningsId": "7ca6324f-dc01-487c-a513-1f4608e43032",
-            "endringer": [
-              {
-                "kilde": "Dolly",
-                "registrert": "2021-08-05T15:11:02",
-                "registrertAv": "Folkeregisteret",
-                "systemkilde": "FREG",
-                "type": "OPPRETT"
-              }
-            ]
-          }
-        },
-        {
-          "foedselsdato": "2007-08-29",
-          "foedeland": "NIC",
-          "foedested": "Fødested i/på NICARAGUA",
-          "foedselsaar": 2007,
-          "metadata": {
-            "master": "FREG",
-            "historisk": false,
-            "opplysningsId": "54fa5c01-a488-4202-adbc-01441141d964",
-            "endringer": [
-              {
-                "kilde": "Dolly",
-                "registrert": "2021-08-05T15:11:02",
-                "registrertAv": "Folkeregisteret",
-                "systemkilde": "FREG",
-                "type": "OPPRETT"
-              }
-            ]
-          }
-        }
-      ],
       "sivilstand": [],
       "doedsfall": [],
       "foreldreansvar": [

@@ -85,6 +85,15 @@ internal class PdlKlientTest {
                     ?.toString(),
             )
             assertEquals(
+                1987,
+                hentPerson
+                    ?.first()
+                    ?.person
+                    ?.foedselsdato
+                    ?.first()
+                    ?.foedselsaar,
+            )
+            assertEquals(
                 "FJI",
                 hentPerson
                     ?.first()
@@ -93,7 +102,25 @@ internal class PdlKlientTest {
                     ?.first()
                     ?.foedeland,
             )
-            // TODO sjekk flere relevante felter
+            assertEquals(
+                "Coconut Tree",
+                hentPerson
+                    ?.first()
+                    ?.person
+                    ?.foedested
+                    ?.first()
+                    ?.foedekommune,
+            )
+
+            assertEquals(
+                "ROBUST",
+                hentPerson
+                    ?.get(1)
+                    ?.person
+                    ?.navn
+                    ?.first()
+                    ?.fornavn,
+            )
         }
     }
 

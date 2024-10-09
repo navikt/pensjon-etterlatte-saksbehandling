@@ -40,7 +40,6 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -65,7 +64,7 @@ class JournalfoerBrevServiceTest {
 
     @Test
     fun `Journalfoering fungerer som forventet`() {
-        val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.REDIGERBAR)
+        val brev = opprettBrev(Status.FERDIGSTILT)
         val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, Enheter.defaultEnhet.enhetNr)
         val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
 
@@ -102,7 +101,7 @@ class JournalfoerBrevServiceTest {
         names = ["FERDIGSTILT"],
     )
     fun `Journalfoering feiler hvis status er feil`(status: Status) {
-        val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
+        val brev = opprettBrev(status)
         every { db.hentBrev(any()) } returns brev
         coEvery {
             behandlingService.hentSak(
@@ -333,24 +332,22 @@ class JournalfoerBrevServiceTest {
         }
     }
 
-    private fun opprettBrev(
-        status: Status,
-        prosessType: BrevProsessType,
-    ) = Brev(
-        id = Random.nextLong(10000),
-        sakId = randomSakId(),
-        behandlingId = null,
-        tittel = null,
-        spraak = Spraak.NB,
-        prosessType = prosessType,
-        soekerFnr = "fnr",
-        status = status,
-        statusEndret = Tidspunkt.now(),
-        opprettet = Tidspunkt.now(),
-        mottaker = opprettMottaker(SOEKER_FOEDSELSNUMMER.value),
-        brevtype = Brevtype.INFORMASJON,
-        brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
-    )
+    private fun opprettBrev(status: Status) =
+        Brev(
+            id = Random.nextLong(10000),
+            sakId = randomSakId(),
+            behandlingId = null,
+            tittel = null,
+            spraak = Spraak.NB,
+            prosessType = BrevProsessType.REDIGERBAR,
+            soekerFnr = "fnr",
+            status = status,
+            statusEndret = Tidspunkt.now(),
+            opprettet = Tidspunkt.now(),
+            mottaker = opprettMottaker(SOEKER_FOEDSELSNUMMER.value),
+            brevtype = Brevtype.INFORMASJON,
+            brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
+        )
 
     private fun opprettMottaker(fnr: String) =
         Mottaker(

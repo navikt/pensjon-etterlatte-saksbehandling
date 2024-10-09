@@ -95,7 +95,7 @@ class BrevapiKlient(
             throw ForespoerselException(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_JOURNALFOERING_AV_BREV",
-                detail = "Kunne ikke journalføre brev for sakidid: $sakId",
+                detail = "Kunne ikke journalføre brev for sakid: $sakId",
             )
         }
     }
@@ -116,7 +116,7 @@ class BrevapiKlient(
             throw ForespoerselException(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_OPPRETT_OG_JOURNALFOERING_AV_NOTAT",
-                detail = "Kunne ikke opprettet og journalføre notat for sakidid: $sakId",
+                detail = "Kunne ikke opprettet og journalføre notat for sakid: $sakId",
             )
         }
     }

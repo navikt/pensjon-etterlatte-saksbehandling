@@ -1,6 +1,6 @@
-import { BodyShort } from '@navikt/ds-react'
-import styled from 'styled-components'
+import { BodyShort, Box, Label, VStack } from '@navikt/ds-react'
 import { Trygdeavtale, TrygdetidAvtale, TrygdetidAvtaleKriteria } from '~shared/api/trygdetid'
+import { JaNeiRec } from '~shared/types/ISvar'
 
 interface TrygdeavtaleVisningProps {
   trygdeavtale: Trygdeavtale
@@ -14,38 +14,72 @@ export const TrygdeavtaleVisning = ({ trygdeavtale, avtaler, kriterier }: Trygde
   const avtaleKriteria = kriterier.find((kriteria) => trygdeavtale.avtaleKriteriaKode === kriteria.kode)
 
   return (
-    <TrygdeavtaleBody>
-      <BodyShort>
-        {avtale && avtale.beskrivelse}
-        {avtaleDato && <> - {avtaleDato.beskrivelse}</>}
-      </BodyShort>
-      {avtaleKriteria && <BodyShort>{avtaleKriteria.beskrivelse}</BodyShort>}
+    <VStack gap="8">
+      <Box>
+        <Label>Avtale</Label>
+        <BodyShort>
+          {avtale && avtale.beskrivelse}
+          {avtaleDato && <> - {avtaleDato.beskrivelse}</>}
+        </BodyShort>
+      </Box>
+
+      {avtaleKriteria && (
+        <Box>
+          <Label>Avtalekriterier</Label>
+          <BodyShort>{avtaleKriteria.beskrivelse}</BodyShort>
+        </Box>
+      )}
       {trygdeavtale.personKrets && (
-        <BodyShort>Er avdøde i personkretsen i denne avtalen? {trygdeavtale.personKrets}</BodyShort>
+        <Box>
+          <Label>Er avdøde i personkretsen i denne avtalen? </Label>
+          <BodyShort>{JaNeiRec[trygdeavtale.personKrets]}</BodyShort>
+        </Box>
       )}
       {trygdeavtale.arbInntekt1G && (
-        <BodyShort>
-          Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet? {trygdeavtale.arbInntekt1G}
-        </BodyShort>
+        <VStack gap="2">
+          <Box>
+            <Label>Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?</Label>
+            <BodyShort>{JaNeiRec[trygdeavtale.arbInntekt1G]}</BodyShort>
+          </Box>
+          {trygdeavtale.arbInntekt1GKommentar && (
+            <Box>
+              <Label>Kommentar</Label>
+              <BodyShort>{trygdeavtale.arbInntekt1GKommentar}</BodyShort>
+            </Box>
+          )}
+        </VStack>
       )}
-      {trygdeavtale.arbInntekt1GKommentar && <BodyShort>Kommentar: {trygdeavtale.arbInntekt1GKommentar}</BodyShort>}
       {trygdeavtale.beregArt50 && (
-        <BodyShort>Beregning etter artikkel 50 (EØS-forordning 883/2004)? {trygdeavtale.beregArt50}</BodyShort>
+        <VStack gap="2">
+          <Box>
+            <Label>Beregning etter artikkel 50 (EØS-forordning 883/2004)?</Label>
+            <BodyShort>{JaNeiRec[trygdeavtale.beregArt50]}</BodyShort>
+          </Box>
+
+          {trygdeavtale.beregArt50Kommentar && (
+            <Box>
+              <Label>Kommentar</Label>
+              <BodyShort>{trygdeavtale.beregArt50Kommentar}</BodyShort>
+            </Box>
+          )}
+        </VStack>
       )}
-      {trygdeavtale.beregArt50Kommentar && <BodyShort>Kommentar: {trygdeavtale.beregArt50Kommentar}</BodyShort>}
+
       {trygdeavtale.nordiskTrygdeAvtale && (
-        <BodyShort>
-          Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?{' '}
-          {trygdeavtale.nordiskTrygdeAvtale}
-        </BodyShort>
+        <VStack gap="2">
+          <Box>
+            <Label>Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?</Label>
+            <BodyShort>{JaNeiRec[trygdeavtale.nordiskTrygdeAvtale]}</BodyShort>
+          </Box>
+
+          {trygdeavtale.nordiskTrygdeAvtaleKommentar && (
+            <Box>
+              <Label>Kommentar</Label>
+              <BodyShort>{trygdeavtale.nordiskTrygdeAvtaleKommentar}</BodyShort>
+            </Box>
+          )}
+        </VStack>
       )}
-      {trygdeavtale.nordiskTrygdeAvtaleKommentar && (
-        <BodyShort>Kommentar: {trygdeavtale.nordiskTrygdeAvtaleKommentar}</BodyShort>
-      )}
-    </TrygdeavtaleBody>
+    </VStack>
   )
 }
-
-const TrygdeavtaleBody = styled.div`
-  margin-bottom: 2em;
-`

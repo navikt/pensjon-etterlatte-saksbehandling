@@ -51,7 +51,8 @@ object PersonMapper {
                     hentPerson.statsborgerskap,
                 )
             val sivilstand = hentPerson.sivilstand?.let { pdlSivilstand -> avklarSivilstatus(ppsKlient, fnr, pdlSivilstand) }
-            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
+            val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
+            val foedested = ppsKlient.avklarFoedested(hentPerson.foedested)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val barnekull =
                 if (personRolle == PersonRolle.AVDOED) {
@@ -70,10 +71,10 @@ object PersonMapper {
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = fnr,
-                foedselsdato = foedsel.foedselsdato,
-                foedselsaar = foedsel.foedselsaar,
+                foedselsdato = foedselsdato.foedselsdato,
+                foedselsaar = foedselsdato.foedselsaar,
                 doedsdato = doedsfall?.doedsdato,
-                foedeland = foedsel.foedeland,
+                foedeland = foedested?.foedeland,
                 adressebeskyttelse =
                     adressebeskyttelse?.let {
                         AdressebeskyttelseGradering.valueOf(it.gradering.toString())
@@ -124,7 +125,7 @@ object PersonMapper {
                     hentPerson.statsborgerskap,
                 )
             val sivilstand = hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) }
-            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
+            val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
             val barnekull =
@@ -140,7 +141,7 @@ object PersonMapper {
                 fornavn = navn.fornavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = ident,
-                foedselsdato = foedsel.foedselsdato,
+                foedselsdato = foedselsdato.foedselsdato,
                 doedsdato = doedsfall?.doedsdato,
                 bostedsadresse =
                     bostedsadresse?.map {
@@ -250,7 +251,8 @@ object PersonMapper {
                 hentPerson.sivilstand?.let { pdlSivilstand ->
                     avklarSivilstatus(ppsKlient, request.foedselsnummer, pdlSivilstand)
                 }
-            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
+            val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
+            val foedested = ppsKlient.avklarFoedested(hentPerson.foedested)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val barnekull =
                 if (request.rolle == PersonRolle.AVDOED) {
@@ -269,10 +271,10 @@ object PersonMapper {
                 mellomnavn = navn.mellomnavn?.let { OpplysningDTO(navn.mellomnavn, navn.metadata.opplysningsId) },
                 etternavn = OpplysningDTO(navn.etternavn, navn.metadata.opplysningsId),
                 foedselsnummer = OpplysningDTO(request.foedselsnummer, null),
-                foedselsdato = foedsel.foedselsdato?.let { OpplysningDTO(it, foedsel.metadata.opplysningsId) },
-                foedselsaar = OpplysningDTO(foedsel.foedselsaar, foedsel.metadata.opplysningsId),
+                foedselsdato = foedselsdato.foedselsdato?.let { OpplysningDTO(it, foedselsdato.metadata.opplysningsId) },
+                foedselsaar = OpplysningDTO(foedselsdato.foedselsaar, foedselsdato.metadata.opplysningsId),
                 doedsdato = doedsfall?.doedsdato?.let { OpplysningDTO(it, doedsfall.metadata.opplysningsId) },
-                foedeland = foedsel.foedeland?.let { OpplysningDTO(it, foedsel.metadata.opplysningsId) },
+                foedeland = foedested?.foedeland?.let { OpplysningDTO(it, foedested.metadata.opplysningsId) },
                 adressebeskyttelse =
                     adressebeskyttelse?.let {
                         OpplysningDTO(

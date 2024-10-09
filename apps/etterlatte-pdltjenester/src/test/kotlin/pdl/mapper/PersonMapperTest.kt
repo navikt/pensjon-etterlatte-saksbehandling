@@ -10,7 +10,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.pdl.ParallelleSannheterException
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.pdl.PdlFoedsel
+import no.nav.etterlatte.pdl.PdlFoedested
+import no.nav.etterlatte.pdl.PdlFoedselsdato
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlMetadata
@@ -45,11 +46,10 @@ class PersonMapperTest {
 
         val ppsKlient =
             mockk<ParallelleSannheterKlient> {
-                coEvery { avklarNavn(pdlHentPerson.navn) } returns pdlHentPerson.navn.first()
+                setupMockToPickFirst(pdlHentPerson)
                 coEvery { avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
-                coEvery { avklarStatsborgerskap(statsborgerskapPdl) } throws Exception("Whoops")
-                coEvery { avklarFoedsel(pdlHentPerson.foedsel) } returns pdlHentPerson.foedsel.first()
                 coEvery { avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
+                coEvery { avklarStatsborgerskap(statsborgerskapPdl) } throws Exception("Whoops")
             }
         val pdlKlient = mockk<PdlKlient>()
 
@@ -109,9 +109,8 @@ class PersonMapperTest {
         val pdlKlient = mockk<PdlKlient>()
         val ppsKlient =
             mockk<ParallelleSannheterKlient> {
-                coEvery { avklarNavn(pdlHentPerson.navn) } returns pdlHentPerson.navn.first()
+                setupMockToPickFirst(pdlHentPerson)
                 coEvery { avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
-                coEvery { avklarFoedsel(pdlHentPerson.foedsel) } returns pdlHentPerson.foedsel.first()
                 coEvery { avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
                 coEvery {
                     avklarSivilstand(
@@ -154,10 +153,9 @@ class PersonMapperTest {
 
         val ppsKlient =
             mockk<ParallelleSannheterKlient> {
-                coEvery { avklarNavn(pdlHentPerson.navn) } returns pdlHentPerson.navn.first()
+                setupMockToPickFirst(pdlHentPerson)
                 coEvery { avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
                 coEvery { avklarStatsborgerskap(statsborgerskapPdl) } returns statsborgerskapPdl.first()
-                coEvery { avklarFoedsel(pdlHentPerson.foedsel) } returns pdlHentPerson.foedsel.first()
                 coEvery { avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
             }
         val pdlKlient = mockk<PdlKlient>()
@@ -182,9 +180,8 @@ class PersonMapperTest {
 
         val ppsKlient =
             mockk<ParallelleSannheterKlient> {
-                coEvery { avklarNavn(pdlHentPerson.navn) } returns pdlHentPerson.navn.first()
+                setupMockToPickFirst(pdlHentPerson)
                 coEvery { avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
-                coEvery { avklarFoedsel(pdlHentPerson.foedsel) } returns pdlHentPerson.foedsel.first()
                 coEvery { avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
             }
         val pdlKlient = mockk<PdlKlient>()
@@ -207,20 +204,23 @@ fun pdlmetadata(): PdlMetadata = PdlMetadata(endringer = listOf(), historisk = f
 
 fun pdlHentPerson(
     navn: List<PdlNavn> = listOf(PdlNavn("fornavn", null, "etternavn", metadata = pdlmetadata())),
-    foedsel: List<PdlFoedsel> =
+    foedsel: List<PdlFoedselsdato> =
         listOf(
-            PdlFoedsel(
+            PdlFoedselsdato(
+                foedselsdato = LocalDate.of(1990, 1, 1),
                 foedselsaar = 1990,
                 metadata = pdlmetadata(),
             ),
         ),
+    foedested: List<PdlFoedested> = emptyList(),
     statsborgerskap: List<PdlStatsborgerskap>? = null,
     sivilstand: List<PdlSivilstand>? = null,
 ): PdlHentPerson =
     PdlHentPerson(
         adressebeskyttelse = listOf(),
         navn = navn,
-        foedsel = foedsel,
+        foedselsdato = foedsel,
+        foedested = foedested,
         sivilstand = sivilstand,
         doedsfall = listOf(),
         bostedsadresse = null,
@@ -234,3 +234,9 @@ fun pdlHentPerson(
         forelderBarnRelasjon = null,
         vergemaalEllerFremtidsfullmakt = null,
     )
+
+private fun ParallelleSannheterKlient.setupMockToPickFirst(pdlHentPerson: PdlHentPerson) {
+    coEvery { avklarNavn(pdlHentPerson.navn) } returns pdlHentPerson.navn.first()
+    coEvery { avklarFoedselsdato(pdlHentPerson.foedselsdato) } returns pdlHentPerson.foedselsdato.first()
+    coEvery { avklarFoedested(pdlHentPerson.foedested) } returns pdlHentPerson.foedested.firstOrNull()
+}

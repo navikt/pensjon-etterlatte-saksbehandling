@@ -27,12 +27,31 @@
               }
             }
           ],
-          "foedsel": [
+          "foedselsdato": [
             {
               "foedselsdato": "1987-07-30",
-              "foedeland": "FJI",
-              "foedested": "Fødested i/på FIJI",
               "foedselsaar": 1987,
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "6a9e00f2-f7f4-4b14-a3c8-3df3a1f1949b",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-06-24T09:33:27",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "foedested": [
+            {
+              "foedested": "Fødested i/på FIJI",
+              "foedeland": "FJI",
+              "foedekommune": "Coconut Tree",
               "metadata": {
                 "master": "FREG",
                 "historisk": false,
@@ -225,12 +244,30 @@
               }
             }
           ],
-          "foedsel": [
+          "foedselsdato": [
             {
               "foedselsdato": "1970-06-06",
+              "foedselsaar": 1970,
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "138a38a9-4b99-44a5-93c9-6fde683a8fd6",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:10:58",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "foedested": [
+            {
               "foedeland": "ESP",
               "foedested": "Fødested i/på SPANIA",
-              "foedselsaar": 1970,
               "metadata": {
                 "master": "FREG",
                 "historisk": false,

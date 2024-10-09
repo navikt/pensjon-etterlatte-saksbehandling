@@ -157,7 +157,7 @@ data class PdlHentPersonAdressebeskyttelse(
 data class PdlHentPersonNavnFoedselsdato(
     val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
     val navn: List<PdlNavn>,
-    val foedsel: List<PdlFoedsel>,
+    val foedselsdato: List<PdlFoedselsdato>,
     val doedsfall: List<PdlDoedsfall>,
     val vergemaalEllerFremtidsfullmakt: List<PdlVergemaalEllerFremtidsfullmakt>?,
 )

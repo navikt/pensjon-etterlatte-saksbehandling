@@ -192,7 +192,7 @@ object PersonMapper {
                         .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
                         .identifikasjonsnummer
                 }
-            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
+            val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val vergemaalEllerFremtidsfullmakt =
                 hentPerson.vergemaalEllerFremtidsfullmakt?.let { ppsKlient.avklarVergemaal(it) }
@@ -202,8 +202,8 @@ object PersonMapper {
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = Folkeregisteridentifikator.of(fnr),
-                foedselsdato = foedsel.foedselsdato,
-                foedselsaar = foedsel.foedselsaar,
+                foedselsdato = foedselsdato.foedselsdato,
+                foedselsaar = foedselsdato.foedselsaar,
                 doedsdato = doedsfall?.doedsdato,
                 vergemaal = vergemaalEllerFremtidsfullmakt?.let(VergeMapper::mapVerge),
             )

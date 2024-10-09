@@ -219,15 +219,6 @@ data class PdlStatsborgerskap(
     val metadata: PdlMetadata,
 )
 
-data class PdlFoedsel(
-    val foedselsdato: LocalDate? = null,
-    val foedeland: String? = null,
-    val foedested: String? = null,
-    val foedselsaar: Int,
-    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
-    val metadata: PdlMetadata,
-)
-
 data class PdlFoedselsdato(
     val foedselsdato: LocalDate?,
     val foedselsaar: Int,

@@ -91,12 +91,11 @@ class VirkFoerIverksattVirk(
         detail = "Virkningstidspunktet du har satt ($virk) er før det første iverksatte virkningstidspunktet ($foersteVirk)",
     )
 
-class VirkFoerOmsKildePesys(
-    virk: YearMonth,
-    foersteVirk: YearMonth,
-) : UgyldigForespoerselException(
-        code = "VIRK_FOER_FOERSTE_IVERKSATT_VIRK", // TODO
-        detail = "Virkningstidspunktet du har satt ($virk) er før det første iverksatte virkningstidspunktet ($foersteVirk)",
+class VirkFoerOmsKildePesys :
+    UgyldigForespoerselException(
+        code = "VIRK_FOER_REFORM_MED_OPPRINNELSE_PESYS",
+        detail =
+            "Denne saken er overført fra Pesys. Ved revurdering før 01.01.2024 må det gjøres revurdering i Pesys for perioden før og i Gjenny for perioden etter.",
     )
 
 class BehandlingNotFoundException(
@@ -289,7 +288,7 @@ internal class BehandlingServiceImpl(
     override fun hentBehandlingerForSak(sakId: SakId): List<Behandling> = hentBehandlingerForSakId(sakId)
 
     override fun hentFoerstegangsbehandling(sakId: SakId): Foerstegangsbehandling =
-        behandlingDao.hentFoerstegangsbehandling(sakId)
+        behandlingDao.hentInnvilgaFoerstegangsbehandling(sakId)
             ?: throw TilstandException.UgyldigTilstand("Førstegangsbehandling for $sakId finnes ikke.")
 
     /**
@@ -534,7 +533,7 @@ internal class BehandlingServiceImpl(
 
         return if (virkningstidspunkt.isBefore(foersteVirkDato)) {
             if (foerstegangsbehandling.kilde == Vedtaksloesning.PESYS) {
-                throw VirkFoerOmsKildePesys(virkningstidspunkt, foersteVirkDato)
+                throw VirkFoerOmsKildePesys()
             }
             // Vi tillater virkningstidspunkt før første virk dersom saksbehandler vil overstyre
             if (overstyr) {

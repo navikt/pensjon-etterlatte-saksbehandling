@@ -122,7 +122,7 @@ class BehandlingDao(
             }
         }
 
-    fun hentFoerstegangsbehandling(sakid: SakId): Foerstegangsbehandling? =
+    fun hentInnvilgaFoerstegangsbehandling(sakid: SakId): Foerstegangsbehandling? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -132,6 +132,7 @@ class BehandlingDao(
                         FROM behandling b
                         INNER JOIN sak s ON b.sak_id = s.id
                         WHERE sak_id = ? AND behandlingstype = 'FØRSTEGANGSBEHANDLING'
+                        AND status = 'IVERKSATT'
                         """.trimIndent(),
                     )
 

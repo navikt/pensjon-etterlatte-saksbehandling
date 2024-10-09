@@ -730,6 +730,17 @@ internal class BehandlingServiceImplTest {
         }
     }
 
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `saker ikke innvilget i Pesys skal ikke feile hvis virkningstidspunkt før januar`(sakType: SakType) {
+        sjekkOmVirkningstidspunktErGyldig(
+            sakType = sakType,
+            behandlingType = BehandlingType.REVURDERING,
+            virkningstidspunkt = Tidspunkt.parse("2023-12-01T00:00:00Z"),
+            foersteVirk = YearMonth.of(2023, 12),
+        )
+    }
+
     private fun sjekkOmVirkningstidspunktErGyldig(
         sakType: SakType,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -1115,7 +1126,7 @@ internal class BehandlingServiceImplTest {
 
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns tidligereBehandlinger // TODO fjern?
-        every { behandlingDaoMock.hentFoerstegangsbehandling(behandling.sak.id) } returns foerstegangsbehandling
+        every { behandlingDaoMock.hentInnvilgaFoerstegangsbehandling(behandling.sak.id) } returns foerstegangsbehandling
     }
 
     private fun mockPersongalleri() =

@@ -46,7 +46,11 @@ class PersonWebService(
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString()
 
-                if (it.errors?.personIkkeFunnet() == true) {
+                if (it.errors?.manglerRolleFortroligAdresse() == true) {
+                    throw PdlForesporselFeilet(
+                        "Denne personen har adressebeskyttelse. Behandlingen skal derfor sendes til enhet Vikafossen som vil behandle saken videre.",
+                    )
+                } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke person i PDL")
                 } else {
                     throw PdlForesporselFeilet(
@@ -222,4 +226,13 @@ class PersonWebService(
     }
 
     private fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
+
+    private fun List<PdlResponseError>.manglerRolleFortroligAdresse() =
+        any { error ->
+            error.extensions?.code == "unauthorized" &&
+                error.extensions
+                    ?.details
+                    ?.policy
+                    ?.contains("adressebeskyttelse_fortrolig_adresse") == true
+        }
 }

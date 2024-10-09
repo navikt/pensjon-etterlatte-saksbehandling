@@ -16,7 +16,7 @@ import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FloppydiskIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 interface TrygdetidAvtaleOptionProps {
   defaultBeskrivelse: string
@@ -51,10 +51,21 @@ export function TrygdeAvtaleRedigering(props: {
     register,
     watch,
     handleSubmit,
-    formState: { errors },
+    setValue,
+    formState: { errors, isDirty },
   } = useForm<Partial<Trygdeavtale>>({
     defaultValues: trygdeavtale,
   })
+
+  const valgtAvtaleKode = watch('avtaleKode')
+  const valgtAvtale = avtaler.find((avtale) => avtale.kode === valgtAvtaleKode)
+
+  useEffect(() => {
+    // passer på å resette avtaleDatoKode hvis valgt avtale endrer seg
+    if (isDirty) {
+      setValue('avtaleDatoKode', undefined)
+    }
+  }, [valgtAvtaleKode])
 
   if (!behandling?.id) {
     return null
@@ -83,10 +94,6 @@ export function TrygdeAvtaleRedigering(props: {
       }
     )
   }
-
-  const valgtAvtaleKode = watch('avtaleKode')
-  const valgtAvtale = avtaler.find((avtale) => avtale.kode === valgtAvtaleKode)
-
   return (
     <form onSubmit={handleSubmit(lagreOgOppdater)}>
       <VStack gap="6">

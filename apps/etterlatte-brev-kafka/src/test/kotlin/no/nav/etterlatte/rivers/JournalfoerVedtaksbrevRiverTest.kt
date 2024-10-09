@@ -1,20 +1,14 @@
 package no.nav.etterlatte.rivers
 
-import io.mockk.Called
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
-import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -22,8 +16,8 @@ import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
 import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -51,23 +45,23 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class JournalfoerVedtaksbrevRiverTest {
-    private val vedtaksbrevService = mockk<VedtaksbrevService>()
-    private val journalfoerBrevService = mockk<JournalfoerBrevService>()
+    private val brevApiKlient = mockk<BrevapiKlient>()
 
-    private val testRapid = TestRapid().apply { JournalfoerVedtaksbrevRiver(this, journalfoerBrevService) }
+    private val testRapid = TestRapid().apply { JournalfoerVedtaksbrevRiver(this, brevApiKlient) }
 
     @BeforeEach
-    fun before() = clearMocks(vedtaksbrevService)
+    fun before() = clearMocks(brevApiKlient)
 
     @AfterEach
-    fun after() = confirmVerified(vedtaksbrevService)
+    fun after() = confirmVerified(brevApiKlient)
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
-        val brev =
+        val brevId: Long = 1
+        val brev1 =
             Brev(
-                1,
-                randomSakId(),
+                brevId,
+                1L,
                 BEHANDLING_ID,
                 "tittel",
                 Spraak.NB,
@@ -80,26 +74,21 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 brevtype = Brevtype.VEDTAK,
                 brevkoder = Brevkoder.BP_INNVILGELSE,
             )
+        val brev =
+            brev1
         val response = OpprettJournalpostResponse("1234", true, emptyList())
 
-        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-        coEvery { journalfoerBrevService.journalfoerVedtaksbrev(any(), any()) } returns JournalfoerVedtaksbrevResponseOgBrevid(1, response)
+        coEvery { brevApiKlient.journalfoerVedtaksbrev(any()) } returns
+            JournalfoerVedtaksbrevResponseOgBrevid(
+                brevId,
+                response,
+            )
 
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
 
         val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
-
-        val vedtakCapture = slot<VedtakTilJournalfoering>()
-        coVerify(exactly = 1) {
-            journalfoerBrevService.journalfoerVedtaksbrev(capture(vedtakCapture), any())
-        }
-
-        val vedtakActual = vedtakCapture.captured
-
-        assertEquals(vedtak.id, vedtakActual.vedtakId)
-        assertEquals(vedtak.behandlingId, vedtakActual.behandlingId)
-        assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.ansvarligEnhet)
+        coVerify { brevApiKlient.journalfoerVedtaksbrev(any()) }
 
         val actualMessage = inspektoer.message(0)
         assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), actualMessage.get(EVENT_NAME_KEY).asText())
@@ -122,8 +111,6 @@ internal class JournalfoerVedtaksbrevRiverTest {
             )
 
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
-
-        verify { vedtaksbrevService wasNot Called }
     }
 
     private fun opprettMelding(vedtak: VedtakDto): JsonMessage =

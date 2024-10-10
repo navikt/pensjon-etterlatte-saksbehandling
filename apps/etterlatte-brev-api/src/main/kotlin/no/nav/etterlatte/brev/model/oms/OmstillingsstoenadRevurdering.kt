@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -37,6 +38,7 @@ data class OmstillingsstoenadRevurdering(
     val harUtbetaling: Boolean,
     val omsRettUtenTidsbegrensning: Boolean,
     val feilutbetaling: FeilutbetalingType,
+    val bosattUtland: Boolean,
 ) : BrevDataFerdigstilling {
     init {
         if (erOmgjoering && datoVedtakOmgjoering == null) {
@@ -59,6 +61,7 @@ data class OmstillingsstoenadRevurdering(
             navnAvdoed: String,
             vilkaarsVurdering: VilkaarsvurderingDto,
             datoVedtakOmgjoering: LocalDate?,
+            utlandstilknytning: UtlandstilknytningType?,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -133,6 +136,7 @@ data class OmstillingsstoenadRevurdering(
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 feilutbetaling = feilutbetaling,
+                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
             )
         }
 

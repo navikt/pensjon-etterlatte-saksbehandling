@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeFagomraade
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
@@ -19,6 +18,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakFattet
+import no.nav.etterlatte.utbetaling.klienter.VedtaksvurderingKlient
 import no.nav.system.os.entiteter.oppdragskjema.Attestant
 import no.nav.system.os.entiteter.oppdragskjema.Enhet
 import no.nav.system.os.entiteter.typer.simpletypes.FradragTillegg

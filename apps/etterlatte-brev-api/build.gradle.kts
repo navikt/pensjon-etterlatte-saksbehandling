@@ -17,7 +17,6 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
-    implementation(libs.ktor2.servercio) // Rart at denne må inn siden libbet også definerer denne
     implementation(libs.ktor2.server)
     implementation(libs.ktor2.clientcore)
 

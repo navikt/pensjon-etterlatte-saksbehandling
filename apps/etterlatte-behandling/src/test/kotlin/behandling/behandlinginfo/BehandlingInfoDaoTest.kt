@@ -71,9 +71,9 @@ internal class BehandlingInfoDaoTest(
     @Test
     fun `skal lagre erOmgjoeringSluttbehandlingUtland`() {
         val sluttbehandlingUtland = true
-        dao.hentErOmgjoeringSluttbehandlingUtland(behandlingId) shouldBe !sluttbehandlingUtland
+        behandlingDao.hentBehandling(behandlingId)?.erSluttbehandling() shouldBe !sluttbehandlingUtland
         dao.lagreErOmgjoeringSluttbehandlingUtland(behandlingId, sluttbehandlingUtland)
-        dao.hentErOmgjoeringSluttbehandlingUtland(behandlingId) shouldBe sluttbehandlingUtland
+        behandlingDao.hentBehandling(behandlingId)?.erSluttbehandling() shouldBe sluttbehandlingUtland
     }
 
     @Test

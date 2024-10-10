@@ -40,6 +40,8 @@ sealed class Revurdering(
 
     override fun begrunnelse() = begrunnelse
 
+    override fun erSluttbehandling(): Boolean = this.revurderingsaarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND
+
     companion object {
         fun opprett(
             id: UUID,

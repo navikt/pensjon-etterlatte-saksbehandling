@@ -34,27 +34,6 @@ class BehandlingInfoDao(
         }
     }
 
-    fun hentErOmgjoeringSluttbehandlingUtland(behandlingId: UUID): Boolean =
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                prepareStatement(
-                    """
-                SELECT omgjoering_sluttbehandling_utland 
-                FROM behandling_info 
-                WHERE behandling_id = ?
-                """,
-                ).apply { setObject(1, behandlingId) }
-                    .executeQuery()
-                    .run {
-                        if (next()) {
-                            getBoolean("omgjoering_sluttbehandling_utland")
-                        } else {
-                            false // TODO: returnere false eller kaste exception?
-                        }
-                    }
-            }
-        }
-
     fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {

@@ -355,7 +355,12 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
-            lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(behandlingId, trygdetidId, trygdetidGrunnlag, brukerTokenInfo)
+            lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+                behandlingId,
+                trygdetidId,
+                trygdetidGrunnlag,
+                brukerTokenInfo,
+            )
         }
 
     private suspend fun lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
@@ -521,6 +526,18 @@ class TrygdetidServiceImpl(
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        // Merk: vi kan ikke bruke den vanlige sjekken på kanOppdatereTrygdetid, siden dette kallet skjer typisk
+        // når behandlingen akkurat er opprettet. Men det er viktig at vi ikke tillater endringer hvis behandlingen
+        // ikke kan endres.
+        if (behandling.status !in BehandlingStatus.kanEndres()) {
+            throw IkkeTillattException(
+                "BEHANLDING_KAN_IKKE_ENDRES",
+                "Kan ikke opprette overstyrt trygdetid i en behandling som ikke kan endres",
+            )
+        }
+
         val trygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
 
         if (trygdetider.isNotEmpty()) {
@@ -531,15 +548,38 @@ class TrygdetidServiceImpl(
                 throw TrygdetidAlleredeOpprettetException()
             }
         }
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
 
-        val avdoed =
+        val avdoede =
             grunnlagKlient
                 .hentGrunnlag(behandling.id, brukerTokenInfo)
                 .hentAvdoede()
-                .minByOrNull { it.hentDoedsdato()?.verdi ?: LocalDate.MAX }
-        // TODO: Det er mest sannsynlig den med tidligst dødsdato som er aktuell, men dette er midlertidig løsning
+        val avdoed =
+            if (avdoede.isNotEmpty()) {
+                val avdoedViKoblerTrygdetidPaa =
+                    if (avdoede.size == 1) {
+                        avdoede.first()
+                    } else {
+                        // TODO: Det er mest sannsynlig den med tidligst dødsdato som er aktuell,
+                        //   men det er muligens behov for å overstyre trygdetiden til en eller flere avdøde,
+                        //   og dette burde bli angitt i requesten.
+                        //   slik det er nå får man ikke muliggheten til å godt overstyre trygdetiden hvis det er
+                        //   flere avdøde i saken og man trenger flere ulike perioder for de to avdøde.
+                        avdoede.minBy { it.hentDoedsdato()?.verdi ?: LocalDate.MAX }
+                    }
+                if (avdoedViKoblerTrygdetidPaa.hentDoedsdato()?.verdi == null) {
+                    throw UgyldigForespoerselException(
+                        "KJENT_AVDOED_MANGLER_DOEDSDATO",
+                        "Persongalleriet inneholder en kjent avdød som ikke har en dødsdato registrert. For å " +
+                            "overstyre trygdetid i saken må avdød angitt i persongalleriet få registrert en dødsdato " +
+                            "eller persongalleriet må rettes på.",
+                    )
+                } else {
+                    avdoedViKoblerTrygdetidPaa
+                }
+            } else {
+                null // ukjent avdød
+            }
         val trygdetid =
             Trygdetid(
                 sakId = behandling.sak,

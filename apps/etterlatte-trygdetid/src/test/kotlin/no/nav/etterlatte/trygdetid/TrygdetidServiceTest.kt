@@ -18,9 +18,12 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -29,8 +32,10 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -39,6 +44,7 @@ import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.eldreAvdoedTestopplysningerMap
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
@@ -1343,6 +1349,130 @@ internal class TrygdetidServiceTest {
             behandlingKlient.kanOppdatereTrygdetid(any(), any())
             behandlingKlient.hentBehandling(any(), any())
             repository.hentTrygdetiderForBehandling(behandlingId)
+        }
+    }
+
+    @Test
+    fun `opprettOverstyrtBeregnetTrygdetid kaster feil hvis behandling ikke kan endres`() {
+        val behandlingId = randomUUID()
+        val behandling =
+            mockk<DetaljertBehandling> {
+                every { status } returns BehandlingStatus.IVERKSATT
+            }
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
+
+        assertThrows<IkkeTillattException> {
+            runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, true, saksbehandler) }
+        }
+        assertThrows<IkkeTillattException> {
+            runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, false, saksbehandler) }
+        }
+        coVerify(exactly = 2) {
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+        }
+        verify { behandling.status }
+    }
+
+    @Test
+    fun `opprettOverstyrtBeregnetTrygdetid kaster feil hvis ingen avdøde i persongalleri har dødsdato`() {
+        val sakId: SakId = randomSakId()
+        val behandlingId = randomUUID()
+        val grunnlag =
+            GrunnlagTestData(
+                opplysningsmapAvdoedOverrides =
+                    mapOf(
+                        Opplysningstype.DOEDSDATO to
+                            Opplysning.Konstant(
+                                randomUUID(),
+                                Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+                                objectMapper.valueToTree(null),
+                            ),
+                    ),
+                opplysningsmapSakOverrides =
+                    mapOf(
+                        Opplysningstype.PERSONGALLERI_V1 to
+                            Opplysning.Konstant(
+                                randomUUID(),
+                                Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+                                Persongalleri(
+                                    soeker = SOEKER_FOEDSELSNUMMER.value,
+                                    avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
+                                ).toJsonNode(),
+                            ),
+                    ),
+            ).hentOpplysningsgrunnlag()
+
+        val behandling: DetaljertBehandling =
+            mockk {
+                every { id } returns behandlingId
+                every { sak } returns sakId
+                every { status } returns BehandlingStatus.OPPRETTET
+            }
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
+        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlag
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
+
+        assertThrows<UgyldigForespoerselException> {
+            runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, overskriv = false, saksbehandler) }
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.hentBehandling(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+        }
+        verify {
+            behandling.status
+            behandling.id
+        }
+    }
+
+    @Test
+    fun `opprettOverstyrtBeregnetTrygdetid tillater å opprette overstyrt trygdetid uten avdøde`() {
+        val sakId: SakId = randomSakId()
+        val behandlingId = randomUUID()
+        val grunnlag =
+            GrunnlagTestData(
+                opplysningsmapAvdoedOverrides = emptyMap(),
+                opplysningsmapSakOverrides =
+                    mapOf(
+                        Opplysningstype.PERSONGALLERI_V1 to
+                            Opplysning.Konstant(
+                                randomUUID(),
+                                Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+                                Persongalleri(
+                                    soeker = SOEKER_FOEDSELSNUMMER.value,
+                                    avdoed = emptyList(),
+                                ).toJsonNode(),
+                            ),
+                    ),
+            ).hentOpplysningsgrunnlag()
+
+        val opprettetTrygdetidSlot = slot<Trygdetid>()
+        val behandling: DetaljertBehandling =
+            mockk {
+                every { id } returns behandlingId
+                every { sak } returns sakId
+                every { status } returns BehandlingStatus.OPPRETTET
+            }
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
+        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlag
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
+        every { repository.opprettTrygdetid(capture(opprettetTrygdetidSlot)) } returnsArgument 0
+        every { repository.oppdaterTrygdetid(any(), any()) } returnsArgument 0
+        runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, overskriv = false, saksbehandler) }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.hentBehandling(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+            repository.opprettTrygdetid(any())
+            repository.oppdaterTrygdetid(any(), any())
+        }
+        verify {
+            behandling.status
+            behandling.id
+            behandling.sak
         }
     }
 

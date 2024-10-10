@@ -5,14 +5,12 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
-import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.SamordningsnotatRiver
-import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
@@ -55,16 +53,14 @@ class ApplicationBuilder {
                     }
                 },
             )
-            if (isDev()) {
-                OpprettJournalfoerOgDistribuerRiver(
-                    brevapiKlient,
-                    grunnlagKlient,
-                    rapidsConnection,
-                )
-                JournalfoerVedtaksbrevRiver(rapidsConnection, brevapiKlient)
-                VedtaksbrevUnderkjentRiver(rapidsConnection, brevapiKlient)
-                DistribuerBrevRiver(rapidsConnection, brevapiKlient)
-                SamordningsnotatRiver(rapidsConnection, brevapiKlient)
-            }
+
+            OpprettJournalfoerOgDistribuerRiver(
+                brevapiKlient,
+                grunnlagKlient,
+                rapidsConnection,
+            )
+            JournalfoerVedtaksbrevRiver(rapidsConnection, brevapiKlient)
+            DistribuerBrevRiver(rapidsConnection, brevapiKlient)
+            SamordningsnotatRiver(rapidsConnection, brevapiKlient)
         }
 }

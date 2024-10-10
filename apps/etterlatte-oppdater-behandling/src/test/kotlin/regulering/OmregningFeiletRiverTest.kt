@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.behandling.tilSakId
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
@@ -24,48 +24,50 @@ internal class OmregningFeiletRiverTest {
     @Test
     fun `Skal varsle behandling om at det er en feilet omregning i en sak`() {
         val kjoering = slot<String>()
-        val sakId = slot<SakId>()
         val status = slot<KjoeringStatus>()
+        val sakIdSlot = slot<SakId>()
+        val sakId = randomSakId()
 
         val melding =
             JsonMessage.newMessage(
                 mapOf(
                     FEILA.lagParMedEventNameKey(),
                     KONTEKST_KEY to Kontekst.OMREGNING,
-                    SAK_ID_KEY to 83L,
+                    SAK_ID_KEY to sakId,
                     HENDELSE_DATA_KEY to
                         OmregningData(
                             kjoering = "OmregningKjoering",
-                            sakId = 83L,
+                            sakId = sakId,
                             revurderingaarsak = Revurderingaarsak.OMREGNING,
                         ).toPacket(),
                 ),
             )
 
         val behandlingService = mockk<BehandlingService>(relaxed = true)
-        every { behandlingService.lagreKjoering(capture(sakId), capture(status), capture(kjoering)) } returns Unit
+        every { behandlingService.lagreKjoering(capture(sakIdSlot), capture(status), capture(kjoering)) } returns Unit
         val inspector = TestRapid().apply { OmregningFeiletRiver(this, behandlingService) }
 
         inspector.sendTestMessage(melding.toJson())
         val sendteMeldinger = inspector.inspektør.size
         Assertions.assertEquals(0, sendteMeldinger)
         Assertions.assertEquals("OmregningKjoering", kjoering.captured)
-        Assertions.assertEquals(tilSakId(83), sakId.captured)
+        Assertions.assertEquals(sakId, sakIdSlot.captured)
         Assertions.assertEquals(KjoeringStatus.FEILA, status.captured)
     }
 
     @Test
     fun `Skal varsle behandling om at det er en feilet regulering i en sak`() {
+        val sakId = randomSakId()
         val melding =
             JsonMessage.newMessage(
                 mapOf(
                     FEILA.lagParMedEventNameKey(),
                     KONTEKST_KEY to Kontekst.REGULERING,
-                    SAK_ID_KEY to 83L,
+                    SAK_ID_KEY to sakId,
                     HENDELSE_DATA_KEY to
                         OmregningData(
                             kjoering = "Regulering2023",
-                            sakId = 83L,
+                            sakId = sakId,
                             revurderingaarsak = Revurderingaarsak.REGULERING,
                         ).toPacket(),
                 ),

@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.util.UUID
 
@@ -25,7 +26,7 @@ class InstitusjonsoppholdDao(
                         "VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?::UUID)",
                 )
             statement.setString(1, UUID.randomUUID().toString())
-            statement.setLong(2, sakId)
+            statement.setSakId(2, sakId)
             statement.setString(3, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelse.name)
             statement.setString(4, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelseBegrunnelse)
             statement.setString(5, institusjonoppholdBegrunnelse.forventetVarighetMerEnn3Maaneder.name)

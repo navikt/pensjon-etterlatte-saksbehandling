@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.Brevkoder
@@ -61,7 +62,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val brev1 =
             Brev(
                 brevId,
-                1L,
+                randomSakId(),
                 BEHANDLING_ID,
                 "tittel",
                 Spraak.NB,

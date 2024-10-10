@@ -314,7 +314,7 @@ fun oppdragForKonsistensavstemming(
 ) = OppdragForKonsistensavstemming(
     sakId =
         no.nav.etterlatte.utbetaling.iverksetting.utbetaling
-            .SakId(sakId),
+            .SakId(sakId.sakId),
     sakType = sakType,
     fnr = Foedselsnummer(fnr),
     utbetalingslinjer = oppdragslinjeForKonsistensavstemming,

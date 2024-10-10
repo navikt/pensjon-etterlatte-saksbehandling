@@ -58,7 +58,7 @@ class VilkaarsvurderingRepository(
             queryString = Queries.HENT_MIGRERT_YRKESSKADE,
             params =
                 mapOf(
-                    "sak_id" to sakId,
+                    "sak_id" to sakId.sakId,
                 ),
         ) {
             true

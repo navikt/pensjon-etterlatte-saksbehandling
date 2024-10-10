@@ -8,6 +8,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -180,7 +181,7 @@ class TrygdetidRepository(
             mapOf(
                 "id" to trygdetid.id,
                 "behandlingId" to trygdetid.behandlingId,
-                "sakId" to trygdetid.sakId,
+                "sakId" to trygdetid.sakId.sakId,
                 "ident" to trygdetid.ident,
                 "yrkesskade" to trygdetid.yrkesskade,
             ),
@@ -595,7 +596,7 @@ class TrygdetidRepository(
         opplysninger: List<Opplysningsgrunnlag>,
     ) = Trygdetid(
         id = uuid("id"),
-        sakId = long("sak_id"),
+        sakId = SakId(long("sak_id")),
         behandlingId = uuid("behandling_id"),
         beregnetTrygdetid =
             stringOrNull("trygdetid_tidspunkt")?.let {

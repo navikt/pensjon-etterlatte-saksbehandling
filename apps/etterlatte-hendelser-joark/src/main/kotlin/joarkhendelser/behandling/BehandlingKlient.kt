@@ -44,13 +44,14 @@ class BehandlingKlient(
     suspend fun hentEllerOpprettSak(
         fnr: String,
         sakType: SakType,
-    ): Long =
+    ): SakId =
         httpClient
             .post("$url/personer/saker/$sakType") {
                 contentType(ContentType.Application.Json)
                 setBody(FoedselsnummerDTO(fnr))
             }.body<ObjectNode>()["id"]
             .longValue()
+            .let { SakId(it) }
 
     suspend fun opprettOppgave(
         sakId: SakId,
@@ -58,7 +59,7 @@ class BehandlingKlient(
         referanse: String,
     ): UUID =
         httpClient
-            .post("$url/oppgaver/sak/$sakId/opprett") {
+            .post("$url/oppgaver/sak/${sakId.sakId}/opprett") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     NyOppgaveDto(

@@ -98,7 +98,7 @@ internal class PesysRepository(
             opprett(
                 "INSERT INTO pesyskopling(behandling_id,pesys_id,sak_id) VALUES(:behandling_id,:pesys_id,:sak_id)" +
                     " ON CONFLICT(pesys_id) DO UPDATE SET behandling_id = :behandling_id, sak_id = :sak_id",
-                mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id, "sak_id" to sakId),
+                mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id, "sak_id" to sakId.sakId),
                 "Lagra koplinga mellom sak $sakId, behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
             )
         }
@@ -115,7 +115,7 @@ internal class PesysRepository(
             Pesyskopling(
                 PesysId(it.long("pesys_id")),
                 it.uuid("behandling_id"),
-                it.long("sak_id"),
+                SakId(it.long("sak_id")),
             )
         }
     }
@@ -167,7 +167,7 @@ internal class PesysRepository(
             Pesyskopling(
                 pesysId,
                 it.uuid(Pesyskoplingtabell.BEHANDLING_ID),
-                it.long(Pesyskoplingtabell.SAK_ID),
+                SakId(it.long(Pesyskoplingtabell.SAK_ID)),
             )
         }
     }

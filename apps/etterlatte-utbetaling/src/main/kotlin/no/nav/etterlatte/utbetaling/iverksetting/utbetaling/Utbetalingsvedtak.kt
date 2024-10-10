@@ -28,7 +28,7 @@ data class Utbetalingsvedtak(
             val innhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
             return Utbetalingsvedtak(
                 vedtakId = vedtak.id,
-                sak = Sak(vedtak.sak.ident, vedtak.sak.id, Saktype.valueOf(vedtak.sak.sakType.toString())),
+                sak = Sak(vedtak.sak.ident, vedtak.sak.id.sakId, Saktype.valueOf(vedtak.sak.sakType.toString())),
                 behandling =
                     Behandling(
                         type = innhold.behandling.type,

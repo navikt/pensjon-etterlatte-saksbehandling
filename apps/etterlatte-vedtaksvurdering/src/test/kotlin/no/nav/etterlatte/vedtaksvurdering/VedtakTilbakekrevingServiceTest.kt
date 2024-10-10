@@ -7,12 +7,12 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
@@ -38,7 +38,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingVedtakDto(
                 UUID.randomUUID(),
-                tilSakId(123L),
+                SakId(123L),
                 SakType.OMSTILLINGSSTOENAD,
                 Folkeregisteridentifikator.of("04417103428"),
                 objectMapper.createObjectNode(),
@@ -69,7 +69,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingVedtakDto(
                 UUID.randomUUID(),
-                tilSakId(123L),
+                SakId(123L),
                 SakType.OMSTILLINGSSTOENAD,
                 Folkeregisteridentifikator.of("04417103428"),
                 objectMapper.createObjectNode(),
@@ -98,7 +98,7 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingVedtakDto(
                 UUID.randomUUID(),
-                tilSakId(123L),
+                SakId(123L),
                 SakType.OMSTILLINGSSTOENAD,
                 Folkeregisteridentifikator.of("04417103428"),
                 objectMapper.createObjectNode(),

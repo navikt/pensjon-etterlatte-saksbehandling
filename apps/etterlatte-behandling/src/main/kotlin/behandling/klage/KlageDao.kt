@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
@@ -54,7 +55,7 @@ class KlageDaoImpl(
                         """.trimIndent(),
                     )
                 statement.setObject(1, klage.id)
-                statement.setLong(2, klage.sak.id)
+                statement.setSakId(2, klage.sak.id)
                 statement.setTidspunkt(3, klage.opprettet)
                 statement.setString(4, klage.status.name)
                 statement.setString(5, klage.kabalStatus?.name)
@@ -100,7 +101,7 @@ class KlageDaoImpl(
                         WHERE s.id = ?
                         """.trimIndent(),
                     )
-                statement.setLong(1, sakId)
+                statement.setSakId(1, sakId)
                 statement.executeQuery().toList {
                     somKlage()
                 }
@@ -136,7 +137,7 @@ class KlageDaoImpl(
                 Sak(
                     ident = getString("fnr"),
                     sakType = enumValueOf(getString("saktype")),
-                    id = getLong("sak_id"),
+                    id = SakId(getLong("sak_id")),
                     enhet = Enhetsnummer(getString("enhet")),
                 ),
             opprettet = getTidspunkt("opprettet"),

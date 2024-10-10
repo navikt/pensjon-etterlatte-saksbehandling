@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.behandling.tilSakId
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -25,7 +25,7 @@ internal class AttestertVedtakRiverTest {
     @Test
     fun `skal lese vedtak og oppdatere til samordning`() {
         val behandlingIdVal = UUID.fromString("e89c6e25-4f22-48b3-b975-4c868d830913")
-        val sakIdVal = tilSakId(15L)
+        val sakIdVal = SakId(15L)
         val vedtakIdVal = 31L
         every { vedtakService.tilSamordningVedtak(behandlingIdVal) } returns
             mockk {

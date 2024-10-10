@@ -58,5 +58,6 @@ fun String.tilSeparertListe() =
         .split(";")
         .filter { it.isNotEmpty() }
         .map { it.toLong() }
+        .map { SakId(it) }
 
 fun List<SakId>.tilSeparertString() = this.joinToString(";") { it.toString() }

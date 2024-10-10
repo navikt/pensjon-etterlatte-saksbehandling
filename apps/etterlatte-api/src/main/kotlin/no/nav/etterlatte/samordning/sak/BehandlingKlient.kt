@@ -45,18 +45,18 @@ class BehandlingKlient(
         }
     }
 
-    suspend fun hentSak(id: SakId): Sak? {
-        logger.info("Henter sak med id=$id")
+    suspend fun hentSak(sakId: SakId): Sak? {
+        logger.info("Henter sak med id=$sakId")
 
         return try {
-            httpClient.get("$behandlingUrl/sak/$id").body<Sak>()
+            httpClient.get("$behandlingUrl/sak/${sakId.sakId}").body<Sak>()
         } catch (e: ClientRequestException) {
             if (e.response.status == HttpStatusCode.NotFound) {
-                logger.info("Ingen sak med id=$id funnet")
+                logger.info("Ingen sak med id=$sakId funnet")
                 return null
             }
 
-            logger.error("Henting av sak med id=$id feilet (status: ${e.response.status})")
+            logger.error("Henting av sak med id=$sakId feilet (status: ${e.response.status})")
 
             when (e.response.status) {
                 HttpStatusCode.Unauthorized -> throw BehandlingManglendeTilgang("Behandling: Ikke tilgang")

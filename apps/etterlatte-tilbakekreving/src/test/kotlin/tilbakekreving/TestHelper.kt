@@ -89,7 +89,7 @@ fun kravgrunnlag(
     perioder: List<KravgrunnlagPeriode>? = null,
 ) = Kravgrunnlag(
     kravgrunnlagId = KravgrunnlagId(123L),
-    sakId = SakId(sak.id),
+    sakId = SakId(sak.id.sakId),
     vedtakId = VedtakId(2L),
     kontrollFelt = Kontrollfelt(""),
     status = status,
@@ -140,7 +140,7 @@ fun kravOgVedtakStatus(
     behandlingId: UUID30 = UUID.randomUUID().toUUID30(),
     status: KravgrunnlagStatus = KravgrunnlagStatus.NY,
 ) = KravOgVedtakstatus(
-    sakId = SakId(sak.id),
+    sakId = SakId(sak.id.sakId),
     vedtakId = VedtakId(2L),
     status = status,
     referanse = behandlingId,

@@ -30,6 +30,7 @@ internal class DokumentRouteTest {
     private val tilgangssjekker = mockk<Tilgangssjekker>()
     private val safService = mockk<SafService>()
     private val dokarkivService = mockk<DokarkivService>()
+    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     @BeforeAll
     fun before() {
@@ -94,6 +95,4 @@ internal class DokumentRouteTest {
 
         verify { safService wasNot Called }
     }
-
-    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 }

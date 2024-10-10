@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.database
 
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import org.postgresql.util.PGobject
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -51,3 +52,8 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
     this.setObject(parameterIndex, jsonObject)
     return this
 }
+
+fun PreparedStatement.setSakId(
+    index: Int,
+    sakId: SakId,
+) = this.setLong(index, sakId.sakId)

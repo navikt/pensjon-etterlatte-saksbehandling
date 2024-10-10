@@ -25,7 +25,7 @@ internal class Norg2KlientTest {
     private val errorJson = "{\"field\": null, \"message\": \"Enheten med nummeret '1234' eksisterer ikke\"}"
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
-    private val klient = mockHttpClient()
+    val klient = mockHttpClient()
 
     companion object {
         private val PORSGRUNN = Enheter.PORSGRUNN.enhetNr

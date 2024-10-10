@@ -1,8 +1,8 @@
 package no.nav.etterlatte.rivers
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevHendelseType
+import no.nav.etterlatte.brev.VedtakTilJournalfoering
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.klienter.BrevapiKlient
@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
@@ -58,7 +57,7 @@ internal class JournalfoerVedtaksbrevRiver(
 
             val journalfoervedtaksbrevResponse = runBlocking { brevapiKlient.journalfoerVedtaksbrev(vedtak) }
             if (journalfoervedtaksbrevResponse == null) {
-                logger.warn("Jorunalføring ble ikke journalført, kan være pga status eller migrering, ")
+                logger.warn("Jorunalføring ble ikke journalført, kan være pga status eller migrering.")
             } else {
                 rapidsConnection.svarSuksess(
                     packet,
@@ -89,12 +88,3 @@ internal class JournalfoerVedtaksbrevRiver(
         publish(packet.toJson())
     }
 }
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class VedtakTilJournalfoering(
-    val vedtakId: Long,
-    val sak: VedtakSak,
-    val behandlingId: UUID,
-    val ansvarligEnhet: Enhetsnummer,
-    val saksbehandler: String,
-)

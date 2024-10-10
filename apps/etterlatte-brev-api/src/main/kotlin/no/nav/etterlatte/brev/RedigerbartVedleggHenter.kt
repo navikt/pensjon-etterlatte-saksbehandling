@@ -22,9 +22,9 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 class RedigerbartVedleggHenter(
-    private val brevbakerService: BrevbakerService,
-    private val adresseService: AdresseService,
-    private val behandlingService: BehandlingService,
+    val brevbakerService: BrevbakerService,
+    val adresseService: AdresseService,
+    val behandlingService: BehandlingService,
 ) {
     suspend fun hentInitiellPayloadVedlegg(
         bruker: BrukerTokenInfo,

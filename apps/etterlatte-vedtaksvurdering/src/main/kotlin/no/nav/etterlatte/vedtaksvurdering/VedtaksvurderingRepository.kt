@@ -5,6 +5,7 @@ import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -84,7 +85,7 @@ class VedtaksvurderingRepository(
                         """,
                 mapOf(
                     "behandlingId" to opprettVedtak.behandlingId,
-                    "sakid" to opprettVedtak.sakId,
+                    "sakid" to opprettVedtak.sakId.sakId,
                     "saktype" to opprettVedtak.sakType.name,
                     "fnr" to opprettVedtak.soeker.value,
                     "vedtakstatus" to opprettVedtak.status.name,
@@ -297,7 +298,7 @@ class VedtaksvurderingRepository(
         return tx.session {
             hentListe(
                 queryString = hentVedtak,
-                params = { mapOf("sakId" to sakId) },
+                params = { mapOf("sakId" to sakId.sakId) },
             ) {
                 it.toVedtak(emptyList())
             }
@@ -481,7 +482,7 @@ class VedtaksvurderingRepository(
     private fun Row.toVedtak(utbetalingsperioder: List<Utbetalingsperiode>) =
         Vedtak(
             id = long("id"),
-            sakId = long("sakid"),
+            sakId = SakId(long("sakid")),
             sakType = SakType.valueOf(string("saktype")),
             behandlingId = uuid("behandlingid"),
             soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },

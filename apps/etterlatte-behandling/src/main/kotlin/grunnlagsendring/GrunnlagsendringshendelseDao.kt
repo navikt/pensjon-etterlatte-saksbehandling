@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
@@ -35,7 +36,7 @@ class GrunnlagsendringshendelseDao(
                     )
                 with(hendelse) {
                     stmt.setObject(1, id)
-                    stmt.setLong(2, sakId)
+                    stmt.setSakId(2, sakId)
                     stmt.setString(3, type.name)
                     stmt.setTidspunkt(4, opprettet.toTidspunkt())
                     stmt.setString(5, status.name)
@@ -207,7 +208,7 @@ class GrunnlagsendringshendelseDao(
                     AND status = ANY(?)
                     """.trimIndent(),
                 ).use {
-                    it.setLong(1, sakId)
+                    it.setSakId(1, sakId)
                     val statusArray = this.createArrayOf("text", statuser.toTypedArray())
                     it.setArray(2, statusArray)
                     it.executeQuery().toList { asGrunnlagsendringshendelse() }
@@ -232,7 +233,7 @@ class GrunnlagsendringshendelseDao(
                     AND status = ANY(?)
                     """.trimIndent(),
                 ).use {
-                    it.setLong(1, sakId)
+                    it.setSakId(1, sakId)
                     it.setString(2, type.toString())
                     val statusArray = this.createArrayOf("text", statuser.toTypedArray())
                     it.setArray(3, statusArray)
@@ -250,7 +251,7 @@ class GrunnlagsendringshendelseDao(
     private fun ResultSet.asGrunnlagsendringshendelse(): Grunnlagsendringshendelse =
         Grunnlagsendringshendelse(
             id = getObject("id") as UUID,
-            sakId = getLong("sak_id"),
+            sakId = SakId(getLong("sak_id")),
             type = GrunnlagsendringsType.valueOf(getString("type")),
             opprettet = getTidspunkt("opprettet").toLocalDatetimeUTC(),
             status = GrunnlagsendringStatus.valueOf(getString("status")),

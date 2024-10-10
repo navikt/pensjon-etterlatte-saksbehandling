@@ -1,6 +1,7 @@
 package no.nav.etterlatte.tidshendelser.regulering
 
 import kotliquery.TransactionalSession
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.transaction
@@ -24,8 +25,8 @@ class ReguleringDao(
                     Reguleringskonfigurasjon(
                         antall = row.int(ANTALL),
                         dato = row.localDate(DATO),
-                        spesifikkeSaker = row.arrayOrNull<Long>(SPESIFIKKE_SAKER)?.toList() ?: listOf(),
-                        ekskluderteSaker = row.arrayOrNull<Long>(EKSKLUDERTE_SAKER)?.toList() ?: listOf(),
+                        spesifikkeSaker = row.arrayOrNull<Long>(SPESIFIKKE_SAKER)?.toList()?.map { SakId(it) } ?: listOf(),
+                        ekskluderteSaker = row.arrayOrNull<Long>(EKSKLUDERTE_SAKER)?.toList()?.map { SakId(it) } ?: listOf(),
                     )
                 }
             } ?: throw IllegalStateException("Kan ikke kjøre regulering uten å ha gyldig reguleringskonfigurasjon")

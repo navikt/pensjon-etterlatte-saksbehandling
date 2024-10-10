@@ -8,12 +8,13 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.beInstanceOf
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
-import no.nav.etterlatte.behandling.tilSakId
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -357,31 +358,31 @@ internal class VedtaksvurderingRepositoryTest(
 
         listOf(
             opprettVedtak(
-                sakId = tilSakId(10),
+                sakId = SakId(10),
                 soeker = soeker1,
                 virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
                 status = VedtakStatus.IVERKSATT,
             ),
             opprettVedtak(
-                sakId = tilSakId(20),
+                sakId = SakId(20),
                 soeker = soeker2,
                 virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
                 status = VedtakStatus.IVERKSATT,
             ),
             opprettVedtak(
-                sakId = tilSakId(20),
+                sakId = SakId(20),
                 soeker = soeker2,
                 virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
                 status = VedtakStatus.SAMORDNET,
             ),
             opprettVedtak(
-                sakId = tilSakId(10),
+                sakId = SakId(10),
                 soeker = soeker1,
                 virkningstidspunkt = YearMonth.of(2024, Month.APRIL),
                 status = VedtakStatus.IVERKSATT,
             ),
             opprettVedtak(
-                sakId = tilSakId(20),
+                sakId = SakId(20),
                 soeker = soeker2,
                 virkningstidspunkt = YearMonth.of(2024, Month.JUNE),
                 status = VedtakStatus.TIL_SAMORDNING,

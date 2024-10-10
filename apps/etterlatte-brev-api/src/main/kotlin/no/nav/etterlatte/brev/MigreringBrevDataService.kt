@@ -12,7 +12,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 class MigreringBrevDataService(
-    private val beregningService: BeregningService,
+    val beregningService: BeregningService,
 ) {
     suspend fun opprettMigreringBrevdata(
         brukerTokenInfo: BrukerTokenInfo,

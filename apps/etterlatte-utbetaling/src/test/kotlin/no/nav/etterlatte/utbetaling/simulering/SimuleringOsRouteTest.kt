@@ -10,20 +10,24 @@ import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.utbetaling.BehandlingKlient
-import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingToggles
+import no.nav.etterlatte.utbetaling.klienter.BehandlingKlient
+import no.nav.etterlatte.utbetaling.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.utbetalingRoutes
 import no.nav.etterlatte.utbetaling.vedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -58,6 +62,10 @@ class SimuleringOsRouteTest {
             vedtaksvurderingKlient,
             simuleringDao,
             simuleringOsKlient,
+            featureToggleService =
+                mockk {
+                    every { isEnabled(UtbetalingToggles.BRUK_REGELVERK_FOR_KLASSIFIKASJONSKODE, any()) } returns true
+                },
         )
 
     @BeforeAll
@@ -77,7 +85,7 @@ class SimuleringOsRouteTest {
 
     @Test
     fun `mappe informasjon fra revurderingsvedtak til simuleringsinput`() {
-        val sakId = 1000223L
+        val sakId = SakId(1000223L)
         val behandlingId = UUID.randomUUID()
 
         val utbetalingsperiodeFeb2024 =
@@ -100,7 +108,9 @@ class SimuleringOsRouteTest {
             vedtak(
                 vedtakId = 1,
                 saktype = SakType.BARNEPENSJON,
-                sakId = sakId,
+                sakId =
+                    no.nav.etterlatte.libs.common.sak
+                        .SakId(sakId.value),
                 ident = SOEKER_FOEDSELSNUMMER.value,
                 virkningstidspunkt = of(2024, FEBRUARY),
                 utbetalingsperioder = listOf(utbetalingsperiodeFeb2024, utbetalingsperiodeMai2024),

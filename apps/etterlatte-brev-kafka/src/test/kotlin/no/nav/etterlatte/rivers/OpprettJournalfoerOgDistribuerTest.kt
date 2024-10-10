@@ -7,8 +7,6 @@ import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.brev.JournalfoerBrevService
-import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -18,9 +16,11 @@ import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -36,7 +36,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -45,29 +44,22 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class OpprettJournalfoerOgDistribuer {
+    private val brevApiKlient = mockk<BrevapiKlient>()
+
     @Test
     fun `melding om attestert vedtak gjoer at vi potensielt oppretter vedtaksbrev, og saa journalfoerer og distribuerer brevet `() {
         val behandlingId = UUID.randomUUID()
         val brev = lagBrev(behandlingId)
-        val journalfoerBrevService =
-            mockk<JournalfoerBrevService>().also {
-                coEvery { it.journalfoerVedtaksbrev(any(), any()) } returns
-                    JournalfoerVedtaksbrevResponseOgBrevid(
-                        brev.id,
-                        OpprettJournalpostResponse(
-                            journalpostId = "123",
-                            journalpostferdigstilt = true,
-                        ),
-                    )
-            }
-        val distribusjonService =
-            mockk<Brevdistribuerer>().also {
-                coEvery { it.distribuer(brev.id, any(), any()) } returns ""
-            }
+        coEvery { brevApiKlient.journalfoerVedtaksbrev(any()) } returns
+            JournalfoerVedtaksbrevResponseOgBrevid(
+                brev.id,
+                OpprettJournalpostResponse(journalpostId = "123", journalpostferdigstilt = true),
+            )
+        coEvery { brevApiKlient.distribuer(brev.id, any(), any(), any()) } returns BestillingsIdDto("12344")
         val testRapid =
             TestRapid().apply {
-                JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
-                DistribuerBrevRiver(this, distribusjonService)
+                JournalfoerVedtaksbrevRiver(this, brevApiKlient)
+                DistribuerBrevRiver(this, brevApiKlient)
             }
 
         testRapid.sendTestMessage(
@@ -77,7 +69,7 @@ internal class OpprettJournalfoerOgDistribuer {
                         CORRELATION_ID_KEY to UUID.randomUUID().toString(),
                         VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                         "vedtak" to lagVedtakDto(behandlingId),
-                        KILDE_KEY to Vedtaksloesning.GJENNY.name,
+                        "kilde" to Vedtaksloesning.GJENNY.name,
                     ),
                 ).toJson(),
         )

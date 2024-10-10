@@ -1,4 +1,4 @@
-package no.nav.etterlatte.utbetaling
+package no.nav.etterlatte.utbetaling.klienter
 
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config

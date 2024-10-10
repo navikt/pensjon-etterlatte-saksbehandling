@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType.UTBETALING

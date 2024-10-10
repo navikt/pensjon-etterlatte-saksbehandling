@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -22,6 +23,7 @@ internal class DistribuerBrevRiver(
     init {
         initialiserRiver(rapidsConnection, BrevHendelseType.JOURNALFOERT) {
             validate { it.requireKey(BREV_ID_KEY, "journalpostId", "distribusjonType") }
+            validate { it.requireKey("vedtak.sak.id") }
             validate { it.rejectKey("bestillingsId") }
         }
     }
@@ -30,12 +32,15 @@ internal class DistribuerBrevRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        val sakid = SakId(packet["vedtak.sak.id"].asLong())
+
         val bestillingsId =
             runBlocking {
                 brevapiKlient.distribuer(
                     brevId = packet[BREV_ID_KEY].asLong(),
                     distribusjonsType = packet.distribusjonType(),
                     journalpostIdInn = packet["journalpostId"].asText(),
+                    sakId = sakid,
                 )
             }
         rapidsConnection.svarSuksess(packet, bestillingsId)

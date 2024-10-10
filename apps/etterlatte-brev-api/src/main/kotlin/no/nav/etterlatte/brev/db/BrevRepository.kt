@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.db
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
@@ -93,7 +92,7 @@ class BrevRepository(
 
     fun hentBrevForSak(sakId: SakId): List<Brev> =
         using(sessionOf(ds)) {
-            it.run(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId).map(tilBrev).asList)
+            it.run(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId.sakId).map(tilBrev).asList)
         }
 
     fun oppdaterPayload(
@@ -258,14 +257,6 @@ class BrevRepository(
         }
     }
 
-    fun settBrevOppdatert(
-        id: BrevID,
-        vedtak: JsonNode,
-    ): Boolean =
-        using(sessionOf(ds)) {
-            it.lagreHendelse(id, Status.OPPDATERT, vedtak.toJson()) > 0
-        }
-
     fun settBrevFerdigstilt(id: BrevID) {
         using(sessionOf(ds)) {
             it.lagreHendelse(id, Status.FERDIGSTILT)
@@ -279,7 +270,7 @@ class BrevRepository(
                     queryOf(
                         OPPRETT_BREV_QUERY,
                         mapOf(
-                            "sak_id" to ulagretBrev.sakId,
+                            "sak_id" to ulagretBrev.sakId.sakId,
                             "behandling_id" to ulagretBrev.behandlingId,
                             "prosess_type" to ulagretBrev.prosessType.name,
                             "soeker_fnr" to ulagretBrev.soekerFnr,
@@ -411,7 +402,7 @@ class BrevRepository(
     private val tilBrev: (Row) -> Brev = { row ->
         Brev(
             id = row.long("id"),
-            sakId = row.long("sak_id"),
+            sakId = SakId(row.long("sak_id")),
             behandlingId = row.uuidOrNull("behandling_id"),
             soekerFnr = row.string("soeker_fnr"),
             tittel = row.stringOrNull("tittel"),

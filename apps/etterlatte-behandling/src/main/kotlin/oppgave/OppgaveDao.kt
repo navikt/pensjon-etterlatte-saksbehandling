@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -139,7 +140,7 @@ class OppgaveDaoImpl(
                 statement.setObject(1, oppgaveIntern.id)
                 statement.setString(2, oppgaveIntern.status.name)
                 statement.setString(3, oppgaveIntern.enhet.enhetNr)
-                statement.setLong(4, oppgaveIntern.sakId)
+                statement.setSakId(4, oppgaveIntern.sakId)
                 statement.setString(5, oppgaveIntern.type.name)
                 statement.setString(6, oppgaveIntern.saksbehandler?.ident)
                 statement.setString(7, oppgaveIntern.referanse)
@@ -170,7 +171,7 @@ class OppgaveDaoImpl(
                     statement.setObject(1, oppgaveIntern.id)
                     statement.setString(2, oppgaveIntern.status.name)
                     statement.setString(3, oppgaveIntern.enhet.enhetNr)
-                    statement.setLong(4, oppgaveIntern.sakId)
+                    statement.setSakId(4, oppgaveIntern.sakId)
                     statement.setString(5, oppgaveIntern.type.name)
                     statement.setString(6, oppgaveIntern.saksbehandler?.ident)
                     statement.setString(7, oppgaveIntern.referanse)
@@ -245,7 +246,7 @@ class OppgaveDaoImpl(
                         )
                         """.trimIndent(),
                     )
-                statement.setLong(1, sakId)
+                statement.setLong(1, sakId.sakId)
                 statement.setString(2, type.name)
                 statement.executeQuery().single {
                     val trueOrFalsePostgresFormat = getString("exists")
@@ -269,7 +270,7 @@ class OppgaveDaoImpl(
                         WHERE o.sak_id = ? and o.type = ANY(?)
                         """.trimIndent(),
                     )
-                statement.setLong(1, sakId)
+                statement.setSakId(1, sakId)
                 statement.setArray(2, createArrayOf("text", typer.map { t -> t.name }.toTypedArray()))
                 statement
                     .executeQuery()
@@ -673,7 +674,7 @@ class OppgaveDaoImpl(
                     .toList {
                         VentefristGaarUt(
                             oppgaveId = getUUID("id"),
-                            sakId = getLong("sak_id"),
+                            sakId = SakId(getLong("sak_id")),
                             referanse = getString("referanse"),
                             oppgavekilde = OppgaveKilde.valueOf(getString("kilde")),
                             merknad = getString("merknad"),
@@ -689,7 +690,7 @@ class OppgaveDaoImpl(
             id = getObject("id") as UUID,
             status = Status.valueOf(getString("status")),
             enhet = Enhetsnummer(getString("enhet")),
-            sakId = getLong("sak_id"),
+            sakId = SakId(getLong("sak_id")),
             kilde = getString("kilde")?.let { OppgaveKilde.valueOf(it) },
             type = OppgaveType.valueOf(getString("type")),
             referanse = getString("referanse"),

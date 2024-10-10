@@ -1,6 +1,17 @@
 import { IBehandlingStatus, IBoddEllerArbeidetUtlandet } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { Box, Checkbox, Heading, HelpText, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
+import {
+  BodyShort,
+  Box,
+  Checkbox,
+  Heading,
+  HelpText,
+  HStack,
+  Radio,
+  RadioGroup,
+  Textarea,
+  VStack,
+} from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useState } from 'react'
@@ -9,7 +20,6 @@ import { lagreBoddEllerArbeidetUtlandet } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterBoddEllerArbeidetUtlandet } from '~store/reducers/BehandlingReducer'
 import { JaNei } from '~shared/types/ISvar'
 import BoddEllerArbeidetIUtlandetVisning from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetIUtlandetVisning'
-import styled from 'styled-components'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const BoddEllerArbeidetUtlandetVurdering = ({
@@ -48,26 +58,29 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
     useApiCall(lagreBoddEllerArbeidetUtlandet)
 
   const lagre = (onSuccess?: () => void) => {
-    svar ? setRadioError('') : setRadioError('Du må velge et svar')
+    if (!svar) {
+      setRadioError('Du må velge et svar')
+      return
+    }
+    setRadioError('')
 
-    if (svar)
-      return setBoddEllerArbeidetUtlandet(
-        {
-          behandlingId,
-          begrunnelse,
-          svar: svar === JaNei.JA,
-          boddArbeidetIkkeEosEllerAvtaleland,
-          boddArbeidetEosNordiskKonvensjon,
-          boddArbeidetAvtaleland,
-          vurdereAvoededsTrygdeavtale,
-          skalSendeKravpakke,
-        },
-        (response) => {
-          dispatch(oppdaterBoddEllerArbeidetUtlandet(response))
-          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
-          onSuccess?.()
-        }
-      )
+    return setBoddEllerArbeidetUtlandet(
+      {
+        behandlingId,
+        begrunnelse,
+        boddEllerArbeidetUtlandet: svar === JaNei.JA,
+        boddArbeidetIkkeEosEllerAvtaleland,
+        boddArbeidetEosNordiskKonvensjon,
+        boddArbeidetAvtaleland,
+        vurdereAvoededsTrygdeavtale,
+        skalSendeKravpakke,
+      },
+      (response) => {
+        dispatch(oppdaterBoddEllerArbeidetUtlandet(response))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
+        onSuccess?.()
+      }
+    )
   }
 
   const reset = (onSuccess?: () => void) => {
@@ -77,6 +90,19 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
     setBegrunnelse(boddEllerArbeidetUtlandet?.begrunnelse || '')
     setVurdert(boddEllerArbeidetUtlandet !== null)
     onSuccess?.()
+  }
+
+  const settNyttSvar = (svar: JaNei) => {
+    setSvar(svar)
+    setRadioError('')
+
+    if (svar === JaNei.NEI) {
+      setBoddArbeidetIkkeEosEllerAvtaleland(false)
+      setBoddArbeidetEosNordiskKonvensjon(false)
+      setBoddArbeidetAvtaleland(false)
+      setVurdereAvoededsTrygdeavtale(false)
+      setSkalSendeKravpakke(false)
+    }
   }
 
   return (
@@ -106,10 +132,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
             legend=""
             size="small"
             className="radioGroup"
-            onChange={(event) => {
-              setSvar(JaNei[event as JaNei])
-              setRadioError('')
-            }}
+            onChange={settNyttSvar}
             value={svar || ''}
             error={radioError ? radioError : false}
           >
@@ -168,14 +191,14 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
                   setSkalSendeKravpakke(!skalSendeKravpakke)
                 }}
               >
-                <KravpakkeWrapper>
-                  Det skal sendes kravpakke
+                <HStack gap="2">
+                  <BodyShort>Det skal sendes kravpakke</BodyShort>
                   <HelpText strategy="fixed">
                     Hvis avdøde har hatt AP/UT og kravpakke er sendt med svar om ingen rett fra utland, skal det ikke
                     sendes kravpakke. Hvis du krysser av vil det automatisk bli opprettet “kravpakke til utland” etter
                     attestering.
                   </HelpText>
-                </KravpakkeWrapper>
+                </HStack>
               </Checkbox>
             </div>
           </VStack>
@@ -212,8 +235,3 @@ function finnSvar(boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null):
       return null
   }
 }
-
-const KravpakkeWrapper = styled.div`
-  display: flex;
-  gap: 0.3em;
-`

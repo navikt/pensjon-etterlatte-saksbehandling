@@ -27,7 +27,7 @@ class MigreringKlient(
         sakId: SakId,
     ) {
         retry {
-            client.post("$url/migrering/$sakId/$behandlingId") {
+            client.post("$url/migrering/${sakId.sakId}/$behandlingId") {
                 contentType(ContentType.Application.Json)
                 setBody(pesysId)
             }

@@ -8,6 +8,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
@@ -228,7 +229,7 @@ class OmregningHendelserBeregningRiverTest {
                         },
                     ),
                 beregnetDato = Tidspunkt.now(),
-                grunnlagMetadata = Metadata(sakId = 123L, versjon = 1L),
+                grunnlagMetadata = Metadata(sakId = randomSakId(), versjon = 1L),
                 overstyrBeregning = null,
             )
     }

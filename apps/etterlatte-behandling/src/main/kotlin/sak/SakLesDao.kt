@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -24,7 +25,7 @@ class SakLesDao(
         Sak(
             sakType = enumValueOf(getString("sakType")),
             ident = getString("fnr"),
-            id = getLong("id"),
+            id = SakId(getLong("id")),
             enhet = Enhetsnummer(getString("enhet")),
         )
     }
@@ -39,7 +40,7 @@ class SakLesDao(
                 statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
                 statement.executeQuery().toList {
                     SakMedGradering(
-                        id = getLong(1),
+                        id = SakId(getLong(1)),
                         adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
                     )
                 }
@@ -112,7 +113,7 @@ class SakLesDao(
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak where id = ?")
-                statement.setLong(1, id)
+                statement.setSakId(1, id)
                 statement
                     .executeQuery()
                     .singleOrNull(mapTilSak)
@@ -122,10 +123,10 @@ class SakLesDao(
     fun finnSakMedGraderingOgSkjerming(id: SakId): SakMedGraderingOgSkjermet =
         connectionAutoclosing.hentConnection { connection ->
             val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
-            statement.setLong(1, id)
+            statement.setSakId(1, id)
             statement.executeQuery().single {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("id"),
+                    id = SakId(getLong("id")),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)
@@ -140,7 +141,7 @@ class SakLesDao(
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement = prepareStatement("SELECT flyktning from sak where id = ?")
-                statement.setLong(1, id)
+                statement.setSakId(1, id)
                 statement.executeQuery().singleOrNull {
                     this.getString("flyktning")?.let { objectMapper.readValue(it) }
                 }

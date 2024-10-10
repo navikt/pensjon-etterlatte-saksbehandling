@@ -157,10 +157,10 @@ export const OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER: Array<Hjemmel> =
   ])
 
 export const OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE =
-  'Omstillingsstønad kan tidligst innvilges fra og med den første i måneden etter dødsfallet, og kan gis for opptil tre måneder før måneden kravet ble satt frem. I noen tilfeller kan man gå lenger tilbake, jf. folketrygdloven § 22-13 syvende ledd.\n\nHvis bosatt utland: bruk kravdato i bostedslandet, eventuelt landet søker sist var medlem.'
+  'Omstillingsstønad kan tidligst innvilges fra og med den første i måneden etter dødsfallet, og kan gis for opptil tre måneder før måneden kravet ble satt frem. I noen tilfeller kan man gå lenger tilbake, jf. folketrygdloven § 22-13 syvende ledd.\n\nHvis bosatt utland: bruk kravdato i bostedslandet, eventuelt landet søker sist var medlem.\n\nOmstillingsstønad til tidligere familiepleier innvilges tidligst fra og med den første i måneden etter at pleieforholdet er opphørt.'
 
 export const OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE =
-  'Omstillingsstønad kan tidligst innvilges fra og med den første i måneden etter dødsfallet, og kan gis for opptil tre måneder før måneden kravet ble satt frem. I noen tilfeller kan man gå lenger tilbake, jf. folketrygdloven § 22-13 syvende ledd.'
+  'Omstillingsstønad kan tidligst innvilges fra og med den første i måneden etter dødsfallet, og kan gis for opptil tre måneder før måneden kravet ble satt frem. I noen tilfeller kan man gå lenger tilbake, jf. folketrygdloven § 22-13 syvende ledd.\n\nOmstillingsstønad til tidligere familiepleier innvilges tidligst fra og med den første i måneden etter at pleieforholdet er opphørt.'
 
 export const OMS_REVURDERING_BESKRIVELSE =
   'Omstillingsstønad blir satt opp fra og med den måneden vilkårene for dette er oppfylt, og satt ned fra og med måneden etter den måneden vilkårene for dette er oppfylt. Omstillingsstønad stanses ved utgangen av den måneden retten til ytelsen faller bort.'

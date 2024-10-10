@@ -10,7 +10,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sakId1
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
@@ -37,6 +36,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
@@ -64,7 +64,7 @@ internal class BrevdataFacadeImplTest {
     private val behandlingService = mockk<BehandlingService>()
     private val trygdetidService = mockk<TrygdetidService>()
 
-    private val service =
+    val service =
         BrevdataFacade(
             vedtaksvurderingService,
             grunnlagService,
@@ -287,14 +287,14 @@ internal class BrevdataFacadeImplTest {
     private fun hentBrevutfall() = null
 
     private companion object {
-        private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
-        private val STATISK_UUID = UUID.randomUUID()
-        private val BEHANDLING_ID = UUID.randomUUID()
-        private val ENHET = Enheter.defaultEnhet.enhetNr
+        val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
+        val STATISK_UUID = UUID.randomUUID()
+        val BEHANDLING_ID = UUID.randomUUID()
+        val ENHET = Enheter.defaultEnhet.enhetNr
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
+        val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAKSIDNUMMER = 123L
-        private val SAK_ID = tilSakId(SAKSIDNUMMER)
+        val SAK_ID = SakId(SAKSIDNUMMER)
     }
 }

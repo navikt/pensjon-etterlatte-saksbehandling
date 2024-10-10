@@ -18,7 +18,6 @@ import java.util.UUID
 internal class DistribusjonServiceTest {
     private val mockKlient = mockk<DistribusjonKlient>()
     private val mockDb = mockk<BrevRepository>(relaxed = true)
-
     private val service = DistribusjonServiceImpl(mockKlient, mockDb)
 
     @BeforeEach

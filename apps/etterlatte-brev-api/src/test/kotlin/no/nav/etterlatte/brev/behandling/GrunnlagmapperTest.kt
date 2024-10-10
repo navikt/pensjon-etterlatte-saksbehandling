@@ -31,7 +31,6 @@ import java.util.UUID
 class GrunnlagmapperTest {
     private val pdlVergeOekonomiskFnr = "17418340118"
     private val pdlVergePersonligFnr = "27458328671"
-
     private val adresseService = mockk<AdresseService>()
 
     @Test

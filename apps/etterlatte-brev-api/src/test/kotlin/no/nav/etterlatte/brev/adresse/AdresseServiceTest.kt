@@ -21,8 +21,13 @@ internal class AdresseServiceTest {
     private val norg2Mock = mockk<Norg2Klient>()
     private val saksbehandlerKlient = mockk<SaksbehandlerKlient>()
     private val regoppslagMock = mockk<RegoppslagKlient>()
-
     private val adresseService = AdresseService(norg2Mock, saksbehandlerKlient, regoppslagMock)
+
+    companion object {
+        private val ANSVARLIG_ENHET = Enheter.defaultEnhet.enhetNr
+        private const val SAKSBEHANDLER = "Z123456"
+        private const val ATTESTANT = "Z00002"
+    }
 
     @BeforeEach
     fun before() {
@@ -103,10 +108,4 @@ internal class AdresseServiceTest {
                         ),
                 ),
         )
-
-    companion object {
-        private val ANSVARLIG_ENHET = Enheter.defaultEnhet.enhetNr
-        private const val SAKSBEHANDLER = "Z123456"
-        private const val ATTESTANT = "Z00002"
-    }
 }

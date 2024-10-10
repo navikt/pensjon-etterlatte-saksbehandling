@@ -106,8 +106,7 @@ internal class VedtaksbrevServiceTest {
     private val brevbakerService = mockk<BrevbakerService>()
     private val behandlingService = mockk<BehandlingService>()
     private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
-    private val pdfGenerator =
-        PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
+    private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
     private val innholdTilRedigerbartBrevHenter =
         InnholdTilRedigerbartBrevHenter(brevdataFacade, brevbakerService, adresseService, redigerbartVedleggHenter)
@@ -150,12 +149,12 @@ internal class VedtaksbrevServiceTest {
     }
 
     private companion object {
-        private val SAK_ID = randomSakId()
-        private val BEHANDLING_ID = UUID.randomUUID()
-        private val PDF_BYTES = "Hello world!".toByteArray()
-        private val SAKSBEHANDLER = simpleSaksbehandler()
-        private val ATTESTANT = simpleAttestant()
-        private val utbetalingsinfo =
+        val SAK_ID = randomSakId()
+        val BEHANDLING_ID = UUID.randomUUID()
+        val PDF_BYTES = "Hello world!".toByteArray()
+        val SAKSBEHANDLER = simpleSaksbehandler()
+        val ATTESTANT = simpleAttestant()
+        val utbetalingsinfo =
             Utbetalingsinfo(
                 1,
                 Kroner(3436),

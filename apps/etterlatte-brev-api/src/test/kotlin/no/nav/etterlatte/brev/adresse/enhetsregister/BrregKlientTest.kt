@@ -71,7 +71,7 @@ internal class BrregKlientTest {
             install(ContentNegotiation) { jackson() }
         }
 
-    private val enheterResponse =
+    val enheterResponse =
         ResponseWrapper(
             ResponseWrapper.Embedded(
                 listOf(
@@ -83,5 +83,5 @@ internal class BrregKlientTest {
             ),
         )
 
-    private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+    val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 }

@@ -145,6 +145,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         sakType,
                         vedtakType!!,
                         avdoede,
+                        utlandstilknytningType,
                     )
 
                 OMS_REVURDERING ->
@@ -159,6 +160,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         vedtakType!!,
                         virkningstidspunkt!!,
                         klage,
+                        utlandstilknytningType,
                     )
 
                 OMS_AVSLAG ->
@@ -405,6 +407,7 @@ class BrevDataMapperFerdigstillingVedtak(
         sakType: SakType,
         vedtakType: VedtakType,
         avdoede: List<Avdoed>,
+        utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
         val avkortingsinfo =
             async {
@@ -427,6 +430,7 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkårsvurdering" },
             avdoede,
+            utlandstilknytningType,
         )
     }
 
@@ -441,6 +445,7 @@ class BrevDataMapperFerdigstillingVedtak(
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
         klage: Klage?,
+        utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
         val avkortingsinfo =
             async {
@@ -489,6 +494,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 .navn,
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
             datoVedtakOmgjoering,
+            utlandstilknytningType,
         )
     }
 

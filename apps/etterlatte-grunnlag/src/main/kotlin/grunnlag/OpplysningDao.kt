@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.firstOrNull
 import no.nav.etterlatte.libs.database.setSakId
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
@@ -52,6 +53,15 @@ class OpplysningDao(
             sakId = SakId(getLong("sak_id")),
             hendelseNummer = getLong("hendelsenummer"),
         )
+
+    fun finnesGrunnlagForSak(sakId: SakId): Boolean =
+        connection.use {
+            it
+                .prepareStatement("SELECT EXISTS(SELECT 1 FROM grunnlagshendelse WHERE sak_id = ?)")
+                .apply { setSakId(1, sakId) }
+                .executeQuery()
+                .single { getBoolean(1) }
+        }
 
     fun hentAlleGrunnlagForSak(sakId: SakId): List<GrunnlagHendelse> =
         connection.use {

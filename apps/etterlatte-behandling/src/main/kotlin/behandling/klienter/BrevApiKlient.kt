@@ -123,7 +123,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
         post(
-            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId",
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak?sakId=${sakId.sakId}",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -146,7 +146,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
-            url = "$resourceUrl/api/brev/$brevId/oversendelse/ferdigstill?sakId=$sakId",
+            url = "$resourceUrl/api/brev/$brevId/oversendelse/ferdigstill?sakId=${sakId.sakId}",
             postBody = "",
             onSuccess = {},
             brukerTokenInfo = brukerTokenInfo,
@@ -159,7 +159,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ): JournalpostIdDto =
         post(
-            url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=$sakId",
+            url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=${sakId.sakId}",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -170,7 +170,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ): BestillingsIdDto =
         post(
-            url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=$sakId",
+            url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=${sakId.sakId}",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -181,7 +181,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
         get(
-            url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
+            url = "$resourceUrl/api/brev/$brevId?sakId=${sakId.sakId}",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )

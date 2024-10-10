@@ -7,9 +7,11 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
 import no.nav.helse.rapids_rivers.toUUID
 import java.sql.ResultSet
@@ -29,7 +31,7 @@ class DoedshendelseDao(
                 ).apply {
                     setString(1, Status.FERDIG.name)
                     setLong(2, doedshendelseBrevDistribuert.brevId)
-                    setLong(3, doedshendelseBrevDistribuert.sakId)
+                    setSakId(3, doedshendelseBrevDistribuert.sakId)
                 }.executeUpdate()
             }
         }
@@ -69,7 +71,7 @@ class DoedshendelseDao(
                     WHERE id = ?
                     """.trimIndent(),
                 ).apply {
-                    setLong(1, doedshendelseInternal.sakId)
+                    setLong(1, doedshendelseInternal.sakId?.sakId)
                     setString(2, doedshendelseInternal.status.name)
                     setString(3, doedshendelseInternal.utfall?.name)
                     setTidspunkt(4, doedshendelseInternal.endret)
@@ -155,7 +157,7 @@ private fun ResultSet.asDoedshendelseReminder(): DoedshendelseReminder =
         beroertFnr = getString("beroert_fnr"),
         relasjon = getString("relasjon").let { relasjon -> Relasjon.valueOf(relasjon) },
         endret = getTidspunkt("endret"),
-        sakId = getString("sak_id")?.toLong(),
+        sakId = getString("sak_id")?.toLong()?.let { SakId(it) },
     )
 
 private fun ResultSet.asDoedshendelse(): DoedshendelseInternal =
@@ -171,7 +173,7 @@ private fun ResultSet.asDoedshendelse(): DoedshendelseInternal =
         utfall = getString("utfall")?.let { utfall -> Utfall.valueOf(utfall) },
         oppgaveId = getString("oppgave_id")?.toUUID(),
         brevId = getString("brev_id")?.toLong(),
-        sakId = getString("sak_id")?.toLong(),
+        sakId = getString("sak_id")?.toLong()?.let { SakId(it) },
         endringstype = getString("endringstype")?.let { Endringstype.valueOf(it) },
         kontrollpunkter =
             getString("kontrollpunkter")?.let { objectMapper.readValue(it) },

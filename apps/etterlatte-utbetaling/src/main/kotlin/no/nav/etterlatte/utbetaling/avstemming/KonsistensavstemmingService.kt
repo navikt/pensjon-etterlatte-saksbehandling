@@ -88,7 +88,7 @@ class KonsistensavstemmingService(
                     entry.value
                         .map { utbetaling ->
                             UtbetalingslinjerPerSak(
-                                sakId = 0,
+                                sakId = SakId(0),
                                 saktype = saktype,
                                 fnr = utbetaling.stoenadsmottaker.value,
                                 utbetalingslinjer = utbetaling.utbetalingslinjer,

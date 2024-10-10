@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
@@ -44,7 +45,7 @@ class AktivitetspliktRepo(
                         aktivitetsgrad = EXCLUDED.aktivitetsgrad, varig_unntak = EXCLUDED.varig_unntak; 
                     """.trimIndent(),
                 )
-            statement.setLong(1, statisikkAktivitet.sakId)
+            statement.setSakId(1, statisikkAktivitet.sakId)
             statement.setTidspunkt(2, statisikkAktivitet.registrert)
             statement.setString(3, statisikkAktivitet.avdoedDoedsmaaned.toString())
             statement.setJsonb(4, statisikkAktivitet.unntak)
@@ -78,7 +79,7 @@ class AktivitetspliktRepo(
                     ORDER BY sak_id, registrert_maaned DESC
                     """.trimIndent(),
                 )
-            statement.setLong(1, sakId)
+            statement.setSakId(1, sakId)
             statement.setString(2, yearMonth.toString())
             statement.executeQuery().singleOrNull {
                 somStatistikkAktivititet()
@@ -101,7 +102,7 @@ class AktivitetspliktRepo(
                     ORDER BY sak_id, registrert_maaned DESC
                     """.trimIndent(),
                 )
-            statement.setArray(1, connection.createArrayOf("bigint", sakIder.toTypedArray()))
+            statement.setArray(1, connection.createArrayOf("bigint", sakIder.map { it.sakId }.toTypedArray()))
             statement.setString(2, yearMonth.toString())
             statement
                 .executeQuery()
@@ -110,7 +111,7 @@ class AktivitetspliktRepo(
 
     private fun ResultSet.somStatistikkAktivititet(): StatistikkAktivitet =
         StatistikkAktivitet(
-            sakId = getLong("sak_id"),
+            sakId = SakId(getLong("sak_id")),
             registrert = getTidspunkt("registrert"),
             avdoedDoedsmaaned = getString("avdoed_doedsmaaned").let { YearMonth.parse(it) },
             unntak = getString("unntak").let { objectMapper.readValue(it) },

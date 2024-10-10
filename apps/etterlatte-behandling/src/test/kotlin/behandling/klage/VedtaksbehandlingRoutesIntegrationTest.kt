@@ -240,7 +240,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
     private fun kravgrunnlag(sak: Sak) =
         Kravgrunnlag(
             kravgrunnlagId = KravgrunnlagId(123L),
-            sakId = SakId(sak.id),
+            sakId = SakId(sak.id.sakId),
             vedtakId = VedtakId(2L),
             kontrollFelt = Kontrollfelt(""),
             status = KravgrunnlagStatus.ANNU,

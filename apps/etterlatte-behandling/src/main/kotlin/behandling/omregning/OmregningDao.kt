@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.omregning
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
+import no.nav.etterlatte.libs.database.setSakId
 
 class OmregningDao(
     private val connection: ConnectionAutoclosing,
@@ -19,7 +20,7 @@ class OmregningDao(
                     )
                 statement.setString(1, request.kjoering)
                 statement.setString(2, request.status.name)
-                statement.setLong(3, request.sakId)
+                statement.setSakId(3, request.sakId)
                 statement.executeUpdate().also { require(it == 1) }
             }
         }
@@ -39,7 +40,7 @@ class OmregningDao(
                     )
                 statement.setString(1, request.kjoering)
                 statement.setString(2, request.status.name)
-                statement.setLong(3, request.sakId)
+                statement.setSakId(3, request.sakId)
                 statement.setBigDecimal(4, request.beregningBeloepFoer)
                 statement.setBigDecimal(5, request.beregningBeloepEtter)
                 statement.setBigDecimal(6, request.beregningGFoer)

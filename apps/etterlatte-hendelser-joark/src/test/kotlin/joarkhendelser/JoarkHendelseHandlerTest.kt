@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -49,17 +50,21 @@ internal class JoarkHendelseHandlerTest {
     private val oppgaveKlient = mockk<OppgaveKlient>()
     private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
 
-    private val sut =
-        JoarkHendelseHandler(
-            BehandlingService(behandlingKlientMock),
-            safKlientMock,
-            oppgaveKlient,
-            pdlTjenesterKlientMock,
-        )
+    private lateinit var sut: JoarkHendelseHandler
 
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
+        behandlingKlientMock.also {
+            coEvery { it.hentEllerOpprettSak(any(), any()) }.returns(SakId(101))
+        }
+        sut =
+            JoarkHendelseHandler(
+                BehandlingService(behandlingKlientMock),
+                safKlientMock,
+                oppgaveKlient,
+                pdlTjenesterKlientMock,
+            )
     }
 
     @AfterEach

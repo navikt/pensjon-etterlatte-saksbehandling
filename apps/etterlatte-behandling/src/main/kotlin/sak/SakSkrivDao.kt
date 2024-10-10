@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.ktor.route.logger
 import java.sql.ResultSet
@@ -19,7 +20,7 @@ class SakSkrivDao(
         Sak(
             sakType = enumValueOf(getString("sakType")),
             ident = getString("fnr"),
-            id = getLong("id"),
+            id = SakId(getLong("id")),
             enhet = Enhetsnummer(getString("enhet")),
         )
     }
@@ -32,7 +33,7 @@ class SakSkrivDao(
             with(connection) {
                 val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
                 statement.setString(1, adressebeskyttelseGradering.name)
-                statement.setLong(2, sakId)
+                statement.setSakId(2, sakId)
                 statement.executeUpdate().also {
                     logger.info(
                         "Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId, antall oppdatert er $it",
@@ -78,7 +79,7 @@ class SakSkrivDao(
                     )
                 saker.forEach { sak ->
                     statement.setString(1, sak.enhet.enhetNr)
-                    statement.setLong(2, sak.id)
+                    statement.setSakId(2, sak.id)
                     statement.executeUpdate()
                 }
             }

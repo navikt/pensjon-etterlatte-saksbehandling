@@ -11,6 +11,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.gosysOppgaveId
@@ -57,7 +58,10 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 
             post("/flytt-til-gjenny") {
                 kunSaksbehandler {
-                    val sakId = call.request.queryParameters["sakid"]!!.toLong()
+                    val sakId =
+                        call.request.queryParameters["sakid"]!!
+                            .toLong()
+                            .let { SakId(it) }
                     val nyOppgave = gosysService.flyttTilGjenny(gosysOppgaveId.toLong(), sakId, brukerTokenInfo)
                     call.respond(nyOppgave)
                 }

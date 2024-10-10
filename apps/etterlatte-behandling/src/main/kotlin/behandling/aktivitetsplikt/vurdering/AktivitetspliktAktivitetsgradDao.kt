@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgr
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
@@ -39,7 +40,7 @@ class AktivitetspliktAktivitetsgradDao(
                     """.trimMargin(),
                 )
             stmt.setObject(1, UUID.randomUUID())
-            stmt.setLong(2, sakId)
+            stmt.setSakId(2, sakId)
             stmt.setObject(3, behandlingId)
             stmt.setObject(4, oppgaveId)
             stmt.setString(5, aktivitetsgrad.aktivitetsgrad.name)
@@ -110,7 +111,7 @@ class AktivitetspliktAktivitetsgradDao(
                         LIMIT 1
                         """.trimIndent(),
                     )
-                stmt.setLong(1, sakId)
+                stmt.setSakId(1, sakId)
 
                 val (behandlingId, oppgaveId) =
                     stmt.executeQuery().singleOrNull {
@@ -189,7 +190,7 @@ class AktivitetspliktAktivitetsgradDao(
     private fun ResultSet.toAktivitetsgrad() =
         AktivitetspliktAktivitetsgrad(
             id = getUUID("id"),
-            sakId = getLong("sak_id"),
+            sakId = SakId(getLong("sak_id")),
             behandlingId = getString("behandling_id")?.let { UUID.fromString(it) },
             oppgaveId = getString("oppgave_id")?.let { UUID.fromString(it) },
             aktivitetsgrad = AktivitetspliktAktivitetsgradType.valueOf(getString("aktivitetsgrad")),

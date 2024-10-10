@@ -7,8 +7,8 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
@@ -64,14 +64,14 @@ class VedtakMetricsTest(
         )
         vedtakRepo.opprettVedtak(
             opprettVedtak(
-                sakId = tilSakId(4),
+                sakId = SakId(4),
                 status = VedtakStatus.IVERKSATT,
                 sakType = SakType.OMSTILLINGSSTOENAD,
             ),
         )
         vedtakRepo.opprettVedtak(
             opprettVedtak(
-                sakId = tilSakId(4),
+                sakId = SakId(4),
                 status = VedtakStatus.IVERKSATT,
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 type = VedtakType.OPPHOER,

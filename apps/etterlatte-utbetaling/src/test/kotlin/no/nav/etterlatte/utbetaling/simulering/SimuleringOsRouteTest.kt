@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingToggles
 import no.nav.etterlatte.utbetaling.klienter.BehandlingKlient
@@ -84,7 +85,7 @@ class SimuleringOsRouteTest {
 
     @Test
     fun `mappe informasjon fra revurderingsvedtak til simuleringsinput`() {
-        val sakId = 1000223L
+        val sakId = SakId(1000223L)
         val behandlingId = UUID.randomUUID()
 
         val utbetalingsperiodeFeb2024 =
@@ -107,7 +108,9 @@ class SimuleringOsRouteTest {
             vedtak(
                 vedtakId = 1,
                 saktype = SakType.BARNEPENSJON,
-                sakId = sakId,
+                sakId =
+                    no.nav.etterlatte.libs.common.sak
+                        .SakId(sakId.value),
                 ident = SOEKER_FOEDSELSNUMMER.value,
                 virkningstidspunkt = of(2024, FEBRUARY),
                 utbetalingsperioder = listOf(utbetalingsperiodeFeb2024, utbetalingsperiodeMai2024),

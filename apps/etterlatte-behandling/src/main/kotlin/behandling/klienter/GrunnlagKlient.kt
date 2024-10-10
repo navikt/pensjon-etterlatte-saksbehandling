@@ -196,7 +196,7 @@ class GrunnlagKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceApiUrl/grunnlag/sak/$sakId",
+                            url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
@@ -268,7 +268,7 @@ class GrunnlagKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/sak/$sakId/opprett-grunnlag",
+                        url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}/opprett-grunnlag",
                     ),
                 postBody = opplysningsbehov.toJson(),
                 brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
@@ -368,7 +368,7 @@ class GrunnlagKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/sak/$sakId/nye-opplysninger",
+                        url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}/nye-opplysninger",
                     ),
                 postBody = saksopplysninger.toJson(),
                 brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
@@ -384,7 +384,7 @@ class GrunnlagKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/sak/$sakId",
+                        url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}",
                     ),
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(

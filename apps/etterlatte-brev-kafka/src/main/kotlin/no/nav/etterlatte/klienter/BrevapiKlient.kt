@@ -38,7 +38,7 @@ class BrevapiKlient(
         try {
             logger.info("Oppretter brev for sak med sakId=$sakid")
             return httpClient
-                .post("$baseUrl/api/brev/sak/$sakid/opprett-journalfoer-og-distribuer") {
+                .post("$baseUrl/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
                     contentType(ContentType.Application.Json)
                     setBody(opprett.toJson())
                 }.body<BrevDistribusjonResponse>()
@@ -63,7 +63,7 @@ class BrevapiKlient(
             logger.info("Distribuerer brev med id $brevId")
             return httpClient
                 .post(
-                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}&sakId=$sakId",
+                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}&sakId=${sakId.sakId}",
                 ) {
                     contentType(ContentType.Application.Json)
                 }.body<BestillingsIdDto>()
@@ -105,7 +105,7 @@ class BrevapiKlient(
     ) {
         try {
             logger.info("Oppretet og journalfører notat med sakid: $sakId")
-            httpClient.post("$baseUrl/api/notat/sak/$sakId/manuellsamordning") {
+            httpClient.post("$baseUrl/api/notat/sak/${sakId.sakId}/manuellsamordning") {
                 contentType(ContentType.Application.Json)
                 setBody(samordningManueltBehandletRequest.toJson())
             }

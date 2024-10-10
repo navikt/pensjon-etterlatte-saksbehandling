@@ -11,9 +11,10 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { kanEndreJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 import { KnyttTilAnnenBruker } from './KnyttTilAnnenBruker'
 import { OpprettJournalfoeringsoppgave } from './OpprettJournalfoeringsoppgave'
+import { SettStatusAvbryt } from '~components/person/dokumenter/avvik/SettStatusAvbryt'
 
 enum AvvikHandling {
-  UTGAAR = 'UTGAAR',
+  AVBRYT = 'AVBRYT',
   KNYTT_TIL_ANNEN_SAK = 'KNYTT_TIL_ANNEN_SAK',
   FEILREGISTRER = 'FEILREGISTRER',
   OPPRETT_OPPGAVE = 'OPPRETT_OPPGAVE',
@@ -81,6 +82,7 @@ export const HaandterAvvikModal = ({
             <Radio value={AvvikHandling.FEILREGISTRER}>
               {journalpost.journalstatus === Journalstatus.FEILREGISTRERT ? 'Opphev feilregistrering' : 'Feilregistrer'}
             </Radio>
+            <Radio value={AvvikHandling.AVBRYT}>Avbryt journalpost</Radio>
             <Radio value={AvvikHandling.OPPRETT_OPPGAVE}>Opprett oppgave</Radio>
           </RadioGroup>
 
@@ -92,6 +94,8 @@ export const HaandterAvvikModal = ({
             ) : (
               <FeilregistrerJournalpost journalpost={journalpost} />
             ))}
+
+          {aarsak === AvvikHandling.AVBRYT && <SettStatusAvbryt journalpost={journalpost} />}
 
           {aarsak === AvvikHandling.KNYTT_TIL_ANNEN_SAK &&
             (kanEndreJournalpost(journalpost) ? (

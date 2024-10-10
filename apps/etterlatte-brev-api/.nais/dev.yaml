@@ -83,8 +83,8 @@ spec:
       value: api://dev-fss.teamdokumenthandtering.saf/.default
     - name: DOKARKIV_URL
       value: https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
-    - name: DOKARKIV_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: DOKARKIV_CLIENT_ID
+      value: dev-fss.teamdokumenthandtering.dokarkiv
     - name: DOKDIST_URL
       value: https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1
     - name: DOKDIST_SCOPE

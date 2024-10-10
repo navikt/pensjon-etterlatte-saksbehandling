@@ -54,11 +54,19 @@ fun Route.dokumentRoute(
 
             put {
                 val forsoekFerdigstill = call.request.queryParameters["forsoekFerdigstill"].toBoolean()
-                val journalfoerendeEnhet = call.request.queryParameters["journalfoerendeEnhet"]?.let { Enhetsnummer(it) }
+                val journalfoerendeEnhet =
+                    call.request.queryParameters["journalfoerendeEnhet"]?.let { Enhetsnummer(it) }
 
                 val request = call.receive<OppdaterJournalpostRequest>()
 
-                val response = dokarkivService.oppdater(journalpostId, forsoekFerdigstill, journalfoerendeEnhet, request)
+                val response =
+                    dokarkivService.oppdater(
+                        journalpostId,
+                        forsoekFerdigstill,
+                        journalfoerendeEnhet,
+                        request,
+                        brukerTokenInfo,
+                    )
 
                 call.respond(response)
             }
@@ -66,17 +74,7 @@ fun Route.dokumentRoute(
             put("/knyttTilAnnenSak") {
                 val request = call.receive<KnyttTilAnnenSakRequest>()
 
-                call.respond(dokarkivService.knyttTilAnnenSak(journalpostId, request))
-            }
-
-            put("/feilregistrerSakstilknytning") {
-                dokarkivService.feilregistrerSakstilknytning(journalpostId)
-                call.respond(HttpStatusCode.OK)
-            }
-
-            put("/opphevFeilregistrertSakstilknytning") {
-                dokarkivService.opphevFeilregistrertSakstilknytning(journalpostId)
-                call.respond(HttpStatusCode.OK)
+                call.respond(dokarkivService.knyttTilAnnenSak(journalpostId, request, brukerTokenInfo))
             }
 
             get("/utsendingsinfo") {
@@ -89,6 +87,23 @@ fun Route.dokumentRoute(
                 val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo)
 
                 call.respond(innhold)
+            }
+
+            route("/feilregistrer/") {
+                put("/feilregistrerSakstilknytning") {
+                    dokarkivService.feilregistrerSakstilknytning(journalpostId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
+
+                put("/opphevFeilregistrertSakstilknytning") {
+                    dokarkivService.opphevFeilregistrertSakstilknytning(journalpostId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
+
+                put("/settStatusAvbryt") {
+                    dokarkivService.settStatusAvbryt(journalpostId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }

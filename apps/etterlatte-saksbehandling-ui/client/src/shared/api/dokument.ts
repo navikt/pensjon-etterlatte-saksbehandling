@@ -26,10 +26,13 @@ export const hentDokumenter = async (args: {
   })
 
 export const feilregistrerSakstilknytning = async (journalpostId: string): Promise<ApiResponse<any>> =>
-  apiClient.put(`/dokumenter/${journalpostId}/feilregistrerSakstilknytning`, {})
+  apiClient.put(`/dokumenter/${journalpostId}/feilregistrer/feilregistrerSakstilknytning`, {})
 
 export const opphevFeilregistrertSakstilknytning = async (journalpostId: string): Promise<ApiResponse<any>> =>
-  apiClient.put(`/dokumenter/${journalpostId}/opphevFeilregistrertSakstilknytning`, {})
+  apiClient.put(`/dokumenter/${journalpostId}/feilregistrer/opphevFeilregistrertSakstilknytning`, {})
+
+export const settStatusAvbryt = async (journalpostId: string): Promise<ApiResponse<any>> =>
+  apiClient.put(`/dokumenter/${journalpostId}/feilregistrer/settStatusAvbryt`, {})
 
 export const knyttTilAnnenSak = async (args: {
   journalpostId: string

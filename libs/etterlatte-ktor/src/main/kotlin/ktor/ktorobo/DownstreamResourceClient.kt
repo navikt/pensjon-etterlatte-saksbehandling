@@ -55,6 +55,7 @@ class DownstreamResourceClient(
         httpClient.post(resource.url) {
             bearerAuth(token.accessToken)
             contentType(ContentType.Application.Json)
+            resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             setBody(postBody)
         }
     }
@@ -67,6 +68,7 @@ class DownstreamResourceClient(
         httpClient.put(resource.url) {
             bearerAuth(token.accessToken)
             contentType(ContentType.Application.Json)
+            resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             setBody(putBody)
         }
     }
@@ -79,6 +81,7 @@ class DownstreamResourceClient(
         httpClient.delete(resource.url) {
             bearerAuth(token.accessToken)
             contentType(ContentType.Application.Json)
+            resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             setBody(postBody)
         }
     }
@@ -86,11 +89,12 @@ class DownstreamResourceClient(
     suspend fun patch(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-        patchBody: String,
+        patchBody: Any? = null,
     ) = medToken(resource, brukerTokenInfo) { token ->
         httpClient.patch(resource.url) {
             bearerAuth(token.accessToken)
             contentType(ContentType.Application.Json)
+            resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             setBody(patchBody)
         }
     }

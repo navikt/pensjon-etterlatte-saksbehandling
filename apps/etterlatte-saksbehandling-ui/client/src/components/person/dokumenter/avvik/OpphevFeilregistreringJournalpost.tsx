@@ -1,9 +1,10 @@
 import { Alert, Box, Button, HStack, Loader, VStack } from '@navikt/ds-react'
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opphevFeilregistrertSakstilknytning } from '~shared/api/dokument'
 import { Journalpost } from '~shared/types/Journalpost'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost: Journalpost }) => {
   const [opphevFeilregistreringStatus, apiOpphevFeilregistrering] = useApiCall(opphevFeilregistrertSakstilknytning)
@@ -22,9 +23,8 @@ export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost
   }
 
   return (
-    <>
+    <VStack gap="4">
       <Alert variant="info">Du opphever nå status feilregistrert på journalposten</Alert>
-      <br />
 
       <Box borderWidth="1" padding="4" borderRadius="medium" borderColor="border-subtle">
         <VStack gap="4">
@@ -35,12 +35,15 @@ export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost
         </VStack>
       </Box>
 
-      <br />
+      {mapFailure(opphevFeilregistreringStatus, (error) => (
+        <ApiErrorAlert>{error.detail}</ApiErrorAlert>
+      ))}
+
       <HStack justify="end">
         <Button onClick={opphevFeilregistrering} loading={isPending(opphevFeilregistreringStatus)}>
           Opphev feilregistrering
         </Button>
       </HStack>
-    </>
+    </VStack>
   )
 }

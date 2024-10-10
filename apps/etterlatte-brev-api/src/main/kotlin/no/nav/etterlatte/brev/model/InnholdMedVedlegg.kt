@@ -11,8 +11,8 @@ class ManglerPayloadForVedleggInnholdBrev(
 private val logger = LoggerFactory.getLogger(InnholdMedVedlegg::class.java)
 
 data class InnholdMedVedlegg(
-    private val innhold: () -> List<Slate.Element>,
-    private val innholdVedlegg: () -> List<BrevInnholdVedlegg>,
+    val innhold: () -> List<Slate.Element>,
+    val innholdVedlegg: () -> List<BrevInnholdVedlegg>,
 ) {
     fun finnVedlegg(key: BrevVedleggKey): List<Slate.Element> {
         val vedlegg = innholdVedlegg().find { vedlegg -> vedlegg.key == key }?.payload?.elements

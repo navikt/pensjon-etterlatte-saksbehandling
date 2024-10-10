@@ -13,8 +13,6 @@ import no.nav.etterlatte.BrevKey.REGOPPSLAG_SCOPE
 import no.nav.etterlatte.BrevKey.REGOPPSLAG_URL
 import no.nav.etterlatte.BrevKey.SAF_BASE_URL
 import no.nav.etterlatte.BrevKey.SAF_SCOPE
-import no.nav.etterlatte.EnvKey.DOKARKIV_SCOPE
-import no.nav.etterlatte.EnvKey.DOKARKIV_URL
 import no.nav.etterlatte.EnvKey.NORG2_URL
 import no.nav.etterlatte.EnvKey.PDFGEN_URL
 import no.nav.etterlatte.brev.BrevService
@@ -138,8 +136,7 @@ class ApplicationBuilder {
 
     private val db = BrevRepository(datasource)
 
-    private val dokarkivKlient =
-        DokarkivKlient(httpClient(DOKARKIV_SCOPE, false), env.requireEnvValue(DOKARKIV_URL))
+    private val dokarkivKlient = DokarkivKlient(config)
 
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient)
 
@@ -199,7 +196,8 @@ class ApplicationBuilder {
     private val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel)
 
-    private val journalfoerBrevService = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
+    private val journalfoerBrevService =
+        JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
         BrevService(
@@ -241,7 +239,14 @@ class ApplicationBuilder {
             applikasjonsnavn = "brev-api",
             restModule = {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagService, behandlingService)
+                    brevRoute(
+                        brevService,
+                        pdfService,
+                        brevdistribuerer,
+                        tilgangssjekker,
+                        grunnlagService,
+                        behandlingService,
+                    )
                     vedtaksbrevRoute(vedtaksbrevService, journalfoerBrevService, tilgangssjekker)
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)

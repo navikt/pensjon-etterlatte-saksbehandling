@@ -59,7 +59,7 @@ class NotatService(
 
             notatRepository.lagreInnhold(notat.id, notatPdf)
 
-            return journalfoerInterntNotat(notat, sak, notatPdf)
+            return journalfoerInterntNotat(notat, sak, notatPdf, bruker)
                 .also { response ->
                     notatRepository.settJournalfoert(notat.id, response, bruker)
                 }
@@ -119,6 +119,7 @@ class NotatService(
         notat: Notat,
         sak: Sak,
         pdf: ByteArray,
+        bruker: BrukerTokenInfo,
     ): OpprettJournalpostResponse {
         val tittel = notat.tittel
 
@@ -155,6 +156,6 @@ class NotatService(
                 tittel = tittel,
             )
 
-        return dokarkivService.journalfoer(journalpostRequest)
+        return dokarkivService.journalfoer(journalpostRequest, bruker)
     }
 }

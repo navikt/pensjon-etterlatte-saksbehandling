@@ -97,7 +97,7 @@ class NotatServiceTest(
             )
         } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { pdfGeneratorKlient.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()
-        coEvery { dokarkivService.journalfoer(any()) } returns OpprettJournalpostResponse("123", true)
+        coEvery { dokarkivService.journalfoer(any(), any()) } returns OpprettJournalpostResponse("123", true)
 
         runBlocking {
             notatService.journalfoerNotatISak(
@@ -109,7 +109,7 @@ class NotatServiceTest(
         coVerify(exactly = 1) {
             grunnlagService.hentGrunnlagForSak(sakId, any())
             pdfGeneratorKlient.genererPdf(any(), any(), NotatMal.KLAGE_OVERSENDELSE_BLANKETT)
-            dokarkivService.journalfoer(any())
+            dokarkivService.journalfoer(any(), any())
 
             notatRepository.hentForReferanse(klage.id.toString())
             notatRepository.opprett(any(), any())
@@ -131,7 +131,7 @@ class NotatServiceTest(
             )
         } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { pdfGeneratorKlient.genererPdf(any(), any(), any()) } returns "pdf".toByteArray()
-        coEvery { dokarkivService.journalfoer(any()) } throws Exception()
+        coEvery { dokarkivService.journalfoer(any(), any()) } throws Exception()
 
         assertThrows<Exception> {
             runBlocking {
@@ -144,7 +144,7 @@ class NotatServiceTest(
         coVerify(exactly = 1) {
             grunnlagService.hentGrunnlagForSak(sakId, any())
             pdfGeneratorKlient.genererPdf(any(), any(), NotatMal.KLAGE_OVERSENDELSE_BLANKETT)
-            dokarkivService.journalfoer(any())
+            dokarkivService.journalfoer(any(), any())
             notatRepository.slett(any())
         }
 

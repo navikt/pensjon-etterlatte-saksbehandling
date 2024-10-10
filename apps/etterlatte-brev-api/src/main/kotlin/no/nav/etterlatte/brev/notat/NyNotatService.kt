@@ -185,7 +185,7 @@ class NyNotatService(
         val sak = behandlingService.hentSak(notat.sakId, bruker)
 
         return dokarkivService
-            .journalfoer(mapTilJournalpostRequest(sak, notat, pdf))
+            .journalfoer(mapTilJournalpostRequest(sak, notat, pdf), bruker)
             .also {
                 notatRepository.settJournalfoert(id, it, bruker)
             }

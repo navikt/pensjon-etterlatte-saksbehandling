@@ -19,4 +19,6 @@ data class Enhetsnummer(
 
         fun nullable(enhetNr: String? = null) = enhetNr.takeUnless { it.isNullOrBlank() }?.let { Enhetsnummer(it) }
     }
+
+    override fun toString(): String = enhetNr
 }

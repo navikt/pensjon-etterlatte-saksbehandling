@@ -12,7 +12,7 @@ spec:
   port: 8080
   replicas:
     max: 2
-    min: 2
+    min: 1
     scalingStrategy:
       cpu:
         thresholdPercentage: 90

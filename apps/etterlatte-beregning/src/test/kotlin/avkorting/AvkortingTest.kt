@@ -15,6 +15,7 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Nested
@@ -878,16 +879,85 @@ internal class AvkortingTest {
         }
     }
 
-    @Test
-    fun `utledning av innvilga måneder`() {
-        val aarsoppgjoerFom = YearMonth.of(2024, 3)
-        finnAntallInnvilgaMaanederForAar(aarsoppgjoerFom, null) shouldBe 10
-    }
+    @Nested
+    inner class InnvilgaMaaneder {
+        @Test
+        fun `utledning av innvilga måneder`() {
+            val grunnlag =
+                avkortinggrunnlagLagre(
+                    fom = YearMonth.of(2024, 3),
+                )
+            val opprettaAvkorting =
+                Avkorting().oppdaterMedInntektsgrunnlag(
+                    grunnlag,
+                    bruker,
+                )
+            with(
+                opprettaAvkorting.aarsoppgjoer
+                    .single()
+                    .inntektsavkorting
+                    .single()
+                    .grunnlag,
+            ) {
+                innvilgaMaaneder shouldBe 10
+                overstyrtInnvilgaMaanederAarsak shouldBe null
+                overstyrtInnvilgaMaanederBegrunnelse shouldBe null
+            }
+        }
 
-    @Test
-    fun `utledning av innvilga måneder med opphør`() {
-        val aarsoppgjoerFom = YearMonth.of(2024, 3)
-        val opphoerFom = YearMonth.of(2024, 7)
-        finnAntallInnvilgaMaanederForAar(aarsoppgjoerFom, opphoerFom) shouldBe 4
+        @Test
+        fun `utledning av innvilga måneder med opphør`() {
+            val grunnlag =
+                avkortinggrunnlagLagre(
+                    fom = YearMonth.of(2024, 3),
+                )
+            val opprettaAvkorting =
+                Avkorting().oppdaterMedInntektsgrunnlag(
+                    nyttGrunnlag = grunnlag,
+                    bruker = bruker,
+                    opphoerFom = YearMonth.of(2024, 7),
+                )
+            with(
+                opprettaAvkorting.aarsoppgjoer
+                    .single()
+                    .inntektsavkorting
+                    .single()
+                    .grunnlag,
+            ) {
+                innvilgaMaaneder shouldBe 4
+                overstyrtInnvilgaMaanederAarsak shouldBe null
+                overstyrtInnvilgaMaanederBegrunnelse shouldBe null
+            }
+        }
+
+        @Test
+        fun `utledning av overstyrt innvilga måneder`() {
+            val grunnlag =
+                avkortinggrunnlagLagre(
+                    fom = YearMonth.of(2024, 3),
+                    overstyrtInnvilgaMaaneder =
+                        AvkortingOverstyrtInnvilgaMaanederDto(
+                            antall = 5,
+                            aarsak = OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG.name,
+                            begrunnelse = "Begrunnelse",
+                        ),
+                )
+            val opprettaAvkorting =
+                Avkorting().oppdaterMedInntektsgrunnlag(
+                    nyttGrunnlag = grunnlag,
+                    bruker = bruker,
+                )
+            with(
+                opprettaAvkorting.aarsoppgjoer
+                    .single()
+                    .inntektsavkorting
+                    .single()
+                    .grunnlag,
+            ) {
+                innvilgaMaaneder shouldBe 5
+                overstyrtInnvilgaMaanederAarsak shouldBe OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG
+                overstyrtInnvilgaMaanederBegrunnelse shouldBe "Begrunnelse"
+            }
+        }
     }
 }

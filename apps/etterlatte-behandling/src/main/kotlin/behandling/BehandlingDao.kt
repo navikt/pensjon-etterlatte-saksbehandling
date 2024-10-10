@@ -122,6 +122,25 @@ class BehandlingDao(
             }
         }
 
+    fun hentInnvilgaFoerstegangsbehandling(sakid: SakId): Foerstegangsbehandling? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT b.*, s.sakType, s.enhet, s.fnr 
+                        FROM behandling b
+                        INNER JOIN sak s ON b.sak_id = s.id
+                        WHERE sak_id = ? AND behandlingstype = 'FØRSTEGANGSBEHANDLING'
+                        AND status = 'IVERKSATT'
+                        """.trimIndent(),
+                    )
+
+                stmt.setLong(1, sakid)
+                stmt.executeQuery().singleOrNull { asFoerstegangsbehandling(this) }
+            }
+        }
+
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): List<BehandlingOgSak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {

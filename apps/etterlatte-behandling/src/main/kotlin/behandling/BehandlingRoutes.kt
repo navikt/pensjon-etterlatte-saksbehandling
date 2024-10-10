@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -40,7 +39,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -198,11 +196,7 @@ internal fun Route.behandlingRoutes(
                             }
                         }
 
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson(),
-                    )
+                    call.respond(FastsettVirkningstidspunktResponse.from(virkningstidspunkt))
                 } catch (e: TilstandException.UgyldigTilstand) {
                     logger.warn("Ugyldig tilstand for lagre virkningstidspunkt", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
@@ -227,11 +221,7 @@ internal fun Route.behandlingRoutes(
                         behandlingService.oppdaterUtlandstilknytning(behandlingId, utlandstilknytning)
                     }
 
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = utlandstilknytning.toJson(),
-                    )
+                    call.respond(utlandstilknytning)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     logger.warn("Ugyldig tilstand for lagre utlandstilknytning", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
@@ -261,11 +251,7 @@ internal fun Route.behandlingRoutes(
                         behandlingService.oppdaterViderefoertOpphoer(behandlingId, viderefoertOpphoer)
                     }
 
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = viderefoertOpphoer.toJson(),
-                    )
+                    call.respond(viderefoertOpphoer)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     logger.warn("Ugyldig tilstand for lagre videreført opphør", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
@@ -312,11 +298,7 @@ internal fun Route.behandlingRoutes(
                         )
                     }
 
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = boddEllerArbeidetUtlandet.toJson(),
-                    )
+                    call.respond(boddEllerArbeidetUtlandet)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     logger.warn("Ugyldig tilstand for lagre boddellerarbeidetutlandet", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")

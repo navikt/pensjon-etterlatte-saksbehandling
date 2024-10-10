@@ -11,6 +11,6 @@ export const ENHETER = {
 
 export type EnhetFilterKeys = keyof typeof ENHETER
 
-export function filtrerEnhet(enhetsFilter: EnhetFilterKeys): String {
+export function filtrerEnhet(enhetsFilter: EnhetFilterKeys): string {
   return enhetsFilter.substring(1)
 }

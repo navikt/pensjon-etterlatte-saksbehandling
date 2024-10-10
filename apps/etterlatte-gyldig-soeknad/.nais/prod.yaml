@@ -35,9 +35,6 @@ spec:
     requests:
       cpu: 25m
   replicas:
-    scalingStrategy:
-      cpu:
-        thresholdPercentage: 90
     max: 1
     min: 1
   kafka:

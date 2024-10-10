@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -46,6 +47,7 @@ data class Utbetalingsvedtak(
                                 ),
                             beloep = it.beloep,
                             type = it.type.toUtbetalingsperiodeType(),
+                            regelverk = it.regelverk,
                         )
                     },
                 vedtakFattet =
@@ -97,6 +99,7 @@ data class Utbetalingsperiode(
     val periode: Periode,
     val beloep: BigDecimal?,
     val type: UtbetalingsperiodeType,
+    val regelverk: Regelverk?,
 )
 
 data class VedtakFattet(

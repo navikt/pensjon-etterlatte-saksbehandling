@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling
 
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -61,8 +62,10 @@ fun utbetalingsvedtak(
                 periode = Periode(fom = YearMonth.of(2022, 1), null),
                 beloep = BigDecimal.valueOf(2000),
                 type = UtbetalingsperiodeType.UTBETALING,
+                regelverk = Regelverk.REGELVERK_TOM_DES_2023,
             ),
         ),
+    sakType: Saktype = Saktype.BARNEPENSJON,
 ) = Utbetalingsvedtak(
     vedtakId = vedtakId,
     behandling =
@@ -75,7 +78,7 @@ fun utbetalingsvedtak(
         Sak(
             id = 1,
             ident = "12345678913",
-            sakType = Saktype.BARNEPENSJON,
+            sakType = sakType,
         ),
     vedtakFattet =
         VedtakFattet(

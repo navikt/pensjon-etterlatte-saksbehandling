@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.DatabaseExtension
@@ -274,9 +275,27 @@ internal class UtbetalingDaoIntegrationTest(
         val periode = Periode(YearMonth.now(), null)
         val utbetalingslinjeIder =
             listOf(
-                Utbetalingsperiode(1L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
-                Utbetalingsperiode(2L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
-                Utbetalingsperiode(3L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
+                Utbetalingsperiode(
+                    1L,
+                    periode,
+                    BigDecimal(1000),
+                    UtbetalingsperiodeType.UTBETALING,
+                    Regelverk.fraDato(periode.fom.atDay(1)),
+                ),
+                Utbetalingsperiode(
+                    2L,
+                    periode,
+                    BigDecimal(1000),
+                    UtbetalingsperiodeType.UTBETALING,
+                    Regelverk.fraDato(periode.fom.atDay(1)),
+                ),
+                Utbetalingsperiode(
+                    3L,
+                    periode,
+                    BigDecimal(1000),
+                    UtbetalingsperiodeType.UTBETALING,
+                    Regelverk.fraDato(periode.fom.atDay(1)),
+                ),
             )
         val utbetalingslinjer =
             utbetalingDao.hentDupliserteUtbetalingslinjer(

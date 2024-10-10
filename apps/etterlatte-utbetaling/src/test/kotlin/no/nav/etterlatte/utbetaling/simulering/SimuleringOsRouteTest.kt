@@ -10,11 +10,13 @@ import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -24,6 +26,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.utbetaling.BehandlingKlient
 import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingToggles
 import no.nav.etterlatte.utbetaling.utbetalingRoutes
 import no.nav.etterlatte.utbetaling.vedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -58,6 +61,10 @@ class SimuleringOsRouteTest {
             vedtaksvurderingKlient,
             simuleringDao,
             simuleringOsKlient,
+            featureToggleService =
+                mockk {
+                    every { isEnabled(UtbetalingToggles.BRUK_REGELVERK_FOR_KLASSIFIKASJONSKODE, any()) } returns true
+                },
         )
 
     @BeforeAll

@@ -7,10 +7,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import org.slf4j.LoggerFactory
 
 class Brevdistribuerer(
-    val db: BrevRepository,
-    val distribusjonService: DistribusjonService,
+    private val db: BrevRepository,
+    private val distribusjonService: DistribusjonService,
 ) {
-    val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun distribuer(
         brevId: BrevID,

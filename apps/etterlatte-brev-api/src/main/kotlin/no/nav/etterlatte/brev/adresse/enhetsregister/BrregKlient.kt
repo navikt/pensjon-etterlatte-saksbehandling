@@ -11,10 +11,10 @@ import io.ktor.http.isSuccess
 import org.slf4j.LoggerFactory
 
 class BrregKlient(
-    val httpClient: HttpClient,
-    val host: String,
+    private val httpClient: HttpClient,
+    private val host: String,
 ) {
-    val logger = LoggerFactory.getLogger(BrregService::class.java)
+    private val logger = LoggerFactory.getLogger(BrregService::class.java)
 
     suspend fun hentEnheter(): List<Enhet> {
         try {

@@ -54,7 +54,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class BrevRepository(
-    val ds: DataSource,
+    private val ds: DataSource,
 ) {
     fun hentBrev(id: BrevID): Brev =
         using(sessionOf(ds)) {
@@ -408,7 +408,7 @@ class BrevRepository(
         ).asUpdate,
     )
 
-    val tilBrev: (Row) -> Brev = { row ->
+    private val tilBrev: (Row) -> Brev = { row ->
         Brev(
             id = row.long("id"),
             sakId = row.long("sak_id"),
@@ -445,7 +445,7 @@ class BrevRepository(
         )
     }
 
-    val tilInnhold: (Row) -> BrevInnhold = { row ->
+    private val tilInnhold: (Row) -> BrevInnhold = { row ->
         BrevInnhold(
             row.stringOrNull("tittel") ?: "Tittel mangler",
             row.string("spraak").let { Spraak.valueOf(it) },
@@ -453,13 +453,13 @@ class BrevRepository(
         )
     }
 
-    val tilPdf: (Row) -> Pdf? = { row -> Pdf(row.bytes("bytes")) }
+    private val tilPdf: (Row) -> Pdf? = { row -> Pdf(row.bytes("bytes")) }
 
-    val tilPayload: (Row) -> Slate? = { row ->
+    private val tilPayload: (Row) -> Slate? = { row ->
         row.stringOrNull("payload")?.let { deserialize<Slate>(it) }
     }
 
-    val tilPayloadVedlegg: (Row) -> List<BrevInnholdVedlegg>? = { row ->
+    private val tilPayloadVedlegg: (Row) -> List<BrevInnholdVedlegg>? = { row ->
         row.stringOrNull("payload_vedlegg")?.let { deserialize<List<BrevInnholdVedlegg>>(it) }
     }
 

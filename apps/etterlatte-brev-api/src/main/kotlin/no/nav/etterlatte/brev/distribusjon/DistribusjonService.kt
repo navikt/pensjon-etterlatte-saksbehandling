@@ -18,8 +18,8 @@ interface DistribusjonService {
 }
 
 internal class DistribusjonServiceImpl(
-    val klient: DistribusjonKlient,
-    val db: BrevRepository,
+    private val klient: DistribusjonKlient,
+    private val db: BrevRepository,
 ) : DistribusjonService {
     override fun distribuerJournalpost(
         brevId: Long,

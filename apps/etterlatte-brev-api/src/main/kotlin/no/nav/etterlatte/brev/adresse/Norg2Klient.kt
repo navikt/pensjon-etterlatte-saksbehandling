@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 
 class Norg2Klient(
-    val apiUrl: String,
-    val klient: HttpClient,
+    private val apiUrl: String,
+    private val klient: HttpClient,
 ) {
-    val logger = LoggerFactory.getLogger(Norg2Klient::class.java)
+    private val logger = LoggerFactory.getLogger(Norg2Klient::class.java)
 
-    val cache =
+    private val cache =
         Caffeine
             .newBuilder()
             .expireAfterWrite(Duration.ofDays(1))

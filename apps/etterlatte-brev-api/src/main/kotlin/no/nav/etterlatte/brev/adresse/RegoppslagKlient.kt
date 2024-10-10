@@ -18,12 +18,12 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 
 class RegoppslagKlient(
-    val client: HttpClient,
-    val url: String,
+    private val client: HttpClient,
+    private val url: String,
 ) {
-    val logger = LoggerFactory.getLogger(RegoppslagKlient::class.java)
+    private val logger = LoggerFactory.getLogger(RegoppslagKlient::class.java)
 
-    val cache =
+    private val cache =
         Caffeine
             .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(15))

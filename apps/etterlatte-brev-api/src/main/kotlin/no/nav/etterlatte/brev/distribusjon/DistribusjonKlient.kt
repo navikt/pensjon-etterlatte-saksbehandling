@@ -16,10 +16,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselExceptio
 import org.slf4j.LoggerFactory
 
 class DistribusjonKlient(
-    val client: HttpClient,
-    val url: String,
+    private val client: HttpClient,
+    private val url: String,
 ) {
-    val logger = LoggerFactory.getLogger(DistribusjonKlient::class.java)
+    private val logger = LoggerFactory.getLogger(DistribusjonKlient::class.java)
 
     internal suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse =
         try {

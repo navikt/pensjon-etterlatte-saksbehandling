@@ -19,11 +19,11 @@ import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 class BrevbakerKlient(
-    val client: HttpClient,
-    val apiUrl: String,
+    private val client: HttpClient,
+    private val apiUrl: String,
 ) {
-    val logger = LoggerFactory.getLogger(BrevbakerKlient::class.java)
-    val sikkerlogg = sikkerlogger()
+    private val logger = LoggerFactory.getLogger(BrevbakerKlient::class.java)
+    private val sikkerlogg = sikkerlogger()
 
     suspend fun genererPdf(brevRequest: BrevbakerRequest): BrevbakerPdfResponse =
         try {

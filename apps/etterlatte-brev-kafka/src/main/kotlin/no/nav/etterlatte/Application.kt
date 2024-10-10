@@ -11,7 +11,6 @@ import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.SamordningsnotatRiver
-import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
@@ -61,7 +60,6 @@ class ApplicationBuilder {
                 rapidsConnection,
             )
             JournalfoerVedtaksbrevRiver(rapidsConnection, brevapiKlient)
-            VedtaksbrevUnderkjentRiver(rapidsConnection, brevapiKlient)
             DistribuerBrevRiver(rapidsConnection, brevapiKlient)
             SamordningsnotatRiver(rapidsConnection, brevapiKlient)
         }

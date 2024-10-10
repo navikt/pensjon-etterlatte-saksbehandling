@@ -68,7 +68,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -203,18 +202,6 @@ internal class VedtaksbrevServiceTest {
             brev shouldBe forventetBrev
 
             verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK) }
-        }
-
-        @Test
-        fun `Sletting av brev`() {
-            every { db.settBrevOppdatert(any(), any()) } returns true
-
-            val vedtak = """{}""".toJsonNode()
-            val gjenaapnetOK = vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak)
-
-            gjenaapnetOK shouldBe true
-
-            verify { db.settBrevOppdatert(1, vedtak) }
         }
 
         @Test

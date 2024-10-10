@@ -15,7 +15,6 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevOgVedtakDto
 import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
@@ -125,27 +124,6 @@ class BrevapiKlient(
         try {
             logger.info("Henter vedtaksbrev for behandlingid $behandlingId")
             return httpClient.get("$baseUrl/api/brev/behandling/$behandlingId/vedtak").body<Brev?>()
-        } catch (e: ResponseException) {
-            logger.error("Kunne ikke hente vedtaksbrev for behandling $behandlingId", e)
-
-            throw ForespoerselException(
-                status = e.response.status.value,
-                code = "UKJENT_FEIL_HENT_VEDTAKSBREV",
-                detail = "Kunne ikke hente vedtaksbrev for behandlingid: $behandlingId",
-            )
-        }
-    }
-
-    internal suspend fun fjernFerdigstiltStatusUnderkjentVedtak(
-        brevOgVedtakDto: BrevOgVedtakDto,
-        behandlingId: UUID,
-    ) {
-        try {
-            logger.info("Henter vedtaksbrev for behandlingid $behandlingId")
-            httpClient.post("$baseUrl/api/brev/behandling/$behandlingId/fjern-ferdigstilt") {
-                contentType(ContentType.Application.Json)
-                setBody(brevOgVedtakDto.toJson())
-            }
         } catch (e: ResponseException) {
             logger.error("Kunne ikke hente vedtaksbrev for behandling $behandlingId", e)
 

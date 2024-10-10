@@ -396,8 +396,8 @@ class BeregnBarnepensjonService(
 class BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(
-        code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_IKKE_VALGT",
-        detail = "Barnepensjon beregningsgrunnlag har dato for kun en juridisk forelder, men ikke persongalleriet",
+        code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_MANGLER_I_PERSONGALLERI",
+        detail = "Beregningsgrunnlag kun en juridisk forelder angitt, men det mangler i persongalleriet",
         meta = mapOf("behandlingId" to behandlingId),
     )
 

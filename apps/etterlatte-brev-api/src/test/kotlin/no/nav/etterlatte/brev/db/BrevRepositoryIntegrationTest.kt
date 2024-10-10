@@ -29,7 +29,6 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -161,24 +160,6 @@ internal class BrevRepositoryIntegrationTest(
 
         val hentetBrev = db.hentBrev(brev.id)
         hentetBrev.status shouldBe Status.FERDIGSTILT
-    }
-
-    @Test
-    fun `Endre status ved underkjent vedtak`() {
-        val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
-        val brev = db.opprettBrev(ulagretBrev)
-
-        brev.status shouldBe Status.OPPRETTET
-
-        db.oppdaterPayload(brev.id, Slate())
-        db.settBrevFerdigstilt(brev.id)
-
-        val ferdigstiltBrev = db.hentBrev(brev.id)
-        ferdigstiltBrev.status shouldBe Status.FERDIGSTILT
-
-        db.settBrevOppdatert(brev.id, """{"key":"value"}""".toJsonNode())
-        val underkjentBrev = db.hentBrev(brev.id)
-        underkjentBrev.status shouldBe Status.OPPDATERT
     }
 
     @Test

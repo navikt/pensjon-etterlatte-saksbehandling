@@ -132,15 +132,15 @@ export const slettViderefoertOpphoer = async (args: { behandlingId: string }): P
 export const lagreBoddEllerArbeidetUtlandet = async (args: {
   behandlingId: string
   begrunnelse: string
-  svar: boolean
-  boddArbeidetIkkeEosEllerAvtaleland?: boolean
-  boddArbeidetEosNordiskKonvensjon?: boolean
-  boddArbeidetAvtaleland?: boolean
-  vurdereAvoededsTrygdeavtale?: boolean
-  skalSendeKravpakke?: boolean
+  boddEllerArbeidetUtlandet: boolean
+  boddArbeidetIkkeEosEllerAvtaleland: boolean
+  boddArbeidetEosNordiskKonvensjon: boolean
+  boddArbeidetAvtaleland: boolean
+  vurdereAvoededsTrygdeavtale: boolean
+  skalSendeKravpakke: boolean
 }): Promise<ApiResponse<IBoddEllerArbeidetUtlandet>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/boddellerarbeidetutlandet`, {
-    boddEllerArbeidetUtlandet: args.svar,
+    boddEllerArbeidetUtlandet: args.boddEllerArbeidetUtlandet,
     begrunnelse: args.begrunnelse,
     boddArbeidetIkkeEosEllerAvtaleland: args.boddArbeidetIkkeEosEllerAvtaleland,
     boddArbeidetEosNordiskKonvensjon: args.boddArbeidetEosNordiskKonvensjon,

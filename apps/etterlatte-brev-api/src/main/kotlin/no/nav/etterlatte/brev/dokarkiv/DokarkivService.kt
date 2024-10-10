@@ -30,9 +30,9 @@ interface DokarkivService {
 }
 
 internal class DokarkivServiceImpl(
-    private val client: DokarkivKlient,
+    val client: DokarkivKlient,
 ) : DokarkivService {
-    private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
+    val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
     override suspend fun journalfoer(request: OpprettJournalpost): OpprettJournalpostResponse {
         logger.info("Oppretter journalpost med eksternReferanseId: ${request.eksternReferanseId}")

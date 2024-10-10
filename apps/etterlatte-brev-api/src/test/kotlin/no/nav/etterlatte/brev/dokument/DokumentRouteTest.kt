@@ -26,10 +26,10 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DokumentRouteTest {
-    private val mockOAuth2Server = MockOAuth2Server()
-    private val tilgangssjekker = mockk<Tilgangssjekker>()
-    private val safService = mockk<SafService>()
-    private val dokarkivService = mockk<DokarkivService>()
+    val mockOAuth2Server = MockOAuth2Server()
+    val tilgangssjekker = mockk<Tilgangssjekker>()
+    val safService = mockk<SafService>()
+    val dokarkivService = mockk<DokarkivService>()
 
     @BeforeAll
     fun before() {
@@ -95,5 +95,5 @@ internal class DokumentRouteTest {
         verify { safService wasNot Called }
     }
 
-    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+    val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 }

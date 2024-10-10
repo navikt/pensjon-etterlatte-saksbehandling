@@ -8,7 +8,7 @@ class ManglerPayloadForVedleggInnholdBrev(
     override val detail: String,
 ) : InternfeilException(detail)
 
-private val logger = LoggerFactory.getLogger(InnholdMedVedlegg::class.java)
+val logger = LoggerFactory.getLogger(InnholdMedVedlegg::class.java)
 
 data class InnholdMedVedlegg(
     val innhold: () -> List<Slate.Element>,

@@ -20,16 +20,16 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class Norg2KlientTest {
-    private val porsgrunnEnhetJson = javaClass.getResource("/norg2/porsgrunn_enhet.json")!!.readText()
-    private val porsgrunnKontaktinfoJson = javaClass.getResource("/norg2/porsgrunn_kontaktinfo.json")!!.readText()
-    private val errorJson = "{\"field\": null, \"message\": \"Enheten med nummeret '1234' eksisterer ikke\"}"
-    private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+    val porsgrunnEnhetJson = javaClass.getResource("/norg2/porsgrunn_enhet.json")!!.readText()
+    val porsgrunnKontaktinfoJson = javaClass.getResource("/norg2/porsgrunn_kontaktinfo.json")!!.readText()
+    val errorJson = "{\"field\": null, \"message\": \"Enheten med nummeret '1234' eksisterer ikke\"}"
+    val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
-    private val klient = mockHttpClient()
+    val klient = mockHttpClient()
 
     companion object {
-        private val PORSGRUNN = Enheter.PORSGRUNN.enhetNr
-        private val UKJENT = Enhetsnummer.ukjent
+        val PORSGRUNN = Enheter.PORSGRUNN.enhetNr
+        val UKJENT = Enhetsnummer.ukjent
     }
 
     @Test

@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.distribusjon
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.accept
 import io.ktor.client.request.post
@@ -10,16 +11,15 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.network.sockets.SocketTimeoutException
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
 import org.slf4j.LoggerFactory
 
 class DistribusjonKlient(
-    private val client: HttpClient,
-    private val url: String,
+    val client: HttpClient,
+    val url: String,
 ) {
-    private val logger = LoggerFactory.getLogger(DistribusjonKlient::class.java)
+    val logger = LoggerFactory.getLogger(DistribusjonKlient::class.java)
 
     internal suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse =
         try {

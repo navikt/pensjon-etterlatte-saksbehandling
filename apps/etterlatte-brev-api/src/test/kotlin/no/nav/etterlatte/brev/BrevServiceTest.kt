@@ -39,23 +39,23 @@ import java.util.UUID
 import kotlin.random.Random
 
 internal class BrevServiceTest {
-    private val db = mockk<BrevRepository>(relaxed = true)
-    private val brevbaker = mockk<BrevbakerKlient>()
-    private val sakOgBehandlingService = mockk<BrevdataFacade>()
-    private val adresseService = mockk<AdresseService>()
-    private val journalfoerBrevService = mockk<JournalfoerBrevService>()
-    private val distribusjonService = mockk<DistribusjonServiceImpl>()
-    private val brevDataFacade = mockk<BrevdataFacade>()
-    private val pdfGenerator = mockk<PDFGenerator>()
-    private val brevbakerService = mockk<BrevbakerService>()
-    private val behandlingService = mockk<BehandlingService>()
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
-    private val innholdTilRedigerbartBrevHenter =
+    val db = mockk<BrevRepository>(relaxed = true)
+    val brevbaker = mockk<BrevbakerKlient>()
+    val sakOgBehandlingService = mockk<BrevdataFacade>()
+    val adresseService = mockk<AdresseService>()
+    val journalfoerBrevService = mockk<JournalfoerBrevService>()
+    val distribusjonService = mockk<DistribusjonServiceImpl>()
+    val brevDataFacade = mockk<BrevdataFacade>()
+    val pdfGenerator = mockk<PDFGenerator>()
+    val brevbakerService = mockk<BrevbakerService>()
+    val behandlingService = mockk<BehandlingService>()
+    val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
+    val innholdTilRedigerbartBrevHenter =
         InnholdTilRedigerbartBrevHenter(brevDataFacade, brevbakerService, adresseService, redigerbartVedleggHenter)
-    private val brevoppretter =
+    val brevoppretter =
         Brevoppretter(adresseService, db, innholdTilRedigerbartBrevHenter)
 
-    private val brevService =
+    val brevService =
         BrevService(
             db,
             brevoppretter,
@@ -65,7 +65,7 @@ internal class BrevServiceTest {
             mockk(),
         )
 
-    private val bruker = simpleSaksbehandler("Z123456")
+    val bruker = simpleSaksbehandler("Z123456")
 
     @BeforeEach
     fun before() {

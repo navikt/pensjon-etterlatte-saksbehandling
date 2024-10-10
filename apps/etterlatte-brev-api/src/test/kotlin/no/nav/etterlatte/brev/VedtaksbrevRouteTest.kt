@@ -49,9 +49,9 @@ import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksbrevRouteTest {
-    private val mockOAuth2Server = MockOAuth2Server()
-    private val vedtaksbrevService = mockk<VedtaksbrevService>()
-    private val tilgangssjekker = mockk<Tilgangssjekker>()
+    val mockOAuth2Server = MockOAuth2Server()
+    val vedtaksbrevService = mockk<VedtaksbrevService>()
+    val tilgangssjekker = mockk<Tilgangssjekker>()
 
     @BeforeAll
     fun before() {
@@ -229,7 +229,7 @@ internal class VedtaksbrevRouteTest {
         }
     }
 
-    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+    val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     private fun opprettBrev() =
         Brev(
@@ -263,8 +263,8 @@ internal class VedtaksbrevRouteTest {
         }
 
     companion object {
-        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
-        private val BEHANDLING_ID = UUID.randomUUID()
-        private val SAK_ID = randomSakId()
+        val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+        val BEHANDLING_ID = UUID.randomUUID()
+        val SAK_ID = randomSakId()
     }
 }

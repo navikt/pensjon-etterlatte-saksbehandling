@@ -58,13 +58,13 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BrevdataFacadeImplTest {
-    private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
-    private val grunnlagService = mockk<GrunnlagService>()
-    private val beregningService = mockk<BeregningService>()
-    private val behandlingService = mockk<BehandlingService>()
-    private val trygdetidService = mockk<TrygdetidService>()
+    val vedtaksvurderingService = mockk<VedtaksvurderingService>()
+    val grunnlagService = mockk<GrunnlagService>()
+    val beregningService = mockk<BeregningService>()
+    val behandlingService = mockk<BehandlingService>()
+    val trygdetidService = mockk<TrygdetidService>()
 
-    private val service =
+    val service =
         BrevdataFacade(
             vedtaksvurderingService,
             grunnlagService,
@@ -287,14 +287,14 @@ internal class BrevdataFacadeImplTest {
     private fun hentBrevutfall() = null
 
     private companion object {
-        private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
-        private val STATISK_UUID = UUID.randomUUID()
-        private val BEHANDLING_ID = UUID.randomUUID()
-        private val ENHET = Enheter.defaultEnhet.enhetNr
+        val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
+        val STATISK_UUID = UUID.randomUUID()
+        val BEHANDLING_ID = UUID.randomUUID()
+        val ENHET = Enheter.defaultEnhet.enhetNr
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
+        val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAKSIDNUMMER = 123L
-        private val SAK_ID = tilSakId(SAKSIDNUMMER)
+        val SAK_ID = tilSakId(SAKSIDNUMMER)
     }
 }

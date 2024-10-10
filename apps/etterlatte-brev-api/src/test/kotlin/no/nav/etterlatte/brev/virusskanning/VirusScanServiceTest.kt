@@ -11,7 +11,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 internal class VirusScanServiceTest {
-    private val clamAv = mockk<ClamAvClient>()
+    val clamAv = mockk<ClamAvClient>()
 
     @BeforeEach
     internal fun `Set up`() {

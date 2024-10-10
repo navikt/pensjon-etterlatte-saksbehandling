@@ -20,10 +20,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import org.slf4j.LoggerFactory
 
 class DokarkivKlient(
-    private val client: HttpClient,
-    private val url: String,
+    val client: HttpClient,
+    val url: String,
 ) {
-    private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
+    val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
     internal suspend fun opprettJournalpost(
         request: OpprettJournalpost,

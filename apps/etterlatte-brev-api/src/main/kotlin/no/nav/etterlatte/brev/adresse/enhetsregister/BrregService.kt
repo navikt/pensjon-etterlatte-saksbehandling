@@ -6,11 +6,11 @@ import java.time.Duration
 import java.time.LocalDate
 
 class BrregService(
-    private val klient: BrregKlient,
+    val klient: BrregKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(BrregService::class.java)
+    val logger = LoggerFactory.getLogger(BrregService::class.java)
 
-    private val cache =
+    val cache =
         Caffeine
             .newBuilder()
             .expireAfterWrite(Duration.ofDays(1))

@@ -10,9 +10,9 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 class SafService(
-    private val safKlient: SafKlient,
+    val safKlient: SafKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun hentDokumentPDF(
         journalpostId: String,

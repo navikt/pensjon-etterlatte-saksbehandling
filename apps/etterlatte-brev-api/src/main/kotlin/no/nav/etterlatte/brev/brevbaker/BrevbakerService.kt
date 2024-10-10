@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory
 import java.util.Base64
 
 class BrevbakerService(
-    private val brevbakerKlient: BrevbakerKlient,
+    val brevbakerKlient: BrevbakerKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun genererPdf(
         brevID: BrevID?,

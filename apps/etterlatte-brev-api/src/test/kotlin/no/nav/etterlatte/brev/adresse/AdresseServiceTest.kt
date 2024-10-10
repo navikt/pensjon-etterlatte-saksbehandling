@@ -18,11 +18,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class AdresseServiceTest {
-    private val norg2Mock = mockk<Norg2Klient>()
-    private val saksbehandlerKlient = mockk<SaksbehandlerKlient>()
-    private val regoppslagMock = mockk<RegoppslagKlient>()
+    val norg2Mock = mockk<Norg2Klient>()
+    val saksbehandlerKlient = mockk<SaksbehandlerKlient>()
+    val regoppslagMock = mockk<RegoppslagKlient>()
 
-    private val adresseService = AdresseService(norg2Mock, saksbehandlerKlient, regoppslagMock)
+    val adresseService = AdresseService(norg2Mock, saksbehandlerKlient, regoppslagMock)
 
     @BeforeEach
     fun before() {
@@ -105,7 +105,7 @@ internal class AdresseServiceTest {
         )
 
     companion object {
-        private val ANSVARLIG_ENHET = Enheter.defaultEnhet.enhetNr
+        val ANSVARLIG_ENHET = Enheter.defaultEnhet.enhetNr
         private const val SAKSBEHANDLER = "Z123456"
         private const val ATTESTANT = "Z00002"
     }

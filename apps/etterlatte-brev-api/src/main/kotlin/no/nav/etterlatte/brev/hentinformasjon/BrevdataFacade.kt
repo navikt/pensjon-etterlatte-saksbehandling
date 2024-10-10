@@ -29,11 +29,11 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BrevdataFacade(
-    private val vedtaksvurderingService: VedtaksvurderingService,
-    private val grunnlagService: GrunnlagService,
-    private val behandlingService: BehandlingService,
+    val vedtaksvurderingService: VedtaksvurderingService,
+    val grunnlagService: GrunnlagService,
+    val behandlingService: BehandlingService,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(BrevdataFacade::class.java)
+    val logger: Logger = LoggerFactory.getLogger(BrevdataFacade::class.java)
 
     suspend fun hentGenerellBrevData(
         sakId: SakId,

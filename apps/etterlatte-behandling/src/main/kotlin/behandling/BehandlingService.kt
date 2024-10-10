@@ -683,6 +683,7 @@ internal class BehandlingServiceImpl(
             sendeBrev = behandling.sendeBrev,
             viderefoertOpphoer = viderefoertOpphoer,
             tidligereFamiliepleier = behandling.tidligereFamiliepleier,
+            erSluttbehandling = behandling.erSluttbehandling(),
         )
     }
 

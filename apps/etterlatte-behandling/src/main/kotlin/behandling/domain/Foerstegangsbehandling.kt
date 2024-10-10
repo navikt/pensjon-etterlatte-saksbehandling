@@ -36,6 +36,7 @@ data class Foerstegangsbehandling(
     override val sendeBrev: Boolean,
     override val opphoerFraOgMed: YearMonth? = null,
     override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
+    val erSluttbehandling: Boolean = false,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 
@@ -47,6 +48,8 @@ data class Foerstegangsbehandling(
             SakType.OMSTILLINGSSTOENAD ->
                 (virkningstidspunkt != null) && (gyldighetsproeving != null)
         }
+
+    override fun erSluttbehandling(): Boolean = this.erSluttbehandling
 
     fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Foerstegangsbehandling =
         hvisRedigerbar {

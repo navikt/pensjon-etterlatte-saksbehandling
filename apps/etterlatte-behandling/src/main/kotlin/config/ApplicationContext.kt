@@ -585,6 +585,7 @@ internal class ApplicationContext(
             migreringKlient = migreringKlient,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             vilkaarsvurderingService = vilkaarsvurderingService,
+            behandlingInfoService = behandlingInfoService,
         )
 
     val migreringService =

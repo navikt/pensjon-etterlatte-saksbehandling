@@ -42,4 +42,5 @@ data class DetaljertBehandlingDto(
     val sendeBrev: Boolean,
     val viderefoertOpphoer: ViderefoertOpphoer?,
     val tidligereFamiliepleier: TidligereFamiliepleier?,
+    val erSluttbehandling: Boolean,
 )

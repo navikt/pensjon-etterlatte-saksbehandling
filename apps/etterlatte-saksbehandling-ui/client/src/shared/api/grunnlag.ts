@@ -5,6 +5,9 @@ import { KildePdl } from '~shared/types/kilde'
 import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { SakType } from '~shared/types/sak'
 
+export const getGrunnlagFinnes = async (sakId: number): Promise<ApiResponse<boolean>> =>
+  apiClient.get(`/grunnlag/sak/${sakId}/grunnlag-finnes`)
+
 export const getGrunnlagsAvOpplysningstype = async (args: {
   sakId: number
   behandlingId: string

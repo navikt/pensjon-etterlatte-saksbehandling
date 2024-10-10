@@ -33,7 +33,6 @@ export const hentSakForPerson = async (args: {
   opprettHvisIkkeFinnes?: boolean
 }): Promise<ApiResponse<ISak>> => {
   if (args.opprettHvisIkkeFinnes) {
-    // TODO: Fjerne når søknad gjenlevendepensjon ikke lenger må behandles
     return apiClient.post(`/personer/sak/${args.type}?opprettHvisIkkeFinnes=true`, { foedselsnummer: args.fnr })
   } else {
     return apiClient.post(`/personer/sak/${args.type}`, { foedselsnummer: args.fnr })

@@ -107,4 +107,30 @@ class GrunnlagKlient(
             )
         }
     }
+
+    internal suspend fun finnesGrunnlagForSak(
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): Boolean {
+        try {
+            logger.info("Oppdaterer grunnlag for sak med id=$sakId")
+
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$baseUrl/api/grunnlag/sak/$sakId/grunnlag-finnes"),
+                    bruker,
+                ).mapBoth(
+                    success = { deserialize(it.response!!.toString()) },
+                    failure = { throw it },
+                )
+        } catch (e: ResponseException) {
+            logger.error("Sjekk på om grunnlag finnes feilet (sakId=$sakId)", e)
+
+            throw ForespoerselException(
+                status = e.response.status.value,
+                code = "UKJENT_FEIL_FINNES_GRUNNLAG",
+                detail = "Sjekk på om grunnlag finnes feilet",
+            )
+        }
+    }
 }

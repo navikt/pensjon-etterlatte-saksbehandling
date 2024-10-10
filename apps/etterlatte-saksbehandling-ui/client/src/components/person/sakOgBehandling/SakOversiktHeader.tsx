@@ -16,6 +16,7 @@ import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTypeTag'
+import { OpprettSaksgrunnlag } from '~components/person/sakOgBehandling/OpprettSaksgrunnlag'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -115,6 +116,8 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
             </>
           ),
       })}
+
+      {!behandlinger.length && <OpprettSaksgrunnlag sak={sak} />}
     </VStack>
   )
 }

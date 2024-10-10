@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface GrunnlagService {
+    fun grunnlagFinnesForSak(sakId: SakId): Boolean
+
     fun hentGrunnlagAvType(
         behandlingId: UUID,
         opplysningstype: Opplysningstype,
@@ -115,6 +117,14 @@ class RealGrunnlagService(
     private val grunnlagHenter: GrunnlagHenter,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
+
+    override fun grunnlagFinnesForSak(sakId: SakId): Boolean {
+        logger.info("Sjekker om det finnes grunnlag for sak=$sakId")
+
+        return opplysningDao
+            .finnesGrunnlagForSak(sakId)
+            .also { logger.info("Grunnlag finnes '$it' for sak=$sakId") }
+    }
 
     override fun hentOpplysningsgrunnlagForSak(sakId: SakId): Grunnlag? {
         val persongalleriJsonNode =

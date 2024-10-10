@@ -38,6 +38,7 @@ class BrevDataMapperFerdigstillVarsel(
             if (request.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
                 OmstillingsstoenadAktivitetspliktVarsel(
                     request.innholdMedVedlegg.innhold(),
+                    request.utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
                 )
             } else {
                 ManueltBrevMedTittelData(

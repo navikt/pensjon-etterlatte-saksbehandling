@@ -123,11 +123,22 @@ query(
                 ...metadata
             }
         }
-        foedsel {
+        foedselsdato {
             foedselsdato
+            foedselsaar
+            folkeregistermetadata{
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
+        foedested {
             foedeland
             foedested
-            foedselsaar
+            folkeregistermetadata{
+                ...folkeregistermetadata
+            }
             metadata {
                 ...metadata
             }

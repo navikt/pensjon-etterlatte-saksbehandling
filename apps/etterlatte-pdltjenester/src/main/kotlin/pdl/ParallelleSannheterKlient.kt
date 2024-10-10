@@ -89,7 +89,9 @@ class ParallelleSannheterKlient(
         )
     }
 
-    suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklar(pdlFoedsel, Avklaring.FOEDSEL)
+    suspend fun avklarFoedselsdato(pdlFoedselsdato: List<PdlFoedselsdato>) = avklar(pdlFoedselsdato, Avklaring.FOEDSELSDATO)
+
+    suspend fun avklarFoedested(pdlFoedested: List<PdlFoedested>) = avklarNullable(pdlFoedested, Avklaring.FOEDESTED)
 
     suspend fun avklarDoedsfall(pdlDoedsfall: List<PdlDoedsfall>) = avklarNullable(pdlDoedsfall, Avklaring.DOEDSFALL)
 
@@ -173,7 +175,8 @@ class ParallelleSannheterKlient(
         ADRESSEBESKYTTELSE("adressebeskyttelse"),
         STATSBORGERSKAP("statsborgerskap"),
         SIVILSTAND("sivilstand"),
-        FOEDSEL("foedsel"),
+        FOEDSELSDATO("foedselsdato"),
+        FOEDESTED("foedested"),
         DOEDSFALL("doedsfall"),
         BOSTEDSADRESSE("bostedsadresse"),
         DELTBOSTEDSADRESSE("deltbostedsadresse"),

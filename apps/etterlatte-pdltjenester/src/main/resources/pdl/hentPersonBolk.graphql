@@ -125,10 +125,15 @@ query(
                     ...metadata
                 }
             }
-            foedsel {
-                foedselsdato
+            foedested {
                 foedeland
                 foedested
+                metadata {
+                    ...metadata
+                }
+            }
+            foedselsdato {
+                foedselsdato
                 foedselsaar
                 metadata {
                     ...metadata

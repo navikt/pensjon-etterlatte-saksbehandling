@@ -10,10 +10,10 @@ import io.ktor.http.HttpHeaders
 import org.slf4j.LoggerFactory
 
 class ClamAvClient(
-    val httpClient: HttpClient,
-    val endpointUrl: String,
+    private val httpClient: HttpClient,
+    private val endpointUrl: String,
 ) {
-    val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun skann(request: ClamAVRequest): List<ScanResult> {
         val httpResponse =

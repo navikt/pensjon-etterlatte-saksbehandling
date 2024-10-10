@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory
 
 private const val MAKS_FILSTOERRELSE = 10 * 1024 * 1024
 
-val log: Logger = LoggerFactory.getLogger(VirusScanService::class.java)
+private val log: Logger = LoggerFactory.getLogger(VirusScanService::class.java)
 
 class VirusScanService(
-    val clamAvClient: ClamAvClient,
+    private val clamAvClient: ClamAvClient,
 ) {
     suspend fun filHarVirus(request: VirusScanRequest): Boolean {
         log.info("Skanner fil for virus: ${request.tittel}")

@@ -16,10 +16,9 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class DistribusjonServiceTest {
-    val mockKlient = mockk<DistribusjonKlient>()
-    val mockDb = mockk<BrevRepository>(relaxed = true)
-
-    val service = DistribusjonServiceImpl(mockKlient, mockDb)
+    private val mockKlient = mockk<DistribusjonKlient>()
+    private val mockDb = mockk<BrevRepository>(relaxed = true)
+    private val service = DistribusjonServiceImpl(mockKlient, mockDb)
 
     @BeforeEach
     fun before() {

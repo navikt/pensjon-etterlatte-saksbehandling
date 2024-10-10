@@ -46,7 +46,15 @@ import javax.sql.DataSource
 internal class BrevRepositoryIntegrationTest(
     val dataSource: DataSource,
 ) {
-    val db = BrevRepository(dataSource)
+    private val db = BrevRepository(dataSource)
+
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
+        private val PDF_BYTES = "Hello world!".toByteArray()
+        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+    }
 
     @AfterEach
     fun resetTablesAfterEachTest() {
@@ -464,12 +472,4 @@ internal class BrevRepositoryIntegrationTest(
                     landkode = "NOR",
                 ),
         )
-
-    companion object {
-        @RegisterExtension
-        val dbExtension = DatabaseExtension()
-
-        val PDF_BYTES = "Hello world!".toByteArray()
-        val STOR_SNERK = MottakerFoedselsnummer("11057523044")
-    }
 }

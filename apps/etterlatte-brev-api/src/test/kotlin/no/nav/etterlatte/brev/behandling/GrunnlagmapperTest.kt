@@ -29,10 +29,9 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class GrunnlagmapperTest {
-    val pdlVergeOekonomiskFnr = "17418340118"
-    val pdlVergePersonligFnr = "27458328671"
-
-    val adresseService = mockk<AdresseService>()
+    private val pdlVergeOekonomiskFnr = "17418340118"
+    private val pdlVergePersonligFnr = "27458328671"
+    private val adresseService = mockk<AdresseService>()
 
     @Test
     fun `mapVerge henter ukjent vergemaal hvis flere verger i grunnlag for søker`() {

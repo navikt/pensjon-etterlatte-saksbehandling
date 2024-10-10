@@ -8,11 +8,11 @@ class ManglerPayloadForVedleggInnholdBrev(
     override val detail: String,
 ) : InternfeilException(detail)
 
-val logger = LoggerFactory.getLogger(InnholdMedVedlegg::class.java)
+private val logger = LoggerFactory.getLogger(InnholdMedVedlegg::class.java)
 
 data class InnholdMedVedlegg(
-    val innhold: () -> List<Slate.Element>,
-    val innholdVedlegg: () -> List<BrevInnholdVedlegg>,
+    private val innhold: () -> List<Slate.Element>,
+    private val innholdVedlegg: () -> List<BrevInnholdVedlegg>,
 ) {
     fun finnVedlegg(key: BrevVedleggKey): List<Slate.Element> {
         val vedlegg = innholdVedlegg().find { vedlegg -> vedlegg.key == key }?.payload?.elements

@@ -93,32 +93,31 @@ import java.util.UUID
 import kotlin.random.Random
 
 internal class VedtaksbrevServiceTest {
-    val db = mockk<BrevRepository>(relaxed = true)
-    val brevbaker = mockk<BrevbakerKlient>()
-    val brevdataFacade = mockk<BrevdataFacade>()
-    val beregningService = mockk<BeregningService>()
-    val trygdetidService = mockk<TrygdetidService>()
-    val vedtaksvurderingService = mockk<VedtaksvurderingService>()
-    val adresseService = mockk<AdresseService>()
-    val dokarkivService = mockk<DokarkivServiceImpl>()
-    val migreringBrevDataService = MigreringBrevDataService(beregningService)
-    val brevKodeMappingVedtak = BrevKodeMapperVedtak()
-    val brevbakerService = mockk<BrevbakerService>()
-    val behandlingService = mockk<BehandlingService>()
-    val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
-    val pdfGenerator =
-        PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
-    val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
-    val innholdTilRedigerbartBrevHenter =
+    private val db = mockk<BrevRepository>(relaxed = true)
+    private val brevbaker = mockk<BrevbakerKlient>()
+    private val brevdataFacade = mockk<BrevdataFacade>()
+    private val beregningService = mockk<BeregningService>()
+    private val trygdetidService = mockk<TrygdetidService>()
+    private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
+    private val adresseService = mockk<AdresseService>()
+    private val dokarkivService = mockk<DokarkivServiceImpl>()
+    private val migreringBrevDataService = MigreringBrevDataService(beregningService)
+    private val brevKodeMappingVedtak = BrevKodeMapperVedtak()
+    private val brevbakerService = mockk<BrevbakerService>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
+    private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
+    private val innholdTilRedigerbartBrevHenter =
         InnholdTilRedigerbartBrevHenter(brevdataFacade, brevbakerService, adresseService, redigerbartVedleggHenter)
-    val brevoppretter =
+    private val brevoppretter =
         Brevoppretter(
             adresseService,
             db,
             innholdTilRedigerbartBrevHenter,
         )
 
-    val brevDataMapperFerdigstilling =
+    private val brevDataMapperFerdigstilling =
         spyk(
             BrevDataMapperFerdigstillingVedtak(
                 beregningService,
@@ -127,7 +126,7 @@ internal class VedtaksbrevServiceTest {
                 vilkaarsvurderingService,
             ),
         )
-    val vedtaksbrevService =
+    private val vedtaksbrevService =
         VedtaksbrevService(
             db,
             vedtaksvurderingService,

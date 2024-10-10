@@ -49,12 +49,15 @@ import java.util.UUID
 import kotlin.random.Random
 
 class JournalfoerBrevServiceTest {
-    val db = mockk<BrevRepository>(relaxed = true)
-    val behandlingService = mockk<BehandlingService>()
-    val dokarkivService = mockk<DokarkivService>()
-    val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val db = mockk<BrevRepository>(relaxed = true)
+    private val behandlingService = mockk<BehandlingService>()
+    private val dokarkivService = mockk<DokarkivService>()
+    private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val bruker = simpleSaksbehandler("Z123456")
 
-    val bruker = simpleSaksbehandler("Z123456")
+    private companion object {
+        private val BEHANDLING_ID = UUID.randomUUID()
+    }
 
     @AfterEach
     fun after() {
@@ -373,8 +376,4 @@ class JournalfoerBrevServiceTest {
             ansvarligEnhet = Enheter.defaultEnhet.enhetNr,
             saksbehandler = "EY",
         )
-
-    private companion object {
-        val BEHANDLING_ID = UUID.randomUUID()
-    }
 }

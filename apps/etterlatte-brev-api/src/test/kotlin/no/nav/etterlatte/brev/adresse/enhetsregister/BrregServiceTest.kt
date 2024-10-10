@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BrregServiceTest {
-    val mockKlient = mockk<BrregKlient>()
-    val service = spyk(BrregService(mockKlient))
+    private val mockKlient = mockk<BrregKlient>()
+    private val service = spyk(BrregService(mockKlient))
 
     @AfterEach
     fun afterEach() {

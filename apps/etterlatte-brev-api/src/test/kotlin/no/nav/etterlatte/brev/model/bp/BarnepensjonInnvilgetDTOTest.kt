@@ -31,8 +31,8 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BarnepensjonInnvilgetDTOTest {
-    val grunnbeloep = 118_620
-    val grunnbeloepPerMaaned = 9885
+    private val grunnbeloep = 118_620
+    private val grunnbeloepPerMaaned = 9885
 
     @Test
     fun `setter skille for etterbetaling`() {

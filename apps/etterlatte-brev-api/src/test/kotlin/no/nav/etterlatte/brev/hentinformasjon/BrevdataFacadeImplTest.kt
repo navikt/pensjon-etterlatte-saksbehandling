@@ -58,11 +58,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BrevdataFacadeImplTest {
-    val vedtaksvurderingService = mockk<VedtaksvurderingService>()
-    val grunnlagService = mockk<GrunnlagService>()
-    val beregningService = mockk<BeregningService>()
-    val behandlingService = mockk<BehandlingService>()
-    val trygdetidService = mockk<TrygdetidService>()
+    private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
+    private val grunnlagService = mockk<GrunnlagService>()
+    private val beregningService = mockk<BeregningService>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val trygdetidService = mockk<TrygdetidService>()
 
     val service =
         BrevdataFacade(

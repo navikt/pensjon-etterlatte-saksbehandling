@@ -53,13 +53,18 @@ import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRouteTest {
-    val mockOAuth2Server = MockOAuth2Server()
-    val brevService = mockk<BrevService>()
-    val pdfService = mockk<PDFService>()
-    val brevdistribuerer = mockk<Brevdistribuerer>()
-    val tilgangssjekker = mockk<Tilgangssjekker>()
-    val grunnlagService = mockk<GrunnlagService>()
-    val behandlingService = mockk<BehandlingService>()
+    private val mockOAuth2Server = MockOAuth2Server()
+    private val brevService = mockk<BrevService>()
+    private val pdfService = mockk<PDFService>()
+    private val brevdistribuerer = mockk<Brevdistribuerer>()
+    private val tilgangssjekker = mockk<Tilgangssjekker>()
+    private val grunnlagService = mockk<GrunnlagService>()
+    private val behandlingService = mockk<BehandlingService>()
+
+    companion object {
+        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+        private val SAK_ID = Random.nextLong(1000)
+    }
 
     @BeforeAll
     fun before() {
@@ -279,9 +284,4 @@ internal class BrevRouteTest {
                 behandlingService,
             )
         }
-
-    companion object {
-        val STOR_SNERK = MottakerFoedselsnummer("11057523044")
-        val SAK_ID = Random.nextLong(1000)
-    }
 }

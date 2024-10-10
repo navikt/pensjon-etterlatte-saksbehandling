@@ -64,7 +64,7 @@ internal class BrevdataFacadeImplTest {
     private val behandlingService = mockk<BehandlingService>()
     private val trygdetidService = mockk<TrygdetidService>()
 
-    private val service =
+    val service =
         BrevdataFacade(
             vedtaksvurderingService,
             grunnlagService,
@@ -287,14 +287,14 @@ internal class BrevdataFacadeImplTest {
     private fun hentBrevutfall() = null
 
     private companion object {
-        private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
-        private val STATISK_UUID = UUID.randomUUID()
-        private val BEHANDLING_ID = UUID.randomUUID()
-        private val ENHET = Enheter.defaultEnhet.enhetNr
+        val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
+        val STATISK_UUID = UUID.randomUUID()
+        val BEHANDLING_ID = UUID.randomUUID()
+        val ENHET = Enheter.defaultEnhet.enhetNr
         private const val SAKSBEHANDLER_IDENT = "Z1235"
-        private val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
+        val BRUKERTOKEN = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAKSIDNUMMER = 123L
-        private val SAK_ID = SakId(SAKSIDNUMMER)
+        val SAK_ID = SakId(SAKSIDNUMMER)
     }
 }

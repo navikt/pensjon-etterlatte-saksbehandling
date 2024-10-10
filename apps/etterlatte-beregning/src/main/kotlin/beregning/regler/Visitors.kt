@@ -1,9 +1,9 @@
 package no.nav.etterlatte.beregning.regler
 
-import Regelverk
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel1967
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel2024
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.regler.Node
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.SubsumsjonsNode

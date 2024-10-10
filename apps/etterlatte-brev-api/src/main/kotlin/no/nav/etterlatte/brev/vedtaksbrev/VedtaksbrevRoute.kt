@@ -13,7 +13,6 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.VedtakTilJournalfoering
-import no.nav.etterlatte.brev.model.BrevOgVedtakDto
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
@@ -44,22 +43,6 @@ fun Route.vedtaksbrevRoute(
             }
         }
 
-        post("fjern-ferdigstilt") {
-            kunSystembruker {
-                withBehandlingId(tilgangssjekker) { behandlingId ->
-                    val vedtakId = call.request.queryParameters["vedtakId"]
-                    logger.info("Vedtak (id=$vedtakId) er underkjent - åpner vedtaksbrev for nye endringer")
-                    val brevOgVedtakDto = call.receive<BrevOgVedtakDto>()
-                    val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(brevOgVedtakDto.vedtaksbrev.id, brevOgVedtakDto.vedtak)
-                    if (endretOK) {
-                        logger.info("Vedtaksbrev (id=${brevOgVedtakDto.vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
-                        call.respond(endretOK)
-                    } else {
-                        throw Exception("Kunne ikke åpne vedtaksbrev (id=${brevOgVedtakDto.vedtaksbrev.id}) for endringer")
-                    }
-                }
-            }
-        }
         get("vedtak") {
             withBehandlingId(tilgangssjekker) { behandlingId ->
                 logger.info("Henter vedtaksbrev for behandling (behandlingId=$behandlingId)")

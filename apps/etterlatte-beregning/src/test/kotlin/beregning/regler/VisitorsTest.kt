@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning.regler.beregning.regler
 
-import Regelverk
 import io.kotest.assertions.fail
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
@@ -8,6 +7,7 @@ import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.finnAnvendtRegelverkBarnepensjon
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag

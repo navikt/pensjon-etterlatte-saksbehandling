@@ -53,8 +53,11 @@ class JournalfoerBrevServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val dokarkivService = mockk<DokarkivService>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
-
     private val bruker = simpleSaksbehandler("Z123456")
+
+    private companion object {
+        private val BEHANDLING_ID = UUID.randomUUID()
+    }
 
     @AfterEach
     fun after() {
@@ -373,8 +376,4 @@ class JournalfoerBrevServiceTest {
             ansvarligEnhet = Enheter.defaultEnhet.enhetNr,
             saksbehandler = "EY",
         )
-
-    private companion object {
-        private val BEHANDLING_ID = UUID.randomUUID()
-    }
 }

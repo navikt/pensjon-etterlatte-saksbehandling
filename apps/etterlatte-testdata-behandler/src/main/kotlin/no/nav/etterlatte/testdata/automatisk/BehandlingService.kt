@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -192,8 +193,8 @@ class BehandlingService(
                                 behandlingId = behandling,
                                 aldersgruppe = if (sakType == SakType.BARNEPENSJON) Aldersgruppe.UNDER_18 else null,
                                 feilutbetaling = null,
-                                frivilligSkattetrekk = null,
-                                kilde = null,
+                                frivilligSkattetrekk = false,
+                                kilde = Grunnlagsopplysning.automatiskSaksbehandler,
                             ),
                     ),
                 ).mapBoth(

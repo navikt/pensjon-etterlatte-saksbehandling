@@ -3,6 +3,8 @@ package no.nav.etterlatte.utbetaling.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -78,6 +80,7 @@ class ApplicationContext(
             ),
             objectMapper = simuleringObjectMapper(),
         ),
+    val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load())),
 ) {
     private val clock = utcKlokke()
 
@@ -111,6 +114,7 @@ class ApplicationContext(
             utbetalingDao = utbetalingDao,
             clock = clock,
             vedtaksverifiserer = vedtaksverifiserer,
+            featureToggleService = featureToggleService,
         )
 
     val avstemmingsdataSender =
@@ -136,6 +140,7 @@ class ApplicationContext(
             vedtaksvurderingKlient,
             SimuleringDao(dataSource),
             simuleringOsKlient,
+            featureToggleService,
         )
 
     val leaderElection = LeaderElection(properties.leaderElectorPath)
@@ -187,6 +192,13 @@ class ApplicationContext(
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
 }
+
+private fun featureToggleProperties(config: Config) =
+    FeatureToggleProperties(
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        host = config.getString("funksjonsbrytere.unleash.host"),
+        apiKey = config.getString("funksjonsbrytere.unleash.token"),
+    )
 
 /**
  * Kjøreplan får vi en gang i året fra økonomi og brukes for konsistensavstemming

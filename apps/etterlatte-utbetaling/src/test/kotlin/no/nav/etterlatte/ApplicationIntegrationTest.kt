@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
@@ -21,6 +22,7 @@ import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.config.ApplicationProperties
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingToggles
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
 import no.nav.etterlatte.utbetaling.ugyldigVedtakTilUtbetaling
@@ -73,6 +75,10 @@ class ApplicationIntegrationTest {
             behandlingKlient = mockk(),
             vedtaksvurderingKlient = mockk(),
             simuleringOsKlient = mockk(),
+            featureToggleService =
+                mockk {
+                    every { isEnabled(UtbetalingToggles.BRUK_REGELVERK_FOR_KLASSIFIKASJONSKODE, any()) } returns true
+                },
         ).also {
             rapidsConnection.settOppRiversOgListener(it)
             rapidsConnection.start()

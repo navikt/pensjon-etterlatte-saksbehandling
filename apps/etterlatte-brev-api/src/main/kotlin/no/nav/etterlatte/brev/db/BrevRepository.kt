@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.db
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
@@ -257,14 +256,6 @@ class BrevRepository(
                 ).also { oppdatert -> require(oppdatert == 1) }
         }
     }
-
-    fun settBrevOppdatert(
-        id: BrevID,
-        vedtak: JsonNode,
-    ): Boolean =
-        using(sessionOf(ds)) {
-            it.lagreHendelse(id, Status.OPPDATERT, vedtak.toJson()) > 0
-        }
 
     fun settBrevFerdigstilt(id: BrevID) {
         using(sessionOf(ds)) {

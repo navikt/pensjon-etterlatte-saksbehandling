@@ -60,7 +60,8 @@ object EgendefinertMeldingFeature : TestDataFeature {
                         if (hendelseType == "omregning") {
                             val jsonNode = objectMapper.readTree(json)
                             jsonNode.get(HENDELSE_DATA_KEY).let {
-                                val omregningData: OmregningData = objectMapper.treeToValue(it)
+                                // dobbeltsjekker at vi har en gyldig omregningshendelse
+                                objectMapper.treeToValue<OmregningData>(it)
                             }
                         }
 

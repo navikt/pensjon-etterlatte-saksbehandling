@@ -132,8 +132,8 @@ export const AvkortingInntektForm = ({
               <HStack>
                 Forventet inntekt Norge
                 <HelpText title="Hva innebærer forventet inntekt totalt">
-                  Registrer forventet norsk inntekt for aktuelt år (jan-des). Hvis kjent opphør dette året: registrer
-                  forventet inntekt fra januar til opphørsdato, og rediger innvilgede måneder.
+                  Registrer forventet norsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for dette
+                  året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder stemmer.
                 </HelpText>
               </HStack>
             }
@@ -167,8 +167,8 @@ export const AvkortingInntektForm = ({
               <HStack>
                 Forventet inntekt utland
                 <HelpText title="Hva innebærer forventet inntekt totalt">
-                  Registrer forventet utenlandsk inntekt for aktuelt år (jan-des). Hvis kjent opphør dette året:
-                  registrer forventet inntekt fra januar til opphørsdato, og rediger innvilgede måneder.
+                  Registrer forventet utenlandsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for dette
+                  året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder stemmer.
                 </HelpText>
               </HStack>
             }

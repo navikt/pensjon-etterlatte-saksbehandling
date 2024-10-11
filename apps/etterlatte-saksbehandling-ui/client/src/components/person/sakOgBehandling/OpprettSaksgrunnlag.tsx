@@ -30,9 +30,11 @@ export const OpprettSaksgrunnlag = ({ sak }: { sak: ISakMedUtlandstilknytning })
 
   return (
     <>
-      <Button variant="primary" onClick={() => setIsOpen(true)} icon={<PlusCircleIcon aria-hidden />}>
-        Opprett saksgrunnlag
-      </Button>
+      <div>
+        <Button variant="primary" onClick={() => setIsOpen(true)} icon={<PlusCircleIcon aria-hidden />}>
+          Opprett saksgrunnlag
+        </Button>
+      </div>
 
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Opprett sak">
         {mapResult(grunnlagFinnesResult, {

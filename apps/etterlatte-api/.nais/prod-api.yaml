@@ -118,6 +118,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: alderspensjon-endringssoknad-backend
+          namespace: pensjonselvbetjening
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: pensjonskalkulator-backend
           namespace: pensjonskalkulator
           cluster: prod-gcp

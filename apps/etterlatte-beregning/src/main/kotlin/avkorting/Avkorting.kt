@@ -167,12 +167,10 @@ data class Avkorting(
                             AvkortingGrunnlag(
                                 id = nyttGrunnlag.id,
                                 periode = Periode(fom = nyttGrunnlag.fom, tom = opphoerFom?.minusMonths(1)),
-                                aarsinntekt = nyttGrunnlag.aarsinntekt,
+                                inntektTom = nyttGrunnlag.aarsinntekt,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
-                                fratrekkUtAar = 0,
-                                inntektUtland = nyttGrunnlag.inntektUtland,
+                                inntektUtlandTom = nyttGrunnlag.inntektUtland,
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
-                                fratrekkUtAarUtlang = 0,
                                 innvilgaMaaneder =
                                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
                                         ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, opphoerFom),
@@ -440,12 +438,10 @@ data class Avkorting(
 data class AvkortingGrunnlag(
     val id: UUID,
     val periode: Periode,
-    val aarsinntekt: Int,
+    val inntektTom: Int,
     val fratrekkInnAar: Int,
-    val fratrekkUtAar: Int? = null, // TODO
-    val inntektUtland: Int,
+    val inntektUtlandTom: Int,
     val fratrekkInnAarUtland: Int,
-    val fratrekkUtAarUtlang: Int? = null,
     val innvilgaMaaneder: Int,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler,

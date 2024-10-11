@@ -76,7 +76,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
     innloggetSaksbehandler.skriveEnheter
   )
 
-  const harKunEnJuridiskForelder =
+  const kunEnJuridiskForelderPersongalleri =
     personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
 
   if (behandling.kommerBarnetTilgode == null) {
@@ -111,7 +111,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
       ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
       beregningsMetodeFlereAvdoede: undefined,
       beregningsMetode: beregningsMetodeForm,
-      kunEnJuridiskForelder: harKunEnJuridiskForelder
+      kunEnJuridiskForelder: kunEnJuridiskForelderPersongalleri
         ? periodisertBeregningsgrunnlagTilDto({
             data: {},
             fom: new Date(behandling.virkningstidspunkt!!.dato),
@@ -191,11 +191,6 @@ const BeregningsgrunnlagBarnepensjon = () => {
                           behandling={behandling}
                           oppdaterBeregningsgrunnlag={oppdaterBeregningsgrunnlag}
                           lagreBeregningsGrunnlagResult={lagreBeregningsgrunnlagResult}
-                          datoTilKunEnJuridiskForelder={
-                            behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
-                              ? new Date(behandling.beregningsGrunnlag.kunEnJuridiskForelder.tom)
-                              : undefined
-                          }
                         />
                       )}
                     </>

@@ -11,30 +11,35 @@ dependencies {
         exclude("io.ktor", "ktor-server-auth")
         exclude("io.ktor", "ktor-server-resources")
     }
-    implementation(libs.ktor2.servercorejvm)
     implementation(libs.ktor2.webjars)
-    implementation(libs.ktor2.auth)
     implementation(libs.ktor2.serverresources)
     // Fram hit: ktor-avhengnadar for å dekkje det vi ekskluderer frå openapi-importen
 
     implementation(project(":libs:saksbehandling-common"))
+    api(libs.ktor2.auth)
+    api(libs.ktor2.servercorejvm)
     api(libs.ktor2.servercio)
-    implementation(libs.ktor2.jackson)
+    api(libs.ktor2.server)
+    api(libs.ktor2.clientcontentnegotiation)
+    api(libs.ktor2.jackson)
+    api(libs.ktor2.okhttp)
+    api(libs.ktor2.clientauth)
+    api(libs.ktor2.clientloggingjvm)
+
+    api(libs.navfelles.tokenclientcore)
+
     implementation(libs.ktor2.calllogging)
     implementation(libs.ktor2.callid)
     implementation(libs.ktor2.statuspages)
     implementation(libs.ktor2.servercontentnegotiation)
-    implementation(libs.ktor2.okhttp)
-    implementation(libs.ktor2.clientcontentnegotiation)
+
     implementation(libs.ktor2.metricsmicrometer)
     implementation(libs.ktor2.doublereceive)
-    implementation(libs.navfelles.tokenvalidationktor2) {
+
+    api(libs.navfelles.tokenvalidationktor2) {
         exclude("io.ktor", "ktor-server")
     }
-    implementation(libs.ktor2.server)
-    implementation(libs.ktor2.clientauth)
-    api(libs.ktor2.clientloggingjvm)
-    implementation(libs.navfelles.tokenclientcore)
+
     api(libs.kotlin.result)
 
     implementation(libs.logging.logstashlogbackencoder) {

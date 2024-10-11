@@ -101,12 +101,14 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         )}
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
 
-        <SluttbehandlingUtland
-          sakId={behandling.sakId}
-          revurderingId={behandling.id}
-          sluttbehandlingUtland={behandling.revurderinginfo?.revurderingInfo as SluttbehandlingUtlandInfo | undefined}
-          redigerbar={redigerbar}
-        />
+        {behandling.erSluttbehandling && (
+          <SluttbehandlingUtland
+            sakId={behandling.sakId}
+            revurderingId={behandling.id}
+            sluttbehandlingUtland={behandling.revurderinginfo?.revurderingInfo as SluttbehandlingUtlandInfo | undefined}
+            redigerbar={redigerbar}
+          />
+        )}
 
         {personopplysninger && (
           <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />

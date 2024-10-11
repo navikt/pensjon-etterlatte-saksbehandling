@@ -29,6 +29,7 @@ export interface IDetaljertBehandling {
   sendeBrev: boolean
   viderefoertOpphoer: ViderefoertOpphoer | null
   tidligereFamiliepleier: ITidligereFamiliepleier | null
+  erSluttbehandling: Boolean | false
 }
 
 export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {

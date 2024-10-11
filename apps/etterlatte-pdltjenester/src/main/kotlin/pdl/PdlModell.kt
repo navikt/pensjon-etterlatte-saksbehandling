@@ -228,7 +228,6 @@ data class PdlFoedselsdato(
 
 data class PdlFoedested(
     val foedeland: String?,
-    val foedested: String?,
     val folkeregistermetadata: PdlFolkeregistermetadata? = null,
     val metadata: PdlMetadata,
 )

@@ -135,7 +135,6 @@ query(
         }
         foedested {
             foedeland
-            foedested
             folkeregistermetadata{
                 ...folkeregistermetadata
             }

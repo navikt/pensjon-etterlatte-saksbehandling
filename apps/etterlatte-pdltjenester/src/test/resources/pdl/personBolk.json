@@ -49,7 +49,6 @@
           ],
           "foedested": [
             {
-              "foedested": "Fødested i/på FIJI",
               "foedeland": "FJI",
               "metadata": {
                 "master": "FREG",
@@ -266,7 +265,6 @@
           "foedested": [
             {
               "foedeland": "ESP",
-              "foedested": "Fødested i/på SPANIA",
               "metadata": {
                 "master": "FREG",
                 "historisk": false,

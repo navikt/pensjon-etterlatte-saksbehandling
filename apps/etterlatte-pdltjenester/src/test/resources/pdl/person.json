@@ -24,45 +24,58 @@
           }
         }
       ],
-      "foedsel": [
+      "foedested": [
         {
-          "foedselsdato": "2007-08-29",
-          "foedeland": "NIC",
-          "foedested": "Fødested i/på NICARAGUA",
-          "foedselsaar": 2007,
+          "foedeland": "NOR",
+          "folkeregistermetadata": {
+            "aarsak": null,
+            "ajourholdstidspunkt": "2024-10-03T10:56:59",
+            "gyldighetstidspunkt": "2024-10-03T10:56:59",
+            "kilde": "Dolly",
+            "opphoerstidspunkt": null,
+            "sekvens": null
+          },
           "metadata": {
-            "master": "FREG",
-            "historisk": false,
-            "opplysningsId": "7ca6324f-dc01-487c-a513-1f4608e43032",
             "endringer": [
               {
                 "kilde": "Dolly",
-                "registrert": "2021-08-05T15:11:02",
+                "registrert": "2024-10-03T10:57:58",
                 "registrertAv": "Folkeregisteret",
                 "systemkilde": "FREG",
                 "type": "OPPRETT"
               }
-            ]
+            ],
+            "master": "FREG",
+            "opplysningsId": "4a1c5025-1b5c-448c-a6be-9726c5ee49cc",
+            "historisk": false
           }
-        },
+        }
+      ],
+      "foedselsdato": [
         {
           "foedselsdato": "2007-08-29",
-          "foedeland": "NIC",
-          "foedested": "Fødested i/på NICARAGUA",
           "foedselsaar": 2007,
+          "folkeregistermetadata": {
+            "aarsak": null,
+            "ajourholdstidspunkt": "2007-08-30T00:00",
+            "gyldighetstidspunkt": "2007-08-30T00:00",
+            "kilde": "Dolly",
+            "opphoerstidspunkt": null,
+            "sekvens": null
+          },
           "metadata": {
-            "master": "FREG",
-            "historisk": false,
-            "opplysningsId": "54fa5c01-a488-4202-adbc-01441141d964",
             "endringer": [
               {
                 "kilde": "Dolly",
-                "registrert": "2021-08-05T15:11:02",
+                "registrert": "2024-10-03T10:57:58",
                 "registrertAv": "Folkeregisteret",
                 "systemkilde": "FREG",
                 "type": "OPPRETT"
               }
-            ]
+            ],
+            "master": "FREG",
+            "opplysningsId": "fc561ada-6bc6-4716-9ce2-06b551a55161",
+            "historisk": false
           }
         }
       ],

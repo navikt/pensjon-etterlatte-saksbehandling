@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
+import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
@@ -20,6 +21,12 @@ import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 internal class RevurderingTest {
+    @Test
+    fun `erSluttbehandling() skal ta hensyn til revurderingsaarsak SLUTTBEHANDLING_UTLAND`() {
+        opprettetRevurdering(Prosesstype.MANUELL, Revurderingaarsak.SLUTTBEHANDLING_UTLAND).erSluttbehandling() shouldBe true
+        opprettetRevurdering(Prosesstype.MANUELL, Revurderingaarsak.REGULERING).erSluttbehandling() shouldBe false
+    }
+
     @Test
     fun `regulering kan endre tilstander`() {
         val id = UUID.randomUUID()
@@ -60,7 +67,7 @@ internal class RevurderingTest {
 
     @Nested
     inner class ManuellStatusEndring {
-        private val revurdering = opprettetRevurdering(Prosesstype.MANUELL)
+        private val revurdering = opprettetRevurdering(Prosesstype.MANUELL, Revurderingaarsak.REGULERING)
 
         @Test
         fun `kan endre status gjennom gyldig statusendringsflyt`() {
@@ -152,7 +159,7 @@ internal class RevurderingTest {
 
     @Nested
     inner class AutomatiskStatusEndring {
-        private val revurdering = opprettetRevurdering(Prosesstype.AUTOMATISK)
+        private val revurdering = opprettetRevurdering(Prosesstype.AUTOMATISK, Revurderingaarsak.REGULERING)
 
         @Test
         fun opprettet() {
@@ -207,7 +214,10 @@ internal class RevurderingTest {
     }
 }
 
-private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
+private fun opprettetRevurdering(
+    prosesstype: Prosesstype,
+    revurderingsaarsak: Revurderingaarsak,
+): Revurdering {
     val id = UUID.randomUUID()
     return Revurdering.opprett(
         id = id,
@@ -225,7 +235,7 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
         virkningstidspunkt = virkningstidspunktVurdering(),
         utlandstilknytning = null,
         boddEllerArbeidetUtlandet = null,
-        revurderingsaarsak = Revurderingaarsak.REGULERING,
+        revurderingsaarsak = revurderingsaarsak,
         prosesstype = prosesstype,
         kilde = Vedtaksloesning.GJENNY,
         revurderingInfo = null,

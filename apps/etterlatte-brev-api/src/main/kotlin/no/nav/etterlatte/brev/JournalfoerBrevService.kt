@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory
 import java.util.Base64
 
 class JournalfoerBrevService(
-    val db: BrevRepository,
-    val behandlingService: BehandlingService,
-    val dokarkivService: DokarkivService,
-    val service: VedtaksbrevService,
+    private val db: BrevRepository,
+    private val behandlingService: BehandlingService,
+    private val dokarkivService: DokarkivService,
+    private val service: VedtaksbrevService,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 

@@ -32,8 +32,6 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtland'
-import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -100,15 +98,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
           </HStack>
         )}
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
-
-        {behandling.erSluttbehandling && (
-          <SluttbehandlingUtland
-            sakId={behandling.sakId}
-            revurderingId={behandling.id}
-            sluttbehandlingUtland={behandling.revurderinginfo?.revurderingInfo as SluttbehandlingUtlandInfo | undefined}
-            redigerbar={redigerbar}
-          />
-        )}
 
         {personopplysninger && (
           <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />

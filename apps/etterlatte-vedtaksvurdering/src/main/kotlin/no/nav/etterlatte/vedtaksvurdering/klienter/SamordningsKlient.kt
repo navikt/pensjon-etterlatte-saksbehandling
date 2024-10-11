@@ -114,18 +114,20 @@ class SamordningsKlientImpl(
             val response =
                 httpClient.post("$resourceUrl/api/refusjonskrav") {
                     contentType(ContentType.Application.Json)
-                    header("pid", samordningmelding.pid)
-                    parameter("tpNr", samordningmelding.tpNr)
-                    parameter("samId", samordningmelding.samId)
-                    parameter("refusjonskrav", samordningmelding.refusjonskrav)
+                    setBody(samordningmelding.toRequest())
                 }
-
             if (!response.status.isSuccess()) {
-                throw ResponseException(response, "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]")
+                throw ResponseException(
+                    response,
+                    "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
+                )
             }
         } catch (e: Exception) {
             logger.error("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
-            throw SamordneVedtakGenerellException("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
+            throw SamordneVedtakGenerellException(
+                "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
+                e,
+            )
         }
     }
 }
@@ -155,6 +157,21 @@ internal fun Vedtak.tilSamordneRequest(etterbetaling: Boolean): SamordneVedtakRe
         etterbetaling = etterbetaling,
     )
 }
+
+private data class OpprettRefusjonskravRequest(
+    val pid: String,
+    val tpNr: String,
+    val samId: Long,
+    val refusjonskrav: Boolean,
+)
+
+private fun OppdaterSamordningsmelding.toRequest(): OpprettRefusjonskravRequest =
+    OpprettRefusjonskravRequest(
+        pid = this.pid,
+        tpNr = this.tpNr,
+        samId = this.samId,
+        refusjonskrav = this.refusjonskrav,
+    )
 
 internal data class SamordneVedtakRequest(
     val pid: Folkeregisteridentifikator,

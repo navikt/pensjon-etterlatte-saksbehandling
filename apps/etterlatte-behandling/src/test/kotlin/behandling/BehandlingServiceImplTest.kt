@@ -892,7 +892,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(any()) } returns
             foerstegangsbehandling(
                 id = uuid,
-                sakId = 1,
+                sakId = randomSakId(),
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
@@ -927,7 +927,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(any()) } returns
             foerstegangsbehandling(
                 id = uuid,
-                sakId = 1,
+                sakId = randomSakId(),
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
@@ -1004,7 +1004,7 @@ internal class BehandlingServiceImplTest {
     @Test
     fun `Kan lagre annen forelder`() {
         nyKontekstMedBruker(mockSaksbehandler())
-        val behandling = foerstegangsbehandling(sakId = 1L, id = UUID.randomUUID())
+        val behandling = foerstegangsbehandling(sakId = randomSakId(), id = UUID.randomUUID())
         every { behandlingDaoMock.hentBehandling(behandling.id) } returns behandling
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, TOKEN) } returns mockPersongalleri()
         coEvery { grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, any(), any()) } just runs

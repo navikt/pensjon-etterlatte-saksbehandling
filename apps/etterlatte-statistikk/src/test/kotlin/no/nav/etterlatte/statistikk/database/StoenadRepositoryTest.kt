@@ -4,8 +4,8 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.behandling.sakId3
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -87,7 +87,7 @@ class StoenadRepositoryTest(
     @Test
     fun `lagreStoenadsrad lagrer alle felter til`() {
         val repo = StoenadRepository.using(dataSource)
-        val sak5 = tilSakId(5)
+        val sak5 = SakId(5)
         repo.lagreStoenadsrad(
             StoenadRad(
                 id = -1,
@@ -155,7 +155,7 @@ class StoenadRepositoryTest(
     @Test
     fun `hentStoenadRader henter ut null for beregning riktig`() {
         val repo = StoenadRepository.using(dataSource)
-        val sak5 = tilSakId(5)
+        val sak5 = SakId(5)
         repo.lagreStoenadsrad(
             StoenadRad(
                 id = -1,
@@ -385,7 +385,7 @@ class StoenadRepositoryTest(
                     beregningType = "FOLKETRYGD",
                     anvendtSats = "1G",
                     behandlingId = UUID.randomUUID(),
-                    sakId = tilSakId(5),
+                    sakId = SakId(5),
                     sakNummer = 5,
                     tekniskTid = Tidspunkt.now(),
                     sakYtelse = "BP",

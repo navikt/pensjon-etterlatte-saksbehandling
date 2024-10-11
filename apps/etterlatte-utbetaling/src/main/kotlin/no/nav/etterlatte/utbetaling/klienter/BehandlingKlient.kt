@@ -1,4 +1,4 @@
-package no.nav.etterlatte.utbetaling
+package no.nav.etterlatte.utbetaling.klienter
 
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient

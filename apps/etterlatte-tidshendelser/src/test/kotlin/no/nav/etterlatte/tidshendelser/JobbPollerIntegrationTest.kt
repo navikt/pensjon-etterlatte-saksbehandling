@@ -6,7 +6,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -103,7 +106,7 @@ class JobbPollerIntegrationTest(
         // Men vi vil teste at tilbakestilling ikke skjer hvis vi ikke kan gjøre det trygt
         hendelseDao.opprettHendelserForSaker(
             jobbId = jobb.id,
-            saksIDer = listOf(1, 2, 3, 4),
+            saksIDer = listOf(sakId1, sakId2, sakId3, SakId(4)),
             steg = Steg.IDENTIFISERT_SAK,
         )
         every { aldersovergangerService.execute(jobb) } throws InternfeilException("Å nei")

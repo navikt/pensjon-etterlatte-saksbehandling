@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
 import no.nav.etterlatte.utbetaling.common.toXMLDate
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
@@ -93,7 +92,7 @@ object OppdragMapper {
                             }
                             vedtakId = utbetaling.vedtakId.value.toString()
                             delytelseId = it.id.value.toString()
-                            kodeKlassifik = utbetaling.sakType.tilKodeklassifikasjon()
+                            kodeKlassifik = it.klassifikasjonskode.toString()
                             datoVedtakFom = it.periode.fra.toXMLDate()
                             datoVedtakTom = it.periode.til?.toXMLDate()
                             sats = it.beloep
@@ -123,12 +122,6 @@ fun Saktype.tilKodeFagomraade(): String =
     when (this) {
         Saktype.BARNEPENSJON -> "BARNEPE"
         Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
-    }
-
-fun Saktype.tilKodeklassifikasjon(): String =
-    when (this) {
-        Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP.toString()
-        Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.toString()
     }
 
 fun Oppdrag.vedtakId() =

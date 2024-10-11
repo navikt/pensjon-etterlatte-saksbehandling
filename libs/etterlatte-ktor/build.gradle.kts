@@ -18,7 +18,7 @@ dependencies {
     // Fram hit: ktor-avhengnadar for å dekkje det vi ekskluderer frå openapi-importen
 
     implementation(project(":libs:saksbehandling-common"))
-    implementation(libs.ktor2.servercio)
+    api(libs.ktor2.servercio)
     implementation(libs.ktor2.jackson)
     implementation(libs.ktor2.calllogging)
     implementation(libs.ktor2.callid)

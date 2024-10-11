@@ -15,11 +15,11 @@ import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.slf4j.LoggerFactory
 
 class AdresseService(
-    private val norg2Klient: Norg2Klient,
-    private val saksbehandlerKlient: SaksbehandlerKlient,
-    private val regoppslagKlient: RegoppslagKlient,
+    val norg2Klient: Norg2Klient,
+    val saksbehandlerKlient: SaksbehandlerKlient,
+    val regoppslagKlient: RegoppslagKlient,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun hentMottakerAdresse(
         sakType: SakType,

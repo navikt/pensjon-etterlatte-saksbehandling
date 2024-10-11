@@ -285,7 +285,7 @@ class BehandlingServiceImpl(
     ): UUID =
         runBlocking {
             behandlingKlient
-                .post("$url/oppgaver/sak/$sakId/opprett") {
+                .post("$url/oppgaver/sak/${sakId.sakId}/opprett") {
                     contentType(ContentType.Application.Json)
                     setBody(
                         NyOppgaveDto(
@@ -310,7 +310,7 @@ class BehandlingServiceImpl(
     ): OpprettRevurderingForAktivitetspliktResponse =
         runBlocking {
             behandlingKlient
-                .post("$url/api/sak/$sakId/aktivitetsplikt/revurdering") {
+                .post("$url/api/sak/${sakId.sakId}/aktivitetsplikt/revurdering") {
                     contentType(ContentType.Application.Json)
                     setBody(
                         OpprettRevurderingForAktivitetspliktDto(
@@ -331,7 +331,7 @@ class BehandlingServiceImpl(
     ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse =
         runBlocking {
             behandlingKlient
-                .post("$url/api/sak/$sakId/aktivitetsplikt/varigUnntak") {
+                .post("$url/api/sak/${sakId.sakId}/aktivitetsplikt/varigUnntak") {
                     contentType(ContentType.Application.Json)
                     setBody(
                         OpprettOppgaveForAktivitetspliktVarigUnntakDto(

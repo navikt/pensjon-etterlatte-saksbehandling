@@ -3,10 +3,12 @@ package no.nav.etterlatte.statistikk.database
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
@@ -90,7 +92,7 @@ class StoenadRepository(
                     setString(6, maanedStatistikkRad.beregningType)
                     setString(7, maanedStatistikkRad.anvendtSats)
                     setObject(8, maanedStatistikkRad.behandlingId)
-                    setLong(9, maanedStatistikkRad.sakId)
+                    setSakId(9, maanedStatistikkRad.sakId)
                     setTidspunkt(10, maanedStatistikkRad.tekniskTid)
                     setString(11, maanedStatistikkRad.sakYtelse)
                     setString(12, maanedStatistikkRad.versjon)
@@ -243,8 +245,8 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
         setString(6, stoenadsrad.beregningType)
         setString(7, stoenadsrad.anvendtSats)
         setObject(8, stoenadsrad.behandlingId)
-        setLong(9, stoenadsrad.sakId)
-        setLong(10, stoenadsrad.sakId)
+        setSakId(9, stoenadsrad.sakId)
+        setSakId(10, stoenadsrad.sakId)
         setTidspunkt(11, stoenadsrad.tekniskTid)
         setString(12, stoenadsrad.sakYtelse)
         setString(13, stoenadsrad.versjon)
@@ -276,7 +278,7 @@ private fun ResultSet.asStoenadRad(): StoenadRad =
         beregningType = getString("beregningType"),
         anvendtSats = getString("anvendtSats"),
         behandlingId = getObject("behandlingId") as UUID,
-        sakId = getLong("sakId"),
+        sakId = SakId(getLong("sakId")),
         sakNummer = getLong("sakNummer"),
         tekniskTid = getTimestamp("tekniskTid").toTidspunkt(),
         sakYtelse = getString("sakYtelse"),

@@ -53,6 +53,12 @@ internal class VedtaksbrevRouteTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
 
+    companion object {
+        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+        private val BEHANDLING_ID = UUID.randomUUID()
+        private val SAK_ID = randomSakId()
+    }
+
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
@@ -229,7 +235,7 @@ internal class VedtaksbrevRouteTest {
         }
     }
 
-    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+    val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     private fun opprettBrev() =
         Brev(
@@ -261,10 +267,4 @@ internal class VedtaksbrevRouteTest {
                 tilgangssjekker,
             )
         }
-
-    companion object {
-        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
-        private val BEHANDLING_ID = UUID.randomUUID()
-        private val SAK_ID = randomSakId()
-    }
 }

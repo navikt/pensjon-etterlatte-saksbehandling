@@ -56,7 +56,7 @@ class TilbakekrevingService(
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")
 
             val sak =
-                sakDao.hentSak(kravgrunnlag.sakId.value)
+                sakDao.hentSak(SakId(kravgrunnlag.sakId.value))
                     ?: throw TilbakekrevingHarMangelException("Tilbakekreving mangler sak")
 
             tilbakekrevingDao

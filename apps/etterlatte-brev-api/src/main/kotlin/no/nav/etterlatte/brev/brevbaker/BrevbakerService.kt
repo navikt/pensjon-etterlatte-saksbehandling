@@ -16,7 +16,7 @@ class BrevbakerService(
         brevID: BrevID?,
         brevRequest: BrevbakerRequest,
     ): Pdf {
-        logger.info("Genererer PDF med Brevbakeren")
+        logger.info("Genererer PDF med Brevbakeren med kode ${brevRequest.kode} og id $brevID")
 
         val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererPdf(brevRequest) }
 

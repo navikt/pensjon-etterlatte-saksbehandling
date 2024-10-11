@@ -240,7 +240,7 @@ internal class GrunnlagServiceTest {
                 grunnlagHenter.hentGrunnlagsdata(any())
             } returns sampleFetchedGrunnlag(opplysningsperson)
             every { opplysningDaoMock.finnHendelserIGrunnlag(sakId) } returns emptyList()
-            every { opplysningDaoMock.leggOpplysningTilGrunnlag(any(), any(), any()) } returns sakId
+            every { opplysningDaoMock.leggOpplysningTilGrunnlag(any(), any(), any()) } returns sakId.sakId
 
             val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, galleri)
 

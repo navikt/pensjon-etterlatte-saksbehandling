@@ -77,7 +77,7 @@ class BehandlingClient(
 
     fun hentSakMedBehandlinger(sakId: SakId): SakMedBehandlinger =
         runBlocking {
-            sakOgBehandlingApp.get("$url/saker/$sakId/behandlinger").body()
+            sakOgBehandlingApp.get("$url/saker/${sakId.sakId}/behandlinger").body()
         }
 
     fun opprettOppgave(
@@ -86,7 +86,7 @@ class BehandlingClient(
     ): UUID =
         runBlocking {
             sakOgBehandlingApp
-                .post("$url/oppgaver/sak/$sakId/opprett") {
+                .post("$url/oppgaver/sak/${sakId.sakId}/opprett") {
                     contentType(ContentType.Application.Json)
                     setBody(oppgave)
                 }.body<OppgaveIntern>()

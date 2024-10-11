@@ -38,6 +38,11 @@ class GrunnlagService(
         else -> klient.hentGrunnlag(behandlingId!!, bruker)
     }
 
+    suspend fun finnesGrunnlagForSak(
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ) = klient.finnesGrunnlagForSak(sakId, bruker)
+
     suspend fun hentGrunnlagForSak(
         sakId: SakId,
         bruker: BrukerTokenInfo,

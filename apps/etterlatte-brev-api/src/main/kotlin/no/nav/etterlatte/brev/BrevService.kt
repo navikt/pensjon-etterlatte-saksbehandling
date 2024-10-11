@@ -23,15 +23,15 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 class BrevService(
-    val db: BrevRepository,
-    val brevoppretter: Brevoppretter,
-    val journalfoerBrevService: JournalfoerBrevService,
-    val pdfGenerator: PDFGenerator,
-    val distribuerer: Brevdistribuerer,
-    val oppgaveService: OppgaveService,
+    private val db: BrevRepository,
+    private val brevoppretter: Brevoppretter,
+    private val journalfoerBrevService: JournalfoerBrevService,
+    private val pdfGenerator: PDFGenerator,
+    private val distribuerer: Brevdistribuerer,
+    private val oppgaveService: OppgaveService,
 ) {
-    val logger = LoggerFactory.getLogger(this::class.java)
-    val sikkerlogger = sikkerlogger()
+    private val logger = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogger = sikkerlogger()
 
     suspend fun opprettJournalfoerOgDistribuerRiver(
         bruker: BrukerTokenInfo,

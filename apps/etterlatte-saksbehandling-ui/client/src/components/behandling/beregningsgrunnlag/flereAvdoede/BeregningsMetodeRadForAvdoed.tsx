@@ -153,14 +153,15 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
             .filter((metode) => metode.data.avdoed !== nyMetode.data.avdoed)
             .concat(mapListeTilDto([nyMetode]))
         : mapListeTilDto([nyMetode]),
-      kunEnJuridiskForelder:
-        erTidligsteAvdoede && kunEnJuridiskForelderPersongalleri
+      kunEnJuridiskForelder: kunEnJuridiskForelderPersongalleri
+        ? erTidligsteAvdoede
           ? periodisertBeregningsgrunnlagTilDto({
               fom: nyMetode.fom,
               tom: beregningsmetodeFormData.datoTilKunEnJuridiskForelder,
               data: {},
             })
-          : behandling.beregningsGrunnlag?.kunEnJuridiskForelder,
+          : behandling.beregningsGrunnlag?.kunEnJuridiskForelder
+        : undefined,
     })
   }
 

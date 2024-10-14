@@ -346,9 +346,8 @@ class BehandlingFactory(
         }
 
         if (omgjoeringRequest.skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
-            runBlocking {
-                // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
-
+            // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
+            inTransaction {
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
                     kopierFraBehandling = behandlingerForOmgjoering.sisteAvslaatteBehandling.id,

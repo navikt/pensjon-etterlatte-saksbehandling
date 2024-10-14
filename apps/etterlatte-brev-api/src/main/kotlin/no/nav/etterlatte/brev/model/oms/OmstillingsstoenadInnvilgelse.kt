@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.fromDto
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -31,6 +32,7 @@ data class OmstillingsstoenadInnvilgelse(
     val omsRettUtenTidsbegrensning: Boolean,
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
     val harUtbetaling: Boolean,
+    val bosattUtland: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -40,6 +42,7 @@ data class OmstillingsstoenadInnvilgelse(
             trygdetid: TrygdetidDto,
             vilkaarsVurdering: VilkaarsvurderingDto,
             avdoede: List<Avdoed>,
+            utlandstilknytning: UtlandstilknytningType?,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -105,6 +108,7 @@ data class OmstillingsstoenadInnvilgelse(
                         .isAfter(avkortingsinfo.virkningsdato),
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },

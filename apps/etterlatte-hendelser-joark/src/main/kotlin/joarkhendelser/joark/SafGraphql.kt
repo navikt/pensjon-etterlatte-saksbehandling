@@ -49,18 +49,14 @@ data class JournalpostVariables(
     val journalpostId: String,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Journalpost(
     val journalpostId: String,
     val bruker: Bruker?,
     val tittel: String?,
-    val journalposttype: String,
     val journalstatus: Journalstatus,
-    val dokumenter: List<Dokument>,
     val sak: Fagsak?,
-    val avsenderMottaker: AvsenderMottaker,
     val kanal: Kanal,
-    val datoOpprettet: String,
-    val opprettetAvNavn: String?,
 ) {
     fun erFerdigstilt(): Boolean =
         (journalstatus == Journalstatus.FERDIGSTILT || journalstatus == Journalstatus.JOURNALFOERT) &&
@@ -93,27 +89,11 @@ enum class BrukerIdType {
     ORGNR,
 }
 
-data class Dokument(
-    val dokumentInfoId: String,
-    val tittel: String? = null,
-    val dokumentvarianter: List<Dokumentvarianter>,
-)
-
-data class Dokumentvarianter(
-    val saksbehandlerHarTilgang: Boolean,
-)
-
 data class Fagsak(
     val fagsakId: String?,
     val fagsaksystem: String?,
     val sakstype: String?,
     val tema: String?,
-)
-
-data class AvsenderMottaker(
-    val id: String?,
-    val navn: String?,
-    val erLikBruker: Boolean?,
 )
 
 enum class Kanal(

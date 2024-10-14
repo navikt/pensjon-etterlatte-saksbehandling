@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
 
 /**
  * Håndterer hendelser fra Joark og behandler de hendelsene som tilhører Team Etterlatte.
@@ -28,6 +27,8 @@ import java.lang.RuntimeException
  * Skal kun behandle:
  *  EYB: [SakType.BARNEPENSJON]
  *  EYO: [SakType.OMSTILLINGSSTOENAD]
+ *
+ * OBS! Joark sender kun hendelser for INNGÅENDE journalposter.
  *
  * @see: https://confluence.adeo.no/display/BOA/Joarkhendelser
  **/
@@ -39,18 +40,13 @@ class JoarkHendelseHandler(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(JoarkHendelseHandler::class.java)
 
-    /* TODO:
-     *   Etterlatte-søknadene sin journalføringsriver vil bli problematisk for denne consumeren siden enkelte søknader
-     *   IKKE ferdigstilles. Må trolig skrive om en del der eller finne på noe lurt for å ikke lage dobbelt opp med
-     *   oppgaver til saksbehandler.
-     */
     suspend fun haandterHendelse(hendelse: JournalfoeringHendelseRecord) {
         val hendelseId = hendelse.hendelsesId
         val journalpostId = hendelse.journalpostId
         val temaNytt = hendelse.temaNytt
 
         if (!hendelse.erTemaEtterlatte()) {
-            logger.info("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
+            logger.debug("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
             return // Avbryter behandling
         }
 

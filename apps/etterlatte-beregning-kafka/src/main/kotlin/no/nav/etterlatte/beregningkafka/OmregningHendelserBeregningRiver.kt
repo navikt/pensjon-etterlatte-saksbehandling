@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregningkafka
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -115,7 +117,11 @@ internal class OmregningHendelserBeregningRiver(
         beregning: BeregningOgAvkorting,
         packet: JsonMessage,
     ) {
+        logger.info("Logger funker dette?")
         val dato = packet.omregningData.hentFraDato()
+
+        logger.info("Logger payload", kv("payload", beregning.toJson()))
+
         val forrige =
             requireNotNull(beregning.forrigeBeregning.beregningsperioder.paaDato(dato))
                 .let {

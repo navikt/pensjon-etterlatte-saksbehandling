@@ -386,6 +386,15 @@ class BehandlingFactory(
         sisteAvslaatteBehandling
             .gyldighetsproeving()
             ?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandlingId, it) }
+
+        sisteAvslaatteBehandling.opphoerFraOgMed?.let { behandlingDao.lagreOpphoerFom(nyFoerstegangsbehandlingId, it) }
+
+        sisteAvslaatteBehandling.boddEllerArbeidetUtlandet?.let {
+            behandlingDao.lagreBoddEllerArbeidetUtlandet(
+                nyFoerstegangsbehandlingId,
+                it,
+            )
+        }
     }
 
     internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {

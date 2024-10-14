@@ -98,6 +98,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
           </HStack>
         )}
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
+
         {personopplysninger && (
           <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />
         )}

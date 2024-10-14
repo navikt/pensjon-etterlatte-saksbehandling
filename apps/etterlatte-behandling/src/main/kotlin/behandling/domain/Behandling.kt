@@ -67,6 +67,8 @@ sealed class Behandling {
     abstract val opphoerFraOgMed: YearMonth?
     abstract val tidligereFamiliepleier: TidligereFamiliepleier?
 
+    abstract fun erSluttbehandling(): Boolean
+
     open val relatertBehandlingId: String? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 

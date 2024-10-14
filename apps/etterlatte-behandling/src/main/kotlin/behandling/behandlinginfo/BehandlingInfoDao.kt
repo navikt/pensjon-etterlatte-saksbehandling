@@ -13,6 +13,27 @@ import java.util.UUID
 class BehandlingInfoDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
+    fun lagreErOmgjoeringSluttbehandlingUtland(
+        id: UUID,
+        sluttbehandlingUtland: Boolean,
+    ) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    INSERT INTO behandling_info(behandling_id, omgjoering_sluttbehandling_utland)
+                    VALUES (?, ?)
+                    ON CONFLICT (behandling_id) DO 
+                    UPDATE SET omgjoering_sluttbehandling_utland = excluded.omgjoering_sluttbehandling_utland
+                    """.trimIndent(),
+                ).apply {
+                    setObject(1, id)
+                    setBoolean(2, sluttbehandlingUtland)
+                }.run { executeUpdate() }
+            }
+        }
+    }
+
     fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -64,6 +65,7 @@ class BehandlingFactory(
     private val migreringKlient: MigreringKlient,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
+    private val behandlingInfoService: BehandlingInfoService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -256,7 +258,7 @@ class BehandlingFactory(
     fun opprettOmgjoeringAvslag(
         sakId: SakId,
         saksbehandler: Saksbehandler,
-        skalKopiere: Boolean,
+        omgjoeringRequest: OmgjoeringRequest,
     ): Behandling {
         val behandlingerForOmgjoering =
             inTransaction {
@@ -301,7 +303,14 @@ class BehandlingFactory(
                         prosessType = Prosesstype.MANUELL,
                     )
 
-                if (skalKopiere && sisteAvslaatteBehandling != null) {
+                if (omgjoeringRequest.sluttbehandlingUtland) {
+                    behandlingInfoService.lagreErOmgjoeringSluttbehandlingUtland(
+                        nyFoerstegangsbehandling,
+                        true,
+                    )
+                }
+
+                if (omgjoeringRequest.skalKopiere && sisteAvslaatteBehandling != null) {
                     kopierFoerstegangsbehandlingOversikt(sisteAvslaatteBehandling, nyFoerstegangsbehandling.id)
                 } else {
                     val nyGyldighetsproeving =
@@ -336,7 +345,7 @@ class BehandlingFactory(
             )
         }
 
-        if (skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
+        if (omgjoeringRequest.skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
             runBlocking {
                 // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
 

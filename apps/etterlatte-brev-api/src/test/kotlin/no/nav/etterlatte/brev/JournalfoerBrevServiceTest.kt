@@ -74,7 +74,7 @@ class JournalfoerBrevServiceTest {
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
 
         coEvery { behandlingService.hentSak(any(), any()) } returns sak
-        coEvery { dokarkivService.journalfoer(any()) } returns journalpostResponse
+        coEvery { dokarkivService.journalfoer(any(), any()) } returns journalpostResponse
         every { db.hentBrev(any()) } returns brev
         every { db.settBrevJournalfoert(any(), any()) } returns true
 
@@ -93,7 +93,7 @@ class JournalfoerBrevServiceTest {
         }
         coVerify {
             behandlingService.hentSak(sak.id, bruker)
-            dokarkivService.journalfoer(any())
+            dokarkivService.journalfoer(any(), any())
         }
     }
 
@@ -170,7 +170,7 @@ class JournalfoerBrevServiceTest {
         runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
 
         verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
-        coVerify(exactly = 0) { dokarkivService.journalfoer(any()) }
+        coVerify(exactly = 0) { dokarkivService.journalfoer(any(), any()) }
     }
 
     @ParameterizedTest
@@ -219,7 +219,7 @@ class JournalfoerBrevServiceTest {
                 journalpostId = Random.nextLong().toString(),
                 journalpostferdigstilt = true,
             )
-        coEvery { dokarkivService.journalfoer(any()) } returns journalpostResponse
+        coEvery { dokarkivService.journalfoer(any(), any()) } returns journalpostResponse
 
         val service = JournalfoerBrevService(db, behandlingService, dokarkivService, vedtaksbrevService)
         runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
@@ -234,7 +234,7 @@ class JournalfoerBrevServiceTest {
         coVerify(exactly = 1) {
             vedtaksbrevService.hentVedtaksbrev(forventetBrev.behandlingId!!)
             behandlingService.hentSak(forventetBrev.sakId, any())
-            dokarkivService.journalfoer(capture(requestSlot))
+            dokarkivService.journalfoer(capture(requestSlot), any())
         }
 
         with(requestSlot.captured) {
@@ -291,7 +291,7 @@ class JournalfoerBrevServiceTest {
                 journalpostId = Random.nextLong().toString(),
                 journalpostferdigstilt = true,
             )
-        coEvery { dokarkivService.journalfoer(any()) } returns journalpostResponse
+        coEvery { dokarkivService.journalfoer(any(), any()) } returns journalpostResponse
 
         val sak = Sak(forventetBrev.soekerFnr, type, forventetBrev.sakId, Enheter.PORSGRUNN.enhetNr)
         coEvery { behandlingService.hentSak(any(), any()) } returns sak
@@ -309,7 +309,7 @@ class JournalfoerBrevServiceTest {
         val requestSlot = slot<JournalpostRequest>()
         coVerify {
             behandlingService.hentSak(forventetBrev.sakId, bruker)
-            dokarkivService.journalfoer(capture(requestSlot))
+            dokarkivService.journalfoer(capture(requestSlot), any())
         }
 
         with(requestSlot.captured) {

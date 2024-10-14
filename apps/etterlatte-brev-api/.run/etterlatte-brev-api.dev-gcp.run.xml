@@ -4,7 +4,7 @@
       <env name="BRREG_URL" value="https://data.brreg.no" />
       <env name="DB_JDBC_URL" value="jdbc:postgresql://host.docker.internal:5435/postgres" />
       <env name="DB_USERNAME" value="postgres" />
-      <env name="DOKARKIV_SCOPE" value="api://dev-fss.teamdokumenthandtering.dokarkiv/.default" />
+      <env name="DOKARKIV_CLIENT_ID" value="dev-fss.teamdokumenthandtering.dokarkiv" />
       <env name="DOKARKIV_URL" value="https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost" />
       <env name="DOKDIST_SCOPE" value="api://dev-fss.teamdokumenthandtering.saf/.default" />
       <env name="DOKDIST_URL" value="https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1" />

@@ -80,6 +80,13 @@ data class OppdaterJournalpostResponse(
     val journalpostId: String,
 )
 
+data class DokarkivErrorResponse(
+    val status: Int,
+    val error: String?,
+    val message: String?,
+    val path: String?,
+)
+
 data class KnyttTilAnnenSakRequest(
     val bruker: Bruker,
     val fagsakId: String,

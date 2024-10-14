@@ -1,8 +1,9 @@
-import { Alert, Button, HStack, Loader } from '@navikt/ds-react'
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { Alert, Button, HStack, Loader, VStack } from '@navikt/ds-react'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { feilregistrerSakstilknytning } from '~shared/api/dokument'
 import { Journalpost } from '~shared/types/Journalpost'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journalpost }) => {
   const [feilSakstilknytningStatus, apiFeilregistrerSakstilknytning] = useApiCall(feilregistrerSakstilknytning)
@@ -21,7 +22,7 @@ export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journal
   }
 
   return (
-    <>
+    <VStack gap="4">
       {journalpost.sak ? (
         <Alert variant="info">Du markerer nå journalposten som feilregistrert</Alert>
       ) : (
@@ -29,9 +30,11 @@ export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journal
           Kan ikke feilregistrere sakstilknytning når journalposten ikke er tilknyttet en sak
         </Alert>
       )}
-      <br />
 
-      <br />
+      {mapFailure(feilSakstilknytningStatus, (error) => (
+        <ApiErrorAlert>{error.detail}</ApiErrorAlert>
+      ))}
+
       <HStack justify="end">
         <Button
           variant="danger"
@@ -42,6 +45,6 @@ export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journal
           Feilregistrer sakstilknytning
         </Button>
       </HStack>
-    </>
+    </VStack>
   )
 }

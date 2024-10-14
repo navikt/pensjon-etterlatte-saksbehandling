@@ -3,7 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":libs:etterlatte-ktor"))
+    implementation(project(":libs:etterlatte-ktor")) {
+        exclude("io.ktor:ktor-server-cio", "io.ktor:ktor-server-metrics-micrometer")
+    }
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-migrering-model"))

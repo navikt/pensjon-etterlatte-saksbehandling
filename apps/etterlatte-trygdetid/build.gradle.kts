@@ -12,7 +12,6 @@ dependencies {
     implementation(project(":libs:etterlatte-trygdetid-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
-    implementation(libs.ktor2.servercio)
     implementation(libs.database.kotliquery)
     implementation(libs.navfelles.tokenclientcore)
 

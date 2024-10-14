@@ -9,9 +9,6 @@ dependencies {
     implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
-    implementation(libs.ktor2.servercio)
-    implementation(libs.navfelles.tokenclientcore)
-
     testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.jackson)
     testImplementation(libs.ktor2.clientmock)

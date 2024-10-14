@@ -17,7 +17,6 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
-    implementation(libs.ktor2.server)
     implementation(libs.ktor2.clientcore)
 
     implementation(libs.etterlatte.common)
@@ -26,10 +25,6 @@ dependencies {
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.4.0")
 
     implementation(libs.database.kotliquery)
-
-    implementation(libs.ktor2.clientcontentnegotiation)
-    implementation(libs.ktor2.jackson)
-    implementation(libs.ktor2.clientauth)
     implementation(libs.cache.caffeine)
 
     testImplementation(libs.test.kotest.assertionscore)

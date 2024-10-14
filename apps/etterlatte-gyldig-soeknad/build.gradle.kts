@@ -11,9 +11,6 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:rapidsandrivers-extras"))
 
-    implementation(libs.ktor2.jackson)
-    implementation(libs.ktor2.clientauth)
-
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.test.kotest.assertionscore)

@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
@@ -523,10 +524,25 @@ class BehandlingFactoryTest {
     }
 
     @Test
-    fun `omgjøring skal lage ny førstegangsbehandling og kopiere vurdering hvis flagg er satt`() {
+    fun `omgjøring skal lage ny førstegangsbehandling og kopiere vurdering + vilkårsvurdering hvis flagg er satt`() {
         val sak = sak()
         val saksbehandler = simpleSaksbehandler()
-        val avslaattFoerstegangsbehandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
+
+        val boddEllerArbeidetUtlandet =
+            BoddEllerArbeidetUtlandet(
+                true,
+                Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
+                "begrunnelse",
+                boddArbeidetIkkeEosEllerAvtaleland = true,
+                boddArbeidetEosNordiskKonvensjon = true,
+                boddArbeidetAvtaleland = true,
+                vurdereAvoededsTrygdeavtale = true,
+                skalSendeKravpakke = true,
+            )
+        val opphoerFraOgMed = YearMonth.now()
+        val avslaattFoerstegangsbehandling =
+            foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
+                .copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet, opphoerFraOgMed = opphoerFraOgMed)
         val revurdering =
             revurdering(
                 sak = sak,
@@ -540,6 +556,7 @@ class BehandlingFactoryTest {
                 avslaattFoerstegangsbehandling,
                 revurdering,
             )
+        every { behandlingDaoMock.lagreOpphoerFom(any(), any()) } returns 1
         every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
         every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
         every { behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any()) } returns 1
@@ -594,8 +611,10 @@ class BehandlingFactoryTest {
 
         verify {
             sakServiceMock.finnSak(sak.id)
+            behandlingDaoMock.lagreOpphoerFom(opprettetBehandling.id, any())
+            behandlingDaoMock.lagreBoddEllerArbeidetUtlandet(opprettetBehandling.id, boddEllerArbeidetUtlandet)
             behandlingDaoMock.hentBehandlingerForSak(sak.id)
-            behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any())
+            behandlingDaoMock.lagreNyttVirkningstidspunkt(opprettetBehandling.id, any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             kommerBarnetTilGodeServiceMock.lagreKommerBarnetTilgode(any())

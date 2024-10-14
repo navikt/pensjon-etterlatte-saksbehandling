@@ -187,7 +187,6 @@ const opprettBehandling = (
     sendeBrev: true,
     viderefoertOpphoer: null,
     tidligereFamiliepleier: null,
-    erSluttbehandling: false,
   }
 }
 

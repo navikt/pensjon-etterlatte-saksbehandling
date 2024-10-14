@@ -552,7 +552,7 @@ class BehandlingFactoryTest {
                 vilkaar =
                     BarnepensjonVilkaar1967.inngangsvilkaar(),
             )
-        coEvery { vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any()) } returns
+        every { vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any()) } returns
             VilkaarsvurderingMedBehandlingGrunnlagsversjon(vv, 1L)
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
@@ -603,9 +603,9 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
+            vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any())
         }
         coVerify {
-            vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any())
             grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
             grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
         }

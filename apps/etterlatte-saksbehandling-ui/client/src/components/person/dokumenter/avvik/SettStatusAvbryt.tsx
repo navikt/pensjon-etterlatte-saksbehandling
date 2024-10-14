@@ -20,7 +20,7 @@ export const SettStatusAvbryt = ({ journalpost }: { journalpost: Journalpost }) 
   if (isSuccess(settStatusAvbrytResult)) {
     return (
       <Alert variant="success">
-        Journalposten ble satt til status <strong>UTGÅR</strong>. Laster siden på nytt... <Loader />
+        Journalposten ble satt til status <strong>AVBRUTT</strong>. Laster siden på nytt... <Loader />
       </Alert>
     )
   }
@@ -28,7 +28,7 @@ export const SettStatusAvbryt = ({ journalpost }: { journalpost: Journalpost }) 
   return (
     <VStack gap="4">
       <Alert variant="info">
-        Du markerer nå journalposten med status <strong>AVBRYT</strong>
+        Du markerer nå journalposten med status <strong>AVBRUTT</strong>
       </Alert>
 
       {mapFailure(settStatusAvbrytResult, (error) => (
@@ -37,7 +37,7 @@ export const SettStatusAvbryt = ({ journalpost }: { journalpost: Journalpost }) 
 
       <HStack justify="end">
         <Button variant="danger" onClick={avbrytJournalpost} loading={isPending(settStatusAvbrytResult)}>
-          Sett status avbryt
+          Avbryt journalpost
         </Button>
       </HStack>
     </VStack>

@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -29,7 +30,7 @@ import java.util.UUID
 
 internal class LoependeYtelserforespoerselRiverTest {
     private val foersteMai2023 = LocalDate.of(2023, 5, 1)
-    private val sakId = 123L
+    private val sakId = randomSakId()
 
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(

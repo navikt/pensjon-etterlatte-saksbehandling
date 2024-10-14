@@ -716,6 +716,31 @@ internal class BehandlingServiceImplTest {
         }
     }
 
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `saker innvilget i Pesys skal gi feimelding hvis virkningstidspunkt før januar`(sakType: SakType) {
+        shouldThrow<VirkFoerOmsKildePesys> {
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = Tidspunkt.parse("2023-12-01T00:00:00Z"),
+                foersteVirk = YearMonth.of(2024, 1),
+                kilde = Vedtaksloesning.PESYS,
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `saker ikke innvilget i Pesys skal ikke feile hvis virkningstidspunkt før januar`(sakType: SakType) {
+        sjekkOmVirkningstidspunktErGyldig(
+            sakType = sakType,
+            behandlingType = BehandlingType.REVURDERING,
+            virkningstidspunkt = Tidspunkt.parse("2023-12-01T00:00:00Z"),
+            foersteVirk = YearMonth.of(2023, 12),
+        )
+    }
+
     private fun sjekkOmVirkningstidspunktErGyldig(
         sakType: SakType,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -867,7 +892,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(any()) } returns
             foerstegangsbehandling(
                 id = uuid,
-                sakId = 1,
+                sakId = randomSakId(),
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
@@ -902,7 +927,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(any()) } returns
             foerstegangsbehandling(
                 id = uuid,
-                sakId = 1,
+                sakId = randomSakId(),
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
@@ -979,7 +1004,7 @@ internal class BehandlingServiceImplTest {
     @Test
     fun `Kan lagre annen forelder`() {
         nyKontekstMedBruker(mockSaksbehandler())
-        val behandling = foerstegangsbehandling(sakId = 1L, id = UUID.randomUUID())
+        val behandling = foerstegangsbehandling(sakId = randomSakId(), id = UUID.randomUUID())
         every { behandlingDaoMock.hentBehandling(behandling.id) } returns behandling
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, TOKEN) } returns mockPersongalleri()
         coEvery { grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, any(), any()) } just runs
@@ -1025,19 +1050,25 @@ internal class BehandlingServiceImplTest {
     ) {
         nyKontekstMedBruker(mockSaksbehandler())
 
+        val foerstegangsbehandling =
+            foerstegangsbehandling(
+                id = BEHANDLINGS_ID,
+                sakId = SAK_ID,
+                sakType = sakType,
+                soeknadMottattDato = soeknadMottatt,
+                utlandstilknytning = utlandstilknytning,
+                kilde = kilde,
+                opphoerFraOgMed = opphoerFraOgMed,
+                virkningstidspunkt =
+                    foersteVirk?.let {
+                        Virkningstidspunkt(it, Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()), "")
+                    },
+            )
         val (behandling, tidligereBehandlinger) =
             when (behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
                     Pair(
-                        foerstegangsbehandling(
-                            id = BEHANDLINGS_ID,
-                            sakId = SAK_ID,
-                            sakType = sakType,
-                            soeknadMottattDato = soeknadMottatt,
-                            utlandstilknytning = utlandstilknytning,
-                            kilde = kilde,
-                            opphoerFraOgMed = opphoerFraOgMed,
-                        ),
+                        foerstegangsbehandling,
                         emptyList(),
                     )
 
@@ -1094,7 +1125,8 @@ internal class BehandlingServiceImplTest {
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
 
         every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling
-        every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns tidligereBehandlinger
+        every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns tidligereBehandlinger // TODO fjern?
+        every { behandlingDaoMock.hentInnvilgaFoerstegangsbehandling(behandling.sak.id) } returns foerstegangsbehandling
     }
 
     private fun mockPersongalleri() =

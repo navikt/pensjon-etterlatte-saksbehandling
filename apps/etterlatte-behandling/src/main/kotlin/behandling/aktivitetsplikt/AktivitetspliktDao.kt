@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
 import java.sql.ResultSet
@@ -100,7 +101,7 @@ class AktivitetspliktDao(
                         WHERE sak_id = ?
                         """.trimMargin(),
                     )
-                stmt.setLong(1, sakId)
+                stmt.setSakId(1, sakId)
 
                 stmt.executeQuery().toList { toAktivitet() }
             }
@@ -120,7 +121,7 @@ class AktivitetspliktDao(
                     """.trimMargin(),
                 )
             stmt.setObject(1, UUID.randomUUID())
-            stmt.setLong(2, aktivitet.sakId)
+            stmt.setSakId(2, aktivitet.sakId)
             stmt.setObject(3, behandlingId)
             stmt.setString(4, aktivitet.type.name)
             stmt.setDate(5, Date.valueOf(aktivitet.fom))
@@ -147,7 +148,7 @@ class AktivitetspliktDao(
                     """.trimMargin(),
                 )
             stmt.setObject(1, UUID.randomUUID())
-            stmt.setLong(2, sakId)
+            stmt.setSakId(2, sakId)
             stmt.setString(3, aktivitet.type.name)
             stmt.setDate(4, Date.valueOf(aktivitet.fom))
             stmt.setDate(5, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
@@ -205,7 +206,7 @@ class AktivitetspliktDao(
             stmt.setString(4, kilde.toJson())
             stmt.setString(5, aktivitet.beskrivelse)
             stmt.setObject(6, requireNotNull(aktivitet.id))
-            stmt.setObject(7, sakId)
+            stmt.setSakId(7, sakId)
 
             stmt.executeUpdate()
         }
@@ -243,7 +244,7 @@ class AktivitetspliktDao(
                     """.trimMargin(),
                 )
             stmt.setObject(1, aktivitetId)
-            stmt.setLong(2, sakId)
+            stmt.setSakId(2, sakId)
 
             stmt.executeUpdate()
         }
@@ -271,7 +272,7 @@ class AktivitetspliktDao(
     private fun ResultSet.toAktivitet() =
         AktivitetspliktAktivitet(
             id = getUUID("id"),
-            sakId = getLong("sak_id"),
+            sakId = SakId(getLong("sak_id")),
             type = AktivitetspliktAktivitetType.valueOf(getString("aktivitet_type")),
             fom = getDate("fom").toLocalDate(),
             tom = getDate("tom")?.toLocalDate(),

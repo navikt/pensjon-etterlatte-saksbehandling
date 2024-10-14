@@ -1,5 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
@@ -17,12 +19,22 @@ import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import java.time.Clock
 
+enum class UtbetalingToggles(
+    val value: String,
+) : FeatureToggle {
+    BRUK_REGELVERK_FOR_KLASSIFIKASJONSKODE("bruk-regelverk-for-klassifikasjonskode"),
+    ;
+
+    override fun key(): String = this.value
+}
+
 class UtbetalingService(
     val oppdragMapper: OppdragMapper,
     val oppdragSender: OppdragSender,
     val utbetalingDao: UtbetalingDao,
     val clock: Clock,
     val vedtaksverifiserer: Vedtaksverifiserer,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -41,8 +53,13 @@ class UtbetalingService(
             else -> {
                 val utbetalingMapper =
                     UtbetalingMapper(
-                        tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
+                        tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(SakId(vedtak.sak.id)),
                         vedtak = vedtak,
+                        skalBrukeRegelverk =
+                            featureToggleService.isEnabled(
+                                UtbetalingToggles.BRUK_REGELVERK_FOR_KLASSIFIKASJONSKODE,
+                                false,
+                            ),
                     )
                 val utbetaling = utbetalingMapper.opprettUtbetaling()
                 vedtaksverifiserer.verifiser(utbetaling, vedtak)

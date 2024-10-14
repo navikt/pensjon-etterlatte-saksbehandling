@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.avstemming.regulering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
@@ -182,6 +183,7 @@ class VedtaksverifisererTest(
                             periode = Periode(fom = it.fra, tom = it.til),
                             beloep = it.beloep,
                             type = UtbetalingsperiodeType.UTBETALING,
+                            regelverk = Regelverk.fraDato(it.fra.atDay(1)),
                         )
                     },
                 vedtakFattet =

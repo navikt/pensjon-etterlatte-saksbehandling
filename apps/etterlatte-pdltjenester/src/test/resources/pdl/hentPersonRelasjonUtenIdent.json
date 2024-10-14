@@ -24,11 +24,10 @@
           }
         }
       ],
-      "foedsel": [
+      "foedested": [],
+      "foedselsdato": [
         {
           "foedselsdato": "1982-04-29",
-          "foedeland": "NOR",
-          "foedested": null,
           "foedselsaar": 1982,
           "metadata": {
             "master": "FREG",

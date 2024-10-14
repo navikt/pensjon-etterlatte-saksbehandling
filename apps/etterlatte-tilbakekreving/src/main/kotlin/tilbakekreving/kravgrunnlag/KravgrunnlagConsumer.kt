@@ -48,7 +48,7 @@ class KravgrunnlagConsumer(
                     payload.contains("detaljertKravgrunnlagMelding") -> {
                         logger.info("Mottok melding av type detaljertKravgrunnlagMelding")
                         val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(payload)
-                        val sakId = detaljertKravgrunnlag.fagsystemId.toLong()
+                        val sakId = SakId(detaljertKravgrunnlag.fagsystemId.toLong())
 
                         sjekkAtSisteHendelseForSakErFerdigstilt(sakId, jmsTimestamp)
 
@@ -67,7 +67,7 @@ class KravgrunnlagConsumer(
                     payload.contains("endringKravOgVedtakstatus") -> {
                         logger.info("Mottok melding av type endringKravOgVedtakstatus")
                         val kravOgVedtakstatusDto = toKravOgVedtakstatus(payload)
-                        val sakId = kravOgVedtakstatusDto.fagsystemId.toLong()
+                        val sakId = SakId(kravOgVedtakstatusDto.fagsystemId.toLong())
 
                         sjekkAtSisteHendelseForSakErFerdigstilt(sakId, jmsTimestamp)
 

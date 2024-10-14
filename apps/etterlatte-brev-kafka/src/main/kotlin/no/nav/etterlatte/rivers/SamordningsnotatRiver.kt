@@ -3,6 +3,7 @@ package no.nav.etterlatte.rivers
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
 import no.nav.etterlatte.klienter.BrevapiKlient
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -31,7 +32,7 @@ class SamordningsnotatRiver(
         context: MessageContext,
     ) {
         try {
-            val sakId = packet["sakId"].asLong()
+            val sakId = SakId(packet["sakId"].asLong())
             val vedtakId = packet["vedtakId"].asLong()
             val samordningsmeldingId = packet["samordningsmeldingId"].asLong()
             val kommentar = packet["kommentar"].asText()

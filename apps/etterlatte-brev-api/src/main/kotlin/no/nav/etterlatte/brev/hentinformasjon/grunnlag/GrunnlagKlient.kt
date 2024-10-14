@@ -38,7 +38,7 @@ class GrunnlagKlient(
 
             return downstreamResourceClient
                 .get(
-                    Resource(clientId, "$baseUrl/api/grunnlag/sak/$sakid"),
+                    Resource(clientId, "$baseUrl/api/grunnlag/sak/${sakid.sakId}"),
                     brukerTokenInfo,
                 ).mapBoth(
                     success = { resource -> resource.response.let { deserialize(it.toString()) } },
@@ -104,6 +104,32 @@ class GrunnlagKlient(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_OPPDATER_GRUNNLAG",
                 detail = "Oppdatering av grunnlag for sak feilet id: ${sak.id}",
+            )
+        }
+    }
+
+    internal suspend fun finnesGrunnlagForSak(
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ): Boolean {
+        try {
+            logger.info("Oppdaterer grunnlag for sak med id=$sakId")
+
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$baseUrl/api/grunnlag/sak/$sakId/grunnlag-finnes"),
+                    bruker,
+                ).mapBoth(
+                    success = { deserialize(it.response!!.toString()) },
+                    failure = { throw it },
+                )
+        } catch (e: ResponseException) {
+            logger.error("Sjekk på om grunnlag finnes feilet (sakId=$sakId)", e)
+
+            throw ForespoerselException(
+                status = e.response.status.value,
+                code = "UKJENT_FEIL_FINNES_GRUNNLAG",
+                detail = "Sjekk på om grunnlag finnes feilet",
             )
         }
     }

@@ -24,6 +24,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
@@ -201,6 +202,14 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 logger.info("Oppretter nytt brev på sak=$sakId)")
                 val brevParametre = call.receive<BrevParametre>()
+
+                if (!grunnlagService.finnesGrunnlagForSak(sakId, brukerTokenInfo)) {
+                    throw UgyldigForespoerselException(
+                        "MANGLER_GRUNNLAG",
+                        "Kan ikke opprette brev siden saken mangler grunnlag.",
+                    )
+                }
+
                 val sak = behandlingService.hentSak(sakId, brukerTokenInfo)
                 grunnlagService.oppdaterGrunnlagForSak(sak, brukerTokenInfo)
                 measureTimedValue {

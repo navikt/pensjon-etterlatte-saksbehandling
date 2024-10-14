@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
@@ -33,7 +32,7 @@ class JournalfoerBrevService(
     private val dokarkivService: DokarkivService,
     private val service: VedtaksbrevService,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
+    val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun journalfoer(
         id: BrevID,

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.vedtaksbrev
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevkoder
@@ -232,15 +231,6 @@ class VedtaksbrevService(
             throw VedtaksbrevKanIkkeSlettes(brev.id, "Behandlingen til vedtaksbrevet kan ikke endres")
         }
         db.settBrevSlettet(brev.id, brukerTokenInfo)
-    }
-
-    fun fjernFerdigstiltStatusUnderkjentVedtak(
-        id: BrevID,
-        vedtak: JsonNode,
-    ): Boolean {
-        logger.info("Fjerner status FERDIGSTILT på vedtaksbrev (id=$id)")
-
-        return db.settBrevOppdatert(id, vedtak)
     }
 }
 

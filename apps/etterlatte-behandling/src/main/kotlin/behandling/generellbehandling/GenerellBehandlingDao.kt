@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -31,7 +32,7 @@ class GenerellBehandlingDao(
                     )
                 statement.setObject(1, generellBehandling.id)
                 statement.setJsonb(2, generellBehandling.innhold)
-                statement.setLong(3, generellBehandling.sakId)
+                statement.setSakId(3, generellBehandling.sakId)
                 statement.setTidspunkt(4, generellBehandling.opprettet)
                 statement.setString(5, generellBehandling.type.name)
                 statement.setObject(6, generellBehandling.tilknyttetBehandling)
@@ -92,7 +93,7 @@ class GenerellBehandlingDao(
                         WHERE sak_id = ?
                         """.trimIndent(),
                     )
-                statement.setLong(1, sakId)
+                statement.setSakId(1, sakId)
                 statement.executeQuery().toList {
                     toGenerellBehandling()
                 }
@@ -121,7 +122,7 @@ class GenerellBehandlingDao(
     private fun ResultSet.toGenerellBehandling(): GenerellBehandling =
         GenerellBehandling(
             id = getUUID("id"),
-            sakId = getLong("sak_id"),
+            sakId = SakId(getLong("sak_id")),
             type = GenerellBehandling.GenerellBehandlingType.valueOf(getString("type")),
             innhold = getString("innhold")?.let { objectMapper.readValue(it) },
             opprettet = getTidspunkt("opprettet"),

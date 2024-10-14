@@ -1,3 +1,5 @@
+package no.nav.etterlatte.libs.common
+
 import java.time.LocalDate
 import java.time.Month
 

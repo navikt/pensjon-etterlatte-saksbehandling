@@ -1,12 +1,8 @@
 package no.nav.etterlatte.brev.hentinformasjon.grunnlag
 
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.erOver18
 import no.nav.etterlatte.brev.behandling.hentForelderVerge
-import no.nav.etterlatte.brev.behandling.mapAvdoede
-import no.nav.etterlatte.brev.behandling.mapInnsender
-import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -42,16 +38,10 @@ class GrunnlagService(
         else -> klient.hentGrunnlag(behandlingId!!, bruker)
     }
 
-    suspend fun hentPersonerISak(
-        grunnlag: Grunnlag,
-        brevutfallDto: BrevutfallDto?,
-        sakType: SakType?,
-    ) = PersonerISak(
-        innsender = grunnlag.mapInnsender(),
-        soeker = grunnlag.mapSoeker(brevutfallDto?.aldersgruppe),
-        avdoede = grunnlag.mapAvdoede(),
-        verge = sakType?.let { hentVergeForSak(it, brevutfallDto, grunnlag) },
-    )
+    suspend fun finnesGrunnlagForSak(
+        sakId: SakId,
+        bruker: BrukerTokenInfo,
+    ) = klient.finnesGrunnlagForSak(sakId, bruker)
 
     suspend fun hentGrunnlagForSak(
         sakId: SakId,

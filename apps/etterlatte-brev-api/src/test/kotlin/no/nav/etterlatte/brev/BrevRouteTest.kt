@@ -61,6 +61,11 @@ internal class BrevRouteTest {
     private val grunnlagService = mockk<GrunnlagService>()
     private val behandlingService = mockk<BehandlingService>()
 
+    companion object {
+        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+        private val SAK_ID = Random.nextLong(1000)
+    }
+
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
@@ -236,7 +241,7 @@ internal class BrevRouteTest {
         }
     }
 
-    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+    val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     private fun opprettBrev(id: BrevID) =
         Brev(
@@ -279,9 +284,4 @@ internal class BrevRouteTest {
                 behandlingService,
             )
         }
-
-    companion object {
-        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
-        private val SAK_ID = Random.nextLong(1000)
-    }
 }

@@ -3,6 +3,8 @@ package no.nav.etterlatte.utbetaling.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -16,8 +18,6 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.mq.JmsConnectionFactory
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
-import no.nav.etterlatte.utbetaling.BehandlingKlient
-import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.avstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingService
@@ -41,6 +41,8 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.klienter.BehandlingKlient
+import no.nav.etterlatte.utbetaling.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.simulering.SimuleringDao
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsKlient
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
@@ -78,6 +80,7 @@ class ApplicationContext(
             ),
             objectMapper = simuleringObjectMapper(),
         ),
+    val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load())),
 ) {
     private val clock = utcKlokke()
 
@@ -111,6 +114,7 @@ class ApplicationContext(
             utbetalingDao = utbetalingDao,
             clock = clock,
             vedtaksverifiserer = vedtaksverifiserer,
+            featureToggleService = featureToggleService,
         )
 
     val avstemmingsdataSender =
@@ -136,6 +140,7 @@ class ApplicationContext(
             vedtaksvurderingKlient,
             SimuleringDao(dataSource),
             simuleringOsKlient,
+            featureToggleService,
         )
 
     val leaderElection = LeaderElection(properties.leaderElectorPath)
@@ -187,6 +192,13 @@ class ApplicationContext(
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
 }
+
+private fun featureToggleProperties(config: Config) =
+    FeatureToggleProperties(
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        host = config.getString("funksjonsbrytere.unleash.host"),
+        apiKey = config.getString("funksjonsbrytere.unleash.token"),
+    )
 
 /**
  * Kjøreplan får vi en gang i året fra økonomi og brukes for konsistensavstemming

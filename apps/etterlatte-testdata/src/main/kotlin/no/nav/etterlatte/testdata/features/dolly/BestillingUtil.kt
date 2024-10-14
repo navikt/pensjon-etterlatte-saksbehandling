@@ -74,7 +74,7 @@ fun bestillingTemplateStart(
           "hasMellomnavn": false
         }
       ],
-      "foedsel": [
+      "foedested": [
         {
           "id": null,
           "kilde": "Dolly",
@@ -82,7 +82,15 @@ fun bestillingTemplateStart(
           "folkeregistermetadata": null,
           "foedekommune": null,
           "foedeland": null,
-          "foedested": null,
+          "foedested": null
+        }
+      ],
+      "foedselsdato": [
+        {
+          "id": null,
+          "kilde": "Dolly",
+          "master": "FREG",
+          "folkeregistermetadata": null,
           "foedselsaar": null,
           "foedselsdato": null
         }

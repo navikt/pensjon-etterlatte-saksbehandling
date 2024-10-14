@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.OmregningData
@@ -35,7 +36,7 @@ internal class OmregningsHendelserBehandlingRiverTest {
 
         inspector.sendTestMessage(fullMelding)
 
-        revurderingRequestSlot.captured.sakId shouldBe 1L
+        revurderingRequestSlot.captured.sakId shouldBe SakId(1)
         inspector.inspektør.size shouldBe 2
         with(
             deserialize<OmregningData>(

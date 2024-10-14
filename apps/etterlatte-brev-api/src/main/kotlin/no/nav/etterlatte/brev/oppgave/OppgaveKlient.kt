@@ -33,7 +33,7 @@ class OppgaveKlient(
             try {
                 downstreamResourceClient
                     .post(
-                        resource = Resource(clientId = clientId, url = "$resourceUrl/oppgaver/sak/$sakId/opprett"),
+                        resource = Resource(clientId = clientId, url = "$resourceUrl/oppgaver/sak/${sakId.sakId}/opprett"),
                         brukerTokenInfo = brukerTokenInfo,
                         postBody = nyOppgaveDto,
                     ).mapBoth(

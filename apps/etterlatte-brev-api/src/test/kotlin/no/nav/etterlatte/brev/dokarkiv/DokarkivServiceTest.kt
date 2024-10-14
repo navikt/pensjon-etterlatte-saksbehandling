@@ -17,9 +17,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 internal class DokarkivServiceTest {
-    private val mockKlient = mockk<DokarkivKlient>()
+    val mockKlient = mockk<DokarkivKlient>()
 
-    private val service = DokarkivServiceImpl(mockKlient)
+    val service = DokarkivServiceImpl(mockKlient)
 
     @BeforeEach
     fun before() {

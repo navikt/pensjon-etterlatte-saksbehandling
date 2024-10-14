@@ -16,10 +16,10 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.behandling.sakId2
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -90,7 +90,7 @@ internal class TilbakekrevingRoutesTest {
         val oppdatertKravgrunnlag = kravgrunnlag()
         val sakId = oppdatertKravgrunnlag.sakId.value
         val kravgrunnlagId = oppdatertKravgrunnlag.kravgrunnlagId.value
-        coEvery { service.hentKravgrunnlag(kravgrunnlagId, tilSakId(sakId)) } returns
+        coEvery { service.hentKravgrunnlag(kravgrunnlagId, SakId(sakId)) } returns
             oppdatertKravgrunnlag
 
         testApplication {
@@ -104,7 +104,7 @@ internal class TilbakekrevingRoutesTest {
         }
 
         coVerify(exactly = 1) {
-            service.hentKravgrunnlag(kravgrunnlagId, tilSakId(sakId))
+            service.hentKravgrunnlag(kravgrunnlagId, SakId(sakId))
         }
     }
 
@@ -116,7 +116,7 @@ internal class TilbakekrevingRoutesTest {
 
         testApplication {
             val response =
-                client.get("/api/tilbakekreving/$sakId/kravgrunnlag/$kravgrunnlagId") {
+                client.get("/api/tilbakekreving/${sakId.sakId}/kravgrunnlag/$kravgrunnlagId") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }

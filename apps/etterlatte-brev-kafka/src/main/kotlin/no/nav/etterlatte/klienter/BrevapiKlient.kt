@@ -10,18 +10,17 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
+import no.nav.etterlatte.brev.VedtakTilJournalfoering
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevOgVedtakDto
 import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -39,7 +38,7 @@ class BrevapiKlient(
         try {
             logger.info("Oppretter brev for sak med sakId=$sakid")
             return httpClient
-                .post("$baseUrl/api/brev/sak/$sakid/opprett-journalfoer-og-distribuer") {
+                .post("$baseUrl/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
                     contentType(ContentType.Application.Json)
                     setBody(opprett.toJson())
                 }.body<BrevDistribusjonResponse>()
@@ -64,7 +63,7 @@ class BrevapiKlient(
             logger.info("Distribuerer brev med id $brevId")
             return httpClient
                 .post(
-                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}&sakId=$sakId",
+                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}&sakId=${sakId.sakId}",
                 ) {
                     contentType(ContentType.Application.Json)
                 }.body<BestillingsIdDto>()
@@ -95,7 +94,7 @@ class BrevapiKlient(
             throw ForespoerselException(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_JOURNALFOERING_AV_BREV",
-                detail = "Kunne ikke journalføre brev for sakidid: $sakId",
+                detail = "Kunne ikke journalføre brev for sakid: $sakId",
             )
         }
     }
@@ -106,7 +105,7 @@ class BrevapiKlient(
     ) {
         try {
             logger.info("Oppretet og journalfører notat med sakid: $sakId")
-            httpClient.post("$baseUrl/api/notat/sak/$sakId/manuellsamordning") {
+            httpClient.post("$baseUrl/api/notat/sak/${sakId.sakId}/manuellsamordning") {
                 contentType(ContentType.Application.Json)
                 setBody(samordningManueltBehandletRequest.toJson())
             }
@@ -116,7 +115,7 @@ class BrevapiKlient(
             throw ForespoerselException(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_OPPRETT_OG_JOURNALFOERING_AV_NOTAT",
-                detail = "Kunne ikke opprettet og journalføre notat for sakidid: $sakId",
+                detail = "Kunne ikke opprette og journalføre notat for sakid: $sakId",
             )
         }
     }
@@ -125,27 +124,6 @@ class BrevapiKlient(
         try {
             logger.info("Henter vedtaksbrev for behandlingid $behandlingId")
             return httpClient.get("$baseUrl/api/brev/behandling/$behandlingId/vedtak").body<Brev?>()
-        } catch (e: ResponseException) {
-            logger.error("Kunne ikke hente vedtaksbrev for behandling $behandlingId", e)
-
-            throw ForespoerselException(
-                status = e.response.status.value,
-                code = "UKJENT_FEIL_HENT_VEDTAKSBREV",
-                detail = "Kunne ikke hente vedtaksbrev for behandlingid: $behandlingId",
-            )
-        }
-    }
-
-    internal suspend fun fjernFerdigstiltStatusUnderkjentVedtak(
-        brevOgVedtakDto: BrevOgVedtakDto,
-        behandlingId: UUID,
-    ) {
-        try {
-            logger.info("Henter vedtaksbrev for behandlingid $behandlingId")
-            httpClient.post("$baseUrl/api/brev/behandling/$behandlingId/fjern-ferdigstilt") {
-                contentType(ContentType.Application.Json)
-                setBody(brevOgVedtakDto.toJson())
-            }
         } catch (e: ResponseException) {
             logger.error("Kunne ikke hente vedtaksbrev for behandling $behandlingId", e)
 

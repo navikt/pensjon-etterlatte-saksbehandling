@@ -19,7 +19,7 @@ class Grunnlag(
                 soeker = emptyMap(),
                 familie = listOf(),
                 sak = mapOf(),
-                metadata = Metadata(0, 0),
+                metadata = Metadata(SakId(0), 0),
             )
     }
 

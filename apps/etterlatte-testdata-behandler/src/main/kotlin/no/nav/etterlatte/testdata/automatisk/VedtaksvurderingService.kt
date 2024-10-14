@@ -24,7 +24,7 @@ class VedtaksvurderingService(
         retryOgPakkUt {
             klient
                 .post(
-                    Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"),
+                    Resource(clientId, "$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk/stegvis"),
                     bruker,
                     MigreringKjoringVariant.MED_PAUSE,
                 ).mapBoth(
@@ -41,7 +41,7 @@ class VedtaksvurderingService(
         retryOgPakkUt {
             klient
                 .post(
-                    Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"),
+                    Resource(clientId, "$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk/stegvis"),
                     bruker,
                     MigreringKjoringVariant.FORTSETT_ETTER_PAUSE,
                 ).mapBoth(

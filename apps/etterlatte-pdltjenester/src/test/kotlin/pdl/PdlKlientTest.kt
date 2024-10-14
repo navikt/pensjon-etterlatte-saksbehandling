@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class PdlKlientTest {
     private lateinit var pdlKlient: PdlKlient
@@ -39,16 +40,9 @@ internal class PdlKlientTest {
 
             assertEquals("LITEN", hentPerson?.navn?.first()?.fornavn)
             assertEquals("HEST", hentPerson?.navn?.first()?.etternavn)
-            assertEquals(
-                "2007-08-29",
-                hentPerson
-                    ?.foedsel
-                    ?.first()
-                    ?.foedselsdato
-                    ?.toString(),
-            )
-            assertEquals("NIC", hentPerson?.foedsel?.first()?.foedeland)
-            // TODO sjekk flere relevante felter
+            assertEquals(LocalDate.of(2007, 8, 29), hentPerson?.foedselsdato?.first()?.foedselsdato)
+            assertEquals(2007, hentPerson?.foedselsdato?.first()?.foedselsaar)
+            assertEquals("NOR", hentPerson?.foedested?.first()?.foedeland)
         }
     }
 
@@ -83,21 +77,39 @@ internal class PdlKlientTest {
                 hentPerson
                     ?.first()
                     ?.person
-                    ?.foedsel
+                    ?.foedselsdato
                     ?.first()
                     ?.foedselsdato
                     ?.toString(),
+            )
+            assertEquals(
+                1987,
+                hentPerson
+                    ?.first()
+                    ?.person
+                    ?.foedselsdato
+                    ?.first()
+                    ?.foedselsaar,
             )
             assertEquals(
                 "FJI",
                 hentPerson
                     ?.first()
                     ?.person
-                    ?.foedsel
+                    ?.foedested
                     ?.first()
                     ?.foedeland,
             )
-            // TODO sjekk flere relevante felter
+
+            assertEquals(
+                "ROBUST",
+                hentPerson
+                    ?.get(1)
+                    ?.person
+                    ?.navn
+                    ?.first()
+                    ?.fornavn,
+            )
         }
     }
 

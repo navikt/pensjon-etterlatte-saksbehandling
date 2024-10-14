@@ -34,7 +34,7 @@ fun kravgrunnlag(
     behandlingId: UUID30 = UUID.randomUUID().toUUID30(),
 ) = Kravgrunnlag(
     kravgrunnlagId = KravgrunnlagId(123L),
-    sakId = SakId(sak.id),
+    sakId = SakId(sak.id.sakId),
     vedtakId = VedtakId(2L),
     kontrollFelt = Kontrollfelt(""),
     status = KravgrunnlagStatus.NY,

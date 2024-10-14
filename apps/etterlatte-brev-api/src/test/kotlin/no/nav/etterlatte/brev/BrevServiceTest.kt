@@ -64,7 +64,6 @@ internal class BrevServiceTest {
             mockk(),
             mockk(),
         )
-
     private val bruker = simpleSaksbehandler("Z123456")
 
     @BeforeEach

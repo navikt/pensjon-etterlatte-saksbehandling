@@ -17,7 +17,9 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
-    implementation(project(":libs:rapidsandrivers-extras"))
+    implementation(libs.ktor2.server)
+    implementation(libs.ktor2.clientcore)
+
     implementation(libs.etterlatte.common)
     implementation(libs.pdf.pdfbox)
 

@@ -3,8 +3,10 @@ package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.utbetaling.common.toXMLDate
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -33,7 +35,16 @@ internal class OppdragMapperTest {
     fun oppdragFraVedtakOMS() {
         val oppdrag =
             OppdragMapper.oppdragFraUtbetaling(
-                utbetaling = utbetaling(sakType = Saktype.OMSTILLINGSSTOENAD),
+                utbetaling =
+                    utbetaling(
+                        sakType = Saktype.OMSTILLINGSSTOENAD,
+                        utbetalingslinjer =
+                            listOf(
+                                utbetalingslinje(
+                                    klassifikasjonskode = OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP,
+                                ),
+                            ),
+                    ),
                 erFoersteUtbetalingPaaSak = true,
                 erGRegulering = false,
             )

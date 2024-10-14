@@ -113,7 +113,7 @@ class AldersovergangDao(
             and g.sak_id = :sak_id
             """.trimIndent()
         return tx.session {
-            hent(sql, mapOf("sak_id" to sakId, "opplysningType" to opplysningType.name)) {
+            hent(sql, mapOf("sak_id" to sakId.sakId, "opplysningType" to opplysningType.name)) {
                 it.localDate("foedselsdato")
             }
         }

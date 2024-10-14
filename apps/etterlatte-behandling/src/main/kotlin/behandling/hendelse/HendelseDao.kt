@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -208,7 +209,7 @@ class HendelseDao(
                         """.trimIndent(),
                     )
 
-                statement.setLong(1, sakId)
+                statement.setSakId(1, sakId)
                 statement.executeQuery().toList {
                     asHendelse()
                 }
@@ -241,7 +242,7 @@ class HendelseDao(
             getTidspunktOrNull("inntruffet"),
             getLongOrNull("vedtakid"),
             getUUID("behandlingid"),
-            getLong("sakid"),
+            SakId(getLong("sakid")),
             getString("ident"),
             getString("identType"),
             getString("kommentar"),
@@ -262,7 +263,7 @@ class HendelseDao(
                 stmt.setTidspunkt(2, hendelse.inntruffet)
                 stmt.setLong(3, hendelse.vedtakId)
                 stmt.setObject(4, hendelse.behandlingId)
-                stmt.setLong(5, hendelse.sakId)
+                stmt.setSakId(5, hendelse.sakId)
                 stmt.setString(6, hendelse.ident)
                 stmt.setString(7, hendelse.identType)
                 stmt.setString(8, hendelse.kommentar)

@@ -29,7 +29,6 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -44,9 +43,17 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRepositoryIntegrationTest(
-    private val dataSource: DataSource,
+    val dataSource: DataSource,
 ) {
     private val db = BrevRepository(dataSource)
+
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
+        private val PDF_BYTES = "Hello world!".toByteArray()
+        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+    }
 
     @AfterEach
     fun resetTablesAfterEachTest() {
@@ -161,24 +168,6 @@ internal class BrevRepositoryIntegrationTest(
 
         val hentetBrev = db.hentBrev(brev.id)
         hentetBrev.status shouldBe Status.FERDIGSTILT
-    }
-
-    @Test
-    fun `Endre status ved underkjent vedtak`() {
-        val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
-        val brev = db.opprettBrev(ulagretBrev)
-
-        brev.status shouldBe Status.OPPRETTET
-
-        db.oppdaterPayload(brev.id, Slate())
-        db.settBrevFerdigstilt(brev.id)
-
-        val ferdigstiltBrev = db.hentBrev(brev.id)
-        ferdigstiltBrev.status shouldBe Status.FERDIGSTILT
-
-        db.settBrevOppdatert(brev.id, """{"key":"value"}""".toJsonNode())
-        val underkjentBrev = db.hentBrev(brev.id)
-        underkjentBrev.status shouldBe Status.OPPDATERT
     }
 
     @Test
@@ -464,12 +453,4 @@ internal class BrevRepositoryIntegrationTest(
                     landkode = "NOR",
                 ),
         )
-
-    companion object {
-        @RegisterExtension
-        val dbExtension = DatabaseExtension()
-
-        private val PDF_BYTES = "Hello world!".toByteArray()
-        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
-    }
 }

@@ -49,7 +49,7 @@ class SanksjonRepository(
                     mapOf(
                         "id" to UUID.randomUUID(),
                         "behandlingId" to behandlingId,
-                        "sak_id" to sakId,
+                        "sak_id" to sakId.sakId,
                         "type" to sanksjon.type.name,
                         "fom" to sanksjon.fom,
                         "tom" to sanksjon.tom,
@@ -80,7 +80,7 @@ class SanksjonRepository(
                     mapOf(
                         "id" to UUID.randomUUID(),
                         "behandlingId" to behandlingId,
-                        "sak_id" to sakId,
+                        "sak_id" to sakId.sakId,
                         "type" to sanksjon.type.name,
                         "fom" to sanksjon.fom.atDay(1),
                         "tom" to sanksjon.tom?.atEndOfMonth(),
@@ -134,7 +134,7 @@ class SanksjonRepository(
         Sanksjon(
             id = uuid("id"),
             behandlingId = uuid("behandling_id"),
-            sakId = long("sak_id"),
+            sakId = SakId(long("sak_id")),
             type = SanksjonType.valueOf(string("sanksjon_type")),
             fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },

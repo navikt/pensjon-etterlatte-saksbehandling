@@ -213,14 +213,7 @@ class TrygdetidServiceImpl(
         brukerTokenInfo,
     ) {
         val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
-
-        if (avdoede.isEmpty()) {
-            logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$behandlingId)")
-            throw GrunnlagManglerAvdoede()
-        }
-
         val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
-
         if (eksisterendeTrygdetider.isNotEmpty() && avdoede.size == eksisterendeTrygdetider.size) {
             throw TrygdetidAlleredeOpprettetException()
         }
@@ -229,12 +222,15 @@ class TrygdetidServiceImpl(
 
         when (behandling.behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                if (avdoede.isEmpty()) {
+                    logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$behandlingId)")
+                    throw GrunnlagManglerAvdoede()
+                }
                 logger.info("Oppretter trygdetid for behandling $behandlingId")
                 opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
             }
 
             BehandlingType.REVURDERING -> {
-                logger.info("Oppretter trygdetid for behandling $behandlingId for revurdering")
                 val forrigeBehandling =
                     behandlingKlient.hentSisteIverksatteBehandling(
                         behandling.sak,

@@ -1,18 +1,20 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBrevForSak, slettBrev } from '~shared/api/brev'
-import { useEffect, useState } from 'react'
-import { BodyShort, Box, Button, HStack, Modal, Table } from '@navikt/ds-react'
+import { hentBrevForSak } from '~shared/api/brev'
+import { useEffect } from 'react'
+import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { BrevStatus, formaterBrevtype, IBrev, Mottaker } from '~shared/types/Brev'
-import { DocPencilIcon, ExternalLinkIcon, TrashIcon } from '@navikt/aksel-icons'
+import { DocPencilIcon, ExternalLinkIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import BrevModal from '~components/person/brev/BrevModal'
 import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { isFailure, isPending, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { isFailure, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { LastOppBrev } from '~components/person/brev/LastOppBrev'
 import { NyttBrevModal } from '~components/person/brev/NyttBrevModal'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
+import { SlettBrev } from '~components/person/brev/handlinger/SlettBrev'
+import { BrevUtgaar } from '~components/person/brev/handlinger/BrevUtgaar'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse
@@ -22,12 +24,13 @@ const mapAdresse = (mottaker: Mottaker) => {
   return `${adresselinje}, ${postlinje}`
 }
 
-const brevKanEndres = (status: BrevStatus) => [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(status)
+const vedtaksbrevKanEndres = (status: BrevStatus) => [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(status)
 
-const kanSletteBrev = (brev: IBrev) => brevKanEndres(brev.status) && !brev.behandlingId
+const annetBrevKanEndres = (status: BrevStatus) =>
+  [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT, BrevStatus.FERDIGSTILT, BrevStatus.JOURNALFOERT].includes(status)
 
 const handlingKnapp = (brev: IBrev) => {
-  if (brev.behandlingId && brevKanEndres(brev.status)) {
+  if (brev.behandlingId && vedtaksbrevKanEndres(brev.status)) {
     return (
       <Button
         as="a"
@@ -37,7 +40,7 @@ const handlingKnapp = (brev: IBrev) => {
         icon={<ExternalLinkIcon />}
       />
     )
-  } else if (!brev.behandlingId && brev.status != BrevStatus.DISTRIBUERT) {
+  } else if (!brev.behandlingId && annetBrevKanEndres(brev.status)) {
     return (
       <Button
         as="a"
@@ -112,9 +115,10 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
                   <Table.DataCell>{b.mottaker.navn}</Table.DataCell>
                   <Table.DataCell>{mapAdresse(b.mottaker)}</Table.DataCell>
                   <Table.DataCell>
-                    <HStack gap="4">
+                    <HStack gap="4" justify="end">
+                      <SlettBrev brev={b} />
+                      <BrevUtgaar brev={b} />
                       {handlingKnapp(b)}
-                      {kanSletteBrev(b) && <SlettBrev brevId={b.id} sakId={b.sakId} />}
                     </HStack>
                   </Table.DataCell>
                 </Table.Row>
@@ -135,37 +139,5 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
         ))}
       </div>
     </Box>
-  )
-}
-
-const SlettBrev = ({ brevId, sakId }: { brevId: number; sakId: number }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [slettBrevStatus, apiSlettBrev] = useApiCall(slettBrev)
-
-  const slett = () => {
-    apiSlettBrev({ brevId, sakId }, () => {
-      window.location.reload()
-    })
-  }
-
-  return (
-    <>
-      <Button variant="danger" icon={<TrashIcon />} onClick={() => setIsOpen(true)} />
-
-      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Slett brev">
-        <Modal.Body>
-          <BodyShort spacing>Er du sikker på at du vil slette brevet? Handlingen kan ikke angres.</BodyShort>
-
-          <HStack gap="4" justify="center">
-            <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(slettBrevStatus)}>
-              Nei, avbryt
-            </Button>
-            <Button variant="danger" onClick={slett} loading={isPending(slettBrevStatus)}>
-              Ja, slett
-            </Button>
-          </HStack>
-        </Modal.Body>
-      </Modal>
-    </>
   )
 }

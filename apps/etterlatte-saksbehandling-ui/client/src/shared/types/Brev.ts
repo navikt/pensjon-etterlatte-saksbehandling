@@ -48,6 +48,7 @@ export enum BrevStatus {
   JOURNALFOERT = 'JOURNALFOERT',
   DISTRIBUERT = 'DISTRIBUERT',
   SLETTET = 'SLETTET',
+  UTGAATT = 'UTGAATT',
 }
 
 export enum BrevProsessType {

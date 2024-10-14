@@ -303,11 +303,8 @@ class BehandlingFactory(
                         prosessType = Prosesstype.MANUELL,
                     )
 
-                if (omgjoeringRequest.sluttbehandlingUtland) {
-                    behandlingInfoService.lagreErOmgjoeringSluttbehandlingUtland(
-                        nyFoerstegangsbehandling,
-                        true,
-                    )
+                if (omgjoeringRequest.erSluttbehandlingUtland) {
+                    behandlingInfoService.lagreErOmgjoeringSluttbehandlingUtland(nyFoerstegangsbehandling)
                 }
 
                 if (omgjoeringRequest.skalKopiere && sisteAvslaatteBehandling != null) {

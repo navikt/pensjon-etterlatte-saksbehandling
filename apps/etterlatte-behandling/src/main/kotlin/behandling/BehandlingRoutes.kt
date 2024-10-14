@@ -57,7 +57,7 @@ import java.util.UUID
 
 data class OmgjoeringRequest(
     val skalKopiere: Boolean = false,
-    val sluttbehandlingUtland: Boolean = false,
+    val erSluttbehandlingUtland: Boolean = false,
 )
 
 internal fun Route.behandlingRoutes(

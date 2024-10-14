@@ -17,6 +17,7 @@ export interface OpprettAktivitetspliktOppfolgingRequest {
   aktivitet: string
 }
 
+//TODO: slette?
 export const opprettAktivitetspliktOppfolging = async (args: {
   behandlingId: string
   request: OpprettAktivitetspliktOppfolgingRequest

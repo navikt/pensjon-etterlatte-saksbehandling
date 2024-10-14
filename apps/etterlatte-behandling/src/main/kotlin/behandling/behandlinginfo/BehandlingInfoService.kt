@@ -37,12 +37,8 @@ class BehandlingInfoService(
         return Pair(lagretBrevutfall, lagretEtterbetaling)
     }
 
-    fun lagreErOmgjoeringSluttbehandlingUtland(
-        behandling: Behandling,
-        sluttbehandlingUtland: Boolean,
-    ) {
-        behandlingInfoDao.lagreErOmgjoeringSluttbehandlingUtland(behandling.id, sluttbehandlingUtland)
-    }
+    fun lagreErOmgjoeringSluttbehandlingUtland(behandling: Behandling) =
+        behandlingInfoDao.lagreErOmgjoeringSluttbehandlingUtland(behandling.id)
 
     private fun lagreBrevutfall(
         behandling: Behandling,

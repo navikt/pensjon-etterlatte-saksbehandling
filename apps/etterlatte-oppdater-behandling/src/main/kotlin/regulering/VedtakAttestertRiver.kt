@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
@@ -15,8 +16,8 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGN
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.kjoering
+import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -32,8 +33,9 @@ internal class VedtakAttestertRiver(
 
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(KJOERING) }
+            validate { it.requireKey(OmregningDataPacket.KEY) }
+            validate { it.requireKey(OmregningDataPacket.SAK_ID) }
+            validate { it.requireKey(OmregningDataPacket.KJOERING) }
             validate { it.requireKey(BEREGNING_BELOEP_FOER) }
             validate { it.requireKey(BEREGNING_BELOEP_ETTER) }
             validate { it.requireKey(BEREGNING_G_FOER) }
@@ -45,17 +47,17 @@ internal class VedtakAttestertRiver(
         }
     }
 
-    override fun kontekst() = Kontekst.REGULERING
+    override fun kontekst() = Kontekst.OMREGNING
 
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val sakId = packet.sakId
-        logger.info("Sak $sakId er ferdig regulert, oppdaterer status")
+        val sakId = packet.omregningData.sakId
+        logger.info("Sak $sakId er ferdig omregnet, oppdaterer status")
         val request =
             LagreKjoeringRequest(
-                kjoering = packet.kjoering,
+                kjoering = packet.omregningData.kjoering,
                 status = KjoeringStatus.FERDIGSTILT,
                 sakId = sakId,
                 beregningBeloepFoer = bigDecimal(packet, BEREGNING_BELOEP_FOER),
@@ -68,7 +70,7 @@ internal class VedtakAttestertRiver(
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
         behandlingService.lagreFullfoertKjoering(request)
-        logger.info("Sak $sakId er ferdig regulert, status er oppdatert")
+        logger.info("Sak $sakId er ferdig omregnet, status er oppdatert")
     }
 
     private fun bigDecimal(

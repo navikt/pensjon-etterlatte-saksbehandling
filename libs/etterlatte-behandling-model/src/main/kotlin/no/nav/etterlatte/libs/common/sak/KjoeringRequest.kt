@@ -12,14 +12,14 @@ data class LagreKjoeringRequest(
     val kjoering: String,
     val status: KjoeringStatus,
     val sakId: SakId,
-    val beregningBeloepFoer: BigDecimal,
-    val beregningBeloepEtter: BigDecimal,
-    val beregningGFoer: BigDecimal,
-    val beregningGEtter: BigDecimal,
-    val beregningBruktOmregningsfaktor: BigDecimal,
+    val beregningBeloepFoer: BigDecimal?,
+    val beregningBeloepEtter: BigDecimal?,
+    val beregningGFoer: BigDecimal?,
+    val beregningGEtter: BigDecimal?,
+    val beregningBruktOmregningsfaktor: BigDecimal?,
     val avkortingFoer: BigDecimal?,
     val avkortingEtter: BigDecimal?,
-    val vedtakBeloep: BigDecimal,
+    val vedtakBeloep: BigDecimal?,
 )
 
 enum class KjoeringStatus {

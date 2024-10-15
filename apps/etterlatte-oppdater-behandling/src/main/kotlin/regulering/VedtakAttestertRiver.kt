@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
-import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BELOEP_ETTER
@@ -16,9 +15,7 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGN
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP
-import no.nav.etterlatte.rapidsandrivers.kjoering
 import no.nav.etterlatte.rapidsandrivers.omregningData
-import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -36,11 +33,11 @@ internal class VedtakAttestertRiver(
             validate { it.requireKey(OmregningDataPacket.KEY) }
             validate { it.requireKey(OmregningDataPacket.SAK_ID) }
             validate { it.requireKey(OmregningDataPacket.KJOERING) }
-            validate { it.requireKey(BEREGNING_BELOEP_FOER) }
-            validate { it.requireKey(BEREGNING_BELOEP_ETTER) }
-            validate { it.requireKey(BEREGNING_G_FOER) }
-            validate { it.requireKey(BEREGNING_G_ETTER) }
-            validate { it.requireKey(BEREGNING_BRUKT_OMREGNINGSFAKTOR) }
+            validate { it.interestedIn(BEREGNING_BELOEP_FOER) }
+            validate { it.interestedIn(BEREGNING_BELOEP_ETTER) }
+            validate { it.interestedIn(BEREGNING_G_FOER) }
+            validate { it.interestedIn(BEREGNING_G_ETTER) }
+            validate { it.interestedIn(BEREGNING_BRUKT_OMREGNINGSFAKTOR) }
             validate { it.interestedIn(AVKORTING_FOER) }
             validate { it.interestedIn(AVKORTING_ETTER) }
             validate { it.requireKey(VEDTAK_BELOEP) }
@@ -65,8 +62,8 @@ internal class VedtakAttestertRiver(
                 beregningGFoer = bigDecimal(packet, BEREGNING_G_FOER),
                 beregningGEtter = bigDecimal(packet, BEREGNING_G_ETTER),
                 beregningBruktOmregningsfaktor = bigDecimal(packet, BEREGNING_BRUKT_OMREGNINGSFAKTOR),
-                avkortingFoer = packet[AVKORTING_FOER].asText().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) },
-                avkortingEtter = packet[AVKORTING_ETTER].asText().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) },
+                avkortingFoer = bigDecimal(packet, AVKORTING_FOER),
+                avkortingEtter = bigDecimal(packet, AVKORTING_ETTER),
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
         behandlingService.lagreFullfoertKjoering(request)
@@ -76,5 +73,5 @@ internal class VedtakAttestertRiver(
     private fun bigDecimal(
         packet: JsonMessage,
         noekkel: String,
-    ) = BigDecimal(packet[noekkel].asText())
+    ): BigDecimal? = packet[noekkel].asText().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) }
 }

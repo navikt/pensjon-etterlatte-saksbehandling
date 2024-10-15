@@ -64,7 +64,9 @@ internal class OmregningHendelserBeregningRiver(
         runBlocking {
             val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra)
             packet[BEREGNING_KEY] = beregning.beregning
-            sendMedInformasjonTilKontrollsjekking(beregning, packet)
+
+            // TODO denne burde flyttes ut av direkte omregning
+            // sendMedInformasjonTilKontrollsjekking(beregning, packet)
         }
         packet.setEventNameForHendelseType(OmregningHendelseType.BEREGNA)
         context.publish(packet.toJson())
@@ -76,18 +78,19 @@ internal class OmregningHendelserBeregningRiver(
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,
     ): BeregningOgAvkorting {
-        val g = beregningService.hentGrunnbeloep()
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
 
-        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g, behandlingId = behandlingId)
+        // TODO denne burde flyttes ut av omregning
+        // val g = beregningService.hentGrunnbeloep()
+        // verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g, behandlingId = behandlingId)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
                 beregningService
-                    .regulerAvkorting(behandlingId, behandlingViOmregnerFra)
+                    .omregnAvkorting(behandlingId, behandlingViOmregnerFra)
                     .body<AvkortingDto>()
             val forrigeAvkorting =
                 beregningService

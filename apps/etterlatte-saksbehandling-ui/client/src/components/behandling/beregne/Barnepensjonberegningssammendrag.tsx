@@ -17,7 +17,7 @@ interface BeregningsdetaljerPerson {
   foedselsdato: Date
 }
 
-const SISTE_MAANED_GAMMELT_REGELVERK = new Date(2023, 11, 31, 0, 0, 0, 0)
+export const SISTE_DATO_GAMMELT_REGELVERK = new Date(2023, 11, 31, 0, 0, 0, 0)
 
 const SammendragGammeltRegelverk = (props: {
   soesken: BeregningsdetaljerPerson[]
@@ -138,7 +138,7 @@ export const Barnepensjonberegningssammendrag = ({
   }
 
   const datoPeriodeFom = parseISO(beregningsperiode.datoFOM)
-  const erPaaNyttRegelverk = isAfter(datoPeriodeFom, SISTE_MAANED_GAMMELT_REGELVERK)
+  const erPaaNyttRegelverk = isAfter(datoPeriodeFom, SISTE_DATO_GAMMELT_REGELVERK)
 
   const flereAvdoede = (beregningsperiode.avdoedeForeldre ?? []).length > 1
   const kunEnJuridiskForelder = beregningsperiode.kunEnJuridiskForelder

@@ -1479,7 +1479,7 @@ internal class TrygdetidServiceTest {
     }
 
     @Test
-    fun `opprettOverstyrtBeregnetTrygdetid kaster feil hvis ingen avdøde i persongalleri har dødsdato`() {
+    fun `opprettOverstyrtBeregnetTrygdetid kaster feil hvis ingen avdoede i persongalleri har doedsdato`() {
         val sakId: SakId = randomSakId()
         val behandlingId = randomUUID()
         val grunnlag =
@@ -1533,7 +1533,7 @@ internal class TrygdetidServiceTest {
     }
 
     @Test
-    fun `opprettOverstyrtBeregnetTrygdetid tillater å opprette overstyrt trygdetid uten avdøde`() {
+    fun `opprettOverstyrtBeregnetTrygdetid tillater aa opprette overstyrt trygdetid uten avdoede`() {
         val sakId: SakId = randomSakId()
         val behandlingId = randomUUID()
         val grunnlag =

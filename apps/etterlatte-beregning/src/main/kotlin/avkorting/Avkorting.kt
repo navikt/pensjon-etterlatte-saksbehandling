@@ -167,9 +167,9 @@ data class Avkorting(
                             AvkortingGrunnlag(
                                 id = nyttGrunnlag.id,
                                 periode = Periode(fom = nyttGrunnlag.fom, tom = opphoerFom?.minusMonths(1)),
-                                inntektTom = nyttGrunnlag.aarsinntekt,
+                                inntektTom = nyttGrunnlag.inntektTom,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
-                                inntektUtlandTom = nyttGrunnlag.inntektUtland,
+                                inntektUtlandTom = nyttGrunnlag.inntektUtlandTom,
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
                                 innvilgaMaaneder =
                                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall

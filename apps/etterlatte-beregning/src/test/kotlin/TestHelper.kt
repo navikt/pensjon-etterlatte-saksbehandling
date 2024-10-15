@@ -157,9 +157,9 @@ fun avkortinggrunnlagLagre(
     overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
 ) = AvkortingGrunnlagLagreDto(
     id = id,
-    aarsinntekt = aarsinntekt,
+    inntektTom = aarsinntekt,
     fratrekkInnAar = fratrekkInnAar,
-    inntektUtland = 0,
+    inntektUtlandTom = 0,
     fratrekkInnAarUtland = 0,
     spesifikasjon = "Spesifikasjon",
     fom = fom,

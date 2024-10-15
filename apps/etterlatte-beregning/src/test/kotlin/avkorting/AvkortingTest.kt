@@ -598,9 +598,9 @@ internal class AvkortingTest {
                 with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting) {
                     size shouldBe 1
                     with(get(0).grunnlag) {
-                        inntektTom shouldBe forventetInntekt.aarsinntekt
+                        inntektTom shouldBe forventetInntekt.inntektTom
                         fratrekkInnAar shouldBe forventetInntekt.fratrekkInnAar
-                        inntektUtlandTom shouldBe forventetInntekt.inntektUtland
+                        inntektUtlandTom shouldBe forventetInntekt.inntektUtlandTom
                         fratrekkInnAarUtland shouldBe forventetInntekt.fratrekkInnAarUtland
                         spesifikasjon shouldBe forventetInntekt.spesifikasjon
                     }
@@ -652,9 +652,9 @@ internal class AvkortingTest {
                     size shouldBe 2
                     get(0).grunnlag shouldBe foersteInntekt
                     with(get(1).grunnlag) {
-                        inntektTom shouldBe endretInntekt.aarsinntekt
+                        inntektTom shouldBe endretInntekt.inntektTom
                         fratrekkInnAar shouldBe endretInntekt.fratrekkInnAar
-                        inntektUtlandTom shouldBe endretInntekt.inntektUtland
+                        inntektUtlandTom shouldBe endretInntekt.inntektUtlandTom
                         fratrekkInnAarUtland shouldBe endretInntekt.fratrekkInnAarUtland
                         spesifikasjon shouldBe endretInntekt.spesifikasjon
                     }
@@ -689,9 +689,9 @@ internal class AvkortingTest {
                             tom = YearMonth.of(2024, Month.JULY),
                         )
                     with(get(2).grunnlag) {
-                        inntektTom shouldBe nyttGrunnlag.aarsinntekt
+                        inntektTom shouldBe nyttGrunnlag.inntektTom
                         fratrekkInnAar shouldBe nyttGrunnlag.fratrekkInnAar
-                        inntektUtlandTom shouldBe nyttGrunnlag.inntektUtland
+                        inntektUtlandTom shouldBe nyttGrunnlag.inntektUtlandTom
                         fratrekkInnAarUtland shouldBe nyttGrunnlag.fratrekkInnAarUtland
                         spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
                     }
@@ -743,9 +743,9 @@ internal class AvkortingTest {
                     with(inntektsavkorting) {
                         size shouldBe 1
                         with(get(0).grunnlag) {
-                            inntektTom shouldBe nyttGrunnlag.aarsinntekt
+                            inntektTom shouldBe nyttGrunnlag.inntektTom
                             fratrekkInnAar shouldBe nyttGrunnlag.fratrekkInnAar
-                            inntektUtlandTom shouldBe nyttGrunnlag.inntektUtland
+                            inntektUtlandTom shouldBe nyttGrunnlag.inntektUtlandTom
                             fratrekkInnAarUtland shouldBe nyttGrunnlag.fratrekkInnAarUtland
                             spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
                         }

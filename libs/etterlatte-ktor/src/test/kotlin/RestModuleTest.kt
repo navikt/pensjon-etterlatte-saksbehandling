@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.initialisering.setReady
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO

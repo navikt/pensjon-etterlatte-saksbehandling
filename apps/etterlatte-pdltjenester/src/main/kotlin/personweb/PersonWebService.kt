@@ -46,7 +46,7 @@ class PersonWebService(
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString()
 
-                if (it.errors?.fortroligAdresse() == true) {
+                if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke person i PDL")

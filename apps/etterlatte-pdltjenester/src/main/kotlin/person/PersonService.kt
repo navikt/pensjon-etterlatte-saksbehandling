@@ -47,7 +47,7 @@ class PersonService(
         return pdlKlient.hentPerson(request).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.fortroligAdresse() == true) {
+                if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
@@ -73,7 +73,7 @@ class PersonService(
         return pdlKlient.hentPerson(request).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.fortroligAdresse() == true) {
+                if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
@@ -102,7 +102,7 @@ class PersonService(
         return pdlKlient.hentAdressebeskyttelse(request).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.fortroligAdresse() == true) {
+                if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen ${request.ident}")
@@ -134,7 +134,7 @@ class PersonService(
             .let {
                 if (it.data?.hentPerson == null) {
                     val pdlFeil = it.errors?.asFormatertFeil()
-                    if (it.errors?.fortroligAdresse() == true) {
+                    if (it.errors?.harAdressebeskyttelse() == true) {
                         throw pdlForesporselFeiletForAdressebeskyttelse()
                     } else if (it.errors?.personIkkeFunnet() == true) {
                         throw FantIkkePersonException("Fant ikke personen $fnr")

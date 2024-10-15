@@ -70,7 +70,7 @@ class VilkaarsvurderingService(
         resultat: VilkaarsvurderingResultat,
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val (behandling, grunnlag) = runBlocking { hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo) }
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
             val virkningstidspunkt =
                 behandling.virkningstidspunkt?.dato?.atDay(1)
                     ?: throw IllegalStateException("Virkningstidspunkt må være satt for å sette en vurdering")
@@ -138,7 +138,7 @@ class VilkaarsvurderingService(
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
-            val (behandling, grunnlag) = runBlocking { hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo) }
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
             val tidligereVilkaarsvurdering =
                 vilkaarsvurderingRepositoryWrapper.hent(kopierFraBehandling)
                     ?: throw NullPointerException("Fant ikke vilkårsvurdering fra behandling $kopierFraBehandling")
@@ -234,7 +234,7 @@ class VilkaarsvurderingService(
                 throw IllegalArgumentException("Vilkårsvurdering finnes allerede for behandling $behandlingId")
             }
 
-            val (behandling, grunnlag) = runBlocking { hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo) }
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
 
             val virkningstidspunkt =
                 behandling.virkningstidspunkt
@@ -373,7 +373,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
-        val (behandling, grunnlag) = runBlocking { hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo) }
+        val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
         vilkaarsvurderingRepositoryWrapper.oppdaterGrunnlagsversjon(
             behandlingId = behandlingId,
             grunnlagVersjon = grunnlag.metadata.versjon,

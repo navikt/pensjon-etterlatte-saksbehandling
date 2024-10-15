@@ -336,7 +336,7 @@ class PersonService(
                     sikkerLogg.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer.value})")
 
                     GeografiskTilknytning(ukjent = true)
-                } else if (it.errors?.fortroligAdresse() == true) {
+                } else if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors.personIkkeFunnet()) {
                     throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")

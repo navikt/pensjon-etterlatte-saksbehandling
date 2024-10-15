@@ -21,9 +21,9 @@ class AvkortingService(
             Resource(clientId, "$url/api/beregning/avkorting/$behandlingId"),
             bruker,
             AvkortingGrunnlagLagreDto(
-                aarsinntekt = 200_000,
+                inntektTom = 200_000,
                 fratrekkInnAar = 50_000,
-                inntektUtland = 0,
+                inntektUtlandTom = 0,
                 fratrekkInnAarUtland = 0,
                 spesifikasjon = "kun test",
                 fom = YearMonth.now(),

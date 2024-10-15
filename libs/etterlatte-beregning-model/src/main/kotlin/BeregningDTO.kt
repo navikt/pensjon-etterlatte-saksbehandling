@@ -82,9 +82,9 @@ data class AvkortingGrunnlagDto(
 
 data class AvkortingGrunnlagLagreDto(
     val id: UUID = UUID.randomUUID(),
-    val aarsinntekt: Int,
+    val inntektTom: Int,
     val fratrekkInnAar: Int,
-    val inntektUtland: Int,
+    val inntektUtlandTom: Int,
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
     val fom: YearMonth,

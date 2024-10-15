@@ -8,6 +8,7 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
+import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -20,6 +21,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.PingResult
@@ -31,6 +33,7 @@ import no.nav.etterlatte.libs.ktor.ping
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 interface GrunnlagKlient : Pingable {
@@ -103,6 +106,12 @@ interface GrunnlagKlient : Pingable {
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): PersonopplysningerResponse
+
+    suspend fun aldersovergangMaaned(
+        sakId: SakId,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): YearMonth
 }
 
 class GrunnlagKlientException(
@@ -435,6 +444,39 @@ class GrunnlagKlientImpl(
                 success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },
             )
+
+    override suspend fun aldersovergangMaaned(
+        sakId: SakId,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): YearMonth {
+        logger.info("Henter måned for aldersovergang for sak=$sakId saktype=${sakType.name}")
+
+        return retry<YearMonth> {
+            downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/grunnlag/aldersovergang/sak/${sakId.sakId}/${sakType.name}",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw GrunnlagKlientException(
+                        "Klarte ikke hente måned for aldersovergang for sak=$sakId saktype=${sakType.name}",
+                        it.samlaExceptions(),
+                    )
+                }
+            }
+        }
+    }
 
     override val serviceName: String
         get() = "Grunnlagklient"

@@ -63,6 +63,10 @@ internal val sjekklisteItemsFoerstegangsbehandlingOMS =
         "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
         "Sjekk om bruker har overgangsstønad",
     )
+internal val sjekklisteItemsFyller67 =
+    listOf(
+        "Oppgitt inntekt for hele neste år i søknaden. Måneder etter opphør er trukket fra i beregningen.",
+    )
 
 internal val sjekklisteItemsRevurderingBP =
     listOf(

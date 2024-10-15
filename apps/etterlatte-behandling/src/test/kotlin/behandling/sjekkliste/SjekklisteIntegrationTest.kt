@@ -4,13 +4,17 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoServiceTest.Companion.bruker
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -24,6 +28,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,6 +43,7 @@ class SjekklisteIntegrationTest(
 
     private val behandlingService = mockk<BehandlingService>()
     private val oppgaveService = mockk<OppgaveService>()
+    private val grunnlagKlient = mockk<GrunnlagKlient>()
     private lateinit var sjekklisteDao: SjekklisteDao
     private lateinit var sjekklisteService: SjekklisteService
 
@@ -45,7 +51,7 @@ class SjekklisteIntegrationTest(
     fun setup() {
         nyKontekstMedBrukerOgDatabaseContext(user, DatabaseContextTest(dataSource))
         sjekklisteDao = SjekklisteDao(ConnectionAutoclosingTest(dataSource))
-        sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
+        sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService, grunnlagKlient)
 
         every { user.name() } returns "Sak B. Handlersen"
         every {
@@ -65,7 +71,10 @@ class SjekklisteIntegrationTest(
     fun `Opprett sjekkliste for BP`() {
         val behandling = foerstegangsbehandling(sakId = randomSakId())
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        val opprettet = sjekklisteService.opprettSjekkliste(behandling.id)
+        val opprettet =
+            runBlocking {
+                sjekklisteService.opprettSjekkliste(behandling.id, bruker)
+            }
 
         opprettet.id shouldBe behandling.id
         opprettet.versjon shouldBe 1
@@ -81,7 +90,17 @@ class SjekklisteIntegrationTest(
     fun `Opprett sjekkliste for OMS`() {
         val behandling = foerstegangsbehandling(sakId = randomSakId(), sakType = SakType.OMSTILLINGSSTOENAD)
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        val opprettet = sjekklisteService.opprettSjekkliste(behandling.id)
+        coEvery {
+            grunnlagKlient.aldersovergangMaaned(
+                behandling.sak.id,
+                behandling.sak.sakType,
+                bruker,
+            )
+        } returns YearMonth.of(2030, 1)
+        val opprettet =
+            runBlocking {
+                sjekklisteService.opprettSjekkliste(behandling.id, bruker)
+            }
 
         opprettet.id shouldBe behandling.id
         opprettet.versjon shouldBe 1
@@ -98,7 +117,9 @@ class SjekklisteIntegrationTest(
     fun `Hent eksisterende sjekkliste`() {
         val behandling = foerstegangsbehandling(sakId = randomSakId())
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        sjekklisteService.opprettSjekkliste(behandling.id)
+        runBlocking {
+            sjekklisteService.opprettSjekkliste(behandling.id, bruker)
+        }
 
         val sjekkliste = sjekklisteService.hentSjekkliste(behandling.id)!!
 
@@ -111,7 +132,9 @@ class SjekklisteIntegrationTest(
     fun `Oppdatere sjekkliste i db`() {
         val behandling = foerstegangsbehandling(sakId = randomSakId())
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        sjekklisteService.opprettSjekkliste(behandling.id)
+        runBlocking {
+            sjekklisteService.opprettSjekkliste(behandling.id, bruker)
+        }
 
         sjekklisteService.oppdaterSjekkliste(
             behandling.id,
@@ -138,7 +161,10 @@ class SjekklisteIntegrationTest(
     fun `Oppdatere et sjekkliste-element til avkrysset`() {
         val behandling = foerstegangsbehandling(sakId = randomSakId())
         every { behandlingService.hentBehandling(behandling.id) } returns behandling
-        val opprettet = sjekklisteService.opprettSjekkliste(behandling.id)
+        val opprettet =
+            runBlocking {
+                sjekklisteService.opprettSjekkliste(behandling.id, bruker)
+            }
 
         val item = opprettet.sjekklisteItems.first()
         item.avkrysset shouldBe false

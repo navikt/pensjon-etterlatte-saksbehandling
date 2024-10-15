@@ -268,7 +268,6 @@ internal class BehandlingServiceImpl(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
-    private val behandlingRequestLogger: BehandlingRequestLogger,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagServiceImpl,

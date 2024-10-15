@@ -34,7 +34,6 @@ class MigreringBrevDataService(
                     behandlingId,
                     virkningstidspunkt,
                     brukerTokenInfo,
-                    sakType,
                 )
             BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall.fra(
                 utbetalingsinfo,

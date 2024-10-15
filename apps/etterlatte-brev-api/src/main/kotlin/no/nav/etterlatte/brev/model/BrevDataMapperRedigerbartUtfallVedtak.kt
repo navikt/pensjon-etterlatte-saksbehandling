@@ -196,7 +196,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     behandlingId,
                     virkningstidspunkt!!,
                     bruker,
-                    sakType,
                 )
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
@@ -244,7 +243,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     behandlingId,
                     virkningstidspunkt!!,
                     bruker,
-                    sakType,
                 )
             }
 
@@ -269,7 +267,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     behandlingId,
                     virkningstidspunkt,
                     bruker,
-                    sakType,
                 )
             }
         val avkortingsinfo =

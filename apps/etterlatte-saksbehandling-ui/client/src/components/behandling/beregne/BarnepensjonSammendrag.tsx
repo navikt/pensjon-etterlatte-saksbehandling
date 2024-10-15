@@ -101,7 +101,7 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
                 {beregningsperiode.soeskenFlokk &&
-                  isBefore(beregningsperiode.datoTOM, new Date(2024, 0, 1)) &&
+                  isBefore(beregningsperiode.datoFOM, new Date(2024, 0, 1)) &&
                   `${beregningsperiode.soeskenFlokk.length + 1} barn`}{' '}
                 {beregningsperiode.institusjonsopphold && ' Institusjonsopphold'}
               </Table.DataCell>

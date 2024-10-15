@@ -2,8 +2,11 @@ package no.nav.etterlatte.behandling.sjekkliste
 
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoServiceTest.Companion.bruker
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.foerstegangsbehandling
@@ -23,7 +26,8 @@ class SjekklisteServiceTest {
     private val sjekklisteDao = mockk<SjekklisteDao>()
     private val behandlingService = mockk<BehandlingService>()
     private val oppgaveService = mockk<OppgaveService>()
-    private val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
+    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService, grunnlagKlient)
 
     @BeforeEach
     fun setup() {
@@ -39,7 +43,9 @@ class SjekklisteServiceTest {
         assertAll(
             {
                 assertThrows<SjekklisteIkkeTillattException> {
-                    sjekklisteService.opprettSjekkliste(behandlingId)
+                    runBlocking {
+                        sjekklisteService.opprettSjekkliste(behandlingId, bruker)
+                    }
                 }
             },
             {

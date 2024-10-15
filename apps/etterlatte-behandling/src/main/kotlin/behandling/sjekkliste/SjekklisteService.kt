@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -12,20 +13,26 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import java.time.YearMonth
 import java.util.UUID
 
 class SjekklisteService(
     private val dao: SjekklisteDao,
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
+    private val grunnlagKlient: GrunnlagKlient,
 ) {
     fun hentSjekkliste(id: UUID): Sjekkliste? =
         inTransaction {
             dao.hentSjekkliste(id)
         }
 
-    fun opprettSjekkliste(behandlingId: UUID): Sjekkliste {
+    suspend fun opprettSjekkliste(
+        behandlingId: UUID,
+        brukertoken: BrukerTokenInfo,
+    ): Sjekkliste {
         val behandling =
             inTransaction {
                 requireNotNull(behandlingService.hentBehandling(behandlingId))
@@ -56,9 +63,26 @@ class SjekklisteService(
                             }
                         }
                     }
+
                 SakType.OMSTILLINGSSTOENAD -> {
                     when (behandling.type) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> sjekklisteItemsFoerstegangsbehandlingOMS
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                            val aldersovergangMaaned =
+                                grunnlagKlient.aldersovergangMaaned(
+                                    behandling.sak.id,
+                                    behandling.sak.sakType,
+                                    brukertoken,
+                                )
+
+                            val iAar = YearMonth.now().year
+                            val er67 = aldersovergangMaaned.year == iAar || aldersovergangMaaned.year == (iAar + 1)
+                            if (er67) {
+                                sjekklisteItemsFoerstegangsbehandlingOMS + sjekklisteItemsFyller67
+                            } else {
+                                sjekklisteItemsFoerstegangsbehandlingOMS
+                            }
+                        }
+
                         BehandlingType.REVURDERING -> {
                             if (behandling.revurderingsaarsak() == Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
                                 sjekklisteItemsRevurderingOMS + sjekklisteItemsBosattNorgeSluttbehandling

@@ -380,7 +380,7 @@ internal class ApplicationContext(
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
-    val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
+    val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService, grunnlagKlientImpl)
 
     val klageBrevService = KlageBrevService(brevApiKlient)
     val klageService =

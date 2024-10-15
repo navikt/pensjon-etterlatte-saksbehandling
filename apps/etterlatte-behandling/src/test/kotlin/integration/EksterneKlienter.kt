@@ -87,6 +87,7 @@ import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class GrunnlagKlientTest : GrunnlagKlient {
@@ -203,6 +204,12 @@ class GrunnlagKlientTest : GrunnlagKlient {
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): PersonopplysningerResponse = GrunnlagTestData().hentPersonopplysninger()
+
+    override suspend fun aldersovergangMaaned(
+        sakId: SakId,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): YearMonth = YearMonth.now()
 
     override val serviceName: String
         get() = TODO("Not yet implemented")

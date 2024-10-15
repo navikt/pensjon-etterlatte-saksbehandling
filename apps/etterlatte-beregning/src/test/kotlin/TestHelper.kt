@@ -138,9 +138,9 @@ fun avkortinggrunnlag(
 ) = AvkortingGrunnlag(
     id = id,
     periode = periode,
-    aarsinntekt = aarsinntekt,
+    inntektTom = aarsinntekt,
     fratrekkInnAar = fratrekkInnAar,
-    inntektUtland = 0,
+    inntektUtlandTom = 0,
     fratrekkInnAarUtland = fratrekkInnAarUtland,
     innvilgaMaaneder = innvilgaMaaneder,
     spesifikasjon = "Spesifikasjon",

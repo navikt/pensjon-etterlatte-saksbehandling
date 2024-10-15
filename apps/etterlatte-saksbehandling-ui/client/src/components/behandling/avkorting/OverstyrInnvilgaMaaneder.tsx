@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Button, Heading, HStack, Select, TextField, VStack } from '@navikt/ds-react'
+import { Box, Button, Heading, HelpText, HStack, Select, TextField, VStack } from '@navikt/ds-react'
 import { useFormContext } from 'react-hook-form'
 import {
   hentLesbarTekstForInnvilgaMaanederType,
@@ -74,9 +74,15 @@ export default function OverstyrInnvilgaMaander() {
           </VStack>
         </>
       ) : (
-        <Button size="small" variant="danger" onClick={toggleOverstyrtInnvilgaMaaneder}>
-          Overstyr innvilga måneder
-        </Button>
+        <>
+          <Button size="small" variant="danger" onClick={toggleOverstyrtInnvilgaMaaneder}>
+            Overstyr innvilga måneder
+          </Button>
+          <HelpText title="Info overstyrt innvilga måneder">
+            Fyll inn riktig antall måneder med innvilget stønad i tilfeller der automatisk registrerte innvilgede
+            måneder ikke stemmer, for eksempel ved uforutsette opphør som tidlig uttak av alderspensjon.
+          </HelpText>
+        </>
       )}
     </HStack>
   )

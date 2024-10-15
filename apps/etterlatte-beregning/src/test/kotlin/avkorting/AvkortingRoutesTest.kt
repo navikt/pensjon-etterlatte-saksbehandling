@@ -93,10 +93,10 @@ class AvkortingRoutesTest {
                                     id = avkortingsgrunnlagId,
                                     fom = dato,
                                     tom = dato,
-                                    aarsinntekt = 100000,
+                                    inntektTom = 100000,
                                     fratrekkInnAar = 10000,
                                     spesifikasjon = "Spesifikasjon",
-                                    inntektUtland = 0,
+                                    inntektUtlandTom = 0,
                                     fratrekkInnAarUtland = 0,
                                     relevanteMaanederInnAar = 12,
                                     kilde =
@@ -146,9 +146,9 @@ class AvkortingRoutesTest {
                         avkorting.avkortingGrunnlag[0].let {
                             AvkortingGrunnlagLagreDto(
                                 id = it.fraVirk!!.id,
-                                aarsinntekt = it.fraVirk!!.aarsinntekt,
+                                aarsinntekt = it.fraVirk!!.inntektTom,
                                 fratrekkInnAar = it.fraVirk!!.fratrekkInnAar,
-                                inntektUtland = it.fraVirk!!.inntektUtland,
+                                inntektUtland = it.fraVirk!!.inntektUtlandTom,
                                 fratrekkInnAarUtland = it.fraVirk!!.fratrekkInnAarUtland,
                                 spesifikasjon = it.fraVirk!!.spesifikasjon,
                                 fom = dato,
@@ -167,7 +167,7 @@ class AvkortingRoutesTest {
                     behandlingsId,
                     any(),
                     withArg {
-                        it.aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
+                        it.aarsinntekt shouldBe avkortingsgrunnlag.inntektTom
                         it.fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
                         it.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
                     },

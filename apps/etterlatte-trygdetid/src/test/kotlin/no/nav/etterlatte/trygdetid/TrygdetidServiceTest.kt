@@ -55,6 +55,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.Period
 import java.util.UUID.randomUUID
@@ -225,10 +228,14 @@ internal class TrygdetidServiceTest {
         }
     }
 
-    @Test
-    fun `skal kopiere trygdetid hvis revurdering`() {
+    @ParameterizedTest
+    @MethodSource("grunnlagMedOgUtenAvdoede")
+    fun `skal kopiere trygdetid hvis revurdering`(
+        grunnlag: Grunnlag,
+        forrigeTrygdetid: Trygdetid,
+    ) {
         val behandlingId = randomUUID()
-        val sakId = randomSakId()
+        val sakId = forrigeTrygdetid.sakId
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
@@ -237,26 +244,29 @@ internal class TrygdetidServiceTest {
                 every { revurderingsaarsak } returns Revurderingaarsak.DOEDSFALL
             }
 
-        val forrigebehandlingId = randomUUID()
-        val trygdetid = trygdetid(behandlingId, sakId)
+        val forrigebehandlingId = forrigeTrygdetid.behandlingId
 
         val oppdatertTrygdetidCaptured = slot<Trygdetid>()
-
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
+        every { repository.hentTrygdetiderForBehandling(forrigebehandlingId) } returns listOf(forrigeTrygdetid)
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
             SisteIverksatteBehandling(
                 forrigebehandlingId,
             )
-        every { repository.hentTrygdetiderForBehandling(forrigebehandlingId) } returns listOf(trygdetid)
-        every { repository.opprettTrygdetid(capture(oppdatertTrygdetidCaptured)) } returns trygdetid
+        every { repository.hentTrygdetiderForBehandling(forrigebehandlingId) } returns listOf(forrigeTrygdetid)
+        every { repository.opprettTrygdetid(capture(oppdatertTrygdetidCaptured)) } returns forrigeTrygdetid
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(forrigebehandlingId, any()) } returns grunnlag
 
         runBlocking {
             service.opprettTrygdetiderForBehandling(behandlingId, saksbehandler)
         }
 
+        coVerify {
+            grunnlagKlient.hentGrunnlag(any(), saksbehandler)
+        }
         coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
@@ -267,16 +277,13 @@ internal class TrygdetidServiceTest {
 
             repository.opprettTrygdetid(oppdatertTrygdetidCaptured.captured)
             with(oppdatertTrygdetidCaptured.captured) {
-                this.opplysninger.size shouldBe trygdetid.opplysninger.size
+                this.opplysninger.size shouldBe forrigeTrygdetid.opplysninger.size
                 for (i in 0 until this.opplysninger.size) {
-                    this.opplysninger[i].opplysning shouldBe trygdetid.opplysninger[i].opplysning
-                    this.opplysninger[i].kilde shouldBe trygdetid.opplysninger[i].kilde
-                    this.opplysninger[i].type shouldBe trygdetid.opplysninger[i].type
+                    this.opplysninger[i].opplysning shouldBe forrigeTrygdetid.opplysninger[i].opplysning
+                    this.opplysninger[i].kilde shouldBe forrigeTrygdetid.opplysninger[i].kilde
+                    this.opplysninger[i].type shouldBe forrigeTrygdetid.opplysninger[i].type
                 }
             }
-        }
-        coVerify {
-            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
         }
         verify {
             behandling.id
@@ -1629,5 +1636,53 @@ internal class TrygdetidServiceTest {
         return GrunnlagTestData(
             opplysningsmapAvdoedeOverrides = listOf(nyligAvdoed) + grunnlagEnAvdoed.hentAvdoede(),
         ).hentOpplysningsgrunnlag()
+    }
+
+    companion object {
+        @JvmStatic
+        fun grunnlagMedOgUtenAvdoede(): List<Arguments> {
+            val grunnlag1 = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+            val grunnlag2 =
+                GrunnlagTestData(
+                    opplysningsmapAvdoedOverrides = emptyMap(),
+                    opplysningsmapSakOverrides =
+                        mapOf(
+                            Opplysningstype.PERSONGALLERI_V1 to
+                                Opplysning.Konstant(
+                                    randomUUID(),
+                                    Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+                                    Persongalleri(
+                                        soeker = SOEKER_FOEDSELSNUMMER.value,
+                                        avdoed = emptyList(),
+                                    ).toJsonNode(),
+                                ),
+                        ),
+                ).hentOpplysningsgrunnlag()
+
+            return listOf(
+                Arguments.of(
+                    grunnlag1,
+                    trygdetid(
+                        behandlingId = randomUUID(),
+                        sakId = randomSakId(),
+                        ident =
+                            grunnlag1
+                                .hentAvdoede()
+                                .first()
+                                .hentFoedselsnummer()!!
+                                .verdi.value,
+                    ),
+                ),
+                Arguments.of(
+                    grunnlag2,
+                    trygdetid(
+                        behandlingId = randomUUID(),
+                        sakId = randomSakId(),
+                        ident = "UKJENT_AVDOED",
+                    ),
+                ),
+            )
+        }
     }
 }

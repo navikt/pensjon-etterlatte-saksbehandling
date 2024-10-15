@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -56,9 +57,13 @@ fun trygdetid(
     sakId: SakId = sakId1,
     ident: String =
         GrunnlagTestData()
-            .avdoede
-            .first()
-            .foedselsnummer.value,
+            .hentOpplysningsgrunnlag()
+            .hentAvdoede()
+            .firstOrNull()
+            ?.hentFoedselsnummer()
+            ?.verdi
+            ?.value
+            ?: throw IllegalStateException("Mangler ident for trygdetid"),
     beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     opplysninger: List<Opplysningsgrunnlag> = standardOpplysningsgrunnlag(),

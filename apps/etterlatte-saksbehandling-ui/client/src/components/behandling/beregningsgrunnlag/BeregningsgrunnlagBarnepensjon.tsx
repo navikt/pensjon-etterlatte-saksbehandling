@@ -149,12 +149,13 @@ const BeregningsgrunnlagBarnepensjon = () => {
     )
   }
 
-  const tidligsteAvdoede: IPdlPerson | null =
-    personopplysninger?.avdoede
-      .map((it) => it.opplysning)
-      .reduce((previous, current) => {
-        return current.doedsdato!! < previous.doedsdato!! ? current : previous
-      }) || null
+  const tidligsteAvdoede: IPdlPerson | null = personopplysninger?.avdoede?.length
+    ? personopplysninger?.avdoede
+        .map((it) => it.opplysning)
+        .reduce((previous, current) => {
+          return current.doedsdato!! < previous.doedsdato!! ? current : previous
+        })
+    : null
 
   return (
     <>

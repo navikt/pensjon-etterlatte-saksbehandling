@@ -66,7 +66,7 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
             <Table.HeaderCell>Prorata Brøk</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
             <Table.HeaderCell>Beregning gjelder</Table.HeaderCell>
-            <Table.HeaderCell>Månedelig utbetaling før skatt</Table.HeaderCell>
+            <Table.HeaderCell>Månedlig utbetaling før skatt</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>

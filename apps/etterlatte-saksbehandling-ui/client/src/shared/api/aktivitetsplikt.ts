@@ -64,6 +64,12 @@ export const hentAktivitspliktVurderingForOppgave = async (args: {
 }): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
   apiClient.get(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering`)
 
+export const hentAktivitspliktVurderingForOppgaveNy = async (args: {
+  sakId: number
+  oppgaveId: string
+}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
+  apiClient.get(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/ny`)
+
 export const opprettAktivitspliktAktivitetsgrad = async (args: {
   sakId: number
   oppgaveId: string

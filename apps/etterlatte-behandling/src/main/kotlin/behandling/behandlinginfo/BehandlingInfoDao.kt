@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -30,6 +31,46 @@ class BehandlingInfoDao(
             }
         }
     }
+
+    fun lagreSluttbehandling(
+        behandlingId: UUID,
+        sluttbehandling: SluttbehandlingUtlandBehandlinginfo,
+    ) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    INSERT INTO behandling_info(behandling_id, sluttbehandling)
+                    VALUES (?, ?)
+                    ON CONFLICT (behandling_id) DO 
+                    UPDATE SET sluttbehandling = excluded.sluttbehandling
+                    """.trimIndent(),
+                ).let { statement ->
+                    statement.setObject(1, behandlingId)
+                    statement.setJsonb(2, sluttbehandling)
+                    statement.executeUpdate()
+                }
+            }
+        }
+    }
+
+    fun hentSluttbehandling(behandlingId: UUID): SluttbehandlingUtlandBehandlinginfo? =
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    SELECT sluttbehandling 
+                    FROM behandling_info 
+                    WHERE behandling_id = ?::UUID
+                    """.trimIndent(),
+                ).let { statement ->
+                    statement.setObject(1, behandlingId)
+                    statement.executeQuery().singleOrNull {
+                        getString("sluttbehandling")?.let { objectMapper.readValue<SluttbehandlingUtlandBehandlinginfo>(it) }
+                    }
+                }
+            }
+        }
 
     fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall =
         connectionAutoclosing.hentConnection { connection ->

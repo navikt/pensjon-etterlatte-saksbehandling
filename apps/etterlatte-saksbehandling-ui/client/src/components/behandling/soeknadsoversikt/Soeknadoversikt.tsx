@@ -102,6 +102,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         {personopplysninger && (
           <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />
         )}
+
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
             {behandling.sakType == SakType.BARNEPENSJON && (

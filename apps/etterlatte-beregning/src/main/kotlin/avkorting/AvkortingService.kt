@@ -116,7 +116,7 @@ class AvkortingService(
         val aldersovergangMaaned =
             grunnlagKlient.aldersovergangMaaned(behandling.sak, behandling.sakType, brukerTokenInfo)
         val opphoerFom =
-            when (aldersovergangMaaned.year) {
+            when (aldersovergangMaaned?.year) {
                 lagreGrunnlag.fom.year -> aldersovergangMaaned
                 else -> behandling.opphoerFraOgMed
             }

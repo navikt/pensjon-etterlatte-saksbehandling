@@ -28,7 +28,7 @@ interface GrunnlagKlient {
         sakId: SakId,
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
-    ): YearMonth
+    ): YearMonth?
 }
 
 class GrunnlagKlientException(
@@ -84,10 +84,10 @@ class GrunnlagKlientImpl(
         sakId: SakId,
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
-    ): YearMonth {
+    ): YearMonth? {
         logger.info("Henter måned for aldersovergang for sak=$sakId saktype=${sakType.name}")
 
-        return retry<YearMonth> {
+        return retry<YearMonth?> {
             downstreamResourceClient
                 .get(
                     resource =

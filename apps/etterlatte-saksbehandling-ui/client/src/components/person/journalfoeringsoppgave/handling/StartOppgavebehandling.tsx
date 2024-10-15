@@ -17,6 +17,7 @@ import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { isSuccess } from '~shared/api/apiUtils'
 import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/formatering'
 import { PersonLink } from '~components/person/lenker/PersonLink'
+import { isError } from 'lodash'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -81,6 +82,8 @@ export default function StartOppgavebehandling() {
           dokumentoversikten til brukeren.
         </Alert>
       )}
+
+      {isError(personResult) && <Alert variant="error">{personResult.message}</Alert>}
 
       <RadioGroup
         legend="Velg handling"

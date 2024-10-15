@@ -110,6 +110,11 @@ export const EndreBruker = ({
                     )}
                   </>
                 ),
+                error: (error) => (
+                  <Alert variant="error" size="small">
+                    {error.detail}
+                  </Alert>
+                ),
               })}
             </VStack>
 

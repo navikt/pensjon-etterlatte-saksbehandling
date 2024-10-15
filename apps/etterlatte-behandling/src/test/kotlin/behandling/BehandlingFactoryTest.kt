@@ -463,7 +463,7 @@ class BehandlingFactoryTest {
             behandlingFactory.opprettOmgjoeringAvslag(
                 sakId,
                 saksbehandler,
-                OmgjoeringRequest(),
+                OmgjoeringRequest(false, false),
             )
         }
         verify {
@@ -481,7 +481,7 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns emptyList()
 
         assertThrows<AvslagOmgjoering.IngenFoerstegangsbehandling> {
-            behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest())
+            behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(false, false))
         }
 
         verify {
@@ -513,7 +513,7 @@ class BehandlingFactoryTest {
             behandlingFactory.opprettOmgjoeringAvslag(
                 sak.id,
                 saksbehandler,
-                OmgjoeringRequest(),
+                OmgjoeringRequest(false, false),
             )
         }
 
@@ -603,7 +603,12 @@ class BehandlingFactoryTest {
         every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any()) } just runs
 
-        val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(skalKopiere = true))
+        val opprettetBehandling =
+            behandlingFactory.opprettOmgjoeringAvslag(
+                sak.id,
+                saksbehandler,
+                OmgjoeringRequest(skalKopiere = true, erSluttbehandlingUtland = false),
+            )
         opprettetBehandling.sak.id shouldBe sak.id
         opprettetBehandling.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
         opprettBehandlingSlot.captured.sakId shouldBe sak.id
@@ -682,7 +687,7 @@ class BehandlingFactoryTest {
         every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any()) } just runs
 
-        val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest())
+        val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(false, false))
         opprettetBehandling.sak.id shouldBe sak.id
         opprettetBehandling.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
         opprettBehandlingSlot.captured.sakId shouldBe sak.id

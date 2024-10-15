@@ -4,7 +4,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.log
 import io.ktor.server.routing.application
 import no.nav.etterlatte.libs.common.appIsInGCP
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.run
@@ -22,7 +22,7 @@ class Server(
     val devMode = context.properties.devMode
 
     init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-tilbakekreving")
+        sikkerLoggOppstart("etterlatte-tilbakekreving")
     }
 
     private val engine =

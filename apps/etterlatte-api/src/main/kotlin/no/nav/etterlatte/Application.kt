@@ -2,7 +2,7 @@ package no.nav.etterlatte
 
 import io.ktor.server.application.install
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.run
 import no.nav.etterlatte.samordning.sak.behandlingSakRoutes
@@ -19,7 +19,7 @@ class Server(
     applicationContext: ApplicationContext,
 ) {
     init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-api")
+        sikkerLoggOppstart("etterlatte-api")
     }
 
     private val engine =

@@ -55,8 +55,12 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.Period
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 internal class TrygdetidServiceTest {
@@ -287,12 +291,13 @@ internal class TrygdetidServiceTest {
     }
 
     @Test
-    fun `skal kopiere trygdetid hvis revurdering med flykntingfordel`() {
+    fun `skal kopiere trygdetid hvis revurdering med flyktningfordel`() {
         val forrigeTrygdetid =
             trygdetid(
                 behandlingId = randomUUID(),
                 sakId = randomSakId(),
                 ident = "UKJENT_AVDOED",
+                beregnetTrygdetid = beregnetTrygdetid(overstyrt = true, total = 39),
             )
         val behandlingId = randomUUID()
         val sakId = forrigeTrygdetid.sakId
@@ -354,25 +359,22 @@ internal class TrygdetidServiceTest {
         }
     }
 
-    @Test
-    fun `skal feile ved foerstegangsbehandling uten avdoede`() {
-        val trygdetid =
-            trygdetid(
-                behandlingId = randomUUID(),
-                sakId = randomSakId(),
-                ident = "UKJENT_AVDOED",
-            )
-        val behandlingId = randomUUID()
-        val sakId = trygdetid.sakId
+    @ParameterizedTest
+    @MethodSource("medOgUtenOverstyrtTrygdetid")
+    fun `skal feile ved foerstegangsbehandling uten avdoede`(
+        behandlingId: UUID,
+        sakId: Long,
+        eksisterendeTrygdetider: List<Trygdetid>,
+    ) {
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sak } returns randomSakId()
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             }
         val grunnlagUtenAvdoede = grunnlagUtenAvdoede()
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlagUtenAvdoede
-        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(trygdetid)
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns eksisterendeTrygdetider
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
 
         runBlocking {
@@ -1754,5 +1756,29 @@ internal class TrygdetidServiceTest {
                     ),
             ).hentOpplysningsgrunnlag()
         return grunnlag2
+    }
+
+    companion object {
+        @JvmStatic
+        private fun medOgUtenOverstyrtTrygdetid(): List<Arguments> =
+            listOf(
+                Arguments.of(
+                    randomUUID(),
+                    randomSakId().sakId,
+                    listOf(
+                        trygdetid(
+                            behandlingId = randomUUID(),
+                            sakId = randomSakId(),
+                            ident = "UKJENT_AVDOED",
+                            beregnetTrygdetid = beregnetTrygdetid(overstyrt = true, total = 30),
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    randomUUID(),
+                    randomSakId().sakId,
+                    emptyList<Trygdetid>(),
+                ),
+            )
     }
 }

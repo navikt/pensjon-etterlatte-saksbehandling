@@ -159,6 +159,7 @@ fun beregnetTrygdetid(
     total: Int = 0,
     tidspunkt: Tidspunkt = Tidspunkt.now(),
     yrkesskade: Boolean = false,
+    overstyrt: Boolean = false,
 ) = DetaljertBeregnetTrygdetid(
     resultat =
         DetaljertBeregnetTrygdetidResultat(
@@ -169,7 +170,7 @@ fun beregnetTrygdetid(
             samletTrygdetidNorge = total,
             samletTrygdetidTeoretisk = null,
             prorataBroek = null,
-            overstyrt = false,
+            overstyrt = overstyrt,
             yrkesskade = yrkesskade,
             beregnetSamletTrygdetidNorge = null,
         ),

@@ -13,10 +13,7 @@ import java.util.UUID
 class BehandlingInfoDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun lagreErOmgjoeringSluttbehandlingUtland(
-        id: UUID,
-        sluttbehandlingUtland: Boolean,
-    ) {
+    fun lagreErOmgjoeringSluttbehandlingUtland(id: UUID) {
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(
@@ -28,7 +25,7 @@ class BehandlingInfoDao(
                     """.trimIndent(),
                 ).apply {
                     setObject(1, id)
-                    setBoolean(2, sluttbehandlingUtland)
+                    setBoolean(2, true)
                 }.run { executeUpdate() }
             }
         }

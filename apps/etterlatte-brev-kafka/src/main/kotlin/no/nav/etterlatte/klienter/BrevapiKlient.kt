@@ -4,7 +4,6 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
-import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -12,7 +11,6 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
 import no.nav.etterlatte.brev.VedtakTilJournalfoering
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
@@ -22,11 +20,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 class BrevapiKlient(
     config: Config,
-    val httpClient: HttpClient,
+    private val httpClient: HttpClient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val baseUrl = config.getString("brevapi.resource.url")
@@ -116,21 +113,6 @@ class BrevapiKlient(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_OPPRETT_OG_JOURNALFOERING_AV_NOTAT",
                 detail = "Kunne ikke opprette og journalføre notat for sakid: $sakId",
-            )
-        }
-    }
-
-    internal suspend fun hentVedtaksbrev(behandlingId: UUID): Brev? {
-        try {
-            logger.info("Henter vedtaksbrev for behandlingid $behandlingId")
-            return httpClient.get("$baseUrl/api/brev/behandling/$behandlingId/vedtak").body<Brev?>()
-        } catch (e: ResponseException) {
-            logger.error("Kunne ikke hente vedtaksbrev for behandling $behandlingId", e)
-
-            throw ForespoerselException(
-                status = e.response.status.value,
-                code = "UKJENT_FEIL_HENT_VEDTAKSBREV",
-                detail = "Kunne ikke hente vedtaksbrev for behandlingid: $behandlingId",
             )
         }
     }

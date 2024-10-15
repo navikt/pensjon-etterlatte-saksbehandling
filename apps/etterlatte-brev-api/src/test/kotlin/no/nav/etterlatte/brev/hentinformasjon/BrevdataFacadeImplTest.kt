@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
@@ -49,7 +48,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -227,13 +225,7 @@ internal class BrevdataFacadeImplTest {
     private fun opprettGrunnlag() =
         GrunnlagTestData(
             opplysningsmapSakOverrides =
-                mapOf(
-                    Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
-                    Opplysningstype.PERSONGALLERI_V1 to
-                        opprettOpplysning(
-                            Persongalleri(soeker = SOEKER_FOEDSELSNUMMER.value, innsender = "innsender").toJsonNode(),
-                        ),
-                ),
+                mapOf(Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode())),
         ).hentOpplysningsgrunnlag()
 
     private fun opprettOpplysning(jsonNode: JsonNode) =

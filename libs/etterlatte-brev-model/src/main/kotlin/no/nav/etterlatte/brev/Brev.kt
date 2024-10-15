@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.BrevParametereAutomatisk
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
@@ -132,11 +131,6 @@ data class OpprettJournalpostResponse(
         val dokumentInfoId: String,
     )
 }
-
-data class BrevOgVedtakDto(
-    val vedtaksbrev: Brev,
-    val vedtak: JsonNode,
-)
 
 data class BrevDistribusjonResponse(
     val brevId: BrevID,

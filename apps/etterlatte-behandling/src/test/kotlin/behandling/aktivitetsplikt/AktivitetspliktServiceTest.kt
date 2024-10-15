@@ -80,7 +80,6 @@ class AktivitetspliktServiceTest {
             revurderingService,
             statistikkProduer,
             oppgaveService,
-            featureToggleService,
         )
     private val user =
         mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }

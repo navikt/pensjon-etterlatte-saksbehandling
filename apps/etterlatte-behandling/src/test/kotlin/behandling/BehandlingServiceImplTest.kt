@@ -91,7 +91,6 @@ internal class BehandlingServiceImplTest {
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
             hendelseDao = hendelseDaoMock,
             grunnlagKlient = grunnlagKlientMock,
-            behandlingRequestLogger = mockk(),
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveServiceMock,
             grunnlagService = grunnlagServiceMock,

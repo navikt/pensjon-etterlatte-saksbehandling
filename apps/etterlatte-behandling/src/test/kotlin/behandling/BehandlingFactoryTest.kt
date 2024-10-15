@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
@@ -462,7 +463,7 @@ class BehandlingFactoryTest {
             behandlingFactory.opprettOmgjoeringAvslag(
                 sakId,
                 saksbehandler,
-                OmgjoeringRequest(),
+                OmgjoeringRequest(false, false),
             )
         }
         verify {
@@ -480,7 +481,7 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.hentBehandlingerForSak(sak.id) } returns emptyList()
 
         assertThrows<AvslagOmgjoering.IngenFoerstegangsbehandling> {
-            behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest())
+            behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(false, false))
         }
 
         verify {
@@ -512,7 +513,7 @@ class BehandlingFactoryTest {
             behandlingFactory.opprettOmgjoeringAvslag(
                 sak.id,
                 saksbehandler,
-                OmgjoeringRequest(),
+                OmgjoeringRequest(false, false),
             )
         }
 
@@ -523,10 +524,25 @@ class BehandlingFactoryTest {
     }
 
     @Test
-    fun `omgjøring skal lage ny førstegangsbehandling og kopiere vurdering hvis flagg er satt`() {
+    fun `omgjøring skal lage ny førstegangsbehandling og kopiere vurdering + vilkårsvurdering hvis flagg er satt`() {
         val sak = sak()
         val saksbehandler = simpleSaksbehandler()
-        val avslaattFoerstegangsbehandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
+
+        val boddEllerArbeidetUtlandet =
+            BoddEllerArbeidetUtlandet(
+                true,
+                Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
+                "begrunnelse",
+                boddArbeidetIkkeEosEllerAvtaleland = true,
+                boddArbeidetEosNordiskKonvensjon = true,
+                boddArbeidetAvtaleland = true,
+                vurdereAvoededsTrygdeavtale = true,
+                skalSendeKravpakke = true,
+            )
+        val opphoerFraOgMed = YearMonth.now()
+        val avslaattFoerstegangsbehandling =
+            foerstegangsbehandling(sak = sak, status = BehandlingStatus.AVSLAG)
+                .copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet, opphoerFraOgMed = opphoerFraOgMed)
         val revurdering =
             revurdering(
                 sak = sak,
@@ -540,6 +556,7 @@ class BehandlingFactoryTest {
                 avslaattFoerstegangsbehandling,
                 revurdering,
             )
+        every { behandlingDaoMock.lagreOpphoerFom(any(), any()) } returns 1
         every { behandlingDaoMock.hentBehandling(avslaattFoerstegangsbehandling.id) } returns avslaattFoerstegangsbehandling
         every { behandlingDaoMock.hentBehandling(any()) } returns foerstegangsbehandling(sak = sak)
         every { behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any()) } returns 1
@@ -552,7 +569,7 @@ class BehandlingFactoryTest {
                 vilkaar =
                     BarnepensjonVilkaar1967.inngangsvilkaar(),
             )
-        coEvery { vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any()) } returns
+        every { vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any()) } returns
             VilkaarsvurderingMedBehandlingGrunnlagsversjon(vv, 1L)
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
@@ -586,7 +603,12 @@ class BehandlingFactoryTest {
         every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any()) } just runs
 
-        val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(skalKopiere = true))
+        val opprettetBehandling =
+            behandlingFactory.opprettOmgjoeringAvslag(
+                sak.id,
+                saksbehandler,
+                OmgjoeringRequest(skalKopiere = true, erSluttbehandlingUtland = false),
+            )
         opprettetBehandling.sak.id shouldBe sak.id
         opprettetBehandling.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
         opprettBehandlingSlot.captured.sakId shouldBe sak.id
@@ -594,8 +616,10 @@ class BehandlingFactoryTest {
 
         verify {
             sakServiceMock.finnSak(sak.id)
+            behandlingDaoMock.lagreOpphoerFom(opprettetBehandling.id, any())
+            behandlingDaoMock.lagreBoddEllerArbeidetUtlandet(opprettetBehandling.id, boddEllerArbeidetUtlandet)
             behandlingDaoMock.hentBehandlingerForSak(sak.id)
-            behandlingDaoMock.lagreNyttVirkningstidspunkt(any(), any())
+            behandlingDaoMock.lagreNyttVirkningstidspunkt(opprettetBehandling.id, any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             kommerBarnetTilGodeServiceMock.lagreKommerBarnetTilgode(any())
@@ -603,9 +627,9 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any(), any(), any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
+            vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any())
         }
         coVerify {
-            vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any())
             grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
             grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
         }
@@ -663,7 +687,7 @@ class BehandlingFactoryTest {
         every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any()) } just runs
 
-        val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest())
+        val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(false, false))
         opprettetBehandling.sak.id shouldBe sak.id
         opprettetBehandling.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
         opprettBehandlingSlot.captured.sakId shouldBe sak.id

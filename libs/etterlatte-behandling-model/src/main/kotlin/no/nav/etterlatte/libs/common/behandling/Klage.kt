@@ -416,13 +416,6 @@ data class KlageBlankettPdfgenDTO(
         }
 }
 
-data class SakOgPersonKlagenGjelderPdfgen(
-    val sakId: SakId,
-    val sakType: SakType,
-    val navn: String,
-    val fnr: String,
-)
-
 data class FormkravPdfgen(
     val vedtaketKlagenGjelder: VedtakKlagenGjelderPdfgen,
     val erKlagenSignert: Boolean,

@@ -34,8 +34,8 @@ class BehandlingKlient(
             logger.info("Haandterer skjermet hendelse for fnr maskert ${fnr.maskerFnr()}")
             postTilBehandling(fnr = fnr, skjermet = skjermet)
         } else {
-            sikkerlogger().error("Ugyldig fnr. ($fnr) i skjermet hendelse")
-            logger.error("Ugyldig fnr. i skjermet hendelse. Se sikkerlogg")
+            sikkerlogger().error("Ugyldig fnr. ($fnr) i skjermet hendelse, er skjermet $skjermet")
+            logger.error("Ugyldig fnr i skjermet hendelse, er skjermet $skjermet. Se sikkerlogg. ")
         }
     }
 

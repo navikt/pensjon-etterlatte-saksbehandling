@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -29,7 +28,7 @@ class BeregningServiceTest {
 
         val utbetalingsinfo =
             runBlocking {
-                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo, SakType.BARNEPENSJON)
+                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo)
             }
 
         Assertions.assertEquals(Kroner(3063), utbetalingsinfo.beloep)
@@ -53,7 +52,7 @@ class BeregningServiceTest {
 
         val utbetalingsinfo =
             runBlocking {
-                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo, SakType.BARNEPENSJON)
+                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo)
             }
 
         Assertions.assertEquals(2, utbetalingsinfo.antallBarn)

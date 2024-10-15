@@ -16,10 +16,10 @@ export interface IAvkortingGrunnlag {
   id: string
   fom: string
   tom?: string
-  aarsinntekt: number
+  inntektTom: number
   fratrekkInnAar: number
   relevanteMaanederInnAar: number
-  inntektUtland: number
+  inntektUtlandTom: number
   fratrekkInnAarUtland: number
   spesifikasjon: string
   kilde: {
@@ -30,9 +30,9 @@ export interface IAvkortingGrunnlag {
 
 export interface IAvkortingGrunnlagLagre {
   id?: string
-  aarsinntekt?: number
+  inntektTom?: number
   fratrekkInnAar?: number
-  inntektUtland?: number
+  inntektUtlandTom?: number
   fratrekkInnAarUtland?: number
   spesifikasjon: string
   fom?: string

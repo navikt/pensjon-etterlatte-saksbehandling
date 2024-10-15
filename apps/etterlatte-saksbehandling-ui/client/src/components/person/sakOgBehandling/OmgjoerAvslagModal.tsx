@@ -14,7 +14,7 @@ export function OmgjoerAvslagModal(props: { sakId: number; harAapenBehandling: b
   const [opprettOmgjoeringStatus, opprettOmgjoering] = useApiCall(opprettOmgjoeringFoerstegangsbehandling)
   const navigate = useNavigate()
   function opprett() {
-    opprettOmgjoering({ sakId, skalKopiere, erSluttbehandlingUtland })
+    opprettOmgjoering({ sakId, omgjoeringRequest: { skalKopiere, erSluttbehandlingUtland } })
   }
 
   function lukkModal() {

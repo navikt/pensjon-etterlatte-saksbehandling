@@ -90,10 +90,10 @@ export const AvkortingInntekt = ({
               </Table.Header>
               <Table.Body>
                 {listeVisningAvkortingGrunnlag().map((avkortingGrunnlag, index) => {
-                  const aarsinntekt = avkortingGrunnlag.aarsinntekt ?? 0
+                  const aarsinntekt = avkortingGrunnlag.inntektTom ?? 0
                   const fratrekkInnAar = avkortingGrunnlag.fratrekkInnAar ?? 0
                   const forventetInntekt = aarsinntekt - fratrekkInnAar
-                  const inntektutland = avkortingGrunnlag.inntektUtland ?? 0
+                  const inntektutland = avkortingGrunnlag.inntektUtlandTom ?? 0
                   const fratrekkUtland = avkortingGrunnlag.fratrekkInnAarUtland ?? 0
                   const forventetInntektUtland = inntektutland - fratrekkUtland
                   return (

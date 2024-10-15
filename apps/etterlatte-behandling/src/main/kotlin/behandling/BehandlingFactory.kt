@@ -303,11 +303,8 @@ class BehandlingFactory(
                         prosessType = Prosesstype.MANUELL,
                     )
 
-                if (omgjoeringRequest.sluttbehandlingUtland) {
-                    behandlingInfoService.lagreErOmgjoeringSluttbehandlingUtland(
-                        nyFoerstegangsbehandling,
-                        true,
-                    )
+                if (omgjoeringRequest.erSluttbehandlingUtland) {
+                    behandlingInfoService.lagreErOmgjoeringSluttbehandlingUtland(nyFoerstegangsbehandling)
                 }
 
                 if (omgjoeringRequest.skalKopiere && sisteAvslaatteBehandling != null) {
@@ -346,9 +343,8 @@ class BehandlingFactory(
         }
 
         if (omgjoeringRequest.skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
-            runBlocking {
-                // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
-
+            // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
+            inTransaction {
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
                     kopierFraBehandling = behandlingerForOmgjoering.sisteAvslaatteBehandling.id,
@@ -386,6 +382,15 @@ class BehandlingFactory(
         sisteAvslaatteBehandling
             .gyldighetsproeving()
             ?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandlingId, it) }
+
+        sisteAvslaatteBehandling.opphoerFraOgMed?.let { behandlingDao.lagreOpphoerFom(nyFoerstegangsbehandlingId, it) }
+
+        sisteAvslaatteBehandling.boddEllerArbeidetUtlandet?.let {
+            behandlingDao.lagreBoddEllerArbeidetUtlandet(
+                nyFoerstegangsbehandlingId,
+                it,
+            )
+        }
     }
 
     internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {

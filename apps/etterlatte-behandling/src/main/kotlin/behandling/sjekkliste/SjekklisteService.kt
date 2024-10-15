@@ -74,8 +74,13 @@ class SjekklisteService(
                                     brukertoken,
                                 )
 
-                            val iAar = YearMonth.now().year
-                            val er67 = aldersovergangMaaned.year == iAar || aldersovergangMaaned.year == (iAar + 1)
+                            // Hvis vi ikke vet om de er aldersovergang så må sjekkliste vises for å være sikker
+                            val er67 =
+                                aldersovergangMaaned?.let {
+                                    val iAar = YearMonth.now().year
+                                    it.year == iAar || it.year == (iAar + 1)
+                                } ?: true
+
                             if (er67) {
                                 sjekklisteItemsFoerstegangsbehandlingOMS + sjekklisteItemsFyller67
                             } else {

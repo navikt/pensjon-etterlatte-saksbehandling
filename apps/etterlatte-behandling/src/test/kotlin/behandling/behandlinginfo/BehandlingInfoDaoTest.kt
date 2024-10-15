@@ -9,6 +9,9 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.behandling.utland.LandMedDokumenter
+import no.nav.etterlatte.behandling.utland.MottattDokument
+import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -29,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -74,6 +78,30 @@ internal class BehandlingInfoDaoTest(
         behandlingDao.hentBehandling(behandlingId)?.erSluttbehandling() shouldBe !sluttbehandlingUtland
         dao.lagreErOmgjoeringSluttbehandlingUtland(behandlingId)
         behandlingDao.hentBehandling(behandlingId)?.erSluttbehandling() shouldBe sluttbehandlingUtland
+    }
+
+    @Test
+    fun `Skal lagre sluttbehandling for behandling`() {
+        val sluttbehandling =
+            SluttbehandlingUtlandBehandlinginfo(
+                listOf(
+                    LandMedDokumenter(
+                        landIsoKode = "AFG",
+                        dokumenter =
+                            listOf(
+                                MottattDokument(
+                                    dokumenttype = "P2000",
+                                    dato = LocalDate.now(),
+                                    kommentar = "kom",
+                                ),
+                            ),
+                    ),
+                ),
+                kilde = Grunnlagsopplysning.Saksbehandler("123456", Tidspunkt.now()),
+            )
+        dao.hentSluttbehandling(behandlingId) shouldBe null
+        dao.lagreSluttbehandling(behandlingId, sluttbehandling)
+        dao.hentSluttbehandling(behandlingId) shouldBe sluttbehandling
     }
 
     @Test

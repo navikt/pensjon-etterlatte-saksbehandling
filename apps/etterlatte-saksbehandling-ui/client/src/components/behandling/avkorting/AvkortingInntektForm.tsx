@@ -127,7 +127,6 @@ export const AvkortingInntektForm = ({
               pattern: { value: /^\d+$/, message: 'Kun tall' },
               required: { value: true, message: 'Må fylles ut' },
             })}
-            //label="Forventet inntekt Norge"
             label={
               <HStack>
                 Forventet inntekt Norge

@@ -18,3 +18,9 @@ data class SluttbehandlingUtlandBehandlinginfo(
     val landMedDokumenter: List<LandMedDokumenter>,
     val kilde: Grunnlagsopplysning.Kilde,
 )
+
+data class SluttbehandlingUtlandBehandlinginfoRequest(
+    val landMedDokumenter: List<LandMedDokumenter>,
+) {
+    fun toDomain(kilde: Grunnlagsopplysning.Kilde) = SluttbehandlingUtlandBehandlinginfo(landMedDokumenter, kilde)
+}

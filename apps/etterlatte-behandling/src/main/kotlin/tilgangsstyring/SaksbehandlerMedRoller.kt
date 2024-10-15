@@ -7,14 +7,12 @@ data class SaksbehandlerMedRoller(
     val saksbehandler: Saksbehandler,
     val saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
 ) {
-    fun harRolle(rolle: AzureGroup): Boolean {
+    private fun harRolle(rolle: AzureGroup): Boolean {
         val claims = saksbehandler.getClaims()
         return saksbehandlerGroupIdsByKey[rolle]
             ?.let { return claims?.containsClaim(Claims.groups.name, it) ?: false }
             ?: false
     }
-
-    fun harRolleSaksbehandler() = harRolle(AzureGroup.SAKSBEHANDLER)
 
     fun harRolleAttestant() = (harRolle(AzureGroup.ATTESTANT) || harRolle(AzureGroup.ATTESTANT_GJENNY))
 

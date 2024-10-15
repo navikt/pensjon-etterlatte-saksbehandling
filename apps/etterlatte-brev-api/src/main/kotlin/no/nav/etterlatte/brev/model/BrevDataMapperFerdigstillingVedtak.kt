@@ -215,7 +215,6 @@ class BrevDataMapperFerdigstillingVedtak(
                     behandlingId,
                     virkningstidspunkt,
                     bruker,
-                    sakType,
                 )
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
@@ -268,7 +267,6 @@ class BrevDataMapperFerdigstillingVedtak(
                     behandlingId,
                     virkningstidspunkt,
                     bruker,
-                    sakType,
                 )
             }
         val forrigeUtbetalingsinfo =
@@ -277,7 +275,6 @@ class BrevDataMapperFerdigstillingVedtak(
                     behandlingService.hentSisteIverksatteBehandling(sakId, bruker).id,
                     virkningstidspunkt,
                     bruker,
-                    sakType,
                 )
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
@@ -329,7 +326,6 @@ class BrevDataMapperFerdigstillingVedtak(
                     behandlingId,
                     virkningstidspunkt,
                     bruker,
-                    sakType,
                 )
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }

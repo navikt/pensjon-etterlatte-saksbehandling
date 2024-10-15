@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
 import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
@@ -60,8 +59,6 @@ interface VilkaarsvurderingRepositoryWrapper {
 class VilkarsvurderingRepositorDaoWrapperClient(
     private val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao,
 ) : VilkaarsvurderingRepositoryWrapper {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     // TODO: se over struktur med runblocking her
     override fun hent(behandlingId: UUID): Vilkaarsvurdering? = runBlocking { vilkaarsvurderingKlientDaoImpl.hent(behandlingId) }
 
@@ -139,10 +136,8 @@ class VilkarsvurderingRepositorDaoWrapperClient(
 }
 
 class VilkaarsvurderingRepositoryWrapperDatabase(
-    val vilkarsvurderingRepository: VilkaarsvurderingRepository,
+    private val vilkarsvurderingRepository: VilkaarsvurderingRepository,
 ) : VilkaarsvurderingRepositoryWrapper {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     override fun hent(behandlingId: UUID): Vilkaarsvurdering? = vilkarsvurderingRepository.hent(behandlingId)
 
     override fun hentMigrertYrkesskadefordel(

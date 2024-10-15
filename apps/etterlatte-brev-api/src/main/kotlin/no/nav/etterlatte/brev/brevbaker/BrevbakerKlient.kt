@@ -47,23 +47,6 @@ class BrevbakerKlient(
             throw BrevbakerException("Feil ved kall til brevbaker (se sikkerlogg)", ex)
         }
 
-    suspend fun genererHTML(brevRequest: BrevbakerRequest): BrevbakerHTMLResponse =
-        try {
-            measureTimedValue {
-                client
-                    .post("$apiUrl/etterlatte/html") {
-                        contentType(ContentType.Application.Json)
-                        setBody(brevRequest.toJsonNode())
-                    }.body<BrevbakerHTMLResponse>()
-            }.let { (result, duration) ->
-                logger.info("Fullført brevbaker HTML OK (${duration.toString(DurationUnit.SECONDS, 2)})")
-                result
-            }
-        } catch (ex: Exception) {
-            sikkerlogg.error("Feila ved generer html-kall mot brevbakeren. Requesten var $brevRequest", ex)
-            throw BrevbakerException("Feil ved kall til brevbaker", ex)
-        }
-
     suspend fun genererJSON(brevRequest: BrevbakerRequest): LetterMarkup =
         try {
             measureTimedValue {
@@ -89,11 +72,6 @@ class BrevbakerException(
 
 class BrevbakerPdfResponse(
     val base64pdf: String,
-    val letterMetadata: LetterMetadata,
-)
-
-class BrevbakerHTMLResponse(
-    val html: Map<String, String>,
     val letterMetadata: LetterMetadata,
 )
 

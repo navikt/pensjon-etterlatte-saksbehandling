@@ -4,11 +4,6 @@ import org.slf4j.LoggerFactory
 import java.util.Timer
 import java.util.concurrent.atomic.AtomicBoolean
 
-class ShutdownInProgressException(
-    detail: String,
-    cause: Throwable,
-) : Exception(detail, cause)
-
 val shuttingDown: AtomicBoolean = AtomicBoolean(false)
 
 val logger = LoggerFactory.getLogger("shutdownhookLogger")

@@ -359,7 +359,6 @@ internal class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             hendelseDao = hendelseDao,
             grunnlagKlient = grunnlagKlientImpl,
-            behandlingRequestLogger = behandlingRequestLogger,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
@@ -445,9 +444,8 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             grunnlagKlient = grunnlagKlientImpl,
             revurderingService = revurderingService,
-            oppgaveService = oppgaveService,
             statistikkKafkaProducer = behandlingsHendelser,
-            featureToggleService = featureToggleService,
+            oppgaveService = oppgaveService,
         )
 
     val gyldighetsproevingService =

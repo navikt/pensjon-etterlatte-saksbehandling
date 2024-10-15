@@ -22,11 +22,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.P
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTATUS
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UFOERE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTLAND
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -38,12 +35,9 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.common.person.Utenlandsadresse
-import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.toJson
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 typealias Grunnlagsdata<T> = Map<Opplysningstype, Opplysning<T>>
 
@@ -88,18 +82,9 @@ fun Grunnlagsdata<JsonNode>.hentSoekerPdlV1() = this.hentKonstantOpplysning<Pers
 
 fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<PersonRolle>(PERSONROLLE)
 
-fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() = this.hentKonstantOpplysning<UtenlandsoppholdOpplysninger>(UTENLANDSOPPHOLD)
-
-fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() = this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
-
 fun Grunnlagsdata<JsonNode>.hentErForeldreloes() = this.hentKonstantOpplysning<Boolean>(FORELDRELOES)
 
 fun Grunnlagsdata<JsonNode>.hentErUfoere() = this.hentKonstantOpplysning<Boolean>(UFOERE)
-
-// TODO:
-//  Dette er duplikat av mottatt dato i behandling.
-//  Vi burde avgjøre hvilken som skal være "master" og fjerne den andre.
-fun Grunnlagsdata<JsonNode>.hentSoeknadMottattDato() = this.hentKonstantOpplysning<Map<String, LocalDateTime>>(SOEKNAD_MOTTATT_DATO)
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(opplysningstype: Opplysningstype): Opplysning.Konstant<T>? {
     val grunnlagsdata = this[opplysningstype] ?: return null

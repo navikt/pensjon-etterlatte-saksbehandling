@@ -32,6 +32,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
+import java.time.LocalDate
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -51,11 +52,15 @@ internal class InntektsjusteringRiverTest {
         val inntektsjustering =
             Inntektsjustering(
                 id = UUID.randomUUID(),
+                fnr = "123",
                 inntektsaar = 2025,
                 arbeidsinntekt = 100,
                 naeringsinntekt = 200,
-                arbeidsinntektUtland = 300,
-                naeringsinntektUtland = 400,
+                inntektFraUtland = 300,
+                afpInntekt = 400,
+                afpTjenesteordning = "tjenesteordning",
+                skalGaaAvMedAlderspensjon = "JA",
+                datoForAaGaaAvMedAlderspensjon = LocalDate.of(2025, 6, 10),
                 tidspunkt = Instant.parse("2024-08-01T05:06:07Z"),
             )
 
@@ -119,8 +124,11 @@ internal class InntektsjusteringRiverTest {
             aar shouldBe 2025
             arbeidsinntekt shouldBe 100
             naeringsinntekt shouldBe 200
-            arbeidsinntektUtland shouldBe 300
-            naeringsinntektUtland shouldBe 400
+            inntektFraUtland shouldBe 300
+            afpInntekt shouldBe 400
+            afpInntektAFPTjenesteordning shouldBe "tjenesteordning"
+            skalGaaAvMedAlderspensjon shouldBe "JA"
+            datoForAaGaaAvMedAlderspensjon shouldBe "10.06.2025"
             tidspunkt shouldBe "01.08.2024 05:06:07"
         }
     }

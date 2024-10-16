@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

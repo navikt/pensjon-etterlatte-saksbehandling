@@ -53,3 +53,5 @@ include(
     "libs:etterlatte-vilkaarsvurdering-model",
     "libs:etterlatte-tilbakekreving-model",
 )
+include("libs:etterlatte-tidshendelser-model")
+findProject(":libs:etterlatte-tidshendelser-model")?.name = "etterlatte-tidshendelser-model"

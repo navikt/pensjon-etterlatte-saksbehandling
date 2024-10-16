@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(libs.etterlatte.common)
+    implementation(project(mapOf("path" to ":libs:etterlatte-tidshendelser-model")))
     testImplementation(libs.test.jupiter.api)
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)

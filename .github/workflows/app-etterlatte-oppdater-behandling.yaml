@@ -23,6 +23,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/etterlatte-tidshendelser-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -38,6 +39,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/etterlatte-tidshendelser-model/**
       - gradle/libs.versions.toml
 
 permissions:

@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -1473,10 +1474,10 @@ internal class TrygdetidServiceTest {
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
 
         assertThrows<IkkeTillattException> {
-            runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, true, false, saksbehandler) }
+            runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, true, saksbehandler) }
         }
         assertThrows<IkkeTillattException> {
-            runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, false, false, saksbehandler) }
+            runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, false, saksbehandler) }
         }
         coVerify(exactly = 2) {
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
@@ -1528,7 +1529,6 @@ internal class TrygdetidServiceTest {
                 service.opprettOverstyrtBeregnetTrygdetid(
                     behandlingId,
                     overskriv = false,
-                    tidligereFamiliepleier = false,
                     saksbehandler,
                 )
             }
@@ -1572,6 +1572,7 @@ internal class TrygdetidServiceTest {
                 every { id } returns behandlingId
                 every { sak } returns sakId
                 every { status } returns BehandlingStatus.OPPRETTET
+                every { tidligereFamiliepleier } returns null
             }
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlag
@@ -1582,7 +1583,6 @@ internal class TrygdetidServiceTest {
             service.opprettOverstyrtBeregnetTrygdetid(
                 behandlingId,
                 overskriv = false,
-                tidligereFamiliepleier = false,
                 saksbehandler,
             )
         }
@@ -1598,6 +1598,7 @@ internal class TrygdetidServiceTest {
             behandling.status
             behandling.id
             behandling.sak
+            behandling.tidligereFamiliepleier
         }
     }
 
@@ -1629,6 +1630,15 @@ internal class TrygdetidServiceTest {
                 every { sak } returns sakId
                 every { status } returns BehandlingStatus.OPPRETTET
                 every { soeker } returns "12345678901"
+                every { tidligereFamiliepleier } returns
+                    TidligereFamiliepleier(
+                        svar = true,
+                        kilde = Grunnlagsopplysning.Saksbehandler("12345678901", Tidspunkt.now()),
+                        foedselsnummer = null,
+                        startPleieforhold = LocalDate.now().minusYears(1),
+                        opphoertPleieforhold = LocalDate.now(),
+                        begrunnelse = "Begrunnelse",
+                    )
             }
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlag
@@ -1639,7 +1649,6 @@ internal class TrygdetidServiceTest {
             service.opprettOverstyrtBeregnetTrygdetid(
                 behandlingId,
                 overskriv = false,
-                tidligereFamiliepleier = true,
                 saksbehandler,
             )
         }
@@ -1656,6 +1665,7 @@ internal class TrygdetidServiceTest {
             behandling.id
             behandling.sak
             behandling.soeker
+            behandling.tidligereFamiliepleier
         }
     }
 

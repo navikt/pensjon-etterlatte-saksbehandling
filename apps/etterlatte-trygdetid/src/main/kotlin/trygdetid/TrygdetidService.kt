@@ -112,7 +112,6 @@ interface TrygdetidService {
     suspend fun opprettOverstyrtBeregnetTrygdetid(
         behandlingId: UUID,
         overskriv: Boolean,
-        tidligereFamiliepleier: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
@@ -523,7 +522,6 @@ class TrygdetidServiceImpl(
     override suspend fun opprettOverstyrtBeregnetTrygdetid(
         behandlingId: UUID,
         overskriv: Boolean,
-        tidligereFamiliepleier: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
@@ -580,6 +578,8 @@ class TrygdetidServiceImpl(
             } else {
                 null // ukjent avdød
             }
+
+        val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
 
         val ident =
             if (tidligereFamiliepleier) {

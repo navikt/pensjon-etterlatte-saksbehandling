@@ -50,6 +50,7 @@ fun behandling(
     sendeBrev = true,
     opphoerFraOgMed = null,
     relatertBehandlingId = null,
+    tidligereFamiliepleier = null,
 )
 
 fun trygdetid(

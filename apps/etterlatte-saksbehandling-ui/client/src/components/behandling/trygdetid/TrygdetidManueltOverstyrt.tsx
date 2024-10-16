@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Button, Checkbox, TextField } from '@navikt/ds-react'
+import { Alert, Box, Button, Checkbox, Heading, TextField, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -13,15 +13,16 @@ import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 export const TrygdetidManueltOverstyrt = ({
-  behandlingId,
+  behandling,
   trygdetidId,
   ident,
   beregnetTrygdetid,
   oppdaterTrygdetid,
 }: {
-  behandlingId: string
+  behandling: IDetaljertBehandling
   trygdetidId: string
   ident: string
   beregnetTrygdetid: IDetaljertBeregnetTrygdetid
@@ -46,7 +47,7 @@ export const TrygdetidManueltOverstyrt = ({
   const lagre = () => {
     oppdaterTrygdetidRequest(
       {
-        behandlingId: behandlingId,
+        behandlingId: behandling.id,
         trygdetidId: trygdetidId,
         anvendtTrygdetid: anvendtTrygdetid!!,
         prorataBroek: skalHaProrata
@@ -63,82 +64,97 @@ export const TrygdetidManueltOverstyrt = ({
   }
 
   const overskrivOverstyrtTrygdetid = () => {
-    opprettOverstyrtTrygdetid({ behandlingId, overskriv: true }, () => window.location.reload())
+    opprettOverstyrtTrygdetid({ behandlingId: behandling.id, overskriv: true }, () => window.location.reload())
   }
 
   const identErIGrunnlag = personopplysninger?.avdoede?.find((person) => person.opplysning.foedselsnummer === ident)
+
   if (!identErIGrunnlag) {
-    return (
-      <>
-        {ident === 'UKJENT_AVDOED' ? (
+    if (ident == 'UKJENT_AVDOED' && behandling.behandlingType !== IBehandlingsType.REVURDERING) {
+      return (
+        <>
           <Alert variant="error">
             Brev støtter ikke ukjent avdød. Dersom avdød ikke ble oppgitt ved opprettelse av behandlingen må du opprette
             ny overstyrt trygdetid.
           </Alert>
-        ) : (
-          <Alert variant="error">Fant ikke avdød ident {ident} (trygdetid) i behandlingsgrunnlaget</Alert>
-        )}
-
-        <br />
-
-        <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
-          Opprett på nytt
-        </Button>
-      </>
-    )
+          <br />
+          <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
+            Opprett på nytt
+          </Button>
+        </>
+      )
+    }
+    if (ident !== 'UKJENT_AVDOED') {
+      return <Alert variant="error">Fant ikke avdød ident {ident} (trygdetid) i behandlingsgrunnlaget</Alert>
+    }
   }
 
   return (
-    <FormWrapper>
-      <TextField
-        label="Anvendt trygdetid"
-        placeholder="Anvendt trygdetid"
-        value={anvendtTrygdetid || ''}
-        pattern="[0-9]{11}"
-        maxLength={11}
-        htmlSize={20}
-        onChange={(e) => setAnvendtTrygdetid(Number(e.target.value))}
-      />
-
-      <Checkbox checked={skalHaProrata} onChange={() => setSkalHaProrata(!skalHaProrata)}>
-        Prorata brøk
-      </Checkbox>
-      {skalHaProrata && (
-        <InputRow>
-          <TextField
-            label="Prorata teller"
-            placeholder="Prorata teller"
-            value={prorataTeller || ''}
-            pattern="[0-9]{11}"
-            maxLength={11}
-            onChange={(e) => setTeller(Number(e.target.value))}
-          />
-          <TextField
-            label="Prorata nevner"
-            placeholder="Prorata nevner"
-            value={prorataNevner || ''}
-            pattern="[0-9]{11}"
-            maxLength={11}
-            onChange={(e) => setNevner(Number(e.target.value))}
-          />
-        </InputRow>
+    <>
+      <Heading size="small" level="3">
+        Manuelt overstyrt trygdetid
+      </Heading>
+      {ident == 'UKJENT_AVDOED' && (
+        <Box maxWidth="40rem">
+          <VStack gap="1">
+            <Alert variant="warning">OBS! Trygdetiden er koblet til ukjent avdød</Alert>
+            <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
+              Opprett overstyrt trygdetid på nytt
+            </Button>
+          </VStack>
+        </Box>
       )}
+      <FormWrapper>
+        <TextField
+          label="Anvendt trygdetid"
+          placeholder="Anvendt trygdetid"
+          value={anvendtTrygdetid || ''}
+          pattern="[0-9]{11}"
+          maxLength={11}
+          htmlSize={20}
+          onChange={(e) => setAnvendtTrygdetid(Number(e.target.value))}
+        />
 
-      <Knapp>
-        <Button
-          variant="secondary"
-          onClick={lagre}
-          loading={isPending(status)}
-          disabled={anvendtTrygdetid == null || (skalHaProrata && (prorataNevner == null || prorataTeller == null))}
-        >
-          Send inn
-        </Button>
-      </Knapp>
-      {isFailureHandler({
-        apiResult: status,
-        errorMessage: 'Det oppsto en feil ved oppdatering av trygdetid.',
-      })}
-    </FormWrapper>
+        <Checkbox checked={skalHaProrata} onChange={() => setSkalHaProrata(!skalHaProrata)}>
+          Prorata brøk
+        </Checkbox>
+        {skalHaProrata && (
+          <InputRow>
+            <TextField
+              label="Prorata teller"
+              placeholder="Prorata teller"
+              value={prorataTeller || ''}
+              pattern="[0-9]{11}"
+              maxLength={11}
+              onChange={(e) => setTeller(Number(e.target.value))}
+            />
+            <TextField
+              label="Prorata nevner"
+              placeholder="Prorata nevner"
+              value={prorataNevner || ''}
+              pattern="[0-9]{11}"
+              maxLength={11}
+              onChange={(e) => setNevner(Number(e.target.value))}
+            />
+          </InputRow>
+        )}
+
+        <Knapp>
+          <Button
+            variant="secondary"
+            onClick={lagre}
+            loading={isPending(status)}
+            disabled={anvendtTrygdetid == null || (skalHaProrata && (prorataNevner == null || prorataTeller == null))}
+          >
+            Send inn
+          </Button>
+        </Knapp>
+        {isFailureHandler({
+          apiResult: status,
+          errorMessage: 'Det oppsto en feil ved oppdatering av trygdetid.',
+        })}
+      </FormWrapper>
+    </>
   )
 }
 

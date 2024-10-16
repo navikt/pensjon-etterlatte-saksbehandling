@@ -38,14 +38,13 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
-import { formaterNavn } from '~shared/types/Person'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { tagTekstForKunEnJuridiskForelder } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
+import { mapNavn, tagTekstForKunEnJuridiskForelder } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
 import { AnnenForelderVurdering } from '~shared/types/grunnlag'
 
 interface Props {
@@ -64,17 +63,6 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
   const erEnesteJuridiskeForelder = erTidligsteAvdoede && !!behandling.beregningsGrunnlag?.kunEnJuridiskForelder
   const kunEnJuridiskForelderPersongalleri =
     personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
-
-  const avdoedesNavn = (): string => {
-    const opplysning = personopplysninger?.avdoede?.find(
-      (personOpplysning) => personOpplysning.opplysning.foedselsnummer === trygdetid.ident
-    )?.opplysning
-
-    if (!opplysning) {
-      return trygdetid.ident
-    }
-    return `${formaterNavn(opplysning)} (${trygdetid.ident})`
-  }
 
   const maanedEtterDoedsfall = (): Date | undefined => {
     const opplysning = personopplysninger?.avdoede?.find(
@@ -310,7 +298,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
       }
     >
       <Table.DataCell>
-        {avdoedesNavn()}{' '}
+        {mapNavn(trygdetid.ident, personopplysninger)}{' '}
         {erEnesteJuridiskeForelder && (
           <Tag variant="alt1" size="small">
             {tagTekstForKunEnJuridiskForelder(behandling)}

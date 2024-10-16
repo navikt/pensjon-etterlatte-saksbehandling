@@ -99,7 +99,7 @@ class BehandlingInfoDao(
             with(it) {
                 prepareStatement(
                     """
-                    SELECT behandling_id, brevutfall 
+                    SELECT brevutfall 
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID
                     """,
@@ -151,7 +151,7 @@ class BehandlingInfoDao(
             with(it) {
                 prepareStatement(
                     """
-                    SELECT behandling_id, etterbetaling 
+                    SELECT etterbetaling 
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID AND etterbetaling IS NOT NULL
                     """,

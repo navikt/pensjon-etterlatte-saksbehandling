@@ -9,17 +9,20 @@ data class BarnepensjonAvslag(
     override val innhold: List<Slate.Element>,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
+    val erSluttbehandling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,
             brukerUnder18Aar: Boolean,
             utlandstilknytning: UtlandstilknytningType?,
+            erSluttbehandling: Boolean,
         ): BarnepensjonAvslag =
             BarnepensjonAvslag(
                 innhold = innhold.innhold(),
                 brukerUnder18Aar = brukerUnder18Aar,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                erSluttbehandling = erSluttbehandling,
             )
     }
 }

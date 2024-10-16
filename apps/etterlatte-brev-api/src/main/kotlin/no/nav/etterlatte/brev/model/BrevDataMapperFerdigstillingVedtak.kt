@@ -66,6 +66,7 @@ data class BrevDataFerdigstillingRequest(
     val innholdMedVedlegg: InnholdMedVedlegg,
     val kode: Brevkoder,
     val tittel: String? = null,
+    val erSluttBehandling: Boolean,
 )
 
 class BrevDataMapperFerdigstillingVedtak(
@@ -126,6 +127,8 @@ class BrevDataMapperFerdigstillingVedtak(
                         innholdMedVedlegg,
                         soekerUnder18,
                         utlandstilknytningType,
+                        behandlingId!!,
+                        bruker,
                     )
                 BP_OPPHOER ->
                     barnepensjonOpphoer(
@@ -364,17 +367,24 @@ class BrevDataMapperFerdigstillingVedtak(
         }
     }
 
-    private fun barnepensjonAvslag(
+    private suspend fun barnepensjonAvslag(
         innholdMedVedlegg: InnholdMedVedlegg,
         soekerUnder18: Boolean?,
         utlandstilknytningType: UtlandstilknytningType?,
-    ) = BarnepensjonAvslag.fra(
-        innhold = innholdMedVedlegg,
-        // TODO må kunne sette brevutfall ved avslag.
-        //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
-        brukerUnder18Aar = soekerUnder18 ?: true,
-        utlandstilknytning = utlandstilknytningType,
-    )
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+    ) = coroutineScope {
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+
+        BarnepensjonAvslag.fra(
+            innhold = innholdMedVedlegg,
+            // TODO må kunne sette brevutfall ved avslag.
+            //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
+            brukerUnder18Aar = soekerUnder18 ?: true,
+            utlandstilknytning = utlandstilknytningType,
+            erSluttbehandling = behandling.erSluttbehandling,
+        )
+    }
 
     private suspend fun barnepensjonOpphoer(
         bruker: BrukerTokenInfo,

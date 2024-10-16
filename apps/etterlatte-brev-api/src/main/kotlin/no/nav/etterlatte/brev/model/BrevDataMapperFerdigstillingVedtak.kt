@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.Brevkoder.OMS_INNVILGELSE
 import no.nav.etterlatte.brev.Brevkoder.OMS_OPPHOER
 import no.nav.etterlatte.brev.Brevkoder.OMS_REVURDERING
 import no.nav.etterlatte.brev.Brevkoder.TILBAKEKREVING
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -165,10 +166,13 @@ class BrevDataMapperFerdigstillingVedtak(
                     )
 
                 OMS_AVSLAG ->
-                    OmstillingsstoenadAvslag.fra(
+                    omstillingsstoenadAvslag(
+                        bruker,
+                        behandlingId!!,
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
                     )
+
                 OMS_OPPHOER ->
                     omstillingsstoenadOpphoer(
                         bruker,
@@ -428,6 +432,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,
@@ -436,6 +441,21 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkårsvurdering" },
             avdoede,
+            behandling.erSluttbehandling,
+        )
+    }
+
+    private suspend fun omstillingsstoenadAvslag(
+        bruker: BrukerTokenInfo,
+        behandlingId: UUID,
+        innhold: List<Slate.Element>,
+        utlandstilknytningType: UtlandstilknytningType?,
+    ) = coroutineScope {
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+        OmstillingsstoenadAvslag.fra(
+            innhold,
+            utlandstilknytningType,
+            behandling.erSluttbehandling,
         )
     }
 

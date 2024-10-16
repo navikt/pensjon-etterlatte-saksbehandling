@@ -9,15 +9,18 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 data class OmstillingsstoenadAvslag(
     override val innhold: List<Slate.Element>,
     val bosattUtland: Boolean,
+    val erSluttbehandling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             innhold: List<Slate.Element>,
             utlandstilknytningType: UtlandstilknytningType?,
+            erSluttbehandling: Boolean,
         ): OmstillingsstoenadAvslag =
             OmstillingsstoenadAvslag(
                 bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
                 innhold = innhold,
+                erSluttbehandling = erSluttbehandling,
             )
     }
 }

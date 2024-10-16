@@ -140,7 +140,8 @@ class SimuleringOsService(
         Oppdrag().apply {
             fagsystemId = utbetaling.sakId.value.toString()
             oppdragGjelderId = utbetaling.stoenadsmottaker.value
-            saksbehId = brukerTokenInfo.ident()
+            saksbehId =
+                brukerTokenInfo.ident().let { if (it.contains("gcp")) OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER else it }
 
             utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
             kodeEndring = if (erFoersteUtbetalingPaaSak) "NY" else "ENDR"
@@ -178,7 +179,8 @@ class SimuleringOsService(
             utbetalesTilId = utbetaling.stoenadsmottaker.value
             datoUtbetalesTilIdFom = utbetalingslinje.periode.fra.toOppdragDate()
             henvisning = utbetaling.behandlingId.shortValue.value
-            saksbehId = brukerTokenInfo.ident()
+            saksbehId =
+                brukerTokenInfo.ident().let { if (it.contains("gcp")) OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER else it }
             attestant.add(
                 Attestant().apply {
                     attestantId = OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER

@@ -130,4 +130,5 @@ spec:
         - host: etterlatte-proxy.prod-fss-pub.nais.io
     inbound:
       rules:
+        - application: etterlatte-vedtaksvurdering-kafka
         - application: etterlatte-saksbehandling-ui

@@ -118,11 +118,26 @@ internal class BehandlingInfoDaoTest(
     @Test
     fun `skal hente brevutfall`() {
         val brevutfall = brevutfall(behandlingId)
-
+        dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
         dao.lagreBrevutfall(brevutfall)
         val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)
 
         lagretBrevutfall shouldNotBe null
+    }
+
+    @Test
+    fun `skal hente brevutfall men etterbetaling lå der, skal allikevel gå bra`() {
+        val brevutfall = brevutfall(behandlingId)
+        dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
+        val etterbetaling = etterbetaling(behandlingId)
+        dao.lagreEtterbetaling(etterbetaling)
+        // Tryna her tidligere fordi etterbetaling gjorde at next i singleOrNull ga true og block ble kjørt. Den tryna da på this.getString("brevutfall").let var uten spørsmålstegn
+        dao.hentBrevutfall(brevutfall.behandlingId)
+
+        dao.lagreBrevutfall(brevutfall)
+        val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)
+
+        lagretBrevutfall shouldBe brevutfall
     }
 
     @Test

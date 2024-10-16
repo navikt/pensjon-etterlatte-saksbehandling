@@ -99,7 +99,7 @@ class BehandlingInfoDao(
             with(it) {
                 prepareStatement(
                     """
-                    SELECT behandling_id, brevutfall 
+                    SELECT brevutfall 
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID
                     """,
@@ -151,7 +151,7 @@ class BehandlingInfoDao(
             with(it) {
                 prepareStatement(
                     """
-                    SELECT behandling_id, etterbetaling 
+                    SELECT etterbetaling 
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID AND etterbetaling IS NOT NULL
                     """,
@@ -160,7 +160,7 @@ class BehandlingInfoDao(
             }
         }
 
-    private fun ResultSet.toBrevutfall(): Brevutfall = this.getString("brevutfall").let { objectMapper.readValue(it) }
+    private fun ResultSet.toBrevutfall(): Brevutfall? = this.getString("brevutfall")?.let { objectMapper.readValue(it) }
 
-    private fun ResultSet.toEtterbetaling(): Etterbetaling = this.getString("etterbetaling").let { objectMapper.readValue(it) }
+    private fun ResultSet.toEtterbetaling(): Etterbetaling? = this.getString("etterbetaling")?.let { objectMapper.readValue(it) }
 }

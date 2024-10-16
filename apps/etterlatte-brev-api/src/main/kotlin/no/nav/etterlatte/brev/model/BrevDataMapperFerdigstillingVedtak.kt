@@ -336,6 +336,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         if (erForeldreloes) {
             BarnepensjonInnvilgelseForeldreloes.fra(
@@ -350,6 +351,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 avdoede,
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
+                erSluttbehandling = behandling.erSluttbehandling,
             )
         } else {
             BarnepensjonInnvilgelse.fra(
@@ -363,6 +365,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
+                erSluttbehandling = behandling.erSluttbehandling,
             )
         }
     }

@@ -1634,7 +1634,7 @@ internal class TrygdetidServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlag
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
         every { repository.opprettTrygdetid(capture(opprettetTrygdetidSlot)) } returnsArgument 0
-        every { repository.oppdaterTrygdetid(any(), any()) } returnsArgument 0
+        every { repository.oppdaterTrygdetid(any()) } returnsArgument 0
         runBlocking {
             service.opprettOverstyrtBeregnetTrygdetid(
                 behandlingId,
@@ -1649,7 +1649,7 @@ internal class TrygdetidServiceTest {
             grunnlagKlient.hentGrunnlag(any(), any())
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.opprettTrygdetid(any())
-            repository.oppdaterTrygdetid(any(), any())
+            repository.oppdaterTrygdetid(any())
         }
         verify {
             behandling.status

@@ -78,7 +78,6 @@ export const EnkelPersonTrygdetid = (props: Props) => {
     return (
       <VStack gap="12" maxWidth="69rem">
         <TrygdetidManueltOverstyrt
-          behandling={behandling}
           trygdetidId={trygdetid.id}
           ident={trygdetid.ident}
           oppdaterTrygdetid={oppdaterTrygdetid}

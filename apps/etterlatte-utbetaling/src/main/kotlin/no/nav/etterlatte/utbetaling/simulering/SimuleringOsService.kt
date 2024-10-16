@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
+import no.nav.etterlatte.utbetaling.common.SimulertBeregning
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeFagomraade
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId

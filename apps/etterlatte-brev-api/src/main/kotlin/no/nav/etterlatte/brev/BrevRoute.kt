@@ -158,6 +158,16 @@ fun Route.brevRoute(
             }
         }
 
+        post("utgaar") {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
+                val request = call.receive<BrevUtgaarRequest>()
+
+                service.markerSomUtgaatt(brevId, request.kommentar, brukerTokenInfo)
+
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         delete {
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 call.respond(service.slett(brevId, brukerTokenInfo))
@@ -263,6 +273,10 @@ data class OppdaterPayloadRequest(
 
 data class OppdaterMottakerRequest(
     val mottaker: Mottaker,
+)
+
+data class BrevUtgaarRequest(
+    val kommentar: String,
 )
 
 data class OppdaterTittelRequest(

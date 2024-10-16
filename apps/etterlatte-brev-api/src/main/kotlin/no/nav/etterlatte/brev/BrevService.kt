@@ -12,15 +12,18 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.Duration
 
 class BrevService(
     private val db: BrevRepository,
@@ -211,6 +214,32 @@ class BrevService(
 
         val result = db.settBrevSlettet(id, bruker)
         logger.info("Brev med id=$id slettet=$result")
+    }
+
+    fun markerSomUtgaatt(
+        id: BrevID,
+        kommentar: String,
+        bruker: BrukerTokenInfo,
+    ) {
+        val brev = db.hentBrev(id)
+
+        if (brev.status !in listOf(Status.FERDIGSTILT, Status.JOURNALFOERT)) {
+            throw UgyldigForespoerselException(
+                "KAN_IKKE_MARKERE_SOM_UTGAATT",
+                "Brev har status ${brev.status} og kan ikke markeres som utgått. " +
+                    "Det er kun brev med status FERDIGSTILT eller JOURNALFOERT som kan markeres som utgått",
+            )
+        }
+
+        val alderIDager = Duration.between(Tidspunkt.now(), brev.opprettet).toDays()
+        if (alderIDager < 7) {
+            throw UgyldigForespoerselException(
+                "KAN_IKKE_MARKERE_SOM_UTGAATT",
+                "Brevet er kun $alderIDager dag(er) gammelt. Må være minst en uke gammelt for å markeres som utgått",
+            )
+        }
+
+        db.settBrevUtgaatt(id, kommentar, bruker)
     }
 
     private fun sjekkOmBrevKanEndres(brevID: BrevID): Brev {

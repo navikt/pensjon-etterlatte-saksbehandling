@@ -19,6 +19,7 @@ enum class Status {
     JOURNALFOERT,
     DISTRIBUERT,
     SLETTET,
+    UTGAATT,
     ;
 
     fun ikkeFerdigstilt(): Boolean = this in listOf(OPPRETTET, OPPDATERT)

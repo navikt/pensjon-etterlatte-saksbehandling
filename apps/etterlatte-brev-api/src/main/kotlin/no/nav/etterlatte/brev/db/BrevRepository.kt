@@ -263,6 +263,16 @@ class BrevRepository(
         }
     }
 
+    fun settBrevUtgaatt(
+        id: BrevID,
+        kommentar: String,
+        bruker: BrukerTokenInfo,
+    ) {
+        using(sessionOf(ds)) {
+            it.lagreHendelse(id, Status.UTGAATT, "${bruker.ident()}: $kommentar".toJson())
+        }
+    }
+
     fun opprettBrev(ulagretBrev: OpprettNyttBrev): Brev =
         ds.transaction(true) { tx ->
             val id =

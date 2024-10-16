@@ -1,0 +1,1 @@
+INSERT INTO status (id) VALUES ('UTGAATT');

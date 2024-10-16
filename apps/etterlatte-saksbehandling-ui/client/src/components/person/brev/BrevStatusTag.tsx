@@ -15,6 +15,8 @@ const mapBrevStatus = (status: BrevStatus) => {
       return 'Distribuert'
     case BrevStatus.SLETTET:
       return 'Slettet'
+    case BrevStatus.UTGAATT:
+      return 'Utgått'
   }
 }
 
@@ -29,7 +31,8 @@ const tagColors = (status: BrevStatus) => {
     case BrevStatus.DISTRIBUERT:
       return 'success'
     case BrevStatus.SLETTET:
-      return 'neutral'
+    case BrevStatus.UTGAATT:
+      return 'warning'
   }
 }
 

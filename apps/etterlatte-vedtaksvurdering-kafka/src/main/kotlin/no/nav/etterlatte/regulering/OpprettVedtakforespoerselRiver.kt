@@ -74,8 +74,13 @@ internal class OpprettVedtakforespoerselRiver(
 
     private fun verifiserUendretUtbetaling(behandlingId: UUID) {
         val simulertBeregning = utbetalingKlient.simuler(behandlingId)
-        if (simulertBeregning.etterbetaling.isNotEmpty() || simulertBeregning.tilbakekreving.isNotEmpty()) {
-            throw Exception("Omregningen hadde etterbetaling eller tilbakekreving, avbryter..")
+        val etterbetalingSum = simulertBeregning.etterbetaling.sumOf { it.beloep }
+        val tilbakekrevingSum = simulertBeregning.tilbakekreving.sumOf { it.beloep }
+        if (etterbetalingSum.compareTo(BigDecimal.ZERO) != 0) {
+            throw Exception("Omregningen fører til etterbetaling på $etterbetalingSum kr, avbryter behandlingen")
+        }
+        if (tilbakekrevingSum.compareTo(BigDecimal.ZERO) != 0) {
+            throw Exception("Omregningen fører til tilbakekreving på $tilbakekrevingSum, avbryter behandlingen")
         }
     }
 

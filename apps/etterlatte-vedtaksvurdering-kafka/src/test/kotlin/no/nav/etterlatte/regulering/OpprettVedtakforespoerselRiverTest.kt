@@ -19,6 +19,7 @@ import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -121,8 +122,16 @@ internal class OpprettVedtakforespoerselRiverTest {
             mockk<UtbetalingKlient> {
                 every { simuler(any()) } returns
                     mockk {
-                        every { etterbetaling } returns listOf()
-                        every { tilbakekreving } returns listOf()
+                        every { etterbetaling } returns
+                            listOf(
+                                mockk(relaxed = true) { every { beloep } returns BigDecimal.valueOf(100.00) },
+                                mockk(relaxed = true) { every { beloep } returns BigDecimal.valueOf(-100.00) },
+                            )
+                        every { tilbakekreving } returns
+                            listOf(
+                                mockk(relaxed = true) { every { beloep } returns BigDecimal.valueOf(100.00) },
+                                mockk(relaxed = true) { every { beloep } returns BigDecimal.valueOf(-100.00) },
+                            )
                     }
             }
         val inspector =
@@ -143,7 +152,40 @@ internal class OpprettVedtakforespoerselRiverTest {
     }
 
     @Test
-    fun `skal opprette vedtak, simulere og feile fordi det finnes etterbetaling eller tilbakekreving`() {
+    fun `skal opprette vedtak, simulere og feile fordi det finnes etterbetaling`() {
+        val behandlingId = UUID.randomUUID()
+        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING)
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        val utbetalingKlientMock =
+            mockk<UtbetalingKlient> {
+                every { simuler(any()) } returns
+                    mockk {
+                        every { etterbetaling } returns listOf(mockk(relaxed = true) { every { beloep } returns BigDecimal.valueOf(100) })
+                        every { tilbakekreving } returns listOf(mockk(relaxed = true))
+                    }
+            }
+        val inspector =
+            TestRapid().apply {
+                OpprettVedtakforespoerselRiver(
+                    this,
+                    vedtakServiceMock,
+                    utbetalingKlientMock,
+                    DummyFeatureToggleService(),
+                )
+            }
+
+        inspector.sendTestMessage(melding.toJson())
+
+        val returnertMelding = inspector.inspektør.message(0)
+        returnertMelding.get(EVENT_NAME_KEY).textValue() shouldBe EventNames.FEILA.lagEventnameForType()
+
+        verify { vedtakServiceMock.opprettVedtakOgFatt(sakId, behandlingId) }
+        verify { utbetalingKlientMock.simuler(behandlingId) }
+        verify(exactly = 0) { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
+    }
+
+    @Test
+    fun `skal opprette vedtak, simulere og feile fordi det finnes tilbakekreving`() {
         val behandlingId = UUID.randomUUID()
         val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
@@ -152,7 +194,8 @@ internal class OpprettVedtakforespoerselRiverTest {
                 every { simuler(any()) } returns
                     mockk {
                         every { etterbetaling } returns listOf(mockk(relaxed = true))
-                        every { tilbakekreving } returns listOf(mockk(relaxed = true))
+                        every { tilbakekreving } returns
+                            listOf(mockk(relaxed = true) { every { beloep } returns BigDecimal.valueOf(100) })
                     }
             }
         val inspector =

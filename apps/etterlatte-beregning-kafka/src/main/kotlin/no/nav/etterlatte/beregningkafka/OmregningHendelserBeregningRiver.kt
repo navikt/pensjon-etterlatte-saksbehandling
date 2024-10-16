@@ -4,6 +4,7 @@ import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -62,9 +63,13 @@ internal class OmregningHendelserBeregningRiver(
         val behandlingViOmregnerFra = omregningData.hentForrigeBehandlingid()
         val sakType = omregningData.hentSakType()
         runBlocking {
-            val beregning = beregn(sakType, behandlingId, behandlingViOmregnerFra)
+            val beregning = beregn(sakType, omregningData.revurderingaarsak, behandlingId, behandlingViOmregnerFra)
             packet[BEREGNING_KEY] = beregning.beregning
-            sendMedInformasjonTilKontrollsjekking(beregning, packet)
+
+            // TODO bør vi ha slike ting her?
+            if (omregningData.revurderingaarsak == Revurderingaarsak.REGULERING) {
+                sendMedInformasjonTilKontrollsjekking(beregning, packet)
+            }
         }
         packet.setEventNameForHendelseType(OmregningHendelseType.BEREGNA)
         context.publish(packet.toJson())
@@ -73,21 +78,25 @@ internal class OmregningHendelserBeregningRiver(
 
     internal suspend fun beregn(
         sakType: SakType,
+        revurderingaarsak: Revurderingaarsak,
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,
     ): BeregningOgAvkorting {
-        val g = beregningService.hentGrunnbeloep()
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
 
-        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g, behandlingId = behandlingId)
+        if (revurderingaarsak == Revurderingaarsak.REGULERING) {
+            // TODO denne burde flyttes ut av omregning
+            val g = beregningService.hentGrunnbeloep()
+            verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g, behandlingId = behandlingId)
+        }
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
                 beregningService
-                    .regulerAvkorting(behandlingId, behandlingViOmregnerFra)
+                    .omregnAvkorting(behandlingId, behandlingViOmregnerFra)
                     .body<AvkortingDto>()
             val forrigeAvkorting =
                 beregningService

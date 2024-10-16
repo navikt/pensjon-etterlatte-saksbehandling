@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.util.UUID
 import kotlin.random.Random
 
 class BrevdistribuererTest {
@@ -52,7 +53,7 @@ class BrevdistribuererTest {
                 journalpostId,
                 DistribusjonsType.ANNET,
                 DistribusjonsTidspunktType.KJERNETID,
-                brev.mottaker.adresse,
+                brev.mottakere.first().adresse,
                 false,
             )
         }
@@ -109,14 +110,15 @@ class BrevdistribuererTest {
         status = status,
         statusEndret = Tidspunkt.now(),
         opprettet = Tidspunkt.now(),
-        mottaker = opprettMottaker(),
+        mottakere = listOf(opprettMottaker()),
         brevtype = Brevtype.MANUELT,
         brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
     private fun opprettMottaker() =
         Mottaker(
-            "Stor Snerk",
+            id = UUID.randomUUID(),
+            navn = "Stor Snerk",
             foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,
             adresse =

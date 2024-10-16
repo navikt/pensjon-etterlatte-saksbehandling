@@ -252,6 +252,7 @@ class OversendelseBrevServiceImpl(
 
     private fun tomMottaker() =
         Mottaker(
+            id = UUID.randomUUID(),
             navn = "Ukjent",
             foedselsnummer = null,
             orgnummer = null,

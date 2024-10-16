@@ -157,7 +157,7 @@ class JournalfoerBrevServiceTest {
                 Status.JOURNALFOERT,
                 Tidspunkt.now(),
                 Tidspunkt.now(),
-                mottaker = mockk(),
+                mottakere = mockk(),
                 brevtype = Brevtype.MANUELT,
                 brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
@@ -193,7 +193,7 @@ class JournalfoerBrevServiceTest {
                 status = Status.FERDIGSTILT,
                 statusEndret = Tidspunkt.now(),
                 opprettet = Tidspunkt.now(),
-                mottaker = opprettMottaker(forventetBrevMottakerFnr),
+                mottakere = listOf(opprettMottaker(forventetBrevMottakerFnr)),
                 brevtype = Brevtype.INFORMASJON,
                 brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
@@ -276,7 +276,7 @@ class JournalfoerBrevServiceTest {
                 status = Status.FERDIGSTILT,
                 statusEndret = Tidspunkt.now(),
                 opprettet = Tidspunkt.now(),
-                mottaker = opprettMottaker(forventetBrevMottakerFnr),
+                mottakere = listOf(opprettMottaker(forventetBrevMottakerFnr)),
                 brevtype = Brevtype.MANUELT,
                 brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
             )
@@ -347,14 +347,15 @@ class JournalfoerBrevServiceTest {
             status = status,
             statusEndret = Tidspunkt.now(),
             opprettet = Tidspunkt.now(),
-            mottaker = opprettMottaker(SOEKER_FOEDSELSNUMMER.value),
+            mottakere = listOf(opprettMottaker(SOEKER_FOEDSELSNUMMER.value)),
             brevtype = Brevtype.INFORMASJON,
             brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
 
     private fun opprettMottaker(fnr: String) =
         Mottaker(
-            "Stor Snerk",
+            id = UUID.randomUUID(),
+            navn = "Stor Snerk",
             foedselsnummer = MottakerFoedselsnummer(fnr),
             orgnummer = null,
             adresse =

@@ -31,20 +31,25 @@ class Brevdistribuerer(
                     "JournalpostID mangler på brev (id=${brev.id}, status=${brev.status})"
                 }
 
-        val mottaker =
-            requireNotNull(brev.mottaker) {
-                "Mottaker må være satt for å kunne distribuere brevet (id: $brevId)"
-            }
+        check(brev.mottakere.isNotEmpty()) {
+            "Det må finnes minst 1 mottaker for å kunne distribuere brevet (id: $brevId)"
+        }
 
-        return distribusjonService
-            .distribuerJournalpost(
-                brevId = brev.id,
-                journalpostId = journalpostId,
-                type = distribusjonsType,
-                tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-                adresse = mottaker.adresse,
-                tvingSentralPrint = mottaker.tvingSentralPrint,
-            ).also { logger.info("Distribuerte brev $brevId") }
+        /*
+         * TODO:
+         *  Må håndtere flere [BestillingsID] når det blir mulig å legge til flere mottakere.
+         */
+        return with(brev.mottakere.single()) {
+            distribusjonService
+                .distribuerJournalpost(
+                    brevId = brev.id,
+                    journalpostId = journalpostId,
+                    type = distribusjonsType,
+                    tidspunkt = DistribusjonsTidspunktType.KJERNETID,
+                    adresse = adresse,
+                    tvingSentralPrint = tvingSentralPrint,
+                ).also { logger.info("Distribuerte brev $brevId") }
+        }
     }
 }
 

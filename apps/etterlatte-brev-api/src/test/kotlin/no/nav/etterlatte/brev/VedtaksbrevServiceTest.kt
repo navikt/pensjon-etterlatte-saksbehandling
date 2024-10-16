@@ -740,7 +740,7 @@ internal class VedtaksbrevServiceTest {
         status = status,
         Tidspunkt.now(),
         Tidspunkt.now(),
-        mottaker = opprettMottaker(),
+        mottakere = listOf(opprettMottaker()),
         brevtype = Brevtype.VEDTAK,
         brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
@@ -783,7 +783,8 @@ internal class VedtaksbrevServiceTest {
 
     private fun opprettMottaker() =
         Mottaker(
-            "Rød Blanding",
+            id = UUID.randomUUID(),
+            navn = "Rød Blanding",
             foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,
             adresse =

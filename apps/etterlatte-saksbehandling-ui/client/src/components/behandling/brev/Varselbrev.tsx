@@ -131,7 +131,17 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                   kanRedigeres={redigerbar}
                 />
                 <br />
-                <BrevMottaker brev={varselbrev} kanRedigeres={redigerbar} />
+
+                {varselbrev.mottakere.map((mottaker) => (
+                  <BrevMottaker
+                    key={mottaker.id}
+                    brevId={varselbrev.id}
+                    behandlingId={behandlingId}
+                    sakId={sakId}
+                    mottaker={mottaker}
+                    kanRedigeres={redigerbar}
+                  />
+                ))}
               </>
             )}
           </Box>

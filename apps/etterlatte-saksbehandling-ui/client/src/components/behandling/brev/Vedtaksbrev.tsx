@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Alert, Heading, Box, VStack, HStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
@@ -193,7 +193,16 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 />
                 <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
 
-                <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
+                {vedtaksbrev.mottakere.map((mottaker) => (
+                  <BrevMottaker
+                    key={mottaker.id}
+                    brevId={vedtaksbrev.id}
+                    behandlingId={behandlingId}
+                    sakId={sakId}
+                    mottaker={mottaker}
+                    kanRedigeres={redigerbar}
+                  />
+                ))}
               </>
             )}
           </VStack>

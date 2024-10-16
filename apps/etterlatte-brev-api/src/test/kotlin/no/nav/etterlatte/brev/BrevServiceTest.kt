@@ -25,6 +25,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.random.Random
 
@@ -73,7 +75,14 @@ internal class BrevServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(db, sakOgBehandlingService, adresseService, journalfoerBrevService, distribusjonService, brevbaker)
+        confirmVerified(
+            db,
+            sakOgBehandlingService,
+            adresseService,
+            journalfoerBrevService,
+            distribusjonService,
+            brevbaker,
+        )
     }
 
     @Nested
@@ -190,6 +199,61 @@ internal class BrevServiceTest {
     }
 
     @Nested
+    inner class BrevUtgaar {
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["FERDIGSTILT", "JOURNALFOERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `Brev markeres som utgått - ugyldig status`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<UgyldigForespoerselException> {
+                brevService.markerSomUtgaatt(brev.id, "kommentar", simpleSaksbehandler())
+            }
+
+            verify { db.hentBrev(brev.id) }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["FERDIGSTILT", "JOURNALFOERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Brev markeres som utgått - gyldig status, men for nytt`(status: Status) {
+            val brev =
+                opprettBrev(status, BrevProsessType.REDIGERBAR, opprettet = Tidspunkt.now().plus(6, ChronoUnit.DAYS))
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<UgyldigForespoerselException> {
+                brevService.markerSomUtgaatt(brev.id, "kommentar", simpleSaksbehandler())
+            }
+
+            verify { db.hentBrev(brev.id) }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["FERDIGSTILT", "JOURNALFOERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Brev kan markeres som utgått`(status: Status) {
+            val saksbehandler = simpleSaksbehandler()
+            val kommentar = "en liten kommentar"
+
+            val brev =
+                opprettBrev(
+                    status,
+                    BrevProsessType.REDIGERBAR,
+                    opprettet = Tidspunkt.now().plus(7, ChronoUnit.DAYS).plus(1, ChronoUnit.HOURS),
+                )
+
+            every { db.hentBrev(any()) } returns brev
+
+            brevService.markerSomUtgaatt(brev.id, kommentar, saksbehandler)
+
+            verify {
+                db.hentBrev(brev.id)
+                db.settBrevUtgaatt(brev.id, kommentar, saksbehandler)
+            }
+        }
+    }
+
+    @Nested
     inner class SlettingAvBrev {
         @ParameterizedTest
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
@@ -247,6 +311,7 @@ internal class BrevServiceTest {
         status: Status,
         prosessType: BrevProsessType,
         behandlingId: UUID? = null,
+        opprettet: Tidspunkt = Tidspunkt.now(),
     ) = Brev(
         id = Random.nextLong(10000),
         sakId = randomSakId(),
@@ -257,7 +322,7 @@ internal class BrevServiceTest {
         soekerFnr = "fnr",
         status = status,
         statusEndret = Tidspunkt.now(),
-        opprettet = Tidspunkt.now(),
+        opprettet = opprettet,
         mottaker = opprettMottaker(),
         brevtype = Brevtype.INFORMASJON,
         brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,

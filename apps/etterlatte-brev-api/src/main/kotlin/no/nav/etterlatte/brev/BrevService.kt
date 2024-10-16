@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.time.temporal.ChronoUnit
+import java.time.Duration
 
 class BrevService(
     private val db: BrevRepository,
@@ -226,12 +226,16 @@ class BrevService(
         if (brev.status !in listOf(Status.FERDIGSTILT, Status.JOURNALFOERT)) {
             throw UgyldigForespoerselException(
                 "KAN_IKKE_MARKERE_SOM_UTGAATT",
-                "Det er kun brev som henger på status FERDIGSTILT eller JOURNALFOERT som kan markeres som utgått",
+                "Brev har status ${brev.status} og kan ikke markeres som utgått. " +
+                    "Det er kun brev med status FERDIGSTILT eller JOURNALFOERT som kan markeres som utgått",
             )
-        } else if (brev.opprettet.isAfter(Tidspunkt.now().minus(7, ChronoUnit.DAYS))) {
+        }
+
+        val alderIDager = Duration.between(Tidspunkt.now(), brev.opprettet).toDays()
+        if (alderIDager < 7) {
             throw UgyldigForespoerselException(
                 "KAN_IKKE_MARKERE_SOM_UTGAATT",
-                "Brevet er for nytt til å markeres som utgått",
+                "Brevet er kun $alderIDager dag(er) gammelt. Må være minst en uke gammelt for å markeres som utgått",
             )
         }
 

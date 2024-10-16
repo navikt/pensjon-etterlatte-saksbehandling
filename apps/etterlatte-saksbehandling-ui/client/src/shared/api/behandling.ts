@@ -21,6 +21,7 @@ import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/ins
 import { JaNei } from '~shared/types/ISvar'
 
 import { ILand } from '~utils/kodeverk'
+import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -213,6 +214,24 @@ export const hentBrevutfallOgEtterbetalingApi = async (
 ): Promise<ApiResponse<BrevutfallOgEtterbetaling | null>> => {
   return apiClient.get(`/behandling/${behandlingId}/info/brevutfallogetterbetaling`)
 }
+
+export interface SluttbehandlingUtlandOmgjoering {
+  landMedDokumenter: LandMedDokumenter[]
+}
+
+export const hentSluttbehandlingOmgjoering = async (
+  behandlingId: string
+): Promise<ApiResponse<SluttbehandlingUtlandOmgjoering | null>> => {
+  return apiClient.get(`/behandling/${behandlingId}/info/sluttbehandling`)
+}
+
+export const lagreSluttbehandlingOmgjoering = async (args: {
+  sluttbehandling: SluttbehandlingUtlandOmgjoering
+  behandlingId: string
+}): Promise<ApiResponse<SluttbehandlingUtlandOmgjoering | null>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/info/sluttbehandling`, { ...args.sluttbehandling })
+}
+
 export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> => apiClient.get<ILand[]>('/kodeverk/land') //TODO: verify path
 
 export const redigerAnnenForelder = async (args: {

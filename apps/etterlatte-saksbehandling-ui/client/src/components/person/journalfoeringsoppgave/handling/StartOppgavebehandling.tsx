@@ -82,7 +82,7 @@ export default function StartOppgavebehandling() {
         </Alert>
       )}
 
-      {isFailure(personResult) && <Alert variant="error">{personResult.error.detail}</Alert>}
+      {isFailure(personResult) && <Alert variant="error">Kunne ikke hente person: {personResult.error.detail}</Alert>}
 
       <RadioGroup
         legend="Velg handling"

@@ -112,7 +112,7 @@ export const EndreBruker = ({
                 ),
                 error: (error) => (
                   <Alert variant="error" size="small">
-                    {error.detail}
+                    Kunne ikke hente person: {error.detail}
                   </Alert>
                 ),
               })}

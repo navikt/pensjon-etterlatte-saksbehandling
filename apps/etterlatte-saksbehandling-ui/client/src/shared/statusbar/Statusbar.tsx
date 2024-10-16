@@ -33,7 +33,7 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
     <PersonSkeleton />,
     (error) => (
       <Alert variant="error" size="small">
-        {error.detail}
+        Kunne ikke hente person: {error.detail}
       </Alert>
     ),
     (person) => (

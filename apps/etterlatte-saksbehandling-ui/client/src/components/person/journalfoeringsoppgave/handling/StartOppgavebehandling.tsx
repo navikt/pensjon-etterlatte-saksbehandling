@@ -14,7 +14,7 @@ import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/j
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
-import { isSuccess } from '~shared/api/apiUtils'
+import { isFailure, isSuccess } from '~shared/api/apiUtils'
 import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/formatering'
 import { PersonLink } from '~components/person/lenker/PersonLink'
 
@@ -81,6 +81,8 @@ export default function StartOppgavebehandling() {
           dokumentoversikten til brukeren.
         </Alert>
       )}
+
+      {isFailure(personResult) && <Alert variant="error">Kunne ikke hente person: {personResult.error.detail}</Alert>}
 
       <RadioGroup
         legend="Velg handling"

@@ -10,10 +10,10 @@ import { SakType } from '~shared/types/sak'
 
 export const AvdoedesBarn = ({ sakType, avdoede }: { sakType: SakType; avdoede?: Familiemedlem[] }): ReactNode => {
   const unikeBarn = avdoede
-    ?.flatMap((a) => a.barn || [])
-    .map((b) => b)
+    ?.flatMap((a) => a.barn)
+    .filter((b) => !!b)
     // Fjerne duplikater – ved å sjekke på indeks vil vi få match på første tilfelle, slik at duplikater hoppes over
-    .filter(({ foedselsnummer }, index, arr) => index === arr.findIndex((t) => t?.foedselsnummer === foedselsnummer))
+    .filter((b, index, arr) => index === arr.findIndex((t) => t?.foedselsnummer === b.foedselsnummer))
 
   const opprettHeading = (): string => {
     switch (sakType) {

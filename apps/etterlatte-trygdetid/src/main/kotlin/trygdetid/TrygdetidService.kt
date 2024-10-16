@@ -610,10 +610,7 @@ class TrygdetidServiceImpl(
                 yrkesskade = false,
             )
         val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
-        trygdetidRepository.oppdaterTrygdetid(
-            opprettet,
-            overstyrt = true,
-        ) // Holder ikke å sette overstyrt på detaljertBeregnetTrygdetid
+        trygdetidRepository.oppdaterTrygdetid(opprettet)
     }
 
     override suspend fun setYrkesskade(
@@ -646,13 +643,13 @@ class TrygdetidServiceImpl(
                 trygdetidGrunnlag = emptyList(),
                 beregnetTrygdetid =
                     DetaljertBeregnetTrygdetid(
-                        resultat = beregnetTrygdetid,
+                        resultat = beregnetTrygdetid.copy(overstyrt = true),
                         tidspunkt = Tidspunkt.now(),
                         regelResultat = "".toJsonNode(),
                     ),
             )
 
-        return trygdetidRepository.oppdaterTrygdetid(oppdatertTrygdetid, true)
+        return trygdetidRepository.oppdaterTrygdetid(oppdatertTrygdetid)
     }
 
     override suspend fun oppdaterOpplysningsgrunnlagForTrygdetider(

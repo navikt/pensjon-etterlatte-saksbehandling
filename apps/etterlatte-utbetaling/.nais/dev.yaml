@@ -30,8 +30,6 @@ spec:
   secureLogs:
     enabled: true
   leaderElection: true
-  strategy:
-    type: Recreate
   gcp:
     sqlInstances:
       - type: POSTGRES_14

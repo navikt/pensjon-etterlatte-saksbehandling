@@ -98,7 +98,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                 call.respond(HttpStatusCode.PreconditionFailed)
             } catch (e: BehandlingstilstandException) {
-                logger.error(
+                logger.info(
                     "Kunne ikke opprette vilkaarsvurdering for behandling $behandlingId. " +
                         "Statussjekk for behandling feilet",
                     e,

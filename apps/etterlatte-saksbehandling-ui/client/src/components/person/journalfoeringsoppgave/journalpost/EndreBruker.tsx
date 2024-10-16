@@ -110,6 +110,11 @@ export const EndreBruker = ({
                     )}
                   </>
                 ),
+                error: (error) => (
+                  <Alert variant="error" size="small">
+                    Kunne ikke hente person: {error.detail}
+                  </Alert>
+                ),
               })}
             </VStack>
 

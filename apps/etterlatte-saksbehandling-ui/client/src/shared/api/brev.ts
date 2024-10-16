@@ -121,3 +121,10 @@ export const journalfoerBrev = async (props: { brevId: number; sakId: number }):
 
 export const distribuerBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/${props.brevId}/distribuer?sakId=${props.sakId}`, {})
+
+export const markerBrevSomUtgaar = async (props: {
+  brevId: number
+  sakId: number
+  kommentar: string
+}): Promise<ApiResponse<any>> =>
+  apiClient.post(`/brev/${props.brevId}/utgaar?sakId=${props.sakId}`, { kommentar: props.kommentar })

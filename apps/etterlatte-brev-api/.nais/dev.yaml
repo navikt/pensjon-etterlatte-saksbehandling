@@ -64,8 +64,8 @@ spec:
       cpu: 20m
       memory: 512Mi
   replicas:
-    max: 1
-    min: 1
+    max: 4
+    min: 2
   env:
     - name: BREVBAKER_URL
       value: https://pensjon-brevbaker.intern.dev.nav.no

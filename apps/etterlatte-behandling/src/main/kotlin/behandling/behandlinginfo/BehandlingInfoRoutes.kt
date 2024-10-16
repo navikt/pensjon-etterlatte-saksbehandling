@@ -86,7 +86,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
             }
             get {
                 logger.info("Henter sluttbehandling for behandling $behandlingId")
-                val sluttbehandling = service.hentSluttbehandling(behandlingId)
+                val sluttbehandling = inTransaction { service.hentSluttbehandling(behandlingId) }
                 call.respond(sluttbehandling ?: HttpStatusCode.NoContent)
             }
         }

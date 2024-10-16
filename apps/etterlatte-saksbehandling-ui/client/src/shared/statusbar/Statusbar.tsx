@@ -1,10 +1,10 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
-import { BodyShort, Box, HelpText, HStack, Label, Skeleton } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, HelpText, HStack, Label, Skeleton } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { mapApiResult } from '~shared/api/apiUtils'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
@@ -31,7 +31,11 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
   return mapApiResult(
     result,
     <PersonSkeleton />,
-    () => null,
+    (error) => (
+      <Alert variant="error" size="small">
+        Kunne ikke hente person: {error.detail}
+      </Alert>
+    ),
     (person) => (
       <StatusbarBox>
         <HStack gap="2" align="center" justify="start">

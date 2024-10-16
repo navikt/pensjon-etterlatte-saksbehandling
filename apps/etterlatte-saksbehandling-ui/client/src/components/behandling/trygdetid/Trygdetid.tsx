@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentTrygdetider, ITrygdetid, opprettTrygdetider } from '~shared/api/trygdetid'
+import {
+  hentTrygdetider,
+  ITrygdetid,
+  opprettTrygdetider,
+  opprettTrygdetidOverstyrtMigrering,
+} from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -21,10 +26,11 @@ import { TrygdetidMelding } from '~components/behandling/trygdetid/components/Tr
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 
 interface Props {
   redigerbar: boolean
-  behandling: IDetaljertBehandling
+  behandling: IBehandlingReducer
   vedtaksresultat: VedtakResultat | null
   virkningstidspunktEtterNyRegelDato: boolean
 }
@@ -38,9 +44,12 @@ const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[
 
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
+
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
+  const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
+
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
   const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
@@ -62,6 +71,10 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     return `${formaterNavn(opplysning)} (${fnr})`
   }
 
+  const tidligereFamiliepleier =
+    behandling.tidligereFamiliepleier?.svar &&
+    behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
+
   const oppdaterTrygdetider = (trygdetid: ITrygdetid[]) => {
     setTrygdetider(trygdetid)
     dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
@@ -74,18 +87,25 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         trygdetider.length == 0 ||
         manglerTrygdetid(trygdetider, personopplysninger?.avdoede)
       ) {
-        if (behandlingErIverksatt(behandling.status)) {
-          setHarPilotTrygdetid(true)
-        } else if (redigerbar) {
-          requestOpprettTrygdetid(behandling.id, (trygdetider: ITrygdetid[]) => {
-            oppdaterTrygdetider(trygdetider)
-          })
-        } else if (vedtaksresultat === 'avslag') {
-          setTrygdetidManglerVedAvslag(true)
+        if (tidligereFamiliepleier) {
+          opprettOverstyrtTrygdetidReq(
+            { behandlingId: behandling.id, overskriv: true, tidligereFamiliepleier: true },
+            () => window.location.reload()
+          )
         } else {
-          setTrygdetidIdMangler(true)
-          if (behandling.status !== IBehandlingStatus.AVBRUTT) {
-            throw new Error('Kan ikke opprette trygdetid når readonly')
+          if (behandlingErIverksatt(behandling.status)) {
+            setHarPilotTrygdetid(true)
+          } else if (redigerbar) {
+            requestOpprettTrygdetid(behandling.id, (trygdetider: ITrygdetid[]) => {
+              oppdaterTrygdetider(trygdetider)
+            })
+          } else if (vedtaksresultat === 'avslag') {
+            setTrygdetidManglerVedAvslag(true)
+          } else {
+            setTrygdetidIdMangler(true)
+            if (behandling.status !== IBehandlingStatus.AVBRUTT) {
+              throw new Error('Kan ikke opprette trygdetid når readonly')
+            }
           }
         }
       } else {
@@ -212,6 +232,10 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         {isFailureHandler({
           apiResult: hentAlleLandRequest,
           errorMessage: 'Hent feil har oppstått ved henting av landliste',
+        })}
+        {isFailureHandler({
+          apiResult: overstyrTrygdetidStatus,
+          errorMessage: 'Hent feil har oppstått ved opprettelse av overstyrt trygdetid',
         })}
 
         {behandlingsIdMangler && <ApiErrorAlert>Finner ikke behandling - ID mangler</ApiErrorAlert>}

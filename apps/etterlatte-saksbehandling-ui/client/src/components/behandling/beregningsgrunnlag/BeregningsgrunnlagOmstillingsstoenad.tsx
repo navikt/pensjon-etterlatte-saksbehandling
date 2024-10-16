@@ -32,6 +32,7 @@ import { SakType } from '~shared/types/sak'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { formaterNavn } from '~shared/types/Person'
 
 const BeregningsgrunnlagOmstillingsstoenad = () => {
   const behandling = useBehandling()
@@ -94,6 +95,8 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
     })
   }, [])
 
+  const tidligereFamiliepleier = !!behandling.tidligereFamiliepleier?.svar
+
   return (
     <>
       <>
@@ -105,9 +108,11 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
                 navn={
-                  personopplysninger
+                  personopplysninger?.avdoede[0]
                     ? mapNavn(personopplysninger.avdoede[0].opplysning.foedselsnummer, personopplysninger)
-                    : ''
+                    : tidligereFamiliepleier && personopplysninger?.soeker
+                      ? formaterNavn(personopplysninger.soeker.opplysning)
+                      : ''
                 }
                 behandling={behandling}
                 oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}

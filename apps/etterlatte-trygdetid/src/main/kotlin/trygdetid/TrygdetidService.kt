@@ -112,6 +112,7 @@ interface TrygdetidService {
     suspend fun opprettOverstyrtBeregnetTrygdetid(
         behandlingId: UUID,
         overskriv: Boolean,
+        tidligereFamiliepleier: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
@@ -287,6 +288,7 @@ class TrygdetidServiceImpl(
                     opplysninger = hentOpplysninger(avdoedMedFnr.second, behandling.id),
                     ident = avdoedMedFnr.first,
                     yrkesskade = false,
+                    tidligereFamiliepleier = false,
                 )
             val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
 
@@ -447,6 +449,7 @@ class TrygdetidServiceImpl(
                             beregnetTrygdetid = forrigeTrygdetid.beregnetTrygdetid,
                             ident = forrigeTrygdetid.ident,
                             yrkesskade = forrigeTrygdetid.yrkesskade,
+                            tidligereFamiliepleier = forrigeTrygdetid.tidligereFamiliepleier,
                         )
 
                     trygdetidRepository.opprettTrygdetid(kopiertTrygdetid)
@@ -520,6 +523,7 @@ class TrygdetidServiceImpl(
     override suspend fun opprettOverstyrtBeregnetTrygdetid(
         behandlingId: UUID,
         overskriv: Boolean,
+        tidligereFamiliepleier: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
@@ -576,18 +580,28 @@ class TrygdetidServiceImpl(
             } else {
                 null // ukjent avdød
             }
+
+        val ident =
+            if (tidligereFamiliepleier) {
+                requireNotNull(behandling.soeker) {
+                    "Kunne ikke hente identifikator for soeker til trygdetid i " +
+                        "behandlingen med id=$behandlingId"
+                }
+            } else {
+                avdoed?.let {
+                    requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
+                        "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                            "behandlingen med id=$behandlingId"
+                    }
+                } ?: UKJENT_AVDOED
+            }
+
         val trygdetid =
             Trygdetid(
                 sakId = behandling.sak,
                 behandlingId = behandlingId,
                 opplysninger = avdoed?.let { hentOpplysninger(it, behandlingId) } ?: emptyList(),
-                ident =
-                    avdoed?.let {
-                        requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
-                            "Kunne ikke hente identifikator for avdød til trygdetid i " +
-                                "behandlingen med id=$behandlingId"
-                        }
-                    } ?: UKJENT_AVDOED,
+                ident = ident,
                 trygdetidGrunnlag = emptyList(),
                 beregnetTrygdetid =
                     DetaljertBeregnetTrygdetid(
@@ -608,6 +622,7 @@ class TrygdetidServiceImpl(
                         regelResultat = "".toJsonNode(),
                     ),
                 yrkesskade = false,
+                tidligereFamiliepleier = tidligereFamiliepleier,
             )
         val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
         trygdetidRepository.oppdaterTrygdetid(opprettet)
@@ -743,7 +758,7 @@ class TrygdetidServiceImpl(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        if (trygdetid.ident == UKJENT_AVDOED) {
+        if (trygdetid.ident == UKJENT_AVDOED || trygdetid.tidligereFamiliepleier) {
             return trygdetid
                 .copy(opplysningerDifferanse = OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt()))
         }

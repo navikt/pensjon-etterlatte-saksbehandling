@@ -141,8 +141,12 @@ export const lagreTrygdeavtaleForBehandling = async (args: {
 export const opprettTrygdetidOverstyrtMigrering = async (args: {
   behandlingId: string
   overskriv?: boolean
+  tidligereFamiliepleier?: boolean
 }): Promise<ApiResponse<void>> =>
-  apiClient.post(`/trygdetid_v2/${args.behandlingId}/migrering/manuell/opprett?overskriv=${args.overskriv}`, {})
+  apiClient.post(
+    `/trygdetid_v2/${args.behandlingId}/migrering/manuell/opprett?overskriv=${args.overskriv}&tidligereFamiliepleier=${args.tidligereFamiliepleier}`,
+    {}
+  )
 
 export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
   behandlingId: string

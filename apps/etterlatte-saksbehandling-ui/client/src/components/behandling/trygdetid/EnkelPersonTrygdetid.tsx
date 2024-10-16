@@ -83,6 +83,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
           ident={trygdetid.ident}
           oppdaterTrygdetid={oppdaterTrygdetid}
           beregnetTrygdetid={trygdetid.beregnetTrygdetid}
+          tidligereFamiliepleier={!!behandling.tidligereFamiliepleier?.svar}
         />
         <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
       </VStack>

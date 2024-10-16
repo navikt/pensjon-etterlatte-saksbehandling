@@ -34,6 +34,11 @@ interface VedtakService {
         behandlingId: UUID,
     ): VedtakOgRapid
 
+    fun attesterVedtak(
+        sakId: SakId,
+        behandlingId: UUID,
+    ): VedtakOgRapid
+
     fun tilbakestillVedtak(behandlingId: UUID)
 
     fun tilSamordningVedtak(behandlingId: UUID): VedtakDto
@@ -74,6 +79,18 @@ class VedtakServiceImpl(
                 .post("$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk/stegvis") {
                     contentType(ContentType.Application.Json)
                     setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
+                }.body()
+        }
+
+    override fun attesterVedtak(
+        sakId: SakId,
+        behandlingId: UUID,
+    ): VedtakOgRapid =
+        runBlocking {
+            vedtakKlient
+                .post("$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk/stegvis") {
+                    contentType(ContentType.Application.Json)
+                    setBody(MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.toJson())
                 }.body()
         }
 

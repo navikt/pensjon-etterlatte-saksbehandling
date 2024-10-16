@@ -14,8 +14,9 @@ fun main() {
     initRogR("vedtaksvurdering-kafka") { rapidsConnection, rapidEnv ->
         val appBuilder = AppBuilder(rapidEnv)
         val vedtakKlient = appBuilder.lagVedtakKlient()
+        val utbetalingKlient = appBuilder.lagUtbetalingKlient()
         LoependeYtelserforespoerselRiver(rapidsConnection, vedtakKlient)
-        OpprettVedtakforespoerselRiver(rapidsConnection, vedtakKlient, appBuilder.lagFeatureToggleService())
+        OpprettVedtakforespoerselRiver(rapidsConnection, vedtakKlient, utbetalingKlient, appBuilder.lagFeatureToggleService())
         LagreIverksattVedtakRiver(rapidsConnection, vedtakKlient)
         AttestertVedtakRiver(rapidsConnection, vedtakKlient)
         SamordningMottattRiver(rapidsConnection, vedtakKlient)

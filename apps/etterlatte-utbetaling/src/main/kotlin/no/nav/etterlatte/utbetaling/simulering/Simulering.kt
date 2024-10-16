@@ -2,50 +2,13 @@ package no.nav.etterlatte.utbetaling.simulering
 
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.utbetaling.common.KlasseType
+import no.nav.etterlatte.utbetaling.common.SimulertBeregning
+import no.nav.etterlatte.utbetaling.common.SimulertBeregningsperiode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.system.os.entiteter.beregningskjema.Beregning
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
-data class SimulertBeregning(
-    val gjelderId: Folkeregisteridentifikator,
-    val datoBeregnet: LocalDate,
-    val infomelding: String? = null,
-    val beloep: BigDecimal,
-    val kommendeUtbetalinger: List<SimulertBeregningsperiode>,
-    val etterbetaling: List<SimulertBeregningsperiode>,
-    val tilbakekreving: List<SimulertBeregningsperiode>,
-)
-
-data class SimulertBeregningsperiode(
-    val fom: LocalDate,
-    val tom: LocalDate? = null,
-    val gjelderId: Folkeregisteridentifikator,
-    val utbetalesTilId: String,
-    val forfall: LocalDate,
-    val feilkonto: Boolean,
-    val kodeFaggruppe: String,
-    val enhet: Enhetsnummer,
-    val konto: String,
-    val behandlingskode: String,
-    val beloep: BigDecimal,
-    val tilbakefoering: Boolean,
-    val klassekode: OppdragKlassifikasjonskode,
-    val klassekodeBeskrivelse: String,
-    val klasseType: KlasseType,
-)
-
-enum class KlasseType(
-    val beskrivelse: String,
-) {
-    YTEL("Ytelse"),
-    SKAT("Forskuddsskatt"),
-    FEIL("Feilutbetaling"),
-    MOTP("Motpostering"),
-    JUST("Justering"),
-    TREK("Trekk"),
-}
 
 private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
@@ -70,7 +33,8 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
                         behandlingskode = det.behandlingskode,
                         beloep = det.belop,
                         tilbakefoering = det.isTilbakeforing,
-                        klassekode = OppdragKlassifikasjonskode.fraString(det.klassekode),
+                        klassekode = OppdragKlassifikasjonskode.fraString(det.klassekode).toString(),
+                        klassekodeTekniskArt = OppdragKlassifikasjonskode.fraString(det.klassekode).tekniskArt,
                         klassekodeBeskrivelse = det.klasseKodeBeskrivelse,
                         klasseType = KlasseType.valueOf(det.typeKlasse),
                     ),
@@ -84,7 +48,7 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
         perioder
             .asSequence()
             .filter { !it.forfall.isAfter(simulertPaaDato) }
-            .filter { !it.klassekode.tekniskArt }
+            .filter { !it.klassekodeTekniskArt }
             .filter { it.klasseType != KlasseType.FEIL }
             .toList()
 
@@ -92,7 +56,7 @@ fun Beregning.tilSimulertBeregning(infomelding: String?): SimulertBeregning {
         perioder
             .asSequence()
             .filter { !it.forfall.isAfter(simulertPaaDato) }
-            .filter { !it.klassekode.tekniskArt }
+            .filter { !it.klassekodeTekniskArt }
             .filter { it.klasseType == KlasseType.FEIL }
             .toList()
 

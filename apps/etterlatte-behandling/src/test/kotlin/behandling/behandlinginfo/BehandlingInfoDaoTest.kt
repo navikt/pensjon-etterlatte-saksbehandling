@@ -131,6 +131,7 @@ internal class BehandlingInfoDaoTest(
         dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
         val etterbetaling = etterbetaling(behandlingId)
         dao.lagreEtterbetaling(etterbetaling)
+        // Tryna her tidligere fordi etterbetaling gjorde at next i singleOrNull ga true og block ble kjørt. Den tryna da på this.getString("brevutfall").let var uten spørsmålsteng
         dao.hentBrevutfall(brevutfall.behandlingId)
 
         dao.lagreBrevutfall(brevutfall)

@@ -100,6 +100,9 @@ internal class BehandlingInfoDaoTest(
                 kilde = Grunnlagsopplysning.Saksbehandler("123456", Tidspunkt.now()),
             )
         dao.hentSluttbehandling(behandlingId) shouldBe null
+        val etterbetaling = etterbetaling(behandlingId)
+        dao.lagreEtterbetaling(etterbetaling)
+        dao.hentSluttbehandling(behandlingId) shouldBe null
         dao.lagreSluttbehandling(behandlingId, sluttbehandling)
         dao.hentSluttbehandling(behandlingId) shouldBe sluttbehandling
     }

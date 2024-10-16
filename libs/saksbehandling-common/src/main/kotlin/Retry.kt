@@ -19,7 +19,7 @@ sealed class RetryResult<T> {
 
 suspend fun <T> retryOgPakkUt(
     times: Int = 2,
-    vent: () -> Unit = {},
+    vent: (timesLeft: Int) -> Unit = {},
     block: suspend () -> T,
 ) = retry(times, vent, block).let {
     when (it) {
@@ -30,13 +30,13 @@ suspend fun <T> retryOgPakkUt(
 
 suspend fun <T> retry(
     times: Int = 2,
-    vent: () -> Unit = {},
+    vent: (timesLeft: Int) -> Unit = {},
     block: suspend () -> T,
 ) = retryInner(times, vent, emptyList(), block)
 
 private suspend fun <T> retryInner(
     times: Int,
-    vent: () -> Unit,
+    vent: (timesLeft: Int) -> Unit,
     exceptions: List<Exception>,
     block: suspend () -> T,
 ): RetryResult<T> =
@@ -46,7 +46,8 @@ private suspend fun <T> retryInner(
         if (times < 1) {
             Failure(exceptions + ex)
         } else {
-            vent()
+            val timesLeft = times - 1
+            vent(timesLeft)
             retryInner(times - 1, vent, exceptions + ex, block)
         }
     }

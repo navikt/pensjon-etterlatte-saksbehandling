@@ -17,9 +17,11 @@ import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
+import java.time.Duration
 
 class BrevapiKlient(
     config: Config,
@@ -34,11 +36,13 @@ class BrevapiKlient(
     ): BrevDistribusjonResponse {
         try {
             logger.info("Oppretter brev for sak med sakId=$sakid")
-            return httpClient
-                .post("$baseUrl/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
-                    contentType(ContentType.Application.Json)
-                    setBody(opprett.toJson())
-                }.body<BrevDistribusjonResponse>()
+            return retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
+                httpClient
+                    .post("$baseUrl/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
+                        contentType(ContentType.Application.Json)
+                        setBody(opprett.toJson())
+                    }.body<BrevDistribusjonResponse>()
+            }
         } catch (e: ResponseException) {
             logger.error("Henting av grunnlag for sak med sakId=$sakid feilet", e)
 
@@ -58,12 +62,14 @@ class BrevapiKlient(
     ): BestillingsIdDto {
         try {
             logger.info("Distribuerer brev med id $brevId")
-            return httpClient
-                .post(
-                    "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}&sakId=${sakId.sakId}",
-                ) {
-                    contentType(ContentType.Application.Json)
-                }.body<BestillingsIdDto>()
+            return retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
+                httpClient
+                    .post(
+                        "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}&sakId=${sakId.sakId}",
+                    ) {
+                        contentType(ContentType.Application.Json)
+                    }.body<BestillingsIdDto>()
+            }
         } catch (e: ResponseException) {
             logger.error("Distribuering av brev med brevId=$brevId feilet", e)
 
@@ -79,12 +85,13 @@ class BrevapiKlient(
         val sakId = vedtakjournalfoering.sak.id
         try {
             logger.info("Journalfører brev med sakid: $sakId")
-
-            return httpClient
-                .post("$baseUrl/api/brev/behandling/${vedtakjournalfoering.behandlingId}/journalfoer-vedtak") {
-                    contentType(ContentType.Application.Json)
-                    setBody(vedtakjournalfoering.toJson())
-                }.body<JournalfoerVedtaksbrevResponseOgBrevid?>()
+            return retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
+                httpClient
+                    .post("$baseUrl/api/brev/behandling/${vedtakjournalfoering.behandlingId}/journalfoer-vedtak") {
+                        contentType(ContentType.Application.Json)
+                        setBody(vedtakjournalfoering.toJson())
+                    }.body<JournalfoerVedtaksbrevResponseOgBrevid?>()
+            }
         } catch (e: ResponseException) {
             logger.error("Journalføring for brev med sakid=$sakId feilet", e)
 
@@ -102,9 +109,11 @@ class BrevapiKlient(
     ) {
         try {
             logger.info("Oppretet og journalfører notat med sakid: $sakId")
-            httpClient.post("$baseUrl/api/notat/sak/${sakId.sakId}/manuellsamordning") {
-                contentType(ContentType.Application.Json)
-                setBody(samordningManueltBehandletRequest.toJson())
+            retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
+                httpClient.post("$baseUrl/api/notat/sak/${sakId.sakId}/manuellsamordning") {
+                    contentType(ContentType.Application.Json)
+                    setBody(samordningManueltBehandletRequest.toJson())
+                }
             }
         } catch (e: ResponseException) {
             logger.error("Opprettelse og journalføring for notat med sakid=$sakId feilet", e)

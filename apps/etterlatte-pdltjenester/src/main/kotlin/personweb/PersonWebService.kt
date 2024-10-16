@@ -46,7 +46,7 @@ class PersonWebService(
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString()
 
-                if (it.errors?.fortroligAdresse() == true) {
+                if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke person i PDL")
@@ -202,7 +202,7 @@ class PersonWebService(
         return pdlOboKlient.hentPerson(fnr, rolle, sakType, bruker).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString(", ")
-                if (it.errors?.fortroligAdresse() == true) {
+                if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen $fnr")
@@ -227,13 +227,16 @@ class PersonWebService(
 
     private fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
 
-    private fun List<PdlResponseError>.fortroligAdresse() =
+    private fun List<PdlResponseError>.harAdressebeskyttelse() =
         any { error ->
             error.extensions?.code == "unauthorized" &&
                 error.extensions
                     ?.details
                     ?.policy
-                    ?.contains("adressebeskyttelse_fortrolig_adresse") == true
+                    ?.let { policy ->
+                        policy.contains("adressebeskyttelse_fortrolig_adresse") ||
+                            policy.contains("adressebeskyttelse_strengt_fortrolig_adresse")
+                    } == true
         }
 
     private fun pdlForesporselFeiletForAdressebeskyttelse(): Throwable =

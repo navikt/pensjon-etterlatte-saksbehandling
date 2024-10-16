@@ -47,7 +47,7 @@ class PersonService(
         return pdlKlient.hentPerson(request).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.fortroligAdresse() == true) {
+                if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
@@ -73,7 +73,7 @@ class PersonService(
         return pdlKlient.hentPerson(request).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.fortroligAdresse() == true) {
+                if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
@@ -102,7 +102,7 @@ class PersonService(
         return pdlKlient.hentAdressebeskyttelse(request).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.fortroligAdresse() == true) {
+                if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen ${request.ident}")
@@ -134,7 +134,7 @@ class PersonService(
             .let {
                 if (it.data?.hentPerson == null) {
                     val pdlFeil = it.errors?.asFormatertFeil()
-                    if (it.errors?.fortroligAdresse() == true) {
+                    if (it.errors?.harAdressebeskyttelse() == true) {
                         throw pdlForesporselFeiletForAdressebeskyttelse()
                     } else if (it.errors?.personIkkeFunnet() == true) {
                         throw FantIkkePersonException("Fant ikke personen $fnr")
@@ -336,7 +336,7 @@ class PersonService(
                     sikkerLogg.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer.value})")
 
                     GeografiskTilknytning(ukjent = true)
-                } else if (it.errors?.fortroligAdresse() == true) {
+                } else if (it.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (it.errors.personIkkeFunnet()) {
                     throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
@@ -357,7 +357,7 @@ class PersonService(
         pdlKlient.hentAktoerId(request).let { res ->
             if (res.data?.hentIdenter?.identer == null) {
                 val pdlFeil = res.errors?.asFormatertFeil()
-                if (res.errors?.fortroligAdresse() == true) {
+                if (res.errors?.harAdressebeskyttelse() == true) {
                     throw pdlForesporselFeiletForAdressebeskyttelse()
                 } else if (res.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen ${request.ident}")
@@ -377,13 +377,16 @@ class PersonService(
 
     fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
 
-    private fun List<PdlResponseError>.fortroligAdresse() =
+    private fun List<PdlResponseError>.harAdressebeskyttelse() =
         any { error ->
             error.extensions?.code == "unauthorized" &&
                 error.extensions
                     ?.details
                     ?.policy
-                    ?.contains("adressebeskyttelse_fortrolig_adresse") == true
+                    ?.let { policy ->
+                        policy.contains("adressebeskyttelse_fortrolig_adresse") ||
+                            policy.contains("adressebeskyttelse_strengt_fortrolig_adresse")
+                    } == true
         }
 
     private fun pdlForesporselFeiletForAdressebeskyttelse(): Throwable =

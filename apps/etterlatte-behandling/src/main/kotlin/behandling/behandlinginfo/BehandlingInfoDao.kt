@@ -160,7 +160,7 @@ class BehandlingInfoDao(
             }
         }
 
-    private fun ResultSet.toBrevutfall(): Brevutfall = this.getString("brevutfall").let { objectMapper.readValue(it) }
+    private fun ResultSet.toBrevutfall(): Brevutfall? = this.getString("brevutfall")?.let { objectMapper.readValue(it) }
 
-    private fun ResultSet.toEtterbetaling(): Etterbetaling = this.getString("etterbetaling").let { objectMapper.readValue(it) }
+    private fun ResultSet.toEtterbetaling(): Etterbetaling? = this.getString("etterbetaling")?.let { objectMapper.readValue(it) }
 }

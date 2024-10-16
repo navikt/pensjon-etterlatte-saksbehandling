@@ -118,6 +118,20 @@ internal class BehandlingInfoDaoTest(
     @Test
     fun `skal hente brevutfall`() {
         val brevutfall = brevutfall(behandlingId)
+        dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
+        dao.lagreBrevutfall(brevutfall)
+        val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)
+
+        lagretBrevutfall shouldNotBe null
+    }
+
+    @Test
+    fun `skal hente brevutfall men etterbetaling lå der, skal allikevel gå bra`() {
+        val brevutfall = brevutfall(behandlingId)
+        dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
+        val etterbetaling = etterbetaling(behandlingId)
+        dao.lagreEtterbetaling(etterbetaling)
+        dao.hentBrevutfall(brevutfall.behandlingId)
 
         dao.lagreBrevutfall(brevutfall)
         val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)

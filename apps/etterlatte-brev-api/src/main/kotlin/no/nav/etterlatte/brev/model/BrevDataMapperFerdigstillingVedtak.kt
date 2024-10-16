@@ -67,7 +67,6 @@ data class BrevDataFerdigstillingRequest(
     val innholdMedVedlegg: InnholdMedVedlegg,
     val kode: Brevkoder,
     val tittel: String? = null,
-    val erSluttBehandling: Boolean,
 )
 
 class BrevDataMapperFerdigstillingVedtak(

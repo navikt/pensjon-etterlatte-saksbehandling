@@ -106,7 +106,10 @@ export const TrygdetidManueltOverstyrt = ({
       {ident == 'UKJENT_AVDOED' && (
         <Box maxWidth="40rem">
           <VStack gap="1">
-            <Alert variant="warning">OBS! Trygdetiden er koblet til ukjent avdød.</Alert>
+            <Alert variant="warning">
+              OBS! Trygdetiden er koblet til ukjent avdød. Hvis avdød i saken faktisk er kjent bør du annullere
+              behandlingen og lage en ny behandling med riktig avdød i familieoversikt.
+            </Alert>
             {redigerbar && (
               <Box maxWidth="20rem">
                 <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>

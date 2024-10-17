@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.junit.jupiter.api.Test

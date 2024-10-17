@@ -33,7 +33,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.JobbType
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -49,6 +48,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach

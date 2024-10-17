@@ -22,6 +22,7 @@ on:
       - libs/etterlatte-jobs/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-tidshendelser-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:
@@ -36,6 +37,7 @@ on:
       - libs/etterlatte-jobs/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-tidshendelser-model/**
       - gradle/libs.versions.toml
 
 permissions:

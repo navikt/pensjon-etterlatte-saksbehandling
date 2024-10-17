@@ -5,6 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -25,74 +27,77 @@ import java.util.UUID
 class GrunnlagHenter(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
 ) {
-    suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag =
-        coroutineScope {
-            val persongalleri = opplysningsbehov.persongalleri
-            val persongalleriFraPdl =
-                pdltjenesterKlient.hentPersongalleri(
-                    opplysningsbehov.persongalleri.soeker,
-                    opplysningsbehov.sakType,
-                    opplysningsbehov.persongalleri.innsender,
-                )
-            val sakType = opplysningsbehov.sakType
-            val requesterAvdoed =
-                persongalleri.avdoed.map {
-                    hentPersonAsync(it, PersonRolle.AVDOED, sakType)
-                }
-            val requesterGjenlevende =
-                persongalleri.gjenlevende.map {
-                    hentPersonAsync(it, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType)
-                }
-            val soeker = hentPersonAsync(persongalleri.soeker, soekerRolle(sakType), opplysningsbehov.sakType)
-            val innsender =
-                persongalleri.innsender
-                    ?.takeIf { Folkeregisteridentifikator.isValid(it) }
-                    ?.let { innsenderFnr ->
-                        hentPersonAsync(innsenderFnr, PersonRolle.INNSENDER, sakType)
+    suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag {
+        return coroutineScope {
+            withContext(MDCContext()) {
+                val persongalleri = opplysningsbehov.persongalleri
+                val persongalleriFraPdl =
+                    pdltjenesterKlient.hentPersongalleri(
+                        opplysningsbehov.persongalleri.soeker,
+                        opplysningsbehov.sakType,
+                        opplysningsbehov.persongalleri.innsender,
+                    )
+                val sakType = opplysningsbehov.sakType
+                val requesterAvdoed =
+                    persongalleri.avdoed.map {
+                        hentPersonAsync(it, PersonRolle.AVDOED, sakType)
+                    }
+                val requesterGjenlevende =
+                    persongalleri.gjenlevende.map {
+                        hentPersonAsync(it, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType)
+                    }
+                val soeker = hentPersonAsync(persongalleri.soeker, soekerRolle(sakType), opplysningsbehov.sakType)
+                val innsender =
+                    persongalleri.innsender
+                        ?.takeIf { Folkeregisteridentifikator.isValid(it) }
+                        ?.let { innsenderFnr ->
+                            hentPersonAsync(innsenderFnr, PersonRolle.INNSENDER, sakType)
+                        }
+
+                val soekerPersonInfo =
+                    soeker.let { (person, personDTO) ->
+                        personopplysning(person, personDTO, Opplysningstype.SOEKER_PDL_V1, soekerRolle(sakType))
                     }
 
-            val soekerPersonInfo =
-                soeker.let { (person, personDTO) ->
-                    personopplysning(person, personDTO, Opplysningstype.SOEKER_PDL_V1, soekerRolle(sakType))
-                }
+                val innsenderPersonInfo =
+                    innsender?.let { (person, personDTO) ->
+                        personopplysning(person, personDTO, Opplysningstype.INNSENDER_PDL_V1, PersonRolle.INNSENDER)
+                    }
+                val avdoedePersonInfo =
+                    requesterAvdoed.map { (person, personDTO) ->
+                        personopplysning(person, personDTO, Opplysningstype.AVDOED_PDL_V1, PersonRolle.AVDOED)
+                    }
+                val gjenlevendePersonInfo =
+                    requesterGjenlevende.map { (person, personDTO) ->
+                        personopplysning(person, personDTO, GJENLEVENDE_FORELDER_PDL_V1, PersonRolle.GJENLEVENDE)
+                    }
 
-            val innsenderPersonInfo =
-                innsender?.let { (person, personDTO) ->
-                    personopplysning(person, personDTO, Opplysningstype.INNSENDER_PDL_V1, PersonRolle.INNSENDER)
-                }
-            val avdoedePersonInfo =
-                requesterAvdoed.map { (person, personDTO) ->
-                    personopplysning(person, personDTO, Opplysningstype.AVDOED_PDL_V1, PersonRolle.AVDOED)
-                }
-            val gjenlevendePersonInfo =
-                requesterGjenlevende.map { (person, personDTO) ->
-                    personopplysning(person, personDTO, GJENLEVENDE_FORELDER_PDL_V1, PersonRolle.GJENLEVENDE)
-                }
+                val opplysningList =
+                    listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
+                        .plus(gjenlevendePersonInfo)
+                        .plus(avdoedePersonInfo)
+                val personopplysninger =
+                    opplysningList.map {
+                        it.personDto.foedselsnummer.verdi to
+                            lagEnkelopplysningerFraPDL(
+                                it.person,
+                                it.personDto,
+                                it.opplysningstype,
+                                it.personDto.foedselsnummer.verdi,
+                                it.personRolle,
+                            )
+                    }
 
-            val opplysningList =
-                listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
-                    .plus(gjenlevendePersonInfo)
-                    .plus(avdoedePersonInfo)
-            val personopplysninger =
-                opplysningList.map {
-                    it.personDto.foedselsnummer.verdi to
-                        lagEnkelopplysningerFraPDL(
-                            it.person,
-                            it.personDto,
-                            it.opplysningstype,
-                            it.personDto.foedselsnummer.verdi,
-                            it.personRolle,
-                        )
-                }
+                val saksopplysninger =
+                    listOfNotNull(
+                        opplysningsbehov.persongalleri.tilGrunnlagsopplysningFraSoeknad(overstyrtKilde = opplysningsbehov.kilde),
+                        persongalleriFraPdl?.tilGrunnlagsopplysningFraPdl(),
+                    )
 
-            val saksopplysninger =
-                listOfNotNull(
-                    opplysningsbehov.persongalleri.tilGrunnlagsopplysningFraSoeknad(overstyrtKilde = opplysningsbehov.kilde),
-                    persongalleriFraPdl?.tilGrunnlagsopplysningFraPdl(),
-                )
-
-            HentetGrunnlag(personopplysninger, saksopplysninger)
+                return HentetGrunnlag(personopplysninger, saksopplysninger)
+            }
         }
+    }
 
     private suspend fun personopplysning(
         person: Deferred<Person>,

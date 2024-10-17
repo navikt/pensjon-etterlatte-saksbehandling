@@ -38,7 +38,7 @@ import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.kodeverk.kodeverk
 import no.nav.etterlatte.krr.krrRoute
 import no.nav.etterlatte.libs.common.TimerJob
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
@@ -67,7 +67,7 @@ private class Server(
     private val context: ApplicationContext,
 ) {
     init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-behandling")
+        sikkerLoggOppstart("etterlatte-behandling")
     }
 
     private val engine =

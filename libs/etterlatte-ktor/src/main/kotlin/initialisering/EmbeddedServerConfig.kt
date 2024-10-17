@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.setReady
 
 fun initEmbeddedServer(
     httpPort: Int,

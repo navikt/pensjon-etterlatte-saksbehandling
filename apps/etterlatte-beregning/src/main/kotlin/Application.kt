@@ -5,7 +5,7 @@ import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.grunnlag.beregningsGrunnlag
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.grunnbeloep.grunnbeloep
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.run
@@ -20,7 +20,7 @@ class Server(
     private val context: ApplicationContext,
 ) {
     init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-beregning")
+        sikkerLoggOppstart("etterlatte-beregning")
     }
 
     private val engine =

@@ -19,6 +19,10 @@ fun addShutdownHook(vararg timer: Timer) {
             },
         )
     } catch (e: IllegalStateException) {
-        logger.warn("App er på vei ned allerede, kan ikke legge til shutdownhooks", e)
+        try {
+            logger.warn("App er på vei ned allerede, kan ikke legge til shutdownhooks", e)
+        } catch (e: Exception) {
+            // Ignorer at vi  ikke får logget på grunn av shutdown, da er det ikke noe å gjøre uansett
+        }
     }
 }

@@ -687,7 +687,8 @@ class BehandlingFactoryTest {
         every { oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident) } just runs
         every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any()) } just runs
 
-        val opprettetBehandling = behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(false, false))
+        val opprettetBehandling =
+            behandlingFactory.opprettOmgjoeringAvslag(sak.id, saksbehandler, OmgjoeringRequest(false, false))
         opprettetBehandling.sak.id shouldBe sak.id
         opprettetBehandling.type shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
         opprettBehandlingSlot.captured.sakId shouldBe sak.id
@@ -930,7 +931,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
         every {
-            oppgaveService.tildelSaksbehandler(any(), any())
+            oppgaveService.oppdaterStatusOgMerknad(any(), any(), any())
         } just runs
 
         val foerstegangsbehandling =
@@ -941,8 +942,7 @@ class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
-                )!!
-                .also { it.sendMeldingForHendelse() }
+                ).also { it.sendMeldingForHendelse() }
                 .behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
@@ -1003,8 +1003,8 @@ class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
-                )?.also { it.sendMeldingForHendelse() }
-                ?.behandling
+                ).also { it.sendMeldingForHendelse() }
+                .behandling
         Assertions.assertTrue(revurderingsBehandling is Revurdering)
         verify {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())

@@ -64,7 +64,6 @@ class TrygdetidRepository(
                         beregnet_trygdetid_overstyrt,
                         poengaar_overstyrt,
                         yrkesskade,
-                        tidligere_familiepleier,
                         beregnet_samlet_trygdetid_norge
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
@@ -172,7 +171,7 @@ class TrygdetidRepository(
     ) = queryOf(
         statement =
             """
-            INSERT INTO trygdetid(id, behandling_id, sak_id, ident, yrkesskade, tidligere_familiepleier) VALUES(:id, :behandlingId, :sakId, :ident, :yrkesskade, :tidligere_familiepleier)
+            INSERT INTO trygdetid(id, behandling_id, sak_id, ident, yrkesskade) VALUES(:id, :behandlingId, :sakId, :ident, :yrkesskade)
             """.trimIndent(),
         paramMap =
             mapOf(
@@ -181,7 +180,6 @@ class TrygdetidRepository(
                 "sakId" to trygdetid.sakId.sakId,
                 "ident" to trygdetid.ident,
                 "yrkesskade" to trygdetid.yrkesskade,
-                "tidligere_familiepleier" to trygdetid.tidligereFamiliepleier,
             ),
     ).let { query -> tx.update(query) }
 
@@ -604,7 +602,6 @@ class TrygdetidRepository(
         overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
         ident = string("ident"),
         yrkesskade = boolean("yrkesskade"),
-        tidligereFamiliepleier = boolean("tidligere_familiepleier"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

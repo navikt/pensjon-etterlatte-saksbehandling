@@ -104,7 +104,7 @@ internal class TrygdetidServiceTest {
             repository.hentTrygdetiderForBehandling(behandlingId)
         }
 
-        coVerify(exactly = 1) {
+        coVerify(exactly = 2) {
             grunnlagKlient.hentGrunnlag(any(), any())
         }
     }
@@ -1138,7 +1138,6 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
@@ -1149,6 +1148,11 @@ internal class TrygdetidServiceTest {
                 },
             )
         }
+
+        coVerify(exactly = 2) {
+            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
+        }
+
         verify {
             regulering.id
             regulering.sak
@@ -1219,12 +1223,14 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
-            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.opprettTrygdetid(match { it.behandlingId == behandlingId })
+        }
+        coVerify(exactly = 2) {
+            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
+            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
         }
         verify {
             revurdering.id

@@ -69,7 +69,6 @@ fun trygdetid(
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     opplysninger: List<Opplysningsgrunnlag> = standardOpplysningsgrunnlag(),
     yrkesskade: Boolean = false,
-    tidligereFamiliepleier: Boolean = false,
 ) = Trygdetid(
     id = randomUUID(),
     sakId = sakId,
@@ -79,7 +78,6 @@ fun trygdetid(
     beregnetTrygdetid = beregnetTrygdetid,
     ident = ident,
     yrkesskade = yrkesskade,
-    tidligereFamiliepleier = tidligereFamiliepleier,
 )
 
 fun standardOpplysningsgrunnlag(): List<Opplysningsgrunnlag> {

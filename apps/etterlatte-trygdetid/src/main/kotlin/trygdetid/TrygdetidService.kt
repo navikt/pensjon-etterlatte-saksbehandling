@@ -287,7 +287,6 @@ class TrygdetidServiceImpl(
                     opplysninger = hentOpplysninger(avdoedMedFnr.second, behandling.id),
                     ident = avdoedMedFnr.first,
                     yrkesskade = false,
-                    tidligereFamiliepleier = false,
                 )
             val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
 
@@ -448,7 +447,6 @@ class TrygdetidServiceImpl(
                             beregnetTrygdetid = forrigeTrygdetid.beregnetTrygdetid,
                             ident = forrigeTrygdetid.ident,
                             yrkesskade = forrigeTrygdetid.yrkesskade,
-                            tidligereFamiliepleier = forrigeTrygdetid.tidligereFamiliepleier,
                         )
 
                     trygdetidRepository.opprettTrygdetid(kopiertTrygdetid)
@@ -622,7 +620,6 @@ class TrygdetidServiceImpl(
                         regelResultat = "".toJsonNode(),
                     ),
                 yrkesskade = false,
-                tidligereFamiliepleier = tidligereFamiliepleier,
             )
         val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
         trygdetidRepository.oppdaterTrygdetid(opprettet)
@@ -758,7 +755,8 @@ class TrygdetidServiceImpl(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        if (trygdetid.ident == UKJENT_AVDOED || trygdetid.tidligereFamiliepleier) {
+        val soeker = grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).soeker
+        if (trygdetid.ident == UKJENT_AVDOED || trygdetid.ident == soeker.hentFoedselsnummer()?.verdi?.value) {
             return trygdetid
                 .copy(opplysningerDifferanse = OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt()))
         }

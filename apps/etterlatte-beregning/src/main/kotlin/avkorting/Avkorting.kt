@@ -428,7 +428,7 @@ data class Avkorting(
         if (aarsoppgjoer.any { it.aar == nytt.aar }) {
             return aarsoppgjoer.map { if (it.aar == nytt.aar) nytt else it }
         }
-        return aarsoppgjoer + listOf(nytt)
+        return (aarsoppgjoer + listOf(nytt)).sortedBy { it.aar }
     }
 }
 

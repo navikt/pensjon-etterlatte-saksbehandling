@@ -97,6 +97,15 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
 
   const tidligereFamiliepleier = !!behandling.tidligereFamiliepleier?.svar
 
+  const hentNavn = () => {
+    if (personopplysninger?.avdoede[0]) {
+      return mapNavn(personopplysninger.avdoede[0].opplysning.foedselsnummer, personopplysninger)
+    } else if (tidligereFamiliepleier && personopplysninger?.soeker) {
+      return formaterNavn(personopplysninger.soeker.opplysning)
+    }
+    return ''
+  }
+
   return (
     <>
       <>
@@ -107,13 +116,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
             <>
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
-                navn={
-                  personopplysninger?.avdoede[0]
-                    ? mapNavn(personopplysninger.avdoede[0].opplysning.foedselsnummer, personopplysninger)
-                    : tidligereFamiliepleier && personopplysninger?.soeker
-                      ? formaterNavn(personopplysninger.soeker.opplysning)
-                      : ''
-                }
+                navn={hentNavn()}
                 behandling={behandling}
                 oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
                 lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}

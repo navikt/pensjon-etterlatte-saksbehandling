@@ -52,6 +52,5 @@ include(
     "libs:etterlatte-vedtaksvurdering-model",
     "libs:etterlatte-vilkaarsvurdering-model",
     "libs:etterlatte-tilbakekreving-model",
+    "libs:etterlatte-tidshendelser-model",
 )
-include("libs:etterlatte-tidshendelser-model")
-findProject(":libs:etterlatte-tidshendelser-model")?.name = "etterlatte-tidshendelser-model"

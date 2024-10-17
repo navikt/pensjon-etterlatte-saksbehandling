@@ -14,6 +14,8 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.9.0")
+
     implementation(libs.database.kotliquery)
     implementation(libs.cache.caffeine)
 

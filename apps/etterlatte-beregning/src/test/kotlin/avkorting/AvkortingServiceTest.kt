@@ -645,7 +645,7 @@ internal class AvkortingServiceTest {
             coEvery { grunnlagKlient.aldersovergangMaaned(any(), any(), any()) } returns foedselsdato67aar
             every { endretGrunnlag.fom } returns YearMonth.of(2024, 1)
             every {
-                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -671,7 +671,8 @@ internal class AvkortingServiceTest {
                     endretGrunnlag,
                     bruker,
                     beregning,
-                    any(),
+                    emptyList(),
+                    null,
                     foedselsdato67aar,
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)

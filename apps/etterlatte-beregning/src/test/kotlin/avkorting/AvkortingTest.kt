@@ -931,6 +931,32 @@ internal class AvkortingTest {
         }
 
         @Test
+        fun `utledning av innvilga måneder med aldersoverang`() {
+            val grunnlag =
+                avkortinggrunnlagLagre(
+                    fom = YearMonth.of(2024, 3),
+                )
+            val opprettaAvkorting =
+                Avkorting().oppdaterMedInntektsgrunnlag(
+                    nyttGrunnlag = grunnlag,
+                    bruker = bruker,
+                    opphoerFom = null,
+                    aldersovergang = YearMonth.of(2024, 8),
+                )
+            with(
+                opprettaAvkorting.aarsoppgjoer
+                    .single()
+                    .inntektsavkorting
+                    .single()
+                    .grunnlag,
+            ) {
+                innvilgaMaaneder shouldBe 5
+                overstyrtInnvilgaMaanederAarsak shouldBe null
+                overstyrtInnvilgaMaanederBegrunnelse shouldBe null
+            }
+        }
+
+        @Test
         fun `utledning av overstyrt innvilga måneder`() {
             val grunnlag =
                 avkortinggrunnlagLagre(

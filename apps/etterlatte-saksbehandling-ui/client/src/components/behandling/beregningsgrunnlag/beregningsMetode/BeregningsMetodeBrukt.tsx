@@ -77,6 +77,8 @@ export const BeregningsMetodeBrukt = ({
     setRedigerTrygdetidMetodeBrukt(false)
   }
 
+  const tidligereFamiliepleier = !!behandling.tidligereFamiliepleier?.svar
+
   const beregningsMetode = behandling?.beregningsGrunnlag?.beregningsMetode
 
   return (
@@ -93,7 +95,11 @@ export const BeregningsMetodeBrukt = ({
             <Table.Row>
               <Table.HeaderCell />
               <Table.HeaderCell scope="col">
-                {behandling.sakType === SakType.BARNEPENSJON ? 'Forelder' : 'Avdøde'}
+                {behandling.sakType === SakType.BARNEPENSJON
+                  ? 'Forelder'
+                  : tidligereFamiliepleier
+                    ? 'Familiepleier'
+                    : 'Avdøde'}
               </Table.HeaderCell>
               <Table.HeaderCell scope="col">Trygdetid i beregningen</Table.HeaderCell>
               <Table.HeaderCell />

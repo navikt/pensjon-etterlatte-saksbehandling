@@ -10,6 +10,7 @@ import io.mockk.runs
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -54,6 +55,7 @@ class OmregningHendelserBeregningRiverTest {
         runBlocking {
             river.beregn(
                 SakType.BARNEPENSJON,
+                revurderingaarsak = Revurderingaarsak.REGULERING,
                 behandlingId = nyBehandling,
                 behandlingViOmregnerFra = gammelBehandling,
             )
@@ -88,6 +90,7 @@ class OmregningHendelserBeregningRiverTest {
             assertThrows<MindreEnnForrigeBehandling> {
                 river.beregn(
                     SakType.BARNEPENSJON,
+                    revurderingaarsak = Revurderingaarsak.REGULERING,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
                 )
@@ -124,6 +127,7 @@ class OmregningHendelserBeregningRiverTest {
         runBlocking {
             river.beregn(
                 SakType.BARNEPENSJON,
+                revurderingaarsak = Revurderingaarsak.REGULERING,
                 behandlingId = nyBehandling,
                 behandlingViOmregnerFra = gammelBehandling,
             )
@@ -158,6 +162,7 @@ class OmregningHendelserBeregningRiverTest {
             assertThrows<ForStorOekning> {
                 river.beregn(
                     SakType.BARNEPENSJON,
+                    revurderingaarsak = Revurderingaarsak.REGULERING,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
                 )
@@ -193,6 +198,7 @@ class OmregningHendelserBeregningRiverTest {
             val resultat =
                 river.beregn(
                     SakType.BARNEPENSJON,
+                    revurderingaarsak = Revurderingaarsak.REGULERING,
                     behandlingId = nyBehandling,
                     behandlingViOmregnerFra = gammelBehandling,
                 )

@@ -20,12 +20,14 @@ export const TrygdetidManueltOverstyrt = ({
   ident,
   beregnetTrygdetid,
   oppdaterTrygdetid,
+  tidligereFamiliepleier,
 }: {
   behandlingId: string
   trygdetidId: string
   ident: string
   beregnetTrygdetid: IDetaljertBeregnetTrygdetid
   oppdaterTrygdetid: (trygdetid: ITrygdetid) => void
+  tidligereFamiliepleier?: boolean
 }) => {
   const personopplysninger = usePersonopplysninger()
 
@@ -67,7 +69,7 @@ export const TrygdetidManueltOverstyrt = ({
   }
 
   const identErIGrunnlag = personopplysninger?.avdoede?.find((person) => person.opplysning.foedselsnummer === ident)
-  if (!identErIGrunnlag) {
+  if (!identErIGrunnlag && !tidligereFamiliepleier) {
     return (
       <>
         {ident === 'UKJENT_AVDOED' ? (

@@ -106,15 +106,16 @@ export const Avkorting = ({
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
-              {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-                <AvkortingInntekt
-                  behandling={behandling}
-                  avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
-                  erInnevaerendeAar={false}
-                  redigerbar={redigerbar}
-                  resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-                />
-              )}
+              {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+                !!avkorting?.avkortingGrunnlag?.length && (
+                  <AvkortingInntekt
+                    behandling={behandling}
+                    avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
+                    erInnevaerendeAar={false}
+                    redigerbar={redigerbar}
+                    resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+                  />
+                )}
             </>
           ),
         })}

@@ -22,6 +22,7 @@ data class DetaljertBehandling(
     val sendeBrev: Boolean,
     val opphoerFraOgMed: YearMonth?,
     val relatertBehandlingId: String?,
+    val tidligereFamiliepleier: TidligereFamiliepleier?,
     val erSluttbehandling: Boolean = false,
 )
 

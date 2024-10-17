@@ -576,18 +576,30 @@ class TrygdetidServiceImpl(
             } else {
                 null // ukjent avdød
             }
+
+        val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
+
+        val ident =
+            if (tidligereFamiliepleier) {
+                requireNotNull(behandling.soeker) {
+                    "Kunne ikke hente identifikator for soeker til trygdetid i " +
+                        "behandlingen med id=$behandlingId"
+                }
+            } else {
+                avdoed?.let {
+                    requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
+                        "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                            "behandlingen med id=$behandlingId"
+                    }
+                } ?: UKJENT_AVDOED
+            }
+
         val trygdetid =
             Trygdetid(
                 sakId = behandling.sak,
                 behandlingId = behandlingId,
                 opplysninger = avdoed?.let { hentOpplysninger(it, behandlingId) } ?: emptyList(),
-                ident =
-                    avdoed?.let {
-                        requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
-                            "Kunne ikke hente identifikator for avdød til trygdetid i " +
-                                "behandlingen med id=$behandlingId"
-                        }
-                    } ?: UKJENT_AVDOED,
+                ident = ident,
                 trygdetidGrunnlag = emptyList(),
                 beregnetTrygdetid =
                     DetaljertBeregnetTrygdetid(
@@ -743,7 +755,8 @@ class TrygdetidServiceImpl(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        if (trygdetid.ident == UKJENT_AVDOED) {
+        val soeker = grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).soeker
+        if (trygdetid.ident == UKJENT_AVDOED || trygdetid.ident == soeker.hentFoedselsnummer()?.verdi?.value) {
             return trygdetid
                 .copy(opplysningerDifferanse = OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt()))
         }

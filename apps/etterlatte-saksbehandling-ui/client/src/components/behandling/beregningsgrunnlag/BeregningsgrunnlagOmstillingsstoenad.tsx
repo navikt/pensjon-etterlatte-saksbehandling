@@ -32,6 +32,7 @@ import { SakType } from '~shared/types/sak'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgrunnlag'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { formaterNavn } from '~shared/types/Person'
 
 const BeregningsgrunnlagOmstillingsstoenad = () => {
   const behandling = useBehandling()
@@ -94,6 +95,17 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
     })
   }, [])
 
+  const tidligereFamiliepleier = !!behandling.tidligereFamiliepleier?.svar
+
+  const hentNavn = () => {
+    if (personopplysninger?.avdoede[0]) {
+      return mapNavn(personopplysninger.avdoede[0].opplysning.foedselsnummer, personopplysninger)
+    } else if (tidligereFamiliepleier && personopplysninger?.soeker) {
+      return formaterNavn(personopplysninger.soeker.opplysning)
+    }
+    return ''
+  }
+
   return (
     <>
       <>
@@ -104,11 +116,7 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
             <>
               <BeregningsMetodeBrukt
                 redigerbar={redigerbar}
-                navn={
-                  personopplysninger
-                    ? mapNavn(personopplysninger.avdoede[0].opplysning.foedselsnummer, personopplysninger)
-                    : ''
-                }
+                navn={hentNavn()}
                 behandling={behandling}
                 oppdaterBeregningsgrunnlag={oppdaterBeregningsMetode}
                 lagreBeregningsGrunnlagResult={lagreBeregningsGrunnlagResult}

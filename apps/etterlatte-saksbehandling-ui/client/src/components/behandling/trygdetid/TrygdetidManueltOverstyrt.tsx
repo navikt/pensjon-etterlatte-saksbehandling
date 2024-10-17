@@ -23,12 +23,14 @@ export const TrygdetidManueltOverstyrt = ({
   ident,
   beregnetTrygdetid,
   oppdaterTrygdetid,
+  tidligereFamiliepleier,
   redigerbar,
 }: {
   trygdetidId: string
   ident: string
   beregnetTrygdetid: IDetaljertBeregnetTrygdetid
   oppdaterTrygdetid: (trygdetid: ITrygdetid) => void
+  tidligereFamiliepleier?: boolean
   redigerbar: boolean
 }) => {
   const personopplysninger = usePersonopplysninger()
@@ -74,8 +76,10 @@ export const TrygdetidManueltOverstyrt = ({
   if (!behandling) return <ApiErrorAlert>Fant ikke behandling</ApiErrorAlert>
 
   const identErIGrunnlag = personopplysninger?.avdoede?.find((person) => person.opplysning.foedselsnummer === ident)
-
-  if (!identErIGrunnlag) {
+  if (!identErIGrunnlag && !tidligereFamiliepleier) {
+    if (ident !== 'UKJENT_AVDOED') {
+      return <Alert variant="error">Fant ikke avdød ident {ident} (trygdetid) i behandlingsgrunnlaget</Alert>
+    }
     if (ident == 'UKJENT_AVDOED' && behandling.behandlingType !== IBehandlingsType.REVURDERING) {
       return (
         <>
@@ -91,9 +95,6 @@ export const TrygdetidManueltOverstyrt = ({
           </Box>
         </>
       )
-    }
-    if (ident !== 'UKJENT_AVDOED') {
-      return <Alert variant="error">Fant ikke avdød ident {ident} (trygdetid) i behandlingsgrunnlaget</Alert>
     }
   }
 

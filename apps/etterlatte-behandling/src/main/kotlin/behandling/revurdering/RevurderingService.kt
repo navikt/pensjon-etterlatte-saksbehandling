@@ -29,8 +29,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
@@ -215,7 +217,15 @@ class RevurderingService(
                                     HardkodaSystembruker.opprettGrunnlag,
                                 )
                             }
-                        else -> runBlocking { grunnlagService.leggInnNyttGrunnlag(it, persongalleri, HardkodaSystembruker.opprettGrunnlag) }
+
+                        else ->
+                            runBlocking {
+                                grunnlagService.leggInnNyttGrunnlag(
+                                    it,
+                                    persongalleri,
+                                    HardkodaSystembruker.opprettGrunnlag,
+                                )
+                            }
                     }
                 },
                 sendMeldingForHendelse = {
@@ -227,7 +237,10 @@ class RevurderingService(
                 opprettOgTildelOppgave = {
                     if (paaGrunnAvOppgave != null) {
                         (
-                            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(paaGrunnAvOppgave, it.id.toString())
+                            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(
+                                paaGrunnAvOppgave,
+                                it.id.toString(),
+                            )
                         )
                     } else {
                         val oppgave =
@@ -239,7 +252,13 @@ class RevurderingService(
                                 merknad = begrunnelse,
                                 frist = frist,
                             )
-                        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+                        if ((prosessType == Prosesstype.MANUELL && saksbehandlerIdent != Fagsaksystem.EY.navn) ||
+                            (prosessType == Prosesstype.AUTOMATISK && saksbehandlerIdent == Fagsaksystem.EY.navn)
+                        ) {
+                            oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+                        } else {
+                            oppgaveService.oppdaterStatusOgMerknad(oppgave.id, "", Status.UNDER_BEHANDLING)
+                        }
                     }
                 },
             )

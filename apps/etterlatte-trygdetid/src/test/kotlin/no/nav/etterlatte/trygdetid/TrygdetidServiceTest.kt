@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -103,7 +104,7 @@ internal class TrygdetidServiceTest {
             repository.hentTrygdetiderForBehandling(behandlingId)
         }
 
-        coVerify(exactly = 1) {
+        coVerify(exactly = 2) {
             grunnlagKlient.hentGrunnlag(any(), any())
         }
     }
@@ -1137,7 +1138,6 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
@@ -1148,6 +1148,11 @@ internal class TrygdetidServiceTest {
                 },
             )
         }
+
+        coVerify(exactly = 2) {
+            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
+        }
+
         verify {
             regulering.id
             regulering.sak
@@ -1218,12 +1223,14 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
-            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.opprettTrygdetid(match { it.behandlingId == behandlingId })
+        }
+        coVerify(exactly = 2) {
+            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
+            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
         }
         verify {
             revurdering.id
@@ -1524,7 +1531,13 @@ internal class TrygdetidServiceTest {
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
 
         assertThrows<UgyldigForespoerselException> {
-            runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, overskriv = false, saksbehandler) }
+            runBlocking {
+                service.opprettOverstyrtBeregnetTrygdetid(
+                    behandlingId,
+                    overskriv = false,
+                    saksbehandler,
+                )
+            }
         }
 
         coVerify(exactly = 1) {
@@ -1565,13 +1578,20 @@ internal class TrygdetidServiceTest {
                 every { id } returns behandlingId
                 every { sak } returns sakId
                 every { status } returns BehandlingStatus.OPPRETTET
+                every { tidligereFamiliepleier } returns null
             }
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlag
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
         every { repository.opprettTrygdetid(capture(opprettetTrygdetidSlot)) } returnsArgument 0
         every { repository.oppdaterTrygdetid(any()) } returnsArgument 0
-        runBlocking { service.opprettOverstyrtBeregnetTrygdetid(behandlingId, overskriv = false, saksbehandler) }
+        runBlocking {
+            service.opprettOverstyrtBeregnetTrygdetid(
+                behandlingId,
+                overskriv = false,
+                saksbehandler,
+            )
+        }
 
         coVerify(exactly = 1) {
             behandlingKlient.hentBehandling(any(), any())
@@ -1584,6 +1604,74 @@ internal class TrygdetidServiceTest {
             behandling.status
             behandling.id
             behandling.sak
+            behandling.tidligereFamiliepleier
+        }
+    }
+
+    @Test
+    fun `opprettOverstyrtBeregnetTrygdetid tillater å opprette overstyrt trygdetid uten avdøde med soeker som ident`() {
+        val sakId: SakId = randomSakId()
+        val behandlingId = randomUUID()
+        val grunnlag =
+            GrunnlagTestData(
+                opplysningsmapAvdoedOverrides = emptyMap(),
+                opplysningsmapSakOverrides =
+                    mapOf(
+                        Opplysningstype.PERSONGALLERI_V1 to
+                            Opplysning.Konstant(
+                                randomUUID(),
+                                Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+                                Persongalleri(
+                                    soeker = SOEKER_FOEDSELSNUMMER.value,
+                                    avdoed = emptyList(),
+                                ).toJsonNode(),
+                            ),
+                    ),
+            ).hentOpplysningsgrunnlag()
+
+        val opprettetTrygdetidSlot = slot<Trygdetid>()
+        val behandling: DetaljertBehandling =
+            mockk {
+                every { id } returns behandlingId
+                every { sak } returns sakId
+                every { status } returns BehandlingStatus.OPPRETTET
+                every { soeker } returns "12345678901"
+                every { tidligereFamiliepleier } returns
+                    TidligereFamiliepleier(
+                        svar = true,
+                        kilde = Grunnlagsopplysning.Saksbehandler("12345678901", Tidspunkt.now()),
+                        foedselsnummer = null,
+                        startPleieforhold = LocalDate.now().minusYears(1),
+                        opphoertPleieforhold = LocalDate.now(),
+                        begrunnelse = "Begrunnelse",
+                    )
+            }
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
+        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, any()) } returns grunnlag
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
+        every { repository.opprettTrygdetid(capture(opprettetTrygdetidSlot)) } returnsArgument 0
+        every { repository.oppdaterTrygdetid(any()) } returnsArgument 0
+        runBlocking {
+            service.opprettOverstyrtBeregnetTrygdetid(
+                behandlingId,
+                overskriv = false,
+                saksbehandler,
+            )
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.hentBehandling(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+            repository.opprettTrygdetid(any())
+            repository.oppdaterTrygdetid(any())
+        }
+        verify {
+            behandling.status
+            behandling.id
+            behandling.sak
+            behandling.soeker
+            behandling.tidligereFamiliepleier
         }
     }
 

@@ -151,7 +151,7 @@ class AvkortingService(
     fun slettAvkorting(behandlingId: UUID) = avkortingRepository.slettForBehandling(behandlingId)
 
     /*
-     * Brukes ved automatisk regulering
+     * Brukes ved omregning
      */
     suspend fun kopierAvkorting(
         behandlingId: UUID,

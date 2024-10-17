@@ -274,6 +274,7 @@ internal class BrevdataFacadeImplTest {
             sendeBrev = true,
             opphoerFraOgMed = null,
             relatertBehandlingId = null,
+            tidligereFamiliepleier = null,
         )
 
     private fun hentBrevutfall() = null

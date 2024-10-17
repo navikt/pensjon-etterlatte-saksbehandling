@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
-import java.sql.ResultSet
 import java.util.UUID
 
 class BehandlingInfoDao(
@@ -61,12 +60,12 @@ class BehandlingInfoDao(
                     """
                     SELECT sluttbehandling 
                     FROM behandling_info 
-                    WHERE behandling_id = ?::UUID
+                    WHERE behandling_id = ?::UUID AND sluttbehandling IS NOT NULL
                     """.trimIndent(),
                 ).let { statement ->
                     statement.setObject(1, behandlingId)
                     statement.executeQuery().singleOrNull {
-                        getString("sluttbehandling")?.let { objectMapper.readValue<SluttbehandlingUtlandBehandlinginfo>(it) }
+                        getString("sluttbehandling").let { objectMapper.readValue(it) }
                     }
                 }
             }
@@ -99,12 +98,16 @@ class BehandlingInfoDao(
             with(it) {
                 prepareStatement(
                     """
-                    SELECT behandling_id, brevutfall 
+                    SELECT brevutfall 
                     FROM behandling_info 
-                    WHERE behandling_id = ?::UUID
+                    WHERE behandling_id = ?::UUID AND brevutfall IS NOT NULL
                     """,
                 ).apply { setObject(1, behandlingId) }
-                    .run { executeQuery().singleOrNull { toBrevutfall() } }
+                    .run {
+                        executeQuery().singleOrNull {
+                            getString("brevutfall").let { objectMapper.readValue(it) }
+                        }
+                    }
             }
         }
 
@@ -136,7 +139,7 @@ class BehandlingInfoDao(
                 prepareStatement(
                     """
                     UPDATE behandling_info SET etterbetaling = ?
-                    WHERE behandling_id = ?
+                    WHERE behandling_id = ?::UUID
                     """.trimIndent(),
                 ).apply {
                     setJsonb(1, null)
@@ -151,16 +154,12 @@ class BehandlingInfoDao(
             with(it) {
                 prepareStatement(
                     """
-                    SELECT behandling_id, etterbetaling 
+                    SELECT etterbetaling 
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID AND etterbetaling IS NOT NULL
                     """,
                 ).apply { setObject(1, behandlingId) }
-                    .run { executeQuery().singleOrNull { toEtterbetaling() } }
+                    .run { executeQuery().singleOrNull { getString("etterbetaling").let { objectMapper.readValue(it) } } }
             }
         }
-
-    private fun ResultSet.toBrevutfall(): Brevutfall = this.getString("brevutfall").let { objectMapper.readValue(it) }
-
-    private fun ResultSet.toEtterbetaling(): Etterbetaling = this.getString("etterbetaling").let { objectMapper.readValue(it) }
 }

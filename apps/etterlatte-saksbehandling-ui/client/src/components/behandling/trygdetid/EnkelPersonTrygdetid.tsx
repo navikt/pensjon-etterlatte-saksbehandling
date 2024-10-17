@@ -82,6 +82,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
           ident={trygdetid.ident}
           oppdaterTrygdetid={oppdaterTrygdetid}
           beregnetTrygdetid={trygdetid.beregnetTrygdetid}
+          tidligereFamiliepleier={!!behandling.tidligereFamiliepleier?.svar}
           redigerbar={redigerbar}
         />
         <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />

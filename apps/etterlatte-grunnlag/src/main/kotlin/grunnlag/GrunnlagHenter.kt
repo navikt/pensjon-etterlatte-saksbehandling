@@ -27,8 +27,8 @@ import java.util.UUID
 class GrunnlagHenter(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
 ) {
-    suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag {
-        return coroutineScope {
+    suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag =
+        coroutineScope {
             withContext(MDCContext()) {
                 val persongalleri = opplysningsbehov.persongalleri
                 val persongalleriFraPdl =
@@ -94,10 +94,9 @@ class GrunnlagHenter(
                         persongalleriFraPdl?.tilGrunnlagsopplysningFraPdl(),
                     )
 
-                return HentetGrunnlag(personopplysninger, saksopplysninger)
+                HentetGrunnlag(personopplysninger, saksopplysninger)
             }
         }
-    }
 
     private suspend fun personopplysning(
         person: Deferred<Person>,

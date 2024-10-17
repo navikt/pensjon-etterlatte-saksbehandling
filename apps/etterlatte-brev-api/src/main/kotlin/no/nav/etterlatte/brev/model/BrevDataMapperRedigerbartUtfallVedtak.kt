@@ -144,7 +144,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             sakType,
                         )
                     VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, behandlingId)
-                    VedtakType.AVSLAG -> barnepensjonAvslag(brukerTokenInfo, behandlingId)
+                    VedtakType.AVSLAG -> barnepensjonAvslag(avdoede, brukerTokenInfo, behandlingId)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage)
                     VedtakType.TILBAKEKREVING,
                     null,
@@ -241,11 +241,12 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     }
 
     private suspend fun barnepensjonAvslag(
+        avdoede: List<Avdoed>,
         bruker: BrukerTokenInfo,
         behandlingId: UUID,
     ) = coroutineScope {
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
-        BarnepensjonAvslagRedigerbar(behandling.erSluttbehandling)
+        BarnepensjonAvslagRedigerbar.fra(avdoede, behandling.erSluttbehandling)
     }
 
     private suspend fun barnepensjonEndring(

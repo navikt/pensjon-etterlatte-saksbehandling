@@ -88,7 +88,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         manglerTrygdetid(trygdetider, personopplysninger?.avdoede)
       ) {
         if (tidligereFamiliepleier) {
-          opprettOverstyrtTrygdetidReq({ behandlingId: behandling.id, overskriv: true }, () => window.location.reload())
+          opprettOverstyrtTrygdetidReq({ behandlingId: behandling.id, overskriv: true }, () =>
+            fetchTrygdetider(behandlingId)
+          )
         } else {
           if (behandlingErIverksatt(behandling.status)) {
             setHarPilotTrygdetid(true)

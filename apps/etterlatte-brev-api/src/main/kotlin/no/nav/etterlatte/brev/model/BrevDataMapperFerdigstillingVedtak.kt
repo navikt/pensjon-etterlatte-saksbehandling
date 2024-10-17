@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.Brevkoder.OMS_INNVILGELSE
 import no.nav.etterlatte.brev.Brevkoder.OMS_OPPHOER
 import no.nav.etterlatte.brev.Brevkoder.OMS_REVURDERING
 import no.nav.etterlatte.brev.Brevkoder.TILBAKEKREVING
+import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -162,10 +163,11 @@ class BrevDataMapperFerdigstillingVedtak(
                     )
 
                 OMS_AVSLAG ->
-                    OmstillingsstoenadAvslag.fra(
+                    omstillingsstoenadAvslag(
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
                     )
+
                 OMS_OPPHOER ->
                     omstillingsstoenadOpphoer(
                         bruker,
@@ -333,6 +335,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         if (erForeldreloes) {
             BarnepensjonInnvilgelseForeldreloes.fra(
@@ -347,6 +350,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 avdoede,
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
+                erSluttbehandling = behandling.erSluttbehandling,
             )
         } else {
             BarnepensjonInnvilgelse.fra(
@@ -360,21 +364,24 @@ class BrevDataMapperFerdigstillingVedtak(
                 brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
+                erSluttbehandling = behandling.erSluttbehandling,
             )
         }
     }
 
-    private fun barnepensjonAvslag(
+    private suspend fun barnepensjonAvslag(
         innholdMedVedlegg: InnholdMedVedlegg,
         soekerUnder18: Boolean?,
         utlandstilknytningType: UtlandstilknytningType?,
-    ) = BarnepensjonAvslag.fra(
-        innhold = innholdMedVedlegg,
-        // TODO må kunne sette brevutfall ved avslag.
-        //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
-        brukerUnder18Aar = soekerUnder18 ?: true,
-        utlandstilknytning = utlandstilknytningType,
-    )
+    ) = coroutineScope {
+        BarnepensjonAvslag.fra(
+            innhold = innholdMedVedlegg,
+            // TODO må kunne sette brevutfall ved avslag.
+            //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
+            brukerUnder18Aar = soekerUnder18 ?: true,
+            utlandstilknytning = utlandstilknytningType,
+        )
+    }
 
     private suspend fun barnepensjonOpphoer(
         bruker: BrukerTokenInfo,
@@ -415,6 +422,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,
@@ -423,6 +431,17 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkårsvurdering" },
             avdoede,
+            behandling.erSluttbehandling,
+        )
+    }
+
+    private suspend fun omstillingsstoenadAvslag(
+        innhold: List<Slate.Element>,
+        utlandstilknytningType: UtlandstilknytningType?,
+    ) = coroutineScope {
+        OmstillingsstoenadAvslag.fra(
+            innhold,
+            utlandstilknytningType,
         )
     }
 

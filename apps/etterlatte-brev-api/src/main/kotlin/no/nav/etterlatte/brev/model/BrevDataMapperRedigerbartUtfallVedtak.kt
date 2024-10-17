@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
+import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslagRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoerRedigerbarUtfall
@@ -143,7 +144,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             sakType,
                         )
                     VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, behandlingId)
-                    VedtakType.AVSLAG -> ManueltBrevData()
+                    VedtakType.AVSLAG -> barnepensjonAvslag(brukerTokenInfo, behandlingId)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage)
                     VedtakType.TILBAKEKREVING,
                     null,
@@ -171,13 +172,23 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             vedtakType,
                         )
                     VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, behandlingId)
-                    VedtakType.AVSLAG -> OmstillingsstoenadAvslagRedigerbartUtfall.fra(avdoede)
+                    VedtakType.AVSLAG -> omstillingsstoenadAvslag(brukerTokenInfo, behandlingId, avdoede)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage)
                     VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
                 }
             }
+        }
+
+    private suspend fun omstillingsstoenadAvslag(
+        brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID,
+        avdoede: List<Avdoed>,
+    ): BrevDataRedigerbar =
+        coroutineScope {
+            val behandling = behandlingService.hentBehandling(behandlingId, brukerTokenInfo)
+            OmstillingsstoenadAvslagRedigerbartUtfall.fra(avdoede, behandling.erSluttbehandling)
         }
 
     private suspend fun barnepensjonInnvilgelse(
@@ -227,6 +238,14 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         BarnepensjonOpphoerRedigerbarUtfall.fra(
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
+    }
+
+    private suspend fun barnepensjonAvslag(
+        bruker: BrukerTokenInfo,
+        behandlingId: UUID,
+    ) = coroutineScope {
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+        BarnepensjonAvslagRedigerbar(behandling.erSluttbehandling)
     }
 
     private suspend fun barnepensjonEndring(

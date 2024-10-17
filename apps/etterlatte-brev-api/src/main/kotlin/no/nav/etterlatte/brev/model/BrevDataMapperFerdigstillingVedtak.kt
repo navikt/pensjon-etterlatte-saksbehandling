@@ -127,8 +127,6 @@ class BrevDataMapperFerdigstillingVedtak(
                         innholdMedVedlegg,
                         soekerUnder18,
                         utlandstilknytningType,
-                        behandlingId!!,
-                        bruker,
                     )
                 BP_OPPHOER ->
                     barnepensjonOpphoer(
@@ -166,8 +164,6 @@ class BrevDataMapperFerdigstillingVedtak(
 
                 OMS_AVSLAG ->
                     omstillingsstoenadAvslag(
-                        bruker,
-                        behandlingId!!,
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
                     )
@@ -377,18 +373,13 @@ class BrevDataMapperFerdigstillingVedtak(
         innholdMedVedlegg: InnholdMedVedlegg,
         soekerUnder18: Boolean?,
         utlandstilknytningType: UtlandstilknytningType?,
-        behandlingId: UUID,
-        bruker: BrukerTokenInfo,
     ) = coroutineScope {
-        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
-
         BarnepensjonAvslag.fra(
             innhold = innholdMedVedlegg,
             // TODO må kunne sette brevutfall ved avslag.
             //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
             brukerUnder18Aar = soekerUnder18 ?: true,
             utlandstilknytning = utlandstilknytningType,
-            erSluttbehandling = behandling.erSluttbehandling,
         )
     }
 
@@ -445,16 +436,12 @@ class BrevDataMapperFerdigstillingVedtak(
     }
 
     private suspend fun omstillingsstoenadAvslag(
-        bruker: BrukerTokenInfo,
-        behandlingId: UUID,
         innhold: List<Slate.Element>,
         utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
-        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
         OmstillingsstoenadAvslag.fra(
             innhold,
             utlandstilknytningType,
-            behandling.erSluttbehandling,
         )
     }
 

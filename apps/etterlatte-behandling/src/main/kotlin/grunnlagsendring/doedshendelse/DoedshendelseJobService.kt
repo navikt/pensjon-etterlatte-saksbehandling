@@ -76,7 +76,9 @@ class DoedshendelseJobService(
             }
         doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
             inTransaction {
-                logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
+                logger.info(
+                    "Starter håndtering av dødshendelse med id ${doedshendelse.id} for person ${doedshendelse.beroertFnr.maskerFnr()} avdoed: ${doedshendelse.avdoedFnr.maskerFnr()}",
+                )
                 haandterDoedshendelse(doedshendelse, bruker)
             }
         }

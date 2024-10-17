@@ -46,9 +46,9 @@ class PDFGenerator(
         brevDataMapping: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
     ): Pdf {
         val brev = sjekkOmBrevKanEndres(id)
-        if (brev.mottaker.erGyldig().isNotEmpty()) {
-            sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottaker.erGyldig())
+        if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
+            sikkerlogger.error("Ugyldig mottaker(e): ${brev.mottakere.toJson()}")
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottakere.flatMap { it.erGyldig() })
         }
 
         val pdf =

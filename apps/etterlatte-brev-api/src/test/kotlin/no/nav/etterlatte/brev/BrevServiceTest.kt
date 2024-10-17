@@ -323,14 +323,15 @@ internal class BrevServiceTest {
         status = status,
         statusEndret = Tidspunkt.now(),
         opprettet = opprettet,
-        mottaker = opprettMottaker(),
+        mottakere = listOf(opprettMottaker()),
         brevtype = Brevtype.INFORMASJON,
         brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
     private fun opprettMottaker() =
         Mottaker(
-            "Stor Snerk",
+            id = UUID.randomUUID(),
+            navn = "Stor Snerk",
             foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,
             adresse =

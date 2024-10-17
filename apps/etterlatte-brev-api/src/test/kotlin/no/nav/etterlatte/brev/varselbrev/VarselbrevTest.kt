@@ -66,6 +66,7 @@ class VarselbrevTest(
             mockk<AdresseService>().also {
                 coEvery { it.hentMottakerAdresse(any(), any()) } returns
                     Mottaker(
+                        id = UUID.fromString("d762e98d-514d-4bb5-a6b5-a3fbf4d65887"),
                         navn = "Navn Navnesen",
                         foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                         orgnummer = null,

@@ -1,6 +1,6 @@
 import { Button, Heading, HGrid, HStack, Modal, Radio, Select, TextField, ToggleGroup, VStack } from '@navikt/ds-react'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { AdresseType, IBrev, Mottaker } from '~shared/types/Brev'
+import { AdresseType, Mottaker } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterMottaker } from '~shared/api/brev'
 import { isPending } from '~shared/api/apiUtils'
@@ -15,18 +15,18 @@ enum MottakerType {
 }
 
 interface Props {
-  brev: IBrev
-  setBrev: Dispatch<SetStateAction<IBrev>>
+  brevId: number
+  sakId: number
+  mottaker: Mottaker
+  setMottaker: Dispatch<SetStateAction<Mottaker>>
 }
 
-export function BrevMottakerModal({ brev, setBrev }: Props) {
-  const { id: brevId, sakId, mottaker: initialMottaker } = brev
-
+export function BrevMottakerModal({ brevId, sakId, mottaker: initialMottaker, setMottaker }: Props) {
   const [mottakerStatus, apiOppdaterMottaker] = useApiCall(oppdaterMottaker)
 
   const [isOpen, setIsOpen] = useState(false)
   const [mottakerType, setMottakerType] = useState(
-    brev.mottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
+    initialMottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
   )
 
   const {
@@ -52,8 +52,8 @@ export function BrevMottakerModal({ brev, setBrev }: Props) {
       return
     }
 
-    apiOppdaterMottaker({ brevId, sakId, mottaker: mottaker }, () => {
-      setBrev({ ...brev, mottaker })
+    apiOppdaterMottaker({ brevId, sakId, mottaker }, () => {
+      setMottaker(mottaker)
       setIsOpen(false)
     })
   }

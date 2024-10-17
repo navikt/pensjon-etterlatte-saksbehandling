@@ -75,7 +75,10 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
         val distribuermelding = testRapid.hentMelding(0)
-        Assertions.assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), distribuermelding.somMap()[EVENT_NAME_KEY])
+        Assertions.assertEquals(
+            BrevHendelseType.JOURNALFOERT.lagEventnameForType(),
+            distribuermelding.somMap()[EVENT_NAME_KEY],
+        )
         testRapid.sendTestMessage(distribuermelding)
 
         val distribuert = testRapid.hentMelding(1).somMap()
@@ -94,12 +97,15 @@ internal class OpprettJournalfoerOgDistribuer {
             status = Status.FERDIGSTILT,
             Tidspunkt.now(),
             Tidspunkt.now(),
-            mottaker =
-                Mottaker(
-                    "Langsom Hest",
-                    mockk(),
-                    null,
-                    Adresse(adresseType = "privat", landkode = "NO", land = "Norge"),
+            mottakere =
+                listOf(
+                    Mottaker(
+                        UUID.randomUUID(),
+                        "Langsom Hest",
+                        mockk(),
+                        null,
+                        Adresse(adresseType = "privat", landkode = "NO", land = "Norge"),
+                    ),
                 ),
             brevtype = Brevtype.INFORMASJON,
             brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,

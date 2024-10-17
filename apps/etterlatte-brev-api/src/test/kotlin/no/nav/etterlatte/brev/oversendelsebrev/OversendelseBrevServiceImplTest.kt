@@ -149,6 +149,7 @@ class OversendelseBrevServiceImplTest(
 
     private fun opprettMottaker() =
         Mottaker(
+            UUID.randomUUID(),
             "Rød Blanding",
             foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,

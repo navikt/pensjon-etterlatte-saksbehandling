@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class BrevModelTest {
     @Test
@@ -54,6 +55,7 @@ internal class BrevModelTest {
         landkode: String = "NO",
         land: String = "Norge",
     ) = Mottaker(
+        UUID.randomUUID(),
         navn,
         foedselsnummer,
         orgnummer,

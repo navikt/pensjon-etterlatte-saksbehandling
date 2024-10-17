@@ -8,7 +8,7 @@ export interface IBrev {
   soekerFnr: string
   status: BrevStatus
   statusEndret: string
-  mottaker: Mottaker
+  mottakere: Mottaker[]
   opprettet: string
   brevtype: Brevtype
   journalpostId?: string
@@ -16,6 +16,7 @@ export interface IBrev {
 }
 
 export interface Mottaker {
+  id: string
   navn: string
   foedselsnummer?: {
     value: string
@@ -23,6 +24,7 @@ export interface Mottaker {
   orgnummer?: string
   adresse: Adresse
   tvingSentralPrint: boolean
+  kopimottaker: boolean
 }
 
 export interface Adresse {

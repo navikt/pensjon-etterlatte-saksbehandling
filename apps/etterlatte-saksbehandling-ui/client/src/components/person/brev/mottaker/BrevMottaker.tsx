@@ -1,4 +1,4 @@
-import { AdresseType, IBrev } from '~shared/types/Brev'
+import { AdresseType, Mottaker } from '~shared/types/Brev'
 import { Alert, BodyShort, Box, Heading, HStack, Loader, Tag, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -10,32 +10,39 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { DigitalKontaktinformasjon, hentKontaktinformasjonKRR } from '~shared/api/krr'
 
-export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) {
-  const [brevState, setBrevState] = useState<IBrev>(brev)
+interface MottakerProps {
+  brevId: number
+  behandlingId?: string
+  sakId: number
+  mottaker: Mottaker
+  kanRedigeres: boolean
+}
 
-  const mottaker = brevState!.mottaker
+export function BrevMottaker({ brevId, behandlingId, sakId, mottaker: initialMottaker, kanRedigeres }: MottakerProps) {
+  const [mottaker, setMottaker] = useState(initialMottaker)
+
   const adresse = mottaker?.adresse
 
   const [soeker, getSoekerFraGrunnlag] = useApiCall(getGrunnlagsAvOpplysningstype)
   const [kontaktinfoResult, hentKontaktinfo] = useApiCall(hentKontaktinformasjonKRR)
 
   useEffect(() => {
-    if (!brev.behandlingId) {
+    if (!behandlingId) {
       return
     }
 
     getSoekerFraGrunnlag({
-      sakId: brev.sakId,
-      behandlingId: brev.behandlingId,
+      sakId: sakId,
+      behandlingId: behandlingId,
       opplysningstype: 'SOEKER_PDL_V1',
     })
-  }, [brev])
+  }, [])
 
   useEffect(() => {
-    if (brev.mottaker.foedselsnummer?.value) {
-      hentKontaktinfo(brev.mottaker.foedselsnummer.value)
+    if (mottaker.foedselsnummer?.value) {
+      hentKontaktinfo(mottaker.foedselsnummer.value)
     }
-  }, [brev.mottaker.foedselsnummer?.value])
+  }, [mottaker.foedselsnummer?.value])
 
   return (
     <Box padding="4" borderWidth="1" borderRadius="small">
@@ -68,7 +75,11 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
             </Tag>
           )}
         </Heading>
-        <div>{kanRedigeres && <BrevMottakerModal brev={brevState} setBrev={setBrevState} />}</div>
+        <div>
+          {kanRedigeres && (
+            <BrevMottakerModal brevId={brevId} sakId={sakId} mottaker={mottaker} setMottaker={setMottaker} />
+          )}
+        </div>
       </HStack>
 
       <VStack gap="2">

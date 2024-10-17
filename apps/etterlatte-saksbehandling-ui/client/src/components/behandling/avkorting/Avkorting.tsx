@@ -107,7 +107,7 @@ export const Avkorting = ({
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
               {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-                avkorting?.avkortingGrunnlag.length > 0 && (
+                !!avkorting?.avkortingGrunnlag?.length && (
                   <AvkortingInntekt
                     behandling={behandling}
                     avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}

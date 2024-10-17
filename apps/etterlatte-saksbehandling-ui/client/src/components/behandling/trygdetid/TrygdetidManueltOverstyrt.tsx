@@ -80,19 +80,24 @@ export const TrygdetidManueltOverstyrt = ({
     if (ident !== 'UKJENT_AVDOED') {
       return <Alert variant="error">Fant ikke avdød ident {ident} (trygdetid) i behandlingsgrunnlaget</Alert>
     }
-    if (ident == 'UKJENT_AVDOED' && behandling.behandlingType !== IBehandlingsType.REVURDERING) {
+    if (ident === 'UKJENT_AVDOED' && behandling.behandlingType !== IBehandlingsType.REVURDERING) {
       return (
         <>
-          <Alert variant="error">
-            Brev støtter ikke ukjent avdød. Dersom avdød ikke ble oppgitt ved opprettelse av behandlingen må du opprette
-            ny overstyrt trygdetid.
-          </Alert>
-          <br />
-          <Box maxWidth="20rem">
-            <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
-              Opprett på nytt
-            </Button>
-          </Box>
+          {!redigerbar && <Alert variant="warning">OBS! Trygdetiden er koblet til ukjent avdød.</Alert>}
+          {redigerbar && (
+            <>
+              <Alert variant="error">
+                Brev støtter ikke ukjent avdød. Dersom avdød ikke ble oppgitt ved opprettelse av behandlingen må du
+                opprette ny overstyrt trygdetid.
+              </Alert>
+              <br />
+              <Box maxWidth="20rem">
+                <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
+                  Opprett på nytt
+                </Button>
+              </Box>
+            </>
+          )}
         </>
       )
     }
@@ -104,25 +109,23 @@ export const TrygdetidManueltOverstyrt = ({
         Manuelt overstyrt trygdetid
       </Heading>
 
-      {ident == 'UKJENT_AVDOED' && (
-        <Box maxWidth="40rem">
-          <VStack gap="1">
-            <Alert variant="warning">
-              OBS! Trygdetiden er koblet til ukjent avdød. Hvis avdød i saken faktisk er kjent bør du annullere
-              behandlingen og lage en ny behandling med riktig avdød i familieoversikt.
-            </Alert>
-            {redigerbar && (
-              <Box maxWidth="20rem">
-                <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
-                  Opprett overstyrt trygdetid på nytt
-                </Button>
-              </Box>
-            )}
-          </VStack>
-        </Box>
-      )}
       {redigerbar && (
         <>
+          {ident == 'UKJENT_AVDOED' && (
+            <Box maxWidth="40rem">
+              <VStack gap="1">
+                <Alert variant="warning">
+                  OBS! Trygdetiden er koblet til ukjent avdød. Hvis avdød i saken faktisk er kjent bør du annullere
+                  behandlingen og lage en ny behandling med riktig avdød i familieoversikten.
+                </Alert>
+                <Box maxWidth="20rem">
+                  <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
+                    Opprett overstyrt trygdetid på nytt
+                  </Button>
+                </Box>
+              </VStack>
+            </Box>
+          )}
           <FormWrapper>
             <TextField
               label="Anvendt trygdetid"
@@ -185,6 +188,7 @@ export const TrygdetidManueltOverstyrt = ({
       )}
       {!redigerbar && (
         <VStack gap="2">
+          {ident === 'UKJENT_AVDOED' && <Alert variant="warning">OBS! Trygdetiden er koblet til ukjent avdød.</Alert>}
           <Heading size="xsmall" level="4">
             Anvendt trygdetid
           </Heading>

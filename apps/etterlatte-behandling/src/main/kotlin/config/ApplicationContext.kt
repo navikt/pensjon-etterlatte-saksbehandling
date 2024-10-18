@@ -98,6 +98,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.jobs.next
@@ -457,6 +458,12 @@ internal class ApplicationContext(
         OmregningService(
             behandlingService = behandlingService,
             omregningDao = omregningDao,
+        )
+
+    val aarligInntektsjusteringJobbService =
+        AarligInntektsjusteringJobbService(
+            omregningService = omregningService,
+            rapid = rapid,
         )
 
     val tilgangService = TilgangServiceImpl(sakTilgangDao)

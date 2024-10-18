@@ -44,6 +44,8 @@ enum class OmregningHendelseType : EventnameHendelseType {
 * Verdier til omregninghendelse vil tilføres underveis i omregningsløpet og flere felter er derfor nødt ti å være mutable.
 * Derimot er det ønskelig at feltene er immutable og non null etter de blir satt.
 * Av den grunn er det er feltene tilgjengeliggjort gjennom "hent-" og "endre-" metoder.
+*
+* OBS! For å ta dette objektet i bruk i en melding er du nødt til å bruke metode "toPacket" for å få alle feltene tilgjengelig.
 */
 data class OmregningData(
     val kjoering: String,

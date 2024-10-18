@@ -1,4 +1,3 @@
-import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -7,7 +6,6 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inntektsjustering.InntektsjusteringJobbRiver
-import no.nav.etterlatte.inntektsjustering.skalBehandlingOmregnes
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -31,38 +29,6 @@ import java.time.YearMonth
 class InntektsjusteringJobbRiverTest {
     private val kjoering = "inntektsjustering-jobb-2024"
     private val loependeFom = YearMonth.of(2024, 1)
-
-    @Test
-    fun `skal inkluderes i omregning`() {
-        val behandlinger =
-            listOf(
-                genererBehandlingSammendrag(
-                    BehandlingStatus.IVERKSATT,
-                    Revurderingaarsak.INNTEKTSENDRING,
-                    YearMonth.of(2023, 1),
-                ),
-                genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.ANNEN, YearMonth.of(2024, 1)),
-                genererBehandlingSammendrag(
-                    BehandlingStatus.AVBRUTT,
-                    Revurderingaarsak.INNTEKTSENDRING,
-                    YearMonth.of(2024, 1),
-                ),
-            )
-        skalBehandlingOmregnes(behandlinger, YearMonth.of(2024, 1)) shouldBe true
-    }
-
-    @Test
-    fun `skal IKKE inkluderes i omregning`() {
-        val behandlinger =
-            listOf(
-                genererBehandlingSammendrag(
-                    BehandlingStatus.IVERKSATT,
-                    Revurderingaarsak.INNTEKTSENDRING,
-                    YearMonth.of(2024, 1),
-                ),
-            )
-        skalBehandlingOmregnes(behandlinger, YearMonth.of(2024, 1)) shouldBe false
-    }
 
     @Test
     fun `teste start inntektsjustering jobb aktivert`() {
@@ -98,6 +64,7 @@ class InntektsjusteringJobbRiverTest {
                 loependeFom = loependeFom,
             )
         }
+        // TODO kaller behandling...
     }
 
     @Test

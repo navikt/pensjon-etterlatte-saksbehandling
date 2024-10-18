@@ -145,7 +145,7 @@ class InntektsjusteringJobbRiverTest {
                     ANTALL to 12000,
                     SPESIFIKKE_SAKER to listOf<SakId>(),
                     EKSKLUDERTE_SAKER to listOf<SakId>(),
-                    LOEPENDE_FOM to loependeFom,
+                    LOEPENDE_FOM to loependeFom.atDay(1),
                 ),
             ).toJson()
 

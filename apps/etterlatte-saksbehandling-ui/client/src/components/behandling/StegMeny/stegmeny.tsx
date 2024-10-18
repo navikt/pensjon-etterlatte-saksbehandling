@@ -25,8 +25,10 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const lagVarselbrev =
     behandling.kilde === Vedtaksloesning.GJENOPPRETTA ||
     behandling.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT
-  const soeknadRoutes_ = soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
-  const revurderingRoutes_ = revurderingRoutes(behandling, lagVarselbrev)
+  const routes =
+    behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+      ? soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
+      : revurderingRoutes(behandling, lagVarselbrev)
 
   const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1
 
@@ -48,24 +50,14 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
         () => (
           <StegMenyBox>
             <HStack gap="6" align="center">
-              {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-                soeknadRoutes_.map((pathInfo, index) => (
-                  <NavLenke
-                    key={pathInfo.path}
-                    pathInfo={pathInfo}
-                    behandling={props.behandling}
-                    separator={erSisteRoute(index, soeknadRoutes_)}
-                  />
-                ))}
-              {behandlingType === IBehandlingsType.REVURDERING &&
-                revurderingRoutes_.map((pathInfo, index) => (
-                  <NavLenke
-                    key={pathInfo.path}
-                    pathInfo={pathInfo}
-                    behandling={props.behandling}
-                    separator={erSisteRoute(index, revurderingRoutes_)}
-                  />
-                ))}
+              {routes.map((pathInfo, index) => (
+                <NavLenke
+                  key={pathInfo.path}
+                  pathInfo={pathInfo}
+                  behandling={props.behandling}
+                  separator={erSisteRoute(index, routes)}
+                />
+              ))}
             </HStack>
           </StegMenyBox>
         )

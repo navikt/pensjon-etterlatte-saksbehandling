@@ -249,6 +249,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         opphoerFraOgMed = opphoerFraOgMed,
         relatertBehandlingId = relatertBehandlingId,
         tidligereFamiliepleier = tidligereFamiliepleier,
+        erSluttbehandling = erSluttbehandling(),
     )
 
 fun Behandling.toBehandlingSammendrag() =

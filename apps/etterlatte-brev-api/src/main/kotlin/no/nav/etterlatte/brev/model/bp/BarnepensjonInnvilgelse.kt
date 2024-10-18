@@ -33,6 +33,7 @@ data class BarnepensjonInnvilgelse(
     val erGjenoppretting: Boolean,
     val harUtbetaling: Boolean,
     val erMigrertYrkesskade: Boolean,
+    val erSluttbehandling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -48,6 +49,7 @@ data class BarnepensjonInnvilgelse(
             brevutfall: BrevutfallDto,
             erGjenoppretting: Boolean,
             erMigrertYrkesskade: Boolean,
+            erSluttbehandling: Boolean,
         ): BarnepensjonInnvilgelse {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             val frivilligSkattetrekk =
@@ -69,6 +71,7 @@ data class BarnepensjonInnvilgelse(
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
+                erSluttbehandling = erSluttbehandling,
             )
         }
     }

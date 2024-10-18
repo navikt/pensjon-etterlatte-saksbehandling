@@ -62,11 +62,16 @@ data class Adresse(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
+    val id: UUID,
     val navn: String,
     val foedselsnummer: MottakerFoedselsnummer? = null,
     val orgnummer: String? = null,
     val adresse: Adresse,
     val tvingSentralPrint: Boolean = false,
+    val type: MottakerType = MottakerType.HOVED,
+    // TODO: flytte disse fra brev- til mottakernivå
+    //  val journalpostId: String
+    //  val bestillingId: BestillingID
 ) {
     fun erGyldig(): List<String> =
         if (navn.isBlank()) {
@@ -77,6 +82,8 @@ data class Mottaker(
             adresse.erGyldig()
         }
 }
+
+enum class MottakerType { HOVED, KOPI }
 
 data class Brev(
     val id: BrevID,
@@ -89,7 +96,7 @@ data class Brev(
     val status: Status,
     val statusEndret: Tidspunkt,
     val opprettet: Tidspunkt,
-    val mottaker: Mottaker,
+    val mottakere: List<Mottaker>,
     val brevtype: Brevtype,
     val brevkoder: Brevkoder?,
     val journalpostId: String? = null,

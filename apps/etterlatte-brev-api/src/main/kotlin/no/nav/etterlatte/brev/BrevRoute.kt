@@ -77,9 +77,9 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 val body = call.receive<OppdaterMottakerRequest>()
 
-                val mottaker = service.oppdaterMottaker(brevId, body.mottaker)
+                service.oppdaterMottaker(brevId, body.mottaker)
 
-                call.respond(mottaker)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

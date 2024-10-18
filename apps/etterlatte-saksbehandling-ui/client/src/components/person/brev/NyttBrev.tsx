@@ -2,7 +2,7 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
@@ -67,7 +67,16 @@ export default function NyttBrev() {
                 <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
               </div>
               <div style={{ margin: '1rem' }}>
-                <BrevMottaker brev={brev} kanRedigeres={kanRedigeres} />
+                {brev.mottakere.map((mottaker) => (
+                  <BrevMottaker
+                    key={mottaker.id}
+                    brevId={brev.id}
+                    behandlingId={brev.behandlingId}
+                    sakId={brev.sakId}
+                    mottaker={mottaker}
+                    kanRedigeres={kanRedigeres}
+                  />
+                ))}
               </div>
             </Column>
             <Column>

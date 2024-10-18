@@ -115,11 +115,21 @@ internal class OversendelsesbrevRouteTest {
             Status.OPPRETTET,
             Tidspunkt.now(),
             Tidspunkt.now(),
-            Mottaker(
-                "Stor Snerk",
-                STOR_SNERK,
-                null,
-                Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+            listOf(
+                Mottaker(
+                    UUID.randomUUID(),
+                    "Stor Snerk",
+                    STOR_SNERK,
+                    null,
+                    Adresse(
+                        adresseType = "NORSKPOSTADRESSE",
+                        "Testgaten 13",
+                        "1234",
+                        "OSLO",
+                        land = "Norge",
+                        landkode = "NOR",
+                    ),
+                ),
             ),
             brevtype = Brevtype.OVERSENDELSE_KLAGE,
             brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,

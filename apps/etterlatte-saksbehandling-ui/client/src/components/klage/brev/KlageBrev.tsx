@@ -1,6 +1,6 @@
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
-import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { erKlageRedigerbar, Klage } from '~shared/types/Klage'
@@ -12,7 +12,7 @@ import { hentBrev } from '~shared/api/brev'
 import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { JaNei } from '~shared/types/ISvar'
-import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
@@ -64,18 +64,22 @@ export function KlageBrev() {
                 ? 'Oversendelsesbrev til klager'
                 : 'Avvisningsbrev til klager'}
             </BodyShort>
-            {isSuccess(hentetBrev) && (
-              <>
-                <BrevTittel
-                  brevId={hentetBrev.data.id}
-                  sakId={hentetBrev.data.sakId}
-                  tittel={hentetBrev.data.tittel}
-                  kanRedigeres={redigerbar}
-                />
-                <br />
-                <BrevMottaker brev={hentetBrev.data} kanRedigeres={redigerbar} />
-              </>
-            )}
+            {mapSuccess(hentetBrev, (brev) => (
+              <VStack gap="4">
+                <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={redigerbar} />
+
+                {brev.mottakere.map((mottaker) => (
+                  <BrevMottaker
+                    key={mottaker.id}
+                    brevId={brev.id}
+                    behandlingId={brev.behandlingId}
+                    sakId={brev.sakId}
+                    mottaker={mottaker}
+                    kanRedigeres={redigerbar}
+                  />
+                ))}
+              </VStack>
+            ))}
           </Box>
         </Sidebar>
 

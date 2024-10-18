@@ -72,7 +72,16 @@ export function TilbakekrevingBrev({
                 <br />
                 <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
                 <br />
-                <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
+                {vedtaksbrev.mottakere.map((mottaker) => (
+                  <BrevMottaker
+                    key={mottaker.id}
+                    brevId={vedtaksbrev.id}
+                    behandlingId={vedtaksbrev.behandlingId}
+                    sakId={vedtaksbrev.sakId}
+                    mottaker={mottaker}
+                    kanRedigeres={redigerbar}
+                  />
+                ))}
               </>
             )}
           </Box>

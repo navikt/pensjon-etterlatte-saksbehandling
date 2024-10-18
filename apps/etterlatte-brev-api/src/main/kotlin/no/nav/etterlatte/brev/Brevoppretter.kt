@@ -152,6 +152,7 @@ class Brevoppretter(
 
     private fun tomMottaker() =
         Mottaker(
+            UUID.randomUUID(),
             navn = "Ukjent",
             foedselsnummer = null,
             orgnummer = null,

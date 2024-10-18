@@ -128,9 +128,9 @@ class VedtaksbrevService(
             return
         } else if (!brev.kanEndres()) {
             throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
-        } else if (brev.mottaker.erGyldig().isNotEmpty()) {
-            sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottaker.erGyldig())
+        } else if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
+            sikkerlogger.error("Ugyldig mottaker(e): ${brev.mottakere.toJson()}")
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottakere.flatMap { it.erGyldig() })
         }
 
         val (saksbehandlerIdent, vedtakStatus) =

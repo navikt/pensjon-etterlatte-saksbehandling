@@ -50,14 +50,9 @@ private fun generateCorrelationId() = UUID.randomUUID().toString()
 
 fun getCorrelationId(): String = MDC.get(CORRELATION_ID) ?: generateCorrelationId()
 
-fun sikkerLoggOppstartOgAvslutning(applikasjonsnavn: String) {
+fun sikkerLoggOppstart(applikasjonsnavn: String) {
     val sikkerLogg = sikkerlogger()
     sikkerLogg.info("SikkerLogg: $applikasjonsnavn oppstart")
-    Runtime.getRuntime().addShutdownHook(
-        Thread {
-            sikkerLogg.debug("SikkerLogg: $applikasjonsnavn avslutter")
-        },
-    )
 }
 
 fun sikkerlogger(): Logger = LoggerFactory.getLogger("sikkerLogg")

@@ -40,7 +40,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { next, routeErGyldig } = useBehandlingRoutes()
   if (!routeErGyldig()) {
     throw Error(
-      `Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} `
+      `Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} mangler kanskje vilkårsvurdering? `
     )
   }
 

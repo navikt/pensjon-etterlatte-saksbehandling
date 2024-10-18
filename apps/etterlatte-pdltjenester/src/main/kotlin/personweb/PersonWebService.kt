@@ -20,6 +20,7 @@ import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.dto.PersonSoekSvar
 import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(
@@ -51,8 +52,9 @@ class PersonWebService(
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke person i PDL")
                 } else {
+                    sikkerLogg.warn("Kunne ikke hente person med fnr=$ident fra PDL: $pdlFeil")
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente person med ident=${ident.maskerFnr()} fra PDL: $pdlFeil",
+                        "Kunne ikke hente person med ident=${ident.maskerFnr()} se sikkerlogg for pdlfeil",
                     )
                 }
             } else {
@@ -73,8 +75,8 @@ class PersonWebService(
 
         return pdlOboKlient.soekPerson(soekPerson, bruker).let { personSoekSvar ->
             if (personSoekSvar.errors?.isNotEmpty() != null) {
-                logger.error("Fikk feil i PDL søk feil: {}", personSoekSvar.errors.toJson())
-                throw PdlForesporselFeilet("Kunne ikke søke mot pdl")
+                sikkerLogg.warn("Fikk feil i PDL søk feil: {}", personSoekSvar.errors.toJson())
+                throw PdlForesporselFeilet("Kunne ikke søke mot pdl se sikkerlogg for feil")
             } else {
                 if (personSoekSvar.data != null) {
                     if (personSoekSvar.data.sokPerson?.hits != null) {
@@ -207,8 +209,9 @@ class PersonWebService(
                 } else if (it.errors?.personIkkeFunnet() == true) {
                     throw FantIkkePersonException("Fant ikke personen $fnr")
                 } else {
+                    sikkerLogg.warn("Kunne ikke hente person med fnr=$fnr fra PDL: $pdlFeil")
                     throw no.nav.etterlatte.person.PdlForesporselFeilet(
-                        "Kunne ikke hente person med fnr=$fnr fra PDL: $pdlFeil",
+                        "Kunne ikke hente person med fnr=$fnr se sikkerlogg for feilmelding",
                     )
                 }
             } else {

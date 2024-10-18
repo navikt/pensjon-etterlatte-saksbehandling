@@ -327,6 +327,19 @@ internal fun Route.behandlingRoutes(
             }
         }
 
+        get("/tidligere-familiepleier") {
+            logger.info("Henter tidligereFamiliepleier for behandling $behandlingId")
+            val tidligereFamiliepleier =
+                inTransaction {
+                    behandlingService.hentTidligereFamiliepleier(behandlingId)
+                }
+
+            when (tidligereFamiliepleier) {
+                null -> call.respond(HttpStatusCode.NoContent)
+                else -> call.respond(tidligereFamiliepleier)
+            }
+        }
+
         post("/oppdater-grunnlag") {
             kunSkrivetilgang {
                 inTransaction {

@@ -78,6 +78,7 @@ data class HardkodaSystembruker private constructor(
         val oppgave = HardkodaSystembruker(Systembrukere.OPPGAVE)
         val opprettGrunnlag = HardkodaSystembruker(Systembrukere.OPPRETT_GRUNNLAG) // skal bort på sikt
         val ryddeBeregning = HardkodaSystembruker(Systembrukere.BEREGNING)
+        val omregning = HardkodaSystembruker(Systembrukere.OMREGNING)
     }
 
     enum class Systembrukere(
@@ -89,6 +90,7 @@ data class HardkodaSystembruker private constructor(
         TESTDATA("testdata"),
         OPPGAVE("oppgave"),
         BEREGNING("beregning"),
+        OMREGNING("omregning"),
     }
 }
 
@@ -113,19 +115,19 @@ data class Saksbehandler internal constructor(
 }
 
 enum class Claims {
-   /*
-    This is a special claim used to determine whether a token is a machine-to-machine (app-only) token or a on-behalf-of (user) token.
-    https://docs.nais.io/auth/entra-id/reference/?h=idtyp#claims
-    https://learn.microsoft.com/en-us/entra/identity-platform/optional-claims-reference#v10-and-v20-optional-claims-set
-    */
+    /*
+     This is a special claim used to determine whether a token is a machine-to-machine (app-only) token or a on-behalf-of (user) token.
+     https://docs.nais.io/auth/entra-id/reference/?h=idtyp#claims
+     https://learn.microsoft.com/en-us/entra/identity-platform/optional-claims-reference#v10-and-v20-optional-claims-set
+     */
     @Suppress("ktlint:standard:enum-entry-name-case")
     idtyp,
 
-   /*
-   Kun for Saksbehandlertoken!
-   The internal identifier for the employees in NAV. Only applies in flows where a user is involved i.e., either the login or on-behalf-of flows.
-   https://docs.nais.io/auth/entra-id/reference/?h=NAVident#claims
-    */
+    /*
+    Kun for Saksbehandlertoken!
+    The internal identifier for the employees in NAV. Only applies in flows where a user is involved i.e., either the login or on-behalf-of flows.
+    https://docs.nais.io/auth/entra-id/reference/?h=NAVident#claims
+     */
     NAVident,
 
     /*

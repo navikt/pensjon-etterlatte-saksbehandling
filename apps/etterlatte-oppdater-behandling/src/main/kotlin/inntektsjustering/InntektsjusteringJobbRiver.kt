@@ -83,13 +83,13 @@ internal class InntektsjusteringJobbRiver(
             haandterSaker = { sakerSomSkalInformeres ->
                 sakerSomSkalInformeres.saker.forEach { sak ->
 
+                    // TODO kall nytt endepunkt og fjern kode..
+
                     logger.info("$kjoering: Klar til å opprette, journalføre og distribuere varsel og vedtak for sakId ${sak.id}")
 
                     val sakMedBehandlinger = behandlingService.hentBehandlingerForSak(FoedselsnummerDTO(sak.ident))
                     if (skalBehandlingOmregnes(sakMedBehandlinger.behandlinger, loependeFom)) {
                         // TODO status KLAR_FOR_OMREGNING
-
-                        // TODO Sjekk kjøring og status før fortsettelse? Eller ekslduer ved uthenging?
 
                         packet.omregningData =
                             OmregningData(

@@ -107,14 +107,12 @@ export const tagTekstForKunEnJuridiskForelder = (behandling: IBehandlingReducer)
 }
 
 export const mapNavn = (fnr: string, personopplysninger: Personopplysninger | null): string => {
-  if (!personopplysninger) return fnr
-
-  const opplysning = personopplysninger.avdoede.find(
+  const opplysning = personopplysninger?.avdoede?.find(
     (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
   )?.opplysning
 
   if (!opplysning) {
-    return fnr
+    return fnr === 'UKJENT_AVDOED' ? 'Ukjent avdød' : fnr
   }
   return `${formaterNavn(opplysning)} (${fnr})`
 }

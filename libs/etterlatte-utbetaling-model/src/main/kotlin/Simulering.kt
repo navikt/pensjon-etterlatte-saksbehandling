@@ -29,7 +29,6 @@ data class SimulertBeregningsperiode(
     val beloep: BigDecimal,
     val tilbakefoering: Boolean,
     val klassekode: String,
-    val klassekodeTekniskArt: Boolean,
     val klassekodeBeskrivelse: String,
     val klasseType: KlasseType,
 )

@@ -36,6 +36,7 @@ data class OmstillingsstoenadInnvilgelse(
     val harUtbetaling: Boolean,
     val bosattUtland: Boolean,
     val erSluttbehandling: Boolean,
+    val tidligereFamiliepleier: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -119,6 +120,7 @@ data class OmstillingsstoenadInnvilgelse(
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
                 erSluttbehandling = behandling.erSluttbehandling,
+                tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false,
             )
         }
     }

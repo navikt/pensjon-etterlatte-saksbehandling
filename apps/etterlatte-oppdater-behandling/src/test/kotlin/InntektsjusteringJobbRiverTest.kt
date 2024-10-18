@@ -28,7 +28,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class InntektsjusteringJobbRiver {
+class InntektsjusteringJobbRiverTest {
     private val kjoering = "inntektsjustering-jobb-2024"
     private val loependeFom = YearMonth.of(2024, 1)
 
@@ -36,9 +36,17 @@ class InntektsjusteringJobbRiver {
     fun `skal inkluderes i omregning`() {
         val behandlinger =
             listOf(
-                genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.INNTEKTSENDRING, YearMonth.of(2023, 1)),
+                genererBehandlingSammendrag(
+                    BehandlingStatus.IVERKSATT,
+                    Revurderingaarsak.INNTEKTSENDRING,
+                    YearMonth.of(2023, 1),
+                ),
                 genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.ANNEN, YearMonth.of(2024, 1)),
-                genererBehandlingSammendrag(BehandlingStatus.AVBRUTT, Revurderingaarsak.INNTEKTSENDRING, YearMonth.of(2024, 1)),
+                genererBehandlingSammendrag(
+                    BehandlingStatus.AVBRUTT,
+                    Revurderingaarsak.INNTEKTSENDRING,
+                    YearMonth.of(2024, 1),
+                ),
             )
         skalBehandlingOmregnes(behandlinger, YearMonth.of(2024, 1)) shouldBe true
     }
@@ -46,7 +54,13 @@ class InntektsjusteringJobbRiver {
     @Test
     fun `skal IKKE inkluderes i omregning`() {
         val behandlinger =
-            listOf(genererBehandlingSammendrag(BehandlingStatus.IVERKSATT, Revurderingaarsak.INNTEKTSENDRING, YearMonth.of(2024, 1)))
+            listOf(
+                genererBehandlingSammendrag(
+                    BehandlingStatus.IVERKSATT,
+                    Revurderingaarsak.INNTEKTSENDRING,
+                    YearMonth.of(2024, 1),
+                ),
+            )
         skalBehandlingOmregnes(behandlinger, YearMonth.of(2024, 1)) shouldBe false
     }
 
@@ -59,7 +73,14 @@ class InntektsjusteringJobbRiver {
             mockk<BehandlingService>(relaxed = true).also {
                 every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
-                        listOf(Sak("saksbehandler1", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)),
+                        listOf(
+                            Sak(
+                                "saksbehandler1",
+                                SakType.OMSTILLINGSSTOENAD,
+                                randomSakId(),
+                                Enheter.PORSGRUNN.enhetNr,
+                            ),
+                        ),
                     )
             }
 
@@ -68,7 +89,14 @@ class InntektsjusteringJobbRiver {
         inspector.sendTestMessage(genererMelding(loependeFom))
 
         verify(exactly = 1) {
-            behandlingServiceMock.hentAlleSaker(kjoering, any(), any(), any(), SakType.OMSTILLINGSSTOENAD, loependeFom = loependeFom)
+            behandlingServiceMock.hentAlleSaker(
+                kjoering,
+                any(),
+                any(),
+                any(),
+                SakType.OMSTILLINGSSTOENAD,
+                loependeFom = loependeFom,
+            )
         }
     }
 
@@ -81,7 +109,14 @@ class InntektsjusteringJobbRiver {
             mockk<BehandlingService>(relaxed = true).also {
                 every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
-                        listOf(Sak("saksbehandler1", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)),
+                        listOf(
+                            Sak(
+                                "saksbehandler1",
+                                SakType.OMSTILLINGSSTOENAD,
+                                randomSakId(),
+                                Enheter.PORSGRUNN.enhetNr,
+                            ),
+                        ),
                     )
             }
 
@@ -90,7 +125,14 @@ class InntektsjusteringJobbRiver {
 
         inspector.sendTestMessage(genererMelding(loependeFom))
         verify(exactly = 0) {
-            behandlingServiceMock.hentAlleSaker(kjoering, any(), any(), any(), SakType.OMSTILLINGSSTOENAD, loependeFom = loependeFom)
+            behandlingServiceMock.hentAlleSaker(
+                kjoering,
+                any(),
+                any(),
+                any(),
+                SakType.OMSTILLINGSSTOENAD,
+                loependeFom = loependeFom,
+            )
         }
     }
 

@@ -56,6 +56,7 @@ internal class OmregningsHendelserBehandlingRiver(
         omregningData.endreSakType(sakType)
         omregningData.endreBehandlingId(behandlingId)
         omregningData.endreForrigeBehandlingid(forrigeBehandlingId)
+        omregningData.endreVerifiserUtbetalingUendret(true)
         packet.omregningData = omregningData
 
         packet.setEventNameForHendelseType(OmregningHendelseType.BEHANDLING_OPPRETTA)

@@ -53,6 +53,7 @@ data class OmregningData(
     private var sakType: SakType? = null,
     private var behandlingId: UUID? = null,
     private var forrigeBehandlingId: UUID? = null,
+    private var verifiserUtbetalingUendret: Boolean? = null,
 ) {
     fun toPacket() =
         OmregningDataPacket(
@@ -63,6 +64,7 @@ data class OmregningData(
             sakType,
             behandlingId,
             forrigeBehandlingId,
+            verifiserUtbetalingUendret,
         )
 
     fun hentFraDato(): LocalDate = fradato ?: throw OmregningshendelseHarFeilTilstand(OmregningData::fradato.name)
@@ -100,6 +102,16 @@ data class OmregningData(
         }
         forrigeBehandlingId = value
     }
+
+    fun hentVerifiserUtbetalingUendret() =
+        verifiserUtbetalingUendret ?: throw OmregningshendelseHarFeilTilstand(OmregningData::verifiserUtbetalingUendret.name)
+
+    fun endreVerifiserUtbetalingUendret(value: Boolean) {
+        if (verifiserUtbetalingUendret != null) {
+            throw OmregningshendelseSkalIkkeMuteres(OmregningData::verifiserUtbetalingUendret.name)
+        }
+        verifiserUtbetalingUendret = value
+    }
 }
 
 data class OmregningDataPacket(
@@ -110,6 +122,7 @@ data class OmregningDataPacket(
     val sakType: SakType?,
     val behandlingId: UUID?,
     val forrigeBehandlingId: UUID?,
+    val verifiserUtbetalingUendret: Boolean?,
 ) {
     companion object KEYS {
         val KEY = HENDELSE_DATA_KEY
@@ -119,6 +132,7 @@ data class OmregningDataPacket(
         val FRA_DATO = "$HENDELSE_DATA_KEY.${OmregningDataPacket::fradato.name}"
         val BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::behandlingId.name}"
         val FORRIGE_BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::forrigeBehandlingId.name}"
+        val VERIFISER_UTBETALING_UENDRET = "$HENDELSE_DATA_KEY.${OmregningDataPacket::verifiserUtbetalingUendret.name}"
     }
 }
 

@@ -2,7 +2,6 @@ package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
@@ -58,15 +57,15 @@ internal class OpprettVedtakforespoerselRiver(
             if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
                 vedtak.opprettVedtakOgFatt(sakId, behandlingId)
             } else {
-                // TODO bør se på flyten her også
-                if (omregningData.revurderingaarsak == Revurderingaarsak.REGULERING) {
-                    vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
-                } else {
+                if (omregningData.hentVerifiserUtbetalingUendret()) {
                     vedtak.opprettVedtakOgFatt(sakId, behandlingId)
                     verifiserUendretUtbetaling(behandlingId)
                     vedtak.attesterVedtak(sakId, behandlingId)
+                } else {
+                    vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
                 }
             }
+
         hentBeloep(respons, dato)?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
         logger.info("Opprettet vedtak ${respons.vedtak.id} for sak: $sakId og behandling: $behandlingId")
         RapidUtsender.sendUt(respons, packet, context)

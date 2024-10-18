@@ -324,6 +324,7 @@ class KlageServiceImpl(
             when (kabalrespons.resultat) {
                 BehandlingResultat.HENLAGT,
                 BehandlingResultat.IKKE_SATT,
+                BehandlingResultat.HEVET,
                 -> {
                 } // Her trenger vi ikke gjøre noe
                 BehandlingResultat.IKKE_MEDHOLD,

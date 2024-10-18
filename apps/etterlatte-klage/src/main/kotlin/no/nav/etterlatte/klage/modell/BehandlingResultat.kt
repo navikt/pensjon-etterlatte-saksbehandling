@@ -13,6 +13,7 @@ enum class BehandlingEventType {
 enum class KlageinstansUtfall(
     val navn: String,
 ) {
+    HEVET("Hevet"),
     TRUKKET("Trukket KA"),
     RETUR("Retur KA"),
     OPPHEVET("Opphevet KA"),

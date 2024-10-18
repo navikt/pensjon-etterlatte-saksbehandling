@@ -13,7 +13,7 @@ import {
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
-import { soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
+import { hentGyldigeNavigeringsStatuser, soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
@@ -138,6 +138,25 @@ export const useBehandlingRoutes = () => {
 
   const aktuelleRoutes = hentAktuelleRoutes(behandling, personopplysninger)
 
+  const routeErGyldig = (): boolean => {
+    const alleRoutes: BehandlingRouteTypes[] = Object.values(routeTypes)
+    const valgtRoute = alleRoutes.filter((value) => value.path === currentRoute)
+    if (valgtRoute.length) {
+      const pathInfo = valgtRoute[0]
+      if (pathInfo.kreverBehandlingsstatus) {
+        return (
+          !!pathInfo.kreverBehandlingsstatus &&
+          !!behandling &&
+          hentGyldigeNavigeringsStatuser(behandling.status).includes(pathInfo.kreverBehandlingsstatus(behandling))
+        )
+      } else {
+        return true
+      }
+    } else {
+      return false
+    }
+  }
+
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
 
@@ -154,7 +173,16 @@ export const useBehandlingRoutes = () => {
     goto(previousPath)
   }
 
-  return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
+  return {
+    next,
+    back,
+    lastPage,
+    firstPage,
+    behandlingRoutes: aktuelleRoutes,
+    currentRoute,
+    goto,
+    routeErGyldig: routeErGyldig,
+  }
 }
 
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysninger: Personopplysninger | null) => {

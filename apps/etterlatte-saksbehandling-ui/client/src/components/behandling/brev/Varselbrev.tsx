@@ -37,7 +37,12 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   )
 
   const [varselbrev, setVarselbrev] = useState<IBrev>()
-  const { next } = useBehandlingRoutes()
+  const { next, routeErGyldig } = useBehandlingRoutes()
+  if (!routeErGyldig()) {
+    throw Error(
+      `Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} `
+    )
+  }
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVarselbrev)
   const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVarselbrev)

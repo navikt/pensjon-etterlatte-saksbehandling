@@ -40,7 +40,9 @@ loggerRouter.post('/', express.json(), (req, res) => {
   const user = getNAVident(req.headers.authorization)
   const errorData = logEvent.data
 
-  if (logEvent.type && logEvent.type === 'info') {
+  if (logEvent.type && logEvent.type.toLowerCase() === 'info') {
+    frontendLogger.info('Frontendlogging: ', JSON.stringify(logEvent))
+  } else if (logEvent.type && logEvent.type.toLowerCase() === 'warning') {
     frontendLogger.info('Frontendlogging: ', JSON.stringify(logEvent))
   } else {
     if (logEvent.stackInfo && isStackInfoValid(logEvent.stackInfo)) {

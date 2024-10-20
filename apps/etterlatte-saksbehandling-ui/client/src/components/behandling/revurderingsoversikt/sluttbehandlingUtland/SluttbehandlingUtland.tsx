@@ -171,7 +171,7 @@ export default function SluttbehandlingUtland({
           resetFeilkoder={() => setFeilkoder(new Set([]))}
         />
       )}
-      {landMedDokumenter.length > 0 ? (
+      {redigerbar && landMedDokumenter.length > 0 ? (
         <Button
           style={{ marginTop: '1.5rem', marginLeft: '0.5rem' }}
           loading={isPending(lagreRevurderingsinfoStatus)}

@@ -346,6 +346,7 @@ fun behandling(
     sendeBrev = true,
     opphoerFraOgMed = null,
     relatertBehandlingId = null,
+    tidligereFamiliepleier = null,
 )
 
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)

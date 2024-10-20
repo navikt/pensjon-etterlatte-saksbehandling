@@ -75,6 +75,7 @@ enum class BehandlingResultat {
     IKKE_MEDHOLD_FORMKRAV_AVVIST,
     IKKE_SATT,
     HENLAGT,
+    HEVET,
 }
 
 data class Kabalrespons(

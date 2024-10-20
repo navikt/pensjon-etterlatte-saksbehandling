@@ -5,9 +5,6 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType
-import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
-import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_3AAR
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -15,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Month
@@ -67,7 +65,7 @@ class TidshendelseServiceTest {
                 TidshendelsePacket(
                     lagMeldingForVurdertLoependeYtelse(
                         sakId = sakId2,
-                        type = TidshendelserJobbType.OMS_DOED_4MND,
+                        type = JobbType.OMS_DOED_4MND,
                         behandlingsmaaned = YearMonth.of(2024, 1),
                         behandlingId = behandlingId,
                     ),
@@ -80,7 +78,7 @@ class TidshendelseServiceTest {
                 sakId = sakId2,
                 oppgaveType = OppgaveType.AKTIVITETSPLIKT,
                 referanse = behandlingId.toString(),
-                merknad = "Infobrev om aktivitetsplikt OMS etter 4 mnd",
+                merknad = any(),
                 frist = withArg { it shouldNotBe null },
             )
         }
@@ -94,7 +92,7 @@ class TidshendelseServiceTest {
         val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
 
-        val melding = lagMeldingForVurdertLoependeYtelse(sakId, behandlingsmaaned, type = AO_BP20)
+        val melding = lagMeldingForVurdertLoependeYtelse(sakId, behandlingsmaaned, type = JobbType.AO_BP20)
         melding["yrkesskadefordel_pre_20240101"] = true
 
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding))
@@ -109,7 +107,7 @@ class TidshendelseServiceTest {
         val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
 
-        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, type = OMS_DOED_3AAR)
+        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, type = JobbType.OMS_DOED_3AAR)
         melding["oms_rett_uten_tidsbegrensning"] = true
 
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding))
@@ -147,7 +145,7 @@ class TidshendelseServiceTest {
                 sakId = sakId,
                 oppgaveType = OppgaveType.REVURDERING,
                 referanse = null,
-                merknad = "Aldersovergang v/20 år",
+                merknad = any(),
                 frist = any(),
             )
         }

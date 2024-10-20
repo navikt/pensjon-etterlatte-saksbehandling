@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":libs:etterlatte-oppgave-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
+    implementation(project(":libs:etterlatte-tidshendelser-model"))
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)

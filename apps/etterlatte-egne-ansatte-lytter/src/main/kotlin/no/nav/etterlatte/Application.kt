@@ -10,7 +10,7 @@ import no.nav.etterlatte.kafka.KafkaEnvironment
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
 import no.nav.etterlatte.libs.ktor.initialisering.run
@@ -25,7 +25,7 @@ class Server {
     private val engine = initEmbeddedServerUtenRest(httpPort = 8080, applicationConfig = defaultConfig)
 
     init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-egne-ansatte-lytter")
+        sikkerLoggOppstart("etterlatte-egne-ansatte-lytter")
     }
 
     fun run() {

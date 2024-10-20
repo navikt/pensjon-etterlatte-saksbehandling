@@ -1,4 +1,4 @@
-import { Button, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
+import { Alert, Button, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { NOK } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
@@ -12,6 +12,7 @@ import { lastDayOfMonth } from 'date-fns'
 import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
 import { IAvkortingGrunnlagFrontend } from '~shared/types/IAvkorting'
 import { PencilIcon } from '@navikt/aksel-icons'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -29,6 +30,13 @@ export const AvkortingInntekt = ({
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, useInnloggetSaksbehandler().skriveEnheter)
   const [visForm, setVisForm] = useState(false)
   const [visHistorikk, setVisHistorikk] = useState(false)
+
+  const personopplysning = usePersonopplysninger()
+  const fyller67 =
+    personopplysning &&
+    personopplysning.soeker &&
+    avkortingGrunnlagFrontend &&
+    avkortingGrunnlagFrontend.aar - personopplysning.soeker.opplysning.foedselsaar === 67
 
   const listeVisningAvkortingGrunnlag = () => {
     if (avkortingGrunnlagFrontend === undefined) {
@@ -63,6 +71,11 @@ export const AvkortingInntekt = ({
         (avkortingGrunnlagFrontend.fraVirk || avkortingGrunnlagFrontend.historikk.length > 0) && (
           <VStack marginBlock="4">
             <Heading size="small">{avkortingGrunnlagFrontend.aar}</Heading>
+            {fyller67 && (
+              <Alert variant="warning">
+                Bruker fyller 67 for inntektsåret og antall innvilga måneder vil bli tilpasset deretter.
+              </Alert>
+            )}
             <Table className="table" zebraStripes>
               <Table.Header>
                 <Table.Row>

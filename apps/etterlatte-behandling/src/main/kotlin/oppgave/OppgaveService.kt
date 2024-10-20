@@ -651,6 +651,7 @@ class OppgaveService(
                         OppgaveType.TILLEGGSINFORMASJON,
                         OppgaveType.GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
                         OppgaveType.AKTIVITETSPLIKT,
+                        OppgaveType.AKTIVITETSPLIKT_12MND,
                         OppgaveType.AKTIVITETSPLIKT_REVURDERING,
                         OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
                         ->

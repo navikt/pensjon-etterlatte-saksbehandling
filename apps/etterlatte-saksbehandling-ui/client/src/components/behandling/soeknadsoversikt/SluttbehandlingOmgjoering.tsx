@@ -126,14 +126,14 @@ function Sluttbehandling({
       ) : null}
       {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
         <SEDLandMedDokumenter
-          redigerbar={redigerbar} //TODO: fikse dette
+          redigerbar={redigerbar}
           landListe={alleLandKodeverk}
           landMedDokumenter={landMedDokumenter}
           setLandMedDokumenter={setLandMedDokumenter}
           resetFeilkoder={() => setFeilkoder(new Set([]))}
         />
       )}
-      {landMedDokumenter.length > 0 ? (
+      {redigerbar && landMedDokumenter.length > 0 ? (
         <Button
           style={{ marginTop: '1.5rem', marginLeft: '0.5rem' }}
           loading={isPending(lagreStatus)}

@@ -6,7 +6,7 @@ import no.nav.etterlatte.brev.notat.notatRoute
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.run
@@ -19,7 +19,7 @@ private class Server(
     val context: ApplicationContext,
 ) {
     init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-brev-api") // TODO: naisappame?
+        sikkerLoggOppstart("etterlatte-brev-api") // TODO: naisappame?
     }
 
     val engine =

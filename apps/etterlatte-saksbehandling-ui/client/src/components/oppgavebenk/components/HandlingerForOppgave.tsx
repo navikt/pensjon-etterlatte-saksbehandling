@@ -151,6 +151,14 @@ export const HandlingerForOppgave = ({
           <AktivitetspliktInfoModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         ))
       )
+    case Oppgavetype.AKTIVITETSPLIKT_12MND:
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/`}>
+            Gå til vurdering
+          </Button>
+        )
+      )
     case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:
       return (
         erInnloggetSaksbehandlerOppgave && (

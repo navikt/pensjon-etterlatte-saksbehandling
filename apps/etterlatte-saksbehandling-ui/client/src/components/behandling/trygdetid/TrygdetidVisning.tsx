@@ -1,6 +1,6 @@
 import { Box, Button, Heading } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
-import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
@@ -10,7 +10,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import React from 'react'
 import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
 import { oppdaterStatus } from '~shared/api/trygdetid'
-import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
@@ -19,7 +19,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
-const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
+const TrygdetidVisning = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()

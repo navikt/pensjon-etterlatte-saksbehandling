@@ -64,33 +64,35 @@ export default function SEDLandMedDokumenter({
                     .join(', ')}
                 </Table.DataCell>
                 <Table.DataCell scope="row">
-                  <Button
-                    disabled={!redigerbar}
-                    variant="tertiary"
-                    icon={<TrashIcon />}
-                    onClick={() => fjernLand()}
-                    style={{ float: 'right' }}
-                  >
-                    Slett land
-                  </Button>
+                  {redigerbar && (
+                    <Button
+                      variant="tertiary"
+                      icon={<TrashIcon />}
+                      onClick={() => fjernLand()}
+                      style={{ float: 'right' }}
+                    >
+                      Slett land
+                    </Button>
+                  )}
                 </Table.DataCell>
               </Table.ExpandableRow>
             )
           })}
         </Table.Body>
       </Table>
-      <Button
-        disabled={!redigerbar}
-        style={{ marginTop: '1rem' }}
-        onClick={() => {
-          setLandMedDokumenter((landMedDokumenter) => {
-            return landMedDokumenter.concat({ dokumenter: [] })
-          })
-        }}
-        variant="tertiary"
-      >
-        Legg til land
-      </Button>
+      {redigerbar && (
+        <Button
+          style={{ marginTop: '1rem' }}
+          onClick={() => {
+            setLandMedDokumenter((landMedDokumenter) => {
+              return landMedDokumenter.concat({ dokumenter: [] })
+            })
+          }}
+          variant="tertiary"
+        >
+          Legg til land
+        </Button>
+      )}
     </>
   )
 }

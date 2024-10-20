@@ -145,8 +145,9 @@ data class Avkorting(
         beregning: Beregning,
         sanksjoner: List<Sanksjon>,
         opphoerFom: YearMonth?,
+        aldersovergang: YearMonth? = null,
     ): Avkorting {
-        val oppdatertMedNyInntekt = oppdaterMedInntektsgrunnlag(nyttGrunnlag, bruker, opphoerFom)
+        val oppdatertMedNyInntekt = oppdaterMedInntektsgrunnlag(nyttGrunnlag, bruker, opphoerFom, aldersovergang)
         return oppdatertMedNyInntekt.beregnAvkortingRevurdering(beregning, sanksjoner)
     }
 
@@ -154,6 +155,7 @@ data class Avkorting(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
         bruker: BrukerTokenInfo,
         opphoerFom: YearMonth? = null,
+        aldersovergang: YearMonth? = null,
     ): Avkorting {
         val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom)
         val oppdatert =
@@ -173,7 +175,7 @@ data class Avkorting(
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
                                 innvilgaMaaneder =
                                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, opphoerFom),
+                                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, opphoerFom, aldersovergang),
                                 overstyrtInnvilgaMaanederAarsak =
                                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
@@ -428,7 +430,7 @@ data class Avkorting(
         if (aarsoppgjoer.any { it.aar == nytt.aar }) {
             return aarsoppgjoer.map { if (it.aar == nytt.aar) nytt else it }
         }
-        return aarsoppgjoer + listOf(nytt)
+        return (aarsoppgjoer + listOf(nytt)).sortedBy { it.aar }
     }
 }
 
@@ -676,7 +678,9 @@ private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning
 fun finnAntallInnvilgaMaanederForAar(
     aarsoppgjoerFom: YearMonth,
     opphoerFom: YearMonth?,
+    aldersovergang: YearMonth?,
 ): Int {
-    val tom = opphoerFom?.monthValue?.let { it - 1 } ?: 12
+    val tomMaaned = opphoerFom ?: aldersovergang
+    val tom = tomMaaned?.monthValue?.let { it - 1 } ?: 12
     return tom - (aarsoppgjoerFom.monthValue - 1)
 }

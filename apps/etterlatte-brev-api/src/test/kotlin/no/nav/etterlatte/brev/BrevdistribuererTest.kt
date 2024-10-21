@@ -53,7 +53,7 @@ class BrevdistribuererTest {
                 journalpostId,
                 DistribusjonsType.ANNET,
                 DistribusjonsTidspunktType.KJERNETID,
-                brev.mottakere.first().adresse,
+                brev.mottakere.single().adresse,
                 false,
             )
         }

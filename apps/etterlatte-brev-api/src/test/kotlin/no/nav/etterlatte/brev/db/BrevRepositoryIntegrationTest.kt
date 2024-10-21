@@ -95,7 +95,7 @@ internal class BrevRepositoryIntegrationTest(
         val hentetBrev = db.hentBrev(nyttBrev.id)
         assertEquals(nyttBrev.id, hentetBrev.id)
         assertEquals(behandlingId, hentetBrev.behandlingId)
-        assertEquals(hentetBrev.mottakere.first(), ulagretBrev.mottaker)
+        assertEquals(hentetBrev.mottakere.single(), ulagretBrev.mottaker)
     }
 
     @Test

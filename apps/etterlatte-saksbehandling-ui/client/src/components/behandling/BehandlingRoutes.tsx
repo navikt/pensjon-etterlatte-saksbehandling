@@ -159,14 +159,14 @@ export const useBehandlingRoutes = () => {
   const next = () => {
     const index = aktuelleRoutes.findIndex((item) => item.path === currentRoute)
     const nextPath = aktuelleRoutes[index + 1].path
-    goto(nextPath as BehandlingRouteTypesPath)
+    goto(nextPath)
   }
 
   const back = () => {
     const index = aktuelleRoutes.findIndex((item) => item.path === currentRoute)
     const previousPath = aktuelleRoutes[index - 1].path
 
-    goto(previousPath as BehandlingRouteTypesPath)
+    goto(previousPath)
   }
 
   return {

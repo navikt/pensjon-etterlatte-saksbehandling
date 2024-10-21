@@ -5,11 +5,14 @@ import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 
 class OmregningService(
     private val behandlingService: BehandlingService,
     private val omregningDao: OmregningDao,
 ) {
+    fun oppdaterKjoering(request: KjoeringRequest) = oppdaterKjoering(request, HardkodaSystembruker.omregning)
+
     fun oppdaterKjoering(
         request: KjoeringRequest,
         bruker: BrukerTokenInfo,

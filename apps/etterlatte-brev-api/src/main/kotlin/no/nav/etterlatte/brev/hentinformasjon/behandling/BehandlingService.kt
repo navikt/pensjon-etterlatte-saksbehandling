@@ -42,4 +42,9 @@ class BehandlingService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo)
+
+    suspend fun hentTidligereFamiliepleier(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = behandlingKlient.hentTidligereFamiliepleier(behandlingId, brukerTokenInfo)
 }

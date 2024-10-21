@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.fromDto
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -32,6 +33,7 @@ data class OmstillingsstoenadInnvilgelse(
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
     val harUtbetaling: Boolean,
     val erSluttbehandling: Boolean,
+    val tidligereFamiliepleier: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -42,6 +44,7 @@ data class OmstillingsstoenadInnvilgelse(
             vilkaarsVurdering: VilkaarsvurderingDto,
             avdoede: List<Avdoed>,
             erSluttbehandling: Boolean,
+            tidligereFamiliepleier: TidligereFamiliepleier?,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -111,6 +114,7 @@ data class OmstillingsstoenadInnvilgelse(
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
                 erSluttbehandling = erSluttbehandling,
+                tidligereFamiliepleier = tidligereFamiliepleier?.svar ?: false,
             )
         }
     }

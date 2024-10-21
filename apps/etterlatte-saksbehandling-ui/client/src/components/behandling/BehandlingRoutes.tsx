@@ -105,7 +105,7 @@ const behandlingroutes: Record<string, BehandlingRouteType> = {
     kreverBehandlingsstatus: () => IBehandlingStatus.AVKORTET,
   },
 }
-
+// skal kun brukes av Behandling som laster behandling, å newe opp denne kan få utilsiktede konsekvenser andre steder
 export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()

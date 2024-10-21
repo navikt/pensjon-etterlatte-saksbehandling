@@ -167,7 +167,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysn
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandlingRoutes(behandling).filter((route) =>
-        soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
+        foerstegangsbehandlingRoutes(behandling, personopplysninger, lagVarselbrev)
           .map((pathinfo) => pathinfo.path)
           .includes(route.path)
       )
@@ -180,7 +180,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysn
   }
 }
 
-export function soeknadRoutes(
+export function foerstegangsbehandlingRoutes(
   behandling: IBehandlingReducer,
   personopplysninger: Personopplysninger | null,
   lagVarselbrev: boolean

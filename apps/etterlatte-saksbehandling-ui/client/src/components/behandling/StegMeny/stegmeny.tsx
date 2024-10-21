@@ -2,7 +2,11 @@ import styled from 'styled-components'
 import { IBehandlingsType, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
 import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
-import { BehandlingRouteTypes, revurderingRoutes, soeknadRoutes } from '~components/behandling/BehandlingRoutes'
+import {
+  BehandlingRouteTypes,
+  revurderingRoutes,
+  foerstegangsbehandlingRoutes,
+} from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import React, { useEffect } from 'react'
@@ -27,7 +31,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
     behandling.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT
   const routes =
     behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-      ? soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
+      ? foerstegangsbehandlingRoutes(behandling, personopplysninger, lagVarselbrev)
       : revurderingRoutes(behandling, lagVarselbrev)
 
   const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1

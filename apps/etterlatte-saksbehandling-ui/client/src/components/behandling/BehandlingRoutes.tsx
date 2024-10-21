@@ -188,7 +188,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysn
   const lagVarselbrev =
     behandling?.kilde === Vedtaksloesning.GJENOPPRETTA ||
     behandling?.revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT
-  //denne
+
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return foerstegangsbehandlingRoutes(behandling, personopplysninger, lagVarselbrev)

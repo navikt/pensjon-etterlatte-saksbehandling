@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
 import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
-import { BehandlingRouteTypes, useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteType, useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import React, { useEffect } from 'react'
@@ -19,7 +19,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
 
   const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
 
-  const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1
+  const erSisteRoute = (index: number, list: BehandlingRouteType[]) => index != list.length - 1
 
   // Trenger vilkårsvurdering for å kunne vise riktig routes etter at vv i en behandling er utført
   useEffect(() => {

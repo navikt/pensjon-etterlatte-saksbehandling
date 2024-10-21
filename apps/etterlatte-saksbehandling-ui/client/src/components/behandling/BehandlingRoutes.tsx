@@ -106,23 +106,6 @@ const behandlingroutes: Record<string, BehandlingRouteType> = {
   },
 }
 
-function useRouteNavigation() {
-  const match = useMatch('/behandling/:behandlingId/:section')
-  const [currentRoute, setCurrentRoute] = useState<string | undefined>(match?.params?.section)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    setCurrentRoute(match?.params?.section)
-  }, [match])
-
-  const goto = (path: BehandlingRouteTypesPath) => {
-    setCurrentRoute(path)
-    navigate(`/behandling/${match?.params?.behandlingId}/${path}`)
-  }
-
-  return { currentRoute, goto }
-}
-
 export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
@@ -182,6 +165,23 @@ export const useBehandlingRoutes = () => {
   }
 }
 
+function useRouteNavigation() {
+  const match = useMatch('/behandling/:behandlingId/:section')
+  const [currentRoute, setCurrentRoute] = useState<string | undefined>(match?.params?.section)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    setCurrentRoute(match?.params?.section)
+  }, [match])
+
+  const goto = (path: BehandlingRouteTypesPath) => {
+    setCurrentRoute(path)
+    navigate(`/behandling/${match?.params?.behandlingId}/${path}`)
+  }
+
+  return { currentRoute, goto }
+}
+
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysninger: Personopplysninger | null) => {
   if (!behandling) return []
 
@@ -197,7 +197,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysn
   }
 }
 
-export function foerstegangsbehandlingRoutes(
+function foerstegangsbehandlingRoutes(
   behandling: IBehandlingReducer,
   personopplysninger: Personopplysninger | null,
   lagVarselbrev: boolean
@@ -231,7 +231,7 @@ export function foerstegangsbehandlingRoutes(
   )
 }
 
-export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteType> {
+function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteType> {
   const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteType> = opphoer

@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringKjoering
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -16,7 +17,6 @@ import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import org.slf4j.LoggerFactory
-import java.time.Year
 import java.time.YearMonth
 
 class AarligInntektsjusteringJobbService(
@@ -74,7 +74,7 @@ class AarligInntektsjusteringJobbService(
                             TEKNISK_TID_KEY to Tidspunkt.now(),
                             OmregningDataPacket.KEY to
                                 OmregningData(
-                                    kjoering = "Årlig inntektsjustering ${Year.now().plusYears(1)}",
+                                    kjoering = AarligInntektsjusteringKjoering.getKjoering(),
                                     sakId = sakId,
                                     revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING, // TODO egen årsak?
                                     fradato = loependeFom.atDay(1),

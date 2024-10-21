@@ -46,6 +46,18 @@ const sanksjonDefaultValue: SanksjonDefaultValue = {
   type: '',
 }
 
+function tidligstSanksjonFom(sanksjoner?: ISanksjon[], behandling?: IBehandlingReducer): Date | undefined {
+  if (behandling?.behandlingType === 'REVURDERING' && sanksjoner?.length) {
+    return new Date(
+      [...sanksjoner].sort((a, b) => new Date(a.fom).getMilliseconds() - new Date(b.fom).getMilliseconds())[0].fom
+    )
+  }
+  if (behandling?.virkningstidspunkt?.dato) {
+    return new Date(behandling?.virkningstidspunkt?.dato)
+  }
+  return undefined
+}
+
 export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const [lagreSanksjonResponse, lagreSanksjonRequest] = useApiCall(lagreSanksjon)
   const [hentSanksjonStatus, hentSanksjonRequest] = useApiCall(hentSanksjon)
@@ -128,6 +140,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     if (tom && isBefore(tom, fom)) {
       return 'Fra-dato kan ikke være etter til-dato'
     } else if (
+      behandling.behandlingType !== 'REVURDERING' &&
       behandling.virkningstidspunkt?.dato &&
       isBefore(startOfDay(fom), startOfDay(new Date(behandling.virkningstidspunkt.dato)))
     ) {
@@ -146,8 +159,6 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     }
     return undefined
   }
-
-  const sanksjonFraDato = behandling.virkningstidspunkt?.dato ? new Date(behandling.virkningstidspunkt.dato) : undefined
 
   return (
     <TableBox>
@@ -295,7 +306,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                       label="Dato fra og med"
                       name="datoFom"
                       control={control}
-                      fromDate={sanksjonFraDato}
+                      fromDate={tidligstSanksjonFom(sanksjoner, behandling)}
                       validate={validerFom}
                       required
                     />
@@ -303,7 +314,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                       label="Dato til og med (valgfri)"
                       name="datoTom"
                       control={control}
-                      fromDate={sanksjonFraDato}
+                      fromDate={tidligstSanksjonFom(sanksjoner, behandling)}
                       validate={validerTom}
                     />
                   </HStack>

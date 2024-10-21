@@ -70,7 +70,10 @@ class SanksjonService(
         if (behandling.virkningstidspunkt == null) throw ManglerVirkningstidspunktException()
         if (sanksjon.sakId != behandling.sak) throw SakidTilhoererIkkeBehandlingException()
 
-        if (sanksjon.tom != null && sanksjon.tom.isBefore(sanksjon.fom)) throw TomErFoerFomException()
+        val normalisertFom = YearMonth.from(sanksjon.fom)
+        val normalisertTom = sanksjon.tom?.let { YearMonth.from(it) }
+        if (normalisertTom != null && normalisertTom.isBefore(normalisertFom)) throw TomErFoerFomException()
+
         if (!sanksjonErLikeFoerVirk(behandling, sanksjon, brukerTokenInfo)) {
             throw SanksjonEndresFoerVirkException()
         }
@@ -132,8 +135,8 @@ class SanksjonService(
                 listOf(
                     GrunnlagMedPeriode(
                         data = sanksjon.type,
-                        fom = sanksjon.fom,
-                        tom = sanksjon.tom,
+                        fom = YearMonth.from(sanksjon.fom).atDay(1),
+                        tom = sanksjon.tom?.let { YearMonth.from(it).atEndOfMonth() },
                     ),
                 )
 

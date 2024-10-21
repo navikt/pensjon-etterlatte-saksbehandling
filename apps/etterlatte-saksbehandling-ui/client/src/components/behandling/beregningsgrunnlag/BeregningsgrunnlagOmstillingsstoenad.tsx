@@ -1,6 +1,6 @@
 import { Box, Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { BehandlingRouteContext } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
@@ -12,7 +12,7 @@ import {
   oppdaterBeregningsGrunnlag,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {
   Beregning,
   BeregningsMetodeBeregningsgrunnlagForm,
@@ -37,7 +37,7 @@ import { formaterNavn } from '~shared/types/Person'
 const BeregningsgrunnlagOmstillingsstoenad = () => {
   const behandling = useBehandling()
   const personopplysninger = usePersonopplysninger()
-  const { next } = useBehandlingRoutes()
+  const { next } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [visManglendeBeregningsgrunnlag, setVisManglendeBeregningsgrunnlag] = useState(false)

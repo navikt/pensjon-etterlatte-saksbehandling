@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { createContext, useEffect, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router'
 import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
@@ -164,6 +164,32 @@ export const useBehandlingRoutes = () => {
     currentRouteErGyldig: currentRouteErGyldig,
   }
 }
+
+type DefaultBehandlingRoutecontextType = {
+  next: () => void
+  back: () => void
+  lastPage: boolean
+  firstPage: boolean
+  behandlingRoutes: BehandlingRouteType[]
+  currentRoute: string | undefined
+  goto: (path: BehandlingRouteTypesPath) => void
+  routeErGyldig: (route: string | undefined) => boolean
+  currentRouteErGyldig: () => boolean
+}
+
+const DefaultBehandlingRoutecontext: DefaultBehandlingRoutecontextType = {
+  next: () => {},
+  back: () => {},
+  lastPage: false,
+  firstPage: true,
+  behandlingRoutes: new Array<BehandlingRouteType>(),
+  currentRoute: undefined,
+  goto: () => {},
+  routeErGyldig: () => false,
+  currentRouteErGyldig: () => false,
+}
+
+export const BehandlingRouteContext = createContext<DefaultBehandlingRoutecontextType>(DefaultBehandlingRoutecontext)
 
 function useRouteNavigation() {
   const match = useMatch('/behandling/:behandlingId/:section')

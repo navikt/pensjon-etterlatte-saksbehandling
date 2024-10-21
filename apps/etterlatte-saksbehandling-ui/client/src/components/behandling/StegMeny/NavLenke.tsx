@@ -1,15 +1,16 @@
 import { ChevronRightIcon } from '@navikt/aksel-icons'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { BehandlingRouteType, useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteContext, BehandlingRouteType } from '~components/behandling/BehandlingRoutes'
 import { Label, Link } from '@navikt/ds-react'
 import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
+import { useContext } from 'react'
 
 export const NavLenke = (props: {
   pathInfo: BehandlingRouteType
   behandling: IBehandlingReducer
   separator: boolean
 }) => {
-  const { routeErGyldig } = useBehandlingRoutes()
+  const { routeErGyldig } = useContext(BehandlingRouteContext)
 
   const { pathInfo, separator } = props
 

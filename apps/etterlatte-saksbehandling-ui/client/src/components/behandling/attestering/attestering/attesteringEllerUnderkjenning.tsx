@@ -1,8 +1,8 @@
-import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
 import { Alert, BodyShort, VStack } from '@navikt/ds-react'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
@@ -17,8 +17,7 @@ type Props = {
 }
 
 export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedtak, erFattet }: Props) => {
-  const { lastPage } = useBehandlingRoutes()
-
+  const { lastPage } = useContext(BehandlingRouteContext)
   const oppgave = useSelectorOppgaveUnderBehandling()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 

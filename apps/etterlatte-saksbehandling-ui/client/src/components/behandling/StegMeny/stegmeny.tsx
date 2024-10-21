@@ -1,10 +1,10 @@
 import styled from 'styled-components'
 import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
 import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
-import { BehandlingRouteType, useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteContext, BehandlingRouteType } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
 import { mapApiResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -15,7 +15,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
   const behandling = props.behandling
   const { id } = behandling
-  const { behandlingRoutes } = useBehandlingRoutes()
+  const { behandlingRoutes } = useContext(BehandlingRouteContext)
 
   const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
 

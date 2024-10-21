@@ -1,6 +1,6 @@
 import { handlinger } from '../handlinger/typer'
 import { Button } from '@navikt/ds-react'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { BehandlingRouteContext } from '../BehandlingRoutes'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/vedtaksvurdering'
@@ -14,9 +14,10 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { useContext } from 'react'
 
 export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
-  const { next, goto } = useBehandlingRoutes()
+  const { next, goto } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
   const { behandlingId } = props
   const vedtaksresultat = useVedtaksResultat()

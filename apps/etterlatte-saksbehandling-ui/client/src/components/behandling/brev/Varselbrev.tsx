@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Alert, BodyShort, Box, Button, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
@@ -18,7 +18,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
-import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import { hentOppgaveForReferanseUnderBehandling, settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
@@ -37,7 +37,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   )
 
   const [varselbrev, setVarselbrev] = useState<IBrev>()
-  const { next, currentRouteErGyldig } = useBehandlingRoutes()
+  const { next, currentRouteErGyldig } = useContext(BehandlingRouteContext)
   if (!currentRouteErGyldig()) {
     throw Error(
       `Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} mangler kanskje vilkårsvurdering? `

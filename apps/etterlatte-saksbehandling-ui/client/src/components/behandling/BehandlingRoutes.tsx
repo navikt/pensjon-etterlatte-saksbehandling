@@ -115,9 +115,9 @@ const routeTypes = {
 }
 
 function useRouteNavigation() {
-  const [currentRoute, setCurrentRoute] = useState<string | undefined>()
-  const navigate = useNavigate()
   const match = useMatch('/behandling/:behandlingId/:section')
+  const [currentRoute, setCurrentRoute] = useState<string | undefined>(match?.params?.section)
+  const navigate = useNavigate()
 
   useEffect(() => {
     setCurrentRoute(match?.params?.section)

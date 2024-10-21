@@ -139,13 +139,13 @@ class BrevService(
     }
 
     fun oppdaterMottaker(
-        id: BrevID,
+        brevId: BrevID,
         mottaker: Mottaker,
     ): Int {
-        sjekkOmBrevKanEndres(id)
+        sjekkOmBrevKanEndres(brevId)
         return db
-            .oppdaterMottaker(id, mottaker)
-            .also { logger.info("Mottaker på brev (id=$id) oppdatert") }
+            .oppdaterMottaker(brevId, mottaker)
+            .also { logger.info("Mottaker på brev (id=$brevId) oppdatert") }
     }
 
     fun oppdaterTittel(
@@ -187,9 +187,9 @@ class BrevService(
     ) {
         val brev = sjekkOmBrevKanEndres(id)
 
-        if (brev.mottaker.erGyldig().isNotEmpty()) {
-            sikkerlogger.error("Ugyldig mottaker: ${brev.mottaker.toJson()}")
-            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottaker.erGyldig())
+        if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
+            sikkerlogger.error("Ugyldig mottaker: ${brev.mottakere.toJson()}")
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottakere.flatMap { it.erGyldig() })
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
             db.settBrevFerdigstilt(id)
         } else {

@@ -86,7 +86,8 @@ internal class BrevRepositoryIntegrationTest(
 
         assertEquals(emptyList<Brev>(), db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK))
 
-        val nyttBrev = db.opprettBrev(ulagretBrev(behandlingId = behandlingId))
+        val ulagretBrev = ulagretBrev(behandlingId = behandlingId)
+        val nyttBrev = db.opprettBrev(ulagretBrev)
 
         val brevTilBehandling = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).first()
         assertEquals(nyttBrev.status, brevTilBehandling.status)
@@ -94,7 +95,7 @@ internal class BrevRepositoryIntegrationTest(
         val hentetBrev = db.hentBrev(nyttBrev.id)
         assertEquals(nyttBrev.id, hentetBrev.id)
         assertEquals(behandlingId, hentetBrev.behandlingId)
-        assertEquals(hentetBrev.mottaker, opprettMottaker())
+        assertEquals(hentetBrev.mottakere.single(), ulagretBrev.mottaker)
     }
 
     @Test
@@ -478,6 +479,7 @@ internal class BrevRepositoryIntegrationTest(
 
     private fun opprettMottaker() =
         Mottaker(
+            id = UUID.randomUUID(),
             navn = "Test Testesen",
             foedselsnummer = STOR_SNERK,
             adresse =

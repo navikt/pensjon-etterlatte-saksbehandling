@@ -32,7 +32,7 @@ class JournalfoerBrevService(
     private val dokarkivService: DokarkivService,
     private val service: VedtaksbrevService,
 ) {
-    val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun journalfoer(
         id: BrevID,
@@ -110,8 +110,12 @@ class JournalfoerBrevService(
         val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
         val pdf = requireNotNull(db.hentPdf(brev.id))
 
+        /*
+         * TODO:
+         *   Her må det skilles på hoved- og kopimottaker!
+         */
         val avsenderMottaker =
-            with(brev.mottaker) {
+            with(brev.mottakere.single()) {
                 AvsenderMottaker(
                     id = foedselsnummer?.value ?: orgnummer,
                     idType =

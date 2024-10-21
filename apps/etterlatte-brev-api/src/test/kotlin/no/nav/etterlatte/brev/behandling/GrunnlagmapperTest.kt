@@ -119,6 +119,7 @@ class GrunnlagmapperTest {
         navn: String,
         fnr: String,
     ) = Mottaker(
+        UUID.randomUUID(),
         navn,
         MottakerFoedselsnummer(fnr),
         "orgnr",

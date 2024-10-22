@@ -38,17 +38,40 @@ class SanksjonService(
         return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
     }
 
+    /**
+     * Kopierer inn sanksjoner fra forrige iverksatte behandling til denne hvis:
+     *
+     *  1. denne behandlingen er en revurdering
+     *  2. denne behandlingen har ingen sanksjoner knyttet til seg allerede
+     *  3. den forrige iverksatte behandlingen i saken har sanksjoner
+     *
+     *  Dette fungerer bra nok til at denne metoden kan kjøres "ofte" -- som i dag
+     *  er hver gang vi beregner.
+     *
+     *  Men det fungerer ikke så bra hvis det man vil gjøre er å slette en sanksjon som
+     *  er lagt inn feil (en omgjøring pga klage for eksempel). Da må bruken av denne
+     *  funksjonen justeres.
+     */
     suspend fun kopierSanksjon(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        logger.info("Kopierer sanksjoner fra forrige behandling med behandlingID=$behandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        if (behandling.behandlingType != BehandlingType.REVURDERING) {
+            return
+        }
+
         val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
 
-        val sanksjoner = sanksjonRepository.hentSanksjon(forrigeBehandlingId)
-        if (sanksjoner != null) {
-            sanksjoner.forEach {
+        val sanksjonerIDenneBehandlingen = sanksjonRepository.hentSanksjon(behandlingId)
+        val sanksjonerIForrigeBehandling = sanksjonRepository.hentSanksjon(forrigeBehandlingId)
+
+        if (sanksjonerIDenneBehandlingen.isNullOrEmpty()) {
+            sanksjonerIForrigeBehandling?.forEach {
+                logger.info(
+                    "Kopierer sanksjon [${it.id}] fra forrige behandling til behandlingen " +
+                        "med behandlingID=$behandlingId, fra behandling med id=$forrigeBehandlingId",
+                )
                 sanksjonRepository.opprettSanksjonFraKopi(
                     behandlingId,
                     it.sakId,
@@ -74,7 +97,7 @@ class SanksjonService(
         val normalisertTom = sanksjon.tom?.let { YearMonth.from(it) }
         if (normalisertTom != null && normalisertTom.isBefore(normalisertFom)) throw TomErFoerFomException()
 
-        if (!sanksjonErLikeFoerVirk(behandling, sanksjon, brukerTokenInfo)) {
+        if (!sanksjonerErLikeFoerVirk(behandling, sanksjon, brukerTokenInfo)) {
             throw SanksjonEndresFoerVirkException()
         }
 
@@ -90,7 +113,7 @@ class SanksjonService(
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
     }
 
-    private suspend fun sanksjonErLikeFoerVirk(
+    private suspend fun sanksjonerErLikeFoerVirk(
         behandling: DetaljertBehandling,
         sanksjon: LagreSanksjon,
         brukerTokenInfo: BrukerTokenInfo,

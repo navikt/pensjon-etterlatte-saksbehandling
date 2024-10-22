@@ -11,8 +11,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '@reduxjs/toolkit'
 import OverstyrInnvilgaMaander from '~components/behandling/avkorting/OverstyrInnvilgaMaaneder'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import React from 'react'
+import React, { useState } from 'react'
 
 export const AvkortingInntektForm = ({
   behandling,
@@ -25,8 +24,6 @@ export const AvkortingInntektForm = ({
   erInnevaerendeAar: boolean
   setVisForm: (visForm: boolean) => void
 }) => {
-  const skalKunneOverstyreInnvilgaMaaneder = useFeatureEnabledMedDefault('avkorting-overstyre-innvilga-maaneder', false)
-
   const dispatch = useAppDispatch()
 
   const [lagreAvkortingGrunnlagResult, lagreAvkortingGrunnlagRequest] = useApiCall(lagreAvkortingGrunnlag)
@@ -118,6 +115,14 @@ export const AvkortingInntektForm = ({
     )
   }
 
+  const [skalOverstyreMaaneder, setSkalOverstyreMaaneder] = useState(false)
+  const toggleOverstyrtInnvilgaMaaneder = () => {
+    if (skalOverstyreMaaneder) {
+      reset({ overstyrtInnvilgaMaaneder: undefined })
+    }
+    setSkalOverstyreMaaneder(!skalOverstyreMaaneder)
+  }
+
   return (
     <FormProvider {...methods}>
       <VStack>
@@ -197,25 +202,28 @@ export const AvkortingInntektForm = ({
             <BodyShort>{formaterDato(inntektFom)}</BodyShort>
           </VStack>
         </HStack>
-        <TextAreaWrapper
-          {...register('spesifikasjon')}
-          resize="vertical"
-          label={
-            <>
-              <Label>Spesifikasjon av inntekt</Label>
-              <ReadMore header="Hva regnes som inntekt?">
-                Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
-                arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
-                sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og foreldrepenger etter kap
-                14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
-              </ReadMore>
-            </>
-          }
-        />
-        {skalKunneOverstyreInnvilgaMaaneder && <OverstyrInnvilgaMaander />}
+        <TextAreaWrapper {...register('spesifikasjon')} resize="vertical" label="Spesifikasjon av inntekt" />
+
+        <VStack gap="1">
+          <ReadMore header="Hva regnes som inntekt?">
+            Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
+            arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
+            sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og foreldrepenger etter kap 14
+            og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
+          </ReadMore>
+          <ReadMore header="Når du skal overstyre innvilga måneder">
+            Fyll inn riktig antall måneder med innvilget stønad i tilfeller der automatisk registrerte innvilgede
+            måneder ikke stemmer, for eksempel ved uforutsette opphør som tidlig uttak av alderspensjon.
+          </ReadMore>
+        </VStack>
+
+        {skalOverstyreMaaneder && <OverstyrInnvilgaMaander toggleSkalOverstyre={toggleOverstyrtInnvilgaMaaneder} />}
         <HStack gap="1" marginBlock="4">
           <Button size="small" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
             Lagre
+          </Button>
+          <Button size="small" variant="danger" onClick={toggleOverstyrtInnvilgaMaaneder}>
+            {skalOverstyreMaaneder ? 'Fjern overstyrt innvilga måneder' : 'Overstyr innvilga måneder'}
           </Button>
           <Button
             size="small"

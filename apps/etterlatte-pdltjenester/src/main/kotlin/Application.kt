@@ -3,7 +3,7 @@ package no.nav.etterlatte
 import io.ktor.server.routing.route
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.run
@@ -23,7 +23,7 @@ class Server(
     applicationContext: ApplicationContext,
 ) {
     init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-pdltjenester")
+        sikkerLoggOppstart("etterlatte-pdltjenester")
     }
 
     private val engine =

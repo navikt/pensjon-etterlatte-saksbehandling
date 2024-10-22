@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.appIsInGCP
-import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
@@ -47,7 +47,7 @@ import java.util.UUID
 
 class ApplicationContext {
     init {
-        sikkerLoggOppstartOgAvslutning("etterlatte-vedtaksvurdering")
+        sikkerLoggOppstart("etterlatte-vedtaksvurdering")
     }
 
     val env = Miljoevariabler.systemEnv()

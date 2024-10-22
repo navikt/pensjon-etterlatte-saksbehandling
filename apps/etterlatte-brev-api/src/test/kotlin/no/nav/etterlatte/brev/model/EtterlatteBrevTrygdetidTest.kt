@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.Test
@@ -121,6 +122,24 @@ class EtterlatteBrevTrygdetidTest {
             navnAvdoed shouldBe "Ole"
         }
     }
+
+    @Test
+    fun `trygdetid med beregning utleder avdoedes navn hvis overstyrt for ukjent avdoed`() {
+        val avdoede = emptyList<Avdoed>()
+
+        with(
+            trygdetidDto(
+                ident = UKJENT_AVDOED,
+                samletTrygdetidNorge = 40,
+                samletTrygdetidTeoretisk = null,
+                prorataBroek = null,
+                perioder = emptyList(),
+                overstyrt = true,
+            ).fromDto(BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL, avdoede),
+        ) {
+            navnAvdoed shouldBe "ukjent avdød"
+        }
+    }
 }
 
 fun trygdetidDto(
@@ -129,6 +148,7 @@ fun trygdetidDto(
     samletTrygdetidTeoretisk: Int? = null,
     prorataBroek: IntBroek? = null,
     perioder: List<TrygdetidGrunnlagDto> = emptyList(),
+    overstyrt: Boolean = false,
 ) = TrygdetidDto(
     id = UUID.randomUUID(),
     ident = ident,
@@ -145,7 +165,7 @@ fun trygdetidDto(
                     faktiskTrygdetidTeoretisk = null,
                     fremtidigTrygdetidTeoretisk = null,
                     beregnetSamletTrygdetidNorge = null,
-                    overstyrt = false,
+                    overstyrt = overstyrt,
                     yrkesskade = false,
                 ),
             tidspunkt = Tidspunkt.now(),

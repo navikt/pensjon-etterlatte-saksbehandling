@@ -12,8 +12,6 @@ dependencies {
     implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:etterlatte-pdl-model"))
 
-    implementation(libs.ktor2.servercio)
-
     implementation(libs.kafka.avro) {
         exclude("org.apache.commons", "commons-compress")
     }

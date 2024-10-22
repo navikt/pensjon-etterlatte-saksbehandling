@@ -94,10 +94,7 @@ class TrygdetidRepository(
                 }
             }.let { hentTrygdetidMedIdNotNull(behandlingId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
 
-    fun oppdaterTrygdetid(
-        oppdatertTrygdetid: Trygdetid,
-        overstyrt: Boolean = false,
-    ): Trygdetid =
+    fun oppdaterTrygdetid(oppdatertTrygdetid: Trygdetid): Trygdetid =
         dataSource
             .transaction { tx ->
                 val gjeldendeTrygdetid =
@@ -146,7 +143,6 @@ class TrygdetidRepository(
                         oppdatertTrygdetid.id,
                         oppdatertTrygdetid.beregnetTrygdetid,
                         tx,
-                        overstyrt,
                     )
                 } else {
                     nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
@@ -379,7 +375,6 @@ class TrygdetidRepository(
         trygdetidId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetid,
         tx: TransactionalSession,
-        overstyrt: Boolean = false,
     ) {
         val beregnetVerdi = beregnetTrygdetid.resultat
 
@@ -442,7 +437,7 @@ class TrygdetidRepository(
                     "prorataBroekNevner" to beregnetVerdi.prorataBroek?.nevner,
                     "trygdetidTidspunkt" to beregnetTrygdetid.tidspunkt.toTimestamp(),
                     "trygdetidRegelresultat" to beregnetTrygdetid.regelResultat.toJson(),
-                    "overstyrt" to overstyrt,
+                    "overstyrt" to beregnetTrygdetid.resultat.overstyrt,
                     "yrkesskade" to beregnetVerdi.yrkesskade,
                 ),
         ).let { query ->

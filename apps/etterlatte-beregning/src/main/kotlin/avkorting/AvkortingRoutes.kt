@@ -60,7 +60,7 @@ fun Route.avkorting(
 
         post("/med/{forrigeBehandlingId}") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                logger.info("Regulere avkorting for behandlingId=$it")
+                logger.info("Kopierer avkorting for behandlingId=$it")
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
                 val avkorting = avkortingService.kopierAvkorting(it, forrigeBehandlingId, brukerTokenInfo)
                 call.respond(avkorting.toDto())
@@ -82,9 +82,9 @@ fun AvkortingGrunnlag.toDto() =
         id = id,
         fom = periode.fom,
         tom = periode.tom,
-        aarsinntekt = aarsinntekt,
+        inntektTom = inntektTom,
         fratrekkInnAar = fratrekkInnAar,
-        inntektUtland = inntektUtland,
+        inntektUtlandTom = inntektUtlandTom,
         fratrekkInnAarUtland = fratrekkInnAarUtland,
         relevanteMaanederInnAar = innvilgaMaaneder,
         spesifikasjon = spesifikasjon,

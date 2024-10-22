@@ -56,9 +56,10 @@ class BehandlingDao(
 ) {
     private val alleBehandlingerMedSak =
         """
-        SELECT b.*, s.sakType, s.enhet, s.fnr 
+        SELECT b.*, i.omgjoering_sluttbehandling_utland, s.sakType, s.enhet, s.fnr 
         FROM behandling b
         INNER JOIN sak s ON b.sak_id = s.id
+        LEFT JOIN behandling_info i ON b.id = i.behandling_id
         """.trimIndent()
 
     fun hentBehandling(id: UUID): Behandling? =
@@ -109,9 +110,7 @@ class BehandlingDao(
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT b.*, s.sakType, s.enhet, s.fnr 
-                        FROM behandling b
-                        INNER JOIN sak s ON b.sak_id = s.id
+                        $alleBehandlingerMedSak
                         WHERE sak_id = ? AND behandlingstype = 'REVURDERING'
                         AND revurdering_aarsak = ANY (?)
                         """.trimIndent(),
@@ -129,9 +128,7 @@ class BehandlingDao(
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT b.*, s.sakType, s.enhet, s.fnr 
-                        FROM behandling b
-                        INNER JOIN sak s ON b.sak_id = s.id
+                        $alleBehandlingerMedSak
                         WHERE sak_id = ? AND behandlingstype = 'FØRSTEGANGSBEHANDLING'
                         AND status = 'IVERKSATT'
                         """.trimIndent(),
@@ -211,6 +208,7 @@ class BehandlingDao(
                 rs
                     .getString("tidligere_familiepleier")
                     ?.let { objectMapper.readValue(it) },
+            erSluttbehandling = rs.getBoolean("omgjoering_sluttbehandling_utland"),
         )
     }
 

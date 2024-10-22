@@ -149,7 +149,7 @@ data class AvkortingGrunnlag(
             AvkortingGrunnlag(
                 fom = dto.fom,
                 tom = dto.tom,
-                aarsinntekt = dto.aarsinntekt,
+                aarsinntekt = dto.inntektTom,
                 fratrekkInnAar = dto.fratrekkInnAar,
                 relevanteMaanederInnAar = dto.relevanteMaanederInnAar,
                 spesifikasjon = dto.spesifikasjon,

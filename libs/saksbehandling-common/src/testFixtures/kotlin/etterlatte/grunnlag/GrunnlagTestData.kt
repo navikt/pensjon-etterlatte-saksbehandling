@@ -47,18 +47,17 @@ data class GrunnlagTestData(
         get() = personTestData(gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides)
 
     val sak: Map<Opplysningstype, Opplysning<JsonNode>> =
-        opplysningsmapSakOverrides +
-            mapOf(
-                PERSONGALLERI_V1 to
-                    Opplysning.Konstant.create(
-                        lagOpplysning(
-                            opplysningsType = PERSONGALLERI_V1,
-                            kilde = Grunnlagsopplysning.automatiskSaksbehandler,
-                            opplysning = hentPersonGalleri().toJsonNode(),
-                            periode = null,
-                        ),
+        mapOf(
+            PERSONGALLERI_V1 to
+                Opplysning.Konstant.create(
+                    lagOpplysning(
+                        opplysningsType = PERSONGALLERI_V1,
+                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        opplysning = hentPersonGalleri().toJsonNode(),
+                        periode = null,
                     ),
-            )
+                ),
+        ) + opplysningsmapSakOverrides
 
     private val avdoedesBarnOverrides
         get() =

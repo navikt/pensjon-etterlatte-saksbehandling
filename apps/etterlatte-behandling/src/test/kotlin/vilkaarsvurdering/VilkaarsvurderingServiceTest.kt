@@ -431,13 +431,11 @@ internal class VilkaarsvurderingServiceTest(
 
         val vilkaarsvurdering = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!
         val (kopiertVilkaarsvurdering) =
-            runBlocking {
-                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
-                    nyBehandlingId,
-                    vilkaarsvurdering.behandlingId,
-                    brukerTokenInfo,
-                )
-            }
+            vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
+                nyBehandlingId,
+                vilkaarsvurdering.behandlingId,
+                brukerTokenInfo,
+            )
 
         Assertions.assertNotNull(kopiertVilkaarsvurdering.resultat)
         Assertions.assertEquals(vilkaarsvurdering.resultat, kopiertVilkaarsvurdering.resultat)
@@ -573,13 +571,11 @@ internal class VilkaarsvurderingServiceTest(
     @Test
     fun `kopier vilkaarsvurdering gir NullpointerException hvis det ikke finnes tidligere vilkaarsvurdering`() {
         assertThrows<NullPointerException> {
-            runBlocking {
-                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
-                    UUID.randomUUID(),
-                    behandlingId,
-                    brukerTokenInfo,
-                )
-            }
+            vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
+                UUID.randomUUID(),
+                behandlingId,
+                brukerTokenInfo,
+            )
         }
     }
 
@@ -596,13 +592,11 @@ internal class VilkaarsvurderingServiceTest(
         )
 
         val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
-            runBlocking {
-                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
-                    nyBehandlingId,
-                    opprinneligBehandlingId,
-                    brukerTokenInfo,
-                )
-            }
+            vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
+                nyBehandlingId,
+                opprinneligBehandlingId,
+                brukerTokenInfo,
+            )
 
         with(vilkaarsvurderingMedKopierteOppdaterteVilkaar.vilkaar.map { it.hovedvilkaar.type }) {
             val gjeldendeVilkaar = BarnepensjonVilkaar2024.inngangsvilkaar()
@@ -641,13 +635,11 @@ internal class VilkaarsvurderingServiceTest(
         )
 
         val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
-            runBlocking {
-                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
-                    nyBehandlingId,
-                    opprinneligBehandlingId,
-                    brukerTokenInfo,
-                )
-            }
+            vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
+                nyBehandlingId,
+                opprinneligBehandlingId,
+                brukerTokenInfo,
+            )
 
         with(vilkaarsvurderingMedKopierteOppdaterteVilkaar.vilkaar.map { it.hovedvilkaar.type }) {
             val gjeldendeVilkaar = ikkeGjeldendeVilkaar()
@@ -678,13 +670,11 @@ internal class VilkaarsvurderingServiceTest(
         )
 
         val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
-            runBlocking {
-                vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
-                    nyBehandlingId,
-                    opprinneligBehandlingId,
-                    brukerTokenInfo,
-                )
-            }
+            vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
+                nyBehandlingId,
+                opprinneligBehandlingId,
+                brukerTokenInfo,
+            )
 
         vilkaarsvurderingMedKopierteOppdaterteVilkaar.resultat shouldNotBe null
 

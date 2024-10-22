@@ -328,9 +328,9 @@ internal class AvkortingTest {
             avkorting.toFrontend().avkortingGrunnlag.first().historikk.first().asClue {
                 it.fom shouldBe inntektFraAug24.periode.fom
                 it.tom shouldBe inntektFraAug24.periode.tom
-                it.aarsinntekt shouldBe inntektFraAug24.aarsinntekt
+                it.inntektTom shouldBe inntektFraAug24.inntektTom
                 it.fratrekkInnAar shouldBe inntektFraAug24.fratrekkInnAar
-                it.inntektUtland shouldBe inntektFraAug24.inntektUtland
+                it.inntektUtlandTom shouldBe inntektFraAug24.inntektUtlandTom
                 it.fratrekkInnAarUtland shouldBe inntektFraAug24.fratrekkInnAarUtland
                 it.spesifikasjon shouldBe inntektFraAug24.spesifikasjon
                 it.relevanteMaanederInnAar shouldBe 10
@@ -344,7 +344,7 @@ internal class AvkortingTest {
 
                 it.avkortingGrunnlag[0].fraVirk shouldNotBe null
                 it.avkortingGrunnlag[0].fraVirk!!.fom shouldBe inntektFraAug24.periode.fom
-                it.avkortingGrunnlag[0].fraVirk!!.aarsinntekt shouldBe inntektFraAug24.aarsinntekt
+                it.avkortingGrunnlag[0].fraVirk!!.inntektTom shouldBe inntektFraAug24.inntektTom
                 it.avkortingGrunnlag[0].historikk.size shouldBe 1
 
                 it.avkortingGrunnlag[1].fraVirk shouldBe null
@@ -359,13 +359,13 @@ internal class AvkortingTest {
 
                 it.avkortingGrunnlag[0].historikk.size shouldBe 2
                 it.avkortingGrunnlag[0].historikk[0].fom shouldBe inntektFraAug24.periode.fom
-                it.avkortingGrunnlag[0].historikk[0].aarsinntekt shouldBe inntektFraAug24.aarsinntekt
+                it.avkortingGrunnlag[0].historikk[0].inntektTom shouldBe inntektFraAug24.inntektTom
                 it.avkortingGrunnlag[0].historikk[1].fom shouldBe inntektFraMars24.periode.fom
-                it.avkortingGrunnlag[0].historikk[1].aarsinntekt shouldBe inntektFraMars24.aarsinntekt
+                it.avkortingGrunnlag[0].historikk[1].inntektTom shouldBe inntektFraMars24.inntektTom
 
                 it.avkortingGrunnlag[1].historikk.size shouldBe 1
                 it.avkortingGrunnlag[1].historikk[0].fom shouldBe inntektFraJan25.periode.fom
-                it.avkortingGrunnlag[1].historikk[0].aarsinntekt shouldBe inntektFraJan25.aarsinntekt
+                it.avkortingGrunnlag[1].historikk[0].inntektTom shouldBe inntektFraJan25.inntektTom
             }
         }
 
@@ -598,9 +598,9 @@ internal class AvkortingTest {
                 with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting) {
                     size shouldBe 1
                     with(get(0).grunnlag) {
-                        aarsinntekt shouldBe forventetInntekt.aarsinntekt
+                        inntektTom shouldBe forventetInntekt.inntektTom
                         fratrekkInnAar shouldBe forventetInntekt.fratrekkInnAar
-                        inntektUtland shouldBe forventetInntekt.inntektUtland
+                        inntektUtlandTom shouldBe forventetInntekt.inntektUtlandTom
                         fratrekkInnAarUtland shouldBe forventetInntekt.fratrekkInnAarUtland
                         spesifikasjon shouldBe forventetInntekt.spesifikasjon
                     }
@@ -652,9 +652,9 @@ internal class AvkortingTest {
                     size shouldBe 2
                     get(0).grunnlag shouldBe foersteInntekt
                     with(get(1).grunnlag) {
-                        aarsinntekt shouldBe endretInntekt.aarsinntekt
+                        inntektTom shouldBe endretInntekt.inntektTom
                         fratrekkInnAar shouldBe endretInntekt.fratrekkInnAar
-                        inntektUtland shouldBe endretInntekt.inntektUtland
+                        inntektUtlandTom shouldBe endretInntekt.inntektUtlandTom
                         fratrekkInnAarUtland shouldBe endretInntekt.fratrekkInnAarUtland
                         spesifikasjon shouldBe endretInntekt.spesifikasjon
                     }
@@ -689,9 +689,9 @@ internal class AvkortingTest {
                             tom = YearMonth.of(2024, Month.JULY),
                         )
                     with(get(2).grunnlag) {
-                        aarsinntekt shouldBe nyttGrunnlag.aarsinntekt
+                        inntektTom shouldBe nyttGrunnlag.inntektTom
                         fratrekkInnAar shouldBe nyttGrunnlag.fratrekkInnAar
-                        inntektUtland shouldBe nyttGrunnlag.inntektUtland
+                        inntektUtlandTom shouldBe nyttGrunnlag.inntektUtlandTom
                         fratrekkInnAarUtland shouldBe nyttGrunnlag.fratrekkInnAarUtland
                         spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
                     }
@@ -743,9 +743,9 @@ internal class AvkortingTest {
                     with(inntektsavkorting) {
                         size shouldBe 1
                         with(get(0).grunnlag) {
-                            aarsinntekt shouldBe nyttGrunnlag.aarsinntekt
+                            inntektTom shouldBe nyttGrunnlag.inntektTom
                             fratrekkInnAar shouldBe nyttGrunnlag.fratrekkInnAar
-                            inntektUtland shouldBe nyttGrunnlag.inntektUtland
+                            inntektUtlandTom shouldBe nyttGrunnlag.inntektUtlandTom
                             fratrekkInnAarUtland shouldBe nyttGrunnlag.fratrekkInnAarUtland
                             spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
                         }
@@ -925,6 +925,32 @@ internal class AvkortingTest {
                     .grunnlag,
             ) {
                 innvilgaMaaneder shouldBe 4
+                overstyrtInnvilgaMaanederAarsak shouldBe null
+                overstyrtInnvilgaMaanederBegrunnelse shouldBe null
+            }
+        }
+
+        @Test
+        fun `utledning av innvilga måneder med aldersoverang`() {
+            val grunnlag =
+                avkortinggrunnlagLagre(
+                    fom = YearMonth.of(2024, 3),
+                )
+            val opprettaAvkorting =
+                Avkorting().oppdaterMedInntektsgrunnlag(
+                    nyttGrunnlag = grunnlag,
+                    bruker = bruker,
+                    opphoerFom = null,
+                    aldersovergang = YearMonth.of(2024, 8),
+                )
+            with(
+                opprettaAvkorting.aarsoppgjoer
+                    .single()
+                    .inntektsavkorting
+                    .single()
+                    .grunnlag,
+            ) {
+                innvilgaMaaneder shouldBe 5
                 overstyrtInnvilgaMaanederAarsak shouldBe null
                 overstyrtInnvilgaMaanederBegrunnelse shouldBe null
             }

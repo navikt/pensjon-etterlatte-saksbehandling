@@ -3,9 +3,9 @@ import io.kotest.matchers.shouldBe
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.etterlatte.TidshendelsePacket
-import no.nav.etterlatte.TidshendelseService
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
@@ -22,7 +22,7 @@ class TidshendelsePacketTest {
             JsonMessage(
                 mapOf(
                     "dato" to "2018-02-25",
-                    TIDSHENDELSE_TYPE_KEY to TidshendelseService.TidshendelserJobbType.AO_BP21,
+                    TIDSHENDELSE_TYPE_KEY to JobbType.AO_BP21,
                 ).toJson(),
                 MessageProblems(""),
                 PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
@@ -38,7 +38,7 @@ class TidshendelsePacketTest {
         tidshendelsePacket.harMigrertYrkesskadeFordel shouldBe false
         tidshendelsePacket.harRettUtenTidsbegrensning shouldBe false
         tidshendelsePacket.hendelseId shouldBe ""
-        tidshendelsePacket.jobbtype shouldBe TidshendelseService.TidshendelserJobbType.AO_BP21
+        tidshendelsePacket.jobbtype shouldBe JobbType.AO_BP21
         tidshendelsePacket.sakId shouldBe SakId(0L)
     }
 
@@ -49,7 +49,7 @@ class TidshendelsePacketTest {
             JsonMessage(
                 mapOf(
                     "dato" to "2018-01-08",
-                    "ao_type" to TidshendelseService.TidshendelserJobbType.AO_BP20,
+                    "ao_type" to JobbType.AO_BP20,
                     "dry_run" to true,
                     "hendelse_data" to
                         mapOf(
@@ -75,7 +75,7 @@ class TidshendelsePacketTest {
         tidshendelsePacket.harMigrertYrkesskadeFordel shouldBe true
         tidshendelsePacket.harRettUtenTidsbegrensning shouldBe true
         tidshendelsePacket.hendelseId shouldBe "min_id"
-        tidshendelsePacket.jobbtype shouldBe TidshendelseService.TidshendelserJobbType.AO_BP20
+        tidshendelsePacket.jobbtype shouldBe JobbType.AO_BP20
         tidshendelsePacket.sakId shouldBe SakId(8448L)
     }
 

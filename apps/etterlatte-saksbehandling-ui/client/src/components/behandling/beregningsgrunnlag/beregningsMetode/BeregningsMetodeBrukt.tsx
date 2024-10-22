@@ -30,7 +30,6 @@ interface Props {
   oppdaterBeregningsgrunnlag: (beregningsmetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => void
   lagreBeregningsGrunnlagResult: Result<BeregningsGrunnlagDto>
   kunEnJuridiskForelder?: Boolean
-  datoTilKunEnJuridiskForelder?: Date | undefined
 }
 
 export const BeregningsMetodeBrukt = ({
@@ -39,29 +38,28 @@ export const BeregningsMetodeBrukt = ({
   behandling,
   oppdaterBeregningsgrunnlag,
   lagreBeregningsGrunnlagResult,
-  datoTilKunEnJuridiskForelder = undefined,
 }: Props) => {
   const [redigerTrydgetidMetodeBrukt, setRedigerTrygdetidMetodeBrukt] = useState<boolean>(false)
   const personopplysninger = usePersonopplysninger()
 
   const eksisterendeMetode = behandling.beregningsGrunnlag?.beregningsMetode
-  const kunEnJuridiskForelder =
+  const kunEnJuridiskForelder = !!behandling.beregningsGrunnlag?.kunEnJuridiskForelder
+  const kunEnJuridiskForelderPersongalleri =
     personopplysninger?.annenForelder?.vurdering === AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER
+  const datoTilKunEnJuridiskForelder = behandling?.beregningsGrunnlag?.kunEnJuridiskForelder?.tom
+    ? new Date(behandling.beregningsGrunnlag.kunEnJuridiskForelder.tom)
+    : undefined
 
-  const toFormData = (
-    datoTilKun: Date | undefined,
+  const toBeregningsmetodeForm = (
     beregningsMetodeBeregningsgrunnlag: BeregningsMetodeBeregningsgrunnlag
   ): BeregningsMetodeBeregningsgrunnlagForm => ({
     beregningsMetode: beregningsMetodeBeregningsgrunnlag.beregningsMetode,
     begrunnelse: beregningsMetodeBeregningsgrunnlag.begrunnelse,
-    datoTilKunEnJuridiskForelder: datoTilKun,
+    datoTilKunEnJuridiskForelder: datoTilKunEnJuridiskForelder,
   })
 
   const { register, control, reset, handleSubmit } = useForm<BeregningsMetodeBeregningsgrunnlagForm>({
-    defaultValues: toFormData(
-      datoTilKunEnJuridiskForelder,
-      eksisterendeMetode ? eksisterendeMetode : defaultBeregningMetode
-    ),
+    defaultValues: toBeregningsmetodeForm(eksisterendeMetode ? eksisterendeMetode : defaultBeregningMetode),
   })
 
   const slettBeregningsMetode = () => {
@@ -79,6 +77,8 @@ export const BeregningsMetodeBrukt = ({
     setRedigerTrygdetidMetodeBrukt(false)
   }
 
+  const tidligereFamiliepleier = !!behandling.tidligereFamiliepleier?.svar
+
   const beregningsMetode = behandling?.beregningsGrunnlag?.beregningsMetode
 
   return (
@@ -95,7 +95,11 @@ export const BeregningsMetodeBrukt = ({
             <Table.Row>
               <Table.HeaderCell />
               <Table.HeaderCell scope="col">
-                {behandling.sakType === SakType.BARNEPENSJON ? 'Forelder' : 'Avdøde'}
+                {behandling.sakType === SakType.BARNEPENSJON
+                  ? 'Forelder'
+                  : tidligereFamiliepleier
+                    ? 'Familiepleier'
+                    : 'Avdøde'}
               </Table.HeaderCell>
               <Table.HeaderCell scope="col">Trygdetid i beregningen</Table.HeaderCell>
               <Table.HeaderCell />
@@ -111,7 +115,7 @@ export const BeregningsMetodeBrukt = ({
                   <>
                     <form onSubmit={handleSubmit(lagreBeregningsMetode)}>
                       <VStack gap="4">
-                        {kunEnJuridiskForelder && (
+                        {kunEnJuridiskForelderPersongalleri && (
                           <ControlledMaanedVelger
                             name="datoTilKunEnJuridiskForelder"
                             label="Til og med dato for kun én juridisk forelder(Valgfritt)"

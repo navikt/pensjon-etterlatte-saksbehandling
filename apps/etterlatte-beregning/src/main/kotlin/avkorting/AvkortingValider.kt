@@ -81,9 +81,3 @@ class HarFratrekkInnAarForFulltAar :
         code = "NY_INNTEKT_FRATREKK_INN_AAR_FULLT_AAR",
         detail = "Kan ikke legge til fratrekk inn år når det er innvilga måned fra og med januar",
     )
-
-class RevurderingHarEndretFratrekkInnAar :
-    IkkeTillattException(
-        code = "NY_INNTEKT_FRATREKK_INN_AAR_REVURDERING",
-        detail = "Skal ikke endre fratrekk inn år i en revurdering",
-    )

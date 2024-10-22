@@ -27,12 +27,12 @@ import org.slf4j.LoggerFactory
 import java.util.Base64
 
 class JournalfoerBrevService(
-    val db: BrevRepository,
-    val behandlingService: BehandlingService,
-    val dokarkivService: DokarkivService,
-    val service: VedtaksbrevService,
+    private val db: BrevRepository,
+    private val behandlingService: BehandlingService,
+    private val dokarkivService: DokarkivService,
+    private val service: VedtaksbrevService,
 ) {
-    val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun journalfoer(
         id: BrevID,
@@ -44,7 +44,7 @@ class JournalfoerBrevService(
         }
         val sak = behandlingService.hentSak(brev.sakId, bruker)
 
-        return journalfoer(brev, sak).journalpostId
+        return journalfoer(brev, sak, bruker).journalpostId
     }
 
     suspend fun journalfoerVedtaksbrev(
@@ -73,7 +73,7 @@ class JournalfoerBrevService(
 
         val sak = behandlingService.hentSak(brev.sakId, bruker)
 
-        return journalfoer(brev, sak)
+        return journalfoer(brev, sak, bruker)
             .also { logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK") }
             .let { JournalfoerVedtaksbrevResponseOgBrevid(brev.id, it) }
     }
@@ -81,20 +81,21 @@ class JournalfoerBrevService(
     private suspend fun journalfoer(
         brev: Brev,
         sak: Sak,
+        bruker: BrukerTokenInfo,
     ): OpprettJournalpostResponse {
         logger.info("Skal journalføre brev ${brev.id}")
         if (brev.status != Status.FERDIGSTILT) {
             throw FeilStatusForJournalfoering(brev.id, brev.status)
         }
 
-        val response = dokarkivService.journalfoer(mapTilJournalpostRequest(brev, sak))
+        val response = dokarkivService.journalfoer(mapTilJournalpostRequest(brev, sak), bruker)
 
         if (response.journalpostferdigstilt) {
             db.settBrevJournalfoert(brev.id, response)
         } else {
             logger.info("Kunne ikke ferdigstille journalpost. Forsøker på nytt...")
             dokarkivService
-                .ferdigstillJournalpost(response.journalpostId, sak.enhet)
+                .ferdigstillJournalpost(response.journalpostId, sak.enhet, bruker)
                 .also { db.settBrevJournalfoert(brev.id, response.copy(journalpostferdigstilt = it)) }
         }
 
@@ -109,8 +110,12 @@ class JournalfoerBrevService(
         val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
         val pdf = requireNotNull(db.hentPdf(brev.id))
 
+        /*
+         * TODO:
+         *   Her må det skilles på hoved- og kopimottaker!
+         */
         val avsenderMottaker =
-            with(brev.mottaker) {
+            with(brev.mottakere.single()) {
                 AvsenderMottaker(
                     id = foedselsnummer?.value ?: orgnummer,
                     idType =

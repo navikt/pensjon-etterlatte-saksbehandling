@@ -12,7 +12,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 class MigreringBrevDataService(
-    val beregningService: BeregningService,
+    private val beregningService: BeregningService,
 ) {
     suspend fun opprettMigreringBrevdata(
         brukerTokenInfo: BrukerTokenInfo,
@@ -34,7 +34,6 @@ class MigreringBrevDataService(
                     behandlingId,
                     virkningstidspunkt,
                     brukerTokenInfo,
-                    sakType,
                 )
             BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall.fra(
                 utbetalingsinfo,

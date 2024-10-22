@@ -21,9 +21,9 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 class Brevoppretter(
-    val adresseService: AdresseService,
-    val db: BrevRepository,
-    val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
+    private val adresseService: AdresseService,
+    private val db: BrevRepository,
+    private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
     suspend fun opprettBrevSomHarInnhold(
         sakId: SakId,
@@ -152,6 +152,7 @@ class Brevoppretter(
 
     private fun tomMottaker() =
         Mottaker(
+            UUID.randomUUID(),
             navn = "Ukjent",
             foedselsnummer = null,
             orgnummer = null,

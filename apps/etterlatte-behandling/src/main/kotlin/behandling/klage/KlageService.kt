@@ -324,6 +324,7 @@ class KlageServiceImpl(
             when (kabalrespons.resultat) {
                 BehandlingResultat.HENLAGT,
                 BehandlingResultat.IKKE_SATT,
+                BehandlingResultat.HEVET,
                 -> {
                 } // Her trenger vi ikke gjøre noe
                 BehandlingResultat.IKKE_MEDHOLD,
@@ -606,7 +607,7 @@ class KlageServiceImpl(
             klage = klage,
             ekstradataInnstilling =
                 EkstradataInnstilling(
-                    mottakerInnstilling = brevMottakerTilKlageMottaker(ferdigstillResultat.oversendelsesbrev.mottaker),
+                    mottakerInnstilling = brevMottakerTilKlageMottaker(ferdigstillResultat.oversendelsesbrev.mottakere.single()),
                     // TODO: Håndter verge
                     vergeEllerFullmektig = null,
                     journalpostInnstillingsbrev = ferdigstillResultat.notatTilKa.journalpostId,

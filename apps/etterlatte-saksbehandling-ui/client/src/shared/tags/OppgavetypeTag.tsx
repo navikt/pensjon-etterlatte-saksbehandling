@@ -28,6 +28,8 @@ export const OppgavetypeTag = ({ oppgavetype }: { oppgavetype: Oppgavetype }) =>
       return <Tag variant="alt3-moderate">Gjenoppretting</Tag>
     case Oppgavetype.AKTIVITETSPLIKT:
       return <Tag variant="alt3-filled">Aktivitetsplikt</Tag>
+    case Oppgavetype.AKTIVITETSPLIKT_12MND:
+      return <Tag variant="alt3-filled">Aktivitetsplikt 12 Måneder</Tag>
     case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:
       return <Tag variant="alt3-filled">Aktivitetsplikt</Tag>
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:

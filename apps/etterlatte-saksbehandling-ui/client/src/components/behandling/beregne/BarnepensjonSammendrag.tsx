@@ -3,7 +3,10 @@ import styled from 'styled-components'
 import { compareDesc, isBefore, lastDayOfMonth } from 'date-fns'
 import { formaterDato } from '~utils/formatering/dato'
 import { Beregning } from '~shared/types/Beregning'
-import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
+import {
+  Barnepensjonberegningssammendrag,
+  SISTE_DATO_GAMMELT_REGELVERK,
+} from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
 import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -63,7 +66,7 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
             <Table.HeaderCell>Prorata Brøk</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
             <Table.HeaderCell>Beregning gjelder</Table.HeaderCell>
-            <Table.HeaderCell>Månedelig utbetaling før skatt</Table.HeaderCell>
+            <Table.HeaderCell>Månedlig utbetaling før skatt</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -101,7 +104,7 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
                 {beregningsperiode.soeskenFlokk &&
-                  isBefore(beregningsperiode.datoTOM, new Date(2024, 0, 1)) &&
+                  isBefore(beregningsperiode.datoFOM, SISTE_DATO_GAMMELT_REGELVERK) &&
                   `${beregningsperiode.soeskenFlokk.length + 1} barn`}{' '}
                 {beregningsperiode.institusjonsopphold && ' Institusjonsopphold'}
               </Table.DataCell>

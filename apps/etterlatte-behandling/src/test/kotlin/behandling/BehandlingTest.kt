@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.common.Enheter
@@ -27,28 +28,7 @@ internal class BehandlingTest {
     val id = UUID.randomUUID()
     private val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
 
-    private val behandling =
-        Foerstegangsbehandling(
-            id = id,
-            sak =
-                Sak(
-                    ident = "",
-                    sakType = SakType.BARNEPENSJON,
-                    id = sakId1,
-                    enhet = Enheter.defaultEnhet.enhetNr,
-                ),
-            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-            status = BehandlingStatus.OPPRETTET,
-            utlandstilknytning = Utlandstilknytning(UtlandstilknytningType.NASJONAL, saksbehandler, ""),
-            kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, id),
-            virkningstidspunkt = null,
-            boddEllerArbeidetUtlandet = null,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            kilde = Vedtaksloesning.GJENNY,
-            sendeBrev = true,
-        )
+    private val behandling = opprettFoerstegangsbehandling(false)
 
     private val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "begrunnelse")
     private val gyldighetsResultat =
@@ -57,6 +37,12 @@ internal class BehandlingTest {
             listOf(),
             Tidspunkt.now().toLocalDatetimeUTC(),
         )
+
+    @Test
+    fun `erSluttbehandling() skal ta hensyn til parameter erSluttbehandling`() {
+        opprettFoerstegangsbehandling(true).erSluttbehandling() shouldBe true
+        opprettFoerstegangsbehandling(false).erSluttbehandling() shouldBe false
+    }
 
     @Test
     fun `kan oppdatere behandling når den er OPPRETTET`() {
@@ -225,4 +211,28 @@ internal class BehandlingTest {
                 .tilBeregnet()
         }
     }
+
+    private fun opprettFoerstegangsbehandling(erSluttbehandling: Boolean): Foerstegangsbehandling =
+        Foerstegangsbehandling(
+            id = id,
+            sak =
+                Sak(
+                    ident = "",
+                    sakType = SakType.BARNEPENSJON,
+                    id = sakId1,
+                    enhet = Enheter.defaultEnhet.enhetNr,
+                ),
+            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
+            status = BehandlingStatus.OPPRETTET,
+            utlandstilknytning = Utlandstilknytning(UtlandstilknytningType.NASJONAL, saksbehandler, ""),
+            kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, id),
+            virkningstidspunkt = null,
+            boddEllerArbeidetUtlandet = null,
+            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+            gyldighetsproeving = null,
+            kilde = Vedtaksloesning.GJENNY,
+            sendeBrev = true,
+            erSluttbehandling = erSluttbehandling,
+        )
 }

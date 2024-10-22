@@ -35,7 +35,17 @@ export const Avkorting = ({
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
 
-  const skalHaInntektNesteAar = useFeatureEnabledMedDefault('validere_aarsintnekt_neste_aar', false)
+  const inntektNesteAarBryter = useFeatureEnabledMedDefault('validere_aarsintnekt_neste_aar', false)
+
+  const klarForBrevutfall = () => {
+    if (avkorting == undefined) {
+      return false
+    }
+    if (behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && inntektNesteAarBryter) {
+      return avkorting.avkortingGrunnlag.length === 2
+    }
+    return true
+  }
 
   const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
 
@@ -96,15 +106,16 @@ export const Avkorting = ({
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
-              {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-                <AvkortingInntekt
-                  behandling={behandling}
-                  avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
-                  erInnevaerendeAar={false}
-                  redigerbar={redigerbar}
-                  resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-                />
-              )}
+              {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+                !!avkorting?.avkortingGrunnlag?.length && (
+                  <AvkortingInntekt
+                    behandling={behandling}
+                    avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
+                    erInnevaerendeAar={false}
+                    redigerbar={redigerbar}
+                    resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+                  />
+                )}
             </>
           ),
         })}
@@ -112,10 +123,7 @@ export const Avkorting = ({
         {visSanksjon && <Sanksjon behandling={behandling} />}
         {avkorting && <YtelseEtterAvkorting />}
         {avkorting && <SimulerUtbetaling behandling={behandling} />}
-        {!skalHaInntektNesteAar && avkorting && (
-          <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />
-        )}
-        {skalHaInntektNesteAar && avkorting && avkorting.avkortingGrunnlag.length === 2 && (
+        {klarForBrevutfall() && (
           <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />
         )}
       </VStack>

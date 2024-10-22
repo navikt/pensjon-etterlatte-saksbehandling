@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -64,6 +65,7 @@ class BehandlingFactory(
     private val migreringKlient: MigreringKlient,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
+    private val behandlingInfoService: BehandlingInfoService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -256,7 +258,7 @@ class BehandlingFactory(
     fun opprettOmgjoeringAvslag(
         sakId: SakId,
         saksbehandler: Saksbehandler,
-        skalKopiere: Boolean,
+        omgjoeringRequest: OmgjoeringRequest,
     ): Behandling {
         val behandlingerForOmgjoering =
             inTransaction {
@@ -301,7 +303,11 @@ class BehandlingFactory(
                         prosessType = Prosesstype.MANUELL,
                     )
 
-                if (skalKopiere && sisteAvslaatteBehandling != null) {
+                if (omgjoeringRequest.erSluttbehandlingUtland) {
+                    behandlingInfoService.lagreErOmgjoeringSluttbehandlingUtland(nyFoerstegangsbehandling)
+                }
+
+                if (omgjoeringRequest.skalKopiere && sisteAvslaatteBehandling != null) {
                     kopierFoerstegangsbehandlingOversikt(sisteAvslaatteBehandling, nyFoerstegangsbehandling.id)
                 } else {
                     val nyGyldighetsproeving =
@@ -336,10 +342,9 @@ class BehandlingFactory(
             )
         }
 
-        if (skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
-            runBlocking {
-                // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
-
+        if (omgjoeringRequest.skalKopiere && behandlingerForOmgjoering.sisteAvslaatteBehandling != null) {
+            // Dette må skje etter at grunnlag er lagt inn da det trengs i kopiering
+            inTransaction {
                 vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = behandlingerForOmgjoering.nyFoerstegangsbehandling.id,
                     kopierFraBehandling = behandlingerForOmgjoering.sisteAvslaatteBehandling.id,
@@ -377,6 +382,15 @@ class BehandlingFactory(
         sisteAvslaatteBehandling
             .gyldighetsproeving()
             ?.let { behandlingDao.lagreGyldighetsproeving(nyFoerstegangsbehandlingId, it) }
+
+        sisteAvslaatteBehandling.opphoerFraOgMed?.let { behandlingDao.lagreOpphoerFom(nyFoerstegangsbehandlingId, it) }
+
+        sisteAvslaatteBehandling.boddEllerArbeidetUtlandet?.let {
+            behandlingDao.lagreBoddEllerArbeidetUtlandet(
+                nyFoerstegangsbehandlingId,
+                it,
+            )
+        }
     }
 
     internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {

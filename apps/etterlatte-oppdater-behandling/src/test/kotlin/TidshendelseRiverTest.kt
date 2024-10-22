@@ -6,11 +6,10 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
-import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -71,7 +70,7 @@ class TidshendelseRiverTest {
         // Verifiser det som ble sendt til service
         packetSlot.captured.hendelseId shouldBeEqual hendelseId.toString()
         packetSlot.captured.sakId shouldBe sakId
-        packetSlot.captured.jobbtype shouldBe AO_BP20
+        packetSlot.captured.jobbtype shouldBe JobbType.AO_BP20
         packetSlot.captured.dryrun shouldBe false
         packetSlot.captured.behandlingsmaaned shouldBe behandlingsmaaned
         packetSlot.captured.behandlingId shouldBe null
@@ -90,7 +89,7 @@ class TidshendelseRiverTest {
                 hendelseId = hendelseId,
                 sakId = sakId,
                 behandlingsmaaned = behandlingsmaaned,
-                type = OMS_DOED_5AAR,
+                type = JobbType.OMS_DOED_5AAR,
             )
         val forrigeBehandlingId = UUID.randomUUID()
         val nyBehandlingId = UUID.randomUUID()
@@ -115,7 +114,7 @@ class TidshendelseRiverTest {
         // Verifiser det som ble sendt til service
         packetSlot.captured.hendelseId shouldBeEqual hendelseId.toString()
         packetSlot.captured.sakId shouldBe sakId
-        packetSlot.captured.jobbtype shouldBe OMS_DOED_5AAR
+        packetSlot.captured.jobbtype shouldBe JobbType.OMS_DOED_5AAR
         packetSlot.captured.dryrun shouldBe false
         packetSlot.captured.behandlingsmaaned shouldBe behandlingsmaaned
         packetSlot.captured.behandlingId shouldBe null
@@ -152,7 +151,7 @@ class TidshendelseRiverTest {
         with(packetSlot.captured) {
             this.hendelseId shouldBeEqual hendelseId.toString()
             this.sakId shouldBe sakId
-            this.jobbtype shouldBe AO_BP20
+            this.jobbtype shouldBe JobbType.AO_BP20
             this.dryrun shouldBe false
             this.behandlingsmaaned shouldBe april2024
             this.behandlingId shouldBe null
@@ -167,7 +166,7 @@ fun lagMeldingForVurdertLoependeYtelse(
     hendelseId: UUID = UUID.randomUUID(),
     sakId: SakId,
     behandlingsmaaned: YearMonth,
-    type: TidshendelseService.TidshendelserJobbType = AO_BP20,
+    type: JobbType = JobbType.AO_BP20,
     dryRun: Boolean = false,
     behandlingId: UUID? = null,
 ): JsonMessage {
@@ -197,7 +196,7 @@ fun lagMeldingForVurdertLoependeYtelse(
 fun lagMeldingForVurdertLoependeYtelse(
     sakId: SakId,
     behandlingsmaaned: YearMonth,
-    type: TidshendelseService.TidshendelserJobbType = AO_BP20,
+    type: JobbType = JobbType.AO_BP20,
     dryRun: Boolean = false,
     behandlingId: UUID? = null,
 ): JsonMessage =

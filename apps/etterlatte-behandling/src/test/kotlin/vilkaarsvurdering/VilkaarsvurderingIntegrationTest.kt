@@ -125,7 +125,6 @@ internal class VilkaarsvurderingIntegrationTest(
                 grunnlagsendringshendelseDao = applicationContext.grunnlagsendringshendelseDao,
                 hendelseDao = applicationContext.hendelseDao,
                 grunnlagKlient = grunnlagKlientMock,
-                behandlingRequestLogger = mockk(),
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,

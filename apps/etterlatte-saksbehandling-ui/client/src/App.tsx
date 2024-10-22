@@ -25,6 +25,7 @@ import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { setDefaultOptions } from 'date-fns'
 import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
+import { VurderAktivitetspliktOppgave } from '~components/aktivitetsplikt/VurderAktivitetspliktOppgave'
 
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
@@ -61,6 +62,7 @@ function App() {
                   <Route path="/klage/:klageId/*" element={<Klagebehandling />} />
                   <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
                   <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
+                  <Route path="/aktivitet-vurdering/:oppgaveId/*" element={<VurderAktivitetspliktOppgave />}></Route>
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </ErrorBoundary>

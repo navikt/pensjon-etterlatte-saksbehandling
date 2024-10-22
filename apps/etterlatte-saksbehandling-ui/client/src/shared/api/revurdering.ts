@@ -68,10 +68,17 @@ export const opprettOmgjoeringKlage = async (args: {
   return apiClient.post(`/revurdering/${args.sakId}/omgjoering-klage`, { oppgaveIdOmgjoering: args.oppgaveId })
 }
 
+interface OmgjoeringRequest {
+  skalKopiere: boolean
+  erSluttbehandlingUtland: boolean
+}
+
 export const opprettOmgjoeringFoerstegangsbehandling = async (args: {
   sakId: number
-  skalKopiere: boolean
+  omgjoeringRequest: OmgjoeringRequest
 }): Promise<ApiResponse<IBehandlingsammendrag>> => {
-  const skalKopiere = args.skalKopiere
-  return apiClient.post(`/behandling/omgjoer-avslag-avbrudd/${args.sakId}`, { skalKopiere })
+  const omgjoeringRequest = args.omgjoeringRequest
+  return apiClient.post(`/behandling/omgjoer-avslag-avbrudd/${args.sakId}`, {
+    ...omgjoeringRequest,
+  })
 }

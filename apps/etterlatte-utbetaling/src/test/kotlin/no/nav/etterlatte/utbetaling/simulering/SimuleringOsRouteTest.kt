@@ -23,11 +23,11 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.utbetaling.BehandlingKlient
-import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingToggles
+import no.nav.etterlatte.utbetaling.klienter.BehandlingKlient
+import no.nav.etterlatte.utbetaling.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.utbetalingRoutes
 import no.nav.etterlatte.utbetaling.vedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server

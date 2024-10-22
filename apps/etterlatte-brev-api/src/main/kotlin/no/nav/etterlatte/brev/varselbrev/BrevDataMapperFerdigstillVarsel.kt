@@ -83,7 +83,6 @@ class BrevDataMapperFerdigstillVarsel(
                         // Virkningstidspunkt-feltet blir per no ikkje brukt i dette brevet.
                         // Pga gjenbruk av objekt etc er det ikkje trivielt å skrive oss bort frå det heller
                         request.bruker,
-                        request.sakType,
                     )
                 }
             barnepensjonBeregning(

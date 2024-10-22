@@ -138,9 +138,9 @@ fun avkortinggrunnlag(
 ) = AvkortingGrunnlag(
     id = id,
     periode = periode,
-    aarsinntekt = aarsinntekt,
+    inntektTom = aarsinntekt,
     fratrekkInnAar = fratrekkInnAar,
-    inntektUtland = 0,
+    inntektUtlandTom = 0,
     fratrekkInnAarUtland = fratrekkInnAarUtland,
     innvilgaMaaneder = innvilgaMaaneder,
     spesifikasjon = "Spesifikasjon",
@@ -157,9 +157,9 @@ fun avkortinggrunnlagLagre(
     overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
 ) = AvkortingGrunnlagLagreDto(
     id = id,
-    aarsinntekt = aarsinntekt,
+    inntektTom = aarsinntekt,
     fratrekkInnAar = fratrekkInnAar,
-    inntektUtland = 0,
+    inntektUtlandTom = 0,
     fratrekkInnAarUtland = 0,
     spesifikasjon = "Spesifikasjon",
     fom = fom,
@@ -346,6 +346,7 @@ fun behandling(
     sendeBrev = true,
     opphoerFraOgMed = null,
     relatertBehandlingId = null,
+    tidligereFamiliepleier = null,
 )
 
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)

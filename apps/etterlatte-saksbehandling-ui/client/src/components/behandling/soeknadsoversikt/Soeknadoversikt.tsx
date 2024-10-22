@@ -32,6 +32,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import SluttBehandlingOmgjoering from '~components/behandling/soeknadsoversikt/SluttbehandlingOmgjoering'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -98,9 +99,15 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
           </HStack>
         )}
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
+
         {personopplysninger && (
           <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />
         )}
+
+        {behandling.erSluttbehandling && (
+          <SluttBehandlingOmgjoering behandlingId={behandling.id} redigerbar={redigerbar} />
+        )}
+
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
             {behandling.sakType == SakType.BARNEPENSJON && (

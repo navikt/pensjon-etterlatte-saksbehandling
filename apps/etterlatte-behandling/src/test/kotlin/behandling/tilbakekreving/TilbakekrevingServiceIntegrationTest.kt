@@ -562,17 +562,20 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         Brev(
             id = brevId,
             status = no.nav.etterlatte.brev.model.Status.OPPRETTET,
-            mottaker =
-                Mottaker(
-                    navn = "Mottaker mottakersen",
-                    foedselsnummer = MottakerFoedselsnummer("19448310410"),
-                    orgnummer = null,
-                    adresse =
-                        Adresse(
-                            adresseType = "",
-                            landkode = "",
-                            land = "",
-                        ),
+            mottakere =
+                listOf(
+                    Mottaker(
+                        UUID.randomUUID(),
+                        navn = "Mottaker mottakersen",
+                        foedselsnummer = MottakerFoedselsnummer("19448310410"),
+                        orgnummer = null,
+                        adresse =
+                            Adresse(
+                                adresseType = "",
+                                landkode = "",
+                                land = "",
+                            ),
+                    ),
                 ),
             journalpostId = null,
             bestillingId = null,

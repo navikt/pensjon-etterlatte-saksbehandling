@@ -157,7 +157,7 @@ data class PdlHentPersonAdressebeskyttelse(
 data class PdlHentPersonNavnFoedselsdato(
     val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
     val navn: List<PdlNavn>,
-    val foedsel: List<PdlFoedsel>,
+    val foedselsdato: List<PdlFoedselsdato>,
     val doedsfall: List<PdlDoedsfall>,
     val vergemaalEllerFremtidsfullmakt: List<PdlVergemaalEllerFremtidsfullmakt>?,
 )
@@ -165,7 +165,8 @@ data class PdlHentPersonNavnFoedselsdato(
 data class PdlHentPerson(
     val adressebeskyttelse: List<PdlAdressebeskyttelse>,
     val navn: List<PdlNavn>,
-    val foedsel: List<PdlFoedsel>,
+    val foedselsdato: List<PdlFoedselsdato>,
+    val foedested: List<PdlFoedested>,
     val sivilstand: List<PdlSivilstand>?,
     val doedsfall: List<PdlDoedsfall>,
     val bostedsadresse: List<PdlBostedsadresse>?,
@@ -218,11 +219,15 @@ data class PdlStatsborgerskap(
     val metadata: PdlMetadata,
 )
 
-data class PdlFoedsel(
-    val foedselsdato: LocalDate? = null,
-    val foedeland: String? = null,
-    val foedested: String? = null,
+data class PdlFoedselsdato(
+    val foedselsdato: LocalDate?,
     val foedselsaar: Int,
+    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
+    val metadata: PdlMetadata,
+)
+
+data class PdlFoedested(
+    val foedeland: String?,
     val folkeregistermetadata: PdlFolkeregistermetadata? = null,
     val metadata: PdlMetadata,
 )

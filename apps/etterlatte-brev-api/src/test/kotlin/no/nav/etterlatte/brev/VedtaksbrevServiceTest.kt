@@ -311,7 +311,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(sakType, any()) } returns mottaker
             coEvery { adresseService.hentAvsender(any(), any()) } returns opprettAvsender()
-            coEvery { beregningService.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
+            coEvery { beregningService.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
             coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns null
             coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
             coEvery { behandlingService.hentBrevutfall(any(), any()) } returns
@@ -740,7 +740,7 @@ internal class VedtaksbrevServiceTest {
         status = status,
         Tidspunkt.now(),
         Tidspunkt.now(),
-        mottaker = opprettMottaker(),
+        mottakere = listOf(opprettMottaker()),
         brevtype = Brevtype.VEDTAK,
         brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
@@ -783,7 +783,8 @@ internal class VedtaksbrevServiceTest {
 
     private fun opprettMottaker() =
         Mottaker(
-            "Rød Blanding",
+            id = UUID.randomUUID(),
+            navn = "Rød Blanding",
             foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,
             adresse =

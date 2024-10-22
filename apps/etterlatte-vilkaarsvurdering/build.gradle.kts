@@ -11,9 +11,6 @@ dependencies {
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
-    implementation(libs.ktor2.servercio)
-    implementation(libs.navfelles.tokenclientcore)
-
     implementation(libs.database.kotliquery)
 
     testImplementation(libs.ktor2.servertests)

@@ -213,14 +213,7 @@ class TrygdetidServiceImpl(
         brukerTokenInfo,
     ) {
         val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
-
-        if (avdoede.isEmpty()) {
-            logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$behandlingId)")
-            throw GrunnlagManglerAvdoede()
-        }
-
         val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
-
         if (eksisterendeTrygdetider.isNotEmpty() && avdoede.size == eksisterendeTrygdetider.size) {
             throw TrygdetidAlleredeOpprettetException()
         }
@@ -229,12 +222,15 @@ class TrygdetidServiceImpl(
 
         when (behandling.behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                if (avdoede.isEmpty()) {
+                    logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$behandlingId)")
+                    throw GrunnlagManglerAvdoede()
+                }
                 logger.info("Oppretter trygdetid for behandling $behandlingId")
                 opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
             }
 
             BehandlingType.REVURDERING -> {
-                logger.info("Oppretter trygdetid for behandling $behandlingId for revurdering")
                 val forrigeBehandling =
                     behandlingKlient.hentSisteIverksatteBehandling(
                         behandling.sak,
@@ -580,18 +576,30 @@ class TrygdetidServiceImpl(
             } else {
                 null // ukjent avdød
             }
+
+        val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
+
+        val ident =
+            if (tidligereFamiliepleier) {
+                requireNotNull(behandling.soeker) {
+                    "Kunne ikke hente identifikator for soeker til trygdetid i " +
+                        "behandlingen med id=$behandlingId"
+                }
+            } else {
+                avdoed?.let {
+                    requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
+                        "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                            "behandlingen med id=$behandlingId"
+                    }
+                } ?: UKJENT_AVDOED
+            }
+
         val trygdetid =
             Trygdetid(
                 sakId = behandling.sak,
                 behandlingId = behandlingId,
                 opplysninger = avdoed?.let { hentOpplysninger(it, behandlingId) } ?: emptyList(),
-                ident =
-                    avdoed?.let {
-                        requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
-                            "Kunne ikke hente identifikator for avdød til trygdetid i " +
-                                "behandlingen med id=$behandlingId"
-                        }
-                    } ?: UKJENT_AVDOED,
+                ident = ident,
                 trygdetidGrunnlag = emptyList(),
                 beregnetTrygdetid =
                     DetaljertBeregnetTrygdetid(
@@ -614,10 +622,7 @@ class TrygdetidServiceImpl(
                 yrkesskade = false,
             )
         val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
-        trygdetidRepository.oppdaterTrygdetid(
-            opprettet,
-            overstyrt = true,
-        ) // Holder ikke å sette overstyrt på detaljertBeregnetTrygdetid
+        trygdetidRepository.oppdaterTrygdetid(opprettet)
     }
 
     override suspend fun setYrkesskade(
@@ -650,13 +655,13 @@ class TrygdetidServiceImpl(
                 trygdetidGrunnlag = emptyList(),
                 beregnetTrygdetid =
                     DetaljertBeregnetTrygdetid(
-                        resultat = beregnetTrygdetid,
+                        resultat = beregnetTrygdetid.copy(overstyrt = true),
                         tidspunkt = Tidspunkt.now(),
                         regelResultat = "".toJsonNode(),
                     ),
             )
 
-        return trygdetidRepository.oppdaterTrygdetid(oppdatertTrygdetid, true)
+        return trygdetidRepository.oppdaterTrygdetid(oppdatertTrygdetid)
     }
 
     override suspend fun oppdaterOpplysningsgrunnlagForTrygdetider(
@@ -750,7 +755,8 @@ class TrygdetidServiceImpl(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        if (trygdetid.ident == UKJENT_AVDOED) {
+        val soeker = grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).soeker
+        if (trygdetid.ident == UKJENT_AVDOED || trygdetid.ident == soeker.hentFoedselsnummer()?.verdi?.value) {
             return trygdetid
                 .copy(opplysningerDifferanse = OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt()))
         }

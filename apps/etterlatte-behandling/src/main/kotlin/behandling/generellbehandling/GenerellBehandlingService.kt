@@ -368,7 +368,7 @@ class GenerellBehandlingService(
                     }
                         ?: throw FantIkkeFoerstegangsbehandlingForKravpakkeOgSak("Fant ikke behandlingen for sak $sakId")
                 val kravpakke =
-                    this.hentGenerellbehandlingSinTilknyttetedeBehandling(foerstegangsbehandlingMedKravpakke.id)
+                    hentGenerellbehandlingSinTilknyttetedeBehandling(foerstegangsbehandlingMedKravpakke.id)
                         ?: throw FantIkkeKravpakkeForFoerstegangsbehandling(
                             "Fant ikke" +
                                 " kravpakke for ${foerstegangsbehandlingMedKravpakke.id}",

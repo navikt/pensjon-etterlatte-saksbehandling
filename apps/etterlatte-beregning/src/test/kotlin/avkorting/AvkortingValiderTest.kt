@@ -41,10 +41,10 @@ class AvkortingValiderTest {
         assertThrows<FoersteRevurderingSenereEnnJanuar> {
             val inntektMedFratrekk =
                 AvkortingGrunnlagLagreDto(
-                    aarsinntekt = 100000,
+                    inntektTom = 100000,
                     fratrekkInnAar = 0,
                     fratrekkInnAarUtland = 0,
-                    inntektUtland = 100000,
+                    inntektUtlandTom = 100000,
                     spesifikasjon = "asdf",
                     fom = YearMonth.of(2025, 2),
                 )
@@ -82,10 +82,10 @@ class AvkortingValiderTest {
         assertThrows<IkkeTillattException> {
             val inntektMedFratrekk =
                 AvkortingGrunnlagLagreDto(
-                    aarsinntekt = 100000,
+                    inntektTom = 100000,
                     fratrekkInnAar = 0,
                     fratrekkInnAarUtland = 0,
-                    inntektUtland = 100000,
+                    inntektUtlandTom = 100000,
                     spesifikasjon = "asdf",
                     fom = YearMonth.of(2024, 1),
                 )
@@ -176,10 +176,10 @@ class AvkortingValiderTest {
             fratrekkInnAarUtland: Int,
             fom: YearMonth,
         ) = AvkortingGrunnlagLagreDto(
-            aarsinntekt = 100000,
+            inntektTom = 100000,
             fratrekkInnAar = fratrekkInnAar,
             fratrekkInnAarUtland = fratrekkInnAarUtland,
-            inntektUtland = 100000,
+            inntektUtlandTom = 100000,
             spesifikasjon = "asdf",
             fom = fom,
         )
@@ -189,10 +189,10 @@ class AvkortingValiderTest {
     fun `Førstegangsbehandling i gyldig tilstand gir ikke valideringsfeil`() {
         validerInntekt(
             AvkortingGrunnlagLagreDto(
-                aarsinntekt = 100000,
+                inntektTom = 100000,
                 fratrekkInnAar = 5000,
                 fratrekkInnAarUtland = 0,
-                inntektUtland = 100000,
+                inntektUtlandTom = 100000,
                 spesifikasjon = "asdf",
                 fom = YearMonth.of(2024, 2),
             ),
@@ -205,10 +205,10 @@ class AvkortingValiderTest {
     fun `Revurdering i gyldig tilstand gir ikke valideringsfeil`() {
         validerInntekt(
             AvkortingGrunnlagLagreDto(
-                aarsinntekt = 100000,
+                inntektTom = 100000,
                 fratrekkInnAar = 0,
                 fratrekkInnAarUtland = 0,
-                inntektUtland = 100000,
+                inntektUtlandTom = 100000,
                 spesifikasjon = "asdf",
                 fom = YearMonth.of(2024, 1),
             ),

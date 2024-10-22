@@ -75,6 +75,7 @@ enum class BehandlingResultat {
     IKKE_MEDHOLD_FORMKRAV_AVVIST,
     IKKE_SATT,
     HENLAGT,
+    HEVET,
 }
 
 data class Kabalrespons(
@@ -415,13 +416,6 @@ data class KlageBlankettPdfgenDTO(
             VedtakType.AVVIST_KLAGE -> "Avvist klage"
         }
 }
-
-data class SakOgPersonKlagenGjelderPdfgen(
-    val sakId: SakId,
-    val sakType: SakType,
-    val navn: String,
-    val fnr: String,
-)
 
 data class FormkravPdfgen(
     val vedtaketKlagenGjelder: VedtakKlagenGjelderPdfgen,

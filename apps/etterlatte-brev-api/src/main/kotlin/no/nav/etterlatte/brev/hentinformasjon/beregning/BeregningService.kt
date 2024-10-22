@@ -16,8 +16,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.regler.ANTALL_DESIMALER_INNTENKT
 import no.nav.etterlatte.regler.roundingModeInntekt
 import no.nav.pensjon.brevbaker.api.model.Kroner
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
@@ -25,8 +23,6 @@ import java.util.UUID
 class BeregningService(
     private val beregningKlient: BeregningKlient,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(BeregningService::class.java)
-
     suspend fun hentGrunnbeloep(bruker: BrukerTokenInfo) = beregningKlient.hentGrunnbeloep(bruker)
 
     internal suspend fun hentBeregning(
@@ -43,9 +39,8 @@ class BeregningService(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
-        sakType: SakType,
     ): Utbetalingsinfo =
-        finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo, sakType)
+        finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo)
             ?: throw UgyldigForespoerselException(
                 code = "UTBETALINGSINFO_MANGLER",
                 detail = "Utbetalingsinfo er nødvendig, men mangler",
@@ -77,7 +72,6 @@ class BeregningService(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
-        sakType: SakType,
     ): Utbetalingsinfo? {
         val beregning = hentBeregning(behandlingId, brukerTokenInfo) ?: return null
         val beregningsGrunnlag = hentBeregningsGrunnlag(behandlingId, brukerTokenInfo)

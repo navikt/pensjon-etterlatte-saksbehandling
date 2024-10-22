@@ -12,8 +12,6 @@ import no.nav.etterlatte.BrevKey.REGOPPSLAG_SCOPE
 import no.nav.etterlatte.BrevKey.REGOPPSLAG_URL
 import no.nav.etterlatte.BrevKey.SAF_BASE_URL
 import no.nav.etterlatte.BrevKey.SAF_SCOPE
-import no.nav.etterlatte.EnvKey.DOKARKIV_SCOPE
-import no.nav.etterlatte.EnvKey.DOKARKIV_URL
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.EnvKey.NORG2_URL
 import no.nav.etterlatte.EnvKey.PDFGEN_URL
@@ -128,8 +126,7 @@ internal class ApplicationContext {
 
     val db = BrevRepository(datasource)
 
-    val dokarkivKlient =
-        DokarkivKlient(httpClient(DOKARKIV_SCOPE, false), env.requireEnvValue(DOKARKIV_URL))
+    val dokarkivKlient = DokarkivKlient(config)
 
     val dokarkivService = DokarkivServiceImpl(dokarkivKlient)
 

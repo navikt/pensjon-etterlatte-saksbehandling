@@ -3,6 +3,7 @@ package no.nav.etterlatte.tidshendelser
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.slf4j.LoggerFactory
@@ -23,6 +24,7 @@ class OmstillingsstoenadService(
                 JobbType.OMS_DOED_5AAR -> 60
                 JobbType.OMS_DOED_4MND -> 4
                 JobbType.OMS_DOED_6MND -> 6
+                JobbType.OMS_DOED_10MND -> 10
                 JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> 6
                 else -> throw IllegalArgumentException("Ikke-støttet jobbtype: ${jobb.type}")
             }

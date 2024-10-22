@@ -46,7 +46,7 @@ export default function DokumentRad({
           onClick={() => fjernDokument()}
           style={{ marginTop: '1.9rem', maxHeight: '3rem' }}
         >
-          Slett
+          Slett dokument
         </Button>
       )}
     </HStack>

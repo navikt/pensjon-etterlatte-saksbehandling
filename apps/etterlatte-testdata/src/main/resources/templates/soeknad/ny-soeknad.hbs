@@ -26,19 +26,20 @@
     <div class="col-12 col-md-6">
         <form action="/{{ path }}" method="post">
             <div class="mb-3">
-                <label for="key" class="form-label">Nøkkel:</label>
-                <input type="text" name="key" id="key" class="form-control" required>
+                <label for="key" class="form-label">Nøkkel (valgfritt):</label>
+                <input type="text" name="key" id="key" class="form-control">
             </div>
 
             <div class="mb-3">
                 <label for="ytelse" class="form-label">Ytelse:</label>
                 <select name="ytelse"
                         id="ytelse"
-                        class="form-control"
+                        class="form-select"
                         required
                 >
-                <option value="Barnepensjon" >Barnepensjon</opttion>
-                <option value="Omstillingsstoenad" >Omstillingstønad</opttion>
+                    <option value=""></option>
+                    <option value="BARNEPENSJON">Barnepensjon</option>
+                    <option value="OMSTILLINGSSTOENAD">Omstillingstønad</option>
                 </select>
             </div>
 
@@ -77,8 +78,30 @@
                        name="fnrBarn"
                        id="fnrBarn"
                        class="form-control"
-                       required
                 />
+                <div class="form-text">
+                    Hvis flere barn kan du separere de med komma. Dersom du har valgt BARNEPENSJON vil den første i
+                    listen være den som søker om ytelsen.
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="behandlingssteg" class="form-label">Behandlingssteg (valgfritt):</label>
+                <select name="behandlingssteg"
+                        id="behandlingssteg"
+                        class="form-select"
+                        required
+                >
+                    <option value=""></option>
+                    <option value="KLAR">Klar</option>
+                    <option value="BEHANDLING_OPPRETTA">Behandling opprettet</option>
+                    <option value="VILKAARSVURDERT">Vilkaarsvurdert</option>
+                    <option value="TRYGDETID_OPPRETTA">Trygdetid opprettet</option>
+                    <option value="BEREGNA">Beregnet</option>
+                    <option value="AVKORTA">Avkortet</option>
+                    <option value="VEDTAK_FATTA">Vedtak fattet</option>
+                    <option value="IVERKSATT">Iverksatt</option>
+                </select>
             </div>
 
             <button type="submit" class="btn btn-primary">Send</button>

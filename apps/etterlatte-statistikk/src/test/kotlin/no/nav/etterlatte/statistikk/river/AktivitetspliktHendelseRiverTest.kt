@@ -5,7 +5,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AKTIVITETSPLIKT_DTO_RIVER_KEY
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
@@ -17,6 +16,7 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.statistikk.service.AktivitetspliktService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -37,7 +37,7 @@ class AktivitetspliktHendelseRiverTest {
     fun `melding om aktivitet leses og lagres`() {
         val dto =
             AktivitetspliktDto(
-                sakId = tilSakId(123),
+                sakId = SakId(123),
                 avdoedDoedsmaaned = YearMonth.of(2023, 12),
                 aktivitetsgrad =
                     listOf(

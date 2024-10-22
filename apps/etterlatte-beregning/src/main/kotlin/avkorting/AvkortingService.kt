@@ -113,12 +113,19 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val sanksjoner = sanksjonService.hentSanksjon(behandlingId) ?: emptyList()
 
+        // eksplisitt opphørFom overgår aldersovergang
         val aldersovergangMaaned =
-            grunnlagKlient.aldersovergangMaaned(behandling.sak, behandling.sakType, brukerTokenInfo)
-        val opphoerFom =
-            when (aldersovergangMaaned.year) {
-                lagreGrunnlag.fom.year -> aldersovergangMaaned
-                else -> behandling.opphoerFraOgMed
+            when (behandling.opphoerFraOgMed) {
+                null -> {
+                    val aldersovergang =
+                        grunnlagKlient.aldersovergangMaaned(behandling.sak, behandling.sakType, brukerTokenInfo)
+                    when (aldersovergang.year) {
+                        lagreGrunnlag.fom.year -> aldersovergang
+                        else -> null
+                    }
+                }
+
+                else -> null
             }
 
         val beregnetAvkorting =
@@ -127,7 +134,8 @@ class AvkortingService(
                 brukerTokenInfo,
                 beregning,
                 sanksjoner,
-                opphoerFom,
+                behandling.opphoerFraOgMed,
+                aldersovergangMaaned,
             )
 
         avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)
@@ -151,7 +159,7 @@ class AvkortingService(
     fun slettAvkorting(behandlingId: UUID) = avkortingRepository.slettForBehandling(behandlingId)
 
     /*
-     * Brukes ved automatisk regulering
+     * Brukes ved omregning
      */
     suspend fun kopierAvkorting(
         behandlingId: UUID,

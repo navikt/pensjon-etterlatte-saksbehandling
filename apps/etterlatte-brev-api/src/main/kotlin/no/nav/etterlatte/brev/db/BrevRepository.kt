@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.db
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
@@ -33,6 +32,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -93,7 +93,7 @@ class BrevRepository(
 
     fun hentBrevForSak(sakId: SakId): List<Brev> =
         using(sessionOf(ds)) {
-            it.run(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId).map(tilBrev).asList)
+            it.run(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId.sakId).map(tilBrev).asList)
         }
 
     fun oppdaterPayload(
@@ -158,6 +158,7 @@ class BrevRepository(
                 queryOf(
                     OPPDATER_MOTTAKER_QUERY,
                     mapOf(
+                        "id" to mottaker.id,
                         "brev_id" to id,
                         "foedselsnummer" to mottaker.foedselsnummer?.value?.let { it.ifBlank { null } },
                         "orgnummer" to mottaker.orgnummer?.let { it.ifBlank { null } },
@@ -171,6 +172,7 @@ class BrevRepository(
                         "landkode" to mottaker.adresse.landkode,
                         "land" to mottaker.adresse.land,
                         "tving_sentral_print" to mottaker.tvingSentralPrint,
+                        "type" to mottaker.type.name,
                     ),
                 ).asUpdate,
             ).also { require(it == 1) }
@@ -258,17 +260,19 @@ class BrevRepository(
         }
     }
 
-    fun settBrevOppdatert(
-        id: BrevID,
-        vedtak: JsonNode,
-    ): Boolean =
-        using(sessionOf(ds)) {
-            it.lagreHendelse(id, Status.OPPDATERT, vedtak.toJson()) > 0
-        }
-
     fun settBrevFerdigstilt(id: BrevID) {
         using(sessionOf(ds)) {
             it.lagreHendelse(id, Status.FERDIGSTILT)
+        }
+    }
+
+    fun settBrevUtgaatt(
+        id: BrevID,
+        kommentar: String,
+        bruker: BrukerTokenInfo,
+    ) {
+        using(sessionOf(ds)) {
+            it.lagreHendelse(id, Status.UTGAATT, "${bruker.ident()}: $kommentar".toJson())
         }
     }
 
@@ -279,7 +283,7 @@ class BrevRepository(
                     queryOf(
                         OPPRETT_BREV_QUERY,
                         mapOf(
-                            "sak_id" to ulagretBrev.sakId,
+                            "sak_id" to ulagretBrev.sakId.sakId,
                             "behandling_id" to ulagretBrev.behandlingId,
                             "prosess_type" to ulagretBrev.prosessType.name,
                             "soeker_fnr" to ulagretBrev.soekerFnr,
@@ -297,6 +301,7 @@ class BrevRepository(
                     queryOf(
                         OPPRETT_MOTTAKER_QUERY,
                         mapOf(
+                            "id" to ulagretBrev.mottaker.id,
                             "brev_id" to id,
                             "foedselsnummer" to ulagretBrev.mottaker.foedselsnummer?.value,
                             "orgnummer" to ulagretBrev.mottaker.orgnummer,
@@ -309,6 +314,10 @@ class BrevRepository(
                             "poststed" to ulagretBrev.mottaker.adresse.poststed,
                             "landkode" to ulagretBrev.mottaker.adresse.landkode,
                             "land" to ulagretBrev.mottaker.adresse.land,
+                            "type" to ulagretBrev.mottaker.type.name,
+//                           TODO:
+//                            "journalpostId" to ulagretBrev.mottaker.journalpostId,
+//                            "bestillingsId" to ulagretBrev.mottaker.bestillingsId,
                         ),
                     ).asUpdate,
                 ).also { opprettet -> require(opprettet == 1) }
@@ -411,7 +420,7 @@ class BrevRepository(
     private val tilBrev: (Row) -> Brev = { row ->
         Brev(
             id = row.long("id"),
-            sakId = row.long("sak_id"),
+            sakId = SakId(row.long("sak_id")),
             behandlingId = row.uuidOrNull("behandling_id"),
             soekerFnr = row.string("soeker_fnr"),
             tittel = row.stringOrNull("tittel"),
@@ -420,23 +429,27 @@ class BrevRepository(
             status = row.string("status_id").let { Status.valueOf(it) },
             statusEndret = row.tidspunkt("hendelse_opprettet"),
             opprettet = row.tidspunkt("opprettet"),
-            mottaker =
-                Mottaker(
-                    navn = row.string("navn"),
-                    foedselsnummer = row.stringOrNull("foedselsnummer")?.let { MottakerFoedselsnummer(it) },
-                    orgnummer = row.stringOrNull("orgnummer"),
-                    adresse =
-                        Adresse(
-                            adresseType = row.string("adressetype"),
-                            adresselinje1 = row.stringOrNull("adresselinje1"),
-                            adresselinje2 = row.stringOrNull("adresselinje2"),
-                            adresselinje3 = row.stringOrNull("adresselinje3"),
-                            postnummer = row.stringOrNull("postnummer"),
-                            poststed = row.stringOrNull("poststed"),
-                            landkode = row.string("landkode"),
-                            land = row.string("land"),
-                        ),
-                    tvingSentralPrint = row.boolean("tving_sentral_print"),
+            mottakere =
+                listOf(
+                    Mottaker(
+                        id = row.uuid("mottaker_id"),
+                        navn = row.string("navn"),
+                        foedselsnummer = row.stringOrNull("foedselsnummer")?.let { MottakerFoedselsnummer(it) },
+                        orgnummer = row.stringOrNull("orgnummer"),
+                        adresse =
+                            Adresse(
+                                adresseType = row.string("adressetype"),
+                                adresselinje1 = row.stringOrNull("adresselinje1"),
+                                adresselinje2 = row.stringOrNull("adresselinje2"),
+                                adresselinje3 = row.stringOrNull("adresselinje3"),
+                                postnummer = row.stringOrNull("postnummer"),
+                                poststed = row.stringOrNull("poststed"),
+                                landkode = row.string("landkode"),
+                                land = row.string("land"),
+                            ),
+                        tvingSentralPrint = row.boolean("tving_sentral_print"),
+                        type = MottakerType.valueOf(row.string("type")),
+                    ),
                 ),
             brevtype = row.string("brevtype").let { Brevtype.valueOf(it) },
             journalpostId = row.stringOrNull("journalpost_id"),
@@ -469,8 +482,8 @@ class BrevRepository(
         const val HENT_BREV_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.opprettet, h.status_id, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, 
-                b.brevtype, b.brevkoder
+                h.opprettet as hendelse_opprettet, m.id as mottaker_id, m.*, i.tittel, i.spraak, 
+                b.journalpost_id, b.bestilling_id, b.brevtype, b.brevkoder
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -489,8 +502,8 @@ class BrevRepository(
         const val HENT_BREV_FOR_BEHANDLING_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, 
-                b.brevtype, b.brevkoder
+                h.opprettet as hendelse_opprettet, m.id as mottaker_id, m.*, i.tittel, i.spraak, 
+                b.journalpost_id, b.bestilling_id, b.brevtype, b.brevkoder
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -509,8 +522,8 @@ class BrevRepository(
         const val HENT_BREV_FOR_SAK_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, 
-                b.brevtype, b.brevkoder
+                h.opprettet as hendelse_opprettet, m.id as mottaker_id, m.*, i.tittel, i.spraak, 
+                b.journalpost_id, b.bestilling_id, b.brevtype, b.brevkoder
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -533,12 +546,12 @@ class BrevRepository(
 
         const val OPPRETT_MOTTAKER_QUERY = """
             INSERT INTO mottaker (
-                brev_id, foedselsnummer, orgnummer, navn, 
+                id, brev_id, foedselsnummer, orgnummer, navn, 
                 adressetype, adresselinje1, adresselinje2, adresselinje3, 
-                postnummer, poststed, landkode, land
-            ) VALUES (:brev_id, :foedselsnummer, :orgnummer, :navn,
+                postnummer, poststed, landkode, land, type
+            ) VALUES (:id, :brev_id, :foedselsnummer, :orgnummer, :navn,
                 :adressetype, :adresselinje1, :adresselinje2, :adresselinje3,
-                :postnummer, :poststed, :landkode, :land
+                :postnummer, :poststed, :landkode, :land, :type
             )
         """
 
@@ -555,8 +568,9 @@ class BrevRepository(
                 poststed = :poststed,
                 landkode = :landkode,
                 land = :land,
-                tving_sentral_print = :tving_sentral_print
-            WHERE brev_id = :brev_id
+                tving_sentral_print = :tving_sentral_print,
+                type = :type 
+            WHERE id = :id AND brev_id = :brev_id
         """
 
         const val OPPDATER_BREVKODER_QUERY = """

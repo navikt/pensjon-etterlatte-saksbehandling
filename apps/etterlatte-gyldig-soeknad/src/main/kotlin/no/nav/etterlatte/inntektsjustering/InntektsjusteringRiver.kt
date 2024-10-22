@@ -41,10 +41,9 @@ internal class InntektsjusteringRiver(
         try {
             logger.info("Mottatt inntektsjustering (id=${inntektsjustering.id})")
 
-            val fnr = packet[InntektsjusteringInnsendt.fnrBruker].textValue()
             val sak =
                 runBlocking {
-                    behandlingKlient.finnEllerOpprettSak(fnr, SakType.OMSTILLINGSSTOENAD)
+                    behandlingKlient.finnEllerOpprettSak(inntektsjustering.fnr, SakType.OMSTILLINGSSTOENAD)
                 }
 
             val journalpostResponse = journalfoerInntektsjusteringService.opprettJournalpost(sak, inntektsjustering)

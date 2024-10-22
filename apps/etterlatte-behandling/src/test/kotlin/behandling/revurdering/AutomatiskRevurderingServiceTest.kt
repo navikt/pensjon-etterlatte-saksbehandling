@@ -8,6 +8,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.OmregningAvSakUnderSamordning
 import no.nav.etterlatte.behandling.revurdering.OmregningKreverLoependeVedtak
@@ -104,7 +105,7 @@ class AutomatiskRevurderingServiceTest {
 
         val request =
             AutomatiskRevurderingRequest(
-                123L,
+                randomSakId(),
                 LocalDate.now(),
                 Revurderingaarsak.OMREGNING,
             )
@@ -126,7 +127,7 @@ class AutomatiskRevurderingServiceTest {
 
         val request =
             AutomatiskRevurderingRequest(
-                123L,
+                randomSakId(),
                 LocalDate.now(),
                 Revurderingaarsak.OMREGNING,
             )
@@ -150,7 +151,7 @@ class AutomatiskRevurderingServiceTest {
 
         val request =
             AutomatiskRevurderingRequest(
-                123L,
+                randomSakId(),
                 LocalDate.now(),
                 Revurderingaarsak.OMREGNING,
             )
@@ -175,7 +176,7 @@ class AutomatiskRevurderingServiceTest {
 
         val request =
             AutomatiskRevurderingRequest(
-                123L,
+                randomSakId(),
                 LocalDate.now(),
                 Revurderingaarsak.OMREGNING,
             )

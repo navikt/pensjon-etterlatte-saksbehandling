@@ -49,6 +49,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.util.UUID
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -60,6 +61,11 @@ internal class BrevRouteTest {
     private val tilgangssjekker = mockk<Tilgangssjekker>()
     private val grunnlagService = mockk<GrunnlagService>()
     private val behandlingService = mockk<BehandlingService>()
+
+    companion object {
+        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+        private val SAK_ID = Random.nextLong(1000)
+    }
 
     @BeforeAll
     fun before() {
@@ -131,6 +137,7 @@ internal class BrevRouteTest {
     fun deserialiser() {
         val mottaker =
             """{
+            "id": "d762e98d-514d-4bb5-a6b5-a3fbf4d65887",
             "navn": "Peder Ås",
             "foedselsnummer": {
                 "value": "25478323363"
@@ -236,7 +243,7 @@ internal class BrevRouteTest {
         }
     }
 
-    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+    val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     private fun opprettBrev(id: BrevID) =
         Brev(
@@ -250,18 +257,21 @@ internal class BrevRouteTest {
             status = Status.OPPRETTET,
             statusEndret = Tidspunkt.now(),
             opprettet = Tidspunkt.now(),
-            mottaker =
-                Mottaker(
-                    "Stor Snerk",
-                    STOR_SNERK,
-                    null,
-                    Adresse(
-                        adresseType = "NORSKPOSTADRESSE",
-                        "Testgaten 13",
-                        "1234",
-                        "OSLO",
-                        land = "Norge",
-                        landkode = "NOR",
+            mottakere =
+                listOf(
+                    Mottaker(
+                        id = UUID.randomUUID(),
+                        "Stor Snerk",
+                        STOR_SNERK,
+                        null,
+                        Adresse(
+                            adresseType = "NORSKPOSTADRESSE",
+                            "Testgaten 13",
+                            "1234",
+                            "OSLO",
+                            land = "Norge",
+                            landkode = "NOR",
+                        ),
                     ),
                 ),
             brevtype = Brevtype.INFORMASJON,
@@ -279,9 +289,4 @@ internal class BrevRouteTest {
                 behandlingService,
             )
         }
-
-    companion object {
-        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
-        private val SAK_ID = Random.nextLong(1000)
-    }
 }

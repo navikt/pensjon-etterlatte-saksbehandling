@@ -24,6 +24,7 @@
                  <select name="hendelseType" id="hendelseType" onchange="prefill()">
                   <option value="udefinert" selcted >Udefinert</option>
                   <option value="omregning">Omregning</option>
+                  <option value="inntektsjusteringjobb">Inntektsjusteringjobb</option>
                 </select>
             </div>
 
@@ -50,7 +51,10 @@
     function prefill() {
         const hendelseType = document.getElementById('hendelseType').value
         if (hendelseType === 'omregning') {
-            document.getElementById('json').value = '{"@event_name":"OMREGNING:KLAR_FOR_OMREGNING","hendelse_data":{"sakId":"","fradato":"","revurderingaarsak":""}}'
+            document.getElementById('json').value = '{"@event_name":"OMREGNING:KLAR_FOR_OMREGNING","hendelse_data":{"sakId":"","fradato":"2024-01-01","revurderingaarsak":""}}'
+            prettify()
+        } else if( hendelseType == 'inntektsjusteringjobb') {
+            document.getElementById('json').value = '{"@event_name": "INNTEKTSJUSTERING:START_INNTEKTSJUSTERING_JOBB","kjoering": "asdf","antall": 1,"loepende_fom": "2024-01-01","spesifikke_saker": "","ekskluderte_saker": ""}'
             prettify()
         } else {
         document.getElementById('json').value = ''

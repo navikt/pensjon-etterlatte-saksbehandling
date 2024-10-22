@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.Base64
@@ -99,8 +100,13 @@ class JournalfoerInntektsjusteringService(
                             aar = inntektsjustering.inntektsaar,
                             arbeidsinntekt = inntektsjustering.arbeidsinntekt,
                             naeringsinntekt = inntektsjustering.naeringsinntekt,
-                            arbeidsinntektUtland = inntektsjustering.arbeidsinntektUtland,
-                            naeringsinntektUtland = inntektsjustering.naeringsinntektUtland,
+                            inntektFraUtland = inntektsjustering.inntektFraUtland,
+                            afpInntekt = inntektsjustering.afpInntekt,
+                            afpInntektAFPTjenesteordning = inntektsjustering.afpTjenesteordning ?: "",
+                            skalGaaAvMedAlderspensjon = inntektsjustering.skalGaaAvMedAlderspensjon,
+                            datoForAaGaaAvMedAlderspensjon =
+                                inntektsjustering.datoForAaGaaAvMedAlderspensjon?.formatert()
+                                    ?: "",
                             tidspunkt = inntektsjustering.formatertTidspunkt(),
                         ),
                     mal = "inntektsjustering_nytt_aar_v1",
@@ -124,14 +130,19 @@ data class ArkiverInntektsjustering(
     val aar: Int,
     val arbeidsinntekt: Int,
     val naeringsinntekt: Int,
-    val arbeidsinntektUtland: Int,
-    val naeringsinntektUtland: Int,
+    val inntektFraUtland: Int,
+    val afpInntekt: Int,
+    val afpInntektAFPTjenesteordning: String,
+    val skalGaaAvMedAlderspensjon: String,
+    val datoForAaGaaAvMedAlderspensjon: String,
     val tidspunkt: String,
 ) : PDFMal
 
-fun Inntektsjustering.formatertTidspunkt(): String {
-    fun t(tall: Int) = if (tall < 10) "0$tall" else "$tall"
-    return with(LocalDateTime.ofInstant(tidspunkt, ZoneOffset.ofHours(0))) {
+private fun Inntektsjustering.formatertTidspunkt() =
+    with(LocalDateTime.ofInstant(tidspunkt, ZoneOffset.ofHours(0))) {
         "${t(dayOfMonth)}.${t(monthValue)}.$year ${t(hour)}:${t(minute)}:${t(second)}"
     }
-}
+
+private fun LocalDate.formatert() = "${t(dayOfMonth)}.${t(monthValue)}.$year"
+
+private fun t(tall: Int) = if (tall < 10) "0$tall" else "$tall"

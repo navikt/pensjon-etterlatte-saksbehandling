@@ -13,7 +13,7 @@ import {
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
-import { soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
+import { hentGyldigeNavigeringsStatuser, soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
@@ -115,9 +115,9 @@ const routeTypes = {
 }
 
 function useRouteNavigation() {
-  const [currentRoute, setCurrentRoute] = useState<string | undefined>()
-  const navigate = useNavigate()
   const match = useMatch('/behandling/:behandlingId/:section')
+  const [currentRoute, setCurrentRoute] = useState<string | undefined>(match?.params?.section)
+  const navigate = useNavigate()
 
   useEffect(() => {
     setCurrentRoute(match?.params?.section)
@@ -138,6 +138,25 @@ export const useBehandlingRoutes = () => {
 
   const aktuelleRoutes = hentAktuelleRoutes(behandling, personopplysninger)
 
+  const routeErGyldig = (): boolean => {
+    const alleRoutes: BehandlingRouteTypes[] = Object.values(routeTypes)
+    const valgtRoute = alleRoutes.filter((value) => value.path === currentRoute)
+    if (valgtRoute.length) {
+      const pathInfo = valgtRoute[0]
+      if (pathInfo.kreverBehandlingsstatus) {
+        return (
+          !!pathInfo.kreverBehandlingsstatus &&
+          !!behandling &&
+          hentGyldigeNavigeringsStatuser(behandling.status).includes(pathInfo.kreverBehandlingsstatus(behandling))
+        )
+      } else {
+        return true
+      }
+    } else {
+      return false
+    }
+  }
+
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
 
@@ -154,7 +173,16 @@ export const useBehandlingRoutes = () => {
     goto(previousPath)
   }
 
-  return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
+  return {
+    next,
+    back,
+    lastPage,
+    firstPage,
+    behandlingRoutes: aktuelleRoutes,
+    currentRoute,
+    goto,
+    routeErGyldig: routeErGyldig,
+  }
 }
 
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysninger: Personopplysninger | null) => {
@@ -167,7 +195,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysn
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandlingRoutes(behandling).filter((route) =>
-        soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
+        foerstegangsbehandlingRoutes(behandling, personopplysninger, lagVarselbrev)
           .map((pathinfo) => pathinfo.path)
           .includes(route.path)
       )
@@ -180,7 +208,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysn
   }
 }
 
-export function soeknadRoutes(
+export function foerstegangsbehandlingRoutes(
   behandling: IBehandlingReducer,
   personopplysninger: Personopplysninger | null,
   lagVarselbrev: boolean

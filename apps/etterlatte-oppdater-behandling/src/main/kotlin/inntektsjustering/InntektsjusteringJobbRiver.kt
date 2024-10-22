@@ -3,12 +3,8 @@ package no.nav.etterlatte.inntektsjustering
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.KjoeringStatus
-import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
@@ -26,7 +22,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 
 internal class InntektsjusteringJobbRiver(
     rapidsConnection: RapidsConnection,
@@ -65,6 +60,7 @@ internal class InntektsjusteringJobbRiver(
             logger = logger,
             antall = antall,
             finnSaker = { antallIDenneRunden ->
+                // TODO eksludere de som allerede er kjørt?
                 behandlingService.hentAlleSaker(
                     kjoering,
                     antallIDenneRunden,
@@ -75,37 +71,18 @@ internal class InntektsjusteringJobbRiver(
                 )
             },
             haandterSaker = { sakerSomSkalInformeres ->
-                sakerSomSkalInformeres.saker.forEach { sak ->
-
-                    logger.info("$kjoering: Klar til å opprette, journalføre og distribuere varsel og vedtak for sakId ${sak.id}")
-                    behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
-
-                    val sakMedBehandlinger = behandlingService.hentBehandlingerForSak(FoedselsnummerDTO(sak.ident))
-                    if (skalBehandlingOmregnes(sakMedBehandlinger.behandlinger, loependeFom)) {
-                        // TODO: START OMREGNING
-                    } else {
-                        behandlingService.lagreKjoering(sak.id, KjoeringStatus.FERDIGSTILT, kjoering)
-                    }
-                }
+                logger.info("Starter årlig inntektsjustering $kjoering")
+                val request =
+                    AarligInntektsjusteringRequest(
+                        kjoering = kjoering,
+                        loependeFom = loependeFom,
+                        saker = sakerSomSkalInformeres.saker.map { it.id },
+                    )
+                behandlingService.startAarligInntektsjustering(request)
             },
         )
-
-        logger.info("$kjoering: Ferdig")
     }
 }
-
-fun skalBehandlingOmregnes(
-    behandlinger: List<BehandlingSammendrag>,
-    loependeFom: YearMonth,
-): Boolean =
-    behandlinger.any {
-        it.status == BehandlingStatus.IVERKSATT &&
-            it.aarsak == Revurderingaarsak.INNTEKTSENDRING.name &&
-            !(
-                it.virkningstidspunkt?.dato?.year == loependeFom.year &&
-                    it.virkningstidspunkt?.dato?.monthValue == 1
-            )
-    }
 
 enum class InntektsjusterinFeatureToggle(
     private val key: String,

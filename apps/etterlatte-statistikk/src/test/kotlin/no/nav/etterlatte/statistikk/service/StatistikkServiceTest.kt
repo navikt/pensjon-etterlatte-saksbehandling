@@ -12,7 +12,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -428,11 +427,11 @@ class StatistikkServiceTest {
 
         val omsStoenadRad =
             omsSakId.map {
-                stoenadRad(sakId = tilSakId(it), sakYtelse = SakType.OMSTILLINGSSTOENAD.name)
+                stoenadRad(sakId = SakId(it), sakYtelse = SakType.OMSTILLINGSSTOENAD.name)
             }
         val bpStoenadRad =
             bpSakId.map {
-                stoenadRad(sakId = tilSakId(it), sakYtelse = SakType.BARNEPENSJON.name)
+                stoenadRad(sakId = SakId(it), sakYtelse = SakType.BARNEPENSJON.name)
             }
         val service =
             StatistikkService(
@@ -455,8 +454,8 @@ class StatistikkServiceTest {
 
         service.produserStoenadStatistikkForMaaned(statistikkMaaned)
 
-        brukteOmsIder.captured.shouldContainAll(omsSakId.map { tilSakId(it) })
-        brukteOmsIder.captured.shouldNotContainAnyOf(bpSakId.map { tilSakId(it) })
+        brukteOmsIder.captured.shouldContainAll(omsSakId.map { SakId(it) })
+        brukteOmsIder.captured.shouldNotContainAnyOf(bpSakId.map { SakId(it) })
     }
 }
 

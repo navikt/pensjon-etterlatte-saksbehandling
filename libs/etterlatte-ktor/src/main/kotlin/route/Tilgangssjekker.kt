@@ -125,7 +125,7 @@ class Tilgangssjekker(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/sak/$sakId?skrivetilgang=$skrivetilgang",
+                            url = "$resourceUrl/tilgang/sak/${sakId.sakId}?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                 ).mapBoth(

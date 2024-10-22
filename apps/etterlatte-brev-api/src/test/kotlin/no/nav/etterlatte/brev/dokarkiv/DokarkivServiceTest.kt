@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -16,9 +17,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 internal class DokarkivServiceTest {
-    private val mockKlient = mockk<DokarkivKlient>()
+    val mockKlient = mockk<DokarkivKlient>()
 
-    private val service = DokarkivServiceImpl(mockKlient)
+    val service = DokarkivServiceImpl(mockKlient)
 
     @BeforeEach
     fun before() {
@@ -34,14 +35,14 @@ internal class DokarkivServiceTest {
     fun `Opprett journalpost`() {
         val forventetResponse = OpprettJournalpostResponse("12345", journalpostferdigstilt = true)
 
-        coEvery { mockKlient.opprettJournalpost(any<OpprettJournalpost>(), any()) } returns forventetResponse
+        coEvery { mockKlient.opprettJournalpost(any<OpprettJournalpost>(), any(), any()) } returns forventetResponse
 
         val request = mockk<JournalpostRequest>(relaxed = true)
-        val response = runBlocking { service.journalfoer(request) }
+        val response = runBlocking { service.journalfoer(request, simpleSaksbehandler()) }
 
         response.journalpostId shouldBe forventetResponse.journalpostId
 
-        coVerify { mockKlient.opprettJournalpost(request, true) }
+        coVerify { mockKlient.opprettJournalpost(request, true, any()) }
     }
 
     @Nested
@@ -50,7 +51,7 @@ internal class DokarkivServiceTest {
         fun `Fagsaksystem FS22 mappes korrekt`() {
             val journalpostId = "1"
 
-            coEvery { mockKlient.oppdaterJournalpost(any(), any()) } returns OppdaterJournalpostResponse(journalpostId)
+            coEvery { mockKlient.oppdaterJournalpost(any(), any(), any()) } returns OppdaterJournalpostResponse(journalpostId)
 
             val request =
                 OppdaterJournalpostRequest(
@@ -58,11 +59,11 @@ internal class DokarkivServiceTest {
                 )
 
             runBlocking {
-                service.oppdater(journalpostId, false, null, request)
+                service.oppdater(journalpostId, false, null, request, simpleSaksbehandler())
             }
 
             val requestSlot = slot<OppdaterJournalpostRequest>()
-            coVerify { mockKlient.oppdaterJournalpost(journalpostId, capture(requestSlot)) }
+            coVerify { mockKlient.oppdaterJournalpost(journalpostId, capture(requestSlot), any()) }
 
             with(requestSlot.captured) {
                 sak?.fagsakId shouldBe null
@@ -76,7 +77,7 @@ internal class DokarkivServiceTest {
         fun `Fagsaksystem EY mappes korrekt`() {
             val journalpostId = "1"
 
-            coEvery { mockKlient.oppdaterJournalpost(any(), any()) } returns OppdaterJournalpostResponse(journalpostId)
+            coEvery { mockKlient.oppdaterJournalpost(any(), any(), any()) } returns OppdaterJournalpostResponse(journalpostId)
 
             val request =
                 OppdaterJournalpostRequest(
@@ -90,11 +91,11 @@ internal class DokarkivServiceTest {
                 )
 
             runBlocking {
-                service.oppdater(journalpostId, false, null, request)
+                service.oppdater(journalpostId, false, null, request, simpleSaksbehandler())
             }
 
             val requestSlot = slot<OppdaterJournalpostRequest>()
-            coVerify { mockKlient.oppdaterJournalpost(journalpostId, capture(requestSlot)) }
+            coVerify { mockKlient.oppdaterJournalpost(journalpostId, capture(requestSlot), any()) }
 
             with(requestSlot.captured) {
                 sak?.fagsakId shouldBe "1234"

@@ -1,18 +1,76 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
-import java.sql.ResultSet
 import java.util.UUID
 
 class BehandlingInfoDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
+    fun lagreErOmgjoeringSluttbehandlingUtland(id: UUID) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    INSERT INTO behandling_info(behandling_id, omgjoering_sluttbehandling_utland)
+                    VALUES (?, ?)
+                    ON CONFLICT (behandling_id) DO 
+                    UPDATE SET omgjoering_sluttbehandling_utland = excluded.omgjoering_sluttbehandling_utland
+                    """.trimIndent(),
+                ).apply {
+                    setObject(1, id)
+                    setBoolean(2, true)
+                }.run { executeUpdate() }
+            }
+        }
+    }
+
+    fun lagreSluttbehandling(
+        behandlingId: UUID,
+        sluttbehandling: SluttbehandlingUtlandBehandlinginfo,
+    ) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    INSERT INTO behandling_info(behandling_id, sluttbehandling)
+                    VALUES (?, ?)
+                    ON CONFLICT (behandling_id) DO 
+                    UPDATE SET sluttbehandling = excluded.sluttbehandling
+                    """.trimIndent(),
+                ).let { statement ->
+                    statement.setObject(1, behandlingId)
+                    statement.setJsonb(2, sluttbehandling)
+                    statement.executeUpdate()
+                }
+            }
+        }
+    }
+
+    fun hentSluttbehandling(behandlingId: UUID): SluttbehandlingUtlandBehandlinginfo? =
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    SELECT sluttbehandling 
+                    FROM behandling_info 
+                    WHERE behandling_id = ?::UUID AND sluttbehandling IS NOT NULL
+                    """.trimIndent(),
+                ).let { statement ->
+                    statement.setObject(1, behandlingId)
+                    statement.executeQuery().singleOrNull {
+                        getString("sluttbehandling").let { objectMapper.readValue(it) }
+                    }
+                }
+            }
+        }
+
     fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
@@ -40,12 +98,16 @@ class BehandlingInfoDao(
             with(it) {
                 prepareStatement(
                     """
-                    SELECT behandling_id, brevutfall 
+                    SELECT brevutfall 
                     FROM behandling_info 
-                    WHERE behandling_id = ?::UUID
+                    WHERE behandling_id = ?::UUID AND brevutfall IS NOT NULL
                     """,
                 ).apply { setObject(1, behandlingId) }
-                    .run { executeQuery().singleOrNull { toBrevutfall() } }
+                    .run {
+                        executeQuery().singleOrNull {
+                            getString("brevutfall").let { objectMapper.readValue(it) }
+                        }
+                    }
             }
         }
 
@@ -77,7 +139,7 @@ class BehandlingInfoDao(
                 prepareStatement(
                     """
                     UPDATE behandling_info SET etterbetaling = ?
-                    WHERE behandling_id = ?
+                    WHERE behandling_id = ?::UUID
                     """.trimIndent(),
                 ).apply {
                     setJsonb(1, null)
@@ -92,16 +154,12 @@ class BehandlingInfoDao(
             with(it) {
                 prepareStatement(
                     """
-                    SELECT behandling_id, etterbetaling 
+                    SELECT etterbetaling 
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID AND etterbetaling IS NOT NULL
                     """,
                 ).apply { setObject(1, behandlingId) }
-                    .run { executeQuery().singleOrNull { toEtterbetaling() } }
+                    .run { executeQuery().singleOrNull { getString("etterbetaling").let { objectMapper.readValue(it) } } }
             }
         }
-
-    private fun ResultSet.toBrevutfall(): Brevutfall = this.getString("brevutfall").let { objectMapper.readValue(it) }
-
-    private fun ResultSet.toEtterbetaling(): Etterbetaling = this.getString("etterbetaling").let { objectMapper.readValue(it) }
 }

@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import no.nav.etterlatte.utbetaling.klienter.BehandlingKlient
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
 
 internal fun Route.utbetalingRoutes(

@@ -19,7 +19,9 @@ import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.logger
+import org.slf4j.LoggerFactory
+import kotlin.coroutines.cancellation.CancellationException
 
 fun initEmbeddedServer(
     httpPort: Int,
@@ -27,9 +29,10 @@ fun initEmbeddedServer(
     withMetrics: Boolean = true,
     cronJobs: List<TimerJob> = listOf(),
     routes: (Route.() -> Unit)? = null,
+    routePrefix: String? = null,
     authenticatedRoutes: Route.() -> Unit,
 ) = settOppEmbeddedServer(httpPort, applicationConfig, cronJobs) {
-    restModule(sikkerlogger(), withMetrics = withMetrics, routes = routes) {
+    restModule(sikkerlogger(), withMetrics = withMetrics, routes = routes, routePrefix = routePrefix) {
         authenticatedRoutes()
     }
 }
@@ -73,6 +76,12 @@ private fun settOppEmbeddedServer(
             },
     )
 
+val logger = LoggerFactory.getLogger("CIOApplicationEngine")
+
 fun CIOApplicationEngine.run() {
-    start(true)
+    try {
+        start(true)
+    } catch (e: CancellationException) {
+        logger.warn("Appen redeployes mens den kjører opp e.l.", e)
+    }
 }

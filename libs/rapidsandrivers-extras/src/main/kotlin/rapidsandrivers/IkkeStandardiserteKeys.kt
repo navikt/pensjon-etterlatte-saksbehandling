@@ -29,7 +29,7 @@ const val ER_OVER_18_AAR = "er_over_18_aar"
 const val KONTEKST_KEY = "kontekst"
 
 var JsonMessage.sakId: SakId
-    get() = this[SAK_ID_KEY].asLong()
+    get() = SakId(this[SAK_ID_KEY].asLong())
     set(name) {
         this[SAK_ID_KEY] = name
     }

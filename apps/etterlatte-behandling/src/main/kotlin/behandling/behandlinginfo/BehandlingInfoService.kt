@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.behandlinginfo
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
@@ -36,6 +37,18 @@ class BehandlingInfoService(
 
         return Pair(lagretBrevutfall, lagretEtterbetaling)
     }
+
+    fun lagreErOmgjoeringSluttbehandlingUtland(behandling: Behandling) =
+        behandlingInfoDao.lagreErOmgjoeringSluttbehandlingUtland(behandling.id)
+
+    fun lagreSluttbehandling(
+        behandlingId: UUID,
+        sluttbehandling: SluttbehandlingUtlandBehandlinginfo,
+    ) {
+        behandlingInfoDao.lagreSluttbehandling(behandlingId, sluttbehandling)
+    }
+
+    fun hentSluttbehandling(behandlingId: UUID): SluttbehandlingUtlandBehandlinginfo? = behandlingInfoDao.hentSluttbehandling(behandlingId)
 
     private fun lagreBrevutfall(
         behandling: Behandling,

@@ -26,10 +26,11 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -44,9 +45,17 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRepositoryIntegrationTest(
-    private val dataSource: DataSource,
+    val dataSource: DataSource,
 ) {
     private val db = BrevRepository(dataSource)
+
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
+        private val PDF_BYTES = "Hello world!".toByteArray()
+        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+    }
 
     @AfterEach
     fun resetTablesAfterEachTest() {
@@ -77,7 +86,8 @@ internal class BrevRepositoryIntegrationTest(
 
         assertEquals(emptyList<Brev>(), db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK))
 
-        val nyttBrev = db.opprettBrev(ulagretBrev(behandlingId = behandlingId))
+        val ulagretBrev = ulagretBrev(behandlingId = behandlingId)
+        val nyttBrev = db.opprettBrev(ulagretBrev)
 
         val brevTilBehandling = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).first()
         assertEquals(nyttBrev.status, brevTilBehandling.status)
@@ -85,7 +95,7 @@ internal class BrevRepositoryIntegrationTest(
         val hentetBrev = db.hentBrev(nyttBrev.id)
         assertEquals(nyttBrev.id, hentetBrev.id)
         assertEquals(behandlingId, hentetBrev.behandlingId)
-        assertEquals(hentetBrev.mottaker, opprettMottaker())
+        assertEquals(hentetBrev.mottakere.single(), ulagretBrev.mottaker)
     }
 
     @Test
@@ -164,30 +174,17 @@ internal class BrevRepositoryIntegrationTest(
     }
 
     @Test
-    fun `Endre status ved underkjent vedtak`() {
-        val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
-        val brev = db.opprettBrev(ulagretBrev)
-
-        brev.status shouldBe Status.OPPRETTET
-
-        db.oppdaterPayload(brev.id, Slate())
-        db.settBrevFerdigstilt(brev.id)
-
-        val ferdigstiltBrev = db.hentBrev(brev.id)
-        ferdigstiltBrev.status shouldBe Status.FERDIGSTILT
-
-        db.settBrevOppdatert(brev.id, """{"key":"value"}""".toJsonNode())
-        val underkjentBrev = db.hentBrev(brev.id)
-        underkjentBrev.status shouldBe Status.OPPDATERT
-    }
-
-    @Test
     fun `Oppdater journalpost ID`() {
         val journalpostId = UUID.randomUUID().toString()
 
         val brev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
 
-        assertTrue(db.settBrevJournalfoert(brev.id, OpprettJournalpostResponse(journalpostId, journalpostferdigstilt = true)))
+        assertTrue(
+            db.settBrevJournalfoert(
+                brev.id,
+                OpprettJournalpostResponse(journalpostId, journalpostferdigstilt = true),
+            ),
+        )
     }
 
     @Test
@@ -275,6 +272,36 @@ internal class BrevRepositoryIntegrationTest(
 
         val slettetBrev = db.hentBrev(brevSkalSlettes.id)
         assertEquals(Status.SLETTET, slettetBrev.status)
+    }
+
+    @Test
+    fun `Marker brev med status UTGAATT`() {
+        val saksbehandler = simpleSaksbehandler("Z123456")
+        val kommentar = "En generell kommentar"
+
+        val brev = db.opprettBrev(ulagretBrev())
+
+        db.settBrevUtgaatt(brev.id, kommentar, saksbehandler)
+
+        val endretBrev = db.hentBrev(brev.id)
+
+        assertEquals(Status.UTGAATT, endretBrev.status)
+
+        val hendelser =
+            using(sessionOf(dataSource)) {
+                it.run(
+                    queryOf(
+                        "SELECT status_id, payload FROM hendelse WHERE brev_id = ?",
+                        brev.id,
+                    ).map { row ->
+                        Pair(Status.valueOf(row.string("status_id")), row.string("payload"))
+                    }.asList,
+                )
+            }
+
+        val hendelse = hendelser.single { it.first == Status.UTGAATT }
+
+        assertEquals("${saksbehandler.ident}: $kommentar", deserialize<String>(hendelse.second))
     }
 
     @Nested
@@ -452,6 +479,7 @@ internal class BrevRepositoryIntegrationTest(
 
     private fun opprettMottaker() =
         Mottaker(
+            id = UUID.randomUUID(),
             navn = "Test Testesen",
             foedselsnummer = STOR_SNERK,
             adresse =
@@ -464,12 +492,4 @@ internal class BrevRepositoryIntegrationTest(
                     landkode = "NOR",
                 ),
         )
-
-    companion object {
-        @RegisterExtension
-        val dbExtension = DatabaseExtension()
-
-        private val PDF_BYTES = "Hello world!".toByteArray()
-        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
-    }
 }

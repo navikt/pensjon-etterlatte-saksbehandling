@@ -2,7 +2,11 @@ import styled from 'styled-components'
 import { IBehandlingsType, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
 import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
-import { BehandlingRouteTypes, revurderingRoutes, soeknadRoutes } from '~components/behandling/BehandlingRoutes'
+import {
+  BehandlingRouteTypes,
+  revurderingRoutes,
+  foerstegangsbehandlingRoutes,
+} from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import React, { useEffect } from 'react'
@@ -25,8 +29,10 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const lagVarselbrev =
     behandling.kilde === Vedtaksloesning.GJENOPPRETTA ||
     behandling.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT
-  const soeknadRoutes_ = soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
-  const revurderingRoutes_ = revurderingRoutes(behandling, lagVarselbrev)
+  const routes =
+    behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+      ? foerstegangsbehandlingRoutes(behandling, personopplysninger, lagVarselbrev)
+      : revurderingRoutes(behandling, lagVarselbrev)
 
   const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1
 
@@ -48,24 +54,14 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
         () => (
           <StegMenyBox>
             <HStack gap="6" align="center">
-              {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-                soeknadRoutes_.map((pathInfo, index) => (
-                  <NavLenke
-                    key={pathInfo.path}
-                    pathInfo={pathInfo}
-                    behandling={props.behandling}
-                    separator={erSisteRoute(index, soeknadRoutes_)}
-                  />
-                ))}
-              {behandlingType === IBehandlingsType.REVURDERING &&
-                revurderingRoutes_.map((pathInfo, index) => (
-                  <NavLenke
-                    key={pathInfo.path}
-                    pathInfo={pathInfo}
-                    behandling={props.behandling}
-                    separator={erSisteRoute(index, revurderingRoutes_)}
-                  />
-                ))}
+              {routes.map((pathInfo, index) => (
+                <NavLenke
+                  key={pathInfo.path}
+                  pathInfo={pathInfo}
+                  behandling={props.behandling}
+                  separator={erSisteRoute(index, routes)}
+                />
+              ))}
             </HStack>
           </StegMenyBox>
         )

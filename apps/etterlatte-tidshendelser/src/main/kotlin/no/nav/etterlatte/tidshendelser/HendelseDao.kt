@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
@@ -124,7 +125,7 @@ class HendelseDao(
             saksIDer.map { sakId ->
                 mapOf(
                     "jobbId" to jobbId,
-                    "sakId" to sakId,
+                    "sakId" to sakId.sakId,
                     "steg" to steg.name,
                 )
             }

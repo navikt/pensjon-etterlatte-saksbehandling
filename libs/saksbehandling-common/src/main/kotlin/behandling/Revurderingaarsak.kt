@@ -58,7 +58,7 @@ enum class Revurderingaarsak(
     EKSPORT(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     IMPORT(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     ANNEN(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    AKTIVITETSPLIKT(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
+    AKTIVITETSPLIKT(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
 
     UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 

@@ -11,10 +11,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
-import no.nav.etterlatte.joarkhendelser.joark.AvsenderMottaker
 import no.nav.etterlatte.joarkhendelser.joark.Bruker
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
-import no.nav.etterlatte.joarkhendelser.joark.Dokument
 import no.nav.etterlatte.joarkhendelser.joark.Fagsak
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
@@ -29,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -49,17 +48,21 @@ internal class JoarkHendelseHandlerTest {
     private val oppgaveKlient = mockk<OppgaveKlient>()
     private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
 
-    private val sut =
-        JoarkHendelseHandler(
-            BehandlingService(behandlingKlientMock),
-            safKlientMock,
-            oppgaveKlient,
-            pdlTjenesterKlientMock,
-        )
+    private lateinit var sut: JoarkHendelseHandler
 
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
+        behandlingKlientMock.also {
+            coEvery { it.hentEllerOpprettSak(any(), any()) }.returns(SakId(101))
+        }
+        sut =
+            JoarkHendelseHandler(
+                BehandlingService(behandlingKlientMock),
+                safKlientMock,
+                oppgaveKlient,
+                pdlTjenesterKlientMock,
+            )
     }
 
     @AfterEach
@@ -477,13 +480,8 @@ internal class JoarkHendelseHandlerTest {
         journalpostId = journalpostId.toString(),
         bruker = bruker,
         tittel = "Tittel",
-        journalposttype = "journalposttype",
         journalstatus = status,
-        dokumenter = listOf(Dokument("dokumentInfoId", "tittel", emptyList())),
         sak = Fagsak("1", "EY", "FAGSAK", sakType.tema),
-        avsenderMottaker = AvsenderMottaker(bruker?.id, "Fornavn Etternavn", true),
         kanal = Kanal.SKAN_IM,
-        datoOpprettet = "datoOpprettet",
-        opprettetAvNavn = "etterlatte:journalfoer-soeknad",
     )
 }

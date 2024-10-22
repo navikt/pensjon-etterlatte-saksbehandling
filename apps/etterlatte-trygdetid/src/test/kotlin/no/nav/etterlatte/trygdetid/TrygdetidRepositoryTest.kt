@@ -5,9 +5,9 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.behandling.tilSakId
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
@@ -386,6 +386,6 @@ internal class TrygdetidRepositoryTest(
     private fun behandlingMock() =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns tilSakId(123L)
+            every { sak } returns SakId(123L)
         }
 }

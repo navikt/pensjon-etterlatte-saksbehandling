@@ -4,11 +4,6 @@ import org.slf4j.LoggerFactory
 import java.util.Timer
 import java.util.concurrent.atomic.AtomicBoolean
 
-class ShutdownInProgressException(
-    detail: String,
-    cause: Throwable,
-) : Exception(detail, cause)
-
 val shuttingDown: AtomicBoolean = AtomicBoolean(false)
 
 val logger = LoggerFactory.getLogger("shutdownhookLogger")
@@ -24,6 +19,10 @@ fun addShutdownHook(vararg timer: Timer) {
             },
         )
     } catch (e: IllegalStateException) {
-        logger.warn("App er på vei ned allerede, kan ikke legge til shutdownhooks", e)
+        try {
+            logger.warn("App er på vei ned allerede, kan ikke legge til shutdownhooks", e)
+        } catch (e: Exception) {
+            // Ignorer at vi  ikke får logget på grunn av shutdown, da er det ikke noe å gjøre uansett
+        }
     }
 }

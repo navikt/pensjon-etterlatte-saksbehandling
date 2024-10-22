@@ -79,7 +79,7 @@ class BehandlingKlient(
 
         val response =
             downstreamResourceClient.get(
-                resource = Resource(clientId = clientId, url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"),
+                resource = Resource(clientId = clientId, url = "$resourceUrl/saker/${sakId.sakId}/behandlinger/sisteIverksatte"),
                 brukerTokenInfo = brukerTokenInfo,
             )
 

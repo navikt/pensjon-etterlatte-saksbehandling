@@ -8,6 +8,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -93,10 +94,7 @@ class TrygdetidRepository(
                 }
             }.let { hentTrygdetidMedIdNotNull(behandlingId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
 
-    fun oppdaterTrygdetid(
-        oppdatertTrygdetid: Trygdetid,
-        overstyrt: Boolean = false,
-    ): Trygdetid =
+    fun oppdaterTrygdetid(oppdatertTrygdetid: Trygdetid): Trygdetid =
         dataSource
             .transaction { tx ->
                 val gjeldendeTrygdetid =
@@ -145,7 +143,6 @@ class TrygdetidRepository(
                         oppdatertTrygdetid.id,
                         oppdatertTrygdetid.beregnetTrygdetid,
                         tx,
-                        overstyrt,
                     )
                 } else {
                     nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
@@ -180,7 +177,7 @@ class TrygdetidRepository(
             mapOf(
                 "id" to trygdetid.id,
                 "behandlingId" to trygdetid.behandlingId,
-                "sakId" to trygdetid.sakId,
+                "sakId" to trygdetid.sakId.sakId,
                 "ident" to trygdetid.ident,
                 "yrkesskade" to trygdetid.yrkesskade,
             ),
@@ -378,7 +375,6 @@ class TrygdetidRepository(
         trygdetidId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetid,
         tx: TransactionalSession,
-        overstyrt: Boolean = false,
     ) {
         val beregnetVerdi = beregnetTrygdetid.resultat
 
@@ -441,7 +437,7 @@ class TrygdetidRepository(
                     "prorataBroekNevner" to beregnetVerdi.prorataBroek?.nevner,
                     "trygdetidTidspunkt" to beregnetTrygdetid.tidspunkt.toTimestamp(),
                     "trygdetidRegelresultat" to beregnetTrygdetid.regelResultat.toJson(),
-                    "overstyrt" to overstyrt,
+                    "overstyrt" to beregnetTrygdetid.resultat.overstyrt,
                     "yrkesskade" to beregnetVerdi.yrkesskade,
                 ),
         ).let { query ->
@@ -595,7 +591,7 @@ class TrygdetidRepository(
         opplysninger: List<Opplysningsgrunnlag>,
     ) = Trygdetid(
         id = uuid("id"),
-        sakId = long("sak_id"),
+        sakId = SakId(long("sak_id")),
         behandlingId = uuid("behandling_id"),
         beregnetTrygdetid =
             stringOrNull("trygdetid_tidspunkt")?.let {

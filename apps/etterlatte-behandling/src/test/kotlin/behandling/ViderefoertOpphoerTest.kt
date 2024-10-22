@@ -70,7 +70,6 @@ class ViderefoertOpphoerTest(
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = mockk(),
                 grunnlagKlient = mockk(),
-                behandlingRequestLogger = mockk(),
                 kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
                 oppgaveService = mockk(),
                 grunnlagService = mockk(),

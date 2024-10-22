@@ -9,6 +9,9 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.behandling.utland.LandMedDokumenter
+import no.nav.etterlatte.behandling.utland.MottattDokument
+import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -29,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -69,6 +73,42 @@ internal class BehandlingInfoDaoTest(
     }
 
     @Test
+    fun `skal lagre erOmgjoeringSluttbehandlingUtland`() {
+        val sluttbehandlingUtland = true
+        behandlingDao.hentBehandling(behandlingId)?.erSluttbehandling() shouldBe !sluttbehandlingUtland
+        dao.lagreErOmgjoeringSluttbehandlingUtland(behandlingId)
+        behandlingDao.hentBehandling(behandlingId)?.erSluttbehandling() shouldBe sluttbehandlingUtland
+    }
+
+    @Test
+    fun `Skal lagre sluttbehandling for behandling`() {
+        val sluttbehandling =
+            SluttbehandlingUtlandBehandlinginfo(
+                listOf(
+                    LandMedDokumenter(
+                        landIsoKode = "AFG",
+                        dokumenter =
+                            listOf(
+                                MottattDokument(
+                                    dokumenttype = "P2000",
+                                    dato = LocalDate.now(),
+                                    kommentar = "kom",
+                                ),
+                            ),
+                    ),
+                ),
+                kilde = Grunnlagsopplysning.Saksbehandler("123456", Tidspunkt.now()),
+            )
+        dao.hentSluttbehandling(behandlingId) shouldBe null
+        // Kun for å teste at det fungerer med singleornull selvom det finnes noe på behandlingiden
+        val etterbetaling = etterbetaling(behandlingId)
+        dao.lagreEtterbetaling(etterbetaling)
+        dao.hentSluttbehandling(behandlingId) shouldBe null
+        dao.lagreSluttbehandling(behandlingId, sluttbehandling)
+        dao.hentSluttbehandling(behandlingId) shouldBe sluttbehandling
+    }
+
+    @Test
     fun `skal lagre brevutfall`() {
         val brevutfall = brevutfall(behandlingId)
 
@@ -82,11 +122,26 @@ internal class BehandlingInfoDaoTest(
     @Test
     fun `skal hente brevutfall`() {
         val brevutfall = brevutfall(behandlingId)
-
+        dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
         dao.lagreBrevutfall(brevutfall)
         val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)
 
         lagretBrevutfall shouldNotBe null
+    }
+
+    @Test
+    fun `skal hente brevutfall men etterbetaling lå der, skal allikevel gå bra`() {
+        val brevutfall = brevutfall(behandlingId)
+        dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
+        val etterbetaling = etterbetaling(behandlingId)
+        dao.lagreEtterbetaling(etterbetaling)
+        // Tryna her tidligere fordi etterbetaling gjorde at next i singleOrNull ga true og block ble kjørt. Den tryna da på this.getString("brevutfall").let var uten spørsmålstegn
+        dao.hentBrevutfall(brevutfall.behandlingId)
+
+        dao.lagreBrevutfall(brevutfall)
+        val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)
+
+        lagretBrevutfall shouldBe brevutfall
     }
 
     @Test

@@ -7,6 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfoRequest
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -65,6 +66,28 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                     null -> call.respond(HttpStatusCode.NoContent)
                     else -> call.respond(brevutfall.toDto())
                 }
+            }
+        }
+
+        route("sluttbehandling") {
+            post {
+                kunSkrivetilgang {
+                    medBody<SluttbehandlingUtlandBehandlinginfoRequest> { dto ->
+                        logger.info("Lagrer sluttbehandling for behandling $behandlingId")
+                        inTransaction {
+                            service.lagreSluttbehandling(
+                                behandlingId,
+                                dto.toDomain(Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())),
+                            )
+                        }
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+            }
+            get {
+                logger.info("Henter sluttbehandling for behandling $behandlingId")
+                val sluttbehandling = inTransaction { service.hentSluttbehandling(behandlingId) }
+                call.respond(sluttbehandling ?: HttpStatusCode.NoContent)
             }
         }
 

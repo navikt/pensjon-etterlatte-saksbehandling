@@ -3,7 +3,8 @@ package no.nav.etterlatte.tidshendelser
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import no.nav.etterlatte.behandling.randomSakId
-import no.nav.etterlatte.behandling.tilSakId
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -40,12 +41,12 @@ class HendelsePollerIntegrationTest(
         hendelseDao.opprettHendelserForSaker(
             jobb.id,
             listOf(
-                tilSakId(5),
-                tilSakId(7),
-                tilSakId(12),
-                tilSakId(20),
-                tilSakId(33),
-                tilSakId(50),
+                SakId(5),
+                SakId(7),
+                SakId(12),
+                SakId(20),
+                SakId(33),
+                SakId(50),
             ),
             Steg.IDENTIFISERT_SAK,
         )

@@ -214,7 +214,7 @@ internal class BehandlingTest {
 
         coEvery {
             adresseService.hentMottakerAdresse(any<SakType>(), vergesFnr.value)
-        } returns Mottaker("Viggo Verge", null, null, mockk())
+        } returns Mottaker(UUID.randomUUID(), "Viggo Verge", null, null, mockk())
 
         val grunnlagService = GrunnlagService(mockk(), adresseService)
         val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }

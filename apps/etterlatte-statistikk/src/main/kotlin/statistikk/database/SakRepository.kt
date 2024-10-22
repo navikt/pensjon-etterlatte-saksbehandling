@@ -5,8 +5,10 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
 import no.nav.etterlatte.statistikk.domain.SakRad
@@ -65,7 +67,7 @@ class SakRepository(
         SakRad(
             id = getLong("id"),
             referanseId = getObject("behandling_id") as UUID,
-            sakId = getLong("sak_id"),
+            sakId = SakId(getLong("sak_id")),
             mottattTidspunkt = getTimestamp("mottatt_tid").toTidspunkt(),
             registrertTidspunkt = getTimestamp("registrert_tid").toTidspunkt(),
             ferdigbehandletTidspunkt = getTimestamp("ferdigbehandlet_tid")?.toTidspunkt(),
@@ -139,7 +141,7 @@ class SakRepository(
 private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
     this.apply {
         setObject(1, sakRad.referanseId)
-        setLong(2, sakRad.sakId)
+        setSakId(2, sakRad.sakId)
         setTidspunkt(3, sakRad.mottattTidspunkt)
         setTidspunkt(4, sakRad.registrertTidspunkt)
         setTidspunkt(5, sakRad.ferdigbehandletTidspunkt)

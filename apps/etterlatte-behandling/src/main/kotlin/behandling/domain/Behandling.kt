@@ -67,6 +67,8 @@ sealed class Behandling {
     abstract val opphoerFraOgMed: YearMonth?
     abstract val tidligereFamiliepleier: TidligereFamiliepleier?
 
+    abstract fun erSluttbehandling(): Boolean
+
     open val relatertBehandlingId: String? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
@@ -246,6 +248,8 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         sendeBrev = sendeBrev,
         opphoerFraOgMed = opphoerFraOgMed,
         relatertBehandlingId = relatertBehandlingId,
+        tidligereFamiliepleier = tidligereFamiliepleier,
+        erSluttbehandling = erSluttbehandling(),
     )
 
 fun Behandling.toBehandlingSammendrag() =

@@ -84,7 +84,7 @@ class VilkaarsvurderingKlientDaoImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel/$sakId",
+                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel/${sakId.sakId}",
                     ),
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(

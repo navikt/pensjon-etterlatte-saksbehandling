@@ -34,6 +34,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
     val erGjenoppretting: Boolean,
     val vedtattIPesys: Boolean,
     val erMigrertYrkesskade: Boolean,
+    val erSluttbehandling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -50,6 +51,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
             avdoede: List<Avdoed>,
             erGjenoppretting: Boolean,
             erMigrertYrkesskade: Boolean,
+            erSluttbehandling: Boolean,
         ): BarnepensjonInnvilgelseForeldreloes {
             val beregningsperioder =
                 barnepensjonBeregningsperioder(utbetalingsinfo)
@@ -81,6 +83,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
                 vedtattIPesys = vedtattIPesys,
+                erSluttbehandling = erSluttbehandling,
             )
         }
     }

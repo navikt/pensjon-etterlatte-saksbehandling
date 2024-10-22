@@ -24,6 +24,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
@@ -76,9 +77,9 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 val body = call.receive<OppdaterMottakerRequest>()
 
-                val mottaker = service.oppdaterMottaker(brevId, body.mottaker)
+                service.oppdaterMottaker(brevId, body.mottaker)
 
-                call.respond(mottaker)
+                call.respond(HttpStatusCode.OK)
             }
         }
 
@@ -157,6 +158,16 @@ fun Route.brevRoute(
             }
         }
 
+        post("utgaar") {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
+                val request = call.receive<BrevUtgaarRequest>()
+
+                service.markerSomUtgaatt(brevId, request.kommentar, brukerTokenInfo)
+
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         delete {
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 call.respond(service.slett(brevId, brukerTokenInfo))
@@ -201,6 +212,14 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 logger.info("Oppretter nytt brev på sak=$sakId)")
                 val brevParametre = call.receive<BrevParametre>()
+
+                if (!grunnlagService.finnesGrunnlagForSak(sakId, brukerTokenInfo)) {
+                    throw UgyldigForespoerselException(
+                        "MANGLER_GRUNNLAG",
+                        "Kan ikke opprette brev siden saken mangler grunnlag.",
+                    )
+                }
+
                 val sak = behandlingService.hentSak(sakId, brukerTokenInfo)
                 grunnlagService.oppdaterGrunnlagForSak(sak, brukerTokenInfo)
                 measureTimedValue {
@@ -254,6 +273,10 @@ data class OppdaterPayloadRequest(
 
 data class OppdaterMottakerRequest(
     val mottaker: Mottaker,
+)
+
+data class BrevUtgaarRequest(
+    val kommentar: String,
 )
 
 data class OppdaterTittelRequest(

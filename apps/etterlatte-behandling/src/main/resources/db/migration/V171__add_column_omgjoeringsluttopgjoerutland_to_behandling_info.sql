@@ -1,0 +1,2 @@
+ALTER TABLE behandling_info
+ADD COLUMN omgjoering_sluttbehandling_utland BOOLEAN DEFAULT FALSE;

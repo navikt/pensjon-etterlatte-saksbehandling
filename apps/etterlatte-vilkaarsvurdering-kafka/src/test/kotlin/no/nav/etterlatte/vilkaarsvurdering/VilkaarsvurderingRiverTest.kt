@@ -3,6 +3,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
@@ -31,7 +32,7 @@ internal class VilkaarsvurderingRiverTest {
         val omregningData =
             OmregningData(
                 kjoering = "kjoering",
-                sakId = 1L,
+                sakId = randomSakId(),
                 revurderingaarsak = Revurderingaarsak.REGULERING,
                 fradato = LocalDate.now(),
                 behandlingId = behandlingId,

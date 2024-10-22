@@ -68,7 +68,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -107,8 +106,7 @@ internal class VedtaksbrevServiceTest {
     private val brevbakerService = mockk<BrevbakerService>()
     private val behandlingService = mockk<BehandlingService>()
     private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
-    private val pdfGenerator =
-        PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
+    private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, adresseService, behandlingService)
     private val innholdTilRedigerbartBrevHenter =
         InnholdTilRedigerbartBrevHenter(brevdataFacade, brevbakerService, adresseService, redigerbartVedleggHenter)
@@ -151,12 +149,12 @@ internal class VedtaksbrevServiceTest {
     }
 
     private companion object {
-        private val SAK_ID = randomSakId()
-        private val BEHANDLING_ID = UUID.randomUUID()
-        private val PDF_BYTES = "Hello world!".toByteArray()
-        private val SAKSBEHANDLER = simpleSaksbehandler()
-        private val ATTESTANT = simpleAttestant()
-        private val utbetalingsinfo =
+        val SAK_ID = randomSakId()
+        val BEHANDLING_ID = UUID.randomUUID()
+        val PDF_BYTES = "Hello world!".toByteArray()
+        val SAKSBEHANDLER = simpleSaksbehandler()
+        val ATTESTANT = simpleAttestant()
+        val utbetalingsinfo =
             Utbetalingsinfo(
                 1,
                 Kroner(3436),
@@ -203,18 +201,6 @@ internal class VedtaksbrevServiceTest {
             brev shouldBe forventetBrev
 
             verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK) }
-        }
-
-        @Test
-        fun `Sletting av brev`() {
-            every { db.settBrevOppdatert(any(), any()) } returns true
-
-            val vedtak = """{}""".toJsonNode()
-            val gjenaapnetOK = vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak)
-
-            gjenaapnetOK shouldBe true
-
-            verify { db.settBrevOppdatert(1, vedtak) }
         }
 
         @Test
@@ -325,7 +311,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(sakType, any()) } returns mottaker
             coEvery { adresseService.hentAvsender(any(), any()) } returns opprettAvsender()
-            coEvery { beregningService.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
+            coEvery { beregningService.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
             coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns null
             coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
             coEvery { behandlingService.hentBrevutfall(any(), any()) } returns
@@ -754,7 +740,7 @@ internal class VedtaksbrevServiceTest {
         status = status,
         Tidspunkt.now(),
         Tidspunkt.now(),
-        mottaker = opprettMottaker(),
+        mottakere = listOf(opprettMottaker()),
         brevtype = Brevtype.VEDTAK,
         brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
@@ -797,7 +783,8 @@ internal class VedtaksbrevServiceTest {
 
     private fun opprettMottaker() =
         Mottaker(
-            "Rød Blanding",
+            id = UUID.randomUUID(),
+            navn = "Rød Blanding",
             foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,
             adresse =

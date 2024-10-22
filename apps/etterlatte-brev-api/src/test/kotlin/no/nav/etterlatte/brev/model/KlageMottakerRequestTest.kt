@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class KlageMottakerRequestTest {
     @Nested
@@ -76,16 +77,24 @@ internal class KlageMottakerRequestTest {
 
         @Test
         fun `Sjekk gyldighet av mottaker fungerer - felles uavhengig av land`() {
-            val manglerNavn = Mottaker("", adresse = mockk())
+            val manglerNavn = Mottaker(UUID.randomUUID(), "", adresse = mockk())
 
             manglerNavn.erGyldig() shouldNotBe emptyList<String>()
 
-            val manglerFnrOgOrgnr = Mottaker("Navn Navnesen", foedselsnummer = null, orgnummer = null, adresse = mockk())
+            val manglerFnrOgOrgnr =
+                Mottaker(
+                    UUID.randomUUID(),
+                    "Navn Navnesen",
+                    foedselsnummer = null,
+                    orgnummer = null,
+                    adresse = mockk(),
+                )
 
             manglerFnrOgOrgnr.erGyldig() shouldNotBe emptyList<String>()
 
             val manglerLand =
                 Mottaker(
+                    UUID.randomUUID(),
                     "Navn",
                     foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse = Adresse("type", postnummer = "1234", poststed = "", landkode = "NO", land = ""),
@@ -95,6 +104,7 @@ internal class KlageMottakerRequestTest {
 
             val manglerLandkode =
                 Mottaker(
+                    UUID.randomUUID(),
                     "Navn",
                     foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse = Adresse("type", postnummer = "1234", poststed = "", landkode = "", land = "Norge"),
@@ -107,6 +117,7 @@ internal class KlageMottakerRequestTest {
         fun `Sjekk gyldighet av mottaker fungerer - NORSKPOSTADRESSE`() {
             val manglerPoststed =
                 Mottaker(
+                    UUID.randomUUID(),
                     "Navn",
                     foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse = Adresse("NORSKPOSTADRESSE", postnummer = "1234", poststed = "", landkode = "NO", land = "Norge"),
@@ -116,6 +127,7 @@ internal class KlageMottakerRequestTest {
 
             val manglerPostnummer =
                 Mottaker(
+                    UUID.randomUUID(),
                     "Navn",
                     foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse = Adresse("NORSKPOSTADRESSE", postnummer = "", poststed = "Oslo", landkode = "NO", land = "Norge"),
@@ -128,6 +140,7 @@ internal class KlageMottakerRequestTest {
         fun `Sjekk gyldighet av mottaker fungerer - UTENLANDSKPOSTADRESSE`() {
             val manglerAdresselinje =
                 Mottaker(
+                    UUID.randomUUID(),
                     "Navn",
                     foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse =

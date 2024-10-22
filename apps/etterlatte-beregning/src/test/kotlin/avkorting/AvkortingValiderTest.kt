@@ -5,7 +5,6 @@ import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.avkorting.FoersteRevurderingSenereEnnJanuar
 import no.nav.etterlatte.avkorting.HarFratrekkInnAarForFulltAar
 import no.nav.etterlatte.avkorting.Inntektsavkorting
-import no.nav.etterlatte.avkorting.RevurderingHarEndretFratrekkInnAar
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
@@ -42,10 +41,10 @@ class AvkortingValiderTest {
         assertThrows<FoersteRevurderingSenereEnnJanuar> {
             val inntektMedFratrekk =
                 AvkortingGrunnlagLagreDto(
-                    aarsinntekt = 100000,
+                    inntektTom = 100000,
                     fratrekkInnAar = 0,
                     fratrekkInnAarUtland = 0,
-                    inntektUtland = 100000,
+                    inntektUtlandTom = 100000,
                     spesifikasjon = "asdf",
                     fom = YearMonth.of(2025, 2),
                 )
@@ -83,10 +82,10 @@ class AvkortingValiderTest {
         assertThrows<IkkeTillattException> {
             val inntektMedFratrekk =
                 AvkortingGrunnlagLagreDto(
-                    aarsinntekt = 100000,
+                    inntektTom = 100000,
                     fratrekkInnAar = 0,
                     fratrekkInnAarUtland = 0,
-                    inntektUtland = 100000,
+                    inntektUtlandTom = 100000,
                     spesifikasjon = "asdf",
                     fom = YearMonth.of(2024, 1),
                 )
@@ -127,58 +126,6 @@ class AvkortingValiderTest {
                     )
 
                 validerInntekt(inntektMedFratrekkUtland, avkorting, true)
-            }
-        }
-
-        @Test
-        fun `Revurdering med tidligere grunnlag samme år`() {
-            val avkorting =
-                Avkorting(
-                    aarsoppgjoer =
-                        listOf(
-                            aarsoppgjoer(
-                                aar = 2024,
-                                inntektsavkorting =
-                                    listOf(
-                                        Inntektsavkorting(
-                                            avkortinggrunnlag(
-                                                innvilgaMaaneder = 12,
-                                                periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
-                                                fratrekkInnAar = 100000,
-                                                fratrekkInnAarUtland = 50000,
-                                            ),
-                                        ),
-                                    ),
-                            ),
-                        ),
-                )
-
-            val utenFratrekk =
-                inntektDto(
-                    fratrekkInnAar = 0,
-                    fratrekkInnAarUtland = 0,
-                    fom = YearMonth.of(2024, 3),
-                )
-            validerInntekt(utenFratrekk, avkorting, false)
-
-            assertThrows<RevurderingHarEndretFratrekkInnAar> {
-                val inntektMedFratrekk =
-                    inntektDto(
-                        fratrekkInnAar = 100001,
-                        fratrekkInnAarUtland = 50000,
-                        fom = YearMonth.of(2024, 3),
-                    )
-                validerInntekt(inntektMedFratrekk, avkorting, false)
-            }
-
-            assertThrows<RevurderingHarEndretFratrekkInnAar> {
-                val inntektMedFratrekkUtland =
-                    inntektDto(
-                        fratrekkInnAar = 100000,
-                        fratrekkInnAarUtland = 50001,
-                        fom = YearMonth.of(2024, 3),
-                    )
-                validerInntekt(inntektMedFratrekkUtland, avkorting, false)
             }
         }
 
@@ -229,10 +176,10 @@ class AvkortingValiderTest {
             fratrekkInnAarUtland: Int,
             fom: YearMonth,
         ) = AvkortingGrunnlagLagreDto(
-            aarsinntekt = 100000,
+            inntektTom = 100000,
             fratrekkInnAar = fratrekkInnAar,
             fratrekkInnAarUtland = fratrekkInnAarUtland,
-            inntektUtland = 100000,
+            inntektUtlandTom = 100000,
             spesifikasjon = "asdf",
             fom = fom,
         )
@@ -242,10 +189,10 @@ class AvkortingValiderTest {
     fun `Førstegangsbehandling i gyldig tilstand gir ikke valideringsfeil`() {
         validerInntekt(
             AvkortingGrunnlagLagreDto(
-                aarsinntekt = 100000,
+                inntektTom = 100000,
                 fratrekkInnAar = 5000,
                 fratrekkInnAarUtland = 0,
-                inntektUtland = 100000,
+                inntektUtlandTom = 100000,
                 spesifikasjon = "asdf",
                 fom = YearMonth.of(2024, 2),
             ),
@@ -258,10 +205,10 @@ class AvkortingValiderTest {
     fun `Revurdering i gyldig tilstand gir ikke valideringsfeil`() {
         validerInntekt(
             AvkortingGrunnlagLagreDto(
-                aarsinntekt = 100000,
+                inntektTom = 100000,
                 fratrekkInnAar = 0,
                 fratrekkInnAarUtland = 0,
-                inntektUtland = 100000,
+                inntektUtlandTom = 100000,
                 spesifikasjon = "asdf",
                 fom = YearMonth.of(2024, 1),
             ),

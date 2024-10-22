@@ -14,6 +14,8 @@
       <env name="KODEVERK_URL" value="https://kodeverk-api.nav.no/api/v1/kodeverk" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-trygdetid" />
+      <env name="PEN_CLIENT_ID" value="ddd52335-cfe8-4ee9-9e68-416a5ab26efa" />
+      <env name="PEN_URL" value="https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-trygdetid.main" />

@@ -1,8 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.brev.BrevDataRedigerbar
+import no.nav.etterlatte.brev.BrevParametereAutomatisk
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
@@ -20,6 +19,7 @@ enum class Status {
     JOURNALFOERT,
     DISTRIBUERT,
     SLETTET,
+    UTGAATT,
     ;
 
     fun ikkeFerdigstilt(): Boolean = this in listOf(OPPRETTET, OPPDATERT)
@@ -62,11 +62,16 @@ data class Adresse(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
+    val id: UUID,
     val navn: String,
     val foedselsnummer: MottakerFoedselsnummer? = null,
     val orgnummer: String? = null,
     val adresse: Adresse,
     val tvingSentralPrint: Boolean = false,
+    val type: MottakerType = MottakerType.HOVED,
+    // TODO: flytte disse fra brev- til mottakernivå
+    //  val journalpostId: String
+    //  val bestillingId: BestillingID
 ) {
     fun erGyldig(): List<String> =
         if (navn.isBlank()) {
@@ -77,6 +82,8 @@ data class Mottaker(
             adresse.erGyldig()
         }
 }
+
+enum class MottakerType { HOVED, KOPI }
 
 data class Brev(
     val id: BrevID,
@@ -89,7 +96,7 @@ data class Brev(
     val status: Status,
     val statusEndret: Tidspunkt,
     val opprettet: Tidspunkt,
-    val mottaker: Mottaker,
+    val mottakere: List<Mottaker>,
     val brevtype: Brevtype,
     val brevkoder: Brevkoder?,
     val journalpostId: String? = null,
@@ -109,14 +116,14 @@ enum class BrevProsessType {
     OPPLASTET_PDF,
 }
 
-class OpprettJournalfoerOgDistribuerRequest(
+data class OpprettJournalfoerOgDistribuerRequest(
     val brevKode: Brevkoder,
-    val brevDataRedigerbar: BrevDataRedigerbar,
+    val brevParametereAutomatisk: BrevParametereAutomatisk,
     val avsenderRequest: SaksbehandlerOgAttestant,
     val sakId: SakId,
 )
 
-class JournalfoerVedtaksbrevResponseOgBrevid(
+data class JournalfoerVedtaksbrevResponseOgBrevid(
     val brevId: BrevID,
     val opprettetJournalpost: OpprettJournalpostResponse,
 )
@@ -132,11 +139,6 @@ data class OpprettJournalpostResponse(
         val dokumentInfoId: String,
     )
 }
-
-data class BrevOgVedtakDto(
-    val vedtaksbrev: Brev,
-    val vedtak: JsonNode,
-)
 
 data class BrevDistribusjonResponse(
     val brevId: BrevID,

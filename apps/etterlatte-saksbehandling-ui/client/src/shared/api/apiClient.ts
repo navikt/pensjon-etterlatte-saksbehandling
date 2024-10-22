@@ -95,7 +95,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
 
       if (response.status >= 500) {
         if (shouldLogError) {
-          logger.generalError({
+          logger.generalWarning({
             msg: `Fikk feil i kall mot backend. Url: ${url}`,
             errorInfo: { url, method, error },
           })
@@ -105,7 +105,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
       } else {
         // logger 3xx og 4xx som info
         if (shouldLogError) {
-          logger.generalInfo({
+          logger.generalWarning({
             msg: `Fikk status=${response.status} i kall mot backend`,
             errorInfo: { url, method, error },
           })
@@ -117,7 +117,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)
     if (shouldLogError && window.windowOpen) {
-      logger.generalError({ msg: `Fikk Rejection i kall mot backend: ${e}`, errorInfo: { url, method } })
+      logger.generalWarning({ msg: `Fikk Rejection i kall mot backend: ${e}`, errorInfo: { url, method } })
     }
     return {
       ok: false,
@@ -137,7 +137,7 @@ async function errorFrom(response: Response): Promise<JsonError> {
   try {
     return JSON.parse(responseContent)
   } catch (err) {
-    logger.generalError({
+    logger.generalWarning({
       msg:
         `${responseContent} $Url: ${response.url}` ||
         `Feil oppsto ved parsing av JSON-error. HTTP-kode: ${response.status} url: ${response.url}`,

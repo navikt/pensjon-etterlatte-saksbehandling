@@ -34,14 +34,18 @@ class DoedshendelseReminderService(
     }
 
     private fun run() {
+        logger.info("Starter dødshendelsejob for å sjekke om vi har meldinger som er gamle nok")
         val alleFerdigDoedsmeldingerMedBrevBp = inTransaction { hentAlleFerdigDoedsmeldingerMedBrevBp() }
+        logger.info("Antall meldinger på vent ${alleFerdigDoedsmeldingerMedBrevBp.size}")
         val gamleNokHendelser = hendelserErGamleNok(alleFerdigDoedsmeldingerMedBrevBp)
+        logger.info("Antall hendelser som er gamle nok hendelser ${alleFerdigDoedsmeldingerMedBrevBp.size}")
         gamleNokHendelser.forEach {
             inTransaction { lagOppgaveOmIkkeSoekt(it) }
         }
     }
 
     private fun lagOppgaveOmIkkeSoekt(hendelse: DoedshendelseReminder) {
+        logger.info("Behandler doedshendelseReminder id ${hendelse.id} med sakid: ${hendelse.sakId}")
         if (hendelse.sakId == null) {
             logger.info(
                 "Kan ikke opprette oppfølgingsoppgave for hendelse uten sakId. " +
@@ -51,16 +55,19 @@ class DoedshendelseReminderService(
         }
         val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId)
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }
+        logger.info("Doedshendelse har blitt søkt på $harSoekt")
         if (!harSoekt) {
             val oppgaveFinnes = oppgaveService.oppgaveMedTypeFinnes(hendelse.sakId, OppgaveType.MANGLER_SOEKNAD)
             if (!oppgaveFinnes) {
+                logger.info("Oppretter oppgave for dødshende hendelse ${hendelse.id} ${OppgaveType.MANGLER_SOEKNAD}")
+                val standardFrist30dager = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
                 oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = hendelse.sakId,
                     kilde = OppgaveKilde.DOEDSHENDELSE,
                     type = OppgaveType.MANGLER_SOEKNAD,
-                    merknad = "Har ikke søkt om barnepensjon 2 mnd. etter utsendt brev. Sjekk om det må sendes påminnelse.",
-                    frist = Tidspunkt.now().plus(30L, ChronoUnit.DAYS),
+                    merknad = "Har ikke søkt om barnepensjon $fireMaaneder mnd. etter utsendt brev. Sjekk om det må sendes påminnelse.",
+                    frist = standardFrist30dager,
                 )
             }
         }

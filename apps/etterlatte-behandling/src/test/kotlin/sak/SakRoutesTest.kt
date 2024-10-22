@@ -189,12 +189,11 @@ internal class SakRoutesTest {
 
     @Test
     fun `siste iverksatte route returnerer 200 ok og behandling`() {
-        val sakId = 1
         coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns mockk(relaxed = true)
 
         withTestApplication { client ->
             val response =
-                client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
+                client.get("/saker/1/behandlinger/sisteIverksatte") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
@@ -204,11 +203,10 @@ internal class SakRoutesTest {
 
     @Test
     fun `siste iverksatte route returnerer 404 naar det ikke finnes noen iverksatt behandling`() {
-        val sakId = 1
         coEvery { behandlingService.hentSisteIverksatte(sakId1) } returns null
         withTestApplication { client ->
             val response =
-                client.get("/saker/$sakId/behandlinger/sisteIverksatte") {
+                client.get("/saker/1/behandlinger/sisteIverksatte") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 

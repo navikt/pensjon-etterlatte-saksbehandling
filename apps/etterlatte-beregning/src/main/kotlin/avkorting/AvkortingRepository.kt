@@ -225,7 +225,7 @@ class AvkortingRepository(
             mapOf(
                 "id" to aarsoppgjoer.id,
                 "behandling_id" to behandlingId,
-                "sak_id" to sakId,
+                "sak_id" to sakId.sakId,
                 "aar" to aarsoppgjoer.aar,
                 "fom" to aarsoppgjoer.fom.atDay(1),
             ),
@@ -240,11 +240,11 @@ class AvkortingRepository(
         statement =
             """
             INSERT INTO avkortingsgrunnlag(
-                id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, inntekt_utland, fratrekk_inn_aar_utland,
+                id, behandling_id, fom, tom, inntekt_tom, fratrekk_inn_ut, inntekt_utland_tom, fratrekk_inn_aar_utland,
                 spesifikasjon, kilde, aarsoppgjoer_id, relevante_maaneder,
                 overstyrt_innvilga_maaneder_aarsak, overstyrt_innvilga_maaneder_begrunnelse
             ) VALUES (
-                :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :inntektUtland, :fratrekkInnAarUtland,
+                :id, :behandlingId, :fom, :tom, :inntektTom, :fratrekkInnAar, :inntektUtlandTom, :fratrekkInnAarUtland,
                 :spesifikasjon, :kilde, :aarsoppgjoerId, :relevanteMaaneder,
                 :overstyrtInnvilgaMaanederAarsak, :overstyrtInnvilgaMaanederBegrunnelse
             )
@@ -256,9 +256,9 @@ class AvkortingRepository(
                 "aarsoppgjoerId" to aarsoppgjoerId,
                 "fom" to avkortingsgrunnlag.periode.fom.atDay(1),
                 "tom" to avkortingsgrunnlag.periode.tom?.atDay(1),
-                "aarsinntekt" to avkortingsgrunnlag.aarsinntekt,
+                "inntektTom" to avkortingsgrunnlag.inntektTom,
                 "fratrekkInnAar" to avkortingsgrunnlag.fratrekkInnAar,
-                "inntektUtland" to avkortingsgrunnlag.inntektUtland,
+                "inntektUtlandTom" to avkortingsgrunnlag.inntektUtlandTom,
                 "fratrekkInnAarUtland" to avkortingsgrunnlag.fratrekkInnAarUtland,
                 "relevanteMaaneder" to avkortingsgrunnlag.innvilgaMaaneder,
                 "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
@@ -404,9 +404,9 @@ class AvkortingRepository(
                     fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
                     tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
                 ),
-            aarsinntekt = int("aarsinntekt"),
+            inntektTom = int("inntekt_tom"),
             fratrekkInnAar = int("fratrekk_inn_ut"),
-            inntektUtland = int("inntekt_utland"),
+            inntektUtlandTom = int("inntekt_utland_tom"),
             fratrekkInnAarUtland = int("fratrekk_inn_aar_utland"),
             innvilgaMaaneder = int("relevante_maaneder"),
             spesifikasjon = string("spesifikasjon"),

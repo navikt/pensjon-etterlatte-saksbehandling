@@ -57,6 +57,7 @@ import java.util.UUID
 
 data class OmgjoeringRequest(
     val skalKopiere: Boolean,
+    val erSluttbehandlingUtland: Boolean,
 )
 
 internal fun Route.behandlingRoutes(
@@ -82,9 +83,9 @@ internal fun Route.behandlingRoutes(
 
     post("/api/behandling/omgjoer-avslag-avbrudd/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-            val skalKopiereRequest = call.receive<OmgjoeringRequest>()
+            val omgjoeringRequest = call.receive<OmgjoeringRequest>()
             val behandlingOgOppgave =
-                behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler, skalKopiereRequest.skalKopiere)
+                behandlingFactory.opprettOmgjoeringAvslag(sakId, saksbehandler, omgjoeringRequest)
             call.respond(behandlingOgOppgave.toBehandlingSammendrag())
         }
     }

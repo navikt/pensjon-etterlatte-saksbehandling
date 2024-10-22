@@ -9,6 +9,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakSkrivDao
@@ -77,7 +78,7 @@ class OmregningServiceTest(
                             LagreKjoeringRequest(
                                 kjoering = getString("kjoering"),
                                 status = KjoeringStatus.valueOf(getString("status")),
-                                sakId = getLong("sak_id"),
+                                sakId = SakId(getLong("sak_id")),
                                 beregningBeloepFoer = getBigDecimal("beregning_beloep_foer"),
                                 beregningBeloepEtter = getBigDecimal("beregning_beloep_etter"),
                                 beregningGFoer = getBigDecimal("beregning_g_foer"),

@@ -53,6 +53,12 @@ internal class VedtaksbrevRouteTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
 
+    companion object {
+        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+        private val BEHANDLING_ID = UUID.randomUUID()
+        private val SAK_ID = randomSakId()
+    }
+
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
@@ -229,7 +235,7 @@ internal class VedtaksbrevRouteTest {
         }
     }
 
-    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+    val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     private fun opprettBrev() =
         Brev(
@@ -243,11 +249,14 @@ internal class VedtaksbrevRouteTest {
             Status.OPPRETTET,
             Tidspunkt.now(),
             Tidspunkt.now(),
-            Mottaker(
-                "Stor Snerk",
-                STOR_SNERK,
-                null,
-                Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+            listOf(
+                Mottaker(
+                    UUID.randomUUID(),
+                    "Stor Snerk",
+                    STOR_SNERK,
+                    null,
+                    Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+                ),
             ),
             brevtype = Brevtype.INFORMASJON,
             brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
@@ -261,10 +270,4 @@ internal class VedtaksbrevRouteTest {
                 tilgangssjekker,
             )
         }
-
-    companion object {
-        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
-        private val BEHANDLING_ID = UUID.randomUUID()
-        private val SAK_ID = randomSakId()
-    }
 }

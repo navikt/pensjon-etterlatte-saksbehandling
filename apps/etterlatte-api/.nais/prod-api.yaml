@@ -105,6 +105,9 @@ spec:
         - application: arbeid-og-inntekt
           namespace: team-inntekt
           cluster: prod-fss
+          permissions:
+            roles:
+              - les-oms-sak-for-person
         - application: pensjon-pen
           namespace: pensjondeployer
           cluster: prod-fss
@@ -113,6 +116,12 @@ spec:
               - les-oms-vedtak
               - les-bp-vedtak
         - application: pensjon-selvbetjening-soknad-alder-backend
+          namespace: pensjonselvbetjening
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: alderspensjon-endringssoknad-backend
           namespace: pensjonselvbetjening
           cluster: prod-gcp
           permissions:

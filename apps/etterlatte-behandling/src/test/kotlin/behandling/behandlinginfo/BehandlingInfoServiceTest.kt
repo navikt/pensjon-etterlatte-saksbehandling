@@ -32,7 +32,7 @@ internal class BehandlingInfoServiceTest {
         BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsstatusService)
 
     companion object {
-        val bruker = simpleSaksbehandler()
+        private val bruker = simpleSaksbehandler()
     }
 
     @Test

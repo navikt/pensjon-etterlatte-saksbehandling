@@ -107,6 +107,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sendeBrev = true,
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
+                tidligereFamiliepleier = null,
             )
 
         every { repository.finnBeregningsGrunnlag(any()) } returns null
@@ -160,6 +161,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sendeBrev = true,
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
+                tidligereFamiliepleier = null,
             )
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
@@ -316,6 +318,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sendeBrev = true,
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
+                tidligereFamiliepleier = null,
             )
 
         testApplication {
@@ -376,6 +379,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sendeBrev = true,
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
+                tidligereFamiliepleier = null,
             )
 
         testApplication {
@@ -653,6 +657,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sendeBrev = true,
                 opphoerFraOgMed = null,
                 relatertBehandlingId = null,
+                tidligereFamiliepleier = null,
             )
 
         every { repository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, capture(slot)) } just runs

@@ -149,6 +149,7 @@ enum class OppdragKlassifikasjonskode(
     val tekniskArt: Boolean = false,
 ) {
     BARNEPENSJON_OPTP("BARNEPENSJON-OPTP"),
+    BARNEPEFOER2024_OPTP("BARNEPEFØR2024-OPTP"),
     OMSTILLINGSTOENAD_OPTP("OMSTILLINGOR"),
     FORSKUDDSSKATT("FSKTSKAT"),
     FEILKONTO("KL_KODE_FEIL_PEN"),
@@ -168,6 +169,8 @@ enum class OppdragKlassifikasjonskode(
             when (string) {
                 "BARNEPENSJON-OPTP" -> BARNEPENSJON_OPTP
                 "BARNEPENSJON_OPTP" -> BARNEPENSJON_OPTP
+                "BARNEPEFØR2024-OPTP" -> BARNEPEFOER2024_OPTP
+                "BARNEPEFØR2024_OPTP" -> BARNEPEFOER2024_OPTP
                 "OMSTILLINGOR" -> OMSTILLINGSTOENAD_OPTP
                 "FSKTSKAT" -> FORSKUDDSSKATT
                 "KL_KODE_FEIL_PEN" -> FEILKONTO

@@ -11,7 +11,6 @@
       <env name="LOGBACK_LEVEL" value="DEBUG" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
-    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-samordning-vedtak.main" />
     <shortenClasspath name="NONE" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="true" />

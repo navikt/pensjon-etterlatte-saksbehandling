@@ -4,7 +4,6 @@ import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/Omgjoer
 import React from 'react'
 import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktRevurderingModal'
 import { GeneriskOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GeneriskOppgaveModal'
@@ -13,6 +12,10 @@ import { PersonOversiktFane } from '~components/person/Person'
 import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfo6MndVarigUnntakModal'
 import { BrevOppgaveModal } from '~components/oppgavebenk/oppgaveModal/BrevOppgaveModal'
 import { TilleggsinformasjonOppgaveModal } from '~components/oppgavebenk/oppgaveModal/TilleggsinformasjonOppgaveModal'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
+
+export const FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT = 'aktivitetsplikt.ny-vurdering'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -25,6 +28,10 @@ export const HandlingerForOppgave = ({
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
+  const brukNyVurderingssideAktivitetsplikt = useFeatureEnabledMedDefault(
+    FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT,
+    false
+  )
 
   if (kilde === OppgaveKilde.GENERELL_BEHANDLING) {
     switch (type) {
@@ -135,8 +142,21 @@ export const HandlingerForOppgave = ({
       )
     case Oppgavetype.AKTIVITETSPLIKT:
       return (
-        erInnloggetSaksbehandlerOppgave && (
+        erInnloggetSaksbehandlerOppgave &&
+        (brukNyVurderingssideAktivitetsplikt ? (
+          <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/`}>
+            Gå til vurdering
+          </Button>
+        ) : (
           <AktivitetspliktInfoModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        ))
+      )
+    case Oppgavetype.AKTIVITETSPLIKT_12MND:
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/`}>
+            Gå til vurdering
+          </Button>
         )
       )
     case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:

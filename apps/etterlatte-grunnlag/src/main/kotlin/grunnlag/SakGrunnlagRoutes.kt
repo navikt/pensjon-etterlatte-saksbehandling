@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withSakId
 
 fun Route.sakGrunnlagRoute(
@@ -32,13 +31,18 @@ fun Route.sakGrunnlagRoute(
             }
         }
 
+        get("/grunnlag-finnes") {
+            withSakId(behandlingKlient) { sakId ->
+                val grunnlagFinnes = grunnlagService.grunnlagFinnesForSak(sakId)
+                call.respond(grunnlagFinnes)
+            }
+        }
+
         post("opprett-grunnlag") {
-            kunSystembruker {
-                withSakId(behandlingKlient, skrivetilgang = true) { sakId ->
-                    val opplysningsbehov = call.receive<Opplysningsbehov>()
-                    grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
-                    call.respond(HttpStatusCode.OK)
-                }
+            withSakId(behandlingKlient, skrivetilgang = true) { sakId ->
+                val opplysningsbehov = call.receive<Opplysningsbehov>()
+                grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

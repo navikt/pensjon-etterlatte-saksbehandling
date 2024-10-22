@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -139,6 +140,12 @@ private fun hentAvdoedNavn(
     trygdetidDto: TrygdetidDto,
     avdoede: List<Avdoed>,
 ): String {
+    if (avdoede.isEmpty() &&
+        trygdetidDto.beregnetTrygdetid?.resultat?.overstyrt == true &&
+        trygdetidDto.ident == UKJENT_AVDOED
+    ) {
+        return "ukjent avdød"
+    }
     if (avdoede.isEmpty()) {
         throw IngenStoetteForUkjentAvdoed()
     }

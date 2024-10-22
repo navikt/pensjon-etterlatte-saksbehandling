@@ -7,6 +7,7 @@ import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.LOEPENDE_FOM
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.asLocalDate
 import java.time.YearMonth
 
 object RapidEvents {
@@ -18,7 +19,7 @@ object RapidEvents {
 }
 
 var JsonMessage.loependeFom: YearMonth
-    get() = YearMonth.parse(this[LOEPENDE_FOM].asText())
+    get() = this[LOEPENDE_FOM].asLocalDate().let { YearMonth.from(it) }
     set(value) {
         this[LOEPENDE_FOM] = value.toString()
     }
@@ -58,5 +59,6 @@ fun String.tilSeparertListe() =
         .split(";")
         .filter { it.isNotEmpty() }
         .map { it.toLong() }
+        .map { SakId(it) }
 
 fun List<SakId>.tilSeparertString() = this.joinToString(";") { it.toString() }

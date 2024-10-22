@@ -65,7 +65,16 @@ internal fun Route.sakSystemRoutes(
 
                 call.respond(
                     Saker(
-                        inTransaction { sakService.hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakstype, loependeFom) },
+                        inTransaction {
+                            sakService.hentSaker(
+                                kjoering,
+                                antall,
+                                spesifikkeSaker,
+                                ekskluderteSaker,
+                                sakstype,
+                                loependeFom,
+                            )
+                        },
                     ),
                 )
             }
@@ -240,7 +249,9 @@ internal fun Route.sakWebRoutes(
 
             get("/behandlinger/foerstevirk") {
                 logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
-                val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) } ?: throw GenerellIkkeFunnetException()
+                val foersteVirk =
+                    inTransaction { behandlingService.hentFoerstegangsbehandling(sakId).virkningstidspunkt?.dato }
+                        ?: throw GenerellIkkeFunnetException()
                 call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
             }
 
@@ -313,7 +324,10 @@ internal fun Route.sakWebRoutes(
             post("arkivergrunnlagsendringshendelse") {
                 kunSaksbehandler { saksbehandler ->
                     val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()
-                    grunnlagsendringshendelseService.arkiverHendelseMedKommentar(hendelse = arkivertHendelse, saksbehandler)
+                    grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
+                        hendelse = arkivertHendelse,
+                        saksbehandler,
+                    )
                     call.respond(HttpStatusCode.OK)
                 }
             }

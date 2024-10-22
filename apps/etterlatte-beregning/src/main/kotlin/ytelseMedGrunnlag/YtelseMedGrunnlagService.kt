@@ -34,7 +34,7 @@ class YtelseMedGrunnlagService(
                     avkorting.avkortingGrunnlag
                         .filter { it.fom <= avkortetYtelse.fom }
                         .maxBy { it.fom }
-                val aarsinntekt = grunnlag.aarsinntekt + grunnlag.inntektUtland
+                val aarsinntekt = grunnlag.inntektTom + grunnlag.inntektUtlandTom
                 val fratrekkInnAar = grunnlag.fratrekkInnAar + grunnlag.fratrekkInnAarUtland
 
                 YtelseMedGrunnlagPeriodisertDto(

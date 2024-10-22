@@ -104,6 +104,12 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: arbeid-og-inntekt
+          namespace: team-inntekt
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-sak-for-person
         - application: arbeid-og-inntekt-q1
           namespace: team-inntekt
           cluster: dev-fss

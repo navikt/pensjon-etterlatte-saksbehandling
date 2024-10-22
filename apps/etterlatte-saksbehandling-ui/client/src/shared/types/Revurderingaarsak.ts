@@ -2,6 +2,7 @@
 
 export enum Revurderingaarsak {
   REGULERING = 'REGULERING',
+  OMREGNING = 'OMREGNING',
   ANSVARLIGE_FORELDRE = 'ANSVARLIGE_FORELDRE',
   SOESKENJUSTERING = 'SOESKENJUSTERING',
   UTLAND = 'UTLAND',
@@ -45,6 +46,7 @@ export enum Revurderingaarsak {
 
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   REGULERING: 'Regulering',
+  OMREGNING: 'Omregning',
   ANSVARLIGE_FORELDRE: 'Ansvarlige foreldre',
   SOESKENJUSTERING: 'Søskenjustering',
   UTLAND: 'Utland',

@@ -98,6 +98,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.jobs.next
@@ -359,7 +360,6 @@ internal class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             hendelseDao = hendelseDao,
             grunnlagKlient = grunnlagKlientImpl,
-            behandlingRequestLogger = behandlingRequestLogger,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
@@ -445,9 +445,8 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             grunnlagKlient = grunnlagKlientImpl,
             revurderingService = revurderingService,
-            oppgaveService = oppgaveService,
             statistikkKafkaProducer = behandlingsHendelser,
-            featureToggleService = featureToggleService,
+            oppgaveService = oppgaveService,
         )
 
     val gyldighetsproevingService =
@@ -459,6 +458,12 @@ internal class ApplicationContext(
         OmregningService(
             behandlingService = behandlingService,
             omregningDao = omregningDao,
+        )
+
+    val aarligInntektsjusteringJobbService =
+        AarligInntektsjusteringJobbService(
+            omregningService = omregningService,
+            rapid = rapid,
         )
 
     val tilgangService = TilgangServiceImpl(sakTilgangDao)
@@ -585,6 +590,7 @@ internal class ApplicationContext(
             migreringKlient = migreringKlient,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             vilkaarsvurderingService = vilkaarsvurderingService,
+            behandlingInfoService = behandlingInfoService,
         )
 
     val migreringService =

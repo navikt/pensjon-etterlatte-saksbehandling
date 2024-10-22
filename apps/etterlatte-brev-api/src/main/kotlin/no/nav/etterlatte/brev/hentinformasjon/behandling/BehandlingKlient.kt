@@ -34,7 +34,7 @@ class BehandlingKlient(
         brukerTokenInfo: BrukerTokenInfo,
     ): Sak =
         get(
-            url = "$resourceUrl/saker/$sakId",
+            url = "$resourceUrl/saker/${sakId.sakId}",
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Sjekking av tilgang for behandling med id =$sakId feilet" },
             brukerTokenInfo = brukerTokenInfo,
@@ -45,7 +45,7 @@ class BehandlingKlient(
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling =
         get(
-            url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte",
+            url = "$resourceUrl/saker/${sakId.sakId}/behandlinger/sisteIverksatte",
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Klarte ikke hente siste iverksatte behandling på sak med id=$sakId" },
             brukerTokenInfo = brukerTokenInfo,
@@ -131,17 +131,6 @@ class BehandlingKlient(
             url = "$resourceUrl/api/klage/$klageId",
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Kunne ikke hente klage med id=$klageId" },
-            brukerTokenInfo = brukerTokenInfo,
-        )
-
-    internal suspend fun hentKlagerForSak(
-        sakId: SakId,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): List<Klage> =
-        get(
-            url = "$resourceUrl/api/klage/sak/$sakId",
-            onSuccess = { deserialize(it.response!!.toString()) },
-            errorMessage = { "Kunne ikke hente klager for sak=$sakId" },
             brukerTokenInfo = brukerTokenInfo,
         )
 }

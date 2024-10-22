@@ -6,6 +6,7 @@ import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnla
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype

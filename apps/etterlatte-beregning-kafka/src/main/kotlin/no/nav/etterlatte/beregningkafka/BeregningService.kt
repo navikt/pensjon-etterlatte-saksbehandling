@@ -43,7 +43,7 @@ class BeregningService(
             beregningApp.put("$url/api/beregning/beregningsgrunnlag/$omregningsId/overstyr/regulering")
         }
 
-    fun regulerAvkorting(
+    fun omregnAvkorting(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
     ): HttpResponse =

@@ -1,7 +1,7 @@
 import { Beregning, OverstyrBeregning } from '~shared/types/Beregning'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '../../felles/utils'
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import { CalculatorIcon, PlusIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
@@ -14,7 +14,7 @@ import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { NesteOgTilbake } from '../../handlinger/NesteOgTilbake'
 import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
-import { useBehandlingRoutes } from '../../BehandlingRoutes'
+import { BehandlingRouteContext } from '../../BehandlingRoutes'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -43,7 +43,7 @@ const OverstyrBeregningGrunnlag = (props: {
   const [overstyrBeregningGrunnlagResult, overstyrBeregningGrunnlagRequest] = useApiCall(hentOverstyrBeregningGrunnlag)
   const [opprettEllerEndreBeregningResult, opprettEllerEndreBeregningRequest] = useApiCall(opprettEllerEndreBeregning)
 
-  const { next } = useBehandlingRoutes()
+  const { next } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
 
   const onSubmit = () => {

@@ -1,9 +1,10 @@
 import { Button } from '@navikt/ds-react'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { BehandlingRouteContext } from '../BehandlingRoutes'
 import { handlinger } from './typer'
+import { useContext } from 'react'
 
 export const Tilbake = () => {
-  const { back, firstPage } = useBehandlingRoutes()
+  const { back, firstPage } = useContext(BehandlingRouteContext)
 
   return (
     <>

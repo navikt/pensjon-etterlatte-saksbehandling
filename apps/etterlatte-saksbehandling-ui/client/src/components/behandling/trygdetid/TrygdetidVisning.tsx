@@ -5,9 +5,9 @@ import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React from 'react'
+import React, { useContext } from 'react'
 import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
 import { oppdaterStatus } from '~shared/api/trygdetid'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -29,7 +29,7 @@ const TrygdetidVisning = (props: { behandling: IBehandlingReducer }) => {
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
-  const { next } = useBehandlingRoutes()
+  const { next } = useContext(BehandlingRouteContext)
 
   const vedtaksresultat = useVedtaksResultat()
 

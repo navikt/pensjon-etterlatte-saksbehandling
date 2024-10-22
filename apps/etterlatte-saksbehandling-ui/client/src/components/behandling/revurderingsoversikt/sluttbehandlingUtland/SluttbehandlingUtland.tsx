@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, ErrorSummary, Heading, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, ErrorSummary, Heading, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
 import { useEffect, useState } from 'react'
@@ -96,7 +96,7 @@ export default function SluttbehandlingUtland({
   }
 
   return (
-    <>
+    <Box marginBlock="10 0" maxWidth="1200px">
       <Heading level="2" size="medium">
         Sluttbehandling ved mottatt info utland
       </Heading>
@@ -161,16 +161,17 @@ export default function SluttbehandlingUtland({
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
 
       <Spinner label="Henter land" visible={isPending(hentAlleLandRequest)} />
-
-      {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
-        <SEDLandMedDokumenter
-          redigerbar={redigerbar}
-          landListe={alleLandKodeverk}
-          landMedDokumenter={landMedDokumenter}
-          setLandMedDokumenter={setLandMedDokumenter}
-          resetFeilkoder={() => setFeilkoder(new Set([]))}
-        />
-      )}
+      {(redigerbar || !!sluttbehandlingUtland?.landMedDokumenter.length) &&
+        isSuccess(hentAlleLandRequest) &&
+        alleLandKodeverk && (
+          <SEDLandMedDokumenter
+            redigerbar={redigerbar}
+            landListe={alleLandKodeverk}
+            landMedDokumenter={landMedDokumenter}
+            setLandMedDokumenter={setLandMedDokumenter}
+            resetFeilkoder={() => setFeilkoder(new Set([]))}
+          />
+        )}
       {redigerbar && landMedDokumenter.length > 0 ? (
         <Button
           style={{ marginTop: '1.5rem', marginLeft: '0.5rem' }}
@@ -213,7 +214,7 @@ export default function SluttbehandlingUtland({
             />
           )
         )}
-    </>
+    </Box>
   )
 }
 

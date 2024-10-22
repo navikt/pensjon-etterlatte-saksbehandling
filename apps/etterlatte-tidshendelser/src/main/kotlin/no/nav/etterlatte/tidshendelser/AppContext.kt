@@ -19,6 +19,9 @@ import no.nav.etterlatte.tidshendelser.TidshendelserKey.HENDELSE_POLLER_MAX_ANTA
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.JOBB_POLLER_INITIAL_DELAY
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.JOBB_POLLER_INTERVAL
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.JOBB_POLLER_OPENING_HOURS
+import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_INITIAL_DELAY
+import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_INTERVAL
+import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_OPENING_HOURS
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
@@ -78,6 +81,14 @@ class AppContext(
             jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService, reguleringService),
         )
 
+    val opprettJobberTask =
+        OpprettJobberJobb(
+            initialDelaySeconds = env.requireEnvValue(OPPRETT_JOBBER_INITIAL_DELAY).toLong(),
+            periode = env.requireEnvValue(OPPRETT_JOBBER_INTERVAL).let { Duration.parse(it) } ?: Duration.ofMinutes(5),
+            openingHours = env.requireEnvValue(OPPRETT_JOBBER_OPENING_HOURS).let { OpeningHours.of(it) },
+            opprettJobb = OpprettJobb(hendelseDao),
+        )
+
     val hendelsePollerTask =
         HendelsePollerTask(
             initialDelaySeconds = env.requireEnvValue(HENDELSE_POLLER_INITIAL_DELAY).toLong(),
@@ -102,6 +113,9 @@ enum class TidshendelserKey : EnvEnum {
     JOBB_POLLER_INITIAL_DELAY,
     JOBB_POLLER_INTERVAL,
     JOBB_POLLER_OPENING_HOURS,
+    OPPRETT_JOBBER_INITIAL_DELAY,
+    OPPRETT_JOBBER_INTERVAL,
+    OPPRETT_JOBBER_OPENING_HOURS,
     ;
 
     override fun key() = name

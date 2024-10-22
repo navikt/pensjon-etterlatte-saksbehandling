@@ -24,6 +24,7 @@ fun main() =
                         appContext.dataSource.migrate()
                         timers.add(appContext.jobbPollerTask.schedule())
                         timers.add(appContext.hendelsePollerTask.schedule())
+                        timers.add(appContext.opprettJobberTask.schedule())
                     }
 
                     override fun onShutdownSignal(rapidsConnection: RapidsConnection) {

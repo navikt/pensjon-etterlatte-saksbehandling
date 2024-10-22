@@ -62,10 +62,7 @@ internal val sjekklisteItemsFoerstegangsbehandlingOMS =
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
         "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
         "Sjekk om bruker har overgangsstønad",
-    )
-internal val sjekklisteItemsFyller67 =
-    listOf(
-        "Oppgitt inntekt for hele neste år i søknaden. Måneder etter opphør er trukket fra i beregningen.",
+        "Forutsigbart opphør før desember neste år: Oppgitt inntekt for neste år i søknaden er kontrollert, og måneder etter opphør er trukket fra i beregningen.",
     )
 
 internal val sjekklisteItemsRevurderingBP =
@@ -73,6 +70,7 @@ internal val sjekklisteItemsRevurderingBP =
         "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
         "Barnet mottar uføretrygd fra NAV - pensjonen er avkortet",
         "Mottatt nye bankopplysninger - sendt oppgave til NØP",
+        "Inntekt neste år: sjekket at bruker har oppgitt inntekt frem til forutsigbart opphør pga aldersovergang e.l.",
     )
 
 internal val sjekklisteItemsRevurderingOMS =

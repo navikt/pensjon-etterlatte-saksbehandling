@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
-import java.time.YearMonth
 import java.util.UUID
 
 class SjekklisteService(
@@ -67,25 +66,7 @@ class SjekklisteService(
                 SakType.OMSTILLINGSSTOENAD -> {
                     when (behandling.type) {
                         BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                            val aldersovergangMaaned =
-                                grunnlagKlient.aldersovergangMaaned(
-                                    behandling.sak.id,
-                                    behandling.sak.sakType,
-                                    brukertoken,
-                                )
-
-                            // Hvis vi ikke vet om de er aldersovergang så må sjekkliste vises for å være sikker
-                            val er67 =
-                                aldersovergangMaaned?.let {
-                                    val iAar = YearMonth.now().year
-                                    it.year == iAar || it.year == (iAar + 1)
-                                } ?: true
-
-                            if (er67) {
-                                sjekklisteItemsFoerstegangsbehandlingOMS + sjekklisteItemsFyller67
-                            } else {
-                                sjekklisteItemsFoerstegangsbehandlingOMS
-                            }
+                            sjekklisteItemsFoerstegangsbehandlingOMS
                         }
 
                         BehandlingType.REVURDERING -> {

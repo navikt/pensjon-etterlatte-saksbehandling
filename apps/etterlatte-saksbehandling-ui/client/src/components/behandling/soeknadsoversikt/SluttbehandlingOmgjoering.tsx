@@ -12,16 +12,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
-import { BodyShort, Button, ErrorSummary, Heading } from '@navikt/ds-react'
+import { BodyShort, Box, Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import styled from 'styled-components'
-
-const SluttbehandlingWrapper = styled.div`
-  margin-top: 2em;
-  margin-bottom: 2em;
-`
 
 export default function SluttBehandlingOmgjoering({
   behandlingId,
@@ -36,8 +30,7 @@ export default function SluttBehandlingOmgjoering({
   }, [])
 
   return (
-    <SluttbehandlingWrapper>
-      {' '}
+    <Box marginBlock="10 0" maxWidth="1200px">
       {mapResult(sluttbehandlingStatus, {
         success: (sluttbehandlingUtland) => (
           <Sluttbehandling
@@ -49,7 +42,7 @@ export default function SluttBehandlingOmgjoering({
         error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
         pending: <Spinner label="Henter status for sluttbehandling..." />,
       })}
-    </SluttbehandlingWrapper>
+    </Box>
   )
 }
 

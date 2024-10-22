@@ -108,7 +108,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 <KlageListe sakId={sak.id} />
               </VStack>
 
-              <VStack style={{ marginBottom: '4rem' }} gap="4">
+              <VStack marginBlock="10" gap="4">
                 <Heading size="medium">Tilbakekrevinger</Heading>
                 <TilbakekrevingListe sakId={sak.id} />
               </VStack>
@@ -128,6 +128,5 @@ export const HeadingWrapper = styled.div`
 const SakHeaderWrapper = styled.div`
   padding: var(--a-spacing-8);
   border-right: 1px solid var(--a-surface-active);
-  height: 100vh;
   min-width: 25rem;
 `

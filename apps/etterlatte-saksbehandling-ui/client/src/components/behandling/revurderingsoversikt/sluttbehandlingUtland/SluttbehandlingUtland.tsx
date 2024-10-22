@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, ErrorSummary, Heading, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, ErrorSummary, Heading, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
 import { useEffect, useState } from 'react'
@@ -21,12 +21,6 @@ import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
-import styled from 'styled-components'
-
-const SluttbehandlingWrapper = styled.div`
-  margin-top: 2em;
-  margin-bottom: 2em;
-`
 
 export default function SluttbehandlingUtland({
   sakId,
@@ -102,7 +96,7 @@ export default function SluttbehandlingUtland({
   }
 
   return (
-    <SluttbehandlingWrapper>
+    <Box marginBlock="10 0" maxWidth="1200px">
       <Heading level="2" size="medium">
         Sluttbehandling ved mottatt info utland
       </Heading>
@@ -167,7 +161,6 @@ export default function SluttbehandlingUtland({
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
 
       <Spinner label="Henter land" visible={isPending(hentAlleLandRequest)} />
-
       {(redigerbar || !!sluttbehandlingUtland?.landMedDokumenter.length) &&
         isSuccess(hentAlleLandRequest) &&
         alleLandKodeverk && (
@@ -221,7 +214,7 @@ export default function SluttbehandlingUtland({
             />
           )
         )}
-    </SluttbehandlingWrapper>
+    </Box>
   )
 }
 

@@ -13,6 +13,7 @@ import { hentBrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { NavLink } from 'react-router-dom'
+import { BrevStatus } from '~shared/types/Brev'
 
 export const BrevOppgaveModal = ({
   oppgave,
@@ -93,15 +94,19 @@ export const BrevOppgaveModal = ({
 
             {mapResult(brevResult, {
               success: (brev) => {
-                if (!brev.journalpostId)
-                  return <Alert variant="warning">Brevet er ikke journalført eller distribuert!</Alert>
-                else if (!brev.bestillingId) return <Alert variant="warning">Brevet er ikke distribuert!</Alert>
-                else
+                if (brev.status !== BrevStatus.DISTRIBUERT) {
+                  if (brev.status === BrevStatus.JOURNALFOERT) {
+                    return <Alert variant="warning">Brevet er ikke distribuert!</Alert>
+                  } else {
+                    return <Alert variant="warning">Brevet er ikke journalført eller distribuert!</Alert>
+                  }
+                } else {
                   return (
                     <Alert variant="success" inline>
                       Brevet er journalført og distribuert. Oppgaven kan avsluttes.
                     </Alert>
                   )
+                }
               },
               pending: <Spinner label="Henter informasjon om brevet" />,
               error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,

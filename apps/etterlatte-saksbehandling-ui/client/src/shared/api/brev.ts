@@ -30,12 +30,22 @@ export const ferdigstillVedtaksbrev = async (behandlingId: string): Promise<ApiR
 export const opprettVedtaksbrev = async (args: { sakId: number; behandlingId: string }): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
 
+export const opprettMottaker = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<Mottaker>> =>
+  apiClient.put(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, {})
+
 export const oppdaterMottaker = async (props: {
   brevId: number
   sakId: number
   mottaker: Mottaker
-}): Promise<ApiResponse<IBrev>> =>
+}): Promise<ApiResponse<void>> =>
   apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, { mottaker: props.mottaker })
+
+export const slettMottaker = async (props: {
+  brevId: number
+  mottakerId: string
+  sakId: number
+}): Promise<ApiResponse<void>> =>
+  apiClient.delete(`/brev/${props.brevId}/mottaker/${props.mottakerId}?sakId=${props.sakId}`)
 
 export const oppdaterTittel = async (args: {
   brevId: number

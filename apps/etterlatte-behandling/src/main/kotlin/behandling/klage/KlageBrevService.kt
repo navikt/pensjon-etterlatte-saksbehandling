@@ -136,11 +136,13 @@ class KlageBrevService(
                 if (eksisterendeInnstillingsbrev.status.ikkeJournalfoert()) {
                     brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId
                 } else {
+                    // TODO EY-3627:
+                    //   Håndtere flere mottakere
                     logger.info(
                         "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
-                            "journalført på journalpostId=${eksisterendeInnstillingsbrev.journalpostId}",
+                            "journalført på journalpostId=${eksisterendeInnstillingsbrev.mottakere.single().journalpostId}",
                     )
-                    requireNotNull(eksisterendeInnstillingsbrev.journalpostId) {
+                    requireNotNull(eksisterendeInnstillingsbrev.mottakere.single().journalpostId) {
                         "Har et brev med id=$brevId med status=${eksisterendeInnstillingsbrev.status} som mangler journalpostId"
                     }
                 }
@@ -153,9 +155,11 @@ class KlageBrevService(
                         "med bestillingsId $bestillingsIdDistribuering",
                 )
             } else {
+                // TODO EY-3627:
+                //   Håndtere flere mottakere
                 logger.info(
                     "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
-                        "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.bestillingId}",
+                        "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.mottakere.single().bestillingId}",
                 )
             }
             tidspunktJournalfoert to journalpostIdJournalfoering

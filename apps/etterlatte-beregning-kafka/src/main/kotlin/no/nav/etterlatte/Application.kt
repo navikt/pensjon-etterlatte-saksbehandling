@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.beregningkafka.AppBuilder
 import no.nav.etterlatte.beregningkafka.OmregningHendelserBeregningRiver
 import no.nav.etterlatte.beregningkafka.SjekkOmOverstyrtBeregningRiver
+import no.nav.etterlatte.beregningkafka.SjekkOmTidligAlderpensjonRiver
 import rapidsandrivers.initRogR
 
 fun main() =
@@ -13,6 +14,11 @@ fun main() =
             beregningService,
         )
         SjekkOmOverstyrtBeregningRiver(
+            rapidsConnection,
+            beregningService,
+        )
+
+        SjekkOmTidligAlderpensjonRiver(
             rapidsConnection,
             beregningService,
         )

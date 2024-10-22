@@ -1,7 +1,7 @@
 import { Alert, BodyShort, Box, Button, ErrorSummary, Heading, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -17,7 +17,7 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/historikk/HistoriskeSEDer'
 import { formaterDato } from '~utils/formatering/dato'
 
-import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
+import { isPending, mapAllApiResult, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
@@ -159,19 +159,27 @@ export default function SluttbehandlingUtland({
         Mottatt krav fra utland
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
-
-      <Spinner label="Henter land" visible={isPending(hentAlleLandRequest)} />
-      {(redigerbar || !!sluttbehandlingUtland?.landMedDokumenter.length) &&
-        isSuccess(hentAlleLandRequest) &&
-        alleLandKodeverk && (
-          <SEDLandMedDokumenter
-            redigerbar={redigerbar}
-            landListe={alleLandKodeverk}
-            landMedDokumenter={landMedDokumenter}
-            setLandMedDokumenter={setLandMedDokumenter}
-            resetFeilkoder={() => setFeilkoder(new Set([]))}
-          />
-        )}
+      {redigerbar || !!sluttbehandlingUtland?.landMedDokumenter.length ? (
+        mapResult(hentAlleLandRequest, {
+          success: (landliste) => {
+            return landliste ? (
+              <SEDLandMedDokumenter
+                redigerbar={redigerbar}
+                landListe={landliste}
+                landMedDokumenter={landMedDokumenter}
+                setLandMedDokumenter={setLandMedDokumenter}
+                resetFeilkoder={() => setFeilkoder(new Set([]))}
+              />
+            ) : null
+          },
+          error: (error) => (
+            <ApiErrorAlert>En feil oppstod under henting av perioder fra kravgrunnlag: {error.detail}</ApiErrorAlert>
+          ),
+          pending: <Spinner label="Henter land" />,
+        })
+      ) : (
+        <Alert variant="info">Ingen dokumenter er registrert</Alert>
+      )}
       {redigerbar && landMedDokumenter.length > 0 ? (
         <Button
           style={{ marginTop: '1.5rem', marginLeft: '0.5rem' }}

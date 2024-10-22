@@ -106,7 +106,7 @@ const behandlingroutes: Record<string, BehandlingRouteType> = {
   },
 }
 // skal kun brukes av Behandling som laster behandling, å newe opp denne kan få utilsiktede konsekvenser andre steder
-export const useBehandlingRoutes = () => {
+export const useBehandlingRoutes = (): DefaultBehandlingRouteContextType => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
   const personopplysninger = usePersonopplysninger()
@@ -165,7 +165,7 @@ export const useBehandlingRoutes = () => {
   }
 }
 
-type DefaultBehandlingRoutecontextType = {
+type DefaultBehandlingRouteContextType = {
   next: () => void
   back: () => void
   lastPage: boolean
@@ -177,7 +177,7 @@ type DefaultBehandlingRoutecontextType = {
   currentRouteErGyldig: () => boolean
 }
 
-const DefaultBehandlingRoutecontext: DefaultBehandlingRoutecontextType = {
+const DefaultBehandlingRoutecontext: DefaultBehandlingRouteContextType = {
   next: () => {},
   back: () => {},
   lastPage: false,
@@ -189,7 +189,7 @@ const DefaultBehandlingRoutecontext: DefaultBehandlingRoutecontextType = {
   currentRouteErGyldig: () => false,
 }
 
-export const BehandlingRouteContext = createContext<DefaultBehandlingRoutecontextType>(DefaultBehandlingRoutecontext)
+export const BehandlingRouteContext = createContext<DefaultBehandlingRouteContextType>(DefaultBehandlingRoutecontext)
 
 function useRouteNavigation() {
   const match = useMatch('/behandling/:behandlingId/:section')

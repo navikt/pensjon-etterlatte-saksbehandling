@@ -43,7 +43,7 @@ export interface BehandlingRouteType {
   sakstype?: SakType
 }
 
-const behandlingroutes: Record<string, BehandlingRouteType> = {
+export const behandlingroutes: Record<string, BehandlingRouteType> = {
   soeknadsoversikt: {
     path: 'soeknadsoversikt',
     description: 'Søknadsoversikt',
@@ -208,12 +208,17 @@ function useRouteNavigation() {
   return { currentRoute, goto }
 }
 
+export function behandlingHarVarselbrev(behandling: IBehandlingReducer | null) {
+  return (
+    behandling?.kilde === Vedtaksloesning.GJENOPPRETTA ||
+    behandling?.revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT
+  )
+}
+
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysninger: Personopplysninger | null) => {
   if (!behandling) return []
 
-  const lagVarselbrev =
-    behandling?.kilde === Vedtaksloesning.GJENOPPRETTA ||
-    behandling?.revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT
+  const lagVarselbrev = behandlingHarVarselbrev(behandling)
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:

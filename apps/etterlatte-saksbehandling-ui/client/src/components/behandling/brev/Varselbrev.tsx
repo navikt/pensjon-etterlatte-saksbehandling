@@ -25,6 +25,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 import { formaterDato } from '~utils/formatering/dato'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import {logger} from "~utils/logger";
 
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -38,11 +39,6 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const [varselbrev, setVarselbrev] = useState<IBrev>()
   const { next, currentRouteErGyldig } = useContext(BehandlingRouteContext)
-  if (!currentRouteErGyldig()) {
-    throw Error(
-      `Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} mangler kanskje vilkårsvurdering? `
-    )
-  }
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVarselbrev)
   const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVarselbrev)
@@ -105,6 +101,22 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
     })
   }, [behandlingId, sakId, tilbakestilt])
 
+  useEffect(() => {
+    if (!currentRouteErGyldig()) {
+      logger.generalWarning({
+        msg: `Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} mangler kanskje vilkårsvurdering? `,
+      })
+    }
+  }, [])
+
+  if (!currentRouteErGyldig()) {
+    return (
+        <Alert variant="error">
+          Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} mangler
+        kanskje vilkårsvurdering?
+        </Alert>
+    )
+  }
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner label="Henter brev ..." />
   } else if (isPending(opprettBrevStatus)) {

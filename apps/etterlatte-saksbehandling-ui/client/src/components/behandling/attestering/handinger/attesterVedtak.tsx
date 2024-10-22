@@ -5,6 +5,8 @@ import { AttesterYtelse } from '~components/behandling/attestering/handinger/att
 import { AttesterTilbakekreving } from '~components/behandling/attestering/handinger/attesterTilbakekreving'
 import { useKlage } from '~components/klage/useKlage'
 import { AttesterKlage } from '~components/behandling/attestering/handinger/attesterKlage'
+import { Alert } from '@navikt/ds-react'
+import { logger } from '~utils/logger'
 
 export const AttesterVedtak = ({ kommentar }: { kommentar: string }) => {
   const behandling = useBehandling()
@@ -18,6 +20,7 @@ export const AttesterVedtak = ({ kommentar }: { kommentar: string }) => {
   } else if (klage) {
     return <AttesterKlage klage={klage} kommentar={kommentar} />
   } else {
-    throw Error('Mangler behandling')
+    logger.generalWarning({ msg: 'Mangler behandling for attestering av vedtak ' })
+    return <Alert variant="error">Mangler behandling for attestering av vedtak</Alert>
   }
 }

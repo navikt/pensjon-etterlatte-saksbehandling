@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.Slate
 
 data class OmstillingsstoenadAktivitetspliktVarsel(
     override val innhold: List<Slate.Element>,
+    val bosattUtland: Boolean,
 ) : BrevDataFerdigstilling
 
 class OmstillingsstoenadAktivitetspliktVarselUtfall : BrevDataRedigerbar

@@ -21,13 +21,12 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class OmstillingsstoenadInnvilgelse(
     override val innhold: List<Slate.Element>,
-    val avdoed: Avdoed,
+    val avdoed: Avdoed?,
     val beregning: OmstillingsstoenadBeregning,
     val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
     val omsRettUtenTidsbegrensning: Boolean,
@@ -68,13 +67,6 @@ data class OmstillingsstoenadInnvilgelse(
                     )
                 }
 
-            val tomAvdoed =
-                Avdoed(
-                    fnr = Foedselsnummer(""),
-                    navn = "",
-                    doedsdato = LocalDate.now(),
-                )
-
             val erTidligereFamiliepleier = tidligereFamiliepleier?.svar == true
 
             val sisteBeregningsperiode =
@@ -98,7 +90,7 @@ data class OmstillingsstoenadInnvilgelse(
 
             val avdoed =
                 if (erTidligereFamiliepleier) {
-                    tomAvdoed
+                    null
                 } else {
                     avdoede.minBy { it.doedsdato }
                 }
@@ -124,7 +116,7 @@ data class OmstillingsstoenadInnvilgelse(
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = avdoed.navn, // navnAvdoed blir ikke brukt i oms brev
+                                navnAvdoed = avdoed?.navn ?: "", // TODO: navnAvdoed brukes ikke i oms så burde ikke være påkrevd
                             ),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =

@@ -163,17 +163,15 @@ export default function SluttbehandlingUtland({
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
       {redigerbar || !!sluttbehandlingUtland?.landMedDokumenter.length ? (
         mapResult(hentAlleLandRequest, {
-          success: (landliste) => {
-            return landliste ? (
-              <SEDLandMedDokumenter
-                redigerbar={redigerbar}
-                landListe={landliste}
-                landMedDokumenter={landMedDokumenter}
-                setLandMedDokumenter={setLandMedDokumenter}
-                resetFeilkoder={() => setFeilkoder(new Set([]))}
-              />
-            ) : null
-          },
+          success: (landliste) => (
+            <SEDLandMedDokumenter
+              redigerbar={redigerbar}
+              landListe={landliste}
+              landMedDokumenter={landMedDokumenter}
+              setLandMedDokumenter={setLandMedDokumenter}
+              resetFeilkoder={() => setFeilkoder(new Set([]))}
+            />
+          ),
           error: (error) => (
             <ApiErrorAlert>En feil oppstod under henting av perioder fra kravgrunnlag: {error.detail}</ApiErrorAlert>
           ),

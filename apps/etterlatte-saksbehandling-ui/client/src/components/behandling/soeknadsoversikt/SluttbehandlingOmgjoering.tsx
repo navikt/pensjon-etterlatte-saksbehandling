@@ -138,17 +138,15 @@ function Sluttbehandling({
       ) : null}
       {redigerbar || !!sluttbehandlingUtland?.landMedDokumenter.length ? (
         mapResult(hentAlleLandRequest, {
-          success: (landliste) => {
-            return landliste ? (
-              <SEDLandMedDokumenter
-                redigerbar={redigerbar}
-                landListe={landliste}
-                landMedDokumenter={landMedDokumenter}
-                setLandMedDokumenter={setLandMedDokumenter}
-                resetFeilkoder={() => setFeilkoder(new Set([]))}
-              />
-            ) : null
-          },
+          success: (landliste) => (
+            <SEDLandMedDokumenter
+              redigerbar={redigerbar}
+              landListe={landliste}
+              landMedDokumenter={landMedDokumenter}
+              setLandMedDokumenter={setLandMedDokumenter}
+              resetFeilkoder={() => setFeilkoder(new Set([]))}
+            />
+          ),
           error: (error) => (
             <ApiErrorAlert>En feil oppstod under henting av perioder fra kravgrunnlag: {error.detail}</ApiErrorAlert>
           ),

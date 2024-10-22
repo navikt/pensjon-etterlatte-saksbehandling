@@ -240,7 +240,7 @@ export const AvkortingInntektForm = ({
           </ReadMore>
         </VStack>
 
-        {skalOverstyreMaaneder && <OverstyrInnvilgaMaander toggleSkalOverstyre={toggleOverstyrtInnvilgaMaaneder} />}
+        {skalOverstyreMaaneder && <OverstyrInnvilgaMaander />}
         <HStack gap="3" marginBlock="4">
           <Button size="medium" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
             Lagre

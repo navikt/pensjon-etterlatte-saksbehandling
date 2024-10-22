@@ -3,7 +3,7 @@
 update oppgave
 set status  = 'AVBRUTT',
     merknad = 'Avbrutt på grunn av bug under automatisk jobb'
-where sak_id in (select id, sak_id, status, merknad, opprettet, frist
+where sak_id in (select id
                  from oppgave
                  where status = 'NY'
                    and opprettet >= '2024-10-21'

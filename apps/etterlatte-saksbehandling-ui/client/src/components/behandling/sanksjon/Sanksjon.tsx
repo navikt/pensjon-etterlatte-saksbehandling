@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingReducer, oppdaterAvkorting } from '~store/reducers/BehandlingReducer'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar, hasValue } from '~components/behandling/felles/utils'
 import { isFailure, isPending, mapApiResult, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import {
@@ -48,13 +48,15 @@ const sanksjonDefaultValue: SanksjonDefaultValue = {
 }
 
 function tidligstSanksjonFom(sanksjoner?: ISanksjon[], behandling?: IBehandlingReducer): Date | undefined {
-  if (behandling?.behandlingType === 'REVURDERING' && sanksjoner?.length) {
-    return new Date(
-      [...sanksjoner].sort((a, b) => new Date(a.fom).getMilliseconds() - new Date(b.fom).getMilliseconds())[0].fom
-    )
+  if (behandling?.behandlingType === IBehandlingsType.REVURDERING && sanksjoner?.length) {
+    // Gyldige fra og med er tidligste fom i eksisterende sanksjoner, eller virk hvis det er før
+    const tidligsteFomEllerVirk = [...sanksjoner.map((sanksjon) => sanksjon.fom), behandling.virkningstidspunkt?.dato]
+      .filter(hasValue)
+      .sort((a, b) => new Date(a).getMilliseconds() - new Date(b).getMilliseconds())[0]
+    return new Date(tidligsteFomEllerVirk)
   }
   if (behandling?.virkningstidspunkt?.dato) {
-    return new Date(behandling?.virkningstidspunkt?.dato)
+    return new Date(behandling.virkningstidspunkt.dato)
   }
   return undefined
 }

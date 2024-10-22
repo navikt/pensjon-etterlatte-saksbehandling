@@ -112,7 +112,8 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   if (!currentRouteErGyldig()) {
     return (
         <Alert variant="error">
-          {`Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} mangler kanskje vilkårsvurdering?`}{' '}
+          Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} mangler
+        kanskje vilkårsvurdering?
         </Alert>
     )
   }

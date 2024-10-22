@@ -125,12 +125,16 @@ object AvkortingRegelkjoring {
                         code = "OVERLAPPENDE_SANKSJONER",
                         detail =
                             "Behandlingen har sanksjoner som overlapper med hverandre i perioder. Dobbelt " +
-                                "sanksjon i en måned støttes ikke, og de overlappende sanksjonene må endres / fjernes" +
-                                " for å kunne beregne avkortet ytelse.",
+                                "sanksjon i en måned støttes ikke, og de overlappende sanksjonene må endres / " +
+                                "fjernes for å kunne beregne avkortet ytelse.",
                         cause = e,
                     )
 
-                    else -> throw InternfeilException("", e)
+                    else -> throw InternfeilException(
+                        "Kunne ikke sette opp perioder for sanksjon riktig. " +
+                            "Feilen som oppstod var: ${e.code}",
+                        e,
+                    )
                 }
             }
 

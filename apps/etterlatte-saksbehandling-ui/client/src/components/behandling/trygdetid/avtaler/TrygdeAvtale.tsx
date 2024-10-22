@@ -76,7 +76,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
         <HStack gap="2" align="center">
           <HandshakeIcon fontSize={IconSize.DEFAULT} />
           <Heading size="small" level="3">
-            Vurdering av trygdeavtale (Avdød)
+            Vurdering av trygdeavtale (avdød)
           </Heading>
         </HStack>
 

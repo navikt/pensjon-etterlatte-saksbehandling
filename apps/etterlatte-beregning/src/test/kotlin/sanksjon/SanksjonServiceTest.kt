@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -204,6 +205,46 @@ internal class SanksjonServiceTest {
         }
 
         @Test
+        fun `opprett eller lagre sanksjon håndterer rare datoer innenfor måneder`() {
+            val behandlingId = UUID.randomUUID()
+            val forrigeBehandling = UUID.randomUUID()
+            val sanksjon =
+                lagreSanksjon(
+                    fom = LocalDate.of(2024, Month.AUGUST, 5),
+                    tom = LocalDate.of(2024, Month.AUGUST, 1),
+                )
+
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    sak = sakId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    status = BehandlingStatus.BEREGNET,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
+                )
+
+            every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, bruker, any()) } returns true
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker) } returns
+                SisteIverksatteBehandling(
+                    forrigeBehandling,
+                )
+            every { sanksjonRepository.hentSanksjon(behandlingId) } returns null
+            every { sanksjonRepository.hentSanksjon(forrigeBehandling) } returns
+                listOf(
+                    sanksjon(
+                        fom = YearMonth.from(sanksjon.fom),
+                        tom = null,
+                    ),
+                )
+
+            assertDoesNotThrow {
+                runBlocking { service.opprettEllerOppdaterSanksjon(behandlingId, sanksjon, bruker) }
+            }
+        }
+
+        @Test
         fun `for revurderinger skal endringer av sanksjoner som starter før virk tillates kun hvis de er lik fram til virk`() {
             val behandlingId = UUID.randomUUID()
             val sakId = sakId1
@@ -276,7 +317,7 @@ internal class SanksjonServiceTest {
                 lagreSanksjon(
                     id = null,
                     sakId = sakId,
-                    fom = YearMonth.of(2024, 1).atEndOfMonth(),
+                    fom = YearMonth.of(2024, 1).atDay(1),
                     tom = null,
                     type = SanksjonType.STANS,
                 )

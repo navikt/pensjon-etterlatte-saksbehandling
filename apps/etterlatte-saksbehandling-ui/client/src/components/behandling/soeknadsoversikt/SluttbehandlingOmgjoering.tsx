@@ -64,7 +64,9 @@ function Sluttbehandling({
   ]
 
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(
-    sluttbehandlingUtland ? sluttbehandlingUtland.landMedDokumenter : initalStateLandMedDokumenter
+    sluttbehandlingUtland && sluttbehandlingUtland.landMedDokumenter.length
+      ? sluttbehandlingUtland.landMedDokumenter
+      : initalStateLandMedDokumenter
   )
 
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
@@ -155,7 +157,7 @@ function Sluttbehandling({
       ) : (
         <Alert variant="info">Ingen dokumenter er registrert</Alert>
       )}
-      {redigerbar && landMedDokumenter.length > 0 ? (
+      {redigerbar ? (
         <Button
           style={{ marginTop: '1.5rem', marginLeft: '0.5rem' }}
           loading={isPending(lagreStatus)}

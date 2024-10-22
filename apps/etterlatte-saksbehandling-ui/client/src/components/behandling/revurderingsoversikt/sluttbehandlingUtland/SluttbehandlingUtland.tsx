@@ -45,7 +45,9 @@ export default function SluttbehandlingUtland({
     { landIsoKode: undefined, dokumenter: [{ dokumenttype: '', dato: undefined, kommentar: '' }] },
   ]
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(
-    sluttbehandlingUtland ? sluttbehandlingUtland.landMedDokumenter : initalStateLandMedDokumenter
+    sluttbehandlingUtland && sluttbehandlingUtland.landMedDokumenter.length
+      ? sluttbehandlingUtland.landMedDokumenter
+      : initalStateLandMedDokumenter
   )
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
   const [visLagretOk, setVisLagretOk] = useState<boolean>(false)
@@ -180,7 +182,7 @@ export default function SluttbehandlingUtland({
       ) : (
         <Alert variant="info">Ingen dokumenter er registrert</Alert>
       )}
-      {redigerbar && landMedDokumenter.length > 0 ? (
+      {redigerbar ? (
         <Button
           style={{ marginTop: '1.5rem', marginLeft: '0.5rem' }}
           loading={isPending(lagreRevurderingsinfoStatus)}

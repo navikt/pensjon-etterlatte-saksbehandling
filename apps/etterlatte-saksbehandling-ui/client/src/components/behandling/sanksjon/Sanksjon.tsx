@@ -31,6 +31,7 @@ import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/
 import { useAppDispatch } from '~store/Store'
 import { hentAvkorting } from '~shared/api/avkorting'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 interface SanksjonDefaultValue {
   datoFom?: Date
@@ -140,7 +141,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     if (tom && isBefore(tom, fom)) {
       return 'Fra-dato kan ikke være etter til-dato'
     } else if (
-      behandling.behandlingType !== 'REVURDERING' &&
+      behandling.behandlingType !== IBehandlingsType.REVURDERING &&
       behandling.virkningstidspunkt?.dato &&
       isBefore(startOfDay(fom), startOfDay(new Date(behandling.virkningstidspunkt.dato)))
     ) {

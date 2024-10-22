@@ -12,6 +12,7 @@ import { useAppDispatch } from '~store/Store'
 import { isPending } from '@reduxjs/toolkit'
 import OverstyrInnvilgaMaander from '~components/behandling/avkorting/OverstyrInnvilgaMaaneder'
 import React, { useState } from 'react'
+import { CogRotationIcon, TrashIcon } from '@navikt/aksel-icons'
 
 export const AvkortingInntektForm = ({
   behandling,
@@ -204,7 +205,7 @@ export const AvkortingInntektForm = ({
         </HStack>
         <TextAreaWrapper {...register('spesifikasjon')} resize="vertical" label="Spesifikasjon av inntekt" />
 
-        <VStack gap="1">
+        <VStack marginBlock="2" gap="1">
           <ReadMore header="Hva regnes som inntekt?">
             Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
             arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
@@ -218,15 +219,25 @@ export const AvkortingInntektForm = ({
         </VStack>
 
         {skalOverstyreMaaneder && <OverstyrInnvilgaMaander toggleSkalOverstyre={toggleOverstyrtInnvilgaMaaneder} />}
-        <HStack gap="1" marginBlock="4">
-          <Button size="small" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
+        <HStack gap="3" marginBlock="4">
+          <Button size="medium" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
             Lagre
           </Button>
-          <Button size="small" variant="danger" onClick={toggleOverstyrtInnvilgaMaaneder}>
-            {skalOverstyreMaaneder ? 'Fjern overstyrt innvilga måneder' : 'Overstyr innvilga måneder'}
+          <Button size="medium" variant="secondary" onClick={toggleOverstyrtInnvilgaMaaneder}>
+            {skalOverstyreMaaneder ? (
+              <HStack gap="2">
+                <TrashIcon />
+                <>Fjern overstyrt innvilga måneder</>
+              </HStack>
+            ) : (
+              <HStack gap="2">
+                <CogRotationIcon />
+                <>Overstyr innvilga måneder</>
+              </HStack>
+            )}
           </Button>
           <Button
-            size="small"
+            size="medium"
             variant="tertiary"
             onClick={() => {
               setVisForm(false)

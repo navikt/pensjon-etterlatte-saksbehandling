@@ -16,6 +16,12 @@ import { BodyShort, Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import styled from 'styled-components'
+
+const SluttbehandlingWrapper = styled.div`
+  margin-top: 2em;
+  margin-bottom: 2em;
+`
 
 export default function SluttBehandlingOmgjoering({
   behandlingId,
@@ -29,20 +35,31 @@ export default function SluttBehandlingOmgjoering({
     hentSluttbehandling(behandlingId)
   }, [])
 
-  return mapResult(sluttbehandlingStatus, {
-    success: (data) => <Sluttbehandling dokumenter={data} behandlingId={behandlingId} redigerbar={redigerbar} />,
-    error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>, //TODO: registrere uansett?
-    pending: <Spinner label="Henter status for sluttbehandling..." />,
-  })
+  return (
+    <SluttbehandlingWrapper>
+      {' '}
+      {mapResult(sluttbehandlingStatus, {
+        success: (sluttbehandlingUtland) => (
+          <Sluttbehandling
+            sluttbehandlingUtland={sluttbehandlingUtland}
+            behandlingId={behandlingId}
+            redigerbar={redigerbar}
+          />
+        ),
+        error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+        pending: <Spinner label="Henter status for sluttbehandling..." />,
+      })}
+    </SluttbehandlingWrapper>
+  )
 }
 
 function Sluttbehandling({
   behandlingId,
-  dokumenter,
+  sluttbehandlingUtland,
   redigerbar,
 }: {
   behandlingId: string
-  dokumenter: SluttbehandlingUtlandOmgjoering | null
+  sluttbehandlingUtland: SluttbehandlingUtlandOmgjoering | null
   redigerbar: boolean
 }) {
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
@@ -54,7 +71,7 @@ function Sluttbehandling({
   ]
 
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(
-    dokumenter ? dokumenter.landMedDokumenter : initalStateLandMedDokumenter
+    sluttbehandlingUtland ? sluttbehandlingUtland.landMedDokumenter : initalStateLandMedDokumenter
   )
 
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
@@ -124,15 +141,17 @@ function Sluttbehandling({
           ))}
         </ErrorSummary>
       ) : null}
-      {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
-        <SEDLandMedDokumenter
-          redigerbar={redigerbar}
-          landListe={alleLandKodeverk}
-          landMedDokumenter={landMedDokumenter}
-          setLandMedDokumenter={setLandMedDokumenter}
-          resetFeilkoder={() => setFeilkoder(new Set([]))}
-        />
-      )}
+      {(redigerbar || !!sluttbehandlingUtland?.landMedDokumenter.length) &&
+        isSuccess(hentAlleLandRequest) &&
+        alleLandKodeverk && (
+          <SEDLandMedDokumenter
+            redigerbar={redigerbar}
+            landListe={alleLandKodeverk}
+            landMedDokumenter={landMedDokumenter}
+            setLandMedDokumenter={setLandMedDokumenter}
+            resetFeilkoder={() => setFeilkoder(new Set([]))}
+          />
+        )}
       {redigerbar && landMedDokumenter.length > 0 ? (
         <Button
           style={{ marginTop: '1.5rem', marginLeft: '0.5rem' }}

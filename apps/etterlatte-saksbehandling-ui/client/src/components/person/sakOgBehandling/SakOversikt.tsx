@@ -108,7 +108,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 <KlageListe sakId={sak.id} />
               </VStack>
 
-              <VStack gap="4">
+              <VStack style={{ marginBottom: '4rem' }} gap="4">
                 <Heading size="medium">Tilbakekrevinger</Heading>
                 <TilbakekrevingListe sakId={sak.id} />
               </VStack>

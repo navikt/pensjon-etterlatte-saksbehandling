@@ -21,6 +21,12 @@ import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
+import styled from 'styled-components'
+
+const SluttbehandlingWrapper = styled.div`
+  margin-top: 2em;
+  margin-bottom: 2em;
+`
 
 export default function SluttbehandlingUtland({
   sakId,
@@ -96,7 +102,7 @@ export default function SluttbehandlingUtland({
   }
 
   return (
-    <>
+    <SluttbehandlingWrapper>
       <Heading level="2" size="medium">
         Sluttbehandling ved mottatt info utland
       </Heading>
@@ -162,15 +168,17 @@ export default function SluttbehandlingUtland({
 
       <Spinner label="Henter land" visible={isPending(hentAlleLandRequest)} />
 
-      {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
-        <SEDLandMedDokumenter
-          redigerbar={redigerbar}
-          landListe={alleLandKodeverk}
-          landMedDokumenter={landMedDokumenter}
-          setLandMedDokumenter={setLandMedDokumenter}
-          resetFeilkoder={() => setFeilkoder(new Set([]))}
-        />
-      )}
+      {(redigerbar || !!sluttbehandlingUtland?.landMedDokumenter.length) &&
+        isSuccess(hentAlleLandRequest) &&
+        alleLandKodeverk && (
+          <SEDLandMedDokumenter
+            redigerbar={redigerbar}
+            landListe={alleLandKodeverk}
+            landMedDokumenter={landMedDokumenter}
+            setLandMedDokumenter={setLandMedDokumenter}
+            resetFeilkoder={() => setFeilkoder(new Set([]))}
+          />
+        )}
       {redigerbar && landMedDokumenter.length > 0 ? (
         <Button
           style={{ marginTop: '1.5rem', marginLeft: '0.5rem' }}
@@ -213,7 +221,7 @@ export default function SluttbehandlingUtland({
             />
           )
         )}
-    </>
+    </SluttbehandlingWrapper>
   )
 }
 

@@ -1,5 +1,15 @@
-import styled from 'styled-components'
-import { BodyShort, Button, HelpText, HStack, Label, ReadMore, Textarea, TextField, VStack } from '@navikt/ds-react'
+import {
+  BodyShort,
+  Box,
+  Button,
+  HelpText,
+  HStack,
+  Label,
+  ReadMore,
+  Textarea,
+  TextField,
+  VStack,
+} from '@navikt/ds-react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { IAvkortingGrunnlagFrontend, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
@@ -128,82 +138,94 @@ export const AvkortingInntektForm = ({
     <FormProvider {...methods}>
       <VStack>
         <HStack marginBlock="8" gap="2" align="start" wrap={false}>
-          <TekstFelt
-            {...register('inntektTom', {
-              pattern: { value: /^\d+$/, message: 'Kun tall' },
-              required: { value: true, message: 'Må fylles ut' },
-            })}
-            label={
-              <HStack>
-                Forventet inntekt Norge
-                <HelpText title="Hva innebærer forventet inntekt totalt">
-                  Registrer forventet norsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for dette
-                  året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder stemmer.
-                </HelpText>
-              </HStack>
-            }
-            size="medium"
-            type="tel"
-            inputMode="numeric"
-            error={errors.inntektTom?.message}
-          />
-          <TekstFelt
-            {...register('fratrekkInnAar', {
-              required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
-              max: {
-                value: watch('inntektTom') || 0,
-                message: 'Kan ikke være høyere enn årsinntekt',
-              },
-              pattern: { value: /^\d+$/, message: 'Kun tall' },
-            })}
-            label="Fratrekk inn-år"
-            size="medium"
-            type="tel"
-            inputMode="numeric"
-            disabled={alleMaanederIAaretErInnvilget()}
-            error={errors.fratrekkInnAar?.message}
-          />
-          <TekstFelt
-            {...register('inntektUtlandTom', {
-              required: { value: true, message: 'Må fylles ut' },
-              pattern: { value: /^\d+$/, message: 'Kun tall' },
-            })}
-            label={
-              <HStack>
-                Forventet inntekt utland
-                <HelpText title="Hva innebærer forventet inntekt totalt">
-                  Registrer forventet utenlandsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for dette
-                  året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder stemmer.
-                </HelpText>
-              </HStack>
-            }
-            size="medium"
-            type="tel"
-            inputMode="numeric"
-            error={errors.inntektUtlandTom?.message}
-          />
-          <TekstFelt
-            {...register('fratrekkInnAarUtland', {
-              required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
-              max: {
-                value: watch('inntektUtlandTom') || 0,
-                message: 'Kan ikke være høyere enn årsinntekt utland',
-              },
-              pattern: { value: /^\d+$/, message: 'Kun tall' },
-            })}
-            label="Fratrekk inn-år"
-            size="medium"
-            type="tel"
-            disabled={alleMaanederIAaretErInnvilget()}
-            inputMode="numeric"
-            error={errors.fratrekkInnAarUtland?.message}
-          />
+          <Box maxWidth="14rem">
+            <TextField
+              {...register('inntektTom', {
+                pattern: { value: /^\d+$/, message: 'Kun tall' },
+                required: { value: true, message: 'Må fylles ut' },
+              })}
+              label={
+                <HStack>
+                  Forventet inntekt Norge
+                  <HelpText title="Hva innebærer forventet inntekt totalt">
+                    Registrer forventet norsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for dette
+                    året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder
+                    stemmer.
+                  </HelpText>
+                </HStack>
+              }
+              size="medium"
+              type="tel"
+              inputMode="numeric"
+              error={errors.inntektTom?.message}
+            />
+          </Box>
+          <Box maxWidth="14rem">
+            <TextField
+              {...register('fratrekkInnAar', {
+                required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
+                max: {
+                  value: watch('inntektTom') || 0,
+                  message: 'Kan ikke være høyere enn årsinntekt',
+                },
+                pattern: { value: /^\d+$/, message: 'Kun tall' },
+              })}
+              label="Fratrekk inn-år"
+              size="medium"
+              type="tel"
+              inputMode="numeric"
+              disabled={alleMaanederIAaretErInnvilget()}
+              error={errors.fratrekkInnAar?.message}
+            />
+          </Box>
+          <Box maxWidth="14rem">
+            <TextField
+              {...register('inntektUtlandTom', {
+                required: { value: true, message: 'Må fylles ut' },
+                pattern: { value: /^\d+$/, message: 'Kun tall' },
+              })}
+              label={
+                <HStack>
+                  Forventet inntekt utland
+                  <HelpText title="Hva innebærer forventet inntekt totalt">
+                    Registrer forventet utenlandsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for
+                    dette året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder
+                    stemmer.
+                  </HelpText>
+                </HStack>
+              }
+              size="medium"
+              type="tel"
+              inputMode="numeric"
+              error={errors.inntektUtlandTom?.message}
+            />
+          </Box>
+          <Box maxWidth="14rem">
+            <TextField
+              {...register('fratrekkInnAarUtland', {
+                required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
+                max: {
+                  value: watch('inntektUtlandTom') || 0,
+                  message: 'Kan ikke være høyere enn årsinntekt utland',
+                },
+                pattern: { value: /^\d+$/, message: 'Kun tall' },
+              })}
+              label="Fratrekk inn-år"
+              size="medium"
+              type="tel"
+              disabled={alleMaanederIAaretErInnvilget()}
+              inputMode="numeric"
+              error={errors.fratrekkInnAarUtland?.message}
+            />
+          </Box>
           <VStack gap="4">
             <Label>Fra og med dato</Label>
             <BodyShort>{formaterDato(inntektFom)}</BodyShort>
           </VStack>
         </HStack>
-        <TextAreaWrapper {...register('spesifikasjon')} resize="vertical" label="Spesifikasjon av inntekt" />
+        <Box width="39rem">
+          <Textarea {...register('spesifikasjon')} resize="vertical" label="Spesifikasjon av inntekt" />
+        </Box>
 
         <VStack marginBlock="2" gap="1">
           <ReadMore header="Hva regnes som inntekt?">
@@ -254,15 +276,3 @@ export const AvkortingInntektForm = ({
     </FormProvider>
   )
 }
-
-const TekstFelt = styled(TextField)`
-  max-width: 11.85em;
-`
-
-const TextAreaWrapper = styled(Textarea)`
-  textArea {
-    margin-top: 1em;
-    width: 47em;
-    height: 98px;
-  }
-`

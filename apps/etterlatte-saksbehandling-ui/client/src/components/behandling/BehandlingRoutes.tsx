@@ -96,13 +96,15 @@ export const behandlingroutes: Record<string, BehandlingRouteType> = {
     path: 'brev',
     element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
     description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
+    kreverBehandlingsstatus: (behandling: IBehandlingReducer) =>
+      behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.BEREGNET,
   },
   brevOms: {
     path: 'brev',
     element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
     description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: () => IBehandlingStatus.AVKORTET,
+    kreverBehandlingsstatus: (behandling: IBehandlingReducer) =>
+      behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.AVKORTET,
   },
 }
 // skal kun brukes av Behandling som laster behandling, å newe opp denne kan få utilsiktede konsekvenser andre steder

@@ -8,9 +8,12 @@ import no.nav.etterlatte.avkorting.regler.avkortetYtelseMedRestanseOgSanksjon
 import no.nav.etterlatte.avkorting.regler.kroneavrundetInntektAvkorting
 import no.nav.etterlatte.avkorting.regler.restanse
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -113,12 +116,30 @@ object AvkortingRegelkjoring {
             throw IllegalArgumentException("Skal ikke regne med sanksjoner i avkorting av forventet inntekt")
         }
 
+        val sanksjonsperioder =
+            try {
+                periodiserteSanksjoner(sanksjoner)
+            } catch (e: PeriodiseringAvGrunnlagFeil) {
+                when (e) {
+                    is PeriodiseringAvGrunnlagFeil.PerioderOverlapper -> throw UgyldigForespoerselException(
+                        code = "OVERLAPPENDE_SANKSJONER",
+                        detail =
+                            "Behandlingen har sanksjoner som overlapper med hverandre i perioder. Dobbelt " +
+                                "sanksjon i en måned støttes ikke, og de overlappende sanksjonene må endres / fjernes" +
+                                " for å kunne beregne avkortet ytelse.",
+                        cause = e,
+                    )
+
+                    else -> throw InternfeilException("", e)
+                }
+            }
+
         val regelgrunnlag =
             PeriodisertAvkortetYtelseGrunnlag(
                 beregningsperioder = periodiserteBeregninger(ytelseFoerAvkorting),
                 avkortingsperioder = periodiserteAvkortinger(avkortingsperioder),
                 fordeltRestanse = restansegrunnlag(restanse),
-                sanksjonsperioder = periodiserteSanksjoner(sanksjoner),
+                sanksjonsperioder = sanksjonsperioder,
             )
         val resultat = avkortetYtelseMedRestanseOgSanksjon.eksekver(regelgrunnlag, periode.tilRegelPeriode())
         when (resultat) {

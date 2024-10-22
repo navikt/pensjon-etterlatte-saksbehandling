@@ -161,7 +161,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             virkningstidspunkt!!,
                             sakType,
                             vedtakType,
-                            avdoede,
                         )
                     VedtakType.ENDRING ->
                         omstillingsstoenadEndring(
@@ -279,7 +278,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         virkningstidspunkt: YearMonth,
         sakType: SakType,
         vedtakType: VedtakType,
-        avdoede: List<Avdoed>,
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
@@ -301,11 +299,13 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+
         OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
             utbetalingsinfo.await(),
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
-            avdoede,
+            behandling.tidligereFamiliepleier?.svar ?: false,
         )
     }
 

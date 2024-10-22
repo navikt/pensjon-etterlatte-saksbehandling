@@ -86,6 +86,16 @@ class AvkortingService(
         }
     }
 
+    suspend fun erAvkortingOverstyrtForTidligAlderpensjon(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        return true
+    }
+
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

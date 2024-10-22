@@ -90,7 +90,7 @@ const behandlingroutes: Record<string, BehandlingRouteType> = {
     path: 'varselbrev',
     description: 'Varselbrev',
     element: (behandling: IBehandlingReducer) => <Varselbrev behandling={behandling} />,
-    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
+    kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
   },
   brevBp: {
     path: 'brev',

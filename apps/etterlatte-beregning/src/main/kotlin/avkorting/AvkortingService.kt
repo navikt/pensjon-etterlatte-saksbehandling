@@ -21,7 +21,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
-import java.time.Instant
+import java.time.LocalTime
 import java.util.UUID
 
 enum class AvkortingToggles(
@@ -107,12 +107,18 @@ class AvkortingService(
 
         if (overstyrtInntektsavkorting != null) {
             logger.info("Oppretter oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
+
+            val oppgaveFrist =
+                overstyrtInntektsavkorting.grunnlag.periode.fom
+                    .plusMonths(overstyrtInntektsavkorting.grunnlag.innvilgaMaaneder - 2L)
+                    .atDay(1)
+
             behandlingKlient.opprettOppgave(
                 behandling.sak,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
-                Tidspunkt(Instant.now()), // TODO: sette riktig tidspunkt (1mnd før alderspensjon)
+                Tidspunkt.ofNorskTidssone(oppgaveFrist, LocalTime.now()),
             )
         } else {
             logger.info("Fant ingen tidlig alderspensjon for sakId=${behandling.sak.sakId}, trenger ingen oppgave om opphør.")

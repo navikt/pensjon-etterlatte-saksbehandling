@@ -1,6 +1,6 @@
 import { handlinger } from '../handlinger/typer'
 import { Button } from '@navikt/ds-react'
-import { BehandlingRouteContext } from '../BehandlingRoutes'
+import { behandlingHarVarselbrev, BehandlingRouteContext } from '../BehandlingRoutes'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/vedtaksvurdering'
@@ -38,7 +38,11 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
         if (skalBrukeTrygdetid) {
           goto('trygdetid')
         } else {
-          goto('brev')
+          if (behandlingHarVarselbrev(behandling)) {
+            next()
+          } else {
+            goto('brev')
+          }
         }
       })
     })
@@ -66,7 +70,11 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
       case 'avslag':
         return (
           <Button variant="primary" loading={isPending(vedtakResult)} onClick={() => oppdaterVedtakAvslag()}>
-            {skalBrukeTrygdetid ? handlinger.AVSLAG_UTLAND.navn : handlinger.AVSLAG.navn}
+            {skalBrukeTrygdetid
+              ? handlinger.AVSLAG_UTLAND.navn
+              : behandlingHarVarselbrev(behandling)
+                ? handlinger.NESTE.navn
+                : handlinger.AVSLAG.navn}
           </Button>
         )
     }

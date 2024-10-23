@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.fromDto
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
@@ -26,7 +27,7 @@ import java.time.LocalDate
 
 data class OmstillingsstoenadInnvilgelse(
     override val innhold: List<Slate.Element>,
-    val avdoed: Avdoed,
+    val avdoed: Avdoed?,
     val beregning: OmstillingsstoenadBeregning,
     val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
     val omsRettUtenTidsbegrensning: Boolean,
@@ -34,6 +35,7 @@ data class OmstillingsstoenadInnvilgelse(
     val harUtbetaling: Boolean,
     val bosattUtland: Boolean,
     val erSluttbehandling: Boolean,
+    val tidligereFamiliepleier: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -45,6 +47,7 @@ data class OmstillingsstoenadInnvilgelse(
             avdoede: List<Avdoed>,
             utlandstilknytning: UtlandstilknytningType?,
             erSluttbehandling: Boolean,
+            tidligereFamiliepleier: TidligereFamiliepleier?,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -67,7 +70,8 @@ data class OmstillingsstoenadInnvilgelse(
                     )
                 }
 
-            val avdoed = avdoede.single()
+            val erTidligereFamiliepleier = tidligereFamiliepleier?.svar == true
+
             val sisteBeregningsperiode =
                 beregningsperioder
                     .filter {
@@ -87,9 +91,23 @@ data class OmstillingsstoenadInnvilgelse(
                         )
                 }
 
+            val avdoed =
+                if (erTidligereFamiliepleier) {
+                    null
+                } else {
+                    avdoede.minBy { it.doedsdato }
+                }
+
+            val doedsdatoEllerOpphoertPleieforhold =
+                if (erTidligereFamiliepleier) {
+                    tidligereFamiliepleier!!.opphoertPleieforhold!!
+                } else {
+                    avdoede.single().doedsdato
+                }
+
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
-                avdoed = avdoede.minBy { it.doedsdato },
+                avdoed = avdoed,
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
@@ -101,11 +119,11 @@ data class OmstillingsstoenadInnvilgelse(
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = avdoed.navn,
+                                navnAvdoed = avdoed?.navn ?: "", // TODO: navnAvdoed brukes ikke i oms så burde ikke være påkrevd
                             ),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
-                    avdoed.doedsdato
+                    doedsdatoEllerOpphoertPleieforhold
                         .plusMonths(4)
                         .isAfter(avkortingsinfo.virkningsdato),
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
@@ -115,6 +133,7 @@ data class OmstillingsstoenadInnvilgelse(
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
                 erSluttbehandling = erSluttbehandling,
+                tidligereFamiliepleier = erTidligereFamiliepleier,
             )
         }
     }
@@ -122,20 +141,19 @@ data class OmstillingsstoenadInnvilgelse(
 
 data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
     val virkningsdato: LocalDate,
-    val avdoed: Avdoed,
     val utbetalingsbeloep: Kroner,
     val etterbetaling: Boolean,
+    val tidligereFamiliepleier: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
-            avdoede: List<Avdoed>,
+            tidligereFamiliepleier: Boolean,
         ): OmstillingsstoenadInnvilgelseRedigerbartUtfall =
             OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
-                avdoed = avdoede.minBy { it.doedsdato },
                 utbetalingsbeloep =
                     avkortingsinfo.beregningsperioder.firstOrNull()?.utbetaltBeloep
                         ?: throw UgyldigForespoerselException(
@@ -143,6 +161,7 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
                             "Mangler beregningsperioder i avkorting",
                         ),
                 etterbetaling = etterbetaling != null,
+                tidligereFamiliepleier = tidligereFamiliepleier,
             )
     }
 }

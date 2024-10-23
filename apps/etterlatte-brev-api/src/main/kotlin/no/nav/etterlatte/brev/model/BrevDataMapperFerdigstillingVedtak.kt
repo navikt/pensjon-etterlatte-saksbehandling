@@ -166,6 +166,8 @@ class BrevDataMapperFerdigstillingVedtak(
 
                 OMS_AVSLAG ->
                     omstillingsstoenadAvslag(
+                        behandlingId!!,
+                        bruker,
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
                     )
@@ -436,16 +438,22 @@ class BrevDataMapperFerdigstillingVedtak(
             avdoede,
             utlandstilknytningType,
             behandling.erSluttbehandling,
+            behandling.tidligereFamiliepleier,
         )
     }
 
     private suspend fun omstillingsstoenadAvslag(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
         innhold: List<Slate.Element>,
         utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
+        val tidligereFamiliepleier = async { behandlingService.hentTidligereFamiliepleier(behandlingId, bruker) }
+
         OmstillingsstoenadAvslag.fra(
             innhold,
             utlandstilknytningType,
+            tidligereFamiliepleier.await(),
         )
     }
 

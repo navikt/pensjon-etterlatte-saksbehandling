@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.virusskanning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-private const val MAKS_FILSTOERRELSE = 10 * 1024 * 1024
+private const val MAKS_FILSTOERRELSE = 2 * 1024 * 1024
 
 private val log: Logger = LoggerFactory.getLogger(VirusScanService::class.java)
 

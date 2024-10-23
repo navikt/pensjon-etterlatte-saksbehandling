@@ -192,6 +192,7 @@ class BrevDataMapperFerdigstillingVedtak(
                     AvvistKlageFerdigData.fra(
                         innholdMedVedlegg,
                         klage,
+                        utlandstilknytningType,
                     )
 
                 else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")

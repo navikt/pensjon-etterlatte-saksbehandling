@@ -69,6 +69,7 @@ app.use('/api/github', githubRouter)
 
 app.use(
   [
+    '/api/aktivitetsplikt',
     '/api/behandling',
     '/api/personer',
     '/api/revurdering/:sakid',

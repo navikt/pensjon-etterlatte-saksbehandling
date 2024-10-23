@@ -1,5 +1,7 @@
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { JaNei } from '~shared/types/ISvar'
+import { OppgaveDTO } from '~shared/types/oppgave'
+import { ISak } from '~shared/types/sak'
 
 export interface AktivitetspliktOppfolging {
   behandlingId: string
@@ -139,4 +141,16 @@ export const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValu
   fom: new Date(),
   tom: undefined,
   beskrivelse: '',
+}
+
+export interface AktivitetspliktOppgaveVurdering {
+  vurderingType: AktivitetspliktOppgaveType
+  oppgave: OppgaveDTO
+  sak: ISak
+  vurdering: IAktivitetspliktVurderingNy
+}
+
+export enum AktivitetspliktOppgaveType {
+  SEKS_MAANEDER = 'SEKS_MAANEDER',
+  TOLV_MAANEDER = 'TOLV_MAANEDER',
 }

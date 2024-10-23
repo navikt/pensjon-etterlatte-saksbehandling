@@ -1,5 +1,6 @@
-import { Box, Heading } from '@navikt/ds-react'
+import { Box, Heading, VStack } from '@navikt/ds-react'
 import React from 'react'
+import { Vurderinger } from '~components/aktivitetsplikt/vurdering/Vurderinger'
 
 export function VurderAktivitet() {
   return (
@@ -9,7 +10,11 @@ export function VurderAktivitet() {
           Oppfølging av aktivitet
         </Heading>
       </Box>
-      <Box paddingBlock="16"></Box>
+      <Box paddingBlock="16">
+        <VStack gap="4">
+          <Vurderinger />
+        </VStack>
+      </Box>
     </>
   )
 }

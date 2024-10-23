@@ -68,6 +68,6 @@ class AktivitetspliktKopierService(
                 oppgaveId,
             )
         }
-        nyesteVurdering.unntak.forEach { aktivitetspliktUnntakDao.kopierUnntakTilBehandling(it.id, oppgaveId) }
+        nyesteVurdering.unntak.forEach { aktivitetspliktUnntakDao.kopierUnntakTilOppgave(it.id, oppgaveId) }
     }
 }

@@ -187,8 +187,8 @@ class AktivitetspliktAktivitetsgradDao(
             val stmt =
                 prepareStatement(
                     """
-                    INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse) 
-                    SELECT gen_random_uuid(), sak_id, ?, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse
+                    INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd) 
+                    SELECT gen_random_uuid(), sak_id, ?, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd
                     FROM aktivitetsplikt_aktivitetsgrad
                     WHERE id = ?
                     """.trimIndent(),

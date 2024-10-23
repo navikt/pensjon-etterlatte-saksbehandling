@@ -447,6 +447,7 @@ internal class ApplicationContext(
             revurderingService = revurderingService,
             statistikkKafkaProducer = behandlingsHendelser,
             oppgaveService = oppgaveService,
+            aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
 
     val gyldighetsproevingService =

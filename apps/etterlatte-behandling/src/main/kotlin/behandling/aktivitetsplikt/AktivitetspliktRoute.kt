@@ -234,6 +234,14 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
             call.respond(vurdering)
         }
 
+        post("kopier-nyeste") {
+            kunSkrivetilgang(sakId) {
+                logger.info("Kopierer inn nyeste vurdering og unntak")
+                val kopierteVurderinger = inTransaction { aktivitetspliktService.kopierInnTilOppgave(sakId, oppgaveId) }
+                call.respond(kopierteVurderinger ?: HttpStatusCode.NoContent)
+            }
+        }
+
         get("/ny") {
             logger.info("Henter ny aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
             val vurdering =

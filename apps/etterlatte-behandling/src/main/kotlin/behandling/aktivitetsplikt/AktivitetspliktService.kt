@@ -54,6 +54,7 @@ class AktivitetspliktService(
     private val grunnlagKlient: GrunnlagKlient,
     private val revurderingService: RevurderingService,
     private val statistikkKafkaProducer: BehandlingHendelserKafkaProducer,
+    private val aktivitetspliktKopierService: AktivitetspliktKopierService,
     private val oppgaveService: OppgaveService,
 ) {
     fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
@@ -548,7 +549,53 @@ class AktivitetspliktService(
             )
         }
     }
+
+    /**
+     * Kopierer inn siste vurdering av aktivitet i saken inn i oppgaven som er forespurt,
+     * hvis oppgaven er en aktivitetspliktoppgave og den ikke har noen vurderingenr enda
+     * og den ikke er avsluttet.
+     */
+    fun kopierInnTilOppgave(
+        sakId: SakId,
+        oppgaveId: UUID,
+    ): AktivitetspliktVurdering? {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        if (oppgave.sakId != sakId) {
+            throw OppgaveTilhoererIkkeSakException(sakId, oppgaveId)
+        }
+
+        if (oppgave.erAvsluttet()) {
+            throw UgyldigForespoerselException(
+                "OPPGAVE_ER_AVSLUTTET",
+                "Kan ikke kopiere inn vurderinger på aktivitetsplikt på en oppgave som er avsluttet",
+            )
+        }
+
+        when (oppgave.type) {
+            OppgaveType.AKTIVITETSPLIKT,
+            OppgaveType.AKTIVITETSPLIKT_12MND,
+            -> {
+                logger.info("Kopierer inn vurdering")
+            }
+
+            else -> throw UgyldigForespoerselException(
+                "OPPGAVE_HAR_FEIL_TYPE",
+                "Kan ikke kopiere inn vurderingen av aktivitetsplikt til en oppgave som ikke går på aktivitetsplikt!",
+            )
+        }
+
+        aktivitetspliktKopierService.kopierVurderingTilOppgave(sakId, oppgaveId)
+        return hentVurderingForOppgave(oppgaveId)
+    }
 }
+
+class OppgaveTilhoererIkkeSakException(
+    sakId: SakId,
+    oppgaveId: UUID,
+) : UgyldigForespoerselException(
+        code = "OPPGAVE_TILHOERER_IKKE_SAK",
+        detail = "Oppgave med id=$oppgaveId tilhører ikke sak med id=$sakId",
+    )
 
 class ManglerDoedsdatoUnderBehandlingException(
     sakId: SakId,

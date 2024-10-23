@@ -27,6 +27,7 @@ import kotlin.random.Random
 class VedtakEtterbetalingTest {
     private val januar2024 = YearMonth.of(2024, Month.JANUARY)
     private val februar2024 = YearMonth.of(2024, Month.FEBRUARY)
+    private val mai2024 = YearMonth.of(2024, Month.MAY)
     private val mars2024 = YearMonth.of(2024, Month.MARCH)
 
     private val klokkeJanuar2024: Clock = Clock.fixed(Instant.parse("2024-01-20T11:00:00Z"), norskTidssone)
@@ -84,6 +85,37 @@ class VedtakEtterbetalingTest {
             )
 
         val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
+
+        resultat shouldBe false
+    }
+
+    @Test
+    fun `ikke etterbetaling, siste periode er opphoer uten beloep`() {
+        val nyttVedtak =
+            aVedtakMedUtbetalingsperiode(
+                id = 2L,
+                virkningstidspunkt = februar2024,
+                beloep = null,
+                fattetTidspunkt = "2024-10-29T14:05:00Z",
+            )
+
+        every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
+            listOf(
+                aVedtakMedUtbetalingsperiode(
+                    id = 1L,
+                    virkningstidspunkt = februar2024,
+                    beloep = 3000,
+                    fattetTidspunkt = "2024-01-26T11:25:00Z",
+                ),
+                aVedtakMedUtbetalingsperiode(
+                    id = 1L,
+                    virkningstidspunkt = mai2024,
+                    beloep = 4000,
+                    fattetTidspunkt = "2024-01-26T11:25:00Z",
+                ),
+            )
+
+        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, Clock.fixed(Instant.parse("2024-10-23T10:00:00Z"), norskTidssone))
 
         resultat shouldBe false
     }
@@ -153,7 +185,7 @@ class VedtakEtterbetalingTest {
     private fun aVedtakMedUtbetalingsperiode(
         id: Long,
         virkningstidspunkt: YearMonth,
-        beloep: Long,
+        beloep: Long?,
         fattetTidspunkt: String,
     ) = vedtak(
         id = id,
@@ -170,7 +202,7 @@ class VedtakEtterbetalingTest {
                 Utbetalingsperiode(
                     id = Random.nextLong(),
                     periode = Periode(virkningstidspunkt, null),
-                    beloep = BigDecimal.valueOf(beloep),
+                    beloep = beloep?.let { BigDecimal.valueOf(it) },
                     type = UtbetalingsperiodeType.UTBETALING,
                     regelverk = Regelverk.fraDato(virkningstidspunkt.atDay(1)),
                 ),

@@ -38,7 +38,7 @@ class AutomatiskRevurderingService(
      */
     suspend fun oppprettRevurderingOgOppfoelging(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse {
         if (request.revurderingAarsak == Revurderingaarsak.ALDERSOVERGANG) {
-            revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(request.sakId)
+            inTransaction { revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(request.sakId) }
         }
 
         val brukerTokenInfo = hentBrukerToken()

@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetsp
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -104,6 +105,8 @@ interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): DetaljertBehandling
 
     fun hentBehandlingerForSak(foedselsNummerDTO: FoedselsnummerDTO): SakMedBehandlinger
+
+    fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest): HttpResponse
 
     fun opprettOppgave(
         sakId: SakId,
@@ -274,6 +277,14 @@ class BehandlingServiceImpl(
                     contentType(ContentType.Application.Json)
                     setBody(foedselsNummerDTO)
                 }.body()
+        }
+
+    override fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest) =
+        runBlocking {
+            behandlingKlient.post("$url/inntektsjustering/jobb") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
         }
 
     override fun opprettOppgave(

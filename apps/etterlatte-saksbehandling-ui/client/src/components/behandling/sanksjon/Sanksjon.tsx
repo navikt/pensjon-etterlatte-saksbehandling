@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingReducer, oppdaterAvkorting } from '~store/reducers/BehandlingReducer'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar, hasValue } from '~components/behandling/felles/utils'
 import { isFailure, isPending, mapApiResult, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import {
@@ -31,6 +31,7 @@ import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/
 import { useAppDispatch } from '~store/Store'
 import { hentAvkorting } from '~shared/api/avkorting'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 interface SanksjonDefaultValue {
   datoFom?: Date
@@ -44,6 +45,20 @@ const sanksjonDefaultValue: SanksjonDefaultValue = {
   datoTom: undefined,
   beskrivelse: '',
   type: '',
+}
+
+function tidligstSanksjonFom(sanksjoner?: ISanksjon[], behandling?: IBehandlingReducer): Date | undefined {
+  if (behandling?.behandlingType === IBehandlingsType.REVURDERING && sanksjoner?.length) {
+    // Gyldige fra og med er tidligste fom i eksisterende sanksjoner, eller virk hvis det er før
+    const tidligsteFomEllerVirk = [...sanksjoner.map((sanksjon) => sanksjon.fom), behandling.virkningstidspunkt?.dato]
+      .filter(hasValue)
+      .sort((a, b) => new Date(a).getMilliseconds() - new Date(b).getMilliseconds())[0]
+    return new Date(tidligsteFomEllerVirk)
+  }
+  if (behandling?.virkningstidspunkt?.dato) {
+    return new Date(behandling.virkningstidspunkt.dato)
+  }
+  return undefined
 }
 
 export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => {
@@ -128,6 +143,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     if (tom && isBefore(tom, fom)) {
       return 'Fra-dato kan ikke være etter til-dato'
     } else if (
+      behandling.behandlingType !== IBehandlingsType.REVURDERING &&
       behandling.virkningstidspunkt?.dato &&
       isBefore(startOfDay(fom), startOfDay(new Date(behandling.virkningstidspunkt.dato)))
     ) {
@@ -146,8 +162,6 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     }
     return undefined
   }
-
-  const sanksjonFraDato = behandling.virkningstidspunkt?.dato ? new Date(behandling.virkningstidspunkt.dato) : undefined
 
   return (
     <TableBox>
@@ -295,7 +309,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                       label="Dato fra og med"
                       name="datoFom"
                       control={control}
-                      fromDate={sanksjonFraDato}
+                      fromDate={tidligstSanksjonFom(sanksjoner, behandling)}
                       validate={validerFom}
                       required
                     />
@@ -303,7 +317,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                       label="Dato til og med (valgfri)"
                       name="datoTom"
                       control={control}
-                      fromDate={sanksjonFraDato}
+                      fromDate={tidligstSanksjonFom(sanksjoner, behandling)}
                       validate={validerTom}
                     />
                   </HStack>

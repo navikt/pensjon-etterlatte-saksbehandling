@@ -33,8 +33,9 @@ import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { Box } from '@navikt/ds-react'
+import { Alert, Box } from '@navikt/ds-react'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
+import { logger } from '~utils/logger'
 
 export default function BehandleJournalfoeringOppgave() {
   useSidetittel('Journalføringsoppgave')
@@ -68,7 +69,9 @@ export default function BehandleJournalfoeringOppgave() {
         if (oppgave?.referanse) {
           apiHentJournalpost(oppgave.referanse, (journalpost) => dispatch(settJournalpost(journalpost)))
         } else {
-          throw Error(`Oppgave id=${oppgaveId} mangler referanse til journalposten`)
+          logger.generalWarning({
+            msg: `oppgaveId: ${oppgaveId} mangler referanse. Sakid: ${sakMedBehandlinger?.sak.id}`,
+          })
         }
       })
     }
@@ -78,6 +81,10 @@ export default function BehandleJournalfoeringOppgave() {
     return <Spinner label="Henter oppgavedetaljer..." />
   } else if (isPending(sakStatus)) {
     return <Spinner label="Henter sak..." />
+  }
+
+  if (!oppgave?.referanse) {
+    return <Alert variant="error">Oppgave mangler referanse</Alert>
   }
 
   return (

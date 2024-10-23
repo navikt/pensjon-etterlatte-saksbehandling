@@ -1,6 +1,10 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.brev.BrevRequestHendelseType
+import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringKjoering
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
@@ -15,7 +19,9 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGN
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP
+import no.nav.etterlatte.rapidsandrivers.brevKode
 import no.nav.etterlatte.rapidsandrivers.omregningData
+import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -51,10 +57,11 @@ internal class VedtakAttestertRiver(
         context: MessageContext,
     ) {
         val sakId = packet.omregningData.sakId
+        val kjoering = packet.omregningData.kjoering
         logger.info("Sak $sakId er ferdig omregnet, oppdaterer status")
         val request =
             LagreKjoeringRequest(
-                kjoering = packet.omregningData.kjoering,
+                kjoering = kjoering,
                 status = KjoeringStatus.FERDIGSTILT,
                 sakId = sakId,
                 beregningBeloepFoer = bigDecimal(packet, BEREGNING_BELOEP_FOER),
@@ -66,8 +73,17 @@ internal class VedtakAttestertRiver(
                 avkortingEtter = bigDecimal(packet, AVKORTING_ETTER),
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
-        behandlingService.lagreFullfoertKjoering(request)
-        logger.info("Sak $sakId er ferdig omregnet, status er oppdatert")
+
+        // inntektsjustering, send vedtak og varselbrev
+        if (kjoering === AarligInntektsjusteringKjoering.getKjoering()) {
+            packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
+            packet.brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL.toString()
+            packet.sakId = packet.omregningData.sakId
+            context.publish(packet.toJson())
+        } else {
+            behandlingService.lagreFullfoertKjoering(request)
+            logger.info("Sak $sakId er ferdig omregnet, status er oppdatert")
+        }
     }
 
     private fun bigDecimal(

@@ -84,7 +84,6 @@ internal class ReguleringsforespoerselRiver(
                 )
             },
             haandterSaker = { sakerTilOmregning ->
-
                 val sakListe = flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
                 sakerTilOmregning.saker.forEach {
                     publiserSak(it, kjoering, packet, sakListe, context)

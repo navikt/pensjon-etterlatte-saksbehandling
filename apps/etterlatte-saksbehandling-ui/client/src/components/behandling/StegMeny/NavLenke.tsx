@@ -1,26 +1,22 @@
 import { ChevronRightIcon } from '@navikt/aksel-icons'
-import { hentGyldigeNavigeringsStatuser } from '~components/behandling/felles/utils'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { BehandlingRouteTypes } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteContext, BehandlingRouteType } from '~components/behandling/BehandlingRoutes'
 import { Label, Link } from '@navikt/ds-react'
 import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
+import { useContext } from 'react'
 
 export const NavLenke = (props: {
-  pathInfo: BehandlingRouteTypes
+  pathInfo: BehandlingRouteType
   behandling: IBehandlingReducer
   separator: boolean
 }) => {
-  const { pathInfo, separator } = props
-  const { status } = props.behandling
+  const { routeErGyldig } = useContext(BehandlingRouteContext)
 
-  const routeErDisabled =
-    pathInfo.kreverBehandlingsstatus &&
-    !hentGyldigeNavigeringsStatuser(status).includes(pathInfo.kreverBehandlingsstatus(props.behandling))
+  const { pathInfo, separator } = props
+
   return (
     <>
-      {routeErDisabled ? (
-        <DisabledLabel>{pathInfo.description}</DisabledLabel>
-      ) : (
+      {routeErGyldig(pathInfo.path) ? (
         <>
           {location.pathname.split('/')[3] === pathInfo.path ? (
             <Label>{pathInfo.description}</Label>
@@ -32,6 +28,8 @@ export const NavLenke = (props: {
             </Label>
           )}
         </>
+      ) : (
+        <DisabledLabel>{pathInfo.description}</DisabledLabel>
       )}
       {separator && <ChevronRightIcon aria-hidden />}
     </>

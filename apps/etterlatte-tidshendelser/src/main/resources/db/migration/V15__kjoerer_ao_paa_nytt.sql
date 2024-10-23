@@ -1,0 +1,2 @@
+-- Disse ble ikke kjørt ferdig 2024-10-21 fordi det var en feil i deserialisering, setter de til å kjøre i dag
+update jobb set kjoeredato = '2024-10-21' where kjoeredato = '2024-10-20' and status = 'NY';

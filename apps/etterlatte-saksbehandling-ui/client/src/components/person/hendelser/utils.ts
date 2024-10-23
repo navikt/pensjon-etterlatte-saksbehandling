@@ -36,7 +36,7 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagendringshendelseSamsva
   SIVILSTAND: 'endring på sivilstand i PDL',
   INSTITUSJONSOPPHOLD: 'INSTITUSJONSOPPHOLD',
   ADRESSE: 'fått ny geografisk tilknytning men saken kunne ikke flyttes på grunn av åpen behandling',
-  FOLKEREGISTERIDENTIFIKATOR: 'Endring av folkeregisteridentifikator',
+  FOLKEREGISTERIDENTIFIKATOR: 'endring av folkeregisteridentifikator',
 }
 
 export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType): string => {

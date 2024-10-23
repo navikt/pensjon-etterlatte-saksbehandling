@@ -54,8 +54,7 @@ const FolkeregisterSamsvarVisning = ({ samsvar }: { samsvar: Folkeregisteridenti
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Label>Er samsvar</Label>
-        <KortTekst size="small">{samsvar.samsvar}</KortTekst>
+        <Label>{samsvar.samsvar ? 'Er samsvar' : 'Er ikke samsvar'}</Label>
       </div>
     </GrunnlagSammenligningWrapper>
   )

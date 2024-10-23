@@ -108,12 +108,14 @@ class AvkortingService(
         if (overstyrtInntektsavkorting != null) {
             logger.info("Oppretter oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
             behandlingKlient.opprettOppgave(
-                SakId(behandling.sak.sakId),
+                behandling.sak,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
                 Tidspunkt(Instant.now()), // TODO: sette riktig tidspunkt (1mnd før alderspensjon)
             )
+        } else {
+            logger.info("Fant ingen tidlig alderspensjon for sakId=${behandling.sak.sakId}, trenger ingen oppgave om opphør.")
         }
     }
 

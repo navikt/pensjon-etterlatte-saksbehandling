@@ -25,7 +25,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 import { formaterDato } from '~utils/formatering/dato'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import {logger} from "~utils/logger";
+import { logger } from '~utils/logger'
 
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -111,10 +111,10 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   if (!currentRouteErGyldig()) {
     return (
-        <Alert variant="error">
-          Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} mangler
+      <Alert variant="error">
+        Varselbrev er ugyldig for denne behandlingen med {props.behandling.status} id: {props.behandling.id} mangler
         kanskje vilkårsvurdering?
-        </Alert>
+      </Alert>
     )
   }
   if (isPendingOrInitial(hentBrevStatus)) {

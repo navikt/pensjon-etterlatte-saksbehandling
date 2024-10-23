@@ -56,6 +56,11 @@ export enum GrunnlagsendringsType {
   ADRESSE = 'ADRESSE',
 }
 
+export interface Folkeregisteridentifikatorsamsvar {
+  type: 'FOLKEREGISTERIDENTIFIKATOR'
+  samsvar: boolean
+}
+
 export interface DoedsdatoSamsvar {
   type: 'DOEDSDATO'
   samsvar: boolean
@@ -157,6 +162,7 @@ export type SamsvarMellomKildeOgGrunnlag =
   | ReguleringSamsvar
   | InstitusjonsoppholdSamsvar
   | AdresseSamsvar
+  | Folkeregisteridentifikatorsamsvar
 
 export enum GrunnlagsendringStatus {
   VENTER_PAA_JOBB = 'VENTER_PAA_JOBB',

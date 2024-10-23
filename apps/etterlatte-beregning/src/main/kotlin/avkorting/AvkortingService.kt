@@ -86,6 +86,7 @@ class AvkortingService(
         }
     }
 
+    // Sjekke om Avkorting innvilga måneder overstyres på grunn av tidlig alderspensjon
     suspend fun erAvkortingOverstyrtForTidligAlderpensjon(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -93,7 +94,15 @@ class AvkortingService(
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        return true
+        val aarsoppgjoer = avkorting.aarsoppgjoer.single { it.fom == behandling.virkningstidspunkt?.dato }
+        val overstyrtInntektsavkorting =
+            aarsoppgjoer.inntektsavkorting
+                .find {
+                    it.grunnlag.overstyrtInnvilgaMaanederAarsak == OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG &&
+                        it.grunnlag.periode.fom == behandling.virkningstidspunkt?.dato
+                }
+
+        return overstyrtInntektsavkorting != null
     }
 
     suspend fun hentFullfoertAvkorting(

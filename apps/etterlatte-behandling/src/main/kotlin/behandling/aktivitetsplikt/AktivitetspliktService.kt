@@ -251,9 +251,20 @@ class AktivitetspliktService(
         require(
             aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId).isEmpty(),
         ) { "Aktivitetsgrad finnes allerede for oppgave $oppgaveId" }
+        sjekkOmAktivitetsgradErGyldig(aktivitetsgrad)
         aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId = UUID.fromString(oppgave.referanse)) }
+    }
+
+    private fun sjekkOmAktivitetsgradErGyldig(aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad) {
+        if (!aktivitetsgrad.erGyldigUtfylt()) {
+            throw UgyldigForespoerselException(
+                "AKTIVITETSVURDERING_HAR_MANGLER",
+                "Vurderingen av aktivitetsgrad kan ikke lagres, siden den er gjort for kravet fra 12 måneder " +
+                    "men inneholder ikke vurdering av skjønn.",
+            )
+        }
     }
 
     fun upsertAktivitetsgradForBehandling(
@@ -270,7 +281,7 @@ class AktivitetspliktService(
         }
 
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-
+        sjekkOmAktivitetsgradErGyldig(aktivitetsgrad)
         if (aktivitetsgrad.id != null) {
             aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgrad, kilde, behandlingId)
         } else {

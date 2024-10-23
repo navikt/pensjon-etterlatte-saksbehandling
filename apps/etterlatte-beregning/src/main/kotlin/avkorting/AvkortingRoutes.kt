@@ -69,13 +69,8 @@ fun Route.avkorting(
 
         post("/haandter-tidlig-alderspensjon") {
             withBehandlingId(behandlingKlient) {
-                logger.info("Haandterer avkorting er overstyrt for tidlig alderspensjon (behandlingId=$it)")
-
-                if (avkortingService.erAvkortingOverstyrtForTidligAlderpensjon(it, brukerTokenInfo)) {
-                    val frist = ""
-                    val merknad = ""
-//                    behandlingKlient.opprettOppgave(it, brukerTokenInfo, frist, merknad)
-                }
+                logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
+                avkortingService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
             }
         }
 

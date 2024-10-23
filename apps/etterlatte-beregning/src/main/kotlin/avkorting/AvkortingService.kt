@@ -15,10 +15,13 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.util.UUID
 
 enum class AvkortingToggles(
@@ -86,11 +89,11 @@ class AvkortingService(
         }
     }
 
-    // Sjekke om Avkorting innvilga måneder overstyres på grunn av tidlig alderspensjon
-    suspend fun erAvkortingOverstyrtForTidligAlderpensjon(
+    // Sjekke om Avkorting innvilga måneder overstyres på grunn av tidlig alderspensjon, og opprett oppgave om opphør
+    suspend fun opprettOppgaveHvisTidligAlderspensjon(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean {
+    ) {
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
@@ -102,7 +105,16 @@ class AvkortingService(
                         it.grunnlag.periode.fom == behandling.virkningstidspunkt?.dato
                 }
 
-        return overstyrtInntektsavkorting != null
+        if (overstyrtInntektsavkorting != null) {
+            logger.info("Oppretter oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
+            behandlingKlient.opprettOppgave(
+                SakId(behandling.sak.sakId),
+                brukerTokenInfo,
+                OppgaveType.GENERELL_OPPGAVE,
+                "Opphør av ytelse på grunn av alderspensjon.",
+                Tidspunkt(Instant.now()), // TODO: sette riktig tidspunkt (1mnd før alderspensjon)
+            )
+        }
     }
 
     suspend fun hentFullfoertAvkorting(

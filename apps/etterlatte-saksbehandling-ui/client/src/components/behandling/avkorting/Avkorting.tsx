@@ -75,7 +75,7 @@ export const Avkorting = ({
       <VStack gap="8">
         {mapResult(avkortingStatus, {
           pending: <Spinner label="Henter avkorting" />,
-          error: <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>,
+          error: (e) => <ApiErrorAlert>En feil har oppstått: {e.detail}</ApiErrorAlert>,
           success: () => (
             <>
               <VStack maxWidth="70rem">

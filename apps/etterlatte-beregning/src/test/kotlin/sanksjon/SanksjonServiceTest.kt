@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
@@ -523,6 +524,32 @@ internal class SanksjonServiceTest {
 
             coVerify {
                 sanksjonRepository.hentSanksjon(forrigeBehandlingId)
+            }
+        }
+
+        @Test
+        fun `skal ikke kopiere sanksjoner hvis behandlingen allerede har sanksjoner`() {
+            val behandlingId = UUID.randomUUID()
+            val forrigeBehandlingId = UUID.randomUUID()
+            val sanksjonerIBehandling = listOf(sanksjon(behandlingId = behandlingId))
+            val sanksjonerForrige = listOf(sanksjon(behandlingId = forrigeBehandlingId))
+
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    status = BehandlingStatus.BEREGNET,
+                )
+
+            every { sanksjonRepository.hentSanksjon(behandlingId) } returns sanksjonerIBehandling
+            every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns sanksjonerForrige
+
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, any()) } returns
+                SisteIverksatteBehandling(forrigeBehandlingId)
+
+            // Vi oppretter ingen sanksjoner, siden behandlingen har allerede sanksjoner lagt inn
+            verify(exactly = 0) {
+                sanksjonRepository.opprettSanksjonFraKopi(any(), any(), any())
             }
         }
     }

@@ -1,5 +1,15 @@
-import styled from 'styled-components'
-import { BodyShort, Button, HelpText, HStack, Label, ReadMore, Textarea, TextField, VStack } from '@navikt/ds-react'
+import {
+  BodyShort,
+  Box,
+  Button,
+  HelpText,
+  HStack,
+  Label,
+  ReadMore,
+  Textarea,
+  TextField,
+  VStack,
+} from '@navikt/ds-react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { IAvkortingGrunnlagFrontend, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
@@ -11,8 +21,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '@reduxjs/toolkit'
 import OverstyrInnvilgaMaander from '~components/behandling/avkorting/OverstyrInnvilgaMaaneder'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import React from 'react'
+import React, { useState } from 'react'
+import { CogRotationIcon, TrashIcon } from '@navikt/aksel-icons'
 
 export const AvkortingInntektForm = ({
   behandling,
@@ -25,8 +35,6 @@ export const AvkortingInntektForm = ({
   erInnevaerendeAar: boolean
   setVisForm: (visForm: boolean) => void
 }) => {
-  const skalKunneOverstyreInnvilgaMaaneder = useFeatureEnabledMedDefault('avkorting-overstyre-innvilga-maaneder', false)
-
   const dispatch = useAppDispatch()
 
   const [lagreAvkortingGrunnlagResult, lagreAvkortingGrunnlagRequest] = useApiCall(lagreAvkortingGrunnlag)
@@ -118,107 +126,135 @@ export const AvkortingInntektForm = ({
     )
   }
 
+  const [skalOverstyreMaaneder, setSkalOverstyreMaaneder] = useState(false)
+  const toggleOverstyrtInnvilgaMaaneder = () => {
+    if (skalOverstyreMaaneder) {
+      reset({ overstyrtInnvilgaMaaneder: undefined })
+    }
+    setSkalOverstyreMaaneder(!skalOverstyreMaaneder)
+  }
+
   return (
     <FormProvider {...methods}>
       <VStack>
         <HStack marginBlock="8" gap="2" align="start" wrap={false}>
-          <TekstFelt
-            {...register('inntektTom', {
-              pattern: { value: /^\d+$/, message: 'Kun tall' },
-              required: { value: true, message: 'Må fylles ut' },
-            })}
-            label={
-              <HStack>
-                Forventet inntekt Norge
-                <HelpText title="Hva innebærer forventet inntekt totalt">
-                  Registrer forventet norsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for dette
-                  året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder stemmer.
-                </HelpText>
-              </HStack>
-            }
-            size="medium"
-            type="tel"
-            inputMode="numeric"
-            error={errors.inntektTom?.message}
-          />
-          <TekstFelt
-            {...register('fratrekkInnAar', {
-              required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
-              max: {
-                value: watch('inntektTom') || 0,
-                message: 'Kan ikke være høyere enn årsinntekt',
-              },
-              pattern: { value: /^\d+$/, message: 'Kun tall' },
-            })}
-            label="Fratrekk inn-år"
-            size="medium"
-            type="tel"
-            inputMode="numeric"
-            disabled={alleMaanederIAaretErInnvilget()}
-            error={errors.fratrekkInnAar?.message}
-          />
-          <TekstFelt
-            {...register('inntektUtlandTom', {
-              required: { value: true, message: 'Må fylles ut' },
-              pattern: { value: /^\d+$/, message: 'Kun tall' },
-            })}
-            label={
-              <HStack>
-                Forventet inntekt utland
-                <HelpText title="Hva innebærer forventet inntekt totalt">
-                  Registrer forventet utenlandsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for dette
-                  året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder stemmer.
-                </HelpText>
-              </HStack>
-            }
-            size="medium"
-            type="tel"
-            inputMode="numeric"
-            error={errors.inntektUtlandTom?.message}
-          />
-          <TekstFelt
-            {...register('fratrekkInnAarUtland', {
-              required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
-              max: {
-                value: watch('inntektUtlandTom') || 0,
-                message: 'Kan ikke være høyere enn årsinntekt utland',
-              },
-              pattern: { value: /^\d+$/, message: 'Kun tall' },
-            })}
-            label="Fratrekk inn-år"
-            size="medium"
-            type="tel"
-            disabled={alleMaanederIAaretErInnvilget()}
-            inputMode="numeric"
-            error={errors.fratrekkInnAarUtland?.message}
-          />
+          <Box maxWidth="14rem">
+            <TextField
+              {...register('inntektTom', {
+                pattern: { value: /^\d+$/, message: 'Kun tall' },
+                required: { value: true, message: 'Må fylles ut' },
+              })}
+              label={
+                <HStack>
+                  Forventet inntekt Norge
+                  <HelpText title="Hva innebærer forventet inntekt totalt">
+                    Registrer forventet norsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for dette
+                    året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder
+                    stemmer.
+                  </HelpText>
+                </HStack>
+              }
+              size="medium"
+              type="tel"
+              inputMode="numeric"
+              error={errors.inntektTom?.message}
+            />
+          </Box>
+          <Box maxWidth="14rem">
+            <TextField
+              {...register('fratrekkInnAar', {
+                required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
+                max: {
+                  value: watch('inntektTom') || 0,
+                  message: 'Kan ikke være høyere enn årsinntekt',
+                },
+                pattern: { value: /^\d+$/, message: 'Kun tall' },
+              })}
+              label="Fratrekk inn-år"
+              size="medium"
+              type="tel"
+              inputMode="numeric"
+              disabled={alleMaanederIAaretErInnvilget()}
+              error={errors.fratrekkInnAar?.message}
+            />
+          </Box>
+          <Box maxWidth="14rem">
+            <TextField
+              {...register('inntektUtlandTom', {
+                required: { value: true, message: 'Må fylles ut' },
+                pattern: { value: /^\d+$/, message: 'Kun tall' },
+              })}
+              label={
+                <HStack>
+                  Forventet inntekt utland
+                  <HelpText title="Hva innebærer forventet inntekt totalt">
+                    Registrer forventet utenlandsk inntekt for det aktuelle året (jan-des). Hvis opphør er kjent for
+                    dette året, registrer forventet inntekt fra januar til opphørsdato, og sjekk at innvilgede måneder
+                    stemmer.
+                  </HelpText>
+                </HStack>
+              }
+              size="medium"
+              type="tel"
+              inputMode="numeric"
+              error={errors.inntektUtlandTom?.message}
+            />
+          </Box>
+          <Box maxWidth="14rem">
+            <TextField
+              {...register('fratrekkInnAarUtland', {
+                required: { value: !alleMaanederIAaretErInnvilget(), message: 'Må fylles ut' },
+                max: {
+                  value: watch('inntektUtlandTom') || 0,
+                  message: 'Kan ikke være høyere enn årsinntekt utland',
+                },
+                pattern: { value: /^\d+$/, message: 'Kun tall' },
+              })}
+              label="Fratrekk inn-år"
+              size="medium"
+              type="tel"
+              disabled={alleMaanederIAaretErInnvilget()}
+              inputMode="numeric"
+              error={errors.fratrekkInnAarUtland?.message}
+            />
+          </Box>
           <VStack gap="4">
             <Label>Fra og med dato</Label>
             <BodyShort>{formaterDato(inntektFom)}</BodyShort>
           </VStack>
         </HStack>
-        <TextAreaWrapper
-          {...register('spesifikasjon')}
-          resize="vertical"
-          label={
-            <>
-              <Label>Spesifikasjon av inntekt</Label>
-              <ReadMore header="Hva regnes som inntekt?">
-                Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
-                arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
-                sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og foreldrepenger etter kap
-                14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
-              </ReadMore>
-            </>
-          }
-        />
-        {skalKunneOverstyreInnvilgaMaaneder && <OverstyrInnvilgaMaander />}
-        <HStack gap="1" marginBlock="4">
-          <Button size="small" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
+        <Box width="39rem">
+          <Textarea {...register('spesifikasjon')} resize="vertical" label="Spesifikasjon av inntekt" />
+        </Box>
+
+        <VStack marginBlock="2" gap="1">
+          <ReadMore header="Hva regnes som inntekt?">
+            Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
+            arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre nærståendes
+            sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og foreldrepenger etter kap 14
+            og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
+          </ReadMore>
+          <ReadMore header="Når du skal overstyre innvilga måneder">
+            Fyll inn riktig antall måneder med innvilget stønad i tilfeller der automatisk registrerte innvilgede
+            måneder ikke stemmer, for eksempel ved uforutsette opphør som tidlig uttak av alderspensjon.
+          </ReadMore>
+        </VStack>
+
+        {skalOverstyreMaaneder && <OverstyrInnvilgaMaander />}
+        <HStack gap="3" marginBlock="4">
+          <Button size="medium" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
             Lagre
           </Button>
           <Button
-            size="small"
+            size="medium"
+            variant="secondary"
+            onClick={toggleOverstyrtInnvilgaMaaneder}
+            icon={skalOverstyreMaaneder ? <TrashIcon /> : <CogRotationIcon />}
+          >
+            {skalOverstyreMaaneder ? 'Fjern overstyrt innvilga måneder' : 'Overstyr innvilga måneder'}
+          </Button>
+          <Button
+            size="medium"
             variant="tertiary"
             onClick={() => {
               setVisForm(false)
@@ -235,15 +271,3 @@ export const AvkortingInntektForm = ({
     </FormProvider>
   )
 }
-
-const TekstFelt = styled(TextField)`
-  max-width: 11.85em;
-`
-
-const TextAreaWrapper = styled(Textarea)`
-  textArea {
-    margin-top: 1em;
-    width: 47em;
-    height: 98px;
-  }
-`

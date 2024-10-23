@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
@@ -61,6 +62,12 @@ class AktivitetspliktAktivitetsgradDao(
         kilde: Grunnlagsopplysning.Kilde,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
+        if (aktivitetsgrad.id == null) {
+            throw InternfeilException(
+                "Kan ikke oppdatere en aktivitetsgrad som ikke har en id. " +
+                    "BehandlingId=$behandlingId",
+            )
+        }
         with(it) {
             val stmt =
                 prepareStatement(
@@ -78,7 +85,7 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setString(5, aktivitetsgrad.beskrivelse)
             stmt.setString(6, aktivitetsgrad.skjoennsmessigVurdering?.name)
             stmt.setBoolean(7, aktivitetsgrad.vurdertFra12Mnd)
-            stmt.setObject(8, requireNotNull(aktivitetsgrad.id))
+            stmt.setObject(8, aktivitetsgrad.id)
             stmt.setObject(9, behandlingId)
 
             stmt.executeUpdate()

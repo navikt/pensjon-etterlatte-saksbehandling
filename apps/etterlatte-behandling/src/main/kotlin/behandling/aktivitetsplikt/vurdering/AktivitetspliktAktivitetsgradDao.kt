@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
@@ -35,8 +36,8 @@ class AktivitetspliktAktivitetsgradDao(
             val stmt =
                 prepareStatement(
                     """
-                        INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimMargin(),
                 )
             stmt.setObject(1, UUID.randomUUID())
@@ -49,6 +50,8 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setString(8, kilde.toJson())
             stmt.setString(9, kilde.toJson())
             stmt.setString(10, aktivitetsgrad.beskrivelse)
+            stmt.setString(11, aktivitetsgrad.skjoennsmessigVurdering?.name)
+            stmt.setBoolean(12, aktivitetsgrad.vurdertFra12Mnd)
 
             stmt.executeUpdate()
         }
@@ -59,12 +62,18 @@ class AktivitetspliktAktivitetsgradDao(
         kilde: Grunnlagsopplysning.Kilde,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
+        if (aktivitetsgrad.id == null) {
+            throw InternfeilException(
+                "Kan ikke oppdatere en aktivitetsgrad som ikke har en id. " +
+                    "BehandlingId=$behandlingId",
+            )
+        }
         with(it) {
             val stmt =
                 prepareStatement(
                     """
                         UPDATE aktivitetsplikt_aktivitetsgrad
-                        SET  aktivitetsgrad = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ? 
+                        SET  aktivitetsgrad = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ?, skjoennsmessig_vurdering = ?, vurdert_fra_12_mnd = ?
                         WHERE id = ? AND behandling_id = ?
                     """.trimMargin(),
                 )
@@ -74,8 +83,10 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setDate(3, aktivitetsgrad.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(4, kilde.toJson())
             stmt.setString(5, aktivitetsgrad.beskrivelse)
-            stmt.setObject(6, requireNotNull(aktivitetsgrad.id))
-            stmt.setObject(7, behandlingId)
+            stmt.setString(6, aktivitetsgrad.skjoennsmessigVurdering?.name)
+            stmt.setBoolean(7, aktivitetsgrad.vurdertFra12Mnd)
+            stmt.setObject(8, aktivitetsgrad.id)
+            stmt.setObject(9, behandlingId)
 
             stmt.executeUpdate()
         }
@@ -87,7 +98,7 @@ class AktivitetspliktAktivitetsgradDao(
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse
+                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd
                         FROM aktivitetsplikt_aktivitetsgrad
                         WHERE oppgave_id = ?
                         ORDER BY fom ASC NULLS FIRST
@@ -135,7 +146,7 @@ class AktivitetspliktAktivitetsgradDao(
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse
+                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd
                         FROM aktivitetsplikt_aktivitetsgrad
                         WHERE behandling_id = ?
                         ORDER BY fom ASC NULLS FIRST
@@ -155,8 +166,8 @@ class AktivitetspliktAktivitetsgradDao(
             val stmt =
                 prepareStatement(
                     """
-                        INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse) 
-                        SELECT gen_random_uuid(), sak_id, ?, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse
+                        INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd) 
+                        SELECT gen_random_uuid(), sak_id, ?, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd
                         FROM aktivitetsplikt_aktivitetsgrad
                         WHERE id = ?
                     """.trimMargin(),
@@ -194,6 +205,13 @@ class AktivitetspliktAktivitetsgradDao(
             behandlingId = getString("behandling_id")?.let { UUID.fromString(it) },
             oppgaveId = getString("oppgave_id")?.let { UUID.fromString(it) },
             aktivitetsgrad = AktivitetspliktAktivitetsgradType.valueOf(getString("aktivitetsgrad")),
+            skjoennsmessigVurdering =
+                getString("skjoennsmessig_vurdering")?.let {
+                    AktivitetspliktSkjoennsmessigVurdering.valueOf(
+                        it,
+                    )
+                },
+            vurdertFra12Mnd = getBoolean("vurdert_fra_12_mnd"),
             fom = getDate("fom").toLocalDate(),
             tom = getDate("tom")?.toLocalDate(),
             opprettet = objectMapper.readValue(getString("opprettet")),
@@ -208,11 +226,13 @@ data class AktivitetspliktAktivitetsgrad(
     val behandlingId: UUID? = null,
     val oppgaveId: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,
+    val skjoennsmessigVurdering: AktivitetspliktSkjoennsmessigVurdering? = null,
     val fom: LocalDate,
     val tom: LocalDate?,
     override val opprettet: Grunnlagsopplysning.Kilde,
     val endret: Grunnlagsopplysning.Kilde?,
     val beskrivelse: String,
+    val vurdertFra12Mnd: Boolean = false,
 ) : AktivitetspliktVurderingOpprettetDato {
     fun toDto(): AktivitetspliktAktivitetsgradDto =
         AktivitetspliktAktivitetsgradDto(
@@ -227,13 +247,31 @@ data class AktivitetspliktAktivitetsgrad(
         )
 }
 
+enum class AktivitetspliktSkjoennsmessigVurdering {
+    JA,
+    MED_OPPFOELGING,
+    NEI,
+}
+
 data class LagreAktivitetspliktAktivitetsgrad(
     val id: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,
+    val skjoennsmessigVurdering: AktivitetspliktSkjoennsmessigVurdering? = null,
+    val vurdertFra12Mnd: Boolean = false,
     val fom: LocalDate = LocalDate.now(),
     val tom: LocalDate? = null,
     val beskrivelse: String,
-)
+) {
+    fun erGyldigUtfylt(): Boolean =
+        if (vurdertFra12Mnd) {
+            when (aktivitetsgrad) {
+                AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50, AktivitetspliktAktivitetsgradType.AKTIVITET_100 -> true
+                AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50 -> skjoennsmessigVurdering != null
+            }
+        } else {
+            true
+        }
+}
 
 enum class AktivitetspliktAktivitetsgradType {
     AKTIVITET_UNDER_50,

@@ -466,7 +466,6 @@ data class Aarsoppgjoer(
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
     init {
-
         fun validerPeriode(
             periode: Periode,
             feilMelding: String,

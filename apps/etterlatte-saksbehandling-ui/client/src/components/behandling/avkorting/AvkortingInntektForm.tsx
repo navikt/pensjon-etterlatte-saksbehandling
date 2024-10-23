@@ -245,18 +245,13 @@ export const AvkortingInntektForm = ({
           <Button size="medium" loading={isPending(lagreAvkortingGrunnlagResult)} onClick={handleSubmit(onSubmit)}>
             Lagre
           </Button>
-          <Button size="medium" variant="secondary" onClick={toggleOverstyrtInnvilgaMaaneder}>
-            {skalOverstyreMaaneder ? (
-              <HStack gap="2">
-                <TrashIcon />
-                <>Fjern overstyrt innvilga måneder</>
-              </HStack>
-            ) : (
-              <HStack gap="2">
-                <CogRotationIcon />
-                <>Overstyr innvilga måneder</>
-              </HStack>
-            )}
+          <Button
+            size="medium"
+            variant="secondary"
+            onClick={toggleOverstyrtInnvilgaMaaneder}
+            icon={skalOverstyreMaaneder ? <TrashIcon /> : <CogRotationIcon />}
+          >
+            {skalOverstyreMaaneder ? 'Fjern overstyrt innvilga måneder' : 'Overstyr innvilga måneder'}
           </Button>
           <Button
             size="medium"

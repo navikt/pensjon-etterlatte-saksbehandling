@@ -6,6 +6,7 @@ metadata:
   labels:
     team: etterlatte
   annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "2m"
     reloader.stakater.com/match: "true"
 spec:
   image: "{{image}}"

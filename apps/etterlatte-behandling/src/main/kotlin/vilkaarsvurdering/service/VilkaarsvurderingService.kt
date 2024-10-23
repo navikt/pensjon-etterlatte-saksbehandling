@@ -144,7 +144,7 @@ class VilkaarsvurderingService(
 
         if (tidligereVilkaarsvurdering.vilkaar.any { it.vurdering == null }) {
             throw VilkaarsvurderingValideringException(
-                "Mangler vilkår vurdering for vilkårsvurdering",
+                "Mangler vurdering for delvilkårs i vilkårsvurdering",
                 vilkaarvurdering = tidligereVilkaarsvurdering,
             )
         }

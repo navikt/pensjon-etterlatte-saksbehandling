@@ -574,11 +574,7 @@ internal class VilkaarsvurderingRoutesTest(
             }
 
             val vilkaarsvurderingMedBehandlingGrunnlagsversjon = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
-            val resultat =
-                VurdertVilkaarsvurderingResultatDto(
-                    resultat = VilkaarsvurderingUtfall.OPPFYLT,
-                    kommentar = "Søker oppfyller vurderingen",
-                )
+
             val vilkaarsvurdering = vilkaarsvurderingMedBehandlingGrunnlagsversjon.vilkaarsvurdering
             vilkaarsvurdering.vilkaar.forEach { vilkaar ->
                 vilkaarsvurderingServiceImpl.oppdaterVurderingPaaVilkaar(
@@ -592,6 +588,12 @@ internal class VilkaarsvurderingRoutesTest(
                     ),
                 )
             }
+
+            val resultat =
+                VurdertVilkaarsvurderingResultatDto(
+                    resultat = VilkaarsvurderingUtfall.OPPFYLT,
+                    kommentar = "Søker oppfyller vurderingen",
+                )
 
             every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
             client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {

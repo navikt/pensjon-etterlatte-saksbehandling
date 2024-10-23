@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -49,6 +50,9 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
+
+    // Denne må confes opp også med miljøvariabler (se behandling)
+    private val featureToggleService: FeatureToggleService
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -408,7 +412,15 @@ class VedtakBehandlingService(
         repository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
 
         try {
-            samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
+            val svarFins = samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
+            // bare sett samordnet hvis svar fins?
+            if (svarFins) {
+                if (featureToggleService.isEnabled()) {
+                    // hent ut behandlingId
+                    samordne(samordningmelding.)
+                }
+            }
+
         } catch (e: Exception) {
             repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
             throw e

@@ -43,7 +43,10 @@ inline val PipelineContext<*, ApplicationCall>.aktivitetId: UUID
             "Aktivitet id er ikke i path params",
         )
 
-internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: AktivitetspliktService) {
+internal fun Route.aktivitetspliktRoutes(
+    aktivitetspliktService: AktivitetspliktService,
+    aktivitetspliktOppgaveService: AktivitetspliktOppgaveService,
+) {
     val logger = routeLogger
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt") {
@@ -225,6 +228,13 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
         }
     }
 
+    route("/api/aktivitetsplikt/oppgave/${OPPGAVEID_CALL_PARAMETER}") {
+        get {
+            val oppgaveOgVurdering = inTransaction { aktivitetspliktOppgaveService.hentVurderingForOppgave(oppgaveId) }
+            call.respond(oppgaveOgVurdering)
+        }
+    }
+
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
         get {
             logger.info("Henter aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
@@ -232,14 +242,6 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
                 inTransaction { aktivitetspliktService.hentVurderingForOppgaveGammel(oppgaveId) }
                     ?: throw VurderingIkkeFunnetException(sakId, oppgaveId)
             call.respond(vurdering)
-        }
-
-        post("kopier-nyeste") {
-            kunSkrivetilgang(sakId) {
-                logger.info("Kopierer inn nyeste vurdering og unntak")
-                val kopierteVurderinger = inTransaction { aktivitetspliktService.kopierInnTilOppgave(sakId, oppgaveId) }
-                call.respond(kopierteVurderinger ?: HttpStatusCode.NoContent)
-            }
         }
 
         get("/ny") {

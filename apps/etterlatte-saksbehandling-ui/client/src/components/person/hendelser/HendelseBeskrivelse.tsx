@@ -12,6 +12,7 @@ import {
   AnsvarligeForeldreSamsvar,
   BarnSamsvar,
   DoedsdatoSamsvar,
+  Folkeregisteridentifikatorsamsvar,
   Grunnlagsendringshendelse,
   InstitusjonsoppholdSamsvar,
   Sivilstand,
@@ -44,6 +45,17 @@ const VisAnsvarligeForeldreSamsvar = ({ samsvar }: { samsvar: AnsvarligeForeldre
           {samsvar.fraGrunnlag?.map((fnr) => formaterFoedselsnummerMedNavn(navneMap, fnr))?.join(', ') ??
             'Ingen ansvarlige foreldre'}
         </KortTekst>
+      </div>
+    </GrunnlagSammenligningWrapper>
+  )
+}
+
+const FolkeregisterSamsvarVisning = ({ samsvar }: { samsvar: Folkeregisteridentifikatorsamsvar }) => {
+  return (
+    <GrunnlagSammenligningWrapper>
+      <div>
+        <Label>Er samsvar</Label>
+        <KortTekst size="small">{samsvar.samsvar}</KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
   )
@@ -269,6 +281,14 @@ export const HendelseBeskrivelse = ({
         <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <UtlandSamsvarVisning samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
+      )
+    case 'FOLKEREGISTERIDENTIFIKATOR':
+      return (
+        <VStack gap="4">
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
+          <FolkeregisterSamsvarVisning samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
         </VStack>
       )

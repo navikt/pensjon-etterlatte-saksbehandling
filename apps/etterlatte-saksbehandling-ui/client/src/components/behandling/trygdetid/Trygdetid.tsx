@@ -35,10 +35,17 @@ interface Props {
   virkningstidspunktEtterNyRegelDato: boolean
 }
 
-const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[]): boolean => {
-  const avdoedIdenter = (avdoede || []).map((avdoed) => avdoed.opplysning.foedselsnummer)
+const manglerTrygdetid = (
+  trygdetider: ITrygdetid[],
+  tidligereFamiliepleier: boolean,
+  avdoede?: Personopplysning[],
+  soeker?: Personopplysning
+): boolean => {
   const trygdetidIdenter = trygdetider.map((trygdetid) => trygdetid.ident)
 
+  if (tidligereFamiliepleier) return soeker ? !trygdetidIdenter.includes(soeker.opplysning.foedselsnummer) : true
+
+  const avdoedIdenter = (avdoede || []).map((avdoed) => avdoed.opplysning.foedselsnummer)
   return !avdoedIdenter.every((ident) => trygdetidIdenter.includes(ident))
 }
 
@@ -85,7 +92,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       if (
         trygdetider === null ||
         trygdetider.length == 0 ||
-        manglerTrygdetid(trygdetider, personopplysninger?.avdoede)
+        manglerTrygdetid(trygdetider, !!tidligereFamiliepleier, personopplysninger?.avdoede, personopplysninger?.soeker)
       ) {
         if (tidligereFamiliepleier) {
           opprettOverstyrtTrygdetidReq({ behandlingId: behandling.id, overskriv: true }, () =>

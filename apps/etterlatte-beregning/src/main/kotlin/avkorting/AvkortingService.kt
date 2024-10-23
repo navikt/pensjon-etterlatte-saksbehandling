@@ -97,7 +97,7 @@ class AvkortingService(
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        val aarsoppgjoer = avkorting.aarsoppgjoer.single { it.fom == behandling.virkningstidspunkt?.dato }
+        val aarsoppgjoer = avkorting.aarsoppgjoer.single { it.fom.year == behandling.virkningstidspunkt?.dato?.year }
         val overstyrtInntektsavkorting =
             aarsoppgjoer.inntektsavkorting
                 .find {

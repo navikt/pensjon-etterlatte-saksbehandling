@@ -23,6 +23,7 @@ export const grunnlagsendringsTittel: Record<GrunnlagendringshendelseSamsvarType
   SIVILSTAND: 'Sivilstand',
   INSTITUSJONSOPPHOLD: 'Institusjonsopphold',
   ADRESSE: 'Flytting med endret geografisktilknytning ',
+  FOLKEREGISTERIDENTIFIKATOR: 'Endring av folkeregisteridentifikator',
 }
 
 export const grunnlagsendringsBeskrivelse: Record<GrunnlagendringshendelseSamsvarType, string> = {
@@ -35,6 +36,7 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagendringshendelseSamsva
   SIVILSTAND: 'endring på sivilstand i PDL',
   INSTITUSJONSOPPHOLD: 'INSTITUSJONSOPPHOLD',
   ADRESSE: 'fått ny geografisk tilknytning men saken kunne ikke flyttes på grunn av åpen behandling',
+  FOLKEREGISTERIDENTIFIKATOR: 'Endring av folkeregisteridentifikator',
 }
 
 export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType): string => {
@@ -49,6 +51,7 @@ export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType
     case 'ANSVARLIGE_FORELDRE':
     case 'SIVILSTAND':
     case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':
+    case 'FOLKEREGISTERIDENTIFIKATOR':
     case 'ADRESSE':
       return 'Pdl'
   }

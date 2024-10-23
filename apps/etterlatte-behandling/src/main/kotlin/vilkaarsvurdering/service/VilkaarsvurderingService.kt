@@ -130,6 +130,26 @@ class VilkaarsvurderingService(
             vilkaarsvurderingRepositoryWrapper.slettVilkaarResultat(behandlingId, vilkaarId)
         }
 
+    private fun validerTidligereVilkaarsvurdering(tidligereVilkaarsvurdering: Vilkaarsvurdering) {
+        if (tidligereVilkaarsvurdering.resultat == null) {
+            throw VilkaarsvurderingValideringException(
+                "Mangler resultat for vilkårsvurdering",
+                vilkaarvurdering = tidligereVilkaarsvurdering,
+            )
+        }
+
+        if (tidligereVilkaarsvurdering.vilkaar.isEmpty()) {
+            throw VilkaarsvurderingValideringException("Mangler vilkår for vilkårsvurdering", vilkaarvurdering = tidligereVilkaarsvurdering)
+        }
+
+        if (tidligereVilkaarsvurdering.vilkaar.any { it.vurdering == null }) {
+            throw VilkaarsvurderingValideringException(
+                "Mangler vurdering for delvilkår i vilkårsvurdering",
+                vilkaarvurdering = tidligereVilkaarsvurdering,
+            )
+        }
+    }
+
     fun kopierVilkaarsvurdering(
         behandlingId: UUID,
         kopierFraBehandling: UUID,
@@ -145,6 +165,8 @@ class VilkaarsvurderingService(
 
             val virkningstidspunkt =
                 behandling.virkningstidspunkt ?: throw VirkningstidspunktIkkeSattException(behandlingId)
+
+            validerTidligereVilkaarsvurdering(tidligereVilkaarsvurdering)
 
             val vilkaar =
                 when {
@@ -426,6 +448,19 @@ class BehandlingstilstandException(
     message: String? = null,
     e: Exception? = null,
 ) : IllegalStateException(message, e)
+
+class VilkaarsvurderingValideringException(
+    detail: String,
+    vilkaarvurdering: Vilkaarsvurdering,
+) : UgyldigForespoerselException(
+        code = "UGYLDIG_TILSTAND_VILKAARSVURDERING_KOPIER",
+        detail = detail,
+        meta =
+            mapOf(
+                "vilkaarvurderingId" to vilkaarvurdering.id,
+                "behandlingId" to vilkaarvurdering.behandlingId,
+            ),
+    )
 
 class VilkaarsvurderingTilstandException(
     detail: String,

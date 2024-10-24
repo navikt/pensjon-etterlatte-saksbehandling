@@ -413,7 +413,7 @@ class VedtakBehandlingService(
             if (meldingFinnes) { // TODO bør vi ha ytterlige sjekker før vi samordner?
                 val vedtak = repository.hentVedtakTilSamordning(sakId)
                 if (vedtak != null) {
-                    logger.info("Manuelt samordner")
+                    logger.info("Manuelt samordner pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST, sakId=$sakId, vedtakId=${vedtak.id}")
                     samordne(vedtak.behandlingId, brukerTokenInfo)
                 }
             }

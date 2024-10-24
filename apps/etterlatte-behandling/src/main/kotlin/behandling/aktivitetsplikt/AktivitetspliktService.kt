@@ -586,7 +586,7 @@ class AktivitetspliktService(
             OppgaveType.AKTIVITETSPLIKT,
             OppgaveType.AKTIVITETSPLIKT_12MND,
             -> {
-                logger.info("Kopierer inn vurdering")
+                logger.info("Kopierer inn vurdering i sak $sakId til oppgave med id $oppgaveId")
             }
 
             else -> throw UgyldigForespoerselException(

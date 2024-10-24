@@ -22,8 +22,6 @@ export const Column = styled.div`
   }
 `
 
-// TODO: Dette er litt hacky og burde fikses.
-//       Tas i sammenheng med utvikling av brevdesigneren.
 export const MainContent = styled(Box)`
   width: 100%;
   border-width: 0 1px 0 0;

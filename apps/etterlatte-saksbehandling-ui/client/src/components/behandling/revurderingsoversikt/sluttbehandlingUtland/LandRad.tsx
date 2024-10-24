@@ -1,18 +1,7 @@
-import { Select } from '@navikt/ds-react'
-import styled from 'styled-components'
+import { HStack, Select } from '@navikt/ds-react'
 import DokumenterForLand from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/DokumenterForLand'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 import { ILand } from '~utils/kodeverk'
-
-const Flex = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-
-  div:first-child {
-    margin-bottom: auto;
-  }
-`
 
 export default function LandRad({
   lesevisning = false,
@@ -28,7 +17,7 @@ export default function LandRad({
   label?: string
 }) {
   return (
-    <Flex>
+    <HStack gap="4" align="start">
       <Select
         readOnly={lesevisning}
         style={{ marginRight: '2rem', minWidth: '10rem', maxWidth: '12rem' }}
@@ -48,12 +37,13 @@ export default function LandRad({
           </option>
         ))}
       </Select>
+
       <DokumenterForLand
         lesevisning={lesevisning}
         landMedDokumenter={landMedDokumenter}
         oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
         label={label}
       />
-    </Flex>
+    </HStack>
   )
 }

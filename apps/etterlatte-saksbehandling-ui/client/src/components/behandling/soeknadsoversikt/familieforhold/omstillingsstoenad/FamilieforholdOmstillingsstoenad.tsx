@@ -1,8 +1,7 @@
-import styled from 'styled-components'
 import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Person'
 import { BarneListe } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/BarneListe'
 import { Sivilstand } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Sivilstand'
-import { ErrorMessage } from '@navikt/ds-react'
+import { ErrorMessage, HStack } from '@navikt/ds-react'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
@@ -29,7 +28,7 @@ export const FamilieforholdOmstillingsstoenad = ({ personopplysninger, landListe
   return (
     <>
       <SamsvarPersongalleri landListeResult={landListeResult} />
-      <FamilieforholdVoksne>
+      <HStack gap="4">
         {avdoede.map((avdoed) => (
           <Person
             person={avdoed.opplysning}
@@ -40,7 +39,7 @@ export const FamilieforholdOmstillingsstoenad = ({ personopplysninger, landListe
           />
         ))}
         <Person person={soeker.opplysning} kilde={soeker.kilde} landListeResult={landListeResult} />
-      </FamilieforholdVoksne>
+      </HStack>
       {avdoede.map((avd) => (
         <Sivilstand familieforhold={familieforhold} avdoed={avd.opplysning} key={avd.id} />
       ))}
@@ -48,7 +47,3 @@ export const FamilieforholdOmstillingsstoenad = ({ personopplysninger, landListe
     </>
   )
 }
-
-const FamilieforholdVoksne = styled.div`
-  display: flex;
-`

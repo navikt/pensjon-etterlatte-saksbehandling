@@ -111,6 +111,8 @@ class SamordningsKlientImpl(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
+        val meldingFinnes = HttpStatusCode.Conflict
+
         try {
             val response =
                 httpClient.post("$resourceUrl/api/refusjonskrav") {
@@ -122,17 +124,16 @@ class SamordningsKlientImpl(
                     expectSuccess = false
                 }
 
-            when {
-                response.status == HttpStatusCode.Conflict -> return true
-                !response.status.isSuccess() -> {
-                    throw ResponseException(
-                        response,
-                        "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
-                    )
-                }
+            if (response.status == meldingFinnes) return true
+
+            if (!response.status.isSuccess()) {
+                throw ResponseException(
+                    response,
+                    "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
+                )
             }
         } catch (e: ResponseException) {
-            if (e.response.status == HttpStatusCode.Conflict) {
+            if (e.response.status == meldingFinnes) {
                 return true
             }
             throw e

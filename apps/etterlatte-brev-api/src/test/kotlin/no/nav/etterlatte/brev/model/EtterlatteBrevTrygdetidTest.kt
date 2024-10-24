@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.model
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
-import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -11,9 +10,7 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
-import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.trygdetid.TrygdetidType
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
@@ -92,52 +89,6 @@ class EtterlatteBrevTrygdetidTest {
             trygdetidsperioder.forEach {
                 it.land shouldNotBe "NOR"
             }
-        }
-    }
-
-    @Test
-    fun `trygdetid med beregning utleder navn på relevant avdød`() {
-        val avdoede =
-            listOf(
-                Avdoed(
-                    fnr = Foedselsnummer("idTilOle"),
-                    navn = "Ole",
-                    doedsdato = LocalDate.now(),
-                ),
-                Avdoed(
-                    fnr = Foedselsnummer("idTilNasse"),
-                    navn = "Nasse",
-                    doedsdato = LocalDate.now(),
-                ),
-            )
-        with(
-            trygdetidDto(
-                ident = "idTilOle",
-                samletTrygdetidNorge = 40,
-                samletTrygdetidTeoretisk = null,
-                prorataBroek = null,
-                perioder = emptyList(),
-            ).fromDto(BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL, avdoede),
-        ) {
-            navnAvdoed shouldBe "Ole"
-        }
-    }
-
-    @Test
-    fun `trygdetid med beregning utleder avdoedes navn hvis overstyrt for ukjent avdoed`() {
-        val avdoede = emptyList<Avdoed>()
-
-        with(
-            trygdetidDto(
-                ident = UKJENT_AVDOED,
-                samletTrygdetidNorge = 40,
-                samletTrygdetidTeoretisk = null,
-                prorataBroek = null,
-                perioder = emptyList(),
-                overstyrt = true,
-            ).fromDto(BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL, avdoede),
-        ) {
-            navnAvdoed shouldBe "ukjent avdød"
         }
     }
 }

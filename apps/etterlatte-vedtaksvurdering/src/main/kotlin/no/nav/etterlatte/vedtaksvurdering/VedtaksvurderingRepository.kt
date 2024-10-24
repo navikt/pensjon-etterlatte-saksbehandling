@@ -63,6 +63,8 @@ class VedtaksvurderingRepository(
             FROM vedtak 
             WHERE sakid = :sakId
             AND vedtakstatus = :vedtakStatus
+            ORDER BY datoattestert DESC
+            LIMIT 1
             """,
                 params =
                     mapOf(

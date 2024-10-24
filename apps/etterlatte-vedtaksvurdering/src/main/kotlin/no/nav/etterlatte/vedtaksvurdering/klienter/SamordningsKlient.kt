@@ -5,6 +5,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -47,7 +48,7 @@ interface SamordningsKlient {
     suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Boolean
 }
 
 class SamordningsKlientImpl(
@@ -109,7 +110,9 @@ class SamordningsKlientImpl(
     override suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): Boolean {
+        val meldingFinnes = HttpStatusCode.Conflict
+
         try {
             val response =
                 httpClient.post("$resourceUrl/api/refusjonskrav") {
@@ -118,15 +121,31 @@ class SamordningsKlientImpl(
                     parameter("tpNr", samordningmelding.tpNr)
                     parameter("samId", samordningmelding.samId)
                     parameter("refusjonskrav", samordningmelding.refusjonskrav)
+                    expectSuccess = false
                 }
 
+            if (response.status == meldingFinnes) return true
+
             if (!response.status.isSuccess()) {
-                throw ResponseException(response, "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]")
+                throw ResponseException(
+                    response,
+                    "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
+                )
             }
+        } catch (e: ResponseException) {
+            if (e.response.status == meldingFinnes) {
+                return true
+            }
+            throw e
         } catch (e: Exception) {
             logger.error("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
-            throw SamordneVedtakGenerellException("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
+            throw SamordneVedtakGenerellException(
+                "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
+                e,
+            )
         }
+
+        return false
     }
 }
 

@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -114,6 +115,8 @@ internal class AvkortingServiceTest {
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
                 any(),
+                any(),
+                any(),
             )
         } returns Unit
 
@@ -129,6 +132,8 @@ internal class AvkortingServiceTest {
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
                 capture(slotTidspunkt),
+                OppgaveKilde.BEHANDLING,
+                behandlingId.toString(),
             )
             avkortingRepository.hentAvkorting(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)

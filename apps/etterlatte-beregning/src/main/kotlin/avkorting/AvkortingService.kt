@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -124,6 +125,8 @@ class AvkortingService(
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
                 Tidspunkt.ofNorskTidssone(oppgaveFrist, LocalTime.now()),
+                OppgaveKilde.BEHANDLING,
+                behandlingId.toString(),
             )
         } else {
             logger.info("Fant ingen tidlig alderspensjon for sakId=${behandling.sak.sakId}, trenger ingen oppgave om opphør.")

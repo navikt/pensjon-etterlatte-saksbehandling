@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -71,6 +72,8 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         oppgaveType: OppgaveType,
         merknad: String?,
         frist: Tidspunkt? = null,
+        oppgaveKilde: OppgaveKilde,
+        referanse: String,
     )
 }
 
@@ -270,6 +273,8 @@ class BehandlingKlientImpl(
         oppgaveType: OppgaveType,
         merknad: String?,
         frist: Tidspunkt?,
+        oppgaveKilde: OppgaveKilde,
+        referanse: String,
     ) {
         logger.info("Oppretter oppgave for sakId=$sakId")
 
@@ -283,8 +288,8 @@ class BehandlingKlientImpl(
                 oppgaveType = oppgaveType,
                 merknad = merknad,
                 frist = frist,
-                oppgaveKilde = null,
-                referanse = null,
+                oppgaveKilde = oppgaveKilde,
+                referanse = referanse,
                 saksbehandler = null,
             ),
         )

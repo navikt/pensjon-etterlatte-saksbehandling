@@ -158,7 +158,7 @@ class AktivitetspliktAktivitetsgradDao(
             }
         }
 
-    fun kopierAktivitetsgrad(
+    fun kopierAktivitetsgradTilBehandling(
         aktivitetId: UUID,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
@@ -175,6 +175,26 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(1, behandlingId)
             stmt.setObject(2, aktivitetId)
 
+            stmt.executeUpdate()
+        }
+    }
+
+    fun kopierAktivitetsgradTilOppgave(
+        aktivitetId: UUID,
+        oppgaveId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                    INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd) 
+                    SELECT gen_random_uuid(), sak_id, ?, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd
+                    FROM aktivitetsplikt_aktivitetsgrad
+                    WHERE id = ?
+                    """.trimIndent(),
+                )
+            stmt.setObject(1, oppgaveId)
+            stmt.setObject(2, aktivitetId)
             stmt.executeUpdate()
         }
     }

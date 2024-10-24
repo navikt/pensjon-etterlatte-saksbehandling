@@ -1,4 +1,4 @@
-import { useOppgaveForVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { formaterOppgaveStatus } from '~utils/formatering/formatering'
@@ -6,7 +6,7 @@ import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 
 export function AktivitetspliktSidemeny() {
-  const oppgave = useOppgaveForVurdering()
+  const { oppgave } = useAktivitetspliktOppgaveVurdering()
   return (
     <Sidebar>
       <SidebarPanel $border>

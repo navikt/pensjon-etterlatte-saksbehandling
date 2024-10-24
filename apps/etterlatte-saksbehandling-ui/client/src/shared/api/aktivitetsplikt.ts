@@ -1,6 +1,7 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import {
   AktivitetspliktOppfolging,
+  AktivitetspliktOppgaveVurdering,
   IAktivitet,
   IAktivitetspliktVurdering,
   IAktivitetspliktVurderingNy,
@@ -54,7 +55,7 @@ export const hentAktivitspliktVurderingForOppgave = async (args: {
 }): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
   apiClient.get(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering`)
 
-export const hentAktivitspliktVurderingForOppgaveNy = async (args: {
+export const hentAktivitetspliktVurderingForOppgaveNy = async (args: {
   sakId: number
   oppgaveId: string
 }): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
@@ -99,3 +100,7 @@ export const opprettAktivitspliktUnntakForBehandling = async (args: {
   apiClient.post(`/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering/unntak`, {
     ...args.request,
   })
+
+export const hentAktivitetspliktOppgaveVurdering = async (args: {
+  oppgaveId: string
+}): Promise<ApiResponse<AktivitetspliktOppgaveVurdering>> => apiClient.get(`/aktivitetsplikt/oppgave/${args.oppgaveId}`)

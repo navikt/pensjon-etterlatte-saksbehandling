@@ -194,7 +194,7 @@ class RevurderingService(
                     ?.copy(behandlingId = opprettBehandling.id)
                     ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
                 aktivitetspliktDao.kopierAktiviteter(behandlingId, opprettBehandling.id)
-                aktivitetspliktKopierService.kopierVurdering(sakId, opprettBehandling.id)
+                aktivitetspliktKopierService.kopierVurderingTilBehandling(sakId, opprettBehandling.id)
             }
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 

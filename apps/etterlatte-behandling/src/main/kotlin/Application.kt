@@ -173,6 +173,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     )
     aktivitetspliktRoutes(
         aktivitetspliktService = applicationContext.aktivitetspliktService,
+        aktivitetspliktOppgaveService = applicationContext.aktivitetspliktOppgaveService,
     )
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)

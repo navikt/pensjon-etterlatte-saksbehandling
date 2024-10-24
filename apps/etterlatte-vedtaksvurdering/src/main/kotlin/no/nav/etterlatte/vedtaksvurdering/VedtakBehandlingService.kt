@@ -404,19 +404,11 @@ class VedtakBehandlingService(
     suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
-        sakId: SakId,
     ) {
         repository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
 
         try {
-            val meldingFinnes = samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
-            if (meldingFinnes) { // TODO bør vi ha ytterlige sjekker før vi samordner?
-                val vedtak = repository.hentVedtakTilSamordning(sakId)
-                if (vedtak != null) {
-                    logger.info("Manuelt samordner pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST, sakId=$sakId, vedtakId=${vedtak.id}")
-                    samordnetVedtak(vedtak.behandlingId, brukerTokenInfo)
-                }
-            }
+            samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
         } catch (e: Exception) {
             repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
             throw e

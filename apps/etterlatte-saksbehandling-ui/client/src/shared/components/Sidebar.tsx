@@ -54,7 +54,7 @@ const Scroller = styled.div`
 
 const SidebarTools = styled.div`
   border-top: 1px solid #c6c2bf;
-  background-color: #f8f8f8;
+  background-color: var(--a-gray-50);
 
   position: fixed;
   bottom: 0;

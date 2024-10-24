@@ -59,7 +59,7 @@ export const StegMenyBox = styled(Box)`
   padding: var(--a-spacing-4) 0 var(--a-spacing-4) var(--a-spacing-4);
   border-left: 0.4rem solid var(--a-border-action);
   border-bottom: 1px solid var(--a-border-subtle);
-  background: #f8f8f8;
+  background: var(--a-surface-subtle);
 `
 
 export const DisabledLabel = styled(Label)`

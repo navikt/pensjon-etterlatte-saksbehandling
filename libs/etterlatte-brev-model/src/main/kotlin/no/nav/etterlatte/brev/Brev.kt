@@ -69,9 +69,8 @@ data class Mottaker(
     val adresse: Adresse,
     val tvingSentralPrint: Boolean = false,
     val type: MottakerType = MottakerType.HOVED,
-    // TODO: flytte disse fra brev- til mottakernivå
-    //  val journalpostId: String
-    //  val bestillingId: BestillingID
+    val journalpostId: String? = null,
+    val bestillingId: String? = null,
 ) {
     fun erGyldig(): List<String> =
         if (navn.isBlank()) {
@@ -99,8 +98,6 @@ data class Brev(
     val mottakere: List<Mottaker>,
     val brevtype: Brevtype,
     val brevkoder: Brevkoder?,
-    val journalpostId: String? = null,
-    val bestillingId: String? = null,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 }

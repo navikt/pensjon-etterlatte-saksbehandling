@@ -36,7 +36,7 @@ class Brevdistribuerer(
         }
 
         /*
-         * TODO:
+         * TODO EY-3627:
          *  Må håndtere flere [BestillingsID] når det blir mulig å legge til flere mottakere.
          */
         return with(brev.mottakere.single()) {

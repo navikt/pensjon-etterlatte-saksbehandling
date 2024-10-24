@@ -1,9 +1,7 @@
 import { Button, Heading, HGrid, HStack, Modal, Radio, Select, TextField, ToggleGroup, VStack } from '@navikt/ds-react'
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AdresseType, Mottaker } from '~shared/types/Brev'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { oppdaterMottaker } from '~shared/api/brev'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, Result } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Controller, useForm } from 'react-hook-form'
 import { DocPencilIcon } from '@navikt/aksel-icons'
@@ -18,12 +16,11 @@ interface Props {
   brevId: number
   sakId: number
   mottaker: Mottaker
-  setMottaker: Dispatch<SetStateAction<Mottaker>>
+  lagre: (brevId: number, sakId: number, mottaker: Mottaker, onSuccess: () => void) => void
+  lagreResult: Result<void>
 }
 
-export function BrevMottakerModal({ brevId, sakId, mottaker: initialMottaker, setMottaker }: Props) {
-  const [mottakerStatus, apiOppdaterMottaker] = useApiCall(oppdaterMottaker)
-
+export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker, lagre, lagreResult }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [mottakerType, setMottakerType] = useState(
     initialMottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
@@ -46,14 +43,13 @@ export function BrevMottakerModal({ brevId, sakId, mottaker: initialMottaker, se
     else if (mottakerType == MottakerType.PRIVATPERSON) setValue('orgnummer', undefined)
   }, [mottakerType])
 
-  const lagre = (mottaker: Mottaker) => {
+  const lagreEndringer = (mottaker: Mottaker) => {
     if (!isDirty) {
       setIsOpen(false)
       return
     }
 
-    apiOppdaterMottaker({ brevId, sakId, mottaker }, () => {
-      setMottaker(mottaker)
+    lagre(brevId, sakId, mottaker, () => {
       setIsOpen(false)
     })
   }
@@ -69,7 +65,7 @@ export function BrevMottakerModal({ brevId, sakId, mottaker: initialMottaker, se
     <>
       <Button variant="secondary" onClick={() => setIsOpen(true)} icon={<DocPencilIcon aria-hidden />} size="small" />
 
-      <form onSubmit={handleSubmit((data) => lagre(data))}>
+      <form onSubmit={handleSubmit(lagreEndringer)}>
         <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Endre mottaker">
           <Modal.Body>
             <VStack gap="4">
@@ -230,15 +226,15 @@ export function BrevMottakerModal({ brevId, sakId, mottaker: initialMottaker, se
               />
 
               {isFailureHandler({
-                apiResult: mottakerStatus,
+                apiResult: lagreResult,
                 errorMessage: 'Kunne ikke oppdatere mottaker.',
               })}
 
               <HStack gap="4" justify="end">
-                <Button variant="secondary" type="button" disabled={isPending(mottakerStatus)} onClick={avbryt}>
+                <Button variant="secondary" type="button" disabled={isPending(lagreResult)} onClick={avbryt}>
                   Avbryt
                 </Button>
-                <Button variant="primary" type="submit" loading={isPending(mottakerStatus)}>
+                <Button variant="primary" type="submit" loading={isPending(lagreResult)}>
                   Lagre
                 </Button>
               </HStack>

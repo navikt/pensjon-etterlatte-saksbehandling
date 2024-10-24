@@ -45,7 +45,7 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRepositoryIntegrationTest(
-    val dataSource: DataSource,
+    private val dataSource: DataSource,
 ) {
     private val db = BrevRepository(dataSource)
 

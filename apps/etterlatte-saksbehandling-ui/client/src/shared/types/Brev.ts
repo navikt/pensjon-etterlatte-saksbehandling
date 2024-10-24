@@ -11,8 +11,6 @@ export interface IBrev {
   mottakere: Mottaker[]
   opprettet: string
   brevtype: Brevtype
-  journalpostId?: string
-  bestillingId?: string
 }
 
 export interface Mottaker {
@@ -24,7 +22,14 @@ export interface Mottaker {
   orgnummer?: string
   adresse: Adresse
   tvingSentralPrint: boolean
-  kopimottaker: boolean
+  type: MottakerType
+  journalpostId?: string
+  bestillingId?: string
+}
+
+export enum MottakerType {
+  HOVED = 'HOVED',
+  KOPI = 'KOPI',
 }
 
 export interface Adresse {

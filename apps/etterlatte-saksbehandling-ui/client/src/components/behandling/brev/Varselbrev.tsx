@@ -15,7 +15,7 @@ import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
@@ -150,7 +150,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                 <br />
 
                 {varselbrev.mottakere.map((mottaker) => (
-                  <BrevMottaker
+                  <BrevMottakerPanel
                     key={mottaker.id}
                     brevId={varselbrev.id}
                     behandlingId={behandlingId}

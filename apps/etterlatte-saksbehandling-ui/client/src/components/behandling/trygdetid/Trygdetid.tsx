@@ -79,8 +79,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   }
 
   const tidligereFamiliepleier =
-    behandling.tidligereFamiliepleier?.svar &&
-    behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
+    (behandling.tidligereFamiliepleier?.svar &&
+      behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT) ??
+    false
 
   const oppdaterTrygdetider = (trygdetid: ITrygdetid[]) => {
     setTrygdetider(trygdetid)
@@ -92,7 +93,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       if (
         trygdetider === null ||
         trygdetider.length == 0 ||
-        manglerTrygdetid(trygdetider, !!tidligereFamiliepleier, personopplysninger?.avdoede, personopplysninger?.soeker)
+        manglerTrygdetid(trygdetider, tidligereFamiliepleier, personopplysninger?.avdoede, personopplysninger?.soeker)
       ) {
         if (tidligereFamiliepleier) {
           opprettOverstyrtTrygdetidReq({ behandlingId: behandling.id, overskriv: true }, () =>

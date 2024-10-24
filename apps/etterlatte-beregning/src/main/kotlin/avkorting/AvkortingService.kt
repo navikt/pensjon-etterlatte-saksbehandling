@@ -109,9 +109,13 @@ class AvkortingService(
         if (overstyrtInntektsavkorting != null) {
             logger.info("Oppretter oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
 
+            // Vi trekker fra 2 måneder (2L) for å få måneden før opphør (2024.03).
+            // For eksempel, hvis fom = 2024.1 og innvilgaMaaneder = 3:
+            // 01 + 03 = 4 (2024.04), så 4 - 2L = 2 gir oss 2024.02 som er en månede før 2024.03.
+            val innvilgaMaaneder = overstyrtInntektsavkorting.grunnlag.innvilgaMaaneder - 2L
             val oppgaveFrist =
-                overstyrtInntektsavkorting.grunnlag.periode.fom
-                    .plusMonths(overstyrtInntektsavkorting.grunnlag.innvilgaMaaneder - 2L)
+                aarsoppgjoer.fom
+                    .plusMonths(innvilgaMaaneder)
                     .atDay(1)
 
             behandlingKlient.opprettOppgave(

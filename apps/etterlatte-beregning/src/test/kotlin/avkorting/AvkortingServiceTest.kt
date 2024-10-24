@@ -8,6 +8,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.slot
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.Beregning
@@ -78,7 +79,7 @@ internal class AvkortingServiceTest {
     fun `Skal opprette oppgave hvis opphoer ved tidlig alderspensjon`() {
         val behandlingId = UUID.randomUUID()
         val brukerTokenInfo = mockk<BrukerTokenInfo>(relaxed = true)
-        val fom = VirkningstidspunktTestData.virkningstidsunkt()
+        val fom = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1))
 
         val behandling =
             behandling(
@@ -119,17 +120,23 @@ internal class AvkortingServiceTest {
         runBlocking {
             service.opprettOppgaveHvisTidligAlderspensjon(behandlingId, brukerTokenInfo)
         }
+
+        val slotTidspunkt = slot<Tidspunkt>()
         coVerify(exactly = 1) {
             behandlingKlient.opprettOppgave(
                 behandling.sak,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
-                any(), // TODO: verifisere frist?
+                capture(slotTidspunkt),
             )
             avkortingRepository.hentAvkorting(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         }
+
+        val oppgaveFrist = slotTidspunkt.captured.toLocalDate()
+        oppgaveFrist.year shouldBe fom.dato.year
+        oppgaveFrist.month shouldBe fom.dato.month + grunnlag.innvilgaMaaneder.minus(2L)
     }
 
     @Nested

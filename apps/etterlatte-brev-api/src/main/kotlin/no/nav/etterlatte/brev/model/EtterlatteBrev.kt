@@ -140,14 +140,11 @@ private fun hentAvdoedNavn(
     trygdetidDto: TrygdetidDto,
     avdoede: List<Avdoed>,
 ): String {
-    if (avdoede.isEmpty() &&
-        trygdetidDto.beregnetTrygdetid?.resultat?.overstyrt == true &&
-        trygdetidDto.ident == UKJENT_AVDOED
-    ) {
-        return "ukjent avdød"
-    }
     if (avdoede.isEmpty()) {
-        throw IngenStoetteForUkjentAvdoed()
+        when (trygdetidDto.ident) {
+            UKJENT_AVDOED -> return "ukjent avdød"
+            else -> throw IngenStoetteForUkjentAvdoed()
+        }
     }
 
     return avdoede.find { it.fnr.value == trygdetidDto.ident }?.navn ?: run {

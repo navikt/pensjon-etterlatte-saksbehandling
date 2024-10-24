@@ -1,0 +1,1 @@
+UPDATE behandling SET status = 'TIL_SAMORDNING' WHERE id = '6e960200-ac0a-4341-8e00-cf4300588d65';

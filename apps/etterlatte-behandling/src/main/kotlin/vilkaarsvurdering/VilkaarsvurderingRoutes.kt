@@ -33,10 +33,10 @@ import no.nav.etterlatte.vilkaarsvurdering.service.VirkningstidspunktIkkeSattExc
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
+private val logger = LoggerFactory.getLogger("VilkaarsvurderingRoute")
+
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
     route("/api/vilkaarsvurdering") {
-        val logger = LoggerFactory.getLogger("VilkaarsvurderingRoute")
-
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             logger.info("Henter vilkårsvurdering for $behandlingId")
             val vilkaarsvurdering = inTransaction { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId) }

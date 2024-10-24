@@ -69,7 +69,7 @@ class VedtaksvurderingRepository(
                 params =
                     mapOf(
                         "sakId" to sakId.sakId,
-                        "vedtakStatus" to VedtakStatus.TIL_SAMORDNING,
+                        "vedtakStatus" to VedtakStatus.TIL_SAMORDNING.name,
                     ),
             ) {
                 it.toVedtak(emptyList())

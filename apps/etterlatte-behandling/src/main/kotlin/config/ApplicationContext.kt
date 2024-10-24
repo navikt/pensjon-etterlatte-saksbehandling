@@ -152,7 +152,6 @@ import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDaoImpl
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapper
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkarsvurderingRepositorDaoWrapperClient
 import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
 import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
@@ -330,11 +329,8 @@ internal class ApplicationContext(
     val vilkaarsvurderingDao = VilkaarsvurderingRepository(autoClosingDatabase, DelvilkaarRepository())
 
     val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper =
-        if (isProd()) {
-            VilkarsvurderingRepositorDaoWrapperClient(vilkaarsvurderingKlientDaoImpl)
-        } else {
-            VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
-        }
+        VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
+    // VilkarsvurderingRepositorDaoWrapperClient(vilkaarsvurderingKlientDaoImpl)
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))

@@ -6,10 +6,9 @@ import {
   Utfall,
 } from '~shared/types/Klage'
 import React from 'react'
-import { ErrorMessage, Heading, Select, Textarea } from '@navikt/ds-react'
+import { ErrorMessage, Heading, Select, Textarea, VStack } from '@navikt/ds-react'
 import { FieldOrNull } from '~shared/types/util'
 import { Control, Controller } from 'react-hook-form'
-import { SmalVStack } from '~components/klage/styled'
 
 export type FilledFormDataVurdering = {
   utfall: Utfall
@@ -46,7 +45,7 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
   const { control } = props
 
   return (
-    <SmalVStack gap="4">
+    <VStack gap="4" width="30rem">
       <Heading level="2" size="medium">
         Omgjøring
       </Heading>
@@ -94,6 +93,6 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
           )
         }}
       />
-    </SmalVStack>
+    </VStack>
   )
 }

@@ -4,8 +4,7 @@ import { FormdataVurdering } from '~components/klage/vurdering/EndeligVurdering'
 import { useKlage } from '~components/klage/useKlage'
 import { SakType } from '~shared/types/sak'
 import { LOVHJEMLER_BP, LOVHJEMLER_OMS, TEKSTER_LOVHJEMLER } from '~shared/types/Klage'
-import { ErrorMessage, Heading, Select, Textarea } from '@navikt/ds-react'
-import { SmalVStack } from '~components/klage/styled'
+import { ErrorMessage, Heading, Select, Textarea, VStack } from '@navikt/ds-react'
 
 export const KlageInnstilling = ({
   register,
@@ -18,7 +17,7 @@ export const KlageInnstilling = ({
   const aktuelleHjemler = klage?.sak.sakType === SakType.BARNEPENSJON ? LOVHJEMLER_BP : LOVHJEMLER_OMS
 
   return (
-    <SmalVStack gap="4">
+    <VStack gap="4" width="30rem">
       <Heading level="3" size="medium">
         Innstilling til KA
       </Heading>
@@ -58,6 +57,6 @@ export const KlageInnstilling = ({
         label="Intern kommentar til KA"
         description="Kommentaren blir ikke synlig for bruker"
       />
-    </SmalVStack>
+    </VStack>
   )
 }

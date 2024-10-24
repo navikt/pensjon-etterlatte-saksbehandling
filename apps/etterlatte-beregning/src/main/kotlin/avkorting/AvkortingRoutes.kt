@@ -67,6 +67,13 @@ fun Route.avkorting(
             }
         }
 
+        post("/haandter-tidlig-alderspensjon") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
+                avkortingService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
+            }
+        }
+
         delete {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Sletter avkorting for behandlingId=$it")

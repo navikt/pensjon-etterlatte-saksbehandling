@@ -11,8 +11,12 @@ import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -61,6 +65,16 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         brukerTokenInfo: BrukerTokenInfo,
         commit: Boolean,
     ): Boolean
+
+    suspend fun opprettOppgave(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+        oppgaveType: OppgaveType,
+        merknad: String?,
+        frist: Tidspunkt? = null,
+        oppgaveKilde: OppgaveKilde,
+        referanse: String,
+    )
 }
 
 class BehandlingKlientException(
@@ -250,6 +264,34 @@ class BehandlingKlientImpl(
                 logger.info("Behandling med id $behandlingId kan ikke avkortes, commit=$commit")
                 false
             },
+        )
+    }
+
+    override suspend fun opprettOppgave(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+        oppgaveType: OppgaveType,
+        merknad: String?,
+        frist: Tidspunkt?,
+        oppgaveKilde: OppgaveKilde,
+        referanse: String,
+    ) {
+        logger.info("Oppretter oppgave for sakId=$sakId")
+
+        val resource =
+            Resource(clientId = clientId, url = "$resourceUrl/oppgaver/sak/${sakId.sakId}/oppgaver")
+
+        downstreamResourceClient.post(
+            resource,
+            brukerTokenInfo,
+            NyOppgaveDto(
+                oppgaveType = oppgaveType,
+                merknad = merknad,
+                frist = frist,
+                oppgaveKilde = oppgaveKilde,
+                referanse = referanse,
+                saksbehandler = null,
+            ),
         )
     }
 

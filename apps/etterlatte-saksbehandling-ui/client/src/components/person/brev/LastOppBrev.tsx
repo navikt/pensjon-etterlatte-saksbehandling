@@ -12,8 +12,9 @@ import { round } from 'lodash'
 /**
  * Husk å endre [proxy_body_size] i nais-filene hvis du skal øke maks filstørrelse.
  * Mer info: https://docs.nais.io
+ * https://docs.nais.io/workloads/application/reference/ingress/?h=body+size#custom-max-body-size
  **/
-const MAKS_FILSTOERRELSE_MB = 1
+const MAKS_FILSTOERRELSE_MB = 2
 
 export const LastOppBrev = ({ sak }: { sak: ISak }) => {
   const navigate = useNavigate()

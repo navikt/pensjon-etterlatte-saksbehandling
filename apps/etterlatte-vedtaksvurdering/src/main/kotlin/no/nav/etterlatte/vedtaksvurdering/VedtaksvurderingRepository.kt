@@ -68,7 +68,7 @@ class VedtaksvurderingRepository(
             """,
                 params =
                     mapOf(
-                        "sakId" to sakId.sakId,
+                        "sakId" to sakId,
                         "vedtakStatus" to VedtakStatus.TIL_SAMORDNING,
                     ),
             ) {

@@ -112,29 +112,38 @@ class SamordningsKlientImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         try {
-            val response = httpClient.post("$resourceUrl/api/refusjonskrav") {
-                contentType(ContentType.Application.Json)
-                header("pid", samordningmelding.pid)
-                parameter("tpNr", samordningmelding.tpNr)
-                parameter("samId", samordningmelding.samId)
-                parameter("refusjonskrav", samordningmelding.refusjonskrav)
-                expectSuccess = false
+            val response =
+                httpClient.post("$resourceUrl/api/refusjonskrav") {
+                    contentType(ContentType.Application.Json)
+                    header("pid", samordningmelding.pid)
+                    parameter("tpNr", samordningmelding.tpNr)
+                    parameter("samId", samordningmelding.samId)
+                    parameter("refusjonskrav", samordningmelding.refusjonskrav)
+                    expectSuccess = false
+                }
+
+            when {
+                response.status == HttpStatusCode.Conflict -> return true
+                !response.status.isSuccess() -> {
+                    throw ResponseException(
+                        response,
+                        "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
+                    )
+                }
             }
-            if (response.status.value == HttpStatusCode.Conflict.value) {
-                return true
-            } else if(!response.status.isSuccess()) {
-                throw
-            }
-        } catch (e: ResponseException ) {
-            // Kanskje en bedre detection for dette?
-            if (e.response.status.value == HttpStatusCode.Conflict.value) {
+        } catch (e: ResponseException) {
+            if (e.response.status == HttpStatusCode.Conflict) {
                 return true
             }
             throw e
         } catch (e: Exception) {
             logger.error("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
-            throw SamordneVedtakGenerellException("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
+            throw SamordneVedtakGenerellException(
+                "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
+                e,
+            )
         }
+
         return false
     }
 }

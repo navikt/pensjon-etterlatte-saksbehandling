@@ -94,8 +94,9 @@ class AvkortingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: Avkorting()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        logger.info("Sjekker om vi skal opprette oppgave om pååhør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
+        val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
 
         val aarsoppgjoer = avkorting.aarsoppgjoer.single { it.aar == behandling.virkningstidspunkt?.dato?.year }
         val overstyrtInntektsavkorting =

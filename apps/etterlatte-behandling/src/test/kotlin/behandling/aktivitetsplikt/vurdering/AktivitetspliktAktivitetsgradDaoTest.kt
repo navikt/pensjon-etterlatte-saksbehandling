@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.lagNyOppgave
@@ -445,6 +446,38 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 it.sakId shouldBe sak.id
                 it.behandlingId shouldBe nyBehandling.id
                 it.aktivitetsgrad shouldBe aktivitetsgrad.aktivitetsgrad
+                it.fom shouldBe aktivitetsgrad.fom
+                it.opprettet shouldBe kilde
+                it.endret shouldBe kilde
+                it.beskrivelse shouldBe aktivitetsgrad.beskrivelse
+                it.vurdertFra12Mnd shouldBe aktivitetsgrad.vurdertFra12Mnd
+                it.skjoennsmessigVurdering shouldBe aktivitetsgrad.skjoennsmessigVurdering
+            }
+        }
+
+        @Test
+        fun `skal kopiere nyeste aktivitetsgrad til oppgave`() {
+            behandlingDao.opprettBehandling(forrigeBehandling)
+            dao.opprettAktivitetsgrad(lagreAktivitetsgrad, sak.id, kilde, null, forrigeBehandling.id)
+
+            val aktivitetsgrad = dao.hentAktivitetsgradForBehandling(forrigeBehandling.id).single()
+            val oppgave =
+                lagNyOppgave(
+                    sak =
+                        Sak(
+                            ident = "",
+                            sakType = SakType.OMSTILLINGSSTOENAD,
+                            id = forrigeBehandling.sakId,
+                            enhet = Enheter.defaultEnhet.enhetNr,
+                        ),
+                    oppgaveType = OppgaveType.AKTIVITETSPLIKT,
+                )
+            oppgaveDao.opprettOppgave(oppgave)
+            dao.kopierAktivitetsgradTilOppgave(aktivitetsgrad.id, oppgaveId = oppgave.id)
+            dao.hentAktivitetsgradForOppgave(oppgave.id).single().asClue {
+                it.sakId shouldBe aktivitetsgrad.sakId
+                it.behandlingId shouldBe null
+                it.oppgaveId shouldBe oppgave.id
                 it.fom shouldBe aktivitetsgrad.fom
                 it.opprettet shouldBe kilde
                 it.endret shouldBe kilde

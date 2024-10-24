@@ -12,6 +12,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
+import no.nav.etterlatte.beregning.regler.aarsoppgjoer
+import no.nav.etterlatte.beregning.regler.avkorting
+import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
@@ -24,6 +27,12 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.junit.jupiter.api.AfterEach
@@ -63,6 +72,64 @@ internal class AvkortingServiceTest {
     @AfterEach
     fun afterEach() {
         confirmVerified()
+    }
+
+    @Test
+    fun `Skal opprette oppgave hvis opphoer ved tidlig alderspensjon`() {
+        val behandlingId = UUID.randomUUID()
+        val brukerTokenInfo = mockk<BrukerTokenInfo>(relaxed = true)
+        val fom = VirkningstidspunktTestData.virkningstidsunkt()
+
+        val behandling =
+            behandling(
+                id = behandlingId,
+                behandlingType = BehandlingType.REVURDERING,
+                status = BehandlingStatus.IVERKSATT,
+                virkningstidspunkt = fom,
+                sak = SakId(123),
+            )
+
+        val grunnlag =
+            avkortinggrunnlag(
+                id = UUID.randomUUID(),
+                periode = Periode(fom = fom.dato, tom = null),
+                kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Tidspunkt.now()),
+                overstyrtInnvilgaMaanederAarsak = OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG,
+                innvilgaMaaneder = 3,
+            )
+
+        val inntektsavkorting = Inntektsavkorting(grunnlag = grunnlag)
+        val aarsoppgjoer = aarsoppgjoer(aar = fom.dato.year, inntektsavkorting = listOf(inntektsavkorting))
+
+        val avkorting = Avkorting(aarsoppgjoer = listOf(aarsoppgjoer))
+
+        coEvery { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) } returns behandling
+        coEvery { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
+
+        coEvery {
+            behandlingKlient.opprettOppgave(
+                behandling.sak,
+                brukerTokenInfo,
+                OppgaveType.GENERELL_OPPGAVE,
+                "Opphør av ytelse på grunn av alderspensjon.",
+                any(),
+            )
+        } returns Unit
+
+        runBlocking {
+            service.opprettOppgaveHvisTidligAlderspensjon(behandlingId, brukerTokenInfo)
+        }
+        coVerify(exactly = 1) {
+            behandlingKlient.opprettOppgave(
+                behandling.sak,
+                brukerTokenInfo,
+                OppgaveType.GENERELL_OPPGAVE,
+                "Opphør av ytelse på grunn av alderspensjon.",
+                any(), // TODO: verifisere frist?
+            )
+            avkortingRepository.hentAvkorting(behandlingId)
+            behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        }
     }
 
     @Nested

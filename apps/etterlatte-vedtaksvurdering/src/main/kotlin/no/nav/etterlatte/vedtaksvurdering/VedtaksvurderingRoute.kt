@@ -62,7 +62,7 @@ fun Route.vedtaksvurderingRoute(
             withSakId(behandlingKlient) { sakId ->
                 val oppdatering = requireNotNull(call.receive<OppdaterSamordningsmelding>())
                 logger.info("Oppdaterer samordningsmelding=${oppdatering.samId}, sak=$sakId")
-                vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo).run {
+                vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo, sakId).run {
                     rapidService.sendGenerellHendelse(
                         VedtakKafkaHendelseHendelseType.SAMORDNING_MANUELT_BEHANDLET,
                         mapOf(

@@ -123,7 +123,7 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val restanse: Int,
     val avkortingsbeloep: Int,
     val ytelseFoerAvkorting: Int,
-    val aarsinntekt: Int,
+    val oppgittInntekt: Int,
     val fratrekkInnAar: Int,
     val innvilgaMaaneder: Int,
     val trygdetid: Int,

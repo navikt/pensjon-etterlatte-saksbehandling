@@ -25,7 +25,7 @@ data class AvkortetBeregningsperiode(
     val datoTOM: LocalDate?,
     val grunnbeloep: Kroner,
     val inntekt: Kroner,
-    val aarsinntekt: Kroner,
+    val oppgittInntekt: Kroner,
     val fratrekkInnAar: Kroner,
     val innvilgaMaaneder: Int,
     val ytelseFoerAvkorting: Kroner,

@@ -55,7 +55,7 @@ data class OmstillingsstoenadInnvilgelse(
                         datoFOM = it.datoFOM,
                         datoTOM = it.datoTOM,
                         inntekt = it.inntekt,
-                        aarsinntekt = it.aarsinntekt,
+                        oppgittInntekt = it.oppgittInntekt,
                         fratrekkInnAar = it.fratrekkInnAar,
                         innvilgaMaaneder = it.innvilgaMaaneder,
                         grunnbeloep = it.grunnbeloep,

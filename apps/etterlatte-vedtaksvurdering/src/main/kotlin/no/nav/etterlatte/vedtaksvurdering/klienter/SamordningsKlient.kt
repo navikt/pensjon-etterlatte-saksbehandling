@@ -48,7 +48,7 @@ interface SamordningsKlient {
     suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean
+    )
 }
 
 class SamordningsKlientImpl(
@@ -70,7 +70,6 @@ class SamordningsKlientImpl(
                     contentType(ContentType.Application.Json)
                     setBody(vedtak.tilSamordneRequest(etterbetaling))
                 }
-
             if (response.status.isSuccess()) {
                 return response.body<String>().let { objectMapper.readValue<SamordneVedtakRespons>(it) }.ventPaaSvar
             } else {
@@ -110,7 +109,7 @@ class SamordningsKlientImpl(
     override suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean {
+    ) {
         try {
             val response =
                 httpClient.post("$resourceUrl/api/refusjonskrav") {
@@ -122,15 +121,12 @@ class SamordningsKlientImpl(
                     expectSuccess = false
                 }
 
-            if (response.status == HttpStatusCode.Conflict) return true
             if (!response.status.isSuccess()) {
                 throw ResponseException(
                     response,
                     "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
                 )
             }
-        } catch (e: ResponseException) {
-            if (e.response.status == HttpStatusCode.Conflict) return true else throw e
         } catch (e: Exception) {
             logger.error("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
             throw SamordneVedtakGenerellException(
@@ -138,8 +134,6 @@ class SamordningsKlientImpl(
                 e,
             )
         }
-
-        return false
     }
 }
 

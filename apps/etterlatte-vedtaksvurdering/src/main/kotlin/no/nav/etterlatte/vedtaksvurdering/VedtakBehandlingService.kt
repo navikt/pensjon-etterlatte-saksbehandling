@@ -410,17 +410,20 @@ class VedtakBehandlingService(
         repository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
 
         try {
-            val httpConflict = samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
-            // hvis saksbehandler ikke får overstyrt pga SAM responderer med ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
-            // saken er fastlås med status TIL_SAMORDNING og kommer ikke videre, i dette tilfelle samordner vi og sender saken videre
-            if (httpConflict) {
-                val vedtak = repository.hentVedtakTilSamordning(sakId)
-                if (vedtak?.status == VedtakStatus.TIL_SAMORDNING) {
-                    logger.info("Manuelt samordner pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST, sakId=$sakId, vedtakId=${vedtak.id}")
-                    samordnetVedtak(vedtak.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
-                        rapidService.sendToRapid(samordnetVedtak)
-                    }
+            val vedtak: Vedtak? = repository.hentVedtakTilSamordning(sakId)
+
+            // Dette er for å få saker som er TIL_SAMORDNING videre til SAMORDNET i det tilfelle overstyring ikke fungerer
+            // pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
+            val behandlingerSomErStuck = listOf("6e960200-ac0a-4341-8e00-cf4300588d65")
+            val skalOverstyresPgaOverFrist = behandlingerSomErStuck.find { it == vedtak?.behandlingId.toString() } != null
+
+            if (vedtak?.status == VedtakStatus.TIL_SAMORDNING && skalOverstyresPgaOverFrist) {
+                logger.warn("Manuelt samordner pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST, sakId=$sakId, vedtakId=${vedtak.id}")
+                samordnetVedtak(vedtak.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
+                    rapidService.sendToRapid(samordnetVedtak)
                 }
+            } else {
+                samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
             }
         } catch (e: Exception) {
             repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)

@@ -5,9 +5,10 @@ import { opprettBrevFraPDF } from '~shared/api/brev'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { DokumentVisningModal, PdfVisning } from '~shared/brev/pdf-visning'
-import { isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ISak } from '~shared/types/sak'
 import { round } from 'lodash'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 /**
  * Husk å endre [proxy_body_size] i nais-filene hvis du skal øke maks filstørrelse.
@@ -129,6 +130,13 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
                   </Button>
                 )}
               </div>
+              {isFailure(lastOppStatus) && (
+                <ApiErrorAlert>
+                  {lastOppStatus.error.detail
+                    ? lastOppStatus.error.detail
+                    : `Kunne ikke laste oppe brev, status ${lastOppStatus.status}`}
+                </ApiErrorAlert>
+              )}
 
               <HStack gap="4" justify="end">
                 <Button variant="secondary" onClick={avbryt} disabled={isPending(lastOppStatus)}>

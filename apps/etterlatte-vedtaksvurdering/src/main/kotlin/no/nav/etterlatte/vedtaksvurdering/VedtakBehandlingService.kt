@@ -49,6 +49,7 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
+    private val rapidService: VedtaksvurderingRapidService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -409,12 +410,16 @@ class VedtakBehandlingService(
         repository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
 
         try {
-            val meldingFinnes = samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
-            if (meldingFinnes) { // TODO bør vi ha ytterlige sjekker før vi samordner?
+            val httpConflict = samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
+            // hvis saksbehandler ikke får overstyrt pga SAM responderer med ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
+            // saken er fastlås med status TIL_SAMORDNING og kommer ikke videre, i dette tilfelle samordner vi og sender saken videre
+            if (httpConflict) {
                 val vedtak = repository.hentVedtakTilSamordning(sakId)
-                if (vedtak != null) {
+                if (vedtak?.status == VedtakStatus.TIL_SAMORDNING) {
                     logger.info("Manuelt samordner pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST, sakId=$sakId, vedtakId=${vedtak.id}")
-                    samordnetVedtak(vedtak.behandlingId, brukerTokenInfo)
+                    samordnetVedtak(vedtak.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
+                        rapidService.sendToRapid(samordnetVedtak)
+                    }
                 }
             }
         } catch (e: Exception) {

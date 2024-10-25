@@ -148,8 +148,6 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDaoImpl
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapper
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
 import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
@@ -280,11 +278,6 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
-    val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao =
-        VilkaarsvurderingKlientDaoImpl(
-            config,
-            httpClient(),
-        ),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -330,7 +323,6 @@ internal class ApplicationContext(
 
     val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper =
         VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
-    // VilkarsvurderingRepositorDaoWrapperClient(vilkaarsvurderingKlientDaoImpl)
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))

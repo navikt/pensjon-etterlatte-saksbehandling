@@ -8,8 +8,6 @@
       <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
       <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />
       <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no" />
-      <env name="ETTERLATTE_VILKAARSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vilkaarsvurdering" />
-      <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="https://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
       <env name="HTTP_PORT" value="8088" />
       <env name="KODEVERK_URL" value="https://kodeverk-api.nav.no/api/v1/kodeverk" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />

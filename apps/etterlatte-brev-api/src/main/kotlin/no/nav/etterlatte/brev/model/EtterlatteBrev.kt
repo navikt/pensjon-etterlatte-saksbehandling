@@ -93,6 +93,7 @@ data class OmstillingsstoenadBeregningsperiode(
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val sanksjon: Boolean,
     val institusjon: Boolean,
+    val erOverstyrtInnvilgaMaaneder: Boolean,
 )
 
 data class TrygdetidMedBeregningsmetode(

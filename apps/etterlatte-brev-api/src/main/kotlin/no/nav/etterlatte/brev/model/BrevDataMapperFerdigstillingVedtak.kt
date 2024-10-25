@@ -107,6 +107,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         klage,
                     )
+
                 BP_INNVILGELSE,
                 BP_INNVILGELSE_FORELDRELOES,
                 ->
@@ -122,12 +123,14 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         systemkilde,
                     )
+
                 BP_AVSLAG ->
                     barnepensjonAvslag(
                         innholdMedVedlegg,
                         soekerUnder18,
                         utlandstilknytningType,
                     )
+
                 BP_OPPHOER ->
                     barnepensjonOpphoer(
                         bruker,
@@ -436,7 +439,7 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkårsvurdering" },
             avdoede,
             utlandstilknytningType,
-            behandling.erSluttbehandling,
+            behandling,
         )
     }
 
@@ -488,6 +491,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         val datoVedtakOmgjoering =
             klage
@@ -511,6 +515,7 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
             datoVedtakOmgjoering,
             utlandstilknytningType,
+            behandling.opphoerFraOgMed,
         )
     }
 

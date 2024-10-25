@@ -64,7 +64,6 @@ data class AvkortingGrunnlagFrontend(
 data class AvkortingDto(
     val avkortingGrunnlag: List<AvkortingGrunnlagDto>, // TODO kan "flyttes" inn i avkortetYteleDto?
     val avkortetYtelse: List<AvkortetYtelseDto>,
-    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(), // TODO Fjern
 )
 
 data class AvkortingGrunnlagDto(
@@ -75,7 +74,7 @@ data class AvkortingGrunnlagDto(
     val fratrekkInnAar: Int,
     val inntektUtlandTom: Int,
     val fratrekkInnAarUtland: Int,
-    val relevanteMaanederInnAar: Int,
+    val innvilgaMaaneder: Int,
     val spesifikasjon: String,
     val kilde: AvkortingGrunnlagKildeDto,
 )
@@ -126,7 +125,7 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val ytelseFoerAvkorting: Int,
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
-    val relevanteMaanederInnAar: Int,
+    val innvilgaMaaneder: Int,
     val trygdetid: Int,
     val grunnbelop: Int,
     val grunnbelopMnd: Int,

@@ -27,7 +27,7 @@ data class AvkortetBeregningsperiode(
     val inntekt: Kroner,
     val aarsinntekt: Kroner,
     val fratrekkInnAar: Kroner,
-    val relevanteMaanederInnAar: Int,
+    val innvilgaMaaneder: Int,
     val ytelseFoerAvkorting: Kroner,
     val restanse: Kroner,
     val trygdetid: Int,

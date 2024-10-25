@@ -15,7 +15,9 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.fromDto
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -44,7 +46,7 @@ data class OmstillingsstoenadInnvilgelse(
             vilkaarsVurdering: VilkaarsvurderingDto,
             avdoede: List<Avdoed>,
             utlandstilknytning: UtlandstilknytningType?,
-            erSluttbehandling: Boolean,
+            behandling: DetaljertBehandling,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -54,7 +56,7 @@ data class OmstillingsstoenadInnvilgelse(
                         inntekt = it.inntekt,
                         aarsinntekt = it.aarsinntekt,
                         fratrekkInnAar = it.fratrekkInnAar,
-                        relevantMaanederInnAar = it.relevanteMaanederInnAar,
+                        innvilgaMaaneder = it.innvilgaMaaneder,
                         grunnbeloep = it.grunnbeloep,
                         ytelseFoerAvkorting = it.ytelseFoerAvkorting,
                         restanse = it.restanse,
@@ -103,6 +105,8 @@ data class OmstillingsstoenadInnvilgelse(
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = avdoed.navn,
                             ),
+                        oppphoersdato = behandling.opphoerFraOgMed?.atDay(1),
+                        opphoerNesteAar = behandling.opphoerFraOgMed?.year == (behandling.virkningstidspunkt().dato.year + 1),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
                     avdoed.doedsdato
@@ -114,7 +118,7 @@ data class OmstillingsstoenadInnvilgelse(
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
-                erSluttbehandling = erSluttbehandling,
+                erSluttbehandling = behandling.erSluttbehandling,
             )
         }
     }

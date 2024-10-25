@@ -103,6 +103,7 @@ export const AvkortingInntektForm = ({
     handleSubmit,
     formState: { errors },
     watch,
+    getValues,
   } = methods
 
   const onSubmit = (data: IAvkortingGrunnlagLagre) => {
@@ -126,7 +127,7 @@ export const AvkortingInntektForm = ({
     )
   }
 
-  const [skalOverstyreMaaneder, setSkalOverstyreMaaneder] = useState(false)
+  const [skalOverstyreMaaneder, setSkalOverstyreMaaneder] = useState(!!getValues('overstyrtInnvilgaMaaneder'))
   const toggleOverstyrtInnvilgaMaaneder = () => {
     if (skalOverstyreMaaneder) {
       reset({ overstyrtInnvilgaMaaneder: undefined })

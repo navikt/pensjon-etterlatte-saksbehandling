@@ -22,6 +22,7 @@ export interface IAvkortingGrunnlag {
   inntektUtlandTom: number
   fratrekkInnAarUtland: number
   spesifikasjon: string
+  overstyrtInnvilgaMaaneder?: IOverstyrtInnvilgaMaaneder
   kilde: {
     tidspunkt: string
     ident: string

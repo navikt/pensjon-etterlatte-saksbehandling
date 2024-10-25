@@ -77,6 +77,7 @@ data class AvkortingGrunnlagDto(
     val innvilgaMaaneder: Int,
     val spesifikasjon: String,
     val kilde: AvkortingGrunnlagKildeDto,
+    val overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
 )
 
 data class AvkortingGrunnlagLagreDto(

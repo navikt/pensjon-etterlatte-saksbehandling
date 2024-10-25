@@ -98,6 +98,7 @@ internal class VedtakBehandlingServiceTest(
                 behandlingKlient = behandlingKlientMock,
                 samordningsKlient = samordningsKlientMock,
                 trygdetidKlient = trygdetidKlientMock,
+                rapidService = mockk(),
             )
     }
 

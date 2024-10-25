@@ -6,8 +6,15 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.appIsInGCP
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import org.slf4j.LoggerFactory
+import java.net.ConnectException
 import java.net.InetAddress
+
+class LeaderElectionDownException(
+    message: String,
+    override val cause: Throwable,
+) : InternfeilException(detail = message)
 
 open class LeaderElection(
     private val electorPath: String?,
@@ -21,13 +28,17 @@ open class LeaderElection(
     open fun isLeader(): Boolean {
         if (electorPath != null) {
             val leader =
-                runBlocking {
-                    httpClient
-                        .get("http://$electorPath/")
-                        .bodyAsText()
-                        .let(objectMapper::readTree)
-                        .get("name")
-                        .asText()
+                try {
+                    runBlocking {
+                        httpClient
+                            .get("http://$electorPath/")
+                            .bodyAsText()
+                            .let(objectMapper::readTree)
+                            .get("name")
+                            .asText()
+                    }
+                } catch (e: ConnectException) {
+                    throw LeaderElectionDownException("Kan ikke nå leaderelection", e)
                 }
             val isLeader = leader == hostName()
             logger.info("Current pod: ${hostName()?.sanitize()}. Leader: ${leader.sanitize()}. Current pod is leader: $isLeader")

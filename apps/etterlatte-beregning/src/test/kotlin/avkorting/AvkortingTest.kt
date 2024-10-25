@@ -333,7 +333,7 @@ internal class AvkortingTest {
                 it.inntektUtlandTom shouldBe inntektFraAug24.inntektUtlandTom
                 it.fratrekkInnAarUtland shouldBe inntektFraAug24.fratrekkInnAarUtland
                 it.spesifikasjon shouldBe inntektFraAug24.spesifikasjon
-                it.relevanteMaanederInnAar shouldBe 10
+                it.innvilgaMaaneder shouldBe 10
             }
         }
 

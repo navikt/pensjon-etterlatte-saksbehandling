@@ -157,7 +157,7 @@ class BeregningService(
                         ),
                     aarsinntekt = Kroner(it.aarsinntekt),
                     fratrekkInnAar = Kroner(it.fratrekkInnAar),
-                    relevanteMaanederInnAar = it.relevanteMaanederInnAar,
+                    innvilgaMaaneder = it.innvilgaMaaneder,
                     ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
                     restanse = Kroner(it.restanse),
                     utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),

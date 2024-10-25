@@ -46,7 +46,7 @@ class YtelseMedGrunnlagService(
                     trygdetid = beregningIPeriode.trygdetid,
                     aarsinntekt = aarsinntekt,
                     fratrekkInnAar = fratrekkInnAar,
-                    relevanteMaanederInnAar = grunnlag.relevanteMaanederInnAar,
+                    innvilgaMaaneder = grunnlag.innvilgaMaaneder,
                     grunnbelop = beregningIPeriode.grunnbelop,
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                     beregningsMetode = beregningIPeriode.beregningsMetode,

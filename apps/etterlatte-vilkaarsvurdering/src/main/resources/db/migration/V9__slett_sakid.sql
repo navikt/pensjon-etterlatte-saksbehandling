@@ -1,1 +1,0 @@
-ALTER TABLE vilkaarsvurdering DROP COLUMN sak_id;

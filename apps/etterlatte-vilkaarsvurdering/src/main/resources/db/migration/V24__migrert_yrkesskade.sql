@@ -1,1 +1,0 @@
-ALTER TABLE migrert_yrkesskade ADD COLUMN sak_id bigint;

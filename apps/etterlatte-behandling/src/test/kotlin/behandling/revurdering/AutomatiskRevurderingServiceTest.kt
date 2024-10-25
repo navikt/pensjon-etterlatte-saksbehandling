@@ -16,7 +16,7 @@ import no.nav.etterlatte.behandling.revurdering.OmregningOverstyrtBeregning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.nyKontekstMedBruker
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -82,9 +82,10 @@ class AutomatiskRevurderingServiceTest {
             beregningKlient = beregningKlient,
         )
 
+    val systembruker = mockk<Systembruker>()
     val user =
         mockk<SystemUser> {
-            every { brukerTokenInfo } returns mockk<BrukerTokenInfo>()
+            every { brukerTokenInfo } returns systembruker
         }
 
     @BeforeEach
@@ -110,7 +111,7 @@ class AutomatiskRevurderingServiceTest {
                 Revurderingaarsak.OMREGNING,
             )
         runBlocking {
-            service.oppprettRevurderingOgOppfoelging(request)
+            service.oppprettRevurderingOgOppfoelging(request, systembruker)
         }
     }
 
@@ -133,7 +134,7 @@ class AutomatiskRevurderingServiceTest {
             )
         assertThrows<OmregningKreverLoependeVedtak> {
             runBlocking {
-                service.oppprettRevurderingOgOppfoelging(request)
+                service.oppprettRevurderingOgOppfoelging(request, systembruker)
             }
         }
     }
@@ -157,7 +158,7 @@ class AutomatiskRevurderingServiceTest {
             )
         assertThrows<OmregningAvSakUnderSamordning> {
             runBlocking {
-                service.oppprettRevurderingOgOppfoelging(request)
+                service.oppprettRevurderingOgOppfoelging(request, systembruker)
             }
         }
     }
@@ -182,7 +183,7 @@ class AutomatiskRevurderingServiceTest {
             )
         assertThrows<OmregningOverstyrtBeregning> {
             runBlocking {
-                service.oppprettRevurderingOgOppfoelging(request)
+                service.oppprettRevurderingOgOppfoelging(request, systembruker)
             }
         }
     }

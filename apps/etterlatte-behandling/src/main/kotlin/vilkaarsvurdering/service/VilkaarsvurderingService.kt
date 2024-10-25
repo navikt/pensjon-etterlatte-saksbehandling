@@ -132,21 +132,15 @@ class VilkaarsvurderingService(
 
     private fun validerTidligereVilkaarsvurdering(tidligereVilkaarsvurdering: Vilkaarsvurdering) {
         if (tidligereVilkaarsvurdering.resultat == null) {
-            throw VilkaarsvurderingValideringException(
-                "Mangler resultat for vilkårsvurdering",
-                vilkaarvurdering = tidligereVilkaarsvurdering,
-            )
+            logger.warn("Mangler resultat for vilkårsvurdering")
         }
 
         if (tidligereVilkaarsvurdering.vilkaar.isEmpty()) {
-            throw VilkaarsvurderingValideringException("Mangler vilkår for vilkårsvurdering", vilkaarvurdering = tidligereVilkaarsvurdering)
+            logger.warn("Mangler vilkår for vilkårsvurdering")
         }
 
         if (tidligereVilkaarsvurdering.vilkaar.any { it.vurdering == null }) {
-            throw VilkaarsvurderingValideringException(
-                "Mangler vurdering for delvilkår i vilkårsvurdering",
-                vilkaarvurdering = tidligereVilkaarsvurdering,
-            )
+            logger.warn("Mangler vurdering for delvilkår i vilkårsvurdering")
         }
     }
 
@@ -448,19 +442,6 @@ class BehandlingstilstandException(
     message: String? = null,
     e: Exception? = null,
 ) : IllegalStateException(message, e)
-
-class VilkaarsvurderingValideringException(
-    detail: String,
-    vilkaarvurdering: Vilkaarsvurdering,
-) : UgyldigForespoerselException(
-        code = "UGYLDIG_TILSTAND_VILKAARSVURDERING_KOPIER",
-        detail = detail,
-        meta =
-            mapOf(
-                "vilkaarvurderingId" to vilkaarvurdering.id,
-                "behandlingId" to vilkaarvurdering.behandlingId,
-            ),
-    )
 
 class VilkaarsvurderingTilstandException(
     detail: String,

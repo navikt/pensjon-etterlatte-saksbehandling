@@ -82,6 +82,7 @@ class BehandlingInfoService(
         behandling: Behandling,
         opphoer: Boolean,
     ) {
+        // TODO: sjekke her burde sjekke rekkefølge som i frontend... har man en senere eller lik status burde vi her si OK ikke spørre om spesifikk status...
         val kanEndres =
             when (behandling.sak.sakType) {
                 SakType.BARNEPENSJON -> {
@@ -89,6 +90,7 @@ class BehandlingInfoService(
                         behandling.status in
                             listOf(
                                 BehandlingStatus.VILKAARSVURDERT,
+                                BehandlingStatus.TRYGDETID_OPPDATERT,
                                 BehandlingStatus.RETURNERT,
                             )
                     } else {

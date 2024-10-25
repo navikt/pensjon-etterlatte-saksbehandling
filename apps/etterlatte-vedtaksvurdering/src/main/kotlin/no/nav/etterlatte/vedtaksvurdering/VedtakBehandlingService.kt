@@ -411,13 +411,7 @@ class VedtakBehandlingService(
 
         try {
             val vedtak: Vedtak? = repository.hentVedtakTilSamordning(sakId)
-
-            // Dette er for å få saker som er TIL_SAMORDNING videre til SAMORDNET i det tilfelle overstyring ikke fungerer
-            // pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
-            val behandlingerSomErStuck = listOf("6e960200-ac0a-4341-8e00-cf4300588d65")
-            val skalOverstyresPgaOverFrist = behandlingerSomErStuck.find { it == vedtak?.behandlingId.toString() } != null
-
-            if (vedtak?.status == VedtakStatus.TIL_SAMORDNING && skalOverstyresPgaOverFrist) {
+            if (vedtak?.status == VedtakStatus.TIL_SAMORDNING && skalSamordnesManuelt(vedtak.behandlingId)) {
                 logger.warn("Manuelt samordner pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST, sakId=$sakId, vedtakId=${vedtak.id}")
                 samordnetVedtak(vedtak.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
                     rapidService.sendToRapid(samordnetVedtak)
@@ -459,6 +453,13 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             ),
         )
+    }
+
+    // Dette er for å få saker som er TIL_SAMORDNING videre til SAMORDNET i det tilfelle overstyring ikke fungerer
+    // pga SAM returnerer ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
+    private fun skalSamordnesManuelt(behandlingId: UUID): Boolean {
+        val behandlingerSomErStuck = listOf("6e960200-ac0a-4341-8e00-cf4300588d65")
+        return behandlingerSomErStuck.find { it == behandlingId.toString() } != null
     }
 
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.revurdering
 
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -22,6 +20,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -36,21 +35,23 @@ class AutomatiskRevurderingService(
      * Denne tjenesten er tiltenkt automatiske jobber der det kan utføres mange samtidig.
      * Det er derfor behov for retries rundt oppfølgingsmetoder.
      */
-    suspend fun oppprettRevurderingOgOppfoelging(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse {
+    suspend fun oppprettRevurderingOgOppfoelging(
+        request: AutomatiskRevurderingRequest,
+        systembruker: Systembruker,
+    ): AutomatiskRevurderingResponse {
         if (request.revurderingAarsak == Revurderingaarsak.ALDERSOVERGANG) {
             inTransaction { revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(request.sakId) }
         }
 
-        val brukerTokenInfo = hentBrukerToken()
         val loepende =
             vedtakKlient.sakHarLopendeVedtakPaaDato(
                 request.sakId,
                 request.fraDato,
-                brukerTokenInfo,
+                systembruker,
             )
         val forrigeBehandling = hentForrigeBehandling(loepende, request.sakId)
 
-        gyldigForAutomatiskRevurdering(request, loepende, forrigeBehandling, brukerTokenInfo)
+        gyldigForAutomatiskRevurdering(request, loepende, forrigeBehandling, systembruker)
 
         val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
 
@@ -122,12 +123,6 @@ class AutomatiskRevurderingService(
             }
         }
     }
-
-    private fun hentBrukerToken() =
-        when (val appUser = Kontekst.get().AppUser) {
-            is SystemUser -> appUser.brukerTokenInfo
-            else -> throw KunSystembrukerException()
-        }
 
     private fun hentForrigeBehandling(
         vedtak: LoependeYtelseDTO,

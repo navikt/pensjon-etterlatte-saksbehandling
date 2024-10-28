@@ -76,7 +76,7 @@ fun Route.brevRoute(
         }
 
         route("mottaker") {
-            put {
+            post {
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val mottaker = service.opprettMottaker(brevId)
 
@@ -84,7 +84,7 @@ fun Route.brevRoute(
                 }
             }
 
-            post {
+            put {
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val body = call.receive<OppdaterMottakerRequest>()
                     service.oppdaterMottaker(brevId, body.mottaker)

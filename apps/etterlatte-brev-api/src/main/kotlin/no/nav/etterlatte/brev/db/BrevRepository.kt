@@ -59,13 +59,7 @@ class BrevRepository(
     fun hentBrev(id: BrevID): Brev =
         using(sessionOf(ds)) { session ->
             session.single(queryOf(HENT_BREV_QUERY, id)) { brevRow ->
-                val mottakere =
-                    session.list(
-                        queryOf("SELECT * FROM mottaker WHERE brev_id = ?", brevRow.long("id")),
-                        tilMottaker,
-                    )
-
-                brevRow.tilBrev(mottakere)
+                brevRow.tilBrev(session.hentMottakere(brevRow.long("id")))
             }
         }!!
 
@@ -97,26 +91,14 @@ class BrevRepository(
     ): List<Brev> =
         using(sessionOf(ds)) { session ->
             session.list(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId, type.name)) { brevRow ->
-                val mottakere =
-                    session.list(
-                        queryOf("SELECT * FROM mottaker WHERE brev_id = ?", brevRow.long("id")),
-                        tilMottaker,
-                    )
-
-                brevRow.tilBrev(mottakere)
+                brevRow.tilBrev(session.hentMottakere(brevRow.long("id")))
             }
         }
 
     fun hentBrevForSak(sakId: SakId): List<Brev> =
         using(sessionOf(ds)) { session ->
             session.list(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId.sakId)) { brevRow ->
-                val mottakere =
-                    session.list(
-                        queryOf("SELECT * FROM mottaker WHERE brev_id = ?", brevRow.long("id")),
-                        tilMottaker,
-                    )
-
-                brevRow.tilBrev(mottakere)
+                brevRow.tilBrev(session.hentMottakere(brevRow.long("id")))
             }
         }
 
@@ -466,6 +448,12 @@ class BrevRepository(
         status: Status,
         payload: String = "{}",
     ) = lagreHendelse(brevId, status, Tidspunkt.now(), payload)
+
+    private fun Session.hentMottakere(brevId: BrevID) =
+        list(
+            queryOf("SELECT * FROM mottaker WHERE brev_id = ?", brevId),
+            tilMottaker,
+        )
 
     private fun Session.lagreHendelse(
         brevId: BrevID,

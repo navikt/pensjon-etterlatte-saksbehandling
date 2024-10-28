@@ -31,14 +31,14 @@ export const opprettVedtaksbrev = async (args: { sakId: number; behandlingId: st
   apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
 
 export const opprettMottaker = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<Mottaker>> =>
-  apiClient.put(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, {})
+  apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, {})
 
 export const oppdaterMottaker = async (props: {
   brevId: number
   sakId: number
   mottaker: Mottaker
 }): Promise<ApiResponse<void>> =>
-  apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, { mottaker: props.mottaker })
+  apiClient.put(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, { mottaker: props.mottaker })
 
 export const slettMottaker = async (props: {
   brevId: number

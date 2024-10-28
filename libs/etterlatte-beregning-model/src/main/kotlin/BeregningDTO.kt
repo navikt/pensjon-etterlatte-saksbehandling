@@ -133,6 +133,7 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val beregningsMetode: BeregningsMetode?,
     val sanksjon: SanksjonertYtelse?,
     val institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag?,
+    val erOverstyrtInnvilgaMaaneder: Boolean,
 )
 
 enum class OverstyrtBeregningKategori {

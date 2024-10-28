@@ -169,6 +169,7 @@ class BeregningService(
                     // ved manuelt overstyrt beregning har vi ikke grunnlag
                     sanksjon = it.sanksjon,
                     institusjon = it.institusjonsopphold,
+                    erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
                 )
             }
 

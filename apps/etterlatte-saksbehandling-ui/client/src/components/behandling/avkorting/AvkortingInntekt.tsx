@@ -73,7 +73,7 @@ export const AvkortingInntekt = ({
             <Heading size="small">{avkortingGrunnlagFrontend.aar}</Heading>
             {fyller67 && (
               <Alert variant="warning">
-                Bruker fyller 67 for inntektsåret og antall innvilga måneder vil bli tilpasset deretter.
+                Bruker fyller 67 år i inntektsåret og antall innvilga måneder vil bli tilpasset deretter.
               </Alert>
             )}
             <Table className="table" zebraStripes>

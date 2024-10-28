@@ -83,6 +83,7 @@ data class OmstillingsstoenadRevurdering(
                         beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
                         sanksjon = it.sanksjon != null,
                         institusjon = it.institusjon != null && it.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
+                        erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
                     )
                 }
 

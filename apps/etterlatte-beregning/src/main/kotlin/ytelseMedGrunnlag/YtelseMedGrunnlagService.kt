@@ -52,6 +52,7 @@ class YtelseMedGrunnlagService(
                     beregningsMetode = beregningIPeriode.beregningsMetode,
                     sanksjon = avkortetYtelse.sanksjon,
                     institusjonsopphold = beregningIPeriode.institusjonsopphold,
+                    erOverstyrtInnvilgaMaaneder = grunnlag.overstyrtInnvilgaMaaneder != null,
                 )
             }
 

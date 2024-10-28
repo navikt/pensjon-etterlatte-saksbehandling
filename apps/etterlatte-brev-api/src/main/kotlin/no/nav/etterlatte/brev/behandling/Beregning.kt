@@ -36,6 +36,7 @@ data class AvkortetBeregningsperiode(
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val sanksjon: SanksjonertYtelse?,
     val institusjon: InstitusjonsoppholdBeregningsgrunnlag?,
+    val erOverstyrtInnvilgaMaaneder: Boolean,
 )
 
 data class Beregningsperiode(

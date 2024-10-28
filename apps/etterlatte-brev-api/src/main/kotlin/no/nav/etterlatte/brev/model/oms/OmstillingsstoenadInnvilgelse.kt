@@ -67,6 +67,7 @@ data class OmstillingsstoenadInnvilgelse(
                         beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
                         sanksjon = it.sanksjon != null,
                         institusjon = it.institusjon != null && it.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
+                        erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
                     )
                 }
 
@@ -105,6 +106,25 @@ data class OmstillingsstoenadInnvilgelse(
                     avdoede.single().doedsdato
                 }
 
+            // Hvis antall innvilga måneder er overstyrt under beregning skal "forventa" opphørsdato vises selv uten opphørFom
+            val forventaOpphoersDato =
+                when (behandling.opphoerFraOgMed) {
+                    null -> {
+                        if (sisteBeregningsperiode.erOverstyrtInnvilgaMaaneder) {
+                            val foersteFom = beregningsperioder.first().datoFOM
+                            foersteFom.plusMonths(sisteBeregningsperiode.innvilgaMaaneder.toLong())
+                        } else if (sisteBeregningsperiodeNesteAar != null && sisteBeregningsperiodeNesteAar.erOverstyrtInnvilgaMaaneder) {
+                            LocalDate
+                                .of(sisteBeregningsperiodeNesteAar.datoFOM.year, 1, 1)
+                                .plusMonths(sisteBeregningsperiodeNesteAar.innvilgaMaaneder.toLong())
+                        } else {
+                            null
+                        }
+                    }
+
+                    else -> behandling.opphoerFraOgMed?.atDay(1)
+                }
+
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
                 avdoed = avdoed,
@@ -119,10 +139,13 @@ data class OmstillingsstoenadInnvilgelse(
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = avdoed?.navn ?: "", // TODO: navnAvdoed brukes ikke i oms så burde ikke være påkrevd
+                                navnAvdoed =
+                                    avdoed?.navn
+                                        ?: "",
+                                // TODO: navnAvdoed brukes ikke i oms så burde ikke være påkrevd
                             ),
-                        oppphoersdato = behandling.opphoerFraOgMed?.atDay(1),
-                        opphoerNesteAar = behandling.opphoerFraOgMed?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        oppphoersdato = forventaOpphoersDato,
+                        opphoerNesteAar = forventaOpphoersDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
                     doedsdatoEllerOpphoertPleieforhold

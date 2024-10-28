@@ -83,8 +83,8 @@ internal class OmregningJobServiceTest {
                 sakId shouldBe SAK_ID
                 kjoering shouldBe OmregningJobService.kjoering
                 revurderingaarsak shouldBe Revurderingaarsak.OMREGNING
+                verifiserUtbetalingUendret shouldBe true
                 hentFraDato() shouldBe LocalDate.of(2023, Month.NOVEMBER, 1)
-                hentVerifiserUtbetalingUendret() shouldBe true
             }
         }
     }

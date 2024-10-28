@@ -55,7 +55,7 @@ data class OmregningData(
     private var sakType: SakType? = null,
     private var behandlingId: UUID? = null,
     private var forrigeBehandlingId: UUID? = null,
-    private var verifiserUtbetalingUendret: Boolean? = null,
+    val verifiserUtbetalingUendret: Boolean = false,
 ) {
     fun toPacket() =
         OmregningDataPacket(
@@ -103,16 +103,6 @@ data class OmregningData(
             throw OmregningshendelseSkalIkkeMuteres(OmregningData::forrigeBehandlingId.name)
         }
         forrigeBehandlingId = value
-    }
-
-    fun hentVerifiserUtbetalingUendret() =
-        verifiserUtbetalingUendret ?: throw OmregningshendelseHarFeilTilstand(OmregningData::verifiserUtbetalingUendret.name)
-
-    fun endreVerifiserUtbetalingUendret(value: Boolean) {
-        if (verifiserUtbetalingUendret != null) {
-            throw OmregningshendelseSkalIkkeMuteres(OmregningData::verifiserUtbetalingUendret.name)
-        }
-        verifiserUtbetalingUendret = value
     }
 }
 

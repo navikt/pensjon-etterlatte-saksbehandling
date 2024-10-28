@@ -30,6 +30,7 @@ internal class OpprettVedtakforespoerselRiverTest {
     private fun genererOpprettVedtakforespoersel(
         behandlingId: UUID,
         revurderingaarsak: Revurderingaarsak = Revurderingaarsak.REGULERING,
+        verifiserUtbetaling: Boolean = false,
     ) = JsonMessage.newMessage(
         mapOf(
             OmregningHendelseType.BEREGNA.lagParMedEventNameKey(),
@@ -40,6 +41,7 @@ internal class OpprettVedtakforespoerselRiverTest {
                     fradato = foersteMai2023,
                     revurderingaarsak = revurderingaarsak,
                     behandlingId = behandlingId,
+                    verifiserUtbetalingUendret = verifiserUtbetaling,
                 ).toPacket(),
         ),
     )
@@ -116,7 +118,7 @@ internal class OpprettVedtakforespoerselRiverTest {
     @Test
     fun `skal opprette vedtak, simulere og attestere ved uendret utbetaling`() {
         val behandlingId = UUID.randomUUID()
-        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING)
+        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING, true)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val utbetalingKlientMock =
             mockk<UtbetalingKlient> {
@@ -154,7 +156,7 @@ internal class OpprettVedtakforespoerselRiverTest {
     @Test
     fun `skal opprette vedtak, simulere og feile fordi det finnes etterbetaling`() {
         val behandlingId = UUID.randomUUID()
-        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING)
+        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING, true)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val utbetalingKlientMock =
             mockk<UtbetalingKlient> {
@@ -187,7 +189,7 @@ internal class OpprettVedtakforespoerselRiverTest {
     @Test
     fun `skal opprette vedtak, simulere og feile fordi det finnes tilbakekreving`() {
         val behandlingId = UUID.randomUUID()
-        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING)
+        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING, true)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val utbetalingKlientMock =
             mockk<UtbetalingKlient> {

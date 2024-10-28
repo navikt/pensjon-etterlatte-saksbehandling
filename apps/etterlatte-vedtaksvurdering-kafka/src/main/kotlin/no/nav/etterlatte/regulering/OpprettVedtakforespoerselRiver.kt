@@ -57,7 +57,7 @@ internal class OpprettVedtakforespoerselRiver(
             if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
                 vedtak.opprettVedtakOgFatt(sakId, behandlingId)
             } else {
-                if (omregningData.hentVerifiserUtbetalingUendret()) {
+                if (omregningData.verifiserUtbetalingUendret) {
                     vedtak.opprettVedtakOgFatt(sakId, behandlingId)
                     verifiserUendretUtbetaling(behandlingId)
                     vedtak.attesterVedtak(sakId, behandlingId)
@@ -81,6 +81,7 @@ internal class OpprettVedtakforespoerselRiver(
         if (tilbakekrevingSum.compareTo(BigDecimal.ZERO) != 0) {
             throw Exception("Omregningen fører til tilbakekreving på $tilbakekrevingSum, avbryter behandlingen")
         }
+        logger.info("Omregningen førte ikke til tilbakekreving eller etterbetaling")
     }
 
     private fun hentBeloep(

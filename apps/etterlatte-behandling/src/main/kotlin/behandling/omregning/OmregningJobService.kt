@@ -68,10 +68,8 @@ class OmregningJobService(
                     sakId = sakId,
                     revurderingaarsak = Revurderingaarsak.OMREGNING,
                     fradato = foersteVirkningstidspunktForSak,
-                ).apply {
-                    // Bruker simulering til å se at fattet vedtak ikke medfører etterbetaling eller tilbakekreving
-                    endreVerifiserUtbetalingUendret(true)
-                }
+                    verifiserUtbetalingUendret = true,
+                )
 
             logger.info("Publiserer omregningshendelse for sak $sakId på kafka")
             publiserHendelse(omregningData)

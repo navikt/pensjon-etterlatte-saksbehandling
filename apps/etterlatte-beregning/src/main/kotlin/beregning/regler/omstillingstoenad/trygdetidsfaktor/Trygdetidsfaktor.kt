@@ -48,9 +48,9 @@ val trygdetidBruktRegel =
         beskrivelse = "Finn trygdetid basert på faktisk, teoretisk og beregningsmetgode",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-VALGT-TRYGDETID"),
     ) benytter trygdetidRegel og nasjonalTrygdetidRegel og teoretiskTrygdetidRegel med {
-            trygdetid,
-            nasjonal,
-            teoretisk,
+        trygdetid,
+        nasjonal,
+        teoretisk,
         ->
         val nasjonalBeregning = AnvendtTrygdetid(BeregningsMetode.NASJONAL, nasjonal, trygdetid.ident)
         val teoretiskBeregning = AnvendtTrygdetid(BeregningsMetode.PRORATA, teoretisk, trygdetid.ident)
@@ -78,8 +78,8 @@ val trygdetidsFaktor =
         beskrivelse = "Finn trygdetidsfaktor",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-TRYGDETIDSFAKTOR"),
     ) benytter maksTrygdetid og trygdetidBruktRegel med {
-            maksTrygdetid,
-            trygdetid,
+        maksTrygdetid,
+        trygdetid,
         ->
         minOf(trygdetid.trygdetid, maksTrygdetid).divide(maksTrygdetid)
     }

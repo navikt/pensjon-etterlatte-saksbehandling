@@ -376,8 +376,8 @@ internal class GrunnlagDaoIntegrationTest(
 
         // mange dummy-opplysninger tilknyttet andre personer, skal ignoreres...
         listOf(SOEKER_FOEDSELSNUMMER, HALVSOESKEN_ANNEN_FORELDER, GJENLEVENDE_FOEDSELSNUMMER, HALVSOESKEN_FOEDSELSNUMMER).forEachIndexed {
-                i,
-                fnr,
+            i,
+            fnr,
             ->
             val sakId = SakId(i.toLong())
             opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(SOEKER_SOEKNAD_V1, fnr = fnr))

@@ -29,18 +29,18 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
-internal class OmregningJobServiceTest {
+internal class OmregningKlassifikasjonskodeJobServiceTest {
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(mockk()), mockk(), null)
     private val kafkaProdusent: TestProdusent<String, String> = spyk(TestProdusent())
     private lateinit var omregningDao: OmregningDao
     private lateinit var behandlingService: BehandlingService
-    private lateinit var omregningJobService: OmregningJobService
+    private lateinit var omregningKlassifikasjonskodeJobService: OmregningKlassifikasjonskodeJobService
 
     @BeforeEach
     fun before() {
         omregningDao =
             mockk {
-                every { hentSakerTilOmregning(OmregningJobService.kjoering, any()) } returns
+                every { hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, any()) } returns
                     listOf(Pair(SAK_ID, KjoeringStatus.FEILA))
             }
 
@@ -55,8 +55,8 @@ internal class OmregningJobServiceTest {
                     )
             }
 
-        omregningJobService =
-            OmregningJobService(
+        omregningKlassifikasjonskodeJobService =
+            OmregningKlassifikasjonskodeJobService(
                 behandlingService = behandlingService,
                 omregningDao = omregningDao,
                 kafkaProdusent = kafkaProdusent,
@@ -65,9 +65,9 @@ internal class OmregningJobServiceTest {
 
     @Test
     fun `skal hente en sak og og publisere hendelse på kafka`() {
-        omregningJobService.setupKontekstAndRun(kontekst)
+        omregningKlassifikasjonskodeJobService.setupKontekstAndRun(kontekst)
 
-        verify { omregningDao.hentSakerTilOmregning(OmregningJobService.kjoering, 1) }
+        verify { omregningDao.hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, 1) }
         verify { behandlingService.hentFoerstegangsbehandling(SAK_ID) }
         verify { kafkaProdusent.publiser(any(), any()) }
 
@@ -81,7 +81,7 @@ internal class OmregningJobServiceTest {
 
             with(hendelseData) {
                 sakId shouldBe SAK_ID
-                kjoering shouldBe OmregningJobService.kjoering
+                kjoering shouldBe OmregningKlassifikasjonskodeJobService.kjoering
                 revurderingaarsak shouldBe Revurderingaarsak.OMREGNING
                 verifiserUtbetalingUendret shouldBe true
                 hentFraDato() shouldBe LocalDate.of(2023, Month.NOVEMBER, 1)
@@ -94,10 +94,10 @@ internal class OmregningJobServiceTest {
         every { behandlingService.hentFoerstegangsbehandling(any()) } returns foerstegangsbehandling(BehandlingStatus.OPPRETTET)
 
         assertThrows<InternfeilException> {
-            omregningJobService.setupKontekstAndRun(kontekst)
+            omregningKlassifikasjonskodeJobService.setupKontekstAndRun(kontekst)
         }
 
-        verify { omregningDao.hentSakerTilOmregning(OmregningJobService.kjoering, 1) }
+        verify { omregningDao.hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, 1) }
         verify { behandlingService.hentFoerstegangsbehandling(SAK_ID) }
         verify(exactly = 0) { kafkaProdusent.publiser(any(), any()) }
     }
@@ -107,10 +107,10 @@ internal class OmregningJobServiceTest {
         every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(foerstegangsbehandling(BehandlingStatus.OPPRETTET))
 
         assertThrows<InternfeilException> {
-            omregningJobService.setupKontekstAndRun(kontekst)
+            omregningKlassifikasjonskodeJobService.setupKontekstAndRun(kontekst)
         }
 
-        verify { omregningDao.hentSakerTilOmregning(OmregningJobService.kjoering, 1) }
+        verify { omregningDao.hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, 1) }
         verify { behandlingService.hentFoerstegangsbehandling(SAK_ID) }
         verify(exactly = 0) { kafkaProdusent.publiser(any(), any()) }
     }

@@ -28,7 +28,7 @@ import java.time.LocalDateTime
  * Inntil videre er denne kun opprettet for å trigge omregning av saker som skal ha ny klassifikasjonskode ifm ny kode
  * mot skatt for 2023.
  */
-class OmregningJobService(
+class OmregningKlassifikasjonskodeJobService(
     private val omregningDao: OmregningDao,
     private val behandlingService: BehandlingService,
     private val kafkaProdusent: KafkaProdusent<String, String>,
@@ -41,7 +41,7 @@ class OmregningJobService(
     }
 
     private fun run() {
-        logger.info("Starter omregning av $antall sak(er) for kjøring $kjoering")
+        logger.info("Starter omregning av opp til $antall sak(er) for kjøring $kjoering")
 
         val sakerTilOmregning: List<Pair<SakId, KjoeringStatus>> =
             inTransaction {

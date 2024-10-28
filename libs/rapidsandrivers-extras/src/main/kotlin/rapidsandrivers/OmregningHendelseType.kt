@@ -114,7 +114,7 @@ data class OmregningDataPacket(
     val sakType: SakType?,
     val behandlingId: UUID?,
     val forrigeBehandlingId: UUID?,
-    val verifiserUtbetalingUendret: Boolean?,
+    val verifiserUtbetalingUendret: Boolean,
 ) {
     companion object KEYS {
         val KEY = HENDELSE_DATA_KEY

@@ -87,7 +87,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         (behandling) => {
           dispatch(oppdaterBehandling(behandling))
           setVisAdvarselBehandlingEndret(behandlingRedigertEtterOpprettetBrev(vedtaksbrev, behandling.hendelser))
-          setVisAdvarselIngenAvdoede(personopplysninger?.avdoede.length === 0)
+          setVisAdvarselIngenAvdoede(redigerbar && personopplysninger?.avdoede.length === 0)
         },
         () => dispatch(resetBehandling())
       )

@@ -72,6 +72,7 @@ fun Route.avkorting(
             withBehandlingId(behandlingKlient) {
                 logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
                 avkortingService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
             }
         }
 

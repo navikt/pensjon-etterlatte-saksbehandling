@@ -23,7 +23,7 @@ class SjekkOmTidligAlderpensjonRiver(
             validate { it.requireKey("vedtak.behandlingId") }
             validate { it.requireKey("vedtak.sak") }
             validate { it.requireKey("vedtak.sak.id") }
-            validate { it.requireKey("vedtak.sak.sakType", SakType.OMSTILLINGSSTOENAD.toString()) }
+            validate { it.requireValue("vedtak.sak.sakType", SakType.OMSTILLINGSSTOENAD.name) }
         }
     }
 

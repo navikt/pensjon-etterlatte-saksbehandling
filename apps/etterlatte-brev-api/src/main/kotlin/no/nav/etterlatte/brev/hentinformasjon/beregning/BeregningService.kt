@@ -149,15 +149,15 @@ class BeregningService(
                     // (vises i brev) maanedsinntekt regel burde eksponert dette, krever omskrivning av regler som vi må bli enige om
                     inntekt =
                         Kroner(
-                            BigDecimal(it.aarsinntekt - it.fratrekkInnAar)
+                            BigDecimal(it.oppgittInntekt - it.fratrekkInnAar)
                                 .setScale(
                                     ANTALL_DESIMALER_INNTENKT,
                                     roundingModeInntekt,
                                 ).toInt(),
                         ),
-                    aarsinntekt = Kroner(it.aarsinntekt),
+                    oppgittInntekt = Kroner(it.oppgittInntekt),
                     fratrekkInnAar = Kroner(it.fratrekkInnAar),
-                    relevanteMaanederInnAar = it.relevanteMaanederInnAar,
+                    innvilgaMaaneder = it.innvilgaMaaneder,
                     ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
                     restanse = Kroner(it.restanse),
                     utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
@@ -169,6 +169,7 @@ class BeregningService(
                     // ved manuelt overstyrt beregning har vi ikke grunnlag
                     sanksjon = it.sanksjon,
                     institusjon = it.institusjonsopphold,
+                    erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
                 )
             }
 

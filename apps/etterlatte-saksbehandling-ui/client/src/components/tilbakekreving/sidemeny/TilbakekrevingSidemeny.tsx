@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Detail, Heading, Label } from '@navikt/ds-react'
+import { Alert, Box, Detail, Heading, Label } from '@navikt/ds-react'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { useAppDispatch } from '~store/Store'
@@ -65,7 +65,7 @@ export function TilbakekrevingSidemeny() {
         <div>
           <SakTypeTag sakType={tilbakekreving.sak.sakType} />
         </div>
-        <div className="info">
+        <Box marginBlock="4">
           <Label size="small">Saksbehandler</Label>
           {mapApiResult(
             oppgaveResult,
@@ -82,7 +82,7 @@ export function TilbakekrevingSidemeny() {
                 </Alert>
               )
           )}
-        </div>
+        </Box>
         <div>
           <Label size="small">Sakid:</Label>
           <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />

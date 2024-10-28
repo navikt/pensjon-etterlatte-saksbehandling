@@ -158,7 +158,7 @@ class AktivitetspliktUnntakDao(
             }
         }
 
-    fun kopierUnntak(
+    fun kopierUnntakTilBehandling(
         unntakId: UUID,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
@@ -173,6 +173,27 @@ class AktivitetspliktUnntakDao(
                     """.trimMargin(),
                 )
             stmt.setObject(1, behandlingId)
+            stmt.setObject(2, unntakId)
+
+            stmt.executeUpdate()
+        }
+    }
+
+    fun kopierUnntakTilOppgave(
+        unntakId: UUID,
+        oppgaveId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                    INSERT INTO aktivitetsplikt_unntak(id, sak_id, oppgave_id, unntak, fom, tom, opprettet, endret, beskrivelse)
+                    SELECT gen_random_uuid(), sak_id, ?, unntak, fom, tom, opprettet, endret, beskrivelse
+                    FROM aktivitetsplikt_unntak
+                    WHERE id = ?
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, oppgaveId)
             stmt.setObject(2, unntakId)
 
             stmt.executeUpdate()

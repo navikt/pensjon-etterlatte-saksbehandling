@@ -1,1 +1,0 @@
-grant all on all tables in schema vilkaarsvurdering to cloudsqliamuser;

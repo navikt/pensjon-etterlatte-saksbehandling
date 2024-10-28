@@ -59,7 +59,7 @@ export const AvkortingInntektForm = ({
     }
 
     const tidligereAvkortingGrunnlag = avkortingGrunnlagFrontend?.fraVirk ?? avkortingGrunnlagFrontend?.historikk[0]
-    return tidligereAvkortingGrunnlag ? tidligereAvkortingGrunnlag.relevanteMaanederInnAar === 12 : false
+    return tidligereAvkortingGrunnlag ? tidligereAvkortingGrunnlag.innvilgaMaaneder === 12 : false
   }
 
   /*
@@ -103,6 +103,7 @@ export const AvkortingInntektForm = ({
     handleSubmit,
     formState: { errors },
     watch,
+    getValues,
   } = methods
 
   const onSubmit = (data: IAvkortingGrunnlagLagre) => {
@@ -126,7 +127,7 @@ export const AvkortingInntektForm = ({
     )
   }
 
-  const [skalOverstyreMaaneder, setSkalOverstyreMaaneder] = useState(false)
+  const [skalOverstyreMaaneder, setSkalOverstyreMaaneder] = useState(!!getValues('overstyrtInnvilgaMaaneder'))
   const toggleOverstyrtInnvilgaMaaneder = () => {
     if (skalOverstyreMaaneder) {
       reset({ overstyrtInnvilgaMaaneder: undefined })

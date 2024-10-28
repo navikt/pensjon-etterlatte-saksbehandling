@@ -3,7 +3,7 @@ package no.nav.etterlatte.beregningkafka
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.Kontekst
-import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 class SjekkOmTidligAlderpensjonRiver(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
-) : ListenerMedLoggingOgFeilhaandtering() {
+) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun kontekst() = Kontekst.INNTEKTSJUSTERING

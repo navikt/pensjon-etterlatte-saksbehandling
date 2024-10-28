@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktOppgaveService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
@@ -148,11 +149,8 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDaoImpl
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapper
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkarsvurderingRepositorDaoWrapperClient
 import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
 import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
@@ -281,11 +279,6 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
-    val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao =
-        VilkaarsvurderingKlientDaoImpl(
-            config,
-            httpClient(),
-        ),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -330,11 +323,7 @@ internal class ApplicationContext(
     val vilkaarsvurderingDao = VilkaarsvurderingRepository(autoClosingDatabase, DelvilkaarRepository())
 
     val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper =
-        if (isProd()) {
-            VilkarsvurderingRepositorDaoWrapperClient(vilkaarsvurderingKlientDaoImpl)
-        } else {
-            VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
-        }
+        VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
@@ -447,8 +436,8 @@ internal class ApplicationContext(
             revurderingService = revurderingService,
             statistikkKafkaProducer = behandlingsHendelser,
             oppgaveService = oppgaveService,
+            aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
-
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
             behandlingDao = behandlingDao,
@@ -596,6 +585,13 @@ internal class ApplicationContext(
     val migreringService =
         MigreringService(
             behandlingService = behandlingService,
+        )
+
+    val aktivitetspliktOppgaveService =
+        AktivitetspliktOppgaveService(
+            aktivitetspliktService = aktivitetspliktService,
+            oppgaveService = oppgaveService,
+            sakService = sakService,
         )
 
     // Jobs

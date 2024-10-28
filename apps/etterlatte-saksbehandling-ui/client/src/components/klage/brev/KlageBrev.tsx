@@ -15,7 +15,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
-import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 
 function hentBrevId(klage: Klage | null): number | null {
   switch (klage?.utfall?.utfall) {
@@ -69,7 +69,7 @@ export function KlageBrev() {
                 <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={redigerbar} />
 
                 {brev.mottakere.map((mottaker) => (
-                  <BrevMottaker
+                  <BrevMottakerPanel
                     key={mottaker.id}
                     brevId={brev.id}
                     behandlingId={brev.behandlingId}

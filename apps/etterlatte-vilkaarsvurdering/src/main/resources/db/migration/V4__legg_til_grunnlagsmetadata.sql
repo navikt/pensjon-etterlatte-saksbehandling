@@ -1,1 +1,0 @@
-ALTER TABLE vilkaarsvurdering ADD COLUMN metadata JSONB;

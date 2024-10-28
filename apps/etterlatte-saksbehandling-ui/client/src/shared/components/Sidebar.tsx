@@ -33,16 +33,6 @@ export const SidebarPanel = styled.div<{ $border?: boolean }>`
           border: 1px solid #c7c0c0;
         `
       : null}
-
-  .flex {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .info {
-    margin-top: 1em;
-    margin-bottom: 1em;
-  }
 `
 
 const CollapsibleSidebar = styled.div<{ $collapsed: boolean }>`
@@ -64,7 +54,7 @@ const Scroller = styled.div`
 
 const SidebarTools = styled.div`
   border-top: 1px solid #c6c2bf;
-  background-color: #f8f8f8;
+  background-color: var(--a-gray-50);
 
   position: fixed;
   bottom: 0;

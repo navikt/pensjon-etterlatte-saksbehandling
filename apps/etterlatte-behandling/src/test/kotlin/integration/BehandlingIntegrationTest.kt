@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DatabaseConfig
 import no.nav.etterlatte.tilgangsstyring.AzureKey
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.RegisterExtension
 
@@ -49,7 +48,6 @@ abstract class BehandlingIntegrationTest {
         pdlTjenesterKlient: PdlTjenesterKlient? = null,
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
         testProdusent: TestProdusent<String, String>? = null,
-        vilkvurderingdao: VilkaarsvurderingRepository? = null,
     ) {
         mockOAuth2Server.start()
         val props = dbExtension.properties()
@@ -113,7 +111,6 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),
-                vilkaarsvurderingKlientDaoImpl = VilkaarsvurderingKlientDaoTest(),
             )
     }
 

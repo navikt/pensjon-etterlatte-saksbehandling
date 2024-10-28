@@ -143,10 +143,6 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-klage/.default
     - name: ETTERLATTE_KLAGE_API_URL
       value: http://etterlatte-klage
-    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
-    - name: ETTERLATTE_VILKAARSVURDERING_URL
-      value: http://etterlatte-vilkaarsvurdering
     - name: OPPGAVE_CLIENT_ID
       value: dev-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_URL

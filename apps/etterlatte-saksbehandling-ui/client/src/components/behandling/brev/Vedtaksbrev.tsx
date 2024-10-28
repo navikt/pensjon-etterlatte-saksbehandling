@@ -29,7 +29,7 @@ import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandl
 import { useBehandling } from '~components/behandling/useBehandling'
 import { addValideringsfeil, Valideringsfeilkoder } from '~store/reducers/SjekklisteReducer'
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
-import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import BrevutfallModal from '~components/behandling/brevutfall/BrevutfallModal'
@@ -202,7 +202,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
 
                 {vedtaksbrev.mottakere.map((mottaker) => (
-                  <BrevMottaker
+                  <BrevMottakerPanel
                     key={mottaker.id}
                     brevId={vedtaksbrev.id}
                     behandlingId={behandlingId}

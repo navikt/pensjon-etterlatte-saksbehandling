@@ -1,4 +1,3 @@
-import { OppgaveDTO } from '~shared/types/oppgave'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { GridContainer, MainContent } from '~shared/styled'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -10,14 +9,17 @@ import {
 } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAktivitet'
 import { VurderingInfoBrev } from '~components/aktivitetsplikt/brev/VurderingInfoBrev'
+import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
 
-const AktivitetspliktOppgaveContext = createContext<OppgaveDTO>({} as OppgaveDTO)
+const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurdering>(
+  {} as AktivitetspliktOppgaveVurdering
+)
 
-export function OppgaveVurderingRoute(props: { oppgave: OppgaveDTO }) {
-  const { oppgave } = props
+export function OppgaveVurderingRoute(props: { vurderingOgOppgave: AktivitetspliktOppgaveVurdering }) {
+  const { vurderingOgOppgave } = props
   return (
-    <AktivitetspliktOppgaveContext.Provider value={oppgave}>
-      <StatusBar ident={oppgave.fnr} />
+    <AktivitetspliktOppgaveContext.Provider value={vurderingOgOppgave}>
+      <StatusBar ident={vurderingOgOppgave.oppgave.fnr} />
       <AktivitetspliktStegmeny />
 
       <GridContainer>
@@ -34,7 +36,7 @@ export function OppgaveVurderingRoute(props: { oppgave: OppgaveDTO }) {
   )
 }
 
-export const useOppgaveForVurdering = (): OppgaveDTO => {
+export const useAktivitetspliktOppgaveVurdering = (): AktivitetspliktOppgaveVurdering => {
   try {
     const oppgave = useContext(AktivitetspliktOppgaveContext)
     if (!oppgave) {

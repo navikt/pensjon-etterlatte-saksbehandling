@@ -73,7 +73,7 @@ export const AvkortingInntekt = ({
             <Heading size="small">{avkortingGrunnlagFrontend.aar}</Heading>
             {fyller67 && (
               <Alert variant="warning">
-                Bruker fyller 67 for inntektsåret og antall innvilga måneder vil bli tilpasset deretter.
+                Bruker fyller 67 år i inntektsåret og antall innvilga måneder vil bli tilpasset deretter.
               </Alert>
             )}
             <Table className="table" zebraStripes>
@@ -134,7 +134,7 @@ export const AvkortingInntekt = ({
                       <Table.DataCell key="InntektTotalt">
                         {NOK(forventetInntekt + forventetInntektUtland)}
                       </Table.DataCell>
-                      <Table.DataCell>{avkortingGrunnlag.relevanteMaanederInnAar}</Table.DataCell>
+                      <Table.DataCell>{avkortingGrunnlag.innvilgaMaaneder}</Table.DataCell>
                       <Table.DataCell key="Periode">
                         {avkortingGrunnlag.fom && formaterDato(avkortingGrunnlag.fom)} -{' '}
                         {avkortingGrunnlag.tom && formaterDato(lastDayOfMonth(new Date(avkortingGrunnlag.tom)))}

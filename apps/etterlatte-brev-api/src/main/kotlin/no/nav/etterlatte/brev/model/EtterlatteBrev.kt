@@ -71,15 +71,17 @@ data class OmstillingsstoenadBeregning(
     val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
     val sisteBeregningsperiodeNesteAar: OmstillingsstoenadBeregningsperiode?,
     val trygdetid: TrygdetidMedBeregningsmetode,
+    val oppphoersdato: LocalDate?,
+    val opphoerNesteAar: Boolean,
 ) : HarVedlegg
 
 data class OmstillingsstoenadBeregningsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val inntekt: Kroner,
-    val aarsinntekt: Kroner,
+    val oppgittInntekt: Kroner,
     val fratrekkInnAar: Kroner,
-    val relevantMaanederInnAar: Int,
+    val innvilgaMaaneder: Int,
     val grunnbeloep: Kroner,
     val ytelseFoerAvkorting: Kroner,
     val restanse: Kroner,
@@ -89,6 +91,7 @@ data class OmstillingsstoenadBeregningsperiode(
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val sanksjon: Boolean,
     val institusjon: Boolean,
+    val erOverstyrtInnvilgaMaaneder: Boolean,
 )
 
 data class TrygdetidMedBeregningsmetode(

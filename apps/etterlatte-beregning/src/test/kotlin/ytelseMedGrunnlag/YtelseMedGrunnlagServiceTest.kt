@@ -129,7 +129,7 @@ internal class YtelseMedGrunnlagServiceTest {
             ytelseEtterAvkorting shouldBe 15000
             ytelseFoerAvkorting shouldBe 20000
             avkortingsbeloep shouldBe 5000
-            aarsinntekt shouldBe 300000
+            oppgittInntekt shouldBe 300000
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 120000
             grunnbelopMnd shouldBe 10000
@@ -139,7 +139,7 @@ internal class YtelseMedGrunnlagServiceTest {
             ytelseEtterAvkorting shouldBe 17000
             ytelseFoerAvkorting shouldBe 20000
             avkortingsbeloep shouldBe 3000
-            aarsinntekt shouldBe 350000
+            oppgittInntekt shouldBe 350000
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 120000
             grunnbelopMnd shouldBe 10000
@@ -149,7 +149,7 @@ internal class YtelseMedGrunnlagServiceTest {
             ytelseEtterAvkorting shouldBe 17000
             ytelseFoerAvkorting shouldBe 21000
             avkortingsbeloep shouldBe 4000
-            aarsinntekt shouldBe 350000
+            oppgittInntekt shouldBe 350000
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 132000
             grunnbelopMnd shouldBe 11000

@@ -279,7 +279,7 @@ class BehandlingKlientImpl(
         logger.info("Oppretter oppgave for sakId=$sakId")
 
         val resource =
-            Resource(clientId = clientId, url = "$resourceUrl/oppgaver/sak/${sakId.sakId}/oppgaver")
+            Resource(clientId = clientId, url = "$resourceUrl/oppgaver/sak/${sakId.sakId}/opprett")
 
         downstreamResourceClient.post(
             resource,

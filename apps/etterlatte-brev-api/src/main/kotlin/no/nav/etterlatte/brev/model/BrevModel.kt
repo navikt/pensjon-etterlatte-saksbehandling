@@ -33,18 +33,21 @@ fun mottakerFraAdresse(
     tvingSentralPrint = false,
 )
 
-fun tomMottaker(fnr: Folkeregisteridentifikator) =
-    Mottaker(
-        id = UUID.randomUUID(),
-        navn = "N/A",
-        foedselsnummer = MottakerFoedselsnummer(fnr.value),
-        adresse =
-            Adresse(
-                adresseType = "",
-                landkode = "",
-                land = "",
-            ),
-    )
+fun tomMottaker(
+    fnr: Folkeregisteridentifikator? = null,
+    type: MottakerType = MottakerType.HOVED,
+) = Mottaker(
+    id = UUID.randomUUID(),
+    navn = "N/A",
+    foedselsnummer = fnr?.let { MottakerFoedselsnummer(it.value) },
+    adresse =
+        Adresse(
+            adresseType = "",
+            landkode = "",
+            land = "",
+        ),
+    type = type,
+)
 
 fun opprettBrevFra(
     id: BrevID,

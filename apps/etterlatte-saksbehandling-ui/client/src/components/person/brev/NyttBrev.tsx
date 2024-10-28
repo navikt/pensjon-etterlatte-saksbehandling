@@ -16,10 +16,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
-import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { Box, Heading } from '@navikt/ds-react'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 
 export default function NyttBrev() {
   useSidetittel('Nytt brev')
@@ -68,10 +68,9 @@ export default function NyttBrev() {
               </div>
               <div style={{ margin: '1rem' }}>
                 {brev.mottakere.map((mottaker) => (
-                  <BrevMottaker
+                  <BrevMottakerPanel
                     key={mottaker.id}
                     brevId={brev.id}
-                    behandlingId={brev.behandlingId}
                     sakId={brev.sakId}
                     mottaker={mottaker}
                     kanRedigeres={kanRedigeres}

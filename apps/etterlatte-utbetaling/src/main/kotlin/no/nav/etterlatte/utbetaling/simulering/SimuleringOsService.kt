@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.SimulertBeregning
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeFagomraade
@@ -141,8 +142,10 @@ class SimuleringOsService(
             fagsystemId = utbetaling.sakId.value.toString()
             oppdragGjelderId = utbetaling.stoenadsmottaker.value
             saksbehId =
-                brukerTokenInfo.ident().let { if (it.contains("gcp")) OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER else it }
-
+                when (brukerTokenInfo) {
+                    is Systembruker -> OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER
+                    else -> brukerTokenInfo.ident()
+                }
             utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
             kodeEndring = if (erFoersteUtbetalingPaaSak) "NY" else "ENDR"
             kodeFagomraade = utbetaling.sakType.tilKodeFagomraade()
@@ -180,7 +183,10 @@ class SimuleringOsService(
             datoUtbetalesTilIdFom = utbetalingslinje.periode.fra.toOppdragDate()
             henvisning = utbetaling.behandlingId.shortValue.value
             saksbehId =
-                brukerTokenInfo.ident().let { if (it.contains("gcp")) OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER else it }
+                when (brukerTokenInfo) {
+                    is Systembruker -> OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER
+                    else -> brukerTokenInfo.ident()
+                }
             attestant.add(
                 Attestant().apply {
                     attestantId = OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER

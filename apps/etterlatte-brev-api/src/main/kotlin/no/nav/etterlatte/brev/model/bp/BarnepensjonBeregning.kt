@@ -6,14 +6,19 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BrevVedleggKey
+import no.nav.etterlatte.brev.model.FantIkkeIdentTilTrygdetidBlantAvdoede
 import no.nav.etterlatte.brev.model.ForskjelligTrygdetid
+import no.nav.etterlatte.brev.model.IngenStoetteForUkjentAvdoed
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManglerAvdoedBruktTilTrygdetid
+import no.nav.etterlatte.brev.model.OverstyrtTrygdetidManglerAvdoed
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
+import no.nav.etterlatte.sikkerLogg
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.util.UUID
 
@@ -88,9 +93,12 @@ fun mapRiktigMetodeForAnvendteTrygdetider(
         anvendteTrygdetiderIdenter[beregningsperioder.maxBy { it.datoFOM }.trygdetidForIdent]
             ?: throw ManglerAvdoedBruktTilTrygdetid()
 
-    return trygdetid.map {
-        val relevantMetode = anvendteTrygdetiderIdenter[it.ident] ?: fallbackMetode
-        it.fromDto(relevantMetode.beregningsMetodeAnvendt, relevantMetode.beregningsMetodeFraGrunnlag, avdoede)
+    return trygdetid.map { trygdetidDto ->
+        trygdetidMedBeregningsmetode(
+            trygdetidDto = trygdetidDto,
+            identMedMetoder = anvendteTrygdetiderIdenter[trygdetidDto.ident] ?: fallbackMetode,
+            avdoede = avdoede,
+        )
     }
 }
 
@@ -142,4 +150,38 @@ fun finnForskjelligTrygdetid(
         harForskjelligMetode = foersteBeregningsperiode.beregningsMetodeFraGrunnlag != sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
         erForskjellig = trygdetidBruktSenere.ident != trygdetidForFoersteAvdoed.ident,
     )
+}
+
+internal fun trygdetidMedBeregningsmetode(
+    trygdetidDto: TrygdetidDto,
+    identMedMetoder: IdentMedMetodeIGrunnlagOgAnvendtMetode,
+    avdoede: List<Avdoed>,
+) = trygdetidDto.fromDto(
+    identMedMetoder.beregningsMetodeAnvendt,
+    identMedMetoder.beregningsMetodeFraGrunnlag,
+    hentAvdoedNavn(trygdetidDto, avdoede),
+)
+
+private fun hentAvdoedNavn(
+    trygdetidDto: TrygdetidDto,
+    avdoede: List<Avdoed>,
+): String {
+    if (avdoede.isEmpty()) {
+        return when (trygdetidDto.ident) {
+            UKJENT_AVDOED -> "ukjent avdød"
+            else -> throw IngenStoetteForUkjentAvdoed()
+        }
+    }
+
+    return avdoede.find { it.fnr.value == trygdetidDto.ident }?.navn ?: run {
+        if (trygdetidDto.beregnetTrygdetid?.resultat?.overstyrt == true) {
+            sikkerLogg.warn(
+                "Fant ikke avdød fra trygdetid (ident: ${trygdetidDto.ident}) blant avdøde fra " +
+                    "grunnlag (${avdoede.joinToString { it.fnr.value }})",
+            )
+            throw OverstyrtTrygdetidManglerAvdoed()
+        } else {
+            throw FantIkkeIdentTilTrygdetidBlantAvdoede()
+        }
+    }
 }

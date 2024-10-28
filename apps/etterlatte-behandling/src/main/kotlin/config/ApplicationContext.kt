@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktOppgaveService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
@@ -435,8 +436,8 @@ internal class ApplicationContext(
             revurderingService = revurderingService,
             statistikkKafkaProducer = behandlingsHendelser,
             oppgaveService = oppgaveService,
+            aktivitetspliktKopierService = aktivitetspliktKopierService,
         )
-
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
             behandlingDao = behandlingDao,
@@ -584,6 +585,13 @@ internal class ApplicationContext(
     val migreringService =
         MigreringService(
             behandlingService = behandlingService,
+        )
+
+    val aktivitetspliktOppgaveService =
+        AktivitetspliktOppgaveService(
+            aktivitetspliktService = aktivitetspliktService,
+            oppgaveService = oppgaveService,
+            sakService = sakService,
         )
 
     // Jobs

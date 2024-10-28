@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.lagNyOppgave
@@ -76,6 +77,38 @@ class AktivitetspliktAktivitetsgradDaoTest(
             it.opprettet shouldBe kilde
             it.endret shouldBe kilde
             it.beskrivelse shouldBe aktivitetsgrad.beskrivelse
+            it.vurdertFra12Mnd shouldBe aktivitetsgrad.vurdertFra12Mnd
+            it.skjoennsmessigVurdering shouldBe aktivitetsgrad.skjoennsmessigVurdering
+        }
+    }
+
+    @Test
+    fun `skal lagre ned og hente opp en aktivitetsgrad for 12 mnd`() {
+        val behandlingId = null
+        val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
+        val aktivitetsgrad =
+            LagreAktivitetspliktAktivitetsgrad(
+                aktivitetsgrad = AKTIVITET_OVER_50,
+                beskrivelse = "Beskrivelse",
+                skjoennsmessigVurdering = AktivitetspliktSkjoennsmessigVurdering.JA,
+                vurdertFra12Mnd = true,
+            )
+
+        dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, oppgave.id, behandlingId)
+
+        dao.hentAktivitetsgradForOppgave(oppgave.id).single().asClue {
+            it.sakId shouldBe sak.id
+            it.behandlingId shouldBe behandlingId
+            it.oppgaveId shouldBe oppgave.id
+            it.aktivitetsgrad shouldBe aktivitetsgrad.aktivitetsgrad
+            it.fom shouldNotBe null
+            it.opprettet shouldBe kilde
+            it.endret shouldBe kilde
+            it.beskrivelse shouldBe aktivitetsgrad.beskrivelse
+            it.skjoennsmessigVurdering shouldBe aktivitetsgrad.skjoennsmessigVurdering
+            it.vurdertFra12Mnd shouldBe aktivitetsgrad.vurdertFra12Mnd
         }
     }
 
@@ -203,6 +236,42 @@ class AktivitetspliktAktivitetsgradDaoTest(
             it.opprettet shouldBe kilde
             it.endret shouldBe kilde
             it.beskrivelse shouldBe aktivitetsgrad.beskrivelse
+            it.vurdertFra12Mnd shouldBe aktivitetsgrad.vurdertFra12Mnd
+            it.skjoennsmessigVurdering shouldBe aktivitetsgrad.skjoennsmessigVurdering
+        }
+    }
+
+    @Test
+    fun `skal lagre ned og hente opp en ny aktivitetsgrad 12mnd for behandling`() {
+        val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak.id,
+            )
+        behandlingDao.opprettBehandling(opprettBehandling)
+        val aktivitetsgrad =
+            LagreAktivitetspliktAktivitetsgrad(
+                aktivitetsgrad = AKTIVITET_OVER_50,
+                beskrivelse = "Beskrivelse",
+                skjoennsmessigVurdering = AktivitetspliktSkjoennsmessigVurdering.NEI,
+                vurdertFra12Mnd = true,
+            )
+
+        dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
+
+        dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single().asClue {
+            it.sakId shouldBe sak.id
+            it.behandlingId shouldBe opprettBehandling.id
+            it.oppgaveId shouldBe null
+            it.aktivitetsgrad shouldBe aktivitetsgrad.aktivitetsgrad
+            it.fom shouldNotBe null
+            it.opprettet shouldBe kilde
+            it.endret shouldBe kilde
+            it.beskrivelse shouldBe aktivitetsgrad.beskrivelse
+            it.vurdertFra12Mnd shouldBe aktivitetsgrad.vurdertFra12Mnd
+            it.skjoennsmessigVurdering shouldBe aktivitetsgrad.skjoennsmessigVurdering
         }
     }
 
@@ -243,6 +312,50 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 it.aktivitetsgrad shouldBe AKTIVITET_100
                 it.endret shouldBe kilde
                 it.beskrivelse shouldBe aktivitetsgradMedId.beskrivelse
+                it.vurdertFra12Mnd shouldBe aktivitetsgrad.vurdertFra12Mnd
+                it.skjoennsmessigVurdering shouldBe aktivitetsgrad.skjoennsmessigVurdering
+            }
+        }
+
+        @Test
+        fun `oppdaterer med felter for 12 mnd`() {
+            val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+            val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+            val opprettBehandling =
+                opprettBehandling(
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    sakId = sak.id,
+                )
+            behandlingDao.opprettBehandling(opprettBehandling)
+            val aktivitetsgrad =
+                LagreAktivitetspliktAktivitetsgrad(
+                    aktivitetsgrad = AKTIVITET_UNDER_50,
+                    beskrivelse = "Beskrivelse",
+                )
+
+            dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
+
+            val aktivitet = dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single()
+
+            val aktivitetsgradMedId =
+                LagreAktivitetspliktAktivitetsgrad(
+                    id = aktivitet.id,
+                    aktivitetsgrad = AKTIVITET_100,
+                    beskrivelse = "Beskrivelse er oppdatert",
+                    skjoennsmessigVurdering = null,
+                    vurdertFra12Mnd = true,
+                )
+
+            dao.oppdaterAktivitetsgrad(aktivitetsgradMedId, kilde, opprettBehandling.id)
+
+            dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single().asClue {
+                it.sakId shouldBe sak.id
+                it.behandlingId shouldBe opprettBehandling.id
+                it.aktivitetsgrad shouldBe AKTIVITET_100
+                it.endret shouldBe kilde
+                it.beskrivelse shouldBe aktivitetsgradMedId.beskrivelse
+                it.vurdertFra12Mnd shouldBe aktivitetsgradMedId.vurdertFra12Mnd
+                it.skjoennsmessigVurdering shouldBe aktivitetsgradMedId.skjoennsmessigVurdering
             }
         }
     }
@@ -327,7 +440,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
             val aktivitetsgrad = dao.hentAktivitetsgradForBehandling(forrigeBehandling.id).single()
             dao.hentAktivitetsgradForBehandling(nyBehandling.id) shouldBe emptyList()
 
-            dao.kopierAktivitetsgrad(aktivitetsgrad.id, nyBehandling.id) shouldBe 1
+            dao.kopierAktivitetsgradTilBehandling(aktivitetsgrad.id, nyBehandling.id) shouldBe 1
 
             dao.hentAktivitetsgradForBehandling(nyBehandling.id).single().asClue {
                 it.sakId shouldBe sak.id
@@ -337,6 +450,40 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 it.opprettet shouldBe kilde
                 it.endret shouldBe kilde
                 it.beskrivelse shouldBe aktivitetsgrad.beskrivelse
+                it.vurdertFra12Mnd shouldBe aktivitetsgrad.vurdertFra12Mnd
+                it.skjoennsmessigVurdering shouldBe aktivitetsgrad.skjoennsmessigVurdering
+            }
+        }
+
+        @Test
+        fun `skal kopiere nyeste aktivitetsgrad til oppgave`() {
+            behandlingDao.opprettBehandling(forrigeBehandling)
+            dao.opprettAktivitetsgrad(lagreAktivitetsgrad, sak.id, kilde, null, forrigeBehandling.id)
+
+            val aktivitetsgrad = dao.hentAktivitetsgradForBehandling(forrigeBehandling.id).single()
+            val oppgave =
+                lagNyOppgave(
+                    sak =
+                        Sak(
+                            ident = "",
+                            sakType = SakType.OMSTILLINGSSTOENAD,
+                            id = forrigeBehandling.sakId,
+                            enhet = Enheter.defaultEnhet.enhetNr,
+                        ),
+                    oppgaveType = OppgaveType.AKTIVITETSPLIKT,
+                )
+            oppgaveDao.opprettOppgave(oppgave)
+            dao.kopierAktivitetsgradTilOppgave(aktivitetsgrad.id, oppgaveId = oppgave.id)
+            dao.hentAktivitetsgradForOppgave(oppgave.id).single().asClue {
+                it.sakId shouldBe aktivitetsgrad.sakId
+                it.behandlingId shouldBe null
+                it.oppgaveId shouldBe oppgave.id
+                it.fom shouldBe aktivitetsgrad.fom
+                it.opprettet shouldBe kilde
+                it.endret shouldBe kilde
+                it.beskrivelse shouldBe aktivitetsgrad.beskrivelse
+                it.vurdertFra12Mnd shouldBe aktivitetsgrad.vurdertFra12Mnd
+                it.skjoennsmessigVurdering shouldBe aktivitetsgrad.skjoennsmessigVurdering
             }
         }
     }

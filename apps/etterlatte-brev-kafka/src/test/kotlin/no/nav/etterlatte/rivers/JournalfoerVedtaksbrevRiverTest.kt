@@ -59,7 +59,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
         val brevId: Long = 1
-        val brev1 =
+        val brev =
             Brev(
                 brevId,
                 randomSakId(),
@@ -71,12 +71,10 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 Status.FERDIGSTILT,
                 Tidspunkt.now(),
                 Tidspunkt.now(),
-                mottaker = mockk(),
+                mottakere = mockk(),
                 brevtype = Brevtype.VEDTAK,
                 brevkoder = Brevkoder.BP_INNVILGELSE,
             )
-        val brev =
-            brev1
         val response = OpprettJournalpostResponse("1234", true, emptyList())
 
         coEvery { brevApiKlient.journalfoerVedtaksbrev(any()) } returns

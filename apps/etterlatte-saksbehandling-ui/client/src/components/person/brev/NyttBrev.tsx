@@ -2,7 +2,7 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
@@ -16,10 +16,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
-import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { Box, Heading } from '@navikt/ds-react'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 
 export default function NyttBrev() {
   useSidetittel('Nytt brev')
@@ -67,7 +67,15 @@ export default function NyttBrev() {
                 <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
               </div>
               <div style={{ margin: '1rem' }}>
-                <BrevMottaker brev={brev} kanRedigeres={kanRedigeres} />
+                {brev.mottakere.map((mottaker) => (
+                  <BrevMottakerPanel
+                    key={mottaker.id}
+                    brevId={brev.id}
+                    sakId={brev.sakId}
+                    mottaker={mottaker}
+                    kanRedigeres={kanRedigeres}
+                  />
+                ))}
               </div>
             </Column>
             <Column>

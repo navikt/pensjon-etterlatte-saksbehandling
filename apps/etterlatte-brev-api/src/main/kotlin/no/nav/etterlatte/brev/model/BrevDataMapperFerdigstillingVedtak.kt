@@ -107,6 +107,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         klage,
                     )
+
                 BP_INNVILGELSE,
                 BP_INNVILGELSE_FORELDRELOES,
                 ->
@@ -122,12 +123,14 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         systemkilde,
                     )
+
                 BP_AVSLAG ->
                     barnepensjonAvslag(
                         innholdMedVedlegg,
                         soekerUnder18,
                         utlandstilknytningType,
                     )
+
                 BP_OPPHOER ->
                     barnepensjonOpphoer(
                         bruker,
@@ -146,6 +149,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         sakType,
                         vedtakType!!,
                         avdoede,
+                        utlandstilknytningType,
                     )
 
                 OMS_REVURDERING ->
@@ -160,10 +164,13 @@ class BrevDataMapperFerdigstillingVedtak(
                         vedtakType!!,
                         virkningstidspunkt!!,
                         klage,
+                        utlandstilknytningType,
                     )
 
                 OMS_AVSLAG ->
                     omstillingsstoenadAvslag(
+                        behandlingId!!,
+                        bruker,
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
                     )
@@ -190,6 +197,7 @@ class BrevDataMapperFerdigstillingVedtak(
                     AvvistKlageFerdigData.fra(
                         innholdMedVedlegg,
                         klage,
+                        utlandstilknytningType,
                     )
 
                 else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
@@ -408,6 +416,7 @@ class BrevDataMapperFerdigstillingVedtak(
         sakType: SakType,
         vedtakType: VedtakType,
         avdoede: List<Avdoed>,
+        utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
         val avkortingsinfo =
             async {
@@ -431,17 +440,24 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkårsvurdering" },
             avdoede,
-            behandling.erSluttbehandling,
+            utlandstilknytningType,
+            behandling,
         )
     }
 
     private suspend fun omstillingsstoenadAvslag(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
         innhold: List<Slate.Element>,
         utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
+
+        val tidligereFamiliepleier = async { behandlingService.hentTidligereFamiliepleier(behandlingId, bruker) }
+
         OmstillingsstoenadAvslag.fra(
             innhold,
             utlandstilknytningType,
+            tidligereFamiliepleier.await(),
         )
     }
 
@@ -456,6 +472,7 @@ class BrevDataMapperFerdigstillingVedtak(
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
         klage: Klage?,
+        utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
         val avkortingsinfo =
             async {
@@ -482,6 +499,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         val datoVedtakOmgjoering =
             klage
@@ -504,6 +522,8 @@ class BrevDataMapperFerdigstillingVedtak(
                 .navn,
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
             datoVedtakOmgjoering,
+            utlandstilknytningType,
+            behandling.opphoerFraOgMed,
         )
     }
 

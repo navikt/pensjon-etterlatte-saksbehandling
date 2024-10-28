@@ -1,7 +1,6 @@
 import { HeartIcon } from '@navikt/aksel-icons'
 import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
-import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
 import { formaterDatoMedFallback } from '~utils/formatering/dato'
 
@@ -14,14 +13,15 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
   const sivilstand = familieforhold.soeker?.opplysning.sivilstand?.filter((ss) => !ss.historisk)
 
   return (
-    <VStack gap="2">
-      <HStack gap="2">
+    <VStack gap="2" width="67%">
+      <HStack gap="2" align="center" marginBlock="0 2">
         <HeartIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Sivilstand (gjenlevende)
         </Heading>
       </HStack>
-      <SivilstandTable size="small">
+
+      <Table size="small">
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell scope="col">Status</Table.HeaderCell>
@@ -59,11 +59,7 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
             </Table.Row>
           )}
         </Table.Body>
-      </SivilstandTable>
+      </Table>
     </VStack>
   )
 }
-
-const SivilstandTable = styled(Table)`
-  width: 67%;
-`

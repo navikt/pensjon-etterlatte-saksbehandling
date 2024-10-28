@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
+    implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)

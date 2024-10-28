@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { createContext, useEffect, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router'
 import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
@@ -13,7 +13,7 @@ import {
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
-import { soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
+import { hentGyldigeNavigeringsStatuser, soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
@@ -24,10 +24,9 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
-type behandlingRouteTypes =
+type BehandlingRouteTypesPath =
   | 'soeknadsoversikt'
   | 'revurderingsoversikt'
-  | 'opphoeroversikt'
   | 'vilkaarsvurdering'
   | 'aktivitetsplikt'
   | 'trygdetid'
@@ -36,107 +35,108 @@ type behandlingRouteTypes =
   | 'varselbrev'
   | 'brev'
 
-export interface BehandlingRouteTypes {
-  path: string
+export interface BehandlingRouteType {
+  path: BehandlingRouteTypesPath
+  element: (behandling: IBehandlingReducer) => React.JSX.Element
   description: string
   kreverBehandlingsstatus?: (behandling: IBehandlingReducer) => IBehandlingStatus
   sakstype?: SakType
 }
 
-const behandlingRoutes = (
-  behandling: IBehandlingReducer
-): Array<{ path: behandlingRouteTypes; element: React.JSX.Element }> => [
-  { path: 'soeknadsoversikt', element: <Soeknadsoversikt behandling={behandling} /> },
-  { path: 'revurderingsoversikt', element: <Revurderingsoversikt behandling={behandling} /> },
-  { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
-  { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
-  { path: 'trygdetid', element: <TrygdetidVisning behandling={behandling} /> },
-  { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
-  { path: 'beregne', element: <Beregne behandling={behandling} /> },
-  { path: 'varselbrev', element: <Varselbrev behandling={behandling} /> },
-  { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
-]
-
-const routeTypes = {
+export const behandlingroutes: Record<string, BehandlingRouteType> = {
   soeknadsoversikt: {
     path: 'soeknadsoversikt',
     description: 'Søknadsoversikt',
+    element: (behandling: IBehandlingReducer) => <Soeknadsoversikt behandling={behandling} />,
   },
   revurderingsoversikt: {
     path: 'revurderingsoversikt',
     description: 'Revurderingsoversikt',
-  },
-  opphoeroversikt: {
-    path: 'opphoeroversikt',
-    description: 'Opphøroversikt',
+    element: (behandling: IBehandlingReducer) => <Revurderingsoversikt behandling={behandling} />,
   },
   vilkaarsvurdering: {
     path: 'vilkaarsvurdering',
     description: 'Vilkårsvurdering',
+    element: (behandling: IBehandlingReducer) => <Vilkaarsvurdering behandling={behandling} />,
     kreverBehandlingsstatus: (behandling: IDetaljertBehandling) =>
       soeknadsoversiktErFerdigUtfylt(behandling) ? IBehandlingStatus.OPPRETTET : IBehandlingStatus.VILKAARSVURDERT,
   },
   aktivitetsplikt: {
     path: 'aktivitetsplikt',
     description: 'Oppfølging av aktivitet',
+    element: (behandling: IBehandlingReducer) => <Aktivitetsplikt behandling={behandling} />,
     kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
     sakstype: SakType.OMSTILLINGSSTOENAD,
   },
   trygdetid: {
     path: 'trygdetid',
     description: 'Trygdetid',
+    element: (behandling: IBehandlingReducer) => <TrygdetidVisning behandling={behandling} />,
     kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
   },
   beregningsgrunnlag: {
     path: 'beregningsgrunnlag',
     description: 'Beregningsgrunnlag',
+    element: (behandling: IBehandlingReducer) => <Beregningsgrunnlag behandling={behandling} />,
     kreverBehandlingsstatus: () => IBehandlingStatus.TRYGDETID_OPPDATERT,
   },
   beregning: {
     path: 'beregne',
     description: 'Beregning',
+    element: (behandling: IBehandlingReducer) => <Beregne behandling={behandling} />,
     kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
   },
   varselbrev: {
     path: 'varselbrev',
     description: 'Varselbrev',
-    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
+    element: (behandling: IBehandlingReducer) => <Varselbrev behandling={behandling} />,
+    kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
   },
   brevBp: {
     path: 'brev',
+    element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
     description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
+    kreverBehandlingsstatus: (behandling: IBehandlingReducer) =>
+      behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.BEREGNET,
   },
   brevOms: {
     path: 'brev',
+    element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
     description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: () => IBehandlingStatus.AVKORTET,
+    kreverBehandlingsstatus: (behandling: IBehandlingReducer) =>
+      behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.AVKORTET,
   },
 }
-
-function useRouteNavigation() {
-  const [currentRoute, setCurrentRoute] = useState<string | undefined>()
-  const navigate = useNavigate()
-  const match = useMatch('/behandling/:behandlingId/:section')
-
-  useEffect(() => {
-    setCurrentRoute(match?.params?.section)
-  }, [match])
-
-  const goto = (path: behandlingRouteTypes) => {
-    setCurrentRoute(path)
-    navigate(`/behandling/${match?.params?.behandlingId}/${path}`)
-  }
-
-  return { currentRoute, goto }
-}
-
-export const useBehandlingRoutes = () => {
+// skal kun brukes av Behandling som laster behandling, å newe opp denne kan få utilsiktede konsekvenser andre steder
+export const useBehandlingRoutes = (): DefaultBehandlingRouteContextType => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
   const personopplysninger = usePersonopplysninger()
 
   const aktuelleRoutes = hentAktuelleRoutes(behandling, personopplysninger)
+
+  const currentRouteErGyldig = () => {
+    return routeErGyldig(currentRoute)
+  }
+
+  const routeErGyldig = (route: string | undefined): boolean => {
+    const alleRoutes: BehandlingRouteType[] = Object.values(behandlingroutes)
+    const valgtRoute = alleRoutes.filter((value) => value.path === route)
+    if (valgtRoute.length) {
+      const pathInfo = valgtRoute[0]
+      if (pathInfo.kreverBehandlingsstatus) {
+        return (
+          !!pathInfo.kreverBehandlingsstatus &&
+          !!behandling &&
+          hentGyldigeNavigeringsStatuser(behandling.status).includes(pathInfo.kreverBehandlingsstatus(behandling))
+        )
+      } else {
+        return true
+      }
+    } else {
+      return false
+    }
+  }
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
@@ -154,59 +154,109 @@ export const useBehandlingRoutes = () => {
     goto(previousPath)
   }
 
-  return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
+  return {
+    next,
+    back,
+    lastPage,
+    firstPage,
+    behandlingRoutes: aktuelleRoutes,
+    currentRoute,
+    goto,
+    routeErGyldig: routeErGyldig,
+    currentRouteErGyldig: currentRouteErGyldig,
+  }
+}
+
+type DefaultBehandlingRouteContextType = {
+  next: () => void
+  back: () => void
+  lastPage: boolean
+  firstPage: boolean
+  behandlingRoutes: BehandlingRouteType[]
+  currentRoute: string | undefined
+  goto: (path: BehandlingRouteTypesPath) => void
+  routeErGyldig: (route: string | undefined) => boolean
+  currentRouteErGyldig: () => boolean
+}
+
+const DefaultBehandlingRoutecontext: DefaultBehandlingRouteContextType = {
+  next: () => {},
+  back: () => {},
+  lastPage: false,
+  firstPage: true,
+  behandlingRoutes: new Array<BehandlingRouteType>(),
+  currentRoute: undefined,
+  goto: () => {},
+  routeErGyldig: () => false,
+  currentRouteErGyldig: () => false,
+}
+
+export const BehandlingRouteContext = createContext<DefaultBehandlingRouteContextType>(DefaultBehandlingRoutecontext)
+
+function useRouteNavigation() {
+  const match = useMatch('/behandling/:behandlingId/:section')
+  const [currentRoute, setCurrentRoute] = useState<string | undefined>(match?.params?.section)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    setCurrentRoute(match?.params?.section)
+  }, [match])
+
+  const goto = (path: BehandlingRouteTypesPath) => {
+    setCurrentRoute(path)
+    navigate(`/behandling/${match?.params?.behandlingId}/${path}`)
+  }
+
+  return { currentRoute, goto }
+}
+
+export function behandlingHarVarselbrev(behandling: IBehandlingReducer | null) {
+  return (
+    behandling?.kilde === Vedtaksloesning.GJENOPPRETTA ||
+    behandling?.revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT
+  )
 }
 
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysninger: Personopplysninger | null) => {
   if (!behandling) return []
 
-  const lagVarselbrev =
-    behandling?.kilde === Vedtaksloesning.GJENOPPRETTA ||
-    behandling?.revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT
+  const lagVarselbrev = behandlingHarVarselbrev(behandling)
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      return behandlingRoutes(behandling).filter((route) =>
-        soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
-          .map((pathinfo) => pathinfo.path)
-          .includes(route.path)
-      )
+      return foerstegangsbehandlingRoutes(behandling, personopplysninger, lagVarselbrev)
     case IBehandlingsType.REVURDERING:
-      return behandlingRoutes(behandling).filter((route) =>
-        revurderingRoutes(behandling, lagVarselbrev)
-          .map((pathinfo) => pathinfo.path)
-          .includes(route.path)
-      )
+      return revurderingRoutes(behandling, lagVarselbrev)
   }
 }
 
-export function soeknadRoutes(
+function foerstegangsbehandlingRoutes(
   behandling: IBehandlingReducer,
   personopplysninger: Personopplysninger | null,
   lagVarselbrev: boolean
-): Array<BehandlingRouteTypes> {
+): Array<BehandlingRouteType> {
   const avslag = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const ukjentAvdoed = personopplysninger?.avdoede.length === 0
 
-  const defaultRoutes: Array<BehandlingRouteTypes> = avslag
-    ? [routeTypes.soeknadsoversikt, routeTypes.vilkaarsvurdering]
+  const defaultRoutes: Array<BehandlingRouteType> = avslag
+    ? [behandlingroutes.soeknadsoversikt, behandlingroutes.vilkaarsvurdering]
     : [
-        routeTypes.soeknadsoversikt,
-        routeTypes.vilkaarsvurdering,
-        routeTypes.aktivitetsplikt,
-        routeTypes.trygdetid,
-        routeTypes.beregningsgrunnlag,
-        routeTypes.beregning,
+        behandlingroutes.soeknadsoversikt,
+        behandlingroutes.vilkaarsvurdering,
+        behandlingroutes.aktivitetsplikt,
+        behandlingroutes.trygdetid,
+        behandlingroutes.beregningsgrunnlag,
+        behandlingroutes.beregning,
       ]
 
   const boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet ?? false
 
   if (avslag && boddEllerArbeidetUtlandet && !ukjentAvdoed) {
-    defaultRoutes.push(routeTypes.trygdetid)
+    defaultRoutes.push(behandlingroutes.trygdetid)
   }
 
   if (lagVarselbrev) {
-    defaultRoutes.push(routeTypes.varselbrev)
+    defaultRoutes.push(behandlingroutes.varselbrev)
   }
 
   return leggTilBrevHvisKrevesAvBehandling(defaultRoutes, behandling).filter(
@@ -214,22 +264,22 @@ export function soeknadRoutes(
   )
 }
 
-export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
+function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteType> {
   const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
-  const defaultRoutes: Array<BehandlingRouteTypes> = opphoer
-    ? [routeTypes.revurderingsoversikt, routeTypes.vilkaarsvurdering, routeTypes.beregning]
+  const defaultRoutes: Array<BehandlingRouteType> = opphoer
+    ? [behandlingroutes.revurderingsoversikt, behandlingroutes.vilkaarsvurdering, behandlingroutes.beregning]
     : [
-        routeTypes.revurderingsoversikt,
-        routeTypes.vilkaarsvurdering,
-        routeTypes.aktivitetsplikt,
-        routeTypes.trygdetid,
-        routeTypes.beregningsgrunnlag,
-        routeTypes.beregning,
+        behandlingroutes.revurderingsoversikt,
+        behandlingroutes.vilkaarsvurdering,
+        behandlingroutes.aktivitetsplikt,
+        behandlingroutes.trygdetid,
+        behandlingroutes.beregningsgrunnlag,
+        behandlingroutes.beregning,
       ]
 
   if (lagVarselbrev) {
-    defaultRoutes.push(routeTypes.varselbrev)
+    defaultRoutes.push(behandlingroutes.varselbrev)
   }
 
   return leggTilBrevHvisKrevesAvBehandling(defaultRoutes, behandling).filter(
@@ -238,14 +288,17 @@ export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev:
 }
 
 const leggTilBrevHvisKrevesAvBehandling = (
-  routes: Array<BehandlingRouteTypes>,
+  routes: Array<BehandlingRouteType>,
   behandling: IBehandlingReducer
-): Array<BehandlingRouteTypes> => {
+): Array<BehandlingRouteType> => {
   if (behandling.sendeBrev) {
-    return [...routes, behandling.sakType == SakType.OMSTILLINGSSTOENAD ? routeTypes.brevOms : routeTypes.brevBp]
+    return [
+      ...routes,
+      behandling.sakType == SakType.OMSTILLINGSSTOENAD ? behandlingroutes.brevOms : behandlingroutes.brevBp,
+    ]
   }
   return routes
 }
 
-const routesAktuelleForSakstype = (sakType: SakType) => (route: BehandlingRouteTypes) =>
+const routesAktuelleForSakstype = (sakType: SakType) => (route: BehandlingRouteType) =>
   route.sakstype === undefined || route.sakstype === sakType

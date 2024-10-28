@@ -1,1 +1,0 @@
-UPDATE delvilkaar SET vilkaar_type = 'OMS_AKTIVITET_ETTER_6_MND' WHERE vilkaar_type = 'OMS_RETT_UTEN_TIDSBEGRENSNING' AND tittel = 'Krav til aktivitet etter 6 måneder';

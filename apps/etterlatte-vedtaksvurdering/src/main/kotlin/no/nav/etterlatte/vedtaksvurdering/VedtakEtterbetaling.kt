@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import java.math.BigDecimal
 import java.time.Clock
 import java.time.Month
 import java.time.YearMonth
@@ -45,7 +46,9 @@ internal fun Vedtak.erVedtakMedEtterbetaling(
     }
 }
 
-internal fun Utbetalingsperiode.beloepErMindreEnn(that: Utbetalingsperiode) = this.beloep?.compareTo(that.beloep) == -1
+internal fun Utbetalingsperiode.beloepErMindreEnn(that: Utbetalingsperiode) = this.beloep?.compareTo(that.beloep.toNonNullBeloep()) == -1
+
+private fun BigDecimal?.toNonNullBeloep(): BigDecimal = this ?: BigDecimal.valueOf(0)
 
 internal fun Utbetalingsperiode.overlapper(other: Utbetalingsperiode): Boolean = periode.overlapper(other.periode)
 

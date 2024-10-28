@@ -16,6 +16,7 @@ fun mottakerFraAdresse(
     fnr: Folkeregisteridentifikator,
     regoppslag: RegoppslagResponseDTO,
 ) = Mottaker(
+    id = UUID.randomUUID(),
     navn = regoppslag.navn,
     foedselsnummer = MottakerFoedselsnummer(fnr.value),
     adresse =
@@ -32,17 +33,21 @@ fun mottakerFraAdresse(
     tvingSentralPrint = false,
 )
 
-fun tomMottaker(fnr: Folkeregisteridentifikator) =
-    Mottaker(
-        navn = "N/A",
-        foedselsnummer = MottakerFoedselsnummer(fnr.value),
-        adresse =
-            Adresse(
-                adresseType = "",
-                landkode = "",
-                land = "",
-            ),
-    )
+fun tomMottaker(
+    fnr: Folkeregisteridentifikator? = null,
+    type: MottakerType = MottakerType.HOVED,
+) = Mottaker(
+    id = UUID.randomUUID(),
+    navn = "N/A",
+    foedselsnummer = fnr?.let { MottakerFoedselsnummer(it.value) },
+    adresse =
+        Adresse(
+            adresseType = "",
+            landkode = "",
+            land = "",
+        ),
+    type = type,
+)
 
 fun opprettBrevFra(
     id: BrevID,
@@ -57,7 +62,7 @@ fun opprettBrevFra(
     soekerFnr = opprettNyttBrev.soekerFnr,
     status = opprettNyttBrev.status,
     statusEndret = opprettNyttBrev.opprettet,
-    mottaker = opprettNyttBrev.mottaker,
+    mottakere = listOf(opprettNyttBrev.mottaker),
     opprettet = opprettNyttBrev.opprettet,
     brevtype = opprettNyttBrev.brevtype,
     brevkoder = opprettNyttBrev.brevkoder,

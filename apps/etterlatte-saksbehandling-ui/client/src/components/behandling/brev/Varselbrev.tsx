@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Alert, BodyShort, Box, Button, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
@@ -15,16 +15,17 @@ import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
-import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import { hentOppgaveForReferanseUnderBehandling, settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 import { formaterDato } from '~utils/formatering/dato'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { logger } from '~utils/logger'
 
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -37,7 +38,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   )
 
   const [varselbrev, setVarselbrev] = useState<IBrev>()
-  const { next } = useBehandlingRoutes()
+  const { next, currentRouteErGyldig } = useContext(BehandlingRouteContext)
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVarselbrev)
   const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVarselbrev)
@@ -100,6 +101,22 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
     })
   }, [behandlingId, sakId, tilbakestilt])
 
+  useEffect(() => {
+    if (!currentRouteErGyldig()) {
+      logger.generalWarning({
+        msg: `Varselbrev er ugyldig for denne behandlingen med ${props.behandling.status} id: ${props.behandling.id} mangler kanskje vilkårsvurdering? `,
+      })
+    }
+  }, [])
+
+  if (!currentRouteErGyldig()) {
+    return (
+      <Alert variant="error">
+        Varselbrev er ugyldig for denne behandlingen med {props.behandling.status} id: {props.behandling.id} mangler
+        kanskje vilkårsvurdering?
+      </Alert>
+    )
+  }
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner label="Henter brev ..." />
   } else if (isPending(opprettBrevStatus)) {
@@ -131,7 +148,17 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                   kanRedigeres={redigerbar}
                 />
                 <br />
-                <BrevMottaker brev={varselbrev} kanRedigeres={redigerbar} />
+
+                {varselbrev.mottakere.map((mottaker) => (
+                  <BrevMottakerPanel
+                    key={mottaker.id}
+                    brevId={varselbrev.id}
+                    behandlingId={behandlingId}
+                    sakId={sakId}
+                    mottaker={mottaker}
+                    kanRedigeres={redigerbar}
+                  />
+                ))}
               </>
             )}
           </Box>

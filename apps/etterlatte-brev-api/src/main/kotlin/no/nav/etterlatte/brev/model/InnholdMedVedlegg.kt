@@ -1,12 +1,12 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.Slate
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import org.slf4j.LoggerFactory
 
 class ManglerPayloadForVedleggInnholdBrev(
     override val detail: String,
-) : InternfeilException(detail)
+) : IkkeFunnetException("VEDLEGG_IKKE_FUNNET", detail)
 
 private val logger = LoggerFactory.getLogger(InnholdMedVedlegg::class.java)
 

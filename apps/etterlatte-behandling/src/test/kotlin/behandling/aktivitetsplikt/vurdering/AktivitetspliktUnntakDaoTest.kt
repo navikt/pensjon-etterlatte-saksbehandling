@@ -326,7 +326,7 @@ class AktivitetspliktUnntakDaoTest(
             val unntak = dao.hentUnntakForBehandling(forrigeBehandling.id).single()
             dao.hentUnntakForBehandling(nyBehandling.id) shouldBe emptyList()
 
-            dao.kopierUnntak(unntak.id, nyBehandling.id) shouldBe 1
+            dao.kopierUnntakTilBehandling(unntak.id, nyBehandling.id) shouldBe 1
 
             dao.hentUnntakForBehandling(nyBehandling.id).single().asClue {
                 it.sakId shouldBe sak.id

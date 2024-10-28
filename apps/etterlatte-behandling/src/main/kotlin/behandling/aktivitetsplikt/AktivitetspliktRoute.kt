@@ -43,7 +43,10 @@ inline val PipelineContext<*, ApplicationCall>.aktivitetId: UUID
             "Aktivitet id er ikke i path params",
         )
 
-internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: AktivitetspliktService) {
+internal fun Route.aktivitetspliktRoutes(
+    aktivitetspliktService: AktivitetspliktService,
+    aktivitetspliktOppgaveService: AktivitetspliktOppgaveService,
+) {
     val logger = routeLogger
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt") {
@@ -222,6 +225,13 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
                     call.respond(opprettet)
                 }
             }
+        }
+    }
+
+    route("/api/aktivitetsplikt/oppgave/${OPPGAVEID_CALL_PARAMETER}") {
+        get {
+            val oppgaveOgVurdering = inTransaction { aktivitetspliktOppgaveService.hentVurderingForOppgave(oppgaveId) }
+            call.respond(oppgaveOgVurdering)
         }
     }
 

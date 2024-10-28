@@ -1,7 +1,7 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevForSak } from '~shared/api/brev'
 import { useEffect } from 'react'
-import { Box, Button, HStack, Table } from '@navikt/ds-react'
+import { BodyShort, Box, Button, HStack, Table } from '@navikt/ds-react'
 import { BrevStatus, formaterBrevtype, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon, ExternalLinkIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
@@ -91,8 +91,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
                 <Table.HeaderCell>Status</Table.HeaderCell>
                 <Table.HeaderCell>Distribuert</Table.HeaderCell>
                 <Table.HeaderCell>Type</Table.HeaderCell>
-                <Table.HeaderCell>Navn</Table.HeaderCell>
-                <Table.HeaderCell>Adresse</Table.HeaderCell>
+                <Table.HeaderCell>Mottaker</Table.HeaderCell>
                 <Table.HeaderCell></Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -112,10 +111,17 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
                     {b.status === BrevStatus.DISTRIBUERT ? formaterDatoMedKlokkeslett(b.statusEndret) : '-'}
                   </Table.DataCell>
                   <Table.DataCell>{formaterBrevtype(b.brevtype)}</Table.DataCell>
-                  <Table.DataCell>{b.mottaker.navn}</Table.DataCell>
-                  <Table.DataCell>{mapAdresse(b.mottaker)}</Table.DataCell>
                   <Table.DataCell>
-                    <HStack gap="4" justify="end">
+                    {b.mottakere.map((mottaker) => (
+                      <BodyShort key={mottaker.id}>
+                        {mottaker.navn}
+                        <br />
+                        {mapAdresse(mottaker)}
+                      </BodyShort>
+                    ))}
+                  </Table.DataCell>
+                  <Table.DataCell>
+                    <HStack gap="4" justify="end" align="center">
                       <SlettBrev brev={b} />
                       <BrevUtgaar brev={b} />
                       {handlingKnapp(b)}

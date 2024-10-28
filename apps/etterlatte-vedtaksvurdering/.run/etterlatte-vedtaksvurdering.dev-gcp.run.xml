@@ -14,8 +14,6 @@
       <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
       <env name="ETTERLATTE_BEREGNING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-beregning" />
       <env name="ETTERLATTE_BEREGNING_URL" value="https://etterlatte-beregning.intern.dev.nav.no" />
-      <env name="ETTERLATTE_VILKAARSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vilkaarsvurdering" />
-      <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="https://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
       <env name="ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vedtaksvurdering" />
       <env name="ETTERLATTE_VEDTAKSVURDERING_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="ETTERLATTE_TRYGDETID_CLIENT_ID" value="8385435e-f3d7-45ec-be59-ebd1c71df735" />

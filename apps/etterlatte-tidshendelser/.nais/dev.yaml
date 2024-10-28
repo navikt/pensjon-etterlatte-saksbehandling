@@ -58,6 +58,12 @@ spec:
       value: "PT2M"
     - name: JOBB_POLLER_OPENING_HOURS
       value: "06-23"
+    - name: OPPRETT_JOBBER_INITIAL_DELAY
+      value: "65"
+    - name: OPPRETT_JOBBER_INTERVAL
+      value: "PT1H"
+    - name: OPPRETT_JOBBER_OPENING_HOURS
+      value: "09-15"
     - name: HENDELSE_POLLER_INITIAL_DELAY
       value: "60"
     - name: HENDELSE_POLLER_INTERVAL

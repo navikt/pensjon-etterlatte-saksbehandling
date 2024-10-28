@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.uuid
@@ -67,6 +68,13 @@ fun Route.avkorting(
             }
         }
 
+        post("/haandter-tidlig-alderspensjon") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
+                avkortingService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
+            }
+        }
+
         delete {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Sletter avkorting for behandlingId=$it")
@@ -86,9 +94,17 @@ fun AvkortingGrunnlag.toDto() =
         fratrekkInnAar = fratrekkInnAar,
         inntektUtlandTom = inntektUtlandTom,
         fratrekkInnAarUtland = fratrekkInnAarUtland,
-        relevanteMaanederInnAar = innvilgaMaaneder,
+        innvilgaMaaneder = innvilgaMaaneder,
         spesifikasjon = spesifikasjon,
         kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
+        overstyrtInnvilgaMaaneder =
+            overstyrtInnvilgaMaanederAarsak?.let {
+                AvkortingOverstyrtInnvilgaMaanederDto(
+                    antall = innvilgaMaaneder,
+                    aarsak = it.name,
+                    begrunnelse = overstyrtInnvilgaMaanederBegrunnelse ?: "",
+                )
+            },
     )
 
 fun AvkortetYtelse.toDto() =

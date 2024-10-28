@@ -5,7 +5,7 @@ import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { ConfigContext } from '~clientConfig'
 import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger, usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
@@ -31,7 +31,8 @@ const isValidDateOfDeath = (date?: Date) => {
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const { next } = useBehandlingRoutes()
+  const { next } = useContext(BehandlingRouteContext)
+
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandlingErRedigerbar(

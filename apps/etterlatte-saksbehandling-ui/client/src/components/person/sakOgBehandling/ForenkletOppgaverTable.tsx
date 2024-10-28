@@ -6,7 +6,7 @@ import {
   Oppgavestatus,
   Oppgavetype,
 } from '~shared/types/oppgave'
-import { Alert, HStack, Table } from '@navikt/ds-react'
+import { Alert, Box, HStack, Table } from '@navikt/ds-react'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
 import { Saksbehandler } from '~shared/types/saksbehandler'
@@ -19,7 +19,6 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { finnOgOppdaterOppgave, sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
-import styled from 'styled-components'
 import { formaterDato } from '~utils/formatering/dato'
 import { formaterEnumTilLesbarString } from '~utils/formatering/formatering'
 
@@ -107,11 +106,13 @@ export const ForenkletOppgaverTable = ({
                 oppdaterTildeling={oppdaterSaksbehandlerTildeling}
               />
             </Table.DataCell>
-            <HandlingerDataCell>
-              {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && (
-                <HandlingerForOppgave oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
-              )}
-            </HandlingerDataCell>
+            <Table.DataCell>
+              <Box minWidth="13rem">
+                {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && (
+                  <HandlingerForOppgave oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+                )}
+              </Box>
+            </Table.DataCell>
           </Table.Row>
         ))}
       </Table.Body>
@@ -122,7 +123,3 @@ export const ForenkletOppgaverTable = ({
     </Alert>
   )
 }
-
-const HandlingerDataCell = styled(Table.DataCell)`
-  min-width: 13rem;
-`

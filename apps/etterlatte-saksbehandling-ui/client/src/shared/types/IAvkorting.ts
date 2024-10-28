@@ -18,10 +18,11 @@ export interface IAvkortingGrunnlag {
   tom?: string
   inntektTom: number
   fratrekkInnAar: number
-  relevanteMaanederInnAar: number
+  innvilgaMaaneder: number
   inntektUtlandTom: number
   fratrekkInnAarUtland: number
   spesifikasjon: string
+  overstyrtInnvilgaMaaneder?: IOverstyrtInnvilgaMaaneder
   kilde: {
     tidspunkt: string
     ident: string
@@ -47,7 +48,6 @@ export interface IOverstyrtInnvilgaMaaneder {
 
 export enum OverstyrtInnvilaMaanederAarsak {
   TAR_UT_PENSJON_TIDLIG = 'TAR_UT_PENSJON_TIDLIG',
-  BLIR_67 = 'BLIR_67',
   ANNEN = 'ANNEN',
 }
 
@@ -55,8 +55,6 @@ export function hentLesbarTekstForInnvilgaMaanederType(type: OverstyrtInnvilaMaa
   switch (type) {
     case OverstyrtInnvilaMaanederAarsak.TAR_UT_PENSJON_TIDLIG:
       return 'Tar ut pensjon tidlig'
-    case OverstyrtInnvilaMaanederAarsak.BLIR_67:
-      return 'Blir 67'
     case OverstyrtInnvilaMaanederAarsak.ANNEN:
       return 'Annen'
   }

@@ -607,7 +607,10 @@ class KlageServiceImpl(
             klage = klage,
             ekstradataInnstilling =
                 EkstradataInnstilling(
-                    mottakerInnstilling = brevMottakerTilKlageMottaker(ferdigstillResultat.oversendelsesbrev.mottaker),
+                    // TODO EY-3627:
+                    //  Hvordan håndtere flere mottakere her? Kun bruke [MottakerType.HOVED]?
+                    //  Skal det i det hele tatt være mulig å ha flere mottakere på en innstilling?
+                    mottakerInnstilling = brevMottakerTilKlageMottaker(ferdigstillResultat.oversendelsesbrev.mottakere.single()),
                     // TODO: Håndter verge
                     vergeEllerFullmektig = null,
                     journalpostInnstillingsbrev = ferdigstillResultat.notatTilKa.journalpostId,

@@ -25,9 +25,9 @@ data class AvkortetBeregningsperiode(
     val datoTOM: LocalDate?,
     val grunnbeloep: Kroner,
     val inntekt: Kroner,
-    val aarsinntekt: Kroner,
+    val oppgittInntekt: Kroner,
     val fratrekkInnAar: Kroner,
-    val relevanteMaanederInnAar: Int,
+    val innvilgaMaaneder: Int,
     val ytelseFoerAvkorting: Kroner,
     val restanse: Kroner,
     val trygdetid: Int,
@@ -36,6 +36,7 @@ data class AvkortetBeregningsperiode(
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val sanksjon: SanksjonertYtelse?,
     val institusjon: InstitusjonsoppholdBeregningsgrunnlag?,
+    val erOverstyrtInnvilgaMaaneder: Boolean,
 )
 
 data class Beregningsperiode(

@@ -43,6 +43,11 @@ class BeregningService(
             beregningApp.put("$url/api/beregning/beregningsgrunnlag/$omregningsId/overstyr/regulering")
         }
 
+    fun haandterTidligAlderpensjon(behandlingId: UUID): HttpResponse =
+        runBlocking {
+            beregningApp.post("$url/api/beregning/avkorting/$behandlingId/haandter-tidlig-alderspensjon")
+        }
+
     fun omregnAvkorting(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,

@@ -2,8 +2,8 @@ import { behandlingErRedigerbar } from '../felles/utils'
 import { formaterDato } from '~utils/formatering/dato'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
-import React, { useEffect, useState } from 'react'
+import { BehandlingRouteContext } from '../BehandlingRoutes'
+import React, { useContext, useEffect, useState } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
@@ -33,7 +33,7 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
-  const { next } = useBehandlingRoutes()
+  const { next } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtakStatus, oppdaterVedtakRequest] = useApiCall(upsertVedtak)

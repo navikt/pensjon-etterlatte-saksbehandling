@@ -11,6 +11,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
@@ -31,6 +32,7 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -73,13 +75,32 @@ fun Route.brevRoute(
             }
         }
 
-        post("mottaker") {
-            withSakId(tilgangssjekker, skrivetilgang = true) {
-                val body = call.receive<OppdaterMottakerRequest>()
+        route("mottaker") {
+            post {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val mottaker = service.opprettMottaker(brevId)
 
-                val mottaker = service.oppdaterMottaker(brevId, body.mottaker)
+                    call.respond(mottaker)
+                }
+            }
 
-                call.respond(mottaker)
+            put {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val body = call.receive<OppdaterMottakerRequest>()
+                    service.oppdaterMottaker(brevId, body.mottaker)
+
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            delete("{mottakerId}") {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val mottakerId = UUID.fromString(call.parameters["mottakerId"])
+
+                    service.slettMottaker(brevId, mottakerId)
+
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
 

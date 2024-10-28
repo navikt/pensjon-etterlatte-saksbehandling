@@ -1,6 +1,6 @@
 import { handlinger } from '../handlinger/typer'
 import { Button } from '@navikt/ds-react'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { behandlingHarVarselbrev, BehandlingRouteContext } from '../BehandlingRoutes'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { upsertVedtak } from '~shared/api/vedtaksvurdering'
@@ -9,14 +9,14 @@ import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { useContext } from 'react'
 
 export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
-  const { next, goto } = useBehandlingRoutes()
+  const { next, goto } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
   const { behandlingId } = props
   const vedtaksresultat = useVedtaksResultat()
@@ -38,7 +38,11 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
         if (skalBrukeTrygdetid) {
           goto('trygdetid')
         } else {
-          goto('brev')
+          if (behandlingHarVarselbrev(behandling)) {
+            next()
+          } else {
+            goto('brev')
+          }
         }
       })
     })
@@ -66,7 +70,11 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
       case 'avslag':
         return (
           <Button variant="primary" loading={isPending(vedtakResult)} onClick={() => oppdaterVedtakAvslag()}>
-            {skalBrukeTrygdetid ? handlinger.AVSLAG_UTLAND.navn : handlinger.AVSLAG.navn}
+            {skalBrukeTrygdetid
+              ? handlinger.AVSLAG_UTLAND.navn
+              : behandlingHarVarselbrev(behandling)
+                ? handlinger.NESTE.navn
+                : handlinger.AVSLAG.navn}
           </Button>
         )
     }

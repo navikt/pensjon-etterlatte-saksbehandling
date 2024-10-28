@@ -11,7 +11,7 @@ import styled from 'styled-components'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
 import { isFailure, isPending } from '~shared/api/apiUtils'
-import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
@@ -72,7 +72,16 @@ export function TilbakekrevingBrev({
                 <br />
                 <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
                 <br />
-                <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
+                {vedtaksbrev.mottakere.map((mottaker) => (
+                  <BrevMottakerPanel
+                    key={mottaker.id}
+                    brevId={vedtaksbrev.id}
+                    behandlingId={vedtaksbrev.behandlingId}
+                    sakId={vedtaksbrev.sakId}
+                    mottaker={mottaker}
+                    kanRedigeres={redigerbar}
+                  />
+                ))}
               </>
             )}
           </Box>

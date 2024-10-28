@@ -34,7 +34,6 @@ export default function DokumentRad({
       />
       <TextField
         readOnly={lesevisning}
-        size="small"
         label="Kommentar"
         value={dokument.kommentar}
         onChange={(e) => oppdaterDokument('kommentar', e.target.value)}
@@ -46,7 +45,7 @@ export default function DokumentRad({
           onClick={() => fjernDokument()}
           style={{ marginTop: '1.9rem', maxHeight: '3rem' }}
         >
-          Slett
+          Slett dokument
         </Button>
       )}
     </HStack>

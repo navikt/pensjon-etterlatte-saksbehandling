@@ -49,6 +49,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.util.UUID
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -136,6 +137,7 @@ internal class BrevRouteTest {
     fun deserialiser() {
         val mottaker =
             """{
+            "id": "d762e98d-514d-4bb5-a6b5-a3fbf4d65887",
             "navn": "Peder Ås",
             "foedselsnummer": {
                 "value": "25478323363"
@@ -255,18 +257,21 @@ internal class BrevRouteTest {
             status = Status.OPPRETTET,
             statusEndret = Tidspunkt.now(),
             opprettet = Tidspunkt.now(),
-            mottaker =
-                Mottaker(
-                    "Stor Snerk",
-                    STOR_SNERK,
-                    null,
-                    Adresse(
-                        adresseType = "NORSKPOSTADRESSE",
-                        "Testgaten 13",
-                        "1234",
-                        "OSLO",
-                        land = "Norge",
-                        landkode = "NOR",
+            mottakere =
+                listOf(
+                    Mottaker(
+                        id = UUID.randomUUID(),
+                        "Stor Snerk",
+                        STOR_SNERK,
+                        null,
+                        Adresse(
+                            adresseType = "NORSKPOSTADRESSE",
+                            "Testgaten 13",
+                            "1234",
+                            "OSLO",
+                            land = "Norge",
+                            landkode = "NOR",
+                        ),
                     ),
                 ),
             brevtype = Brevtype.INFORMASJON,

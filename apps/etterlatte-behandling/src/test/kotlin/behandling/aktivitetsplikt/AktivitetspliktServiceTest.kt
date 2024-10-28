@@ -69,6 +69,7 @@ class AktivitetspliktServiceTest {
     private val revurderingService: RevurderingService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val statistikkProduer: BehandlingHendelserKafkaProducer = mockk()
+    private val kopierService: AktivitetspliktKopierService = mockk()
     private val featureToggleService: FeatureToggleService = DummyFeatureToggleService()
     private val service =
         AktivitetspliktService(
@@ -79,6 +80,7 @@ class AktivitetspliktServiceTest {
             grunnlagKlient,
             revurderingService,
             statistikkProduer,
+            kopierService,
             oppgaveService,
         )
     private val user =

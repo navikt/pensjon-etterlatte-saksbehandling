@@ -1,10 +1,11 @@
 import { Button, HStack, VStack } from '@navikt/ds-react'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { BehandlingRouteContext } from '../BehandlingRoutes'
 import AvbrytBehandling from './AvbrytBehandling'
 import { handlinger } from './typer'
+import { useContext } from 'react'
 
 export const NesteOgTilbake = () => {
-  const { next, back, lastPage, firstPage } = useBehandlingRoutes()
+  const { next, back, lastPage, firstPage } = useContext(BehandlingRouteContext)
 
   return (
     <VStack gap="4">

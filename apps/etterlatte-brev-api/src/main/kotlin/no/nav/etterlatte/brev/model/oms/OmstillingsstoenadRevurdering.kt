@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import java.time.LocalDate
+import java.time.YearMonth
 
 data class OmstillingsstoenadRevurdering(
     override val innhold: List<Slate.Element>,
@@ -62,6 +63,7 @@ data class OmstillingsstoenadRevurdering(
             vilkaarsVurdering: VilkaarsvurderingDto,
             datoVedtakOmgjoering: LocalDate?,
             utlandstilknytning: UtlandstilknytningType?,
+            opphoerFom: YearMonth?,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -69,9 +71,9 @@ data class OmstillingsstoenadRevurdering(
                         datoFOM = it.datoFOM,
                         datoTOM = it.datoTOM,
                         inntekt = it.inntekt,
-                        aarsinntekt = it.aarsinntekt,
+                        oppgittInntekt = it.oppgittInntekt,
                         fratrekkInnAar = it.fratrekkInnAar,
-                        relevantMaanederInnAar = it.relevanteMaanederInnAar,
+                        innvilgaMaaneder = it.innvilgaMaaneder,
                         grunnbeloep = it.grunnbeloep,
                         ytelseFoerAvkorting = it.ytelseFoerAvkorting,
                         restanse = it.restanse,
@@ -81,6 +83,7 @@ data class OmstillingsstoenadRevurdering(
                         beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
                         sanksjon = it.sanksjon != null,
                         institusjon = it.institusjon != null && it.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
+                        erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
                     )
                 }
 
@@ -124,6 +127,8 @@ data class OmstillingsstoenadRevurdering(
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = navnAvdoed,
                             ),
+                        oppphoersdato = opphoerFom?.atDay(1),
+                        opphoerNesteAar = false, // inntekt neste år ikke implementert for revurdering
                     ),
                 etterbetaling =
                     etterbetalingDTO?.let {
@@ -146,7 +151,8 @@ data class OmstillingsstoenadRevurdering(
         ): Boolean {
             // Sjekker siste periode på forrige iverksatte og gjeldende behandling - mulig dette ikke holder
             // med litt mer komplekse behandlinger?
-            val beloepForrigeBehandling = forrigeAvkortingsinfo?.beregningsperioder?.maxBy { it.datoFOM }?.utbetaltBeloep
+            val beloepForrigeBehandling =
+                forrigeAvkortingsinfo?.beregningsperioder?.maxBy { it.datoFOM }?.utbetaltBeloep
             val beloepGjeldendeBehandling = avkortingsinfo.beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep
             return beloepForrigeBehandling == null || beloepForrigeBehandling != beloepGjeldendeBehandling
         }

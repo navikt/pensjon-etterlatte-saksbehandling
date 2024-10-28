@@ -149,11 +149,8 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDaoImpl
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapper
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkarsvurderingRepositorDaoWrapperClient
 import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
 import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
@@ -282,11 +279,6 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
-    val vilkaarsvurderingKlientDaoImpl: VilkaarsvurderingKlientDao =
-        VilkaarsvurderingKlientDaoImpl(
-            config,
-            httpClient(),
-        ),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -331,11 +323,7 @@ internal class ApplicationContext(
     val vilkaarsvurderingDao = VilkaarsvurderingRepository(autoClosingDatabase, DelvilkaarRepository())
 
     val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper =
-        if (isProd()) {
-            VilkarsvurderingRepositorDaoWrapperClient(vilkaarsvurderingKlientDaoImpl)
-        } else {
-            VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
-        }
+        VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))

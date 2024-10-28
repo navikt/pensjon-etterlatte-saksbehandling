@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.virusskanning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-private const val MAKS_FILSTOERRELSE = 10 * 1024 * 1024
+const val MAKS_FILSTOERRELSE_BREV = 2 * 1024 * 1024
 
 private val log: Logger = LoggerFactory.getLogger(VirusScanService::class.java)
 
@@ -24,7 +24,7 @@ class VirusScanService(
     }
 }
 
-fun filErForStor(file: ByteArray) = file.size > (MAKS_FILSTOERRELSE).also { log.info("Fila er ${file.size} bytes") }
+fun filErForStor(file: ByteArray) = file.size > (MAKS_FILSTOERRELSE_BREV).also { log.info("Fila er ${file.size} bytes") }
 
 data class VirusScanRequest(
     val tittel: String,

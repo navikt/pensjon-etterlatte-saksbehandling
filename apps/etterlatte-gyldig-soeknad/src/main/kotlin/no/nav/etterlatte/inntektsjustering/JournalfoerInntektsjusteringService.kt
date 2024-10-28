@@ -131,9 +131,9 @@ data class ArkiverInntektsjustering(
     val arbeidsinntekt: Int,
     val naeringsinntekt: Int,
     val inntektFraUtland: Int,
-    val afpInntekt: Int,
+    val afpInntekt: Int?,
     val afpInntektAFPTjenesteordning: String,
-    val skalGaaAvMedAlderspensjon: String,
+    val skalGaaAvMedAlderspensjon: String?,
     val datoForAaGaaAvMedAlderspensjon: String,
     val tidspunkt: String,
 ) : PDFMal

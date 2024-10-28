@@ -67,15 +67,11 @@ import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.OppdaterVurdertVilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.StatusOppdatertDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.ServiceStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingDto
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
@@ -83,9 +79,6 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
-import no.nav.etterlatte.vilkaarsvurdering.MigrertYrkesskadefordel
-import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingKlientDao
 import java.time.LocalDate
 import java.util.UUID
 
@@ -551,63 +544,6 @@ class AxsysKlientTest : AxsysKlient {
         get() = "endpoint"
 
     override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
-}
-
-class VilkaarsvurderingKlientDaoTest : VilkaarsvurderingKlientDao {
-    override suspend fun hent(behandlingId: UUID): Vilkaarsvurdering? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun erMigrertYrkesskadefordel(
-        behandlingId: UUID,
-        sakId: SakId,
-    ): MigrertYrkesskadefordel {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun opprettVilkaarsvurdering(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun kopierVilkaarsvurdering(vilkaarsvurdering: OpprettVilkaarsvurderingFraBehandling): Vilkaarsvurdering {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun slettVilkaarsvurderingResultat(behandlingId: UUID): Vilkaarsvurdering {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun lagreVilkaarsvurderingResultatvanlig(
-        behandlingId: UUID,
-        vurdertVilkaarsvurderingDto: VurdertVilkaarsvurderingDto,
-    ): Vilkaarsvurdering {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun slettVilkaarsvurdering(
-        behandlingId: UUID,
-        vilkaarsvurderingId: UUID,
-    ): Vilkaarsvurdering {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun oppdaterGrunnlagsversjon(
-        behandlingId: UUID,
-        grunnlagVersjon: Long,
-    ): StatusOppdatertDto {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun slettVurderingPaaVilkaar(
-        behandlingId: UUID,
-        vilkaarId: UUID,
-    ): Vilkaarsvurdering {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun oppdaterVurderingPaaVilkaar(oppdatervv: OppdaterVurdertVilkaar): Vilkaarsvurdering {
-        TODO("Not yet implemented")
-    }
 }
 
 class KodeverkKlientTest : KodeverkKlient {

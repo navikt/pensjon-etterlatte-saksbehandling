@@ -43,7 +43,7 @@ export interface BehandlingRouteType {
   sakstype?: SakType
 }
 
-const behandlingroutes: Record<string, BehandlingRouteType> = {
+export const behandlingroutes: Record<string, BehandlingRouteType> = {
   soeknadsoversikt: {
     path: 'soeknadsoversikt',
     description: 'Søknadsoversikt',
@@ -90,19 +90,21 @@ const behandlingroutes: Record<string, BehandlingRouteType> = {
     path: 'varselbrev',
     description: 'Varselbrev',
     element: (behandling: IBehandlingReducer) => <Varselbrev behandling={behandling} />,
-    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
+    kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
   },
   brevBp: {
     path: 'brev',
     element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
     description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
+    kreverBehandlingsstatus: (behandling: IBehandlingReducer) =>
+      behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.BEREGNET,
   },
   brevOms: {
     path: 'brev',
     element: (behandling: IBehandlingReducer) => <Vedtaksbrev behandling={behandling} />,
     description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: () => IBehandlingStatus.AVKORTET,
+    kreverBehandlingsstatus: (behandling: IBehandlingReducer) =>
+      behandlingHarVarselbrev(behandling) ? IBehandlingStatus.VILKAARSVURDERT : IBehandlingStatus.AVKORTET,
   },
 }
 // skal kun brukes av Behandling som laster behandling, å newe opp denne kan få utilsiktede konsekvenser andre steder
@@ -208,12 +210,17 @@ function useRouteNavigation() {
   return { currentRoute, goto }
 }
 
+export function behandlingHarVarselbrev(behandling: IBehandlingReducer | null) {
+  return (
+    behandling?.kilde === Vedtaksloesning.GJENOPPRETTA ||
+    behandling?.revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT
+  )
+}
+
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysninger: Personopplysninger | null) => {
   if (!behandling) return []
 
-  const lagVarselbrev =
-    behandling?.kilde === Vedtaksloesning.GJENOPPRETTA ||
-    behandling?.revurderingsaarsak === Revurderingaarsak.AKTIVITETSPLIKT
+  const lagVarselbrev = behandlingHarVarselbrev(behandling)
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:

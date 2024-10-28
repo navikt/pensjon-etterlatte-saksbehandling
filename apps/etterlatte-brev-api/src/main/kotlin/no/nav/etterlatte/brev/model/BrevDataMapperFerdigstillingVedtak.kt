@@ -107,6 +107,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         klage,
                     )
+
                 BP_INNVILGELSE,
                 BP_INNVILGELSE_FORELDRELOES,
                 ->
@@ -122,12 +123,14 @@ class BrevDataMapperFerdigstillingVedtak(
                         avdoede,
                         systemkilde,
                     )
+
                 BP_AVSLAG ->
                     barnepensjonAvslag(
                         innholdMedVedlegg,
                         soekerUnder18,
                         utlandstilknytningType,
                     )
+
                 BP_OPPHOER ->
                     barnepensjonOpphoer(
                         bruker,
@@ -166,6 +169,8 @@ class BrevDataMapperFerdigstillingVedtak(
 
                 OMS_AVSLAG ->
                     omstillingsstoenadAvslag(
+                        behandlingId!!,
+                        bruker,
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
                     )
@@ -192,6 +197,7 @@ class BrevDataMapperFerdigstillingVedtak(
                     AvvistKlageFerdigData.fra(
                         innholdMedVedlegg,
                         klage,
+                        utlandstilknytningType,
                     )
 
                 else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
@@ -435,17 +441,23 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkårsvurdering" },
             avdoede,
             utlandstilknytningType,
-            behandling.erSluttbehandling,
+            behandling,
         )
     }
 
     private suspend fun omstillingsstoenadAvslag(
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
         innhold: List<Slate.Element>,
         utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
+
+        val tidligereFamiliepleier = async { behandlingService.hentTidligereFamiliepleier(behandlingId, bruker) }
+
         OmstillingsstoenadAvslag.fra(
             innhold,
             utlandstilknytningType,
+            tidligereFamiliepleier.await(),
         )
     }
 
@@ -487,6 +499,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         val datoVedtakOmgjoering =
             klage
@@ -510,6 +523,7 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
             datoVedtakOmgjoering,
             utlandstilknytningType,
+            behandling.opphoerFraOgMed,
         )
     }
 

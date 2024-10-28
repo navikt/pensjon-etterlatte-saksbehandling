@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import java.time.LocalDate
 
 data class AvvistKlageFerdigData(
@@ -16,10 +17,11 @@ data class AvvistKlageFerdigData(
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
             klage: Klage?,
+            utlandstilknytningType: UtlandstilknytningType?,
         ): AvvistKlageFerdigData =
             AvvistKlageFerdigData(
                 innhold = innholdMedVedlegg.innhold(),
-                data = AvvistKlageInnholdBrevData.fra(klage),
+                data = AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType),
             )
     }
 }
@@ -28,9 +30,13 @@ data class AvvistKlageInnholdBrevData(
     val sakType: SakType,
     val klageDato: LocalDate,
     val datoForVedtaketKlagenGjelder: LocalDate?,
+    val bosattUtland: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
-        fun fra(muligKlage: Klage?): AvvistKlageInnholdBrevData {
+        fun fra(
+            muligKlage: Klage?,
+            utlandstilknytningType: UtlandstilknytningType?,
+        ): AvvistKlageInnholdBrevData {
             val klage = muligKlage ?: throw IllegalArgumentException("Vedtak mangler klage")
             return AvvistKlageInnholdBrevData(
                 sakType = klage.sak.sakType,
@@ -41,6 +47,7 @@ data class AvvistKlageInnholdBrevData(
                         ?.vedtaketKlagenGjelder
                         ?.datoAttestert
                         ?.toLocalDate(),
+                bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
             )
         }
     }

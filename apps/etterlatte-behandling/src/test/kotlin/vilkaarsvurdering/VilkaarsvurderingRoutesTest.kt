@@ -44,10 +44,12 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.StatusOppdatertDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.mockSaksbehandler
@@ -571,7 +573,22 @@ internal class VilkaarsvurderingRoutesTest(
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl)
             }
 
-            opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            val vilkaarsvurderingMedBehandlingGrunnlagsversjon = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+
+            val vilkaarsvurdering = vilkaarsvurderingMedBehandlingGrunnlagsversjon.vilkaarsvurdering
+            vilkaarsvurdering.vilkaar.forEach { vilkaar ->
+                vilkaarsvurderingServiceImpl.oppdaterVurderingPaaVilkaar(
+                    behandlingId,
+                    simpleSaksbehandler(),
+                    VurdertVilkaar(
+                        vilkaar.id,
+                        VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
+                        null,
+                        VilkaarVurderingData("kommentar", LocalDateTime.now(), "saksbehandler"),
+                    ),
+                )
+            }
+
             val resultat =
                 VurdertVilkaarsvurderingResultatDto(
                     resultat = VilkaarsvurderingUtfall.OPPFYLT,
@@ -605,10 +622,10 @@ internal class VilkaarsvurderingRoutesTest(
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
+            val vilkaarsvurderingsvar = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(revurderingBehandlingId, vilkaarsvurdering.behandlingId)
-            assertNull(vilkaarsvurdering.resultat) // siden vilkår ikke har vurdering her
+            assertEquals(revurderingBehandlingId, vilkaarsvurderingsvar.behandlingId)
+            assertEquals(resultat.resultat, vilkaarsvurderingsvar.resultat?.utfall)
         }
     }
 

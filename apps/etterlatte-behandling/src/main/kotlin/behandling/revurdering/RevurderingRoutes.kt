@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
@@ -123,9 +124,11 @@ internal fun Route.revurderingRoutes(
 
     route("/automatisk-revurdering") {
         post {
-            val request = call.receive<AutomatiskRevurderingRequest>()
-            val response = automatiskRevurderingService.oppprettRevurderingOgOppfoelging(request)
-            call.respond(response)
+            kunSystembruker { systembruker ->
+                val request = call.receive<AutomatiskRevurderingRequest>()
+                val response = automatiskRevurderingService.oppprettRevurderingOgOppfoelging(request, systembruker)
+                call.respond(response)
+            }
         }
     }
 }

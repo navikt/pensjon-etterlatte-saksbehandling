@@ -130,6 +130,20 @@ class VilkaarsvurderingService(
             vilkaarsvurderingRepositoryWrapper.slettVilkaarResultat(behandlingId, vilkaarId)
         }
 
+    private fun validerTidligereVilkaarsvurdering(tidligereVilkaarsvurdering: Vilkaarsvurdering) {
+        if (tidligereVilkaarsvurdering.resultat == null) {
+            logger.warn("Mangler resultat for vilkårsvurdering")
+        }
+
+        if (tidligereVilkaarsvurdering.vilkaar.isEmpty()) {
+            logger.warn("Mangler vilkår for vilkårsvurdering")
+        }
+
+        if (tidligereVilkaarsvurdering.vilkaar.any { it.vurdering == null }) {
+            logger.warn("Mangler vurdering for delvilkår i vilkårsvurdering")
+        }
+    }
+
     fun kopierVilkaarsvurdering(
         behandlingId: UUID,
         kopierFraBehandling: UUID,
@@ -145,6 +159,8 @@ class VilkaarsvurderingService(
 
             val virkningstidspunkt =
                 behandling.virkningstidspunkt ?: throw VirkningstidspunktIkkeSattException(behandlingId)
+
+            validerTidligereVilkaarsvurdering(tidligereVilkaarsvurdering)
 
             val vilkaar =
                 when {

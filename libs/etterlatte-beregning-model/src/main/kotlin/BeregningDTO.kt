@@ -64,7 +64,6 @@ data class AvkortingGrunnlagFrontend(
 data class AvkortingDto(
     val avkortingGrunnlag: List<AvkortingGrunnlagDto>, // TODO kan "flyttes" inn i avkortetYteleDto?
     val avkortetYtelse: List<AvkortetYtelseDto>,
-    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(), // TODO Fjern
 )
 
 data class AvkortingGrunnlagDto(
@@ -75,9 +74,10 @@ data class AvkortingGrunnlagDto(
     val fratrekkInnAar: Int,
     val inntektUtlandTom: Int,
     val fratrekkInnAarUtland: Int,
-    val relevanteMaanederInnAar: Int,
+    val innvilgaMaaneder: Int,
     val spesifikasjon: String,
     val kilde: AvkortingGrunnlagKildeDto,
+    val overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
 )
 
 data class AvkortingGrunnlagLagreDto(
@@ -124,15 +124,16 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val restanse: Int,
     val avkortingsbeloep: Int,
     val ytelseFoerAvkorting: Int,
-    val aarsinntekt: Int,
+    val oppgittInntekt: Int,
     val fratrekkInnAar: Int,
-    val relevanteMaanederInnAar: Int,
+    val innvilgaMaaneder: Int,
     val trygdetid: Int,
     val grunnbelop: Int,
     val grunnbelopMnd: Int,
     val beregningsMetode: BeregningsMetode?,
     val sanksjon: SanksjonertYtelse?,
     val institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag?,
+    val erOverstyrtInnvilgaMaaneder: Boolean,
 )
 
 enum class OverstyrtBeregningKategori {

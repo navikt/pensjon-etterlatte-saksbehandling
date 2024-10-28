@@ -55,6 +55,8 @@ class ApplicationContext {
     val config: Config = ConfigFactory.load()
     val dataSource = DataSourceBuilder.createDataSource(env)
 
+    val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
+
     val leaderElectionHttpClient: HttpClient = httpClient()
     val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
@@ -81,8 +83,9 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             samordningsKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
+            rapidService = vedtaksvurderingRapidService,
         )
-    val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
+
     val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),

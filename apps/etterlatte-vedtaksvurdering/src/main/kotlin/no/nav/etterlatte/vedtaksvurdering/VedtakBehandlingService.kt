@@ -49,6 +49,7 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
+    private val rapidService: VedtaksvurderingRapidService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -404,11 +405,20 @@ class VedtakBehandlingService(
     suspend fun oppdaterSamordningsmelding(
         samordningmelding: OppdaterSamordningsmelding,
         brukerTokenInfo: BrukerTokenInfo,
+        sakId: SakId,
     ) {
         repository.lagreManuellBehandlingSamordningsmelding(samordningmelding, brukerTokenInfo)
 
         try {
-            samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
+            val vedtak: Vedtak? = repository.hentVedtakTilSamordning(sakId)
+            if (vedtak?.status == VedtakStatus.TIL_SAMORDNING && skalSamordnesManuelt(vedtak.behandlingId)) {
+                logger.warn("Manuelt samordner pga ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST, sakId=$sakId, vedtakId=${vedtak.id}")
+                samordnetVedtak(vedtak.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
+                    rapidService.sendToRapid(samordnetVedtak)
+                }
+            } else {
+                samordningsKlient.oppdaterSamordningsmelding(samordningmelding, brukerTokenInfo)
+            }
         } catch (e: Exception) {
             repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
             throw e
@@ -443,6 +453,17 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             ),
         )
+    }
+
+    // Dette er for å få saker som er TIL_SAMORDNING videre til SAMORDNET i det tilfelle overstyring ikke fungerer
+    // pga SAM returnerer ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
+    private fun skalSamordnesManuelt(behandlingId: UUID): Boolean {
+        val behandlingerSomErStuck =
+            listOf(
+                "6e960200-ac0a-4341-8e00-cf4300588d65",
+                "e893f467-4870-4d5c-a37a-9b63059206e3",
+            )
+        return behandlingerSomErStuck.find { it == behandlingId.toString() } != null
     }
 
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =

@@ -54,6 +54,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedUtlandstilknytning
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.route.lagGrunnlagsopplysning
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -188,14 +189,15 @@ interface BehandlingService {
         utlandstilknytning: Utlandstilknytning,
     )
 
-    fun oppdaterViderefoertOpphoer(
+    suspend fun oppdaterViderefoertOpphoer(
         behandlingId: UUID,
         viderefoertOpphoer: ViderefoertOpphoer,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
-    fun fjernViderefoertOpphoer(
+    suspend fun fjernViderefoertOpphoer(
         behandlingId: UUID,
-        kilde: Grunnlagsopplysning.Kilde,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     fun oppdaterBoddEllerArbeidetUtlandet(
@@ -807,9 +809,10 @@ internal class BehandlingServiceImpl(
             }
     }
 
-    override fun oppdaterViderefoertOpphoer(
+    override suspend fun oppdaterViderefoertOpphoer(
         behandlingId: UUID,
         viderefoertOpphoer: ViderefoertOpphoer,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
             hentBehandling(behandlingId)
@@ -830,13 +833,26 @@ internal class BehandlingServiceImpl(
             .also {
                 behandlingDao.lagreViderefoertOpphoer(behandlingId, viderefoertOpphoer)
                 behandlingDao.lagreStatus(it)
+                if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+                    beregningKlient.slettAvkorting(behandling.id, brukerTokenInfo)
+                }
             }
     }
 
-    override fun fjernViderefoertOpphoer(
+    override suspend fun fjernViderefoertOpphoer(
         behandlingId: UUID,
-        kilde: Grunnlagsopplysning.Kilde,
-    ) = behandlingDao.fjernViderefoertOpphoer(behandlingId, kilde)
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val behandling =
+            hentBehandling(behandlingId)
+                ?: throw InternfeilException("Kunne ikke oppdatere videreført opphør fordi behandlingen ikke finnes")
+
+        behandlingDao.fjernViderefoertOpphoer(behandlingId, brukerTokenInfo.lagGrunnlagsopplysning())
+
+        if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+            beregningKlient.slettAvkorting(behandling.id, brukerTokenInfo)
+        }
+    }
 
     override fun hentAapenOmregning(sakId: SakId): UUID? =
         behandlingDao

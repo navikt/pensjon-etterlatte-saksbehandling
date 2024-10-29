@@ -248,7 +248,13 @@ internal fun Route.behandlingRoutes(
                         )
 
                     inTransaction {
-                        behandlingService.oppdaterViderefoertOpphoer(behandlingId, viderefoertOpphoer)
+                        runBlocking {
+                            behandlingService.oppdaterViderefoertOpphoer(
+                                behandlingId,
+                                viderefoertOpphoer,
+                                brukerTokenInfo,
+                            )
+                        }
                     }
 
                     call.respond(viderefoertOpphoer)
@@ -264,10 +270,12 @@ internal fun Route.behandlingRoutes(
                 logger.debug("Prøver å fjerne videreført opphør")
 
                 inTransaction {
-                    behandlingService.fjernViderefoertOpphoer(
-                        behandlingId,
-                        brukerTokenInfo.lagGrunnlagsopplysning(),
-                    )
+                    runBlocking {
+                        behandlingService.fjernViderefoertOpphoer(
+                            behandlingId,
+                            brukerTokenInfo,
+                        )
+                    }
                 }
                 call.respond(HttpStatusCode.OK)
             }
@@ -385,7 +393,10 @@ internal fun Route.behandlingRoutes(
         route("/{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
                 logger.info("Henter detaljert behandling for behandling med id=$behandlingId")
-                when (val behandling = inTransaction { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }) {
+                when (
+                    val behandling =
+                        inTransaction { behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo) }
+                ) {
                     is DetaljertBehandling -> call.respond(behandling)
                     else -> throw IkkeFunnetException(
                         "FANT_IKKE_BEHANDLING",

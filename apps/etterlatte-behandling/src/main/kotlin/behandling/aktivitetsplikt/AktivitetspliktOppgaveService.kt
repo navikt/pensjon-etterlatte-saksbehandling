@@ -73,7 +73,7 @@ data class AktivitetspliktInformasjonBrevdataRequest(
     fun toDaoObjekt(
         oppgaveId: UUID,
         sakid: SakId,
-    ): AktivitetspliktInformasjonBrevdata {
+    ): AktivitetspliktInformasjonBrevdata =
         AktivitetspliktInformasjonBrevdata(
             oppgaveId = oppgaveId,
             sakid = sakid,
@@ -82,7 +82,6 @@ data class AktivitetspliktInformasjonBrevdataRequest(
             redusertEtterInntekt = this.redusertEtterInntekt,
             nasjonalEllerUtland = this.nasjonalEllerUtland,
         )
-    }
 }
 
 data class AktivitetspliktInformasjonBrevdata(

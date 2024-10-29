@@ -40,7 +40,7 @@ class AktivitetspliktOppgaveService(
             }
 
         val brevdata = aksBrevDao.hentBrevdata(oppgaveId = oppgaveId)
-        // TODO: hent inn data fra ny dao her med egen tabell
+
         return AktivitetspliktOppgaveVurdering(
             aktivtetspliktbrevdata = brevdata,
             vurderingType = vurderingType,
@@ -51,6 +51,36 @@ class AktivitetspliktOppgaveService(
                     emptyList(),
                     emptyList(),
                 ),
+        )
+    }
+
+    fun lagreBrevdata(
+        oppgaveId: UUID,
+        data: AktivitetspliktInformasjonBrevdataRequest,
+    ) {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+        aksBrevDao.lagreBrevdata(data.toDaoObjekt(oppgaveId, sakid = sak.id))
+    }
+}
+
+data class AktivitetspliktInformasjonBrevdataRequest(
+    val aktivitetsgrad: Aktivitetsgrad? = null,
+    val utbetaling: Boolean? = null,
+    val redusertEtterInntekt: Boolean? = null,
+    val nasjonalEllerUtland: NasjonalEllerUtland? = null,
+) {
+    fun toDaoObjekt(
+        oppgaveId: UUID,
+        sakid: SakId,
+    ): AktivitetspliktInformasjonBrevdata {
+        AktivitetspliktInformasjonBrevdata(
+            oppgaveId = oppgaveId,
+            sakid = sakid,
+            aktivitetsgrad = this.aktivitetsgrad,
+            utbetaling = this.utbetaling,
+            redusertEtterInntekt = this.redusertEtterInntekt,
+            nasjonalEllerUtland = this.nasjonalEllerUtland,
         )
     }
 }

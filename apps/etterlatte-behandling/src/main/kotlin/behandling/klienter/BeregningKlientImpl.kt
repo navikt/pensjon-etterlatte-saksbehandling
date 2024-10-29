@@ -21,6 +21,11 @@ interface BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
+
+    suspend fun harInntektNesteAar(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
 }
 
 class BeregningKlientImpl(
@@ -56,6 +61,21 @@ class BeregningKlientImpl(
         return downstreamResourceClient
             .get(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/$behandlingId/overstyrt"),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { resource -> resource.response != null },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
+    }
+
+    override suspend fun harInntektNesteAar(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        logger.info("Henter har inntekt neste avkorting for behandling id=$behandlingId")
+        return downstreamResourceClient
+            .get(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/$behandlingId/har-inntekt-neste-aar"),
                 brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
                 success = { resource -> resource.response != null },

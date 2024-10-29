@@ -452,6 +452,8 @@ internal class ApplicationContext(
     val aarligInntektsjusteringJobbService =
         AarligInntektsjusteringJobbService(
             omregningService = omregningService,
+            vedtakKlient = vedtakKlient,
+            beregningsKlient = beregningsKlient,
             rapid = rapid,
         )
 

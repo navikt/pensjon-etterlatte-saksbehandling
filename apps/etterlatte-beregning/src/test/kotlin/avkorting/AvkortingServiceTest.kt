@@ -14,7 +14,6 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
-import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
 import no.nav.etterlatte.beregning.regler.behandling
@@ -74,6 +73,38 @@ internal class AvkortingServiceTest {
     @AfterEach
     fun afterEach() {
         confirmVerified()
+    }
+
+    @Test
+    fun `Sjekk om sak har inntekt for neste aar`() {
+        val behandlingId = UUID.randomUUID()
+
+        // negative test
+        val avkortingFor2024 = Avkorting(aarsoppgjoer = listOf(opprettAarsoppgjoerMedVirk(YearMonth.of(2024, 1))))
+        coEvery { avkortingRepository.hentAvkorting(behandlingId) } returns avkortingFor2024
+
+        runBlocking {
+            service.hentHarInntektNesteAar(behandlingId) shouldBe false
+        }
+
+        // positiv test
+        val avkortingFor2024And2025 =
+            Avkorting(
+                aarsoppgjoer =
+                    listOf(
+                        opprettAarsoppgjoerMedVirk(YearMonth.of(2024, 1)),
+                        opprettAarsoppgjoerMedVirk(YearMonth.of(2025, 1)),
+                    ),
+            )
+        coEvery { avkortingRepository.hentAvkorting(behandlingId) } returns avkortingFor2024And2025
+
+        runBlocking {
+            service.hentHarInntektNesteAar(behandlingId) shouldBe true
+        }
+
+        coVerify(exactly = 2) {
+            avkortingRepository.hentAvkorting(behandlingId)
+        }
     }
 
     @Test
@@ -763,5 +794,20 @@ internal class AvkortingServiceTest {
                 avkortingRepository.hentAvkorting(behandlingId)
             }
         }
+    }
+
+    private fun opprettAarsoppgjoerMedVirk(fom: YearMonth): Aarsoppgjoer {
+        val virk = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(fom.year, fom.month))
+
+        val grunnlag =
+            avkortinggrunnlag(
+                id = UUID.randomUUID(),
+                periode = Periode(fom = virk.dato, tom = null),
+                kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Tidspunkt.now()),
+                innvilgaMaaneder = 3,
+            )
+
+        val inntektsavkorting = Inntektsavkorting(grunnlag = grunnlag)
+        return aarsoppgjoer(aar = fom.year, inntektsavkorting = listOf(inntektsavkorting))
     }
 }

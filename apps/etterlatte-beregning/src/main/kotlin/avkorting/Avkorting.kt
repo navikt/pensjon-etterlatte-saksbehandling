@@ -459,7 +459,7 @@ enum class OverstyrtInnvilgaMaanederAarsak {
 
 data class Aarsoppgjoer(
     val id: UUID,
-    val aar: Int,
+    val aar: Int, // TODO validere på format?
     val fom: YearMonth,
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),

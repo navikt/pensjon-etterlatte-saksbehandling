@@ -45,6 +45,13 @@ fun Route.avkorting(
             }
         }
 
+        get("har-inntekt-neste-aar") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Henter har-inntekt-neste-avkorting med behandlingId=$it")
+                call.respond(avkortingService.hentHarInntektNesteAar(it))
+            }
+        }
+
         post {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Lagre avkorting for behandlingId=$it")

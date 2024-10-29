@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
-import no.nav.etterlatte.brev.model.Aktivitetsgrad
-import no.nav.etterlatte.brev.model.NasjonalEllerUtland
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -65,10 +63,9 @@ class AktivitetspliktOppgaveService(
 }
 
 data class AktivitetspliktInformasjonBrevdataRequest(
-    val aktivitetsgrad: Aktivitetsgrad? = null,
+    val skalSendeBrev: Boolean,
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
-    val nasjonalEllerUtland: NasjonalEllerUtland? = null,
 ) {
     fun toDaoObjekt(
         oppgaveId: UUID,
@@ -77,20 +74,18 @@ data class AktivitetspliktInformasjonBrevdataRequest(
         AktivitetspliktInformasjonBrevdata(
             oppgaveId = oppgaveId,
             sakid = sakid,
-            aktivitetsgrad = this.aktivitetsgrad,
             utbetaling = this.utbetaling,
             redusertEtterInntekt = this.redusertEtterInntekt,
-            nasjonalEllerUtland = this.nasjonalEllerUtland,
+            skalSendeBrev = this.skalSendeBrev,
         )
 }
 
 data class AktivitetspliktInformasjonBrevdata(
     val oppgaveId: UUID,
     val sakid: SakId,
-    val aktivitetsgrad: Aktivitetsgrad? = null,
+    val skalSendeBrev: Boolean,
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
-    val nasjonalEllerUtland: NasjonalEllerUtland? = null,
 )
 
 data class AktivitetspliktOppgaveVurdering(

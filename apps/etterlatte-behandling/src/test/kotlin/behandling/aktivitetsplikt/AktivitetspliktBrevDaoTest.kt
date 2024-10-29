@@ -4,8 +4,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.brev.model.Aktivitetsgrad
-import no.nav.etterlatte.brev.model.NasjonalEllerUtland
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
@@ -34,17 +32,16 @@ class AktivitetspliktBrevDaoTest(
             AktivitetspliktInformasjonBrevdata(
                 sakid = sak.id,
                 oppgaveId = oppgave.id,
-                aktivitetsgrad = Aktivitetsgrad.AKKURAT_100_PROSENT,
+                skalSendeBrev = true,
                 utbetaling = true,
                 redusertEtterInntekt = true,
-                nasjonalEllerUtland = NasjonalEllerUtland.NASJONAL,
             )
 
         dao.lagreBrevdata(brevdata)
         val lagretBrevdata = dao.hentBrevdata(oppgave.id)
         lagretBrevdata shouldBe brevdata
 
-        val oppdatertBrevdata = brevdata.copy(aktivitetsgrad = Aktivitetsgrad.IKKE_I_AKTIVITET)
+        val oppdatertBrevdata = brevdata.copy(utbetaling = false)
         dao.lagreBrevdata(oppdatertBrevdata)
         val oppdatertBredata = dao.hentBrevdata(oppgave.id)
         oppdatertBredata shouldBe oppdatertBrevdata

@@ -1,9 +1,6 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import no.nav.etterlatte.behandling.hendelse.getUUID
-import no.nav.etterlatte.behandling.hendelse.setLong
-import no.nav.etterlatte.brev.model.Aktivitetsgrad
-import no.nav.etterlatte.brev.model.NasjonalEllerUtland
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -18,7 +15,7 @@ class AktivitetspliktBrevDao(
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT oppgave_id, sak_id, aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland from aktivitetsplikt_brevdata
+                        SELECT oppgave_id, sak_id, utbetaling, redusert_etter_inntekt, skal_sende_brev from aktivitetsplikt_brevdata
                         WHERE oppgave_id = ?
                         """.trimIndent(),
                     )
@@ -27,10 +24,9 @@ class AktivitetspliktBrevDao(
                     AktivitetspliktInformasjonBrevdata(
                         oppgaveId = getUUID("oppgave_id"),
                         sakid = SakId(getLong("sak_id")),
-                        aktivitetsgrad = getString("aktivitetsgrad")?.let { Aktivitetsgrad.valueOf(it) },
                         utbetaling = getBoolean("utbetaling"),
-                        redusertEtterInntekt = getBoolean("redusertEtterInntekt"),
-                        nasjonalEllerUtland = getString("nasjonalEllerUtland")?.let { NasjonalEllerUtland.valueOf(it) },
+                        redusertEtterInntekt = getBoolean("redusert_etter_inntekt"),
+                        skalSendeBrev = getBoolean("skal_sende_brev"),
                     )
                 }
             }
@@ -42,19 +38,18 @@ class AktivitetspliktBrevDao(
                 val stmt =
                     prepareStatement(
                         """
-                        INSERT INTO aktivitetsplikt_brevdata(id, sak_id, oppgave_id, aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
-                        VALUES(?, ?, ?, ?, ?, ?, ?) 
+                        INSERT INTO aktivitetsplikt_brevdata(id, sak_id, oppgave_id, utbetaling, redusert_etter_inntekt, skal_sende_brev)
+                        VALUES(?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (oppgave_id) 
-                        DO UPDATE SET aktivitetsgrad = excluded.aktivitetsgrad, utbetaling = excluded.utbetaling, redusertEtterInntekt = excluded.redusertEtterInntekt, nasjonalEllerUtland = excluded.nasjonalEllerUtland
+                        DO UPDATE SET utbetaling = excluded.utbetaling, redusert_etter_inntekt = excluded.redusert_etter_inntekt, skal_sende_brev = excluded.skal_sende_brev
                         """.trimIndent(),
                     )
                 stmt.setObject(1, UUID.randomUUID())
                 stmt.setLong(2, data.sakid.sakId)
                 stmt.setObject(3, data.oppgaveId)
-                stmt.setObject(4, data.aktivitetsgrad?.name)
-                stmt.setObject(5, data.utbetaling)
-                stmt.setObject(6, data.redusertEtterInntekt)
-                stmt.setString(7, data.nasjonalEllerUtland?.name)
+                stmt.setObject(4, data.utbetaling)
+                stmt.setObject(5, data.redusertEtterInntekt)
+                stmt.setBoolean(6, data.skalSendeBrev)
                 stmt.executeUpdate()
             }
         }

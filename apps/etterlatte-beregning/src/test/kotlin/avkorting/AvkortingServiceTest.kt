@@ -79,7 +79,7 @@ internal class AvkortingServiceTest {
     fun `Sjekk om sak har inntekt for neste aar`() {
         val behandlingId = UUID.randomUUID()
 
-        // negative test
+        // negativ test
         val avkortingFor2024 = Avkorting(aarsoppgjoer = listOf(opprettAarsoppgjoerMedVirk(YearMonth.of(2024, 1))))
         coEvery { avkortingRepository.hentAvkorting(behandlingId) } returns avkortingFor2024
 

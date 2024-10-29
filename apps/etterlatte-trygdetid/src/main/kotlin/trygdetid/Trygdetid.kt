@@ -139,39 +139,42 @@ data class TrygdetidPeriode(
     fun overlapperMed(other: TrygdetidPeriode): Boolean = this.fra.isBefore(other.til) && other.fra.isBefore(this.til)
 }
 
-fun List<TrygdetidGrunnlag>.normaliser() =
-    this.sortedBy { it.periode.fra }.mapIndexed { idx, trygdetidGrunnlag ->
-        var fra = trygdetidGrunnlag.periode.fra
-        var til = trygdetidGrunnlag.periode.til
+fun List<TrygdetidGrunnlag>.normaliser(): List<TrygdetidGrunnlag> {
+    val sortertTrygdetidGrunnlag = this.sortedBy { it.periode.fra }
+    return sortertTrygdetidGrunnlag
+        .mapIndexed { idx, trygdetidGrunnlag ->
+            var fra = trygdetidGrunnlag.periode.fra
+            var til = trygdetidGrunnlag.periode.til
 
-        if (trygdetidGrunnlag.poengInnAar) {
-            fra = fra.with(MonthDay.of(1, 1))
-        }
-
-        if (trygdetidGrunnlag.poengUtAar) {
-            til = til.with(MonthDay.of(12, 31))
-        }
-
-        // Håndtere at den forrige var et ut år - og at dette hadde en fra i samme år
-        if (idx > 0) {
-            val prev = this[idx - 1]
-
-            if (prev.poengUtAar && prev.periode.til.year == fra.year) {
-                fra = LocalDate.of(prev.periode.til.year + 1, 1, 1)
+            if (trygdetidGrunnlag.poengInnAar) {
+                fra = fra.with(MonthDay.of(1, 1))
             }
-        }
 
-        // Håndtere at den neste var et inn år - og at dette hadde en til i samme år
-        if (idx < this.size - 2) {
-            val next = this[idx + 1]
-
-            if (next.poengInnAar && next.periode.til.year == fra.year) {
-                til = LocalDate.of(next.periode.til.year - 1, 12, 31)
+            if (trygdetidGrunnlag.poengUtAar) {
+                til = til.with(MonthDay.of(12, 31))
             }
-        }
 
-        trygdetidGrunnlag.copy(periode = TrygdetidPeriode(fra = fra, til = til.plusDays(1)))
-    }
+            // Håndtere at den forrige var et ut år - og at dette hadde en fra i samme år
+            if (idx > 0) {
+                val prev = sortertTrygdetidGrunnlag[idx - 1]
+
+                if (prev.poengUtAar && prev.periode.til.year == fra.year) {
+                    fra = LocalDate.of(prev.periode.til.year + 1, 1, 1)
+                }
+            }
+
+            // Håndtere at den neste var et inn år - og at dette hadde en til i samme år
+            if (idx < sortertTrygdetidGrunnlag.size - 2) {
+                val next = sortertTrygdetidGrunnlag[idx + 1]
+
+                if (next.poengInnAar && next.periode.til.year == fra.year) {
+                    til = LocalDate.of(next.periode.til.year - 1, 12, 31)
+                }
+            }
+
+            trygdetidGrunnlag.copy(periode = TrygdetidPeriode(fra = fra, til = til.plusDays(1)))
+        }
+}
 
 class OverlappendePeriodeException(
     message: String,

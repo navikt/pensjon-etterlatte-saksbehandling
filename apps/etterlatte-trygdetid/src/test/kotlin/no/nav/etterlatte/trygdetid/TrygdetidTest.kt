@@ -165,4 +165,42 @@ internal class TrygdetidTest {
 
         oppdatert.trygdetidGrunnlag.size shouldBe 4
     }
+
+    @Test
+    fun `Skal kunne legge til grunnlag i vilkaarlig rekkefoelge ogsaa hvor det er poengaar som trigger endring av periode`() {
+        val usortertTrygdetid =
+            trygdetid(
+                trygdetidGrunnlag =
+                    listOf(
+                        trygdetidGrunnlag(
+                            periode = TrygdetidPeriode(LocalDate.of(2020, 7, 1), LocalDate.of(2020, 9, 1)),
+                            trygdetidType = TrygdetidType.FAKTISK,
+                        ),
+                        trygdetidGrunnlag(
+                            periode = TrygdetidPeriode(LocalDate.of(2022, 5, 1), LocalDate.of(2022, 8, 31)),
+                            trygdetidType = TrygdetidType.FAKTISK,
+                        ),
+                        trygdetidGrunnlag(
+                            periode = TrygdetidPeriode(LocalDate.of(2019, 2, 1), LocalDate.of(2019, 11, 30)),
+                            poengInnAar = true,
+                            trygdetidType = TrygdetidType.FAKTISK,
+                        ),
+                        trygdetidGrunnlag(
+                            periode = TrygdetidPeriode(LocalDate.of(2019, 12, 1), LocalDate.of(2020, 3, 28)),
+                            trygdetidType = TrygdetidType.FAKTISK,
+                        ),
+                    ),
+            )
+
+        val oppdatert =
+            usortertTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(
+                trygdetidGrunnlag(
+                    periode = TrygdetidPeriode(LocalDate.of(2021, 5, 29), LocalDate.of(2021, 7, 27)),
+                    poengInnAar = true,
+                    trygdetidType = TrygdetidType.FAKTISK,
+                ),
+            )
+
+        oppdatert.trygdetidGrunnlag.size shouldBe 5
+    }
 }

@@ -4,6 +4,7 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -22,8 +23,9 @@ interface BeregningKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 
-    suspend fun harInntektNesteAar(
-        behandlingId: UUID,
+    suspend fun sakHarInntektForAar(
+        sakId: SakId,
+        aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 }
@@ -68,14 +70,15 @@ class BeregningKlientImpl(
             )
     }
 
-    override suspend fun harInntektNesteAar(
-        behandlingId: UUID,
+    override suspend fun sakHarInntektForAar(
+        sakId: SakId,
+        aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
-        logger.info("Henter har inntekt neste avkorting for behandling id=$behandlingId")
+        logger.info("Henter har sakId=$sakId inntekt for aar=$aar")
         return downstreamResourceClient
             .get(
-                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/$behandlingId/har-inntekt-neste-aar"),
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/sak/$sakId/har-inntekt-for/$aar"),
                 brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
                 success = { resource -> resource.response != null },

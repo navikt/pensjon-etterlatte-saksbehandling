@@ -70,7 +70,9 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.ServiceStatus
+import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
@@ -209,7 +211,9 @@ class GrunnlagKlientTest : GrunnlagKlient {
     }
 }
 
-class BeregningKlientTest : BeregningKlient {
+class BeregningKlientTest :
+    BeregningKlient,
+    SakTilgangsSjekk {
     override suspend fun slettAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -221,10 +225,17 @@ class BeregningKlientTest : BeregningKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
 
-    override suspend fun harInntektNesteAar(
-        behandlingId: UUID,
+    override suspend fun sakHarInntektForAar(
+        sakId: SakId,
+        aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
+
+    override suspend fun harTilgangTilSak(
+        sakId: SakId,
+        skrivetilgang: Boolean,
+        bruker: Saksbehandler,
+    ): Boolean = true
 }
 
 class VedtakKlientTest : VedtakKlient {

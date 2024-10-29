@@ -16,18 +16,30 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 fun Route.avkorting(
     avkortingService: AvkortingService,
     behandlingKlient: BehandlingKlient,
 ) {
-    route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
-        val logger = routeLogger
+    val logger = routeLogger
 
+    route("/api/beregning/avkorting/sak/{$SAKID_CALL_PARAMETER}/har-inntekt-for/{inntektsaar}") {
+        get {
+            withSakId(behandlingKlient) {
+                val inntektsaar = call.parameters["inntektsaar"]?.toInt()
+                logger.info("Henter har inntekt for $inntektsaar for sakId=$it")
+                call.respond(avkortingService.hentHarSakInntektForAar(it, inntektsaar!!))
+            }
+        }
+    }
+
+    route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter avkorting med behandlingId=$it")
@@ -42,13 +54,6 @@ fun Route.avkorting(
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter ferdig avkorting med behandlingId=$it")
                 call.respond(avkortingService.hentFullfoertAvkorting(it, brukerTokenInfo))
-            }
-        }
-
-        get("har-inntekt-neste-aar") {
-            withBehandlingId(behandlingKlient) {
-                logger.info("Henter har-inntekt-neste-avkorting med behandlingId=$it")
-                call.respond(avkortingService.hentHarInntektNesteAar(it))
             }
         }
 

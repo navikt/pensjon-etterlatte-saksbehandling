@@ -19,6 +19,32 @@ import javax.sql.DataSource
 class AvkortingRepository(
     private val dataSource: DataSource,
 ) {
+    fun harSakInntektForAar(
+        sakId: SakId,
+        inntektsAar: Int,
+    ): Boolean =
+        dataSource.transaction { tx ->
+            val alleAarsoppgjoer =
+                queryOf(
+                    "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id = ? AND aar = ?",
+                    sakId,
+                    inntektsAar,
+                ).let { query ->
+                    tx.run(
+                        query
+                            .map { row ->
+                                Aarsoppgjoer(
+                                    id = row.uuid("id"),
+                                    aar = row.int("aar"),
+                                    fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                                )
+                            }.asList,
+                    )
+                }
+
+            alleAarsoppgjoer.isNotEmpty()
+        }
+
     fun hentAvkorting(behandlingId: UUID): Avkorting? =
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =

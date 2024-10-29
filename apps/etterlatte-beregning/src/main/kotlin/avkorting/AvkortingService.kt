@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
-import java.time.YearMonth
 import java.util.UUID
 
 enum class AvkortingToggles(
@@ -134,20 +133,10 @@ class AvkortingService(
         }
     }
 
-    fun hentHarInntektNesteAar(behandlingId: UUID): Boolean {
-        val avkorting =
-            avkortingRepository.hentAvkorting(behandlingId)
-                ?: throw AvkortingFinnesIkkeException(behandlingId)
-
-        val foersteJanuarNesteAar = YearMonth.of(YearMonth.now().year + 1, 1)
-        return avkorting.aarsoppgjoer.any { aarsoppgjoer ->
-            aarsoppgjoer.aar == foersteJanuarNesteAar.year &&
-                aarsoppgjoer.inntektsavkorting.any { inntektsavkorting ->
-                    inntektsavkorting.grunnlag.periode.fom ==
-                        foersteJanuarNesteAar
-                }
-        }
-    }
+    fun hentHarSakInntektForAar(
+        sakId: SakId,
+        inntektsAar: Int,
+    ): Boolean = avkortingRepository.harSakInntektForAar(sakId, inntektsAar)
 
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,

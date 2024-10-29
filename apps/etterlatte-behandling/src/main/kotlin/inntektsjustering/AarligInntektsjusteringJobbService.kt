@@ -100,15 +100,8 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
         loependeFom: YearMonth,
     ): Boolean {
-        val fomDato = LocalDate.of(loependeFom.year, loependeFom.month.value, loependeFom.atDay(1).dayOfMonth)
-        val harLoependeYtelse = vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, fomDato, HardkodaSystembruker.omregning)
-        if (!harLoependeYtelse.erLoepende) return false
-
-        if (harLoependeYtelse.behandlingId == null) {
-            // TODO hva gjør vi her?
-        }
-
-        val harOppgittInntektNesteAar = beregningKlient.harInntektNesteAar(harLoependeYtelse.behandlingId!!, HardkodaSystembruker.omregning)
-        return !harOppgittInntektNesteAar
+        val fomDato = LocalDate.of(loependeFom.year, loependeFom.month.value, 1)
+        return vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, fomDato, HardkodaSystembruker.omregning).erLoepende &&
+            !beregningKlient.sakHarInntektForAar(sakId, fomDato.year, HardkodaSystembruker.omregning)
     }
 }

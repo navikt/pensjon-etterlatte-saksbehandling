@@ -39,8 +39,6 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 private const val TRYGDETIDID_CALL_PARAMETER = "trygdetidId"
-private const val KILDEBEHANDLINGID_CALL_PARAMETER = "kildeBehandlingId"
-private const val FORRIGE_BEHANDLINGID_CALL_PARAMETER = "forrigeBehandlingId"
 
 private fun PipelineContext<*, ApplicationCall>.uuidParam(name: String) =
     try {
@@ -54,12 +52,6 @@ private fun PipelineContext<*, ApplicationCall>.uuidParam(name: String) =
 
 private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
     get() = uuidParam(TRYGDETIDID_CALL_PARAMETER)
-
-private inline val PipelineContext<*, ApplicationCall>.kildeBehandlingId: UUID
-    get() = uuidParam(KILDEBEHANDLINGID_CALL_PARAMETER)
-
-private inline val PipelineContext<*, ApplicationCall>.forrigeBehandlingId: UUID
-    get() = uuidParam(FORRIGE_BEHANDLINGID_CALL_PARAMETER)
 
 private val logger: Logger = LoggerFactory.getLogger("TrygdetidRoutes")
 
@@ -220,23 +212,34 @@ fun Route.trygdetid(
                 }
             }
 
-            post("/kopier/{$FORRIGE_BEHANDLINGID_CALL_PARAMETER}") {
+            post("/kopier/{forrigeBehandlingId}") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    logger.info("Oppretter kopi av forrige trygdetider for behandling $behandlingId")
-                    trygdetidService.kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo)
-                    call.respond(HttpStatusCode.OK)
+                    withUuidParam("forrigeBehandlingId") { forrigeBehandlingId ->
+                        logger.info("Oppretter kopi av forrige trygdetider for behandling $behandlingId")
+                        trygdetidService.kopierSisteTrygdetidberegninger(
+                            behandlingId,
+                            forrigeBehandlingId,
+                            brukerTokenInfo,
+                        )
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
             }
 
-            post("/kopier-grunnlag/{$KILDEBEHANDLINGID_CALL_PARAMETER}") {
+            post("/kopier-grunnlag/{kildeBehandlingId}") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    logger.info("Kopier trygdetidsgrunnlag fra behandling $behandlingId til behandling $kildeBehandlingId")
-                    trygdetidService.kopierTrygdetidsgrunnlag(
-                        behandlingId = behandlingId,
-                        kildeBehandlingId = kildeBehandlingId,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
-                    call.respond(HttpStatusCode.OK)
+                    withUuidParam("kildeBehandlingId") { kildeBehandlingId ->
+                        logger.info(
+                            "Kopierer trygdetidsgrunnlag fra behandling $behandlingId " +
+                                "til behandling $kildeBehandlingId",
+                        )
+                        trygdetidService.kopierTrygdetidsgrunnlag(
+                            behandlingId = behandlingId,
+                            kildeBehandlingId = kildeBehandlingId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
             }
 

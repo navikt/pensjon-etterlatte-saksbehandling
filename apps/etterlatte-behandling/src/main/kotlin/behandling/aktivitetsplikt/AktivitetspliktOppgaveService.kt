@@ -1,11 +1,13 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
-import no.nav.etterlatte.brev.model.AktivitetspliktInformasjon10mndBrevdata
+import no.nav.etterlatte.brev.model.Aktivitetsgrad
+import no.nav.etterlatte.brev.model.NasjonalEllerUtland
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import java.util.UUID
@@ -40,7 +42,7 @@ class AktivitetspliktOppgaveService(
         val brevdata = aksBrevDao.hentBrevdata(oppgaveId = oppgaveId)
         // TODO: hent inn data fra ny dao her med egen tabell
         return AktivitetspliktOppgaveVurdering(
-            aktivtetspliktbrevdata10mnd = brevdata,
+            aktivtetspliktbrevdata = brevdata,
             vurderingType = vurderingType,
             oppgave = oppgave,
             sak = sak,
@@ -53,12 +55,21 @@ class AktivitetspliktOppgaveService(
     }
 }
 
+data class AktivitetspliktInformasjonBrevdata(
+    val oppgaveId: UUID,
+    val sakid: SakId,
+    val aktivitetsgrad: Aktivitetsgrad? = null,
+    val utbetaling: Boolean? = null,
+    val redusertEtterInntekt: Boolean? = null,
+    val nasjonalEllerUtland: NasjonalEllerUtland? = null,
+)
+
 data class AktivitetspliktOppgaveVurdering(
     val vurderingType: VurderingType,
     val oppgave: OppgaveIntern,
     val sak: Sak,
     val vurdering: AktivitetspliktVurdering,
-    val aktivtetspliktbrevdata10mnd: AktivitetspliktInformasjon10mndBrevdata?,
+    val aktivtetspliktbrevdata: AktivitetspliktInformasjonBrevdata?,
 )
 
 enum class VurderingType {

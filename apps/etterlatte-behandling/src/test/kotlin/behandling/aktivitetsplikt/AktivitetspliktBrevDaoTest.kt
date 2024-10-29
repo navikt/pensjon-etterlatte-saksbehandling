@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.brev.model.Aktivitetsgrad
-import no.nav.etterlatte.brev.model.AktivitetspliktInformasjon10mndBrevdata
 import no.nav.etterlatte.brev.model.NasjonalEllerUtland
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -28,22 +27,25 @@ class AktivitetspliktBrevDaoTest(
 
     @Test
     fun `Kan lagre, hente og oppdatere brevdata for aktivitetsplikt`() {
+        val sak = sakSkrivDao.opprettSak("person", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
+
         val brevdata =
-            AktivitetspliktInformasjon10mndBrevdata(
+            AktivitetspliktInformasjonBrevdata(
+                sakid = sak.id,
+                oppgaveId = oppgave.id,
                 aktivitetsgrad = Aktivitetsgrad.AKKURAT_100_PROSENT,
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 nasjonalEllerUtland = NasjonalEllerUtland.NASJONAL,
             )
-        val sak = sakSkrivDao.opprettSak("person", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
-        val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
 
-        dao.lagreBrevdata(oppgave.id, sak.id, brevdata)
+        dao.lagreBrevdata(brevdata)
         val lagretBrevdata = dao.hentBrevdata(oppgave.id)
         lagretBrevdata shouldBe brevdata
 
-        val oppdatertBrevdata = brevdata.copy(Aktivitetsgrad.IKKE_I_AKTIVITET)
-        dao.lagreBrevdata(oppgave.id, sak.id, oppdatertBrevdata)
+        val oppdatertBrevdata = brevdata.copy(aktivitetsgrad = Aktivitetsgrad.IKKE_I_AKTIVITET)
+        dao.lagreBrevdata(oppdatertBrevdata)
         val oppdatertBredata = dao.hentBrevdata(oppgave.id)
         oppdatertBredata shouldBe oppdatertBrevdata
 

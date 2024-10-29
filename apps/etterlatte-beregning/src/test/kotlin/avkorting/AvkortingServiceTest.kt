@@ -763,19 +763,4 @@ internal class AvkortingServiceTest {
             }
         }
     }
-
-    private fun opprettAarsoppgjoerMedVirk(fom: YearMonth): Aarsoppgjoer {
-        val virk = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(fom.year, fom.month))
-
-        val grunnlag =
-            avkortinggrunnlag(
-                id = UUID.randomUUID(),
-                periode = Periode(fom = virk.dato, tom = null),
-                kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Tidspunkt.now()),
-                innvilgaMaaneder = 3,
-            )
-
-        val inntektsavkorting = Inntektsavkorting(grunnlag = grunnlag)
-        return aarsoppgjoer(aar = fom.year, inntektsavkorting = listOf(inntektsavkorting))
-    }
 }

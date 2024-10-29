@@ -39,7 +39,6 @@ internal class DistribuerBrevRiver(
                 brevapiKlient.distribuer(
                     brevId = packet[BREV_ID_KEY].asLong(),
                     distribusjonsType = packet.distribusjonType(),
-                    journalpostIdInn = packet["journalpostId"].asText(),
                     sakId = sakid,
                 )
             }

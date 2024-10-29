@@ -91,12 +91,12 @@ internal class DistribuerBrevRiverTest {
                 ),
             )
 
-        coEvery { brevApiKlient.distribuer(brevId, any(), sakId, journalpostId) } returns BestillingsIdDto("bestilt")
+        coEvery { brevApiKlient.distribuer(brevId, any(), sakId) } returns BestillingsIdDto(listOf("bestilt1", "bestilt2"))
 
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         coVerify(exactly = 1) {
-            brevApiKlient.distribuer(brevId, DistribusjonsType.VEDTAK, journalpostIdInn = journalpostId, sakId = sakId)
+            brevApiKlient.distribuer(brevId, DistribusjonsType.VEDTAK, sakId = sakId)
         }
     }
 }

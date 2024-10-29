@@ -53,9 +53,10 @@ internal class OpprettJournalfoerOgDistribuer {
         coEvery { brevApiKlient.journalfoerVedtaksbrev(any()) } returns
             JournalfoerVedtaksbrevResponseOgBrevid(
                 brev.id,
-                OpprettJournalpostResponse(journalpostId = "123", journalpostferdigstilt = true),
+                listOf(OpprettJournalpostResponse(journalpostId = "123", journalpostferdigstilt = true)),
             )
-        coEvery { brevApiKlient.distribuer(brev.id, any(), any(), any()) } returns BestillingsIdDto("12344")
+        coEvery { brevApiKlient.distribuer(brev.id, any(), any()) } returns BestillingsIdDto(listOf("12344"))
+
         val testRapid =
             TestRapid().apply {
                 JournalfoerVedtaksbrevRiver(this, brevApiKlient)

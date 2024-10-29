@@ -111,11 +111,11 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         klageDao = applicationContext.klageDao
         hendelseDao = applicationContext.hendelseDao
 
-        coEvery { brevApiKlientMock.distribuerBrev(any(), any(), any()) } returns BestillingsIdDto(randomString())
+        coEvery { brevApiKlientMock.distribuerBrev(any(), any(), any()) } returns BestillingsIdDto(listOf(randomString()))
         coEvery { brevApiKlientMock.ferdigstillVedtaksbrev(any(), any(), any()) } just runs
         coEvery { brevApiKlientMock.ferdigstillOversendelseBrev(any(), any(), any()) } just runs
         coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns randomOpprettetBrevDto()
-        coEvery { brevApiKlientMock.journalfoerBrev(any(), any(), any()) } returns JournalpostIdDto(randomString())
+        coEvery { brevApiKlientMock.journalfoerBrev(any(), any(), any()) } returns JournalpostIdDto(listOf(randomString()))
         coEvery { brevApiKlientMock.journalfoerNotatKa(any(), any()) } returns OpprettJournalpostDto(randomString())
         coEvery { brevApiKlientMock.opprettKlageOversendelsesbrevISak(any(), any()) } returns randomOpprettetBrevDto()
         coEvery { brevApiKlientMock.opprettVedtaksbrev(any(), any(), any()) } returns randomOpprettetBrevDto()

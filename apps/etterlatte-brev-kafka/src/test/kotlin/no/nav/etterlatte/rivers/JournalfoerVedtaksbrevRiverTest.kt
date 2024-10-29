@@ -80,7 +80,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         coEvery { brevApiKlient.journalfoerVedtaksbrev(any()) } returns
             JournalfoerVedtaksbrevResponseOgBrevid(
                 brevId,
-                response,
+                listOf(response),
             )
 
         val vedtak = opprettVedtak()

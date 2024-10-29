@@ -119,6 +119,10 @@ class KlageBrevService(
         }
     }
 
+    /*
+     * TODO:
+     *  Burde sikre at det er INNSENDEREN sin journalpostId og bestillingId som benyttes
+     * */
     private fun ferdigstillOgDistribuerBrev(
         sakId: SakId,
         brevId: Long,
@@ -134,32 +138,28 @@ class KlageBrevService(
 
             val journalpostIdJournalfoering =
                 if (eksisterendeInnstillingsbrev.status.ikkeJournalfoert()) {
-                    brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId
+                    brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId.first()
                 } else {
-                    // TODO EY-3627:
-                    //   Håndtere flere mottakere
                     logger.info(
                         "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
-                            "journalført på journalpostId=${eksisterendeInnstillingsbrev.mottakere.single().journalpostId}",
+                            "journalført på journalpostId=${eksisterendeInnstillingsbrev.mottakere.first().journalpostId}",
                     )
-                    requireNotNull(eksisterendeInnstillingsbrev.mottakere.single().journalpostId) {
+                    requireNotNull(eksisterendeInnstillingsbrev.mottakere.first().journalpostId) {
                         "Har et brev med id=$brevId med status=${eksisterendeInnstillingsbrev.status} som mangler journalpostId"
                     }
                 }
             val tidspunktJournalfoert = Tidspunkt.now()
 
             if (eksisterendeInnstillingsbrev.status.ikkeDistribuert()) {
-                val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId
+                val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId.first()
                 logger.info(
                     "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
                         "med bestillingsId $bestillingsIdDistribuering",
                 )
             } else {
-                // TODO EY-3627:
-                //   Håndtere flere mottakere
                 logger.info(
                     "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
-                        "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.mottakere.single().bestillingId}",
+                        "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.mottakere.first().bestillingId}",
                 )
             }
             tidspunktJournalfoert to journalpostIdJournalfoering

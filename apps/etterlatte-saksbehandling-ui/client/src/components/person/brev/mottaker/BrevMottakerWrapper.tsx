@@ -7,11 +7,6 @@ import { opprettMottaker } from '~shared/api/brev'
 import { isPending } from '~shared/api/apiUtils'
 import { PlusIcon } from '@navikt/aksel-icons'
 
-/*
- * TODO EY-3627:
- *  Denne er nå ubrukt, men skal benyttes så snart resten av løypa er klar.
- *  Gjenstår å støtte journalføring og distribusjon for flere mottakere.
- */
 export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) => {
   const [mottakere, setMottakere] = useState(brev.mottakere)
 

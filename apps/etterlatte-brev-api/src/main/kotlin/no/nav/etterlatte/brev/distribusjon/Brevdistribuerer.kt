@@ -2,9 +2,11 @@ package no.nav.etterlatte.brev.distribusjon
 
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class Brevdistribuerer(
     private val db: BrevRepository,
@@ -15,8 +17,7 @@ class Brevdistribuerer(
     fun distribuer(
         brevId: BrevID,
         distribusjonsType: DistribusjonsType = DistribusjonsType.ANNET,
-        journalpostIdInn: String? = null,
-    ): BestillingsID {
+    ): List<BestillingsID> {
         logger.info("Starter distribuering av brev $brevId.")
 
         val brev = db.hentBrev(brevId)
@@ -25,31 +26,39 @@ class Brevdistribuerer(
             throw FeilStatusForDistribusjon(brev.id, brev.status)
         }
 
-        val journalpostId =
-            journalpostIdInn
-                ?: requireNotNull(db.hentJournalpostId(brevId)) {
-                    "JournalpostID mangler på brev (id=${brev.id}, status=${brev.status})"
-                }
-
         check(brev.mottakere.isNotEmpty()) {
             "Det må finnes minst 1 mottaker for å kunne distribuere brevet (id: $brevId)"
         }
-
-        /*
-         * TODO EY-3627:
-         *  Må håndtere flere [BestillingsID] når det blir mulig å legge til flere mottakere.
-         */
-        return with(brev.mottakere.single()) {
-            distribusjonService
-                .distribuerJournalpost(
-                    brevId = brev.id,
-                    journalpostId = journalpostId,
-                    type = distribusjonsType,
-                    tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-                    adresse = adresse,
-                    tvingSentralPrint = tvingSentralPrint,
-                ).also { logger.info("Distribuerte brev $brevId") }
+        check(brev.mottakere.size <= 2) {
+            "Brev med flere enn 2 mottakere er ikke støttet (brev=$brevId)"
         }
+
+        return brev.mottakere
+            .filter { it.bestillingId.isNullOrBlank() }
+            .map { mottaker -> sendTilMottaker(brevId, mottaker, distribusjonsType) }
+            .also { db.settBrevDistribuert(brevId, it) }
+            .map { it.bestillingsId }
+    }
+
+    private fun sendTilMottaker(
+        brevId: BrevID,
+        mottaker: Mottaker,
+        distribusjonsType: DistribusjonsType,
+    ): DistribuerJournalpostResponse {
+        if (mottaker.journalpostId == null) {
+            throw JournalpostIdMangler(brevId, mottaker.id)
+        }
+
+        return distribusjonService
+            .distribuerJournalpost(
+                brevId = brevId,
+                type = distribusjonsType,
+                mottaker = mottaker,
+            ).also {
+                db.lagreBestillingId(mottaker.id, it)
+
+                logger.info("Brev $brevId ble distribuert til mottaker=${mottaker.id} med bestillingId=${it.bestillingsId}")
+            }
     }
 }
 
@@ -64,4 +73,12 @@ class FeilStatusForDistribusjon(
                 "brevId" to brevID,
                 "status" to status,
             ),
+    )
+
+class JournalpostIdMangler(
+    brevId: BrevID,
+    mottakerId: UUID,
+) : UgyldigForespoerselException(
+        code = "KAN_IKKE_DISTRIBUERE_UTEN_JOURNALPOST_ID",
+        detail = "JournalpostID mangler på mottaker=$mottakerId (brevId: $brevId)",
     )

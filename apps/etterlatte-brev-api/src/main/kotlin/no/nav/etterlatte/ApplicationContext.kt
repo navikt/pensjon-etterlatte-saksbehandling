@@ -133,7 +133,7 @@ internal class ApplicationContext {
     val distribusjonKlient =
         DistribusjonKlient(httpClient(DOKDIST_SCOPE, false), env.requireEnvValue(DOKDIST_URL))
 
-    val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
+    val distribusjonService = DistribusjonServiceImpl(distribusjonKlient)
 
     val migreringBrevDataService = MigreringBrevDataService(beregningService)
 

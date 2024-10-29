@@ -153,9 +153,12 @@ fun Route.brevRoute(
 
         post("journalfoer") {
             withSakId(tilgangssjekker, skrivetilgang = true) {
-                val journalpostId = service.journalfoer(brevId, brukerTokenInfo)
+                val journalpostIder =
+                    service
+                        .journalfoer(brevId, brukerTokenInfo)
+                        .map { it.journalpostId }
 
-                call.respond(JournalpostIdDto(journalpostId))
+                call.respond(JournalpostIdDto(journalpostIder))
             }
         }
 
@@ -167,15 +170,13 @@ fun Route.brevRoute(
                         is String -> DistribusjonsType.valueOf(queryparamDistribusjonstype)
                         null -> DistribusjonsType.ANNET
                     }
-                val journalpostIdInn = call.request.queryParameters["journalpostIdInn"]
-                val bestillingsId =
+                val bestillingsIder =
                     distribuerer.distribuer(
                         brevId,
                         distribusjonsType = distribusjonsType,
-                        journalpostIdInn = journalpostIdInn,
                     )
 
-                call.respond(BestillingsIdDto(bestillingsId))
+                call.respond(BestillingsIdDto(bestillingsIder))
             }
         }
 

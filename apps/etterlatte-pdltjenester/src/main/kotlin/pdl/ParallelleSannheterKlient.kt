@@ -95,9 +95,6 @@ class ParallelleSannheterKlient(
 
     suspend fun avklarDoedsfall(pdlDoedsfall: List<PdlDoedsfall>) = avklarNullable(pdlDoedsfall, Avklaring.DOEDSFALL)
 
-    suspend fun avklarVergemaal(vergemaalEllerFremtidsfullmakt: List<PdlVergemaalEllerFremtidsfullmakt>) =
-        avklarNullable(vergemaalEllerFremtidsfullmakt, Avklaring.VERGEMAAL_ELLER_FREMTIDSFULLMAKT)
-
     suspend fun avklarBostedsadresse(pdlBostedsadresse: List<PdlBostedsadresse>) =
         avklarNullable(pdlBostedsadresse, Avklaring.BOSTEDSADRESSE)
 

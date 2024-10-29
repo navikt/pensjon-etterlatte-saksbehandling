@@ -495,8 +495,8 @@ class BehandlingDao(
 
 fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLocalDatetimeUTC()
 
-private fun ResultSet.toTidligereFamiliepleier(): TidligereFamiliepleier =
-    this.getString("tidligere_familiepleier").let {
+private fun ResultSet.toTidligereFamiliepleier(): TidligereFamiliepleier? =
+    this.getString("tidligere_familiepleier")?.let {
         objectMapper.readValue(it)
     }
 

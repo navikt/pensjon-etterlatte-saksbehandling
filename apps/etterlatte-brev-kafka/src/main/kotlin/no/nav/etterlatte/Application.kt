@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
+import no.nav.etterlatte.rivers.OpprettDistribuerVarselOgVedtakRiver
 import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.SamordningsnotatRiver
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -59,6 +60,12 @@ class ApplicationBuilder {
                 grunnlagKlient,
                 rapidsConnection,
             )
+
+            OpprettDistribuerVarselOgVedtakRiver(
+                brevapiKlient,
+                rapidsConnection,
+            )
+
             JournalfoerVedtaksbrevRiver(rapidsConnection, brevapiKlient)
             DistribuerBrevRiver(rapidsConnection, brevapiKlient)
             SamordningsnotatRiver(rapidsConnection, brevapiKlient)

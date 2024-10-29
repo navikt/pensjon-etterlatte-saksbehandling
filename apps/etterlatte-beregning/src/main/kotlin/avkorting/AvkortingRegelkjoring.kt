@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.sanksjon.Sanksjon
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -65,7 +66,11 @@ object AvkortingRegelkjoring {
                                     beskrivelse = "Forventet årsinntekt",
                                 )
                             },
-                    ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") },
+                    ) { datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate? ->
+                        throw InternfeilException(
+                            "Noe gikk galt ved uthenting av periodiserte avkortingsgrunnlag under beregning av inntektsavkorting. Dato i periode: $datoIPeriode, første fom: $foersteFom, senesteTom: $senesteTom",
+                        )
+                    },
             )
 
         val resultat = kroneavrundetInntektAvkorting.eksekver(grunnlag, periode.tilRegelPeriode())
@@ -100,7 +105,7 @@ object AvkortingRegelkjoring {
             }
 
             is RegelkjoeringResultat.UgyldigPeriode ->
-                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+                throw InternfeilException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }
     }
 
@@ -113,7 +118,7 @@ object AvkortingRegelkjoring {
         restanse: Restanse? = null,
     ): List<AvkortetYtelse> {
         if (sanksjoner.isNotEmpty() && type == AvkortetYtelseType.FORVENTET_INNTEKT) {
-            throw IllegalArgumentException("Skal ikke regne med sanksjoner i avkorting av forventet inntekt")
+            throw InternfeilException("Skal ikke regne med sanksjoner i avkorting av forventet inntekt")
         }
 
         val sanksjonsperioder =
@@ -188,7 +193,7 @@ object AvkortingRegelkjoring {
             }
 
             is RegelkjoeringResultat.UgyldigPeriode ->
-                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+                throw InternfeilException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }
     }
 
@@ -235,7 +240,11 @@ object AvkortingRegelkjoring {
                         beskrivelse = "Beregnet ytelse før avkorting for periode",
                     )
                 },
-        ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte beregninger") }
+        ) { datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate? ->
+            throw InternfeilException(
+                "Noe gikk galt ved uthenting av periodiserte beregninger under beregning av avkortet ytelse. Dato i periode: $datoIPeriode, første fom: $foersteFom, senesteTom: $senesteTom",
+            )
+        }
 
     private fun periodiserteAvkortinger(avkortingGrunnlag: List<Avkortingsperiode>): PeriodisertGrunnlag<FaktumNode<Int>> =
         PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
@@ -253,7 +262,11 @@ object AvkortingRegelkjoring {
                         beskrivelse = "Beregnet avkorting for periode",
                     )
                 },
-        ) { _, _, _ -> throw IllegalArgumentException("Noe gikk galt ved uthenting av periodiserte avkortinger") }
+        ) { datoIPeriode: LocalDate, foersteFom: LocalDate, senesteTom: LocalDate? ->
+            throw InternfeilException(
+                "Noe gikk galt ved uthenting av periodiserte avkortinger under beregning av avkortet ytelse. Dato i periode: $datoIPeriode, første fom: $foersteFom, senesteTom: $senesteTom",
+            )
+        }
 
     private fun restansegrunnlag(restanse: Restanse?): KonstantGrunnlag<FaktumNode<Int>> =
         KonstantGrunnlag(
@@ -338,7 +351,7 @@ object AvkortingRegelkjoring {
             }
 
             is RegelkjoeringResultat.UgyldigPeriode ->
-                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
+                throw InternfeilException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }
     }
 
@@ -359,7 +372,7 @@ object AvkortingRegelkjoring {
     private fun List<AvkortetYtelse>.avkortetYtelseIMaaned(maaned: YearMonth) =
         this.find {
             maaned >= it.periode.fom && (it.periode.tom == null || maaned <= it.periode.tom)
-        } ?: throw Exception("Maaned finnes ikke i avkortet ytelse sin periode")
+        } ?: throw InternfeilException("Maaned finnes ikke i avkortet ytelse sin periode")
 }
 
 fun Periode.tilRegelPeriode(): RegelPeriode =

@@ -153,6 +153,12 @@ enum class Brevkoder(
         "Informasjon om aktivitetsplikt for omstillingsstønad",
         Brevtype.INFORMASJON,
     ),
+    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD(
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
+        "Informasjon om aktivitetsplikt for omstillingsstønad",
+        Brevtype.INFORMASJON,
+    ),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,

@@ -8,7 +8,9 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVBRUTT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVSLAG
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
@@ -78,7 +80,7 @@ class OmregningKlassifikasjonskodeJobService(
 
     private fun verifiserAtFoerstegangsbehandlingErIverksatt(foerstegangsbehandling: Foerstegangsbehandling) {
         logger.info("Verifiserer at førstegangsbehandling er iverksatt")
-        if (foerstegangsbehandling.status != BehandlingStatus.IVERKSATT) {
+        if (foerstegangsbehandling.status != IVERKSATT) {
             throw InternfeilException(
                 "Omregning feilet for førstegangsbehandling ${foerstegangsbehandling.id} er ikke iverksatt (status=${foerstegangsbehandling.status})",
             )
@@ -90,12 +92,10 @@ class OmregningKlassifikasjonskodeJobService(
         behandlinger: List<Behandling>,
     ) {
         logger.info("Verifiserer at ingen behandlinger er under arbeid")
-        behandlinger.forEach {
-            if (it.status !in listOf(BehandlingStatus.IVERKSATT, BehandlingStatus.AVBRUTT, BehandlingStatus.AVSLAG)) {
-                throw InternfeilException(
-                    "Omregning feilet fordi sak $sakId har en behandling ${it.id} med status ${it.status} - dette er ikke tillatt ved omregning",
-                )
-            }
+        behandlinger.find { it.status !in listOf(IVERKSATT, AVBRUTT, AVSLAG) }?.let {
+            throw InternfeilException(
+                "Omregning feilet fordi sak $sakId har en behandling ${it.id} med status ${it.status} - dette er ikke tillatt ved omregning",
+            )
         }
     }
 

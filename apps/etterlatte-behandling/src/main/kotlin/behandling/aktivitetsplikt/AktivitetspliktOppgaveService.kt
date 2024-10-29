@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
+import no.nav.etterlatte.brev.model.AktivitetspliktInformasjon10mndBrevdata
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -13,6 +14,7 @@ class AktivitetspliktOppgaveService(
     private val aktivitetspliktService: AktivitetspliktService,
     private val oppgaveService: OppgaveService,
     private val sakService: SakService,
+    private val aksBrevDao: AktivitetspliktBrevDao,
 ) {
     fun hentVurderingForOppgave(oppgaveId: UUID): AktivitetspliktOppgaveVurdering {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
@@ -35,7 +37,10 @@ class AktivitetspliktOppgaveService(
                 vurderingerPaaOppgave
             }
 
+        val brevdata = aksBrevDao.hentBrevdata(oppgaveId = oppgaveId)
+        // TODO: hent inn data fra ny dao her med egen tabell
         return AktivitetspliktOppgaveVurdering(
+            aktivtetspliktbrevdata10mnd = brevdata,
             vurderingType = vurderingType,
             oppgave = oppgave,
             sak = sak,
@@ -53,6 +58,7 @@ data class AktivitetspliktOppgaveVurdering(
     val oppgave: OppgaveIntern,
     val sak: Sak,
     val vurdering: AktivitetspliktVurdering,
+    val aktivtetspliktbrevdata10mnd: AktivitetspliktInformasjon10mndBrevdata?,
 )
 
 enum class VurderingType {

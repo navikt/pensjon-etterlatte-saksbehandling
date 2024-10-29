@@ -91,7 +91,7 @@ export const hentSorteringFraLocalStorage = (): OppgaveSortering => {
       return initialSortering
     }
   } catch (e) {
-    logger.generalError({ message: 'Feil i hentingen av sortering fra localstorage' })
+    logger.generalError({ msg: 'Feil i hentingen av sortering fra localstorage' })
     return initialSortering
   }
 }

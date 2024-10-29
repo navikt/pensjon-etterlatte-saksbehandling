@@ -78,12 +78,13 @@ loggerRouter.post('/', express.json(), (req, res) => {
   return res.sendStatus(200)
 })
 
+// Er vel litt optimistisk
 const mapCommonFields = (user?: string, jsonContent?: JsonContent, errorData?: ErrorData) => {
   return {
     user,
     request_uri: sanitizeUrl(jsonContent?.url),
-    outbound_uri: errorData?.errorInfo?.url,
-    method: errorData?.errorInfo?.method,
+    outbound_uri: errorData?.apiErrorInfo?.url,
+    method: errorData?.apiErrorInfo?.method,
     user_device: stringifyUserDevice(jsonContent?.userDeviceInfo),
     user_agent: jsonContent?.userAgent,
   }
@@ -114,9 +115,16 @@ interface LogEvent {
 interface ErrorData {
   msg: string
   errorInfo?: ErrorInfo
+  apiErrorInfo?: ApiErrorInfo
+  err?: Error
 }
 
 interface ErrorInfo {
+  componentStack?: string | null
+  digest?: string | null
+}
+
+interface ApiErrorInfo {
   url: string
   method: string
   error?: JsonError

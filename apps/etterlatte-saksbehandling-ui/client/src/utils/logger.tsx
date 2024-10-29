@@ -2,6 +2,7 @@ import Bowser from 'bowser'
 import { apiClient } from '~shared/api/apiClient'
 import { store } from '~store/Store'
 import { loggError, loggInfo } from '~store/reducers/BehandlingReducer'
+import { ErrorInfo } from 'react'
 
 const browser: any = Bowser.getParser(window.navigator.userAgent)
 
@@ -37,6 +38,26 @@ export interface IStackLineNoColumnNo {
   readonly error: any
 }
 
+interface ErrorData {
+  msg: string
+  errorInfo?: ErrorInfo
+  apiErrorInfo?: ApiErrorInfo
+  err?: Error
+}
+
+interface ApiErrorInfo {
+  url: string
+  method: string
+  error?: JsonError
+}
+
+interface JsonError {
+  status: number
+  detail: string
+  code?: string
+  meta?: Record<string, unknown>
+}
+
 export const logger = {
   info: (stackLineNoColumnNo: IStackLineNoColumnNo) => {
     const data = { type: 'info', stackInfo: stackLineNoColumnNo, jsonContent: { ...defaultContext } }
@@ -62,7 +83,7 @@ export const logger = {
         console.error('Unable to log info message: ', data, ' err: ', err)
       })
   },
-  generalError: (info: object) => {
+  generalError: (info: ErrorData) => {
     const data = { type: 'Error', data: info, jsonContent: { ...defaultContext } }
     loggFunc(data)
       .then(() => store.dispatch(loggError(data)))
@@ -70,7 +91,7 @@ export const logger = {
         console.error('Unable to log error message: ', data, ' err: ', err)
       })
   },
-  generalWarning: (info: object) => {
+  generalWarning: (info: ErrorData) => {
     const data = { type: 'warning', data: info, jsonContent: { ...defaultContext } }
     loggFunc(data)
       .then(() => store.dispatch(loggError(data)))

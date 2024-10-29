@@ -92,7 +92,7 @@ class VilkaarsvurderingRepository(
     }
 
     fun kopierVilkaarsvurdering(
-        nyVilkaarsvurdering: Vilkaarsvurdering,
+        nyVilkaarsvurdering: Vilkaarsvurdering, // TODO ny eller gammel?
         kopiertFraId: UUID,
     ): Vilkaarsvurdering {
         connectionAutoclosing.hentKotliquerySession { session ->

@@ -986,7 +986,7 @@ class BehandlingFactoryTest {
             behandlingDaoMock.hentBehandlingerForSak(any())
         } returns listOf(iverksattBehandling)
         every { aktivitetspliktDao.kopierAktiviteter(any(), any()) } returns 1
-        every { aktivitetspliktKopierService.kopierVurdering(any(), any()) } returns Unit
+        every { aktivitetspliktKopierService.kopierVurderingTilBehandling(any(), any()) } returns Unit
 
         every { behandlingDaoMock.hentBehandling(any()) } returns
             revurdering(

@@ -5,6 +5,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -69,7 +70,6 @@ class SamordningsKlientImpl(
                     contentType(ContentType.Application.Json)
                     setBody(vedtak.tilSamordneRequest(etterbetaling))
                 }
-
             if (response.status.isSuccess()) {
                 return response.body<String>().let { objectMapper.readValue<SamordneVedtakRespons>(it) }.ventPaaSvar
             } else {
@@ -118,14 +118,21 @@ class SamordningsKlientImpl(
                     parameter("tpNr", samordningmelding.tpNr)
                     parameter("samId", samordningmelding.samId)
                     parameter("refusjonskrav", samordningmelding.refusjonskrav)
+                    expectSuccess = false
                 }
 
             if (!response.status.isSuccess()) {
-                throw ResponseException(response, "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]")
+                throw ResponseException(
+                    response,
+                    "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
+                )
             }
         } catch (e: Exception) {
             logger.error("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
-            throw SamordneVedtakGenerellException("Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]", e)
+            throw SamordneVedtakGenerellException(
+                "Oppdatere samordningsmelding feilet [samId=${samordningmelding.samId}]",
+                e,
+            )
         }
     }
 }

@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.virusskanning
 
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -16,6 +17,32 @@ internal class VirusScanServiceTest {
     @BeforeEach
     internal fun `Set up`() {
         clearAllMocks()
+    }
+
+    @Test
+    fun `Skal nekte om fil er for stor`() {
+        val request = VirusScanRequest("Random", ByteArray((MAKS_FILSTOERRELSE_BREV + 10)))
+        runBlocking {
+            val vedleggContainsVirus = VirusScanService(clamAv).filHarVirus(request)
+            assertEquals(true, vedleggContainsVirus)
+        }
+        coVerify(exactly = 0) { clamAv.skann(any()) }
+    }
+
+    @Test
+    fun `Skal gå ok om fil er på størrelse grensen`() {
+        val request = VirusScanRequest("Random", ByteArray((MAKS_FILSTOERRELSE_BREV)))
+
+        coEvery { clamAv.skann(any()) } returns
+            listOf(
+                ScanResult("normalFile", Status.OK),
+            )
+
+        runBlocking {
+            val vedleggContainsVirus = VirusScanService(clamAv).filHarVirus(request)
+            assertEquals(false, vedleggContainsVirus)
+        }
+        coVerify(exactly = 1) { clamAv.skann(any()) }
     }
 
     @Test

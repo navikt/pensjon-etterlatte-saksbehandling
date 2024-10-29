@@ -9,10 +9,12 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
@@ -24,6 +26,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.util.UUID
 
 class BrevService(
     private val db: BrevRepository,
@@ -138,11 +141,47 @@ class BrevService(
             .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
     }
 
+    fun opprettMottaker(brevId: BrevID): Mottaker {
+        val brev = sjekkOmBrevKanEndres(brevId)
+
+        val mottakerType = if (brev.mottakere.isNotEmpty()) MottakerType.KOPI else MottakerType.HOVED
+        val nyMottaker = tomMottaker(type = mottakerType)
+
+        logger.info("Oppretter ny mottaker på brev=$brevId")
+
+        db
+            .opprettMottaker(brevId, nyMottaker)
+            .also { logger.info("Ny mottaker opprettet på brev id=$brevId") }
+
+        return nyMottaker
+    }
+
+    fun slettMottaker(
+        brevId: BrevID,
+        mottakerId: UUID,
+    ) {
+        val brev = sjekkOmBrevKanEndres(brevId)
+
+        logger.info("Sletter mottaker (id=$mottakerId) fra brev=$brevId")
+
+        if (brev.mottakere.size > 1) {
+            db.slettMottaker(brevId, mottakerId)
+        } else {
+            throw UgyldigForespoerselException(
+                code = "KAN_IKKE_SLETTE_MOTTAKER",
+                detail = "Kan ikke slette mottaker. Det må finnes minst 1 mottaker på brevet!",
+            )
+        }
+    }
+
     fun oppdaterMottaker(
         brevId: BrevID,
         mottaker: Mottaker,
     ): Int {
         sjekkOmBrevKanEndres(brevId)
+
+        logger.info("Oppdaterer mottaker (id=${mottaker.id}) på brev=$brevId")
+
         return db
             .oppdaterMottaker(brevId, mottaker)
             .also { logger.info("Mottaker på brev (id=$brevId) oppdatert") }
@@ -231,7 +270,7 @@ class BrevService(
             )
         }
 
-        val alderIDager = Duration.between(Tidspunkt.now(), brev.opprettet).toDays()
+        val alderIDager = Duration.between(brev.opprettet, Tidspunkt.now()).toDays()
         if (alderIDager < 7) {
             throw UgyldigForespoerselException(
                 "KAN_IKKE_MARKERE_SOM_UTGAATT",

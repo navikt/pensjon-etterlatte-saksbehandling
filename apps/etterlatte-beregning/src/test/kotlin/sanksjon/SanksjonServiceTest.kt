@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -204,6 +206,46 @@ internal class SanksjonServiceTest {
         }
 
         @Test
+        fun `opprett eller lagre sanksjon håndterer rare datoer innenfor måneder`() {
+            val behandlingId = UUID.randomUUID()
+            val forrigeBehandling = UUID.randomUUID()
+            val sanksjon =
+                lagreSanksjon(
+                    fom = LocalDate.of(2024, Month.AUGUST, 5),
+                    tom = LocalDate.of(2024, Month.AUGUST, 1),
+                )
+
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    sak = sakId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    status = BehandlingStatus.BEREGNET,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
+                )
+
+            every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, bruker, any()) } returns true
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker) } returns
+                SisteIverksatteBehandling(
+                    forrigeBehandling,
+                )
+            every { sanksjonRepository.hentSanksjon(behandlingId) } returns null
+            every { sanksjonRepository.hentSanksjon(forrigeBehandling) } returns
+                listOf(
+                    sanksjon(
+                        fom = YearMonth.from(sanksjon.fom),
+                        tom = null,
+                    ),
+                )
+
+            assertDoesNotThrow {
+                runBlocking { service.opprettEllerOppdaterSanksjon(behandlingId, sanksjon, bruker) }
+            }
+        }
+
+        @Test
         fun `for revurderinger skal endringer av sanksjoner som starter før virk tillates kun hvis de er lik fram til virk`() {
             val behandlingId = UUID.randomUUID()
             val sakId = sakId1
@@ -276,7 +318,7 @@ internal class SanksjonServiceTest {
                 lagreSanksjon(
                     id = null,
                     sakId = sakId,
-                    fom = YearMonth.of(2024, 1).atEndOfMonth(),
+                    fom = YearMonth.of(2024, 1).atDay(1),
                     tom = null,
                     type = SanksjonType.STANS,
                 )
@@ -482,6 +524,32 @@ internal class SanksjonServiceTest {
 
             coVerify {
                 sanksjonRepository.hentSanksjon(forrigeBehandlingId)
+            }
+        }
+
+        @Test
+        fun `skal ikke kopiere sanksjoner hvis behandlingen allerede har sanksjoner`() {
+            val behandlingId = UUID.randomUUID()
+            val forrigeBehandlingId = UUID.randomUUID()
+            val sanksjonerIBehandling = listOf(sanksjon(behandlingId = behandlingId))
+            val sanksjonerForrige = listOf(sanksjon(behandlingId = forrigeBehandlingId))
+
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    status = BehandlingStatus.BEREGNET,
+                )
+
+            every { sanksjonRepository.hentSanksjon(behandlingId) } returns sanksjonerIBehandling
+            every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns sanksjonerForrige
+
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, any()) } returns
+                SisteIverksatteBehandling(forrigeBehandlingId)
+
+            // Vi oppretter ingen sanksjoner, siden behandlingen har allerede sanksjoner lagt inn
+            verify(exactly = 0) {
+                sanksjonRepository.opprettSanksjonFraKopi(any(), any(), any())
             }
         }
     }

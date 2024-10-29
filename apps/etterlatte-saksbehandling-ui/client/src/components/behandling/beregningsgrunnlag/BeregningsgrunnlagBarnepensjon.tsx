@@ -1,6 +1,6 @@
 import { Box, Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { BehandlingRouteContext } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
@@ -18,7 +18,7 @@ import {
   mapListeTilDto,
   periodisertBeregningsgrunnlagTilDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
@@ -47,7 +47,7 @@ import { mapNavn } from '~components/behandling/beregningsgrunnlag/Beregningsgru
 import { AnnenForelderVurdering } from '~shared/types/grunnlag'
 
 const BeregningsgrunnlagBarnepensjon = () => {
-  const { next } = useBehandlingRoutes()
+  const { next } = useContext(BehandlingRouteContext)
   const personopplysninger = usePersonopplysninger()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const behandling = useBehandling()

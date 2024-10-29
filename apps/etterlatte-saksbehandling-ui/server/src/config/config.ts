@@ -31,11 +31,6 @@ export const FeatureToggleConfig = {
 
 const LOKAL_API_CONFIG = () => {
   return {
-    vilkaarsvurdering: {
-      url: process.env.VILKAARSVURDERING_API_URL || 'https://etterlatte-vilkaarsvurdering.intern.dev.nav.no',
-      scope:
-        process.env.VILKAARSVURDERING_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default',
-    },
     behandling: {
       url: process.env.BEHANDLING_API_URL || 'https://etterlatte-behandling.intern.dev.nav.no',
       scope: process.env.BEHANDLING_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-behandling/.default',

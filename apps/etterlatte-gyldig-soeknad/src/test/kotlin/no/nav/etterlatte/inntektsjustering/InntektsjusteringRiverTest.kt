@@ -126,7 +126,7 @@ internal class InntektsjusteringRiverTest {
             naeringsinntekt shouldBe 200
             inntektFraUtland shouldBe 300
             afpInntekt shouldBe 400
-            afpInntektAFPTjenesteordning shouldBe "tjenesteordning"
+            afpTjenesteordning shouldBe "tjenesteordning"
             skalGaaAvMedAlderspensjon shouldBe "JA"
             datoForAaGaaAvMedAlderspensjon shouldBe "10.06.2025"
             tidspunkt shouldBe "01.08.2024 05:06:07"

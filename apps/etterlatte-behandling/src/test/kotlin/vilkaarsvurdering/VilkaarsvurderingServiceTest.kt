@@ -586,7 +586,7 @@ internal class VilkaarsvurderingServiceTest(
 
         coEvery { behandlingService.hentBehandling(nyBehandlingId) } returns behandling()
 
-        opprettVilkaarsvurderingMedResultat(
+        opprettVilkaarsvurderingMedVurderingOgResultat(
             behandlingId = opprinneligBehandlingId,
             vilkaar = ikkeGjeldendeVilkaar(),
         )
@@ -626,7 +626,7 @@ internal class VilkaarsvurderingServiceTest(
                 revurderingaarsak = Revurderingaarsak.REGULERING,
             )
 
-        opprettVilkaarsvurderingMedResultat(
+        opprettVilkaarsvurderingMedVurderingOgResultat(
             behandlingId = opprinneligBehandlingId,
             vilkaar =
                 ikkeGjeldendeVilkaar().map {
@@ -661,7 +661,7 @@ internal class VilkaarsvurderingServiceTest(
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(nyBehandlingId) } returns behandling()
 
-        opprettVilkaarsvurderingMedResultat(
+        opprettVilkaarsvurderingMedVurderingOgResultat(
             behandlingId = opprinneligBehandlingId,
             vilkaar =
                 BarnepensjonVilkaar2024.inngangsvilkaar().map {
@@ -791,7 +791,7 @@ internal class VilkaarsvurderingServiceTest(
         }
     }
 
-    private fun opprettVilkaarsvurderingMedResultat(
+    private fun opprettVilkaarsvurderingMedVurderingOgResultat(
         behandlingId: UUID,
         vilkaar: List<Vilkaar>,
     ): Vilkaarsvurdering {
@@ -804,6 +804,19 @@ internal class VilkaarsvurderingServiceTest(
                     vilkaar = vilkaar,
                 ),
             )
+
+        opprettetVilkaarsvudering.vilkaar.forEach { vilkaar ->
+            vilkaarsvurderingServiceImpl.oppdaterVurderingPaaVilkaar(
+                behandlingId,
+                simpleSaksbehandler(),
+                VurdertVilkaar(
+                    vilkaar.id,
+                    VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
+                    null,
+                    VilkaarVurderingData("kommentar", LocalDateTime.now(), "saksbehandler"),
+                ),
+            )
+        }
 
         return repository.lagreVilkaarsvurderingResultatvanlig(
             vilkaarsvurdering = opprettetVilkaarsvudering,

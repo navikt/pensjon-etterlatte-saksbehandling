@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
+import java.util.UUID
 
 object OpprettSoeknadFeature : TestDataFeature {
     override val beskrivelse: String
@@ -41,14 +42,19 @@ object OpprettSoeknadFeature : TestDataFeature {
                 try {
                     val (partisjon, offset) =
                         call.receiveParameters().let {
+                            val soeknadType = SoeknadType.valueOf(it["ytelse"]!!)
+                            val barnFnr = it["fnrBarn"]?.takeUnless(CharSequence::isBlank)?.split(",") ?: emptyList()
+
                             producer.publiser(
-                                requireNotNull(it["key"]),
+                                it["key"] ?: UUID.randomUUID().toString(),
                                 opprettSoeknadJson(
-                                    ytelse = it["ytelse"]!!,
+                                    soeknadType = soeknadType,
                                     gjenlevendeFnr = it["fnrGjenlevende"]!!,
                                     avdoedFnr = it["fnrAvdoed"]!!,
-                                    barnFnr = it["fnrBarn"]!!,
-                                    behandlingssteg = Behandlingssteg.BEHANDLING_OPPRETTA,
+                                    barnFnr = barnFnr,
+                                    behandlingssteg =
+                                        it["behandlingssteg"]?.let(Behandlingssteg::valueOf)
+                                            ?: Behandlingssteg.BEHANDLING_OPPRETTA,
                                 ),
                                 mapOf(Claims.NAVident.name to (brukerTokenInfo.ident().toByteArray())),
                             )
@@ -88,25 +94,24 @@ object OpprettSoeknadFeature : TestDataFeature {
 }
 
 private fun opprettSoeknadJson(
-    ytelse: String,
+    soeknadType: SoeknadType,
     gjenlevendeFnr: String,
     avdoedFnr: String,
-    barnFnr: String,
+    barnFnr: List<String>,
     behandlingssteg: Behandlingssteg,
 ): String {
-    val soeknadType =
-        if ("Omstillingsstoenad" == ytelse) {
-            SoeknadType.OMSTILLINGSSTOENAD
-        } else {
-            SoeknadType.BARNEPENSJON
+    if (soeknadType == SoeknadType.BARNEPENSJON) {
+        check(barnFnr.isNotEmpty()) {
+            "Kan ikke opprette barnepensjon uten fnr på barn!"
         }
+    }
 
     return SoeknadMapper
         .opprettJsonMessage(
             soeknadType,
             gjenlevendeFnr,
             avdoedFnr,
-            listOf(barnFnr),
+            barnFnr,
             behandlingssteg,
         ).toJson()
 }

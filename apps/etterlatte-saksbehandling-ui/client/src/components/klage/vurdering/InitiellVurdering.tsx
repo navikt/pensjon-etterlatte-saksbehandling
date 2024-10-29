@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Button, Heading, Radio, Textarea } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { IniteltUtfallMedBegrunnelseDto, Klage, teksterKlageutfall, Utfall } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -8,7 +8,6 @@ import { isPending } from '~shared/api/apiUtils'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { useAppDispatch } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
-import { SmalVStack } from '~components/klage/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { FieldOrNull } from '~shared/types/util'
@@ -73,14 +72,14 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
   const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
 
   return (
-    <SmalVStack gap="4">
+    <VStack gap="4" width="30rem">
       <Heading level="2" size="medium" spacing>
         Første vurdering
       </Heading>
       <>
         {redigeres ? (
           <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
-            <SmalVStack gap="4">
+            <VStack gap="4" width="30rem">
               <ControlledRadioGruppe
                 name="utfall"
                 control={control}
@@ -111,7 +110,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
                   })}
                 </>
               )}
-            </SmalVStack>
+            </VStack>
           </form>
         ) : (
           <div>
@@ -140,6 +139,6 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
           </Alert>
         )}
       </>
-    </SmalVStack>
+    </VStack>
   )
 }

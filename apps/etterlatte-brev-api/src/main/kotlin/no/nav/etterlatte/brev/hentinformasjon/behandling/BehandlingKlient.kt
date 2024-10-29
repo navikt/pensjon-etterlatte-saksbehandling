@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -92,6 +93,17 @@ class BehandlingKlient(
             url = "$resourceUrl/vedtaksbehandling/$behandlingId/redigerbar",
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Klarte ikke hente svar på om vedtaksbehandling med id=$behandlingId kan redigeres" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+
+    internal suspend fun hentTidligereFamiliepleier(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): TidligereFamiliepleier? =
+        get(
+            url = "$resourceUrl/api/behandling/$behandlingId/tidligere-familiepleier",
+            onSuccess = { it.response?.toString()?.let(::deserialize) },
+            errorMessage = { "Klarte ikke hente svar på om tidligere familiepleier for behandling med id=$behandlingId" },
             brukerTokenInfo = brukerTokenInfo,
         )
 

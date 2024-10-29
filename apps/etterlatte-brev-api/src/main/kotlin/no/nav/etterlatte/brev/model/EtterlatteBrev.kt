@@ -11,8 +11,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
-import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -73,15 +71,17 @@ data class OmstillingsstoenadBeregning(
     val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
     val sisteBeregningsperiodeNesteAar: OmstillingsstoenadBeregningsperiode?,
     val trygdetid: TrygdetidMedBeregningsmetode,
+    val oppphoersdato: LocalDate?,
+    val opphoerNesteAar: Boolean,
 ) : HarVedlegg
 
 data class OmstillingsstoenadBeregningsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val inntekt: Kroner,
-    val aarsinntekt: Kroner,
+    val oppgittInntekt: Kroner,
     val fratrekkInnAar: Kroner,
-    val relevantMaanederInnAar: Int,
+    val innvilgaMaaneder: Int,
     val grunnbeloep: Kroner,
     val ytelseFoerAvkorting: Kroner,
     val restanse: Kroner,
@@ -91,6 +91,7 @@ data class OmstillingsstoenadBeregningsperiode(
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val sanksjon: Boolean,
     val institusjon: Boolean,
+    val erOverstyrtInnvilgaMaaneder: Boolean,
 )
 
 data class TrygdetidMedBeregningsmetode(
@@ -125,43 +126,6 @@ data class Trygdetidsperiode(
     val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
     val type: TrygdetidType,
 )
-
-fun TrygdetidDto.fromDto(
-    beregningsMetodeAnvendt: BeregningsMetode,
-    beregningsMetodeFraGrunnlag: BeregningsMetode,
-    avdoede: List<Avdoed>,
-) = this.fromDto(
-    beregningsMetodeAnvendt,
-    beregningsMetodeFraGrunnlag,
-    hentAvdoedNavn(this, avdoede),
-)
-
-private fun hentAvdoedNavn(
-    trygdetidDto: TrygdetidDto,
-    avdoede: List<Avdoed>,
-): String {
-    if (avdoede.isEmpty() &&
-        trygdetidDto.beregnetTrygdetid?.resultat?.overstyrt == true &&
-        trygdetidDto.ident == UKJENT_AVDOED
-    ) {
-        return "ukjent avdød"
-    }
-    if (avdoede.isEmpty()) {
-        throw IngenStoetteForUkjentAvdoed()
-    }
-
-    return avdoede.find { it.fnr.value == trygdetidDto.ident }?.navn ?: run {
-        if (trygdetidDto.beregnetTrygdetid?.resultat?.overstyrt == true) {
-            sikkerLogg.warn(
-                "Fant ikke avdød fra trygdetid (ident: ${trygdetidDto.ident}) blant avdøde fra " +
-                    "grunnlag (${avdoede.joinToString { it.fnr.value }})",
-            )
-            throw OverstyrtTrygdetidManglerAvdoed()
-        } else {
-            throw FantIkkeIdentTilTrygdetidBlantAvdoede()
-        }
-    }
-}
 
 fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt: BeregningsMetode,

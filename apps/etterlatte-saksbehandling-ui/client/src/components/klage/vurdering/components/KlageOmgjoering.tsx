@@ -1,8 +1,7 @@
 import React from 'react'
 import { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { FormdataVurdering } from '~components/klage/vurdering/EndeligVurdering'
-import { Heading, Select, Textarea } from '@navikt/ds-react'
-import { SmalVStack } from '~components/klage/styled'
+import { Heading, Select, Textarea, VStack } from '@navikt/ds-react'
 import { AARSAKER_OMGJOERING, TEKSTER_AARSAK_OMGJOERING } from '~shared/types/Klage'
 
 export const KlageOmgjoering = ({
@@ -13,7 +12,7 @@ export const KlageOmgjoering = ({
   errors: FieldErrors<FormdataVurdering>
 }) => {
   return (
-    <SmalVStack gap="4">
+    <VStack gap="4" width="30rem">
       <Heading level="3" size="medium">
         Omgjøring
       </Heading>
@@ -46,6 +45,6 @@ export const KlageOmgjoering = ({
           },
         })}
       />
-    </SmalVStack>
+    </VStack>
   )
 }

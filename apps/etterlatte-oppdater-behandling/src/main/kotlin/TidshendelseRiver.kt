@@ -61,6 +61,11 @@ class TidshendelseRiver(
         packetUpdates[TIDSHENDELSE_STEG_KEY] = "OPPGAVE_OPPRETTET"
         packetUpdates[HENDELSE_DATA_KEY] = emptyMap<String, Any>()
 
+        logger.info(
+            "Håndterer hendelse i sak ${hendelse.sakId} med id ${hendelse.hendelseId} for " +
+                "jobbtype ${hendelse.jobbtype}",
+        )
+
         when (val result = tidshendelseService.haandterHendelse(hendelse)) {
             is TidshendelseResult.OpprettetOmregning -> {
                 packetUpdates[TIDSHENDELSE_STEG_KEY] = "BEHANDLING_OPPRETTET"

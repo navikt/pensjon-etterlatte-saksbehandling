@@ -5,6 +5,8 @@ import { UnderkjennYtelse } from '~components/behandling/attestering/handinger/u
 import { UnderkjennTilbakekreving } from '~components/behandling/attestering/handinger/underkjennTilbakekreving'
 import { useKlage } from '~components/klage/useKlage'
 import { UnderkjennKlage } from '~components/behandling/attestering/handinger/underkjennKlage'
+import { logger } from '~utils/logger'
+import { Alert } from '@navikt/ds-react'
 
 export const UnderkjennVedtak = ({ kommentar, valgtBegrunnelse }: { kommentar: string; valgtBegrunnelse: string }) => {
   const behandling = useBehandling()
@@ -24,6 +26,7 @@ export const UnderkjennVedtak = ({ kommentar, valgtBegrunnelse }: { kommentar: s
   } else if (klage) {
     return <UnderkjennKlage klage={klage} kommentar={kommentar} valgtBegrunnelse={valgtBegrunnelse} />
   } else {
-    throw Error('Mangler behandling')
+    logger.generalWarning({ msg: 'Mangler behandling for underkjenning av vedtak ' })
+    return <Alert variant="error">Mangler behandling for underkjenning av vedtak</Alert>
   }
 }

@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
+    implementation(project(":libs:etterlatte-oppgave-model"))
 
     implementation(libs.database.kotliquery)
     implementation(libs.navfelles.tokenclientcore)

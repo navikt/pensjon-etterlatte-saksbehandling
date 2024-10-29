@@ -4,7 +4,7 @@ import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
 import { IBehandlingReducer, resetBehandling, setBehandling } from '~store/reducers/BehandlingReducer'
 import { StatusBar } from '~shared/statusbar/Statusbar'
-import { useBehandlingRoutes } from './BehandlingRoutes'
+import { BehandlingRouteContext, useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -25,7 +25,7 @@ export const Behandling = () => {
   const behandlingFraRedux = useBehandling()
   const dispatch = useAppDispatch()
   const { behandlingId: behandlingIdFraURL } = useParams()
-  const { behandlingRoutes } = useBehandlingRoutes()
+  const routedata = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
   const [, fetchPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
   const soeker = usePersonopplysninger()?.soeker?.opplysning
@@ -65,7 +65,7 @@ export const Behandling = () => {
       if (behandlingFraRedux) {
         const behandling = behandlingFraRedux as IBehandlingReducer
         return (
-          <>
+          <BehandlingRouteContext.Provider value={routedata}>
             <StickyToppMeny>
               <StatusBar ident={soeker?.foedselsnummer} />
               <StegMeny behandling={behandling} />
@@ -73,15 +73,15 @@ export const Behandling = () => {
             <GridContainer>
               <MainContent>
                 <Routes>
-                  {behandlingRoutes.map((route) => (
-                    <Route key={route.path} path={route.path} element={route.element} />
+                  {routedata.behandlingRoutes.map((route) => (
+                    <Route key={route.path} path={route.path} element={route.element(behandling)} />
                   ))}
-                  <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
+                  <Route path="*" element={<Navigate to={routedata.behandlingRoutes[0].path} replace />} />
                 </Routes>
               </MainContent>
               <BehandlingSidemeny behandling={behandling} />
             </GridContainer>
-          </>
+          </BehandlingRouteContext.Provider>
         )
       }
       return null

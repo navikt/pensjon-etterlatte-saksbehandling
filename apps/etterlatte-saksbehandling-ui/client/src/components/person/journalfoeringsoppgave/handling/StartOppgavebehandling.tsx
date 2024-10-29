@@ -17,6 +17,7 @@ import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { isFailure, isSuccess } from '~shared/api/apiUtils'
 import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/formatering'
 import { PersonLink } from '~components/person/lenker/PersonLink'
+import { logger } from '~utils/logger'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -44,9 +45,15 @@ export default function StartOppgavebehandling() {
         settTilhoererBruker(oppgave?.fnr === foedselsnummer)
       })
     } else {
-      throw Error('Journalposten mangler bruker')
+      logger.generalWarning({
+        msg: `Journalpostid ${journalpost?.journalpostId} mangler bruker id. sak: ${journalpost?.sak?.fagsakId}`,
+      })
     }
   }, [])
+
+  if (!journalpost?.bruker?.id) {
+    return <Alert variant="error">Journalposten mangler bruker</Alert>
+  }
 
   if (!oppgave) return null
   else if (!erOppgaveRedigerbar(oppgave.status))

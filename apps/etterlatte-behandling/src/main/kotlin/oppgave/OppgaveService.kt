@@ -60,17 +60,21 @@ class OppgaveService(
     fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =
         oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
 
-    private fun sjekkOmkanTildeleAttestantOppgave(): Boolean {
+    private fun sjekkOmkanTildeleAttestantOppgave(saksbehandler: String): Boolean {
         val appUser = Kontekst.get().AppUser
         return when (appUser) {
             is SystemUser -> true
             is Self -> true
             is SaksbehandlerMedEnheterOgRoller -> {
                 val saksbehandlerMedRoller = appUser.saksbehandlerMedRoller
-                if (saksbehandlerMedRoller.harRolleAttestant()) {
-                    return true
+                if (saksbehandler == appUser.name()) {
+                    if (saksbehandlerMedRoller.harRolleAttestant()) {
+                        return true
+                    } else {
+                        throw BrukerManglerAttestantRolleException(saksbehandlerMedRoller.saksbehandler.ident)
+                    }
                 } else {
-                    throw BrukerManglerAttestantRolleException(saksbehandlerMedRoller.saksbehandler.ident)
+                    true
                 }
             }
 
@@ -90,7 +94,7 @@ class OppgaveService(
                 ?: throw OppgaveIkkeFunnet(oppgaveId)
 
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
+        hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave(saksbehandler)
 
         oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
 

@@ -29,12 +29,13 @@ import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandl
 import { useBehandling } from '~components/behandling/useBehandling'
 import { addValideringsfeil, Valideringsfeilkoder } from '~store/reducers/SjekklisteReducer'
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
-import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import BrevutfallModal from '~components/behandling/brevutfall/BrevutfallModal'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -50,6 +51,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev>()
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
+  const [visAdvarselIngenAvdoede, setVisAdvarselIngenAvdoede] = useState(false)
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
@@ -62,6 +64,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const sjekkliste = useSjekkliste()
   const valideringsfeil = useSjekklisteValideringsfeil()
   const behandling = useBehandling()
+  const personopplysninger = usePersonopplysninger()
   const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
@@ -84,6 +87,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         (behandling) => {
           dispatch(oppdaterBehandling(behandling))
           setVisAdvarselBehandlingEndret(behandlingRedigertEtterOpprettetBrev(vedtaksbrev, behandling.hendelser))
+          setVisAdvarselIngenAvdoede(redigerbar && personopplysninger?.avdoede.length === 0)
         },
         () => dispatch(resetBehandling())
       )
@@ -183,6 +187,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
               </Alert>
             )}
 
+            {visAdvarselIngenAvdoede && (
+              <Alert variant="warning">Behandlingen har ingen avdøde. Se nøye gjennom brevet med tanke på dette.</Alert>
+            )}
+
             {vedtaksbrev && (
               <>
                 <BrevTittel
@@ -194,7 +202,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
 
                 {vedtaksbrev.mottakere.map((mottaker) => (
-                  <BrevMottaker
+                  <BrevMottakerPanel
                     key={mottaker.id}
                     brevId={vedtaksbrev.id}
                     behandlingId={behandlingId}

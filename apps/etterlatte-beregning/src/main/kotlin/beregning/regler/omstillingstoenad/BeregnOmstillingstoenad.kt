@@ -84,9 +84,9 @@ val beregnRiktigOmstillingsstoenadOppMotInstitusjonsopphold =
     ) benytter beregnOmstillingstoenadRegelReduserMotTrygdetid og institusjonsoppholdSatsRegelOMS og
         brukerHarTellendeInstitusjonsopphold med
         {
-                beregnetOmstillingsstoenad,
-                beregnetOmstillingsstoenadMedInstitusjonsopphold,
-                harInstitusjonshopphold,
+            beregnetOmstillingsstoenad,
+            beregnetOmstillingsstoenadMedInstitusjonsopphold,
+            harInstitusjonshopphold,
             ->
             if (harInstitusjonshopphold) {
                 beregnetOmstillingsstoenadMedInstitusjonsopphold.coerceAtMost(beregnetOmstillingsstoenad)

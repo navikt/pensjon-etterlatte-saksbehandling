@@ -57,7 +57,7 @@ class AktivitetspliktKopierServiceTest {
 
             every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns emptyList()
-            every { aktivitetspliktUnntakDao.kopierUnntak(unntakId, behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.kopierUnntakTilBehandling(unntakId, behandlingId) } returns 1
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns emptyList()
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
@@ -77,12 +77,12 @@ class AktivitetspliktKopierServiceTest {
                 )
             every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
-            service.kopierVurdering(sakId, behandlingId)
+            service.kopierVurderingTilBehandling(sakId, behandlingId)
 
             verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
             verify { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) }
             verify { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) }
-            verify { aktivitetspliktUnntakDao.kopierUnntak(unntakId, behandlingId) }
+            verify { aktivitetspliktUnntakDao.kopierUnntakTilBehandling(unntakId, behandlingId) }
         }
 
         @Test
@@ -102,16 +102,16 @@ class AktivitetspliktKopierServiceTest {
                 )
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns emptyList()
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns emptyList()
-            every { aktivitetspliktAktivitetsgradDao.kopierAktivitetsgrad(aktivitetsgradId, behandlingId) } returns 1
+            every { aktivitetspliktAktivitetsgradDao.kopierAktivitetsgradTilBehandling(aktivitetsgradId, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns emptyList()
             every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
-            service.kopierVurdering(sakId, behandlingId)
+            service.kopierVurderingTilBehandling(sakId, behandlingId)
 
             verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
             verify { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) }
             verify { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) }
-            verify { aktivitetspliktAktivitetsgradDao.kopierAktivitetsgrad(aktivitetsgradId, behandlingId) }
+            verify { aktivitetspliktAktivitetsgradDao.kopierAktivitetsgradTilBehandling(aktivitetsgradId, behandlingId) }
         }
     }
 

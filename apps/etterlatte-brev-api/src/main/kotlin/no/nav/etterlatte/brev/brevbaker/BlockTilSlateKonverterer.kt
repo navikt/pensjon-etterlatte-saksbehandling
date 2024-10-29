@@ -96,7 +96,7 @@ object BlockTilSlateKonverterer {
                 listOf(
                     Slate.InnerElement(
                         type = Slate.ElementType.PARAGRAPH,
-                        text = it.content.joinToString { i -> i.text },
+                        text = it.content.joinToString("") { i -> i.text },
                     ),
                 ),
         )

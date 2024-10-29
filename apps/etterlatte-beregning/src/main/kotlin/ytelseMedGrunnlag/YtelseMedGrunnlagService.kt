@@ -34,7 +34,7 @@ class YtelseMedGrunnlagService(
                     avkorting.avkortingGrunnlag
                         .filter { it.fom <= avkortetYtelse.fom }
                         .maxBy { it.fom }
-                val aarsinntekt = grunnlag.inntektTom + grunnlag.inntektUtlandTom
+                val oppgittInntekt = grunnlag.inntektTom + grunnlag.inntektUtlandTom
                 val fratrekkInnAar = grunnlag.fratrekkInnAar + grunnlag.fratrekkInnAarUtland
 
                 YtelseMedGrunnlagPeriodisertDto(
@@ -44,14 +44,15 @@ class YtelseMedGrunnlagService(
                     avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
                     ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
                     trygdetid = beregningIPeriode.trygdetid,
-                    aarsinntekt = aarsinntekt,
+                    oppgittInntekt = oppgittInntekt,
                     fratrekkInnAar = fratrekkInnAar,
-                    relevanteMaanederInnAar = grunnlag.relevanteMaanederInnAar,
+                    innvilgaMaaneder = grunnlag.innvilgaMaaneder,
                     grunnbelop = beregningIPeriode.grunnbelop,
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                     beregningsMetode = beregningIPeriode.beregningsMetode,
                     sanksjon = avkortetYtelse.sanksjon,
                     institusjonsopphold = beregningIPeriode.institusjonsopphold,
+                    erOverstyrtInnvilgaMaaneder = grunnlag.overstyrtInnvilgaMaaneder != null,
                 )
             }
 

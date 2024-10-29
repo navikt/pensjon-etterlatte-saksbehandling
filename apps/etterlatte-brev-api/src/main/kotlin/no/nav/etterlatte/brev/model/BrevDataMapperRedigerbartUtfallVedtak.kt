@@ -68,6 +68,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     false,
                     avdoede,
                     forenkletVedtak?.klage,
+                    utlandstilknytningType,
                 )
             }
         }
@@ -121,6 +122,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         loependeIPesys: Boolean,
         avdoede: List<Avdoed>,
         klage: Klage?,
+        utlandstilknytningType: UtlandstilknytningType?,
     ): BrevDataRedigerbar =
         when (sakType) {
             SakType.BARNEPENSJON -> {
@@ -145,7 +147,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                         )
                     VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, behandlingId)
                     VedtakType.AVSLAG -> barnepensjonAvslag(avdoede, brukerTokenInfo, behandlingId)
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
                     VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
@@ -161,7 +163,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             virkningstidspunkt!!,
                             sakType,
                             vedtakType,
-                            avdoede,
                         )
                     VedtakType.ENDRING ->
                         omstillingsstoenadEndring(
@@ -173,7 +174,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                         )
                     VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, behandlingId)
                     VedtakType.AVSLAG -> omstillingsstoenadAvslag(brukerTokenInfo, behandlingId, avdoede)
-                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
                     VedtakType.TILBAKEKREVING,
                     null,
                     -> ManueltBrevData()
@@ -279,7 +280,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         virkningstidspunkt: YearMonth,
         sakType: SakType,
         vedtakType: VedtakType,
-        avdoede: List<Avdoed>,
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
@@ -301,11 +301,13 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+
         OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
             utbetalingsinfo.await(),
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
-            avdoede,
+            behandling.tidligereFamiliepleier?.svar ?: false,
         )
     }
 

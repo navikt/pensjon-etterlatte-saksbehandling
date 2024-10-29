@@ -1,7 +1,6 @@
 import { IBoddEllerArbeidetUtlandet } from '~shared/types/IDetaljertBehandling'
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import styled from 'styled-components'
 
 const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null }) => {
   const { boddEllerArbeidetUtlandet } = props
@@ -9,12 +8,13 @@ const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: I
     <>
       {boddEllerArbeidetUtlandet && boddEllerArbeidetUtlandet.boddEllerArbeidetUtlandet ? (
         <>
-          <SpoersmaalSvarWrapper>
+          <VStack gap="6" marginBlock="0 12">
             <Label as="p" size="small">
               {JaNeiRec[boddEllerArbeidetUtlandet.boddEllerArbeidetUtlandet ? JaNei.JA : JaNei.NEI]}
             </Label>
-          </SpoersmaalSvarWrapper>
-          <SpoersmaalSvarWrapper>
+          </VStack>
+
+          <VStack gap="6" marginBlock="0 12">
             <Heading level="3" size="xsmall">
               Vurdering av utlandsopphold
             </Heading>
@@ -36,8 +36,9 @@ const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: I
                 {JaNeiRec[boddEllerArbeidetUtlandet.boddArbeidetAvtaleland ? JaNei.JA : JaNei.NEI]}
               </Label>
             </div>
-          </SpoersmaalSvarWrapper>
-          <SpoersmaalSvarWrapper>
+          </VStack>
+
+          <VStack gap="6" marginBlock="0 12">
             <Heading level="3" size="xsmall">
               Huk av hvis aktuelt
             </Heading>
@@ -53,25 +54,17 @@ const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: I
                 {JaNeiRec[boddEllerArbeidetUtlandet.skalSendeKravpakke ? JaNei.JA : JaNei.NEI]}
               </Label>
             </div>
-          </SpoersmaalSvarWrapper>
+          </VStack>
         </>
       ) : (
-        <>
-          <TekstWrapper>Nei</TekstWrapper>
+        <VStack gap="6" marginBlock="0 6">
+          <BodyShort size="small">Nei</BodyShort>
 
-          <TekstWrapper>Ved avslag på helnasjonal sak vil ikke trygdetidsbildet vises</TekstWrapper>
-        </>
+          <BodyShort size="small">Ved avslag på helnasjonal sak vil ikke trygdetidsbildet vises</BodyShort>
+        </VStack>
       )}
     </>
   )
 }
 
 export default BoddEllerArbeidetIUtlandetVisning
-
-const SpoersmaalSvarWrapper = styled(VStack).attrs({ gap: '6' })`
-  margin-bottom: 3em;
-`
-
-const TekstWrapper = styled(BodyShort).attrs({ size: 'small' })`
-  margin-bottom: 1.5em;
-`

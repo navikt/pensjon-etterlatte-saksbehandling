@@ -1,1 +1,0 @@
-ALTER TABLE delvilkaar ADD COLUMN spoersmaal TEXT;

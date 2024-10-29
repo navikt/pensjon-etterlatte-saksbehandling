@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregningkafka
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.asUUID
@@ -24,6 +25,12 @@ class SjekkOmTidligAlderpensjonRiver(
             validate { it.requireKey("vedtak.sak") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.OMSTILLINGSSTOENAD.name) }
+            validate {
+                it.requireAny(
+                    "vedtak.type",
+                    listOf(VedtakType.INNVILGELSE.name, VedtakType.ENDRING.name),
+                )
+            }
         }
     }
 

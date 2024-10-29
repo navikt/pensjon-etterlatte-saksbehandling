@@ -218,7 +218,7 @@ internal class BrevServiceTest {
         @EnumSource(Status::class, names = ["FERDIGSTILT", "JOURNALFOERT"], mode = EnumSource.Mode.INCLUDE)
         fun `Brev markeres som utgått - gyldig status, men for nytt`(status: Status) {
             val brev =
-                opprettBrev(status, BrevProsessType.REDIGERBAR, opprettet = Tidspunkt.now().plus(6, ChronoUnit.DAYS))
+                opprettBrev(status, BrevProsessType.REDIGERBAR, opprettet = Tidspunkt.now().minus(6, ChronoUnit.DAYS))
 
             every { db.hentBrev(any()) } returns brev
 
@@ -239,7 +239,7 @@ internal class BrevServiceTest {
                 opprettBrev(
                     status,
                     BrevProsessType.REDIGERBAR,
-                    opprettet = Tidspunkt.now().plus(7, ChronoUnit.DAYS).plus(1, ChronoUnit.HOURS),
+                    opprettet = Tidspunkt.now().minus(7, ChronoUnit.DAYS),
                 )
 
             every { db.hentBrev(any()) } returns brev

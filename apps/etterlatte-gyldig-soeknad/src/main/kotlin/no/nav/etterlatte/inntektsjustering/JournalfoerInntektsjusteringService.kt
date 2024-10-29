@@ -102,7 +102,7 @@ class JournalfoerInntektsjusteringService(
                             naeringsinntekt = inntektsjustering.naeringsinntekt,
                             inntektFraUtland = inntektsjustering.inntektFraUtland,
                             afpInntekt = inntektsjustering.afpInntekt,
-                            afpInntektAFPTjenesteordning = inntektsjustering.afpTjenesteordning ?: "",
+                            afpTjenesteordning = inntektsjustering.afpTjenesteordning ?: "",
                             skalGaaAvMedAlderspensjon = inntektsjustering.skalGaaAvMedAlderspensjon,
                             datoForAaGaaAvMedAlderspensjon =
                                 inntektsjustering.datoForAaGaaAvMedAlderspensjon?.formatert()
@@ -132,7 +132,7 @@ data class ArkiverInntektsjustering(
     val naeringsinntekt: Int,
     val inntektFraUtland: Int,
     val afpInntekt: Int?,
-    val afpInntektAFPTjenesteordning: String,
+    val afpTjenesteordning: String,
     val skalGaaAvMedAlderspensjon: String?,
     val datoForAaGaaAvMedAlderspensjon: String,
     val tidspunkt: String,

@@ -31,10 +31,10 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
           error: JSON.stringify(error),
         })
       } catch (e) {
-        logger.generalError({ err: error, errorInfo })
+        logger.generalError({ msg: 'componentDidCatch, kan ikke parse stackframes', err: error, errorInfo })
       }
     } else {
-      logger.generalError({ err: error, errorInfo })
+      logger.generalError({ msg: 'componentDidCatch, ingen stackframes tilgjengelig', err: error, errorInfo })
     }
   }
 

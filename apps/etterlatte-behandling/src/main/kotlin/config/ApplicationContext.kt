@@ -453,7 +453,7 @@ internal class ApplicationContext(
         AarligInntektsjusteringJobbService(
             omregningService = omregningService,
             vedtakKlient = vedtakKlient,
-            beregningsKlient = beregningsKlient,
+            beregningKlient = beregningsKlient,
             rapid = rapid,
         )
 

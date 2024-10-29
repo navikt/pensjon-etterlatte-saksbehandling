@@ -220,6 +220,11 @@ class BeregningKlientTest : BeregningKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
+
+    override suspend fun harInntektNesteAar(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean = false
 }
 
 class VedtakKlientTest : VedtakKlient {

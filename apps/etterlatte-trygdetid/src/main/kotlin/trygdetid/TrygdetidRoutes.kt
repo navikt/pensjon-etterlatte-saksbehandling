@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidOverstyringDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidYrkesskadeDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.route.withUuidParam
@@ -40,18 +41,16 @@ import java.util.UUID
 
 private const val TRYGDETIDID_CALL_PARAMETER = "trygdetidId"
 
-private fun PipelineContext<*, ApplicationCall>.uuidParam(name: String) =
-    try {
-        this.call.parameters[name]?.let { UUID.fromString(it) }!!
-    } catch (e: Exception) {
-        throw UgyldigForespoerselException(
-            "MANGLER_$name",
-            "$name er ikke i path params",
-        )
-    }
-
 private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
-    get() = uuidParam(TRYGDETIDID_CALL_PARAMETER)
+    get() =
+        try {
+            this.call.uuid(TRYGDETIDID_CALL_PARAMETER)
+        } catch (e: Exception) {
+            throw UgyldigForespoerselException(
+                "MANGLER_TRYGDETID_ID",
+                "Kunne ikke lese ut parameteret trygdetidId",
+            )
+        }
 
 private val logger: Logger = LoggerFactory.getLogger("TrygdetidRoutes")
 

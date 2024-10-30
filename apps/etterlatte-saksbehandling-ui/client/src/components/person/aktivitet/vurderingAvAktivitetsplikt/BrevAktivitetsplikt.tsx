@@ -11,6 +11,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
@@ -135,15 +136,17 @@ export const BrevAktivitetsplikt = () => {
               </HStack>
             )}
           </div>
-          <Button
-            type="button"
-            size="small"
-            icon={<PencilIcon />}
-            variant="secondary"
-            onClick={() => setRedigeres(true)}
-          >
-            Rediger
-          </Button>
+          {erOppgaveRedigerbar(oppgave.status) && (
+            <Button
+              type="button"
+              size="small"
+              icon={<PencilIcon />}
+              variant="secondary"
+              onClick={() => setRedigeres(true)}
+            >
+              Rediger
+            </Button>
+          )}
         </div>
       )}
     </VStack>

@@ -8,7 +8,7 @@ import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Button, Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
@@ -29,7 +29,6 @@ export const GyldigFramsattVurdering = ({
 
   const dispatch = useAppDispatch()
   const [svar, setSvar] = useState<JaNei | undefined>(finnSvar(gyldigFramsatt))
-  const [vurdert, setVurdert] = useState(svar != null)
   const [radioError, setRadioError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(manuellVurdering?.begrunnelse || '')
   const [begrunnelseError, setBegrunnelseError] = useState<string>('')
@@ -62,85 +61,76 @@ export const GyldigFramsattVurdering = ({
     setRadioError('')
     setBegrunnelseError('')
     setBegrunnelse(manuellVurdering?.begrunnelse || '')
-    setVurdert(manuellVurdering != null)
     onSuccess?.()
   }
 
   const tittel = 'Er søknaden gyldig fremsatt?'
 
   return (
-    <>
-      {!vurdert && redigerbar && (
-        <Button variant="secondary" onClick={() => setVurdert(true)}>
-          Legg til vurdering
-        </Button>
-      )}
-      {vurdert && (
-        <VurderingsboksWrapper
-          tittel={tittel}
-          subtittelKomponent={
-            <>
-              {gyldigFramsatt?.resultat && (
-                <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-                  {JaNeiRec[gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? JaNei.JA : JaNei.NEI]}
-                </Label>
-              )}
-            </>
-          }
-          redigerbar={redigerbar}
-          vurdering={
-            manuellVurdering?.kilde
-              ? {
-                  saksbehandler: manuellVurdering?.kilde.ident,
-                  tidspunkt: new Date(manuellVurdering?.kilde.tidspunkt),
-                }
-              : undefined
-          }
-          lagreklikk={lagre}
-          avbrytklikk={reset}
-          kommentar={manuellVurdering?.begrunnelse}
-          defaultRediger={
-            gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT &&
-            gyldigFramsatt?.resultat !== VurderingsResultat.IKKE_OPPFYLT
-          }
-        >
-          <div>
-            <Heading level="3" size="small">
-              Er søknaden gyldig fremsatt?
-            </Heading>
-            <RadioGroupWrapper>
-              <RadioGroup
-                legend=""
-                size="small"
-                className="radioGroup"
-                onChange={(event) => {
-                  setSvar(JaNei[event as JaNei])
-                  setRadioError('')
-                }}
-                value={svar || ''}
-                error={radioError ? radioError : false}
-              >
-                <div className="flex">
-                  <Radio value={JaNei.JA}>Ja</Radio>
-                  <Radio value={JaNei.NEI}>Nei</Radio>
-                </div>
-              </RadioGroup>
-            </RadioGroupWrapper>
-            <SoeknadsoversiktTextArea
-              label="Begrunnelse"
-              placeholder="Forklar begrunnelsen"
-              value={begrunnelse}
-              onChange={(e) => {
-                const oppdatertBegrunnelse = e.target.value
-                setBegrunnelse(oppdatertBegrunnelse)
-                oppdatertBegrunnelse.trim().length > 0 && setBegrunnelseError('')
-              }}
-              error={begrunnelseError ? begrunnelseError : false}
-            />
-          </div>
-        </VurderingsboksWrapper>
-      )}
-    </>
+    <VurderingsboksWrapper
+      tittel={tittel}
+      subtittelKomponent={
+        <>
+          {gyldigFramsatt?.resultat && (
+            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+              {JaNeiRec[gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? JaNei.JA : JaNei.NEI]}
+            </Label>
+          )}
+        </>
+      }
+      redigerbar={redigerbar}
+      vurdering={
+        manuellVurdering?.kilde
+          ? {
+              saksbehandler: manuellVurdering?.kilde.ident,
+              tidspunkt: new Date(manuellVurdering?.kilde.tidspunkt),
+            }
+          : undefined
+      }
+      lagreklikk={lagre}
+      avbrytklikk={reset}
+      kommentar={manuellVurdering?.begrunnelse}
+      defaultRediger={
+        gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT &&
+        gyldigFramsatt?.resultat !== VurderingsResultat.IKKE_OPPFYLT
+      }
+      visAvbryt={!!manuellVurdering?.kilde}
+    >
+      <div>
+        <Heading level="3" size="small">
+          Er søknaden gyldig fremsatt?
+        </Heading>
+        <RadioGroupWrapper>
+          <RadioGroup
+            legend=""
+            size="small"
+            className="radioGroup"
+            onChange={(event) => {
+              setSvar(JaNei[event as JaNei])
+              setRadioError('')
+            }}
+            value={svar || ''}
+            error={radioError ? radioError : false}
+          >
+            <div className="flex">
+              <Radio value={JaNei.JA}>Ja</Radio>
+              <Radio value={JaNei.NEI}>Nei</Radio>
+            </div>
+          </RadioGroup>
+        </RadioGroupWrapper>
+        <SoeknadsoversiktTextArea
+          label="Begrunnelse"
+          placeholder="Forklar begrunnelsen"
+          value={begrunnelse}
+          onChange={(e) => {
+            const oppdatertBegrunnelse = e.target.value
+            setBegrunnelse(oppdatertBegrunnelse)
+            oppdatertBegrunnelse.trim().length > 0 && setBegrunnelseError('')
+          }}
+          error={begrunnelseError ? begrunnelseError : false}
+        />
+      </div>
+    </VurderingsboksWrapper>
   )
 }
 

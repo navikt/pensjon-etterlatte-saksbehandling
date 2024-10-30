@@ -1,9 +1,8 @@
 import { IBoddEllerArbeidetUtlandet, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Informasjon, Vurdering } from '../styled'
-import { useState } from 'react'
 import { BoddEllerArbeidetUtlandetVurdering } from './BoddEllerArbeidetUtlandetVurdering'
-import { BodyShort, Button, VStack } from '@navikt/ds-react'
+import { BodyShort, VStack } from '@navikt/ds-react'
 
 const statusIkon = (boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null) => {
   if (boddEllerArbeidetUtlandet) {
@@ -19,8 +18,6 @@ export const BoddEllerArbeidetUtlandet = ({
   behandling: IDetaljertBehandling
   redigerbar: boolean
 }) => {
-  const [vurdert, setVurdert] = useState<boolean>(!!behandling.boddEllerArbeidetUtlandet)
-
   return (
     <LovtekstMedLenke tittel="Utlandsopphold" hjemler={[]} status={statusIkon(behandling.boddEllerArbeidetUtlandet)}>
       <Informasjon>
@@ -44,18 +41,7 @@ export const BoddEllerArbeidetUtlandet = ({
         </VStack>
       </Informasjon>
       <Vurdering>
-        {vurdert && (
-          <BoddEllerArbeidetUtlandetVurdering
-            redigerbar={redigerbar}
-            setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
-            behandlingId={behandling.id}
-          />
-        )}
-        {!vurdert && redigerbar && (
-          <Button variant="secondary" onClick={() => setVurdert(true)}>
-            Legg til vurdering
-          </Button>
-        )}
+        <BoddEllerArbeidetUtlandetVurdering redigerbar={redigerbar} behandlingId={behandling.id} />
       </Vurdering>
     </LovtekstMedLenke>
   )

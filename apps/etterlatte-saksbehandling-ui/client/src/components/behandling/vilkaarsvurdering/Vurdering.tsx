@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import {
   IVilkaarsvurdering,
@@ -47,7 +47,6 @@ export const Vurdering = ({
   behandlingId: string
   redigerbar: boolean
 }) => {
-  const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
   const [vilkaarutkast, setVilkaarutkast] = useState<VilkaarForm>(initiellForm(vilkaar))
   const [radioError, setRadioError] = useState<string>()
   const [unntakRadioError, setUnntakRadioError] = useState<string>()
@@ -102,7 +101,6 @@ export const Vurdering = ({
       },
       (response) => {
         oppdaterVilkaar(response)
-        setAktivVurdering(false)
         onSuccess?.()
       }
     )
@@ -116,7 +114,6 @@ export const Vurdering = ({
     })
 
   const reset = (onSuccess?: () => void) => {
-    setAktivVurdering(false)
     setRadioError(undefined)
     setKommentarError(undefined)
     setVilkaarutkast(initiellForm(vilkaar))
@@ -145,132 +142,116 @@ export const Vurdering = ({
 
   return (
     <VurderingWrapper>
-      {!vilkaar.vurdering && !aktivVurdering ? (
-        <IkkeVurdert>
-          <Heading size="small">Vilkåret er ikke vurdert</Heading>
-          <Button disabled={!redigerbar} variant="secondary" size="small" onClick={() => setAktivVurdering(true)}>
-            Vurder vilkår
-          </Button>
-        </IkkeVurdert>
-      ) : (
-        <VurderingsboksWrapper
-          tittel={overskrift()}
-          subtittelKomponent={
-            <>
-              {!!oppfyltUnntaksvilkaar ? (
-                <VilkaarVurdertInformasjon>
-                  <Heading size="xsmall" level="3">
-                    Er unntak fra hovedvilkåret oppfylt?
-                  </Heading>
-                  <BodyShort size="small">{oppfyltUnntaksvilkaar?.tittel}</BodyShort>
-                </VilkaarVurdertInformasjon>
-              ) : (
-                <VilkaarVurdertInformasjon>
-                  <Heading size="xsmall" level="3">
-                    {vilkaarSpoersmaal}
-                  </Heading>
-                  <BodyShort size="small">{formaterVurderingsResultat(vilkaar.hovedvilkaar.resultat)}</BodyShort>
-                </VilkaarVurdertInformasjon>
-              )}
-            </>
-          }
-          vurdering={
-            vilkaar.vurdering
-              ? { saksbehandler: vilkaar.vurdering.saksbehandler, tidspunkt: vilkaar.vurdering.tidspunkt }
-              : undefined
-          }
-          key={`${redigerbar}+${vilkaar.id}`}
-          kommentar={vilkaarutkast?.kommentar}
-          defaultRediger={aktivVurdering}
-          redigerbar={redigerbar}
-          slett={(callback) => slettVurderingAvVilkaar(callback)}
-          lagreklikk={(callback) => (valider(vilkaarutkast) ? vilkaarVurdert(vilkaarutkast, callback) : {})}
-          avbrytklikk={reset}
-        >
+      <VurderingsboksWrapper
+        tittel={overskrift()}
+        subtittelKomponent={
           <>
-            <RadioGroupWrapper>
-              <RadioGroup
-                legend={vilkaarSpoersmaal}
-                size="small"
-                className="radioGroup"
-                onChange={(event) => {
-                  setVilkaarutkast({
-                    ...vilkaarutkast,
-                    resultat: VurderingsResultat[event as VurderingsResultat],
-                  })
-                  setRadioError(undefined)
-                }}
-                value={vilkaarutkast.resultat}
-                error={radioError}
-              >
-                <div className="flex">
-                  <Radio value={VurderingsResultat.OPPFYLT}>Ja</Radio>
-                  <Radio value={VurderingsResultat.IKKE_OPPFYLT}>Nei</Radio>
-                  <Radio value={VurderingsResultat.IKKE_VURDERT}>Ikke aktuelt</Radio>
-                </div>
-              </RadioGroup>
-            </RadioGroupWrapper>
-
-            {vilkaarutkast.resultat === VurderingsResultat.IKKE_OPPFYLT &&
-              vilkaar.unntaksvilkaar &&
-              vilkaar.unntaksvilkaar.length > 0 && (
-                <>
-                  <Unntaksvilkaar>
-                    <RadioGroup
-                      legend="Er unntak fra hovedvilkåret oppfylt?"
-                      size="small"
-                      className="radioGroup"
-                      onChange={(type) => {
-                        setVilkaarutkast({
-                          ...vilkaarutkast,
-                          vilkaarsUnntakType: type,
-                        })
-                        setUnntakRadioError(undefined)
-                      }}
-                      value={vilkaarutkast.vilkaarsUnntakType}
-                      error={unntakRadioError}
-                    >
-                      <div className="flex">
-                        {vilkaar.unntaksvilkaar.map((unntakvilkaar) => (
-                          <Radio key={unntakvilkaar.type} value={unntakvilkaar.type}>
-                            {unntakvilkaar.tittel}
-                          </Radio>
-                        ))}
-                        <Radio key="Nei" value={INGEN_VILKAAR_OPPFYLT}>
-                          Nei, ingen av unntakene er oppfylt
-                        </Radio>
-                      </div>
-                    </RadioGroup>
-                  </Unntaksvilkaar>
-                </>
-              )}
-            <VurderingsLabel htmlFor={vilkaar.hovedvilkaar.tittel}>Begrunnelse (obligatorisk)</VurderingsLabel>
-            <Textarea
-              label=""
-              hideLabel={false}
-              placeholder="Gi en begrunnelse for vurderingen"
-              defaultValue={vilkaarutkast.kommentar}
-              onBlur={(e) => setVilkaarutkast({ ...vilkaarutkast, kommentar: e.target.value })}
-              minRows={3}
-              size="small"
-              error={kommentarError ? kommentarError : false}
-              autoComplete="off"
-              name={vilkaar.hovedvilkaar.tittel}
-            />
+            {!!oppfyltUnntaksvilkaar ? (
+              <VilkaarVurdertInformasjon>
+                <Heading size="xsmall" level="3">
+                  Er unntak fra hovedvilkåret oppfylt?
+                </Heading>
+                <BodyShort size="small">{oppfyltUnntaksvilkaar?.tittel}</BodyShort>
+              </VilkaarVurdertInformasjon>
+            ) : (
+              <VilkaarVurdertInformasjon>
+                <Heading size="xsmall" level="3">
+                  {vilkaarSpoersmaal}
+                </Heading>
+                <BodyShort size="small">{formaterVurderingsResultat(vilkaar.hovedvilkaar.resultat)}</BodyShort>
+              </VilkaarVurdertInformasjon>
+            )}
           </>
-        </VurderingsboksWrapper>
-      )}
+        }
+        vurdering={
+          vilkaar.vurdering
+            ? { saksbehandler: vilkaar.vurdering.saksbehandler, tidspunkt: vilkaar.vurdering.tidspunkt }
+            : undefined
+        }
+        key={`${redigerbar}+${vilkaar.id}`}
+        kommentar={vilkaarutkast?.kommentar}
+        defaultRediger={!vilkaar.vurdering}
+        redigerbar={redigerbar}
+        slett={(callback) => slettVurderingAvVilkaar(callback)}
+        lagreklikk={(callback) => (valider(vilkaarutkast) ? vilkaarVurdert(vilkaarutkast, callback) : {})}
+        avbrytklikk={reset}
+        visAvbryt={!!vilkaar.vurdering}
+      >
+        <>
+          <RadioGroupWrapper>
+            <RadioGroup
+              legend={vilkaarSpoersmaal}
+              size="small"
+              className="radioGroup"
+              onChange={(event) => {
+                setVilkaarutkast({
+                  ...vilkaarutkast,
+                  resultat: VurderingsResultat[event as VurderingsResultat],
+                })
+                setRadioError(undefined)
+              }}
+              value={vilkaarutkast.resultat}
+              error={radioError}
+            >
+              <div className="flex">
+                <Radio value={VurderingsResultat.OPPFYLT}>Ja</Radio>
+                <Radio value={VurderingsResultat.IKKE_OPPFYLT}>Nei</Radio>
+                <Radio value={VurderingsResultat.IKKE_VURDERT}>Ikke aktuelt</Radio>
+              </div>
+            </RadioGroup>
+          </RadioGroupWrapper>
+
+          {vilkaarutkast.resultat === VurderingsResultat.IKKE_OPPFYLT &&
+            vilkaar.unntaksvilkaar &&
+            vilkaar.unntaksvilkaar.length > 0 && (
+              <>
+                <Unntaksvilkaar>
+                  <RadioGroup
+                    legend="Er unntak fra hovedvilkåret oppfylt?"
+                    size="small"
+                    className="radioGroup"
+                    onChange={(type) => {
+                      setVilkaarutkast({
+                        ...vilkaarutkast,
+                        vilkaarsUnntakType: type,
+                      })
+                      setUnntakRadioError(undefined)
+                    }}
+                    value={vilkaarutkast.vilkaarsUnntakType}
+                    error={unntakRadioError}
+                  >
+                    <div className="flex">
+                      {vilkaar.unntaksvilkaar.map((unntakvilkaar) => (
+                        <Radio key={unntakvilkaar.type} value={unntakvilkaar.type}>
+                          {unntakvilkaar.tittel}
+                        </Radio>
+                      ))}
+                      <Radio key="Nei" value={INGEN_VILKAAR_OPPFYLT}>
+                        Nei, ingen av unntakene er oppfylt
+                      </Radio>
+                    </div>
+                  </RadioGroup>
+                </Unntaksvilkaar>
+              </>
+            )}
+          <VurderingsLabel htmlFor={vilkaar.hovedvilkaar.tittel}>Begrunnelse (obligatorisk)</VurderingsLabel>
+          <Textarea
+            label=""
+            hideLabel={false}
+            placeholder="Gi en begrunnelse for vurderingen"
+            defaultValue={vilkaarutkast.kommentar}
+            onBlur={(e) => setVilkaarutkast({ ...vilkaarutkast, kommentar: e.target.value })}
+            minRows={3}
+            size="small"
+            error={kommentarError ? kommentarError : false}
+            autoComplete="off"
+            name={vilkaar.hovedvilkaar.tittel}
+          />
+        </>
+      </VurderingsboksWrapper>
     </VurderingWrapper>
   )
 }
-
-export const IkkeVurdert = styled.div`
-  font-size: 0.8em;
-
-  button {
-    margin-top: 1em;
-  }
-`
 
 export const VurderingsLabel = styled.label`
   font-size: 1rem;

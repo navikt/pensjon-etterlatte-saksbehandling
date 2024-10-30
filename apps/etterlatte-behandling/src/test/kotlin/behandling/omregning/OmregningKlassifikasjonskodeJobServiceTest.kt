@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.omregning
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.OmregningData
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -32,35 +34,33 @@ import java.util.UUID
 internal class OmregningKlassifikasjonskodeJobServiceTest {
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(mockk()), mockk(), null)
     private val kafkaProdusent: TestProdusent<String, String> = spyk(TestProdusent())
-    private lateinit var omregningDao: OmregningDao
-    private lateinit var behandlingService: BehandlingService
-    private lateinit var omregningKlassifikasjonskodeJobService: OmregningKlassifikasjonskodeJobService
+    private var omregningDao: OmregningDao = mockk()
+    private var behandlingService: BehandlingService = mockk()
+
+    private val omregningKlassifikasjonskodeJobService: OmregningKlassifikasjonskodeJobService =
+        OmregningKlassifikasjonskodeJobService(
+            behandlingService = behandlingService,
+            omregningDao = omregningDao,
+            kafkaProdusent = kafkaProdusent,
+        )
 
     @BeforeEach
-    fun before() {
-        omregningDao =
-            mockk {
-                every { hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, any()) } returns
-                    listOf(Pair(SAK_ID, KjoeringStatus.FEILA))
-            }
+    fun beforeEach() {
+        every { omregningDao.hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, any()) } returns
+            listOf(Pair(SAK_ID, KjoeringStatus.FEILA))
 
-        behandlingService =
-            mockk {
-                every { hentFoerstegangsbehandling(any()) } returns
-                    foerstegangsbehandling()
-                every { hentBehandlingerForSak(any()) } returns
-                    listOf(
-                        foerstegangsbehandling(),
-                        foerstegangsbehandling(BehandlingStatus.AVBRUTT),
-                    )
-            }
-
-        omregningKlassifikasjonskodeJobService =
-            OmregningKlassifikasjonskodeJobService(
-                behandlingService = behandlingService,
-                omregningDao = omregningDao,
-                kafkaProdusent = kafkaProdusent,
+        every { behandlingService.hentFoerstegangsbehandling(any()) } returns
+            foerstegangsbehandling()
+        every { behandlingService.hentBehandlingerForSak(any()) } returns
+            listOf(
+                foerstegangsbehandling(),
+                foerstegangsbehandling(BehandlingStatus.AVBRUTT),
             )
+    }
+
+    @AfterEach
+    fun afterEach() {
+        clearAllMocks()
     }
 
     @Test

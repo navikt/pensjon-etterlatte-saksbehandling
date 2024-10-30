@@ -74,10 +74,10 @@ internal class VedtakAttestertRiver(
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
 
-        // for inntektsjustering: send vedtak og varselbrev
         if (kjoering === AarligInntektsjusteringKjoering.getKjoering()) {
-            packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
-            packet.brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL.toString()
+            // for inntektsjustering: send vedtak og varselbrev
+            packet.setEventNameForHendelseType(BrevRequestHendelseType.INNTEKTSJUSTERING_VARSEL_OG_VEDTAK)
+            packet.brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL.name
             packet.sakId = packet.omregningData.sakId
             context.publish(packet.toJson())
             // fullfoertKjoring håndteres i OppdaterInntektsjusteringBrevDistribuert

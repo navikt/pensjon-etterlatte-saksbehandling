@@ -1,4 +1,13 @@
-import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon, TrashIcon } from '@navikt/aksel-icons'
+import {
+  Buildings2Icon,
+  HatSchoolIcon,
+  PencilIcon,
+  PersonIcon,
+  ReceptionIcon,
+  RulerIcon,
+  TrashIcon,
+  WaitingRoomIcon,
+} from '@navikt/aksel-icons'
 import { BodyShort, Button, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
 import {
   hentAktiviteterForBehandling,
@@ -225,6 +234,20 @@ export const mapAktivitetstypeProps = (type: AktivitetspliktType): Aktivitetstyp
         beskrivelse: 'Utdanning',
         ikon: <HatSchoolIcon aria-hidden />,
         status: 'neutral',
+      }
+    case AktivitetspliktType.INGEN_AKTIVITET:
+      return {
+        type: AktivitetspliktType.INGEN_AKTIVITET,
+        beskrivelse: 'Ingen Aktivitet',
+        ikon: <WaitingRoomIcon aria-hidden />,
+        status: 'neutral',
+      }
+    case AktivitetspliktType.OPPFOELGING_LOKALKONTOR:
+      return {
+        type: AktivitetspliktType.OPPFOELGING_LOKALKONTOR,
+        beskrivelse: 'Oppfølging lokalkontor',
+        ikon: <ReceptionIcon aria-hidden />,
+        status: 'warning',
       }
   }
 }

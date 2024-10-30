@@ -79,6 +79,7 @@ fun Route.beregningsGrunnlag(
                             beregningsGrunnlagService
                                 .hentOverstyrBeregningGrunnlag(
                                     behandlingId,
+                                    brukerTokenInfo,
                                 ).perioder,
                     )
 

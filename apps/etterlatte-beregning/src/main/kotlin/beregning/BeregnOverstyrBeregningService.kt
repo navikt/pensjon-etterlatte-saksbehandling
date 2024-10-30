@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -54,8 +55,12 @@ class BeregnOverstyrBeregningService(
 
         val beregningsGrunnlag =
             requireNotNull(
-                beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandling.id),
+                beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandling.id, brukerTokenInfo),
             ) { "Behandling ${behandling.id} mangler overstyr beregningsgrunnlag" }
+
+        if (beregningsGrunnlag.behandlingId != behandling.id) {
+            throw OverstyrBeregningGrunnlagMangler(behandling.id)
+        }
 
         val beregningsType =
             when (behandling.sakType) {
@@ -104,7 +109,11 @@ class BeregnOverstyrBeregningService(
                             behandlingId = behandling.id,
                             beregningsType = beregningsType,
                             grunnlag = grunnlag,
-                            beregningsGrunnlag = opprettOverstyrGrunnlagOpphoer(beregningsGrunnlag, virkningstidspunkt.atDay(1)),
+                            beregningsGrunnlag =
+                                opprettOverstyrGrunnlagOpphoer(
+                                    beregningsGrunnlag,
+                                    virkningstidspunkt.atDay(1),
+                                ),
                             virkningstidspunkt = virkningstidspunkt,
                             overstyrBeregning = overstyrBeregning,
                             opphoerFraOgMed = behandling.opphoerFraOgMed,
@@ -158,6 +167,7 @@ class BeregnOverstyrBeregningService(
                     ),
                 ),
             kilde = beregningsGrunnlag.kilde,
+            behandlingId = beregningsGrunnlag.behandlingId,
         ),
         fom,
         null,
@@ -264,3 +274,11 @@ class BeregnOverstyrBeregningService(
         }
     }
 }
+
+class OverstyrBeregningGrunnlagMangler(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        "MANGLER_GRUNNLAG",
+        "Beregningen i behandling med id=$behandlingId skal være overstyrt, men ingen" +
+            " perioder er lagt inn for denne behandlingen",
+    )

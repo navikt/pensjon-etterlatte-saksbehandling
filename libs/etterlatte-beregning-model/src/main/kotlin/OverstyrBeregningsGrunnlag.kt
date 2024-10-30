@@ -40,4 +40,5 @@ data class OverstyrBeregningGrunnlagDTO(
 data class OverstyrBeregningGrunnlag(
     val perioder: List<GrunnlagMedPeriode<OverstyrBeregningGrunnlagData>>,
     val kilde: Grunnlagsopplysning.Saksbehandler,
+    val behandlingId: UUID,
 )

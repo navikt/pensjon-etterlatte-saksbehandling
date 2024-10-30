@@ -2,6 +2,7 @@ import { KildeSaksbehandler } from '~shared/types/kilde'
 import { JaNei } from '~shared/types/ISvar'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { ISak } from '~shared/types/sak'
+import { IBrevAktivitetspliktDto } from '~shared/api/aktivitetsplikt'
 
 export interface AktivitetspliktOppfolging {
   behandlingId: string
@@ -148,6 +149,7 @@ export interface AktivitetspliktOppgaveVurdering {
   oppgave: OppgaveDTO
   sak: ISak
   vurdering: IAktivitetspliktVurderingNy
+  aktivtetspliktbrevdata?: IBrevAktivitetspliktDto
 }
 
 export enum AktivitetspliktOppgaveType {

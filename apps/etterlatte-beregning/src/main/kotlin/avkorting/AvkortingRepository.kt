@@ -25,7 +25,7 @@ class AvkortingRepository(
             val alleAarsoppgjoer =
                 queryOf(
                     "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id = ? AND aar = ?",
-                    harInntektForAarDto.sakId,
+                    harInntektForAarDto.sakId.sakId,
                     harInntektForAarDto.aar,
                 ).let { query ->
                     tx.run(

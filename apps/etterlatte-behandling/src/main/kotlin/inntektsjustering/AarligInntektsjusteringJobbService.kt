@@ -20,7 +20,6 @@ import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.YearMonth
 
 class AarligInntektsjusteringJobbService(
@@ -100,7 +99,7 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
         loependeFom: YearMonth,
     ): Boolean {
-        val fomDato = LocalDate.of(loependeFom.year, loependeFom.month.value, 1)
+        val fomDato = loependeFom.atDay(1)
         return vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, fomDato, HardkodaSystembruker.omregning).erLoepende &&
             !beregningKlient.sakHarInntektForAar(sakId, fomDato.year, HardkodaSystembruker.omregning)
     }

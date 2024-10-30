@@ -845,12 +845,17 @@ internal class BehandlingServiceImpl(
     ) {
         val behandling =
             hentBehandling(behandlingId)
-                ?: throw InternfeilException("Kunne ikke oppdatere videreført opphør fordi behandlingen ikke finnes")
+                ?: throw IkkeFunnetException(
+                    "BEHANDLING_IKKE_FUNNET",
+                    "Kunne ikke oppdatere videreført opphør fordi behandlingen ikke finnes",
+                )
 
-        behandlingDao.fjernViderefoertOpphoer(behandlingId, brukerTokenInfo.lagGrunnlagsopplysning())
-
-        if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
-            beregningKlient.slettAvkorting(behandling.id, brukerTokenInfo)
+        behandling.oppdaterViderefoertOpphoer(null).also {
+            behandlingDao.fjernViderefoertOpphoer(behandlingId, brukerTokenInfo.lagGrunnlagsopplysning())
+            behandlingDao.lagreStatus(it)
+            if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+                beregningKlient.slettAvkorting(behandling.id, brukerTokenInfo)
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
@@ -13,6 +14,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -88,15 +90,18 @@ class ViderefoertOpphoerTest(
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
         val opphoerstidspunkt = YearMonth.of(2024, Month.JUNE)
-        service.oppdaterViderefoertOpphoer(
-            behandlingId = opprettBehandling.id,
-            viderefoertOpphoer =
-                viderefoertOpphoer(
-                    skalViderefoere = JaNei.JA,
-                    behandlingId = opprettBehandling.id,
-                    opphoersdato = opphoerstidspunkt,
-                ),
-        )
+        runBlocking {
+            service.oppdaterViderefoertOpphoer(
+                behandlingId = opprettBehandling.id,
+                viderefoertOpphoer =
+                    viderefoertOpphoer(
+                        skalViderefoere = JaNei.JA,
+                        behandlingId = opprettBehandling.id,
+                        opphoersdato = opphoerstidspunkt,
+                    ),
+                mockk(),
+            )
+        }
         val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(opprettBehandling.id)!!
         assertEquals(opprettBehandling.id, viderefoertOpphoer.behandlingId)
         assertEquals(opphoerstidspunkt, viderefoertOpphoer.dato)
@@ -120,16 +125,20 @@ class ViderefoertOpphoerTest(
                 skalViderefoere = JaNei.JA,
                 vilkaar = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_AVDOED_MINDRE_20_AAR_BOTID_RETT_TILLEGGSPENSJON,
             )
-        service.oppdaterViderefoertOpphoer(
-            behandlingId = opprettBehandling.id,
-            viderefoertOpphoer =
-            viderefoertOpphoer,
-        )
+        runBlocking {
+            service.oppdaterViderefoertOpphoer(
+                behandlingId = opprettBehandling.id,
+                viderefoertOpphoer = viderefoertOpphoer,
+                mockk(),
+            )
+        }
 
-        service.fjernViderefoertOpphoer(
-            opprettBehandling.id,
-            Grunnlagsopplysning.Saksbehandler.create("Slettersen"),
-        )
+        runBlocking {
+            service.fjernViderefoertOpphoer(
+                opprettBehandling.id,
+                brukerTokenInfo = simpleSaksbehandler(ident = "Slettersen"),
+            )
+        }
 
         val alleViderefoertOpphoer = hentAlleViderefoertOpphoer(opprettBehandling.id)
 
@@ -156,40 +165,44 @@ class ViderefoertOpphoerTest(
         val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id)
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
 
-        service.oppdaterViderefoertOpphoer(
-            behandlingId = opprettBehandling.id,
-            viderefoertOpphoer =
-                viderefoertOpphoer(
-                    behandlingId = opprettBehandling.id,
-                    opphoersdato = YearMonth.of(2024, Month.JANUARY),
-                    skalViderefoere = JaNei.JA,
-                ),
-        )
+        runBlocking {
+            service.oppdaterViderefoertOpphoer(
+                behandlingId = opprettBehandling.id,
+                viderefoertOpphoer =
+                    viderefoertOpphoer(
+                        behandlingId = opprettBehandling.id,
+                        opphoersdato = YearMonth.of(2024, Month.JANUARY),
+                        skalViderefoere = JaNei.JA,
+                    ),
+                mockk(),
+            )
 
-        service.fjernViderefoertOpphoer(opprettBehandling.id, saksbehandlerKilde)
+            service.fjernViderefoertOpphoer(opprettBehandling.id, simpleSaksbehandler("A123"))
 
-        service.oppdaterViderefoertOpphoer(
-            behandlingId = opprettBehandling.id,
-            viderefoertOpphoer =
-                viderefoertOpphoer(
-                    behandlingId = opprettBehandling.id,
-                    opphoersdato = YearMonth.of(2024, Month.FEBRUARY),
-                    skalViderefoere = JaNei.JA,
-                ),
-        )
+            service.oppdaterViderefoertOpphoer(
+                behandlingId = opprettBehandling.id,
+                viderefoertOpphoer =
+                    viderefoertOpphoer(
+                        behandlingId = opprettBehandling.id,
+                        opphoersdato = YearMonth.of(2024, Month.FEBRUARY),
+                        skalViderefoere = JaNei.JA,
+                    ),
+                mockk(),
+            )
 
-        service.fjernViderefoertOpphoer(opprettBehandling.id, saksbehandlerKilde)
+            service.fjernViderefoertOpphoer(opprettBehandling.id, simpleSaksbehandler("A123"))
 
-        service.oppdaterViderefoertOpphoer(
-            behandlingId = opprettBehandling.id,
-            viderefoertOpphoer =
-                viderefoertOpphoer(
-                    skalViderefoere = JaNei.JA,
-                    behandlingId = opprettBehandling.id,
-                    opphoersdato = YearMonth.of(2024, Month.MARCH),
-                ),
-        )
-
+            service.oppdaterViderefoertOpphoer(
+                behandlingId = opprettBehandling.id,
+                viderefoertOpphoer =
+                    viderefoertOpphoer(
+                        skalViderefoere = JaNei.JA,
+                        behandlingId = opprettBehandling.id,
+                        opphoersdato = YearMonth.of(2024, Month.MARCH),
+                    ),
+                mockk(),
+            )
+        }
         val alleViderefoertOpphoer = hentAlleViderefoertOpphoer(opprettBehandling.id)
 
         alleViderefoertOpphoer
@@ -217,16 +230,19 @@ class ViderefoertOpphoerTest(
         behandlingDao.opprettBehandling(behandling = opprettBehandling)
 
         shouldThrow<UgyldigForespoerselException> {
-            service.oppdaterViderefoertOpphoer(
-                behandlingId = opprettBehandling.id,
-                viderefoertOpphoer =
-                    viderefoertOpphoer(
-                        opprettBehandling.id,
-                        YearMonth.of(2024, Month.JANUARY),
-                        skalViderefoere = JaNei.JA,
-                        vilkaar = null,
-                    ),
-            )
+            runBlocking {
+                service.oppdaterViderefoertOpphoer(
+                    behandlingId = opprettBehandling.id,
+                    viderefoertOpphoer =
+                        viderefoertOpphoer(
+                            opprettBehandling.id,
+                            YearMonth.of(2024, Month.JANUARY),
+                            skalViderefoere = JaNei.JA,
+                            vilkaar = null,
+                        ),
+                    mockk(),
+                )
+            }
         }
     }
 

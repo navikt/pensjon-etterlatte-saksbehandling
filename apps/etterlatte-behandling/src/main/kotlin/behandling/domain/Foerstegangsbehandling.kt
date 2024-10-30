@@ -64,9 +64,9 @@ data class Foerstegangsbehandling(
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(utlandstilknytning = utlandstilknytning)
         }
 
-    override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer) =
+    override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer?) =
         hvisRedigerbar {
-            endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer.dato)
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer?.dato)
         }
 
     override fun oppdaterBoddEllerArbeidetUtlandet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) =

@@ -31,6 +31,12 @@ av vedtak.
 Simulere mot økonomiløsningen for å se informasjon rundt ikke bare beregnede beløp, men forfallsdatoer, skatt/trekk,
 etterbetaling og potensiell tilbakekreving.
 
+## Datalast
+To ganger i året (august og januar) gjøres det en datalast i Q1-miljøet. Dette fører uheldigvis til at alle våre 
+iverksatte saker fjernes og videre at sakene i Gjenny da ikke lenger er koblet mot saker i økonomi. Ved 
+revurderinger på disse sakene, så vil iverksetting typisk feile med beskjed om at personen ikke finnes 
+eller tilsvarende. 
+
 
 ## Vi får kjøpreplan fra økonomi årlig enten i slack kanalen eller fra po-utbetaling
 slack: po-utbetaling-etterlatte

@@ -23,7 +23,8 @@ data class LagreKjoeringRequest(
 )
 
 enum class KjoeringStatus {
-    KLAR_TIL_REGULERING,
+    KLAR_TIL_REGULERING, // TODO bør denne fases ut da den er spesifikk for regulering?
+    KLAR,
     STARTA,
     FEILA,
     IKKE_LOEPENDE,

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
+import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
@@ -31,8 +32,8 @@ import java.time.LocalDateTime
  * mot skatt for 2023.
  */
 class OmregningKlassifikasjonskodeJobService(
-    private val omregningDao: OmregningDao,
     private val behandlingService: BehandlingService,
+    private val omregningService: OmregningService,
     private val kafkaProdusent: KafkaProdusent<String, String>,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -47,34 +48,40 @@ class OmregningKlassifikasjonskodeJobService(
 
         val sakerTilOmregning: List<Pair<SakId, KjoeringStatus>> =
             inTransaction {
-                omregningDao.hentSakerTilOmregning(kjoering, antall)
+                omregningService.hentSakerTilOmregning(kjoering, antall)
             }
 
         logger.info("${sakerTilOmregning.size} sak(er) hentet for omregning")
 
         sakerTilOmregning.forEach { (sakId, status) ->
-            logger.info("Starter omregning av sak $sakId med status $status")
+            inTransaction {
+                try {
+                    logger.info("Starter omregning av sak $sakId med status $status")
+                    val foerstegangsbehandling = behandlingService.hentFoerstegangsbehandling(sakId)
+                    val alleBehandlingerForSak = behandlingService.hentBehandlingerForSak(sakId)
 
-            val foerstegangsbehandling = behandlingService.hentFoerstegangsbehandling(sakId)
-            val alleBehandlingerForSak = behandlingService.hentBehandlingerForSak(sakId)
+                    verifiserAtFoerstegangsbehandlingErIverksatt(foerstegangsbehandling)
+                    verifiserAtIngenPabegynteBehandlingerFinnes(sakId, alleBehandlingerForSak)
 
-            verifiserAtFoerstegangsbehandlingErIverksatt(foerstegangsbehandling)
-            verifiserAtIngenPabegynteBehandlingerFinnes(sakId, alleBehandlingerForSak)
+                    val foersteVirkningstidspunktForSak = hentFoersteVirkningstidspunktForSak(sakId)
+                    logger.info("Sak $sakId omregnes med virkningstidspunkt fra $foersteVirkningstidspunktForSak")
 
-            val foersteVirkningstidspunktForSak = hentFoersteVirkningstidspunktForSak(sakId)
-            logger.info("Sak $sakId omregnes med virkningstidspunkt fra $foersteVirkningstidspunktForSak")
+                    val omregningData =
+                        OmregningData(
+                            kjoering = kjoering,
+                            sakId = sakId,
+                            revurderingaarsak = Revurderingaarsak.OMREGNING,
+                            fradato = foersteVirkningstidspunktForSak,
+                            verifiserUtbetalingUendret = true,
+                        )
 
-            val omregningData =
-                OmregningData(
-                    kjoering = kjoering,
-                    sakId = sakId,
-                    revurderingaarsak = Revurderingaarsak.OMREGNING,
-                    fradato = foersteVirkningstidspunktForSak,
-                    verifiserUtbetalingUendret = true,
-                )
-
-            logger.info("Publiserer omregningshendelse for sak $sakId på kafka")
-            publiserHendelse(omregningData)
+                    logger.info("Publiserer omregningshendelse for sak $sakId på kafka")
+                    publiserHendelse(omregningData)
+                } catch (e: Exception) {
+                    logger.warn("Omregning feilet for sak $sakId", e)
+                    omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FEILA, sakId))
+                }
+            }
         }
     }
 

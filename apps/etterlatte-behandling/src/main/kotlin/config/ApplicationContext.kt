@@ -521,7 +521,7 @@ internal class ApplicationContext(
         )
 
     private val omregningKlassifikasjonskodeJobService =
-        OmregningKlassifikasjonskodeJobService(omregningDao, behandlingService, rapid)
+        OmregningKlassifikasjonskodeJobService(behandlingService, omregningService, rapid)
 
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(

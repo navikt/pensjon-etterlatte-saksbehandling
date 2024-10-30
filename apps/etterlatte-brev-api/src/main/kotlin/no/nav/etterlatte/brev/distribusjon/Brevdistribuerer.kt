@@ -24,13 +24,10 @@ class Brevdistribuerer(
 
         if (brev.status != Status.JOURNALFOERT) {
             throw FeilStatusForDistribusjon(brev.id, brev.status)
-        }
-
-        check(brev.mottakere.isNotEmpty()) {
-            "Det må finnes minst 1 mottaker for å kunne distribuere brevet (id: $brevId)"
-        }
-        check(brev.mottakere.size <= 2) {
-            "Brev med flere enn 2 mottakere er ikke støttet (brev=$brevId)"
+        } else if (brev.mottakere.isEmpty()) {
+            throw DistribusjonError("Det må finnes minst 1 mottaker for å kunne distribuere brevet (brevId: $brevId)")
+        } else if (brev.mottakere.size > 2) {
+            throw DistribusjonError("Distribusjon av brev med flere enn 2 mottakere er ikke støttet (brevId: $brevId)")
         }
 
         return brev.mottakere
@@ -81,4 +78,11 @@ class JournalpostIdMangler(
 ) : UgyldigForespoerselException(
         code = "KAN_IKKE_DISTRIBUERE_UTEN_JOURNALPOST_ID",
         detail = "JournalpostID mangler på mottaker=$mottakerId (brevId: $brevId)",
+    )
+
+class DistribusjonError(
+    detail: String,
+) : UgyldigForespoerselException(
+        code = "FEIL_VED_DISTRIBUSJON",
+        detail = detail,
     )

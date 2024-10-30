@@ -5,6 +5,8 @@ import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
+import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -85,10 +87,11 @@ class BeregningKlientImpl(
             )
 
         return response.mapBoth(
-            success = { true },
+            success = { resource -> deserialize(resource.response.toString()) },
             failure = {
-                logger.info("Kunne ikke hente inntekt for aar for sakId=$sakId", it.cause)
-                false
+                throw InternfeilException(
+                    "Klarte ikke sjekke om sakId=$sakId har inntekt for aar=$aar, ${it.cause}",
+                )
             },
         )
     }

@@ -22,7 +22,7 @@ internal class DistribuerBrevRiver(
 
     init {
         initialiserRiver(rapidsConnection, BrevHendelseType.JOURNALFOERT) {
-            validate { it.requireKey(BREV_ID_KEY, "journalpostId", "distribusjonType") }
+            validate { it.requireKey(BREV_ID_KEY, "distribusjonType") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.rejectKey("bestillingsId") }
         }

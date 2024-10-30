@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.pdf.PDFGenerator
+import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -231,7 +232,10 @@ class BrevService(
     ) {
         val brev = sjekkOmBrevKanEndres(id)
 
-        if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
+        if (brev.mottakere.size !in 1..2) {
+            logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
+            throw UgyldigAntallMottakere()
+        } else if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottakere.toJson()}")
             throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottakere.flatMap { it.erGyldig() })
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {

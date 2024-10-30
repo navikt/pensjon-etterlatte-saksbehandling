@@ -92,7 +92,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val actualMessage = inspektoer.message(0)
         assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), actualMessage.get(EVENT_NAME_KEY).asText())
         assertEquals(brev.id, actualMessage.get(BREV_ID_KEY).asLong())
-        assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
+        assertEquals("journalpostId", actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
     }
 

@@ -14,7 +14,7 @@ class AktivitetspliktOppgaveService(
     private val aktivitetspliktService: AktivitetspliktService,
     private val oppgaveService: OppgaveService,
     private val sakService: SakService,
-    private val aksBrevDao: AktivitetspliktBrevDao,
+    private val aktivitetspliktBrevDao: AktivitetspliktBrevDao,
 ) {
     fun hentVurderingForOppgave(oppgaveId: UUID): AktivitetspliktOppgaveVurdering {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
@@ -37,7 +37,7 @@ class AktivitetspliktOppgaveService(
                 vurderingerPaaOppgave
             }
 
-        val brevdata = aksBrevDao.hentBrevdata(oppgaveId = oppgaveId)
+        val brevdata = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
 
         return AktivitetspliktOppgaveVurdering(
             aktivtetspliktbrevdata = brevdata,
@@ -58,7 +58,7 @@ class AktivitetspliktOppgaveService(
     ) {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-        aksBrevDao.lagreBrevdata(data.toDaoObjekt(oppgaveId, sakid = sak.id))
+        aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjekt(oppgaveId, sakid = sak.id))
     }
 }
 

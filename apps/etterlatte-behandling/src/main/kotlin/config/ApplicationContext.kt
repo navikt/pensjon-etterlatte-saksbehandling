@@ -601,7 +601,7 @@ internal class ApplicationContext(
             aktivitetspliktService = aktivitetspliktService,
             oppgaveService = oppgaveService,
             sakService = sakService,
-            aksBrevDao = aktivitetspliktBrevDao,
+            aktivitetspliktBrevDao = aktivitetspliktBrevDao,
         )
 
     // Jobs

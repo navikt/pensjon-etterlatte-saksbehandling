@@ -122,6 +122,7 @@ spec:
         - host: etterlatte-proxy.dev-fss-pub.nais.io
     inbound:
       rules:
+        - application: etterlatte-vedtaksvurdering-kafka
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure

@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 
@@ -11,6 +12,11 @@ class OmregningService(
     private val behandlingService: BehandlingService,
     private val omregningDao: OmregningDao,
 ) {
+    fun hentSakerTilOmregning(
+        kjoering: String,
+        antall: Int,
+    ): List<Pair<SakId, KjoeringStatus>> = omregningDao.hentSakerTilOmregning(kjoering, antall)
+
     fun oppdaterKjoering(request: KjoeringRequest) = oppdaterKjoering(request, HardkodaSystembruker.omregning)
 
     fun oppdaterKjoering(

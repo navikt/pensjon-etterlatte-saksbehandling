@@ -55,6 +55,7 @@ data class OmregningData(
     private var sakType: SakType? = null,
     private var behandlingId: UUID? = null,
     private var forrigeBehandlingId: UUID? = null,
+    val verifiserUtbetalingUendret: Boolean = false,
 ) {
     fun toPacket() =
         OmregningDataPacket(
@@ -65,6 +66,7 @@ data class OmregningData(
             sakType,
             behandlingId,
             forrigeBehandlingId,
+            verifiserUtbetalingUendret,
         )
 
     fun hentFraDato(): LocalDate = fradato ?: throw OmregningshendelseHarFeilTilstand(OmregningData::fradato.name)
@@ -112,6 +114,7 @@ data class OmregningDataPacket(
     val sakType: SakType?,
     val behandlingId: UUID?,
     val forrigeBehandlingId: UUID?,
+    val verifiserUtbetalingUendret: Boolean,
 ) {
     companion object KEYS {
         val KEY = HENDELSE_DATA_KEY

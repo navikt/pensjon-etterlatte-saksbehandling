@@ -48,11 +48,16 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: UTBETALING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-utbetaling/.default
+    - name: ETTERLATTE_UTBETALING_URL
+      value: http://etterlatte-utbetaling
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-utbetaling
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

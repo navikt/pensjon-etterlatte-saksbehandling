@@ -301,6 +301,8 @@ data class AktivitetspliktAktivitet(
                     AktivitetspliktAktivitetType.ETABLERER_VIRKSOMHET -> AktivitetType.ETABLERER_VIRKSOMHET
                     AktivitetspliktAktivitetType.ARBEIDSSOEKER -> AktivitetType.ARBEIDSSOEKER
                     AktivitetspliktAktivitetType.UTDANNING -> AktivitetType.UTDANNING
+                    AktivitetspliktAktivitetType.INGEN_AKTIVITET -> AktivitetType.INGEN_AKTIVITET
+                    AktivitetspliktAktivitetType.OPPFOELGING_LOKALKONTOR -> AktivitetType.OPPFOELGING_LOKALKONTOR
                 },
             fom = fom,
             tom = tom,
@@ -322,4 +324,6 @@ enum class AktivitetspliktAktivitetType {
     ETABLERER_VIRKSOMHET,
     ARBEIDSSOEKER,
     UTDANNING,
+    INGEN_AKTIVITET,
+    OPPFOELGING_LOKALKONTOR,
 }

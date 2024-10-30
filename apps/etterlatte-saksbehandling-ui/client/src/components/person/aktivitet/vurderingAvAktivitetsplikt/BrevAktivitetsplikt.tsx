@@ -7,10 +7,10 @@ import { isPending } from '@reduxjs/toolkit'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBrevAktivitetspliktDto, lagreAktivitetspliktBrevdata } from '~shared/api/aktivitetsplikt'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { OppgaveDTO } from '~shared/types/oppgave'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
@@ -26,13 +26,9 @@ function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktDto {
   }
 }
 
-export const BrevAktivitetsplikt = ({
-  oppgave,
-  aktivtetspliktbrevdata,
-}: {
-  oppgave: OppgaveDTO
-  aktivtetspliktbrevdata?: IBrevAktivitetspliktDto
-}) => {
+export const BrevAktivitetsplikt = () => {
+  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+
   const { handleSubmit, watch, control, resetField } = useForm<IBrevAktivitetsplikt>({})
 
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
@@ -64,7 +60,7 @@ export const BrevAktivitetsplikt = ({
         <Heading size="small">Brev data</Heading>
       </HStack>
       {redigeres ? (
-        <>
+        <form onSubmit={handleSubmit(lagreBrevutfall)}>
           <RadioGroupWrapper>
             <ControlledRadioGruppe
               name="skalSendeBrev"
@@ -118,15 +114,10 @@ export const BrevAktivitetsplikt = ({
             apiResult: lagrebrevdataStatus,
             errorMessage: 'Kan ikke lagre brevdata',
           })}
-          <Button
-            loading={isPending(lagrebrevdataStatus)}
-            variant="primary"
-            type="button"
-            onClick={handleSubmit(lagreBrevutfall)}
-          >
+          <Button type="submit" loading={isPending(lagrebrevdataStatus)} variant="primary">
             Lagre brevvurdering
           </Button>
-        </>
+        </form>
       ) : (
         <div>
           <div>

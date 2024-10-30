@@ -7,20 +7,18 @@ import { Heading } from '@navikt/ds-react'
 import { BrevAktivitetsplikt } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/BrevAktivitetsplikt'
 
 export function Vurderinger() {
-  const { oppgave, vurdering, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
 
-  return erOppgaveRedigerbar(oppgave.status) ? (
+  return (
     <>
-      <Heading size="small">Redigering av vurderinger i en oppgave er ikke støttet enda</Heading>
+      <Heading size="small">
+        {erOppgaveRedigerbar(oppgave.status)
+          ? 'Redigering av vurderinger i en oppgave er ikke støttet enda'
+          : 'Vurderinger i oppgave'}
+      </Heading>
       <Aktivitetsgrad aktiviteter={vurdering.aktivitet} />
       <Unntak unntaker={vurdering.unntak} />
-      <BrevAktivitetsplikt oppgave={oppgave} aktivtetspliktbrevdata={aktivtetspliktbrevdata} />
-    </>
-  ) : (
-    <>
-      <Heading size="small">Vurderinger i oppgave</Heading>
-      <Aktivitetsgrad aktiviteter={vurdering.aktivitet} />
-      <Unntak unntaker={vurdering.unntak} />
+      <BrevAktivitetsplikt />
     </>
   )
 }

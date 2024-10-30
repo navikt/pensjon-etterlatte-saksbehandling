@@ -466,36 +466,33 @@ data class Aarsoppgjoer(
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
     init {
-        fun validerPeriode(
-            periode: Periode,
-            feilMelding: String,
-        ) {
+        fun periodeISammeAar(periode: Periode) {
             if (periode.fom.year != aar || (periode.tom?.year?.let { it != aar } == true)) {
-                throw InternfeilException(feilMelding)
+                throw InternfeilException("Perioder må være innenfor årsoppgjøret sitt år $periode")
             }
         }
 
         with(ytelseFoerAvkorting) {
             if (!zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
-                throw InternfeilException("YtelseFoerAvkorting: fom for ytelseFoerAvkorting er ikke i år")
+                throw InternfeilException("fom for YtelseFoerAvkorting er i feil rekkefølge")
             }
         }
 
         with(inntektsavkorting) {
             if (!zipWithNext().all { it.first.grunnlag.periode.fom < it.second.grunnlag.periode.fom }) {
-                throw InternfeilException("Inntektsavkorting: fom for inntektsavkorting.grunnlag er ikke i år")
+                throw InternfeilException("fom for inntektsavkorting er i feil rekkefølge")
             }
             forEach {
-                validerPeriode(it.grunnlag.periode, "Inntektsavkorting: Perioder må være innenfor årsoppgjøret sitt år")
+                periodeISammeAar(it.grunnlag.periode)
             }
         }
 
         with(avkortetYtelseAar) {
             if (!zipWithNext().all { it.first.periode.fom < it.second.periode.fom }) {
-                throw InternfeilException("AvkortetYtelseAar: fom for avkortetYtelseAar er ikke i år")
+                throw InternfeilException("fom for AvkortetYtelseAar er i feil rekkefølge")
             }
             forEach {
-                validerPeriode(it.periode, "AvkortetYtelseAar: Perioder må være innenfor årsoppgjøret sitt år")
+                periodeISammeAar(it.periode)
             }
         }
     }

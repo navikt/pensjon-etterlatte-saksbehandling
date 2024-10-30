@@ -219,6 +219,8 @@ data class PeriodisertAktivitetspliktopplysning(
                         AktivitetType.ETABLERER_VIRKSOMHET -> "ETABLERER_VIRKSOMHET"
                         AktivitetType.ARBEIDSSOEKER -> "ARBEIDSSOEKER"
                         AktivitetType.UTDANNING -> "UTDANNING"
+                        AktivitetType.INGEN_AKTIVITET -> "INGEN_AKTIVITET"
+                        AktivitetType.OPPFOELGING_LOKALKONTOR -> "OPPFOELGING_LOKALKONTOR"
                     },
                 fom = opplysning.fom,
                 tom = opplysning.tom,

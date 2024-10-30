@@ -270,7 +270,7 @@ class AvkortingService(
         ) {
             val opphoerSammeAar =
                 behandling.opphoerFraOgMed?.let { it.year == behandling.virkningstidspunkt().dato.year } ?: false
-            if (!opphoerSammeAar && lagretAvkorting.aarsoppgjoer.size == 2) {
+            if (opphoerSammeAar || lagretAvkorting.aarsoppgjoer.size == 2) {
                 behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
             }
         } else {

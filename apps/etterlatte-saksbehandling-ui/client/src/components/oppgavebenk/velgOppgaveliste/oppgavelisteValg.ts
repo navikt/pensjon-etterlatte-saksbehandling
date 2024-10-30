@@ -18,7 +18,7 @@ export const hentValgFraLocalStorage = (): string => {
     if (!!valg) return valg
     else return initialValg
   } catch (error) {
-    logger.generalError({ message: 'Feil i hentingen av oppgavelista valg fra localstorage' })
+    logger.generalError({ msg: 'Feil i hentingen av oppgavelista valg fra localstorage' })
 
     return initialValg
   }

@@ -27,12 +27,6 @@ interface DoedshendelserKafkaService {
         borIUtlandet: Boolean,
         erOver18aar: Boolean,
     )
-
-    fun sendBrevRequestBPMellomAttenOgTjueVedReformtidspunkt(
-        sak: Sak,
-        borIUtlandet: Boolean,
-        erOver18aar: Boolean,
-    )
 }
 
 class DoedshendelserKafkaServiceImpl(
@@ -58,20 +52,6 @@ class DoedshendelserKafkaServiceImpl(
         erOver18aar: Boolean,
     ) {
         val brevmal: String = Brevkoder.BP_INFORMASJON_DOEDSFALL.name
-        val innhold =
-            mapOf(
-                BOR_I_UTLAND_KEY to borIUtlandet,
-                ER_OVER_18_AAR to erOver18aar,
-            )
-        publiserHendelse(brevmal, innhold, sak)
-    }
-
-    override fun sendBrevRequestBPMellomAttenOgTjueVedReformtidspunkt(
-        sak: Sak,
-        borIUtlandet: Boolean,
-        erOver18aar: Boolean,
-    ) {
-        val brevmal: String = Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT.name
         val innhold =
             mapOf(
                 BOR_I_UTLAND_KEY to borIUtlandet,

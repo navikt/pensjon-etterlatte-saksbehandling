@@ -56,7 +56,7 @@ export const hentPagineringSizeFraLocalStorage = (): number => {
       return DEFAULT_PAGINERING_SIZE
     }
   } catch (e) {
-    logger.generalError({ message: 'Feil i paginering av sortering fra localstorage' })
+    logger.generalError({ msg: 'Feil i paginering av sortering fra localstorage' })
     return DEFAULT_PAGINERING_SIZE
   }
 }

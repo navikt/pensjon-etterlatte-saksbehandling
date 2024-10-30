@@ -1,5 +1,7 @@
 package no.nav.etterlatte.inntektsjustering
 
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -13,6 +15,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
@@ -21,24 +24,26 @@ import java.time.YearMonth
 
 class AarligInntektsjusteringJobbService(
     private val omregningService: OmregningService,
+    private val vedtakKlient: VedtakKlient,
+    private val beregningKlient: BeregningKlient,
     private val rapid: KafkaProdusent<String, String>,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest) {
+    suspend fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest) {
         request.saker.forEach { sakId ->
             startEnkeltSak(request.kjoering, request.loependeFom, sakId)
         }
     }
 
-    private fun startEnkeltSak(
+    private suspend fun startEnkeltSak(
         kjoering: String,
         loependeFom: YearMonth,
         sakId: SakId,
     ) {
         try {
             logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
-            if (!skalBehandlingOmregnes(loependeFom)) {
+            if (!skalBehandlingOmregnes(sakId, loependeFom)) {
                 // TODO Legge til en begrunnelse
                 omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FERDIGSTILT, sakId))
             } else if (kanIkkeKjoeresAutomatisk()) {
@@ -89,11 +94,13 @@ class AarligInntektsjusteringJobbService(
             }
     }
 
-    private fun skalBehandlingOmregnes(loependeFom: YearMonth): Boolean {
-        // TODO kall vedtakfor så om er innvilga / løpende
-
-        // TODO kall berening for å se om det finnes inntekt fra 1.1
-
-        return true
+    // Skal inntektjusteres hvis: 1) er løpende fom dato, 2) ikke har oppgitt inntekt fra 1.1 neste inntektsår
+    private suspend fun skalBehandlingOmregnes(
+        sakId: SakId,
+        loependeFom: YearMonth,
+    ): Boolean {
+        val fomDato = loependeFom.atDay(1)
+        return vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, fomDato, HardkodaSystembruker.omregning).erLoepende &&
+            !beregningKlient.sakHarInntektForAar(sakId, fomDato.year, HardkodaSystembruker.omregning)
     }
 }

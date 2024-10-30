@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 import java.util.UUID
@@ -78,6 +79,11 @@ data class AvkortingGrunnlagDto(
     val spesifikasjon: String,
     val kilde: AvkortingGrunnlagKildeDto,
     val overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
+)
+
+data class AvkortingHarInntektForAarDto(
+    val sakId: SakId,
+    val aar: Int,
 )
 
 data class AvkortingGrunnlagLagreDto(

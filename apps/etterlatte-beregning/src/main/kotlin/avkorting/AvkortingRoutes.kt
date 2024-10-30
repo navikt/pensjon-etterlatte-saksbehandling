@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -25,9 +26,17 @@ fun Route.avkorting(
     avkortingService: AvkortingService,
     behandlingKlient: BehandlingKlient,
 ) {
-    route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
-        val logger = routeLogger
+    val logger = routeLogger
 
+    route("/api/beregning/avkorting/har-inntekt-for-aar") {
+        post {
+            val harInntektForAarDto = call.receive<AvkortingHarInntektForAarDto>()
+            logger.info("Henter har inntekt for ${harInntektForAarDto.aar} for sakId=${harInntektForAarDto.sakId}")
+            call.respond(avkortingService.hentHarSakInntektForAar(harInntektForAarDto))
+        }
+    }
+
+    route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter avkorting med behandlingId=$it")

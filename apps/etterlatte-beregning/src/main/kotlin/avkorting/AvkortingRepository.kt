@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -19,6 +20,24 @@ import javax.sql.DataSource
 class AvkortingRepository(
     private val dataSource: DataSource,
 ) {
+    fun harSakInntektForAar(harInntektForAarDto: AvkortingHarInntektForAarDto): Boolean =
+        dataSource.transaction { tx ->
+            val alleAarsoppgjoer =
+                queryOf(
+                    "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id = ? AND aar = ?",
+                    harInntektForAarDto.sakId.sakId,
+                    harInntektForAarDto.aar,
+                ).let { query ->
+                    tx.run(
+                        query
+                            .map { row -> row.uuid("id") }
+                            .asList,
+                    )
+                }
+
+            alleAarsoppgjoer.isNotEmpty()
+        }
+
     fun hentAvkorting(behandlingId: UUID): Avkorting? =
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =

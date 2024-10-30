@@ -97,7 +97,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
         if (shouldLogError) {
           logger.generalWarning({
             msg: `Fikk feil i kall mot backend. Url: ${url}`,
-            errorInfo: { url, method, error },
+            apiErrorInfo: { url, method, error },
           })
         }
         console.error(error, response)
@@ -107,7 +107,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
         if (shouldLogError) {
           logger.generalWarning({
             msg: `Fikk status=${response.status} i kall mot backend`,
-            errorInfo: { url, method, error },
+            apiErrorInfo: { url, method, error },
           })
         }
         console.log(error, response)
@@ -117,7 +117,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)
     if (shouldLogError && window.windowOpen) {
-      logger.generalWarning({ msg: `Fikk Rejection i kall mot backend: ${e}`, errorInfo: { url, method } })
+      logger.generalWarning({ msg: `Fikk Rejection i kall mot backend: ${e}`, apiErrorInfo: { url, method } })
     }
     return {
       ok: false,

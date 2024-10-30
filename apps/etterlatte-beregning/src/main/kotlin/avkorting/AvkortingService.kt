@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -132,6 +133,9 @@ class AvkortingService(
             logger.info("Fant ingen tidlig alderspensjon for sakId=${behandling.sak.sakId}, trenger ingen oppgave om opphør.")
         }
     }
+
+    fun hentHarSakInntektForAar(harInntektForAarDto: AvkortingHarInntektForAarDto): Boolean =
+        avkortingRepository.harSakInntektForAar(harInntektForAarDto)
 
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,

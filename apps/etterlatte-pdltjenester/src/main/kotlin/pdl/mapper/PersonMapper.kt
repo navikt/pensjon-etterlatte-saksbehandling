@@ -194,8 +194,6 @@ object PersonMapper {
                 }
             val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
-            val vergemaalEllerFremtidsfullmakt =
-                hentPerson.vergemaalEllerFremtidsfullmakt?.let { ppsKlient.avklarVergemaal(it) }
 
             PersonNavnFoedselsaar(
                 fornavn = navn.fornavn,
@@ -205,7 +203,8 @@ object PersonMapper {
                 foedselsdato = foedselsdato.foedselsdato,
                 foedselsaar = foedselsdato.foedselsaar,
                 doedsdato = doedsfall?.doedsdato,
-                vergemaal = vergemaalEllerFremtidsfullmakt?.let(VergeMapper::mapVerge),
+                // PPS støtter p.t. ikke verge. Henter derfor ut første fra listen hvis den ikke er null/tom
+                vergemaal = hentPerson.vergemaalEllerFremtidsfullmakt?.firstOrNull()?.let(VergeMapper::mapVerge),
             )
         }
 

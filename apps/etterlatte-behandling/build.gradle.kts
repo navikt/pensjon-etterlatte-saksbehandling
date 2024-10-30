@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-tidshendelser-model"))
     implementation(project(":libs:etterlatte-trygdetid-model"))
+    implementation(project(":libs:etterlatte-beregning-model"))
 
     implementation(libs.cache.caffeine)
     implementation(libs.navfelles.tokenvalidationktor2) {

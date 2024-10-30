@@ -28,12 +28,12 @@ async function retryInner(
       if (res.ok) {
         return res
       } else {
-        logger.generalError({ message: 'Feil i henting av brytere mot Unleash. Prøver på nytt' })
+        logger.generalError({ msg: 'Feil i henting av brytere mot Unleash. Prøver på nytt' })
         return retryInner(times - 1, promise)
       }
     })
     .catch((err) => {
-      logger.generalError({ message: `Feil i henting av brytere mot Unleash. Prøver på nytt... error: ${err}` })
+      logger.generalError({ msg: `Feil i henting av brytere mot Unleash. Prøver på nytt... error: ${err}` })
       return retryInner(times - 1, promise)
     })
 }

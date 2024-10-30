@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevParametereAutomatisk
-import no.nav.etterlatte.brev.BrevParametereAutomatisk.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar
 import no.nav.etterlatte.brev.BrevParametereAutomatisk.BarnepensjonInformasjonDoedsfallRedigerbar
 import no.nav.etterlatte.brev.BrevParametereAutomatisk.OmstillingsstoenadInformasjonDoedsfallRedigerbar
 import no.nav.etterlatte.brev.BrevParametereAutomatisk.OmstillingsstoenadInntektsjusteringRedigerbar
@@ -14,7 +13,6 @@ import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
-import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
@@ -92,11 +90,6 @@ class OpprettJournalfoerOgDistribuerRiver(
                     val brevdata = opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
                     BarnepensjonInformasjonDoedsfallRedigerbar(brevdata.borIutland, brevdata.avdoedNavn, brevdata.erOver18aar)
                 }
-                Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
-                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                    val brevdata = opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
-                    BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar(brevdata.avdoedNavn, brevdata.borIutland)
-                }
                 Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
                     val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                     val brevdata =
@@ -140,14 +133,6 @@ class OpprettJournalfoerOgDistribuerRiver(
     ) = BarnepensjonInformasjonDoedsfall.fra(
         borIutland,
         erOver18aar,
-        hentAvdoede(sakId),
-    )
-
-    private suspend fun opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(
-        sakId: SakId,
-        borIutland: Boolean,
-    ) = BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt.fra(
-        borIutland,
         hentAvdoede(sakId),
     )
 

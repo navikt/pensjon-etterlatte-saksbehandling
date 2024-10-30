@@ -87,6 +87,12 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
 
+    suspend fun kopierTrygdetidsgrunnlag(
+        behandlingId: UUID,
+        kildeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
     fun overstyrBeregnetTrygdetidForAvdoed(
         behandlingId: UUID,
         ident: String,
@@ -866,6 +872,32 @@ class TrygdetidServiceImpl(
             trygdetidRepository.oppdaterTrygdetid(nyTrygdetid)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
         }
+    }
+
+    override suspend fun kopierTrygdetidsgrunnlag(
+        behandlingId: UUID,
+        kildeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val trygdetiderKilde = trygdetidRepository.hentTrygdetiderForBehandling(kildeBehandlingId)
+        val trygdetiderMaal = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+
+        require(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
+            "Trygdetidene gjelder forskjellige avdøde"
+        }
+
+        trygdetiderMaal
+            .forEach { maal ->
+                trygdetidRepository.oppdaterTrygdetid(
+                    maal.copy(
+                        trygdetidGrunnlag =
+                            trygdetiderKilde
+                                .single { kilde -> maal.ident == kilde.ident }
+                                .trygdetidGrunnlag
+                                .map { it.copy(id = UUID.randomUUID()) },
+                    ),
+                )
+            }
     }
 }
 

@@ -54,6 +54,8 @@ internal class TrygdetidServiceIntegrationTest(
 
     @BeforeAll
     fun beforeAll() {
+        no.nav.etterlatte.logger
+            .info(dbExtension.properties().toString())
         trygdetidService =
             TrygdetidServiceImpl(
                 repository,
@@ -210,6 +212,54 @@ internal class TrygdetidServiceIntegrationTest(
         val trygdetider = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
 
         trygdetider shouldBe emptyList()
+    }
+
+    @Test
+    fun `skal kopiere trygdetidsgrunnlag fra annen behandling`() {
+        val behandlingId = UUID.randomUUID()
+        val kildeBehandlingId = UUID.randomUUID()
+        val grunnlagTestData = GrunnlagTestData()
+
+        val opplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
+        coEvery {
+            grunnlagKlient.hentGrunnlag(any(), any())
+        } returns opplysningsgrunnlag
+
+        repository.opprettTrygdetid(
+            trygdetid(
+                behandlingId = behandlingId,
+                sakId = randomSakId(),
+                trygdetidGrunnlag =
+                    listOf(
+                        trygdetidGrunnlag(
+                            periode = TrygdetidPeriode(fra = LocalDate.of(2021, 1, 1), til = LocalDate.of(2021, 2, 20)),
+                        ),
+                    ),
+            ),
+        )
+
+        repository.opprettTrygdetid(
+            trygdetid(
+                behandlingId = kildeBehandlingId,
+                sakId = randomSakId(),
+                trygdetidGrunnlag =
+                    listOf(
+                        trygdetidGrunnlag(
+                            periode = TrygdetidPeriode(fra = LocalDate.of(2020, 5, 1), til = LocalDate.of(2020, 7, 1)),
+                        ),
+                    ),
+            ),
+        )
+
+        runBlocking { trygdetidService.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, saksbehandler) }
+
+        val trygdetidList = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
+        trygdetidList.size shouldBe 1
+
+        with(trygdetidList.first().trygdetidGrunnlag.sortedBy { it.periode.fra }) {
+            this[0].periode.fra shouldBe LocalDate.of(2020, 5, 1)
+            this[0].periode.til shouldBe LocalDate.of(2020, 7, 1)
+        }
     }
 
     private fun opplysningsgrunnlag(grunnlagTestData: GrunnlagTestData): List<Opplysningsgrunnlag> {

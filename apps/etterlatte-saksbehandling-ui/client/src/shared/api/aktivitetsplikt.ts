@@ -104,3 +104,15 @@ export const opprettAktivitspliktUnntakForBehandling = async (args: {
 export const hentAktivitetspliktOppgaveVurdering = async (args: {
   oppgaveId: string
 }): Promise<ApiResponse<AktivitetspliktOppgaveVurdering>> => apiClient.get(`/aktivitetsplikt/oppgave/${args.oppgaveId}`)
+
+export interface IBrevAktivitetspliktDto {
+  skalSendeBrev: boolean
+  utbetaling: boolean
+  redusertEtterInntekt: boolean
+}
+
+export const lagreAktivitetspliktBrevdata = async (args: {
+  oppgaveId: string
+  brevdata: IBrevAktivitetspliktDto
+}): Promise<ApiResponse<void>> =>
+  apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/brevdata`, { ...args.brevdata })

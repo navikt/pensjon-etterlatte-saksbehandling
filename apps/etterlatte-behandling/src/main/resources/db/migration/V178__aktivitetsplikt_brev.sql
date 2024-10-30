@@ -1,8 +1,7 @@
 CREATE TABLE aktivitetsplikt_brevdata
 (
-    id            UUID PRIMARY KEY,
-    sak_id        BIGINT NOT NULL,
     oppgave_id    UUID UNIQUE,
+    sak_id        BIGINT NOT NULL,
     skal_sende_brev        BOOLEAN NOT NULL,
     utbetaling           BOOLEAN,
     redusert_etter_inntekt     BOOLEAN,

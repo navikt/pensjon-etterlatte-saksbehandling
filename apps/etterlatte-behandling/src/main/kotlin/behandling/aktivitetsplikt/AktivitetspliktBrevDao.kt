@@ -38,18 +38,17 @@ class AktivitetspliktBrevDao(
                 val stmt =
                     prepareStatement(
                         """
-                        INSERT INTO aktivitetsplikt_brevdata(id, sak_id, oppgave_id, utbetaling, redusert_etter_inntekt, skal_sende_brev)
-                        VALUES(?, ?, ?, ?, ?, ?) 
+                        INSERT INTO aktivitetsplikt_brevdata(sak_id, oppgave_id, utbetaling, redusert_etter_inntekt, skal_sende_brev)
+                        VALUES(?, ?, ?, ?, ?) 
                         ON CONFLICT (oppgave_id) 
                         DO UPDATE SET utbetaling = excluded.utbetaling, redusert_etter_inntekt = excluded.redusert_etter_inntekt, skal_sende_brev = excluded.skal_sende_brev
                         """.trimIndent(),
                     )
-                stmt.setObject(1, UUID.randomUUID())
-                stmt.setLong(2, data.sakid.sakId)
-                stmt.setObject(3, data.oppgaveId)
-                stmt.setObject(4, data.utbetaling)
-                stmt.setObject(5, data.redusertEtterInntekt)
-                stmt.setBoolean(6, data.skalSendeBrev)
+                stmt.setLong(1, data.sakid.sakId)
+                stmt.setObject(2, data.oppgaveId)
+                stmt.setObject(3, data.utbetaling)
+                stmt.setObject(4, data.redusertEtterInntekt)
+                stmt.setBoolean(5, data.skalSendeBrev)
                 stmt.executeUpdate()
             }
         }

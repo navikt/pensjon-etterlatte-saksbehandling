@@ -26,6 +26,12 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.SAMORDNET
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.TIL_SAMORDNING
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -36,6 +42,7 @@ import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -264,6 +271,8 @@ interface BehandlingService {
     )
 
     fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier?
+
+    suspend fun finnAnnenBehandlingMedTrygdetidForAvdoede(behandlingId: UUID): Behandling?
 }
 
 internal class BehandlingServiceImpl(
@@ -865,7 +874,7 @@ internal class BehandlingServiceImpl(
                 sakId,
                 listOf(Revurderingaarsak.REGULERING, Revurderingaarsak.OMREGNING),
             ).singleOrNull {
-                it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
+                it.status != BehandlingStatus.AVBRUTT && it.status != IVERKSATT
             }?.id
 
     override fun oppdaterTidligereFamiliepleier(
@@ -892,6 +901,34 @@ internal class BehandlingServiceImpl(
 
     override fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
+
+    override suspend fun finnAnnenBehandlingMedTrygdetidForAvdoede(behandlingId: UUID): Behandling? {
+        val avdoede: List<String>? = grunnlagKlient.hentPersongalleri(behandlingId)?.opplysning?.avdoed
+        if (avdoede.isNullOrEmpty()) {
+            return null
+        }
+
+        val sakerPerAvdoed: List<Set<SakId>> =
+            avdoede.map { avdoed ->
+                grunnlagKlient
+                    .hentPersonSakOgRolle(avdoed)
+                    .sakiderOgRoller
+                    .filter { sakidOgRolle -> sakidOgRolle.rolle == Saksrolle.AVDOED }
+                    .map { it.sakId }
+                    .toSet()
+            }
+
+        val sakerMedAlleAvdoede =
+            sakerPerAvdoed
+                .reduce { acc, next -> acc.intersect(next) }
+
+        val behandlingList = sakerMedAlleAvdoede.flatMap { sakId -> hentBehandlingerForSakId(sakId) }
+
+        return behandlingList
+            .filter { it.id != behandlingId }
+            .filter { it.status in listOf(IVERKSATT, BEREGNET, FATTET_VEDTAK, ATTESTERT, TIL_SAMORDNING, SAMORDNET) }
+            .maxBy { it.behandlingOpprettet }
+    }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

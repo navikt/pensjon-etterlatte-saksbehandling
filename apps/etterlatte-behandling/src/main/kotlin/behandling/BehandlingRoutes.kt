@@ -387,6 +387,17 @@ internal fun Route.behandlingRoutes(
                 call.respond(HttpStatusCode.OK)
             }
         }
+
+        get("/med-trygdetid-for-samme-avdoede") {
+            kunSkrivetilgang {
+                runBlocking {
+                    when (val behandling = behandlingService.finnAnnenBehandlingMedTrygdetidForAvdoede(behandlingId)) {
+                        null -> call.respond(HttpStatusCode.NoContent)
+                        else -> call.respond(behandling)
+                    }
+                }
+            }
+        }
     }
 
     route("/behandlinger") {

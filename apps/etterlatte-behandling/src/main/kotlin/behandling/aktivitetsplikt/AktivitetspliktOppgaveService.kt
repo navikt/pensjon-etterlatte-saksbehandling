@@ -55,10 +55,11 @@ class AktivitetspliktOppgaveService(
     fun lagreBrevdata(
         oppgaveId: UUID,
         data: AktivitetspliktInformasjonBrevdataRequest,
-    ) {
+    ): AktivitetspliktInformasjonBrevdata? {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
         aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjekt(oppgaveId, sakid = sak.id))
+        return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
     }
 }
 

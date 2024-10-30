@@ -29,16 +29,19 @@ function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktDto {
 
 export const BrevAktivitetsplikt = () => {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
-
+  //Hvis jeg lagrer og kommer inn i ikke redigervisning så er aktivtetspliktbrevdata ikke hentet på nytt
   const { handleSubmit, watch, control, resetField } = useForm<IBrevAktivitetsplikt>({})
 
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
   const [redigeres, setRedigeres] = useState<boolean>(!aktivtetspliktbrevdata)
+  const [brevdata, oppdaterBrevdata] = useState<IBrevAktivitetspliktDto | undefined>(aktivtetspliktbrevdata)
 
   const lagreBrevutfall = (data: IBrevAktivitetsplikt) => {
+    const brevdatamappedToDo = mapToDto(data)
     lagrebrevdata(
-      { oppgaveId: oppgave.id, brevdata: mapToDto(data) },
+      { oppgaveId: oppgave.id, brevdata: brevdatamappedToDo },
       () => {
+        oppdaterBrevdata(brevdatamappedToDo)
         setRedigeres(false)
       },
       () => {}
@@ -122,16 +125,13 @@ export const BrevAktivitetsplikt = () => {
       ) : (
         <div>
           <div>
-            {aktivtetspliktbrevdata && (
+            {!!brevdata && (
               <HStack gap="4">
-                <Info
-                  label="Skal sende brev"
-                  tekst={aktivtetspliktbrevdata.skalSendeBrev ? JaNeiRec.JA : JaNeiRec.NEI}
-                />
-                <Info label="Utbetaling" tekst={aktivtetspliktbrevdata.utbetaling ? JaNeiRec.JA : JaNeiRec.NEI} />
+                <Info label="Skal sende brev" tekst={brevdata ? JaNeiRec.JA : JaNeiRec.NEI} />
+                <Info label="Utbetaling" tekst={brevdata.utbetaling ? JaNeiRec.JA : JaNeiRec.NEI} />
                 <Info
                   label="Redusert etter inntekt "
-                  tekst={aktivtetspliktbrevdata.redusertEtterInntekt ? JaNeiRec.JA : JaNeiRec.NEI}
+                  tekst={brevdata.redusertEtterInntekt ? JaNeiRec.JA : JaNeiRec.NEI}
                 />
               </HStack>
             )}

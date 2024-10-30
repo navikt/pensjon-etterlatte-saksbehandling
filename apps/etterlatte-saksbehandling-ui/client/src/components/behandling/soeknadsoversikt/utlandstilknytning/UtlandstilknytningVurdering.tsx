@@ -19,12 +19,10 @@ const UtlandstilknytningTypeTittel: Record<UtlandstilknytningType, string> = {
 export const UtlandstilknytningVurdering = ({
   utlandstilknytning,
   redigerbar,
-  setVurdert,
   behandlingId,
 }: {
   utlandstilknytning: IUtlandstilknytning | null
   redigerbar: boolean
-  setVurdert: (visVurderingKnapp: boolean) => void
   behandlingId: string
 }) => {
   const dispatch = useAppDispatch()
@@ -50,7 +48,6 @@ export const UtlandstilknytningVurdering = ({
     setSvar(utlandstilknytning?.type)
     setRadioError('')
     setBegrunnelse(utlandstilknytning?.begrunnelse || '')
-    setVurdert(utlandstilknytning !== null)
     onSuccess?.()
   }
 
@@ -83,6 +80,7 @@ export const UtlandstilknytningVurdering = ({
       avbrytklikk={reset}
       kommentar={utlandstilknytning?.begrunnelse}
       defaultRediger={utlandstilknytning === null}
+      visAvbryt={!!utlandstilknytning?.kilde}
     >
       <>
         <Heading level="3" size="small">

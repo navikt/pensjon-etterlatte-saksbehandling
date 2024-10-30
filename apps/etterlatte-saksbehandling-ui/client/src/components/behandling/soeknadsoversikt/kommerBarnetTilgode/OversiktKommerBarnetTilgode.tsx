@@ -5,10 +5,9 @@ import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Info } from '../Info'
-import { useState } from 'react'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
-import { Button, HStack } from '@navikt/ds-react'
+import { HStack } from '@navikt/ds-react'
 
 interface AdresseProps {
   label: string
@@ -36,7 +35,6 @@ export const OversiktKommerBarnetTilgode = ({
   gjenlevendeForelder,
   behandlingId,
 }: Props) => {
-  const [vurdert, setVurdert] = useState(kommerBarnetTilgode !== null)
   const bostedsadresse = soeker?.bostedsadresse?.find((adresse) => adresse.aktiv)
   const foreldersadresse = gjenlevendeForelder?.opplysning?.bostedsadresse?.find((adresse) => adresse.aktiv)
 
@@ -71,19 +69,11 @@ export const OversiktKommerBarnetTilgode = ({
       </div>
 
       <Vurdering>
-        {vurdert && (
-          <KommerBarnetTilGodeVurdering
-            kommerBarnetTilgode={kommerBarnetTilgode}
-            redigerbar={redigerbar}
-            setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
-            behandlingId={behandlingId}
-          />
-        )}
-        {!vurdert && redigerbar && (
-          <Button variant="secondary" onClick={() => setVurdert(true)}>
-            Legg til vurdering
-          </Button>
-        )}
+        <KommerBarnetTilGodeVurdering
+          kommerBarnetTilgode={kommerBarnetTilgode}
+          redigerbar={redigerbar}
+          behandlingId={behandlingId}
+        />
       </Vurdering>
     </LovtekstMedLenke>
   )

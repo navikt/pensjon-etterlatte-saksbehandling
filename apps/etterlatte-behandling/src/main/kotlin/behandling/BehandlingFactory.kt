@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -243,7 +244,7 @@ class BehandlingFactory(
                     merknad =
                         when (kilde) {
                             Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
-                            else -> null
+                            else -> opprettMerknad(request.sak, persongalleri)
                         },
                 )
             return BehandlingOgOppgave(behandling, oppgave) {
@@ -392,6 +393,22 @@ class BehandlingFactory(
             )
         }
     }
+
+    private fun opprettMerknad(
+        sak: Sak,
+        persongalleri: Persongalleri,
+    ): String? =
+        if (persongalleri.soesken.isEmpty()) {
+            null
+        } else if (sak.sakType == SakType.BARNEPENSJON) {
+            "${persongalleri.soesken.size} søsken"
+        } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+            val barnUnder20 = persongalleri.soesken.count { Folkeregisteridentifikator.of(it).getAge() < 20 }
+
+            "$barnUnder20 barn u/20år"
+        } else {
+            null
+        }
 
     internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {
         val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }

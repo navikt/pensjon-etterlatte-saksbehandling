@@ -14,13 +14,12 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 
 fun Route.avkorting(
@@ -29,13 +28,11 @@ fun Route.avkorting(
 ) {
     val logger = routeLogger
 
-    route("/api/beregning/avkorting/sak/{$SAKID_CALL_PARAMETER}/har-inntekt-for/{inntektsaar}") {
-        get {
-            withSakId(behandlingKlient) {
-                val inntektsaar = call.parameters["inntektsaar"]?.toInt()
-                logger.info("Henter har inntekt for $inntektsaar for sakId=$it")
-                call.respond(avkortingService.hentHarSakInntektForAar(it, inntektsaar!!))
-            }
+    route("/api/beregning/avkorting/har-inntekt-for-aar") {
+        post {
+            val harInntektForAarDto = call.receive<AvkortingHarInntektForAarDto>()
+            logger.info("Henter har inntekt for ${harInntektForAarDto.aar} for sakId=${harInntektForAarDto.sakId}")
+            call.respond(avkortingService.hentHarSakInntektForAar(harInntektForAarDto))
         }
     }
 

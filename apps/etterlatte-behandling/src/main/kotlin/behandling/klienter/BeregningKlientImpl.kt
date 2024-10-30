@@ -4,6 +4,7 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -75,14 +76,20 @@ class BeregningKlientImpl(
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
-        logger.info("Henter har sakId=$sakId inntekt for aar=$aar")
-        return downstreamResourceClient
-            .get(
-                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/sak/$sakId/har-inntekt-for/$aar"),
+        logger.info("Sjekker om sakId=$sakId har inntekt for aar=$aar")
+        val response =
+            downstreamResourceClient.post(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/har-inntekt-for-aar"),
                 brukerTokenInfo = brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> resource.response != null },
-                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                postBody = AvkortingHarInntektForAarDto(sakId = sakId, aar = aar),
             )
+
+        return response.mapBoth(
+            success = { true },
+            failure = {
+                logger.info("Kunne ikke hente inntekt for aar for sakId=$sakId", it.cause)
+                false
+            },
+        )
     }
 }

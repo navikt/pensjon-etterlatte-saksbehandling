@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
+import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -19,26 +20,18 @@ import javax.sql.DataSource
 class AvkortingRepository(
     private val dataSource: DataSource,
 ) {
-    fun harSakInntektForAar(
-        sakId: SakId,
-        inntektsAar: Int,
-    ): Boolean =
+    fun harSakInntektForAar(harInntektForAarDto: AvkortingHarInntektForAarDto): Boolean =
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =
                 queryOf(
                     "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id = ? AND aar = ?",
-                    sakId,
-                    inntektsAar,
+                    harInntektForAarDto.sakId,
+                    harInntektForAarDto.aar,
                 ).let { query ->
                     tx.run(
                         query
-                            .map { row ->
-                                Aarsoppgjoer(
-                                    id = row.uuid("id"),
-                                    aar = row.int("aar"),
-                                    fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
-                                )
-                            }.asList,
+                            .map { row -> row.uuid("id") }
+                            .asList,
                     )
                 }
 

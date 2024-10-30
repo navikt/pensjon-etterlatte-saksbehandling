@@ -392,11 +392,15 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     sak.id,
                     OppgaveKilde.BEHANDLING,
                     OppgaveType.FOERSTEGANGSBEHANDLING,
+                    "2 søsken",
+                    null,
                     null,
                 )
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                    behandling.id.toString(),
+                    behandling!!.id.toString(),
                     sak.id,
+                    OppgaveKilde.BEHANDLING,
+                    "2 søsken",
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
                 oppgaveService.opprettOppgave(

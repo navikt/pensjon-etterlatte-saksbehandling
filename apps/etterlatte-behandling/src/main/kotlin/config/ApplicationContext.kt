@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktBrevDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktOppgaveService
@@ -319,6 +320,7 @@ internal class ApplicationContext(
     val behandlingInfoDao = BehandlingInfoDao(autoClosingDatabase)
     val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(autoClosingDatabase)
+    val aktivitetspliktBrevDao = AktivitetspliktBrevDao(autoClosingDatabase)
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
     val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
@@ -599,6 +601,7 @@ internal class ApplicationContext(
             aktivitetspliktService = aktivitetspliktService,
             oppgaveService = oppgaveService,
             sakService = sakService,
+            aktivitetspliktBrevDao = aktivitetspliktBrevDao,
         )
 
     // Jobs

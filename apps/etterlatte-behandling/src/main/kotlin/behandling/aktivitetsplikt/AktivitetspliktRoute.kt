@@ -233,6 +233,11 @@ internal fun Route.aktivitetspliktRoutes(
             val oppgaveOgVurdering = inTransaction { aktivitetspliktOppgaveService.hentVurderingForOppgave(oppgaveId) }
             call.respond(oppgaveOgVurdering)
         }
+        post("brevdata") {
+            val brevdata = call.receive<AktivitetspliktInformasjonBrevdataRequest>()
+            inTransaction { aktivitetspliktOppgaveService.lagreBrevdata(oppgaveId, brevdata) }
+            call.respond(HttpStatusCode.OK)
+        }
     }
 
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {

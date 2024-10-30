@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import java.util.UUID
@@ -13,6 +14,7 @@ class AktivitetspliktOppgaveService(
     private val aktivitetspliktService: AktivitetspliktService,
     private val oppgaveService: OppgaveService,
     private val sakService: SakService,
+    private val aktivitetspliktBrevDao: AktivitetspliktBrevDao,
 ) {
     fun hentVurderingForOppgave(oppgaveId: UUID): AktivitetspliktOppgaveVurdering {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
@@ -35,7 +37,10 @@ class AktivitetspliktOppgaveService(
                 vurderingerPaaOppgave
             }
 
+        val brevdata = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
+
         return AktivitetspliktOppgaveVurdering(
+            aktivtetspliktbrevdata = brevdata,
             vurderingType = vurderingType,
             oppgave = oppgave,
             sak = sak,
@@ -46,13 +51,50 @@ class AktivitetspliktOppgaveService(
                 ),
         )
     }
+
+    fun lagreBrevdata(
+        oppgaveId: UUID,
+        data: AktivitetspliktInformasjonBrevdataRequest,
+    ): AktivitetspliktInformasjonBrevdata? {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+        aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjekt(oppgaveId, sakid = sak.id))
+        return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
+    }
 }
+
+data class AktivitetspliktInformasjonBrevdataRequest(
+    val skalSendeBrev: Boolean,
+    val utbetaling: Boolean? = null,
+    val redusertEtterInntekt: Boolean? = null,
+) {
+    fun toDaoObjekt(
+        oppgaveId: UUID,
+        sakid: SakId,
+    ): AktivitetspliktInformasjonBrevdata =
+        AktivitetspliktInformasjonBrevdata(
+            oppgaveId = oppgaveId,
+            sakid = sakid,
+            utbetaling = this.utbetaling,
+            redusertEtterInntekt = this.redusertEtterInntekt,
+            skalSendeBrev = this.skalSendeBrev,
+        )
+}
+
+data class AktivitetspliktInformasjonBrevdata(
+    val oppgaveId: UUID,
+    val sakid: SakId,
+    val skalSendeBrev: Boolean,
+    val utbetaling: Boolean? = null,
+    val redusertEtterInntekt: Boolean? = null,
+)
 
 data class AktivitetspliktOppgaveVurdering(
     val vurderingType: VurderingType,
     val oppgave: OppgaveIntern,
     val sak: Sak,
     val vurdering: AktivitetspliktVurdering,
+    val aktivtetspliktbrevdata: AktivitetspliktInformasjonBrevdata?,
 )
 
 enum class VurderingType {

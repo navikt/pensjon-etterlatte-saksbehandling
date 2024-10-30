@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.model.oms
+package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 

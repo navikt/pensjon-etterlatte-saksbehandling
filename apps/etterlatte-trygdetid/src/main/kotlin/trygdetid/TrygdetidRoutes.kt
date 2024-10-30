@@ -41,15 +41,16 @@ import java.util.UUID
 
 private const val TRYGDETIDID_CALL_PARAMETER = "trygdetidId"
 
-fun PipelineContext<*, ApplicationCall>.trygdetidId(): UUID =
-    try {
-        this.call.parameters[TRYGDETIDID_CALL_PARAMETER]?.let { UUID.fromString(it) }!!
-    } catch (e: Exception) {
-        throw UgyldigForespoerselException(
-            "MANGLER_TRYGDETID_ID",
-            "Kunne ikke lese ut parameteret trygdetidId",
-        )
-    }
+private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
+    get() =
+        try {
+            this.call.uuid(TRYGDETIDID_CALL_PARAMETER)
+        } catch (e: Exception) {
+            throw UgyldigForespoerselException(
+                "MANGLER_TRYGDETID_ID",
+                "Kunne ikke lese ut parameteret trygdetidId",
+            )
+        }
 
 private val logger: Logger = LoggerFactory.getLogger("TrygdetidRoutes")
 
@@ -162,7 +163,7 @@ fun Route.trygdetid(
 
                         trygdetidService.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
                             behandlingId,
-                            trygdetidId(),
+                            trygdetidId,
                             trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),
                             brukerTokenInfo,
                         )
@@ -170,7 +171,7 @@ fun Route.trygdetid(
                             trygdetidService
                                 .hentTrygdetidIBehandlingMedId(
                                     behandlingId,
-                                    trygdetidId(),
+                                    trygdetidId,
                                     brukerTokenInfo,
                                 )!!
                                 .toDto(),
@@ -184,7 +185,7 @@ fun Route.trygdetid(
                             logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
                             trygdetidService.slettTrygdetidGrunnlagForTrygdetid(
                                 behandlingId,
-                                trygdetidId(),
+                                trygdetidId,
                                 trygdetidGrunnlagId,
                                 brukerTokenInfo,
                             )
@@ -192,7 +193,7 @@ fun Route.trygdetid(
                                 trygdetidService
                                     .hentTrygdetidIBehandlingMedId(
                                         behandlingId,
-                                        trygdetidId(),
+                                        trygdetidId,
                                         brukerTokenInfo,
                                     )!!
                                     .toDto(),
@@ -212,10 +213,32 @@ fun Route.trygdetid(
 
             post("/kopier/{forrigeBehandlingId}") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    logger.info("Oppretter kopi av forrige trygdetider for behandling $behandlingId")
-                    val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
-                    trygdetidService.kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo)
-                    call.respond(HttpStatusCode.OK)
+                    withUuidParam("forrigeBehandlingId") { forrigeBehandlingId ->
+                        logger.info("Oppretter kopi av forrige trygdetider for behandling $behandlingId")
+                        trygdetidService.kopierSisteTrygdetidberegninger(
+                            behandlingId,
+                            forrigeBehandlingId,
+                            brukerTokenInfo,
+                        )
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+            }
+
+            post("/kopier-grunnlag/{kildeBehandlingId}") {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                    withUuidParam("kildeBehandlingId") { kildeBehandlingId ->
+                        logger.info(
+                            "Kopierer trygdetidsgrunnlag fra behandling $behandlingId " +
+                                "til behandling $kildeBehandlingId",
+                        )
+                        trygdetidService.kopierTrygdetidsgrunnlag(
+                            behandlingId = behandlingId,
+                            kildeBehandlingId = kildeBehandlingId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
             }
 
@@ -259,7 +282,7 @@ fun Route.trygdetid(
                             val eksisterendeTygdetid =
                                 trygdetidService.hentTrygdetidIBehandlingMedId(
                                     behandlingId,
-                                    trygdetidId(),
+                                    trygdetidId,
                                     brukerTokenInfo,
                                 ) ?: throw GenerellIkkeFunnetException()
 
@@ -279,7 +302,7 @@ fun Route.trygdetid(
                                 trygdetidService
                                     .hentTrygdetidIBehandlingMedId(
                                         behandlingId,
-                                        trygdetidId(),
+                                        trygdetidId,
                                         brukerTokenInfo,
                                     )!!
                                     .toDto(),
@@ -294,21 +317,21 @@ fun Route.trygdetid(
                             val trygdetid =
                                 trygdetidService.hentTrygdetidIBehandlingMedId(
                                     behandlingId,
-                                    trygdetidId(),
+                                    trygdetidId,
                                     brukerTokenInfo,
                                 )
 
                             if (trygdetid != null) {
                                 trygdetidService.reberegnUtenFremtidigTrygdetid(
                                     behandlingId,
-                                    trygdetid.id,
+                                    trygdetidId,
                                     brukerTokenInfo,
                                 )
                                 call.respond(
                                     trygdetidService
                                         .hentTrygdetidIBehandlingMedId(
                                             behandlingId,
-                                            trygdetidId(),
+                                            trygdetidId,
                                             brukerTokenInfo,
                                         )!!
                                         .toDto(),

@@ -455,13 +455,14 @@ class VedtakBehandlingService(
         )
     }
 
-    // Dette er for å få saker som er TIL_SAMORDNING videre til SAMORDNET i det tilfelle overstyring ikke fungerer
-    // pga SAM returnerer ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
+    // MANUELL SAMORDNING: Dette er for å få saker som er TIL_SAMORDNING videre til SAMORDNET i det tilfelle
+    // overstyring ikke fungerer pga SAM returnerer ALLEREDE_REGISTRERT_ELLER_UTENFOR_FRIST
     private fun skalSamordnesManuelt(behandlingId: UUID): Boolean {
         val behandlingerSomErStuck =
             listOf(
-                "6e960200-ac0a-4341-8e00-cf4300588d65",
-                "e893f467-4870-4d5c-a37a-9b63059206e3",
+                "6e960200-ac0a-4341-8e00-cf4300588d65", // iverksatt
+                "e893f467-4870-4d5c-a37a-9b63059206e3", // iverksatt
+                "b3cd19f6-4801-46b7-b711-b0270c754165",
             )
         return behandlingerSomErStuck.find { it == behandlingId.toString() } != null
     }

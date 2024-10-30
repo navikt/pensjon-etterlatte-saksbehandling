@@ -228,7 +228,7 @@ internal fun Route.aktivitetspliktRoutes(
         }
     }
 
-    route("/api/aktivitetsplikt/oppgave/${OPPGAVEID_CALL_PARAMETER}") {
+    route("/api/aktivitetsplikt/oppgave/{${OPPGAVEID_CALL_PARAMETER}}") {
         get {
             val oppgaveOgVurdering = inTransaction { aktivitetspliktOppgaveService.hentVurderingForOppgave(oppgaveId) }
             call.respond(oppgaveOgVurdering)

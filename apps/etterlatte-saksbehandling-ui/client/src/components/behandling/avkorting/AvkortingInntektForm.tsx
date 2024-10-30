@@ -87,6 +87,7 @@ export const AvkortingInntektForm = ({
         inntektUtlandTom: nyligste.inntektUtlandTom,
         fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
         spesifikasjon: '',
+        overstyrtInnvilgaMaaneder: nyligste.overstyrtInnvilgaMaaneder,
       }
     }
     return {

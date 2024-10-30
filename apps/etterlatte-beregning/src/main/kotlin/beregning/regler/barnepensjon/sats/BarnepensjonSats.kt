@@ -159,9 +159,9 @@ val barnepensjonSatsRegel1967 =
         beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET"),
     ) benytter belopForFoersteBarn1967 og belopForEtterfoelgendeBarn1967 og antallSoeskenIKullet1967 med {
-            foerstebarnSats,
-            etterfoelgendeBarnSats,
-            antallSoesken,
+        foerstebarnSats,
+        etterfoelgendeBarnSats,
+        antallSoesken,
         ->
         foerstebarnSats
             .plus(etterfoelgendeBarnSats.multiply(antallSoesken))
@@ -174,9 +174,9 @@ val barnepensjonSatsRegel2024 =
         beskrivelse = "Beregn barnepensjon etter 2024-regelverk",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET", versjon = "2"),
     ) benytter skalHaForeldreloesSats2024 og beloepHvertBarnEnForelderAvdoed2024 og beloepHvertBarnToForeldreAvdoed2024 med {
-            skalHaForeldreloesSats,
-            beloepEnAvdoedForelder,
-            beloepToAvdoedeForeldre,
+        skalHaForeldreloesSats,
+        beloepEnAvdoedForelder,
+        beloepToAvdoedeForeldre,
         ->
         if (skalHaForeldreloesSats) {
             beloepToAvdoedeForeldre

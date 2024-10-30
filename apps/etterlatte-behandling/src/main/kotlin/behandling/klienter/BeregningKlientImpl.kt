@@ -4,6 +4,10 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
+import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -19,6 +23,12 @@ interface BeregningKlient {
 
     suspend fun harOverstyrt(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
+
+    suspend fun sakHarInntektForAar(
+        sakId: SakId,
+        aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 }
@@ -61,5 +71,28 @@ class BeregningKlientImpl(
                 success = { resource -> resource.response != null },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
+    }
+
+    override suspend fun sakHarInntektForAar(
+        sakId: SakId,
+        aar: Int,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        logger.info("Sjekker om sakId=$sakId har inntekt for aar=$aar")
+        val response =
+            downstreamResourceClient.post(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/har-inntekt-for-aar"),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = AvkortingHarInntektForAarDto(sakId = sakId, aar = aar),
+            )
+
+        return response.mapBoth(
+            success = { resource -> deserialize(resource.response.toString()) },
+            failure = {
+                throw InternfeilException(
+                    "Klarte ikke sjekke om sakId=$sakId har inntekt for aar=$aar, ${it.cause}",
+                )
+            },
+        )
     }
 }

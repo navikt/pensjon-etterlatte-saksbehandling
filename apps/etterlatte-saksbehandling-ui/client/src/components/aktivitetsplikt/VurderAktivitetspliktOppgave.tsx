@@ -21,7 +21,7 @@ export function VurderAktivitetspliktOppgave() {
       return
     }
     fetchOppgave({ oppgaveId })
-  }, [oppgaveId, oppgave])
+  }, [oppgaveId])
 
   return mapResult(oppgave, {
     initial: (

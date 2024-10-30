@@ -11,8 +11,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
-import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -128,43 +126,6 @@ data class Trygdetidsperiode(
     val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
     val type: TrygdetidType,
 )
-
-fun TrygdetidDto.fromDto(
-    beregningsMetodeAnvendt: BeregningsMetode,
-    beregningsMetodeFraGrunnlag: BeregningsMetode,
-    avdoede: List<Avdoed>,
-) = this.fromDto(
-    beregningsMetodeAnvendt,
-    beregningsMetodeFraGrunnlag,
-    hentAvdoedNavn(this, avdoede),
-)
-
-private fun hentAvdoedNavn(
-    trygdetidDto: TrygdetidDto,
-    avdoede: List<Avdoed>,
-): String {
-    if (avdoede.isEmpty() &&
-        trygdetidDto.beregnetTrygdetid?.resultat?.overstyrt == true &&
-        trygdetidDto.ident == UKJENT_AVDOED
-    ) {
-        return "ukjent avdød"
-    }
-    if (avdoede.isEmpty()) {
-        throw IngenStoetteForUkjentAvdoed()
-    }
-
-    return avdoede.find { it.fnr.value == trygdetidDto.ident }?.navn ?: run {
-        if (trygdetidDto.beregnetTrygdetid?.resultat?.overstyrt == true) {
-            sikkerLogg.warn(
-                "Fant ikke avdød fra trygdetid (ident: ${trygdetidDto.ident}) blant avdøde fra " +
-                    "grunnlag (${avdoede.joinToString { it.fnr.value }})",
-            )
-            throw OverstyrtTrygdetidManglerAvdoed()
-        } else {
-            throw FantIkkeIdentTilTrygdetidBlantAvdoede()
-        }
-    }
-}
 
 fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt: BeregningsMetode,

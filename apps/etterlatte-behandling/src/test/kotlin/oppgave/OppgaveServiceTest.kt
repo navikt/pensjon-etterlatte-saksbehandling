@@ -223,7 +223,7 @@ internal class OppgaveServiceTest(
                 null,
             )
 
-        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
+        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
         nyKontekstMedBruker(saksbehandlerto)
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
@@ -231,6 +231,68 @@ internal class OppgaveServiceTest(
         assertThrows<BrukerManglerAttestantRolleException> {
             oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, saksbehandlerMedRoller.saksbehandler.ident)
         }
+    }
+
+    @Test
+    fun `skal tildele attesteringsoppgave hvis rolle attestant og innsender tildeler seg selv`() {
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveService.opprettOppgave(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, vanligSaksbehandler.ident)
+
+        val sakIdOgReferanse =
+            oppgaveService.tilAttestering(
+                referanse,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
+        nyKontekstMedBruker(saksbehandlerto)
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
+
+        oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, saksbehandlerMedRoller.saksbehandler.ident)
+    }
+
+    @Test
+    fun `skal tildele attesteringsoppgave hvis innsender tildeler annen sb`() {
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveService.opprettOppgave(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, "annen")
+
+        val sakIdOgReferanse =
+            oppgaveService.tilAttestering(
+                referanse,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns vanligSaksbehandler.ident }
+        nyKontekstMedBruker(saksbehandlerto)
+        val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
+
+        oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, saksbehandlerMedRoller.saksbehandler.ident)
     }
 
     @Test

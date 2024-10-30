@@ -12,7 +12,7 @@ import { Familiemedlem } from '~shared/types/familieOpplysninger'
 import { VurderingAvAktivitetsplikt } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/VurderingAvAktivitetsplikt'
 import { AktivitetspliktStatusTag } from '~shared/tags/AktivitetspliktStatusTag'
 
-const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
+export const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
   else if (avdoede.length === 1) return avdoede[0].doedsdato!!
   else

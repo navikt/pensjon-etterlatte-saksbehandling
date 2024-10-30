@@ -11,7 +11,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -83,6 +85,23 @@ internal class TrygdetidRoutesTest {
             behandlingKlient.harTilgangTilBehandling(any(), any(), any())
             trygdetidService.sjekkGyldighetOgOppdaterBehandlingStatus(any(), any())
         }
+    }
+
+    @Test
+    fun `skal returnere 200 ved kall til kopier-grunnlag`() {
+        val behandlingId = randomUUID()
+        val kildeBehandlingId = randomUUID()
+        coEvery { trygdetidService.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, any()) } just runs
+
+        testApplication {
+            val response =
+                client.post("/api/trygdetid_v2/$behandlingId/kopier-grunnlag/$kildeBehandlingId") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+            response.status shouldBe HttpStatusCode.OK
+        }
+        coVerify { trygdetidService.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, any()) }
     }
 
     private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {

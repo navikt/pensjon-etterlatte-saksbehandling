@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknad
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnhentingAvOpplysninger
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
+import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon10mndBrevdata
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon4MndBrevdata
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon6MndBrevdata
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
@@ -30,6 +31,18 @@ sealed class BrevParametre {
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
             AktivitetspliktInformasjon4MndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
+    }
+
+    @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND")
+    data class AktivitetspliktInformasjon10Mnd(
+        val aktivitetsgrad: Aktivitetsgrad,
+        val utbetaling: Boolean,
+        val redusertEtterInntekt: Boolean,
+        val nasjonalEllerUtland: NasjonalEllerUtland,
+        override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
+    ) : BrevParametre() {
+        override fun brevDataMapping(): BrevDataRedigerbar =
+            AktivitetspliktInformasjon10mndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
     }
 
     @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND")

@@ -1,5 +1,5 @@
 import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon, TrashIcon } from '@navikt/aksel-icons'
-import { Alert, BodyShort, Button, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
 import {
   hentAktiviteterForBehandling,
   hentAktiviteterForSak,
@@ -67,89 +67,89 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
 
   return (
     <VStack gap="8" className="min-w-[800px]">
-      {aktiviteter.length === 0 ? (
-        <Alert variant="info" inline>
-          Ingen aktiviteter er registrert.
-        </Alert>
-      ) : (
-        <Timeline startDate={doedsdato} endDate={sluttdato}>
-          <Timeline.Pin date={doedsdato}>
-            <BodyShort>Dødsdato: {formaterDato(doedsdato)}</BodyShort>
-          </Timeline.Pin>
-          <Timeline.Pin date={new Date()}>
-            <BodyShort>Dagens dato: {formaterDato(new Date())}</BodyShort>
-          </Timeline.Pin>
-          <Timeline.Pin date={seksMndEtterDoedsfall}>
-            <BodyShort>6 måneder etter dødsfall: {formaterDato(seksMndEtterDoedsfall)}</BodyShort>
-          </Timeline.Pin>
-          <Timeline.Pin date={tolvMndEtterDoedsfall}>
-            <BodyShort>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</BodyShort>
-          </Timeline.Pin>
+      <Timeline startDate={doedsdato} endDate={sluttdato}>
+        <Timeline.Pin date={doedsdato}>
+          <BodyShort>Dødsdato: {formaterDato(doedsdato)}</BodyShort>
+        </Timeline.Pin>
+        <Timeline.Pin date={new Date()}>
+          <BodyShort>Dagens dato: {formaterDato(new Date())}</BodyShort>
+        </Timeline.Pin>
+        <Timeline.Pin date={seksMndEtterDoedsfall}>
+          <BodyShort>6 måneder etter dødsfall: {formaterDato(seksMndEtterDoedsfall)}</BodyShort>
+        </Timeline.Pin>
+        <Timeline.Pin date={tolvMndEtterDoedsfall}>
+          <BodyShort>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</BodyShort>
+        </Timeline.Pin>
 
-          {aktivitetsTypeProps.map((props) => (
-            <Timeline.Row key={props.type} label={props.beskrivelse}>
-              {aktiviteter
-                .filter((aktivitet) => aktivitet.type === props.type)
-                .map((aktivitet, i) => (
-                  <Timeline.Period
-                    key={props.type + i}
-                    start={new Date(aktivitet.fom)}
-                    end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
-                    status={props.status}
-                    icon={props.ikon}
-                    statusLabel={props.beskrivelse}
-                  >
-                    <BodyShort weight="semibold">
-                      Fra {formaterDato(new Date(aktivitet.fom))}{' '}
-                      {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
+        {aktiviteter.length === 0 && (
+          <Timeline.Row label="Ingen aktiviteter">
+            <Timeline.Period start={addYears(doedsdato, -1)} end={addYears(doedsdato, -1)}></Timeline.Period>
+          </Timeline.Row>
+        )}
+
+        {aktivitetsTypeProps.map((props) => (
+          <Timeline.Row key={props.type} label={props.beskrivelse}>
+            {aktiviteter
+              .filter((aktivitet) => aktivitet.type === props.type)
+              .map((aktivitet, i) => (
+                <Timeline.Period
+                  key={props.type + i}
+                  start={new Date(aktivitet.fom)}
+                  end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
+                  status={props.status}
+                  icon={props.ikon}
+                  statusLabel={props.beskrivelse}
+                >
+                  <BodyShort weight="semibold">
+                    Fra {formaterDato(new Date(aktivitet.fom))}{' '}
+                    {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
+                  </BodyShort>
+                  <BodyShort>{aktivitet.beskrivelse}</BodyShort>
+                  <VStack>
+                    <BodyShort>
+                      <i>
+                        Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
+                        {aktivitet.opprettet.ident}
+                      </i>
                     </BodyShort>
-                    <BodyShort>{aktivitet.beskrivelse}</BodyShort>
-                    <VStack>
-                      <BodyShort>
-                        <i>
-                          Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
-                          {aktivitet.opprettet.ident}
-                        </i>
-                      </BodyShort>
-                      <BodyShort>
-                        <i>
-                          Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
-                          {aktivitet.endret.ident}
-                        </i>
-                      </BodyShort>
-                    </VStack>
-                    {isPending(slettet) || isPending(slettetForSak) ? (
-                      <Spinner variant="neutral" label="Sletter" margin="1em" />
-                    ) : (
-                      <HStack gap="2">
-                        <Button
-                          variant="secondary"
-                          size="xsmall"
-                          icon={<PencilIcon aria-hidden />}
-                          onClick={() => setRediger(aktivitet)}
-                        >
-                          Rediger
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="xsmall"
-                          icon={<TrashIcon aria-hidden />}
-                          onClick={() => fjernAktivitet(aktivitet.id)}
-                        >
-                          Slett
-                        </Button>
-                      </HStack>
-                    )}
-                    {isFailureHandler({
-                      apiResult: slettet,
-                      errorMessage: 'En feil har oppstått',
-                    })}
-                  </Timeline.Period>
-                ))}
-            </Timeline.Row>
-          ))}
-        </Timeline>
-      )}
+                    <BodyShort>
+                      <i>
+                        Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
+                        {aktivitet.endret.ident}
+                      </i>
+                    </BodyShort>
+                  </VStack>
+                  {isPending(slettet) || isPending(slettetForSak) ? (
+                    <Spinner variant="neutral" label="Sletter" margin="1em" />
+                  ) : (
+                    <HStack gap="2">
+                      <Button
+                        variant="secondary"
+                        size="xsmall"
+                        icon={<PencilIcon aria-hidden />}
+                        onClick={() => setRediger(aktivitet)}
+                      >
+                        Rediger
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="xsmall"
+                        icon={<TrashIcon aria-hidden />}
+                        onClick={() => fjernAktivitet(aktivitet.id)}
+                      >
+                        Slett
+                      </Button>
+                    </HStack>
+                  )}
+                  {isFailureHandler({
+                    apiResult: slettet,
+                    errorMessage: 'En feil har oppstått',
+                  })}
+                </Timeline.Period>
+              ))}
+          </Timeline.Row>
+        ))}
+      </Timeline>
 
       <HStack align="center" justify="space-between">
         <NyAktivitet

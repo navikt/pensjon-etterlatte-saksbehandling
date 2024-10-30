@@ -451,7 +451,6 @@ class BrevDataMapperFerdigstillingVedtak(
         innhold: List<Slate.Element>,
         utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
-
         val tidligereFamiliepleier = async { behandlingService.hentTidligereFamiliepleier(behandlingId, bruker) }
 
         OmstillingsstoenadAvslag.fra(

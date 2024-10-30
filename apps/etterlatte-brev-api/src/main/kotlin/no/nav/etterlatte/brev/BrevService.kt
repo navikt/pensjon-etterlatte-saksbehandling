@@ -270,7 +270,7 @@ class BrevService(
             )
         }
 
-        val alderIDager = Duration.between(Tidspunkt.now(), brev.opprettet).toDays()
+        val alderIDager = Duration.between(brev.opprettet, Tidspunkt.now()).toDays()
         if (alderIDager < 7) {
             throw UgyldigForespoerselException(
                 "KAN_IKKE_MARKERE_SOM_UTGAATT",

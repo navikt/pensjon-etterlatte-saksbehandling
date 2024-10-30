@@ -101,7 +101,7 @@ class BehandlingKlient(
         brukerTokenInfo: BrukerTokenInfo,
     ): TidligereFamiliepleier? =
         get(
-            url = "$resourceUrl/api/behandling/$behandlingId/tidligereFamiliepleier",
+            url = "$resourceUrl/api/behandling/$behandlingId/tidligere-familiepleier",
             onSuccess = { it.response?.toString()?.let(::deserialize) },
             errorMessage = { "Klarte ikke hente svar på om tidligere familiepleier for behandling med id=$behandlingId" },
             brukerTokenInfo = brukerTokenInfo,

@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -96,7 +97,7 @@ class AvkortingService(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        logger.info("Sjekker om vi skal opprette oppgave om pååhør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
+        logger.info("Sjekker om vi skal opprette oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
         val avkorting = avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
 
         val aarsoppgjoer = avkorting.aarsoppgjoer.single { it.aar == behandling.virkningstidspunkt?.dato?.year }
@@ -132,6 +133,9 @@ class AvkortingService(
             logger.info("Fant ingen tidlig alderspensjon for sakId=${behandling.sak.sakId}, trenger ingen oppgave om opphør.")
         }
     }
+
+    fun hentHarSakInntektForAar(harInntektForAarDto: AvkortingHarInntektForAarDto): Boolean =
+        avkortingRepository.harSakInntektForAar(harInntektForAarDto)
 
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,

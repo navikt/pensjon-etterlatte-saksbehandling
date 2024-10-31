@@ -9,6 +9,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode.Companion.Forbidden
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.NotFound
 import io.ktor.http.HttpStatusCode.Companion.OK
@@ -126,17 +127,17 @@ class RestModuleTest {
             client
                 .get("/behandling/${UUID.randomUUID()}") {
                     header(HttpHeaders.Authorization, "Bearer $token")
-                }.let { assertEquals(NotFound, it.status) }
+                }.let { assertEquals(Forbidden, it.status) }
             client
                 .get("/sak/1") {
                     header(HttpHeaders.Authorization, "Bearer $token")
-                }.let { assertEquals(NotFound, it.status) }
+                }.let { assertEquals(Forbidden, it.status) }
             client
                 .post("/person") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO("27458328671").toJson())
-                }.let { assertEquals(NotFound, it.status) }
+                }.let { assertEquals(Forbidden, it.status) }
         }
     }
 

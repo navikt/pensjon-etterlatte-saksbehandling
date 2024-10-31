@@ -31,7 +31,7 @@ class Server(
             ) {
                 beregning(beregningService, behandlingKlient)
                 beregningsGrunnlag(beregningsGrunnlagService, behandlingKlient)
-                avkorting(avkortingService, behandlingKlient)
+                avkorting(avkortingService, behandlingKlient, avkortingTidligAlderspensjonService)
                 ytelseMedGrunnlag(ytelseMedGrunnlagService, behandlingKlient)
                 grunnbeloep(grunnbeloepService)
                 sanksjon(sanksjonService, behandlingKlient)

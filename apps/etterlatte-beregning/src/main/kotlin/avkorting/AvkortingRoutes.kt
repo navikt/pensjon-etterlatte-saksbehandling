@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 fun Route.avkorting(
     avkortingService: AvkortingService,
     behandlingKlient: BehandlingKlient,
+    tidligAlderspensjonService: AvkortingTidligAlderspensjonService,
 ) {
     val logger = routeLogger
 
@@ -80,7 +81,7 @@ fun Route.avkorting(
         post("/haandter-tidlig-alderspensjon") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Haandterer oppgave hvis tidlig alderspensjon (behandlingId=$it)")
-                avkortingService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
+                tidligAlderspensjonService.opprettOppgaveHvisTidligAlderspensjon(it, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
         }

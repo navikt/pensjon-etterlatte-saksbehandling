@@ -3,6 +3,7 @@ package no.nav.etterlatte.jobs
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
+import no.nav.etterlatte.libs.jobs.LeaderElectionDownException
 import no.nav.etterlatte.shuttingDown
 import org.slf4j.Logger
 import java.util.Date
@@ -60,6 +61,12 @@ private fun run(
     val correlationId = UUID.randomUUID().toString()
     withLogContext(correlationId) {
         action(correlationId)
+    }
+} catch (leaderElectionDownException: LeaderElectionDownException) {
+    if (!shuttingDown.get()) {
+        logger.error("Jobb $name feilet siden leaderelection er nede", leaderElectionDownException)
+    } else {
+        logger.error("Jobb $name feilet på vei ned siden leaderelection er nede", leaderElectionDownException)
     }
 } catch (throwable: Throwable) {
     if (!shuttingDown.get()) {

@@ -34,7 +34,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -176,24 +175,37 @@ internal class BrevRepositoryIntegrationTest(
     @Test
     fun `Oppdater journalpost ID`() {
         val journalpostId = UUID.randomUUID().toString()
+        val journalpostResponse = OpprettJournalpostResponse(journalpostId, journalpostferdigstilt = true)
 
         val brev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
 
-        assertTrue(
-            db.settBrevJournalfoert(
-                brev.id,
-                OpprettJournalpostResponse(journalpostId, journalpostferdigstilt = true),
-            ),
-        )
+        brev.status shouldBe Status.OPPRETTET
+
+        db.lagreJournalpostId(brev.mottakere.single().id, journalpostResponse)
+        db.settBrevJournalfoert(brev.id, listOf(journalpostResponse))
+
+        val oppdatertBrev = db.hentBrev(brev.id)
+
+        oppdatertBrev.mottakere.single().journalpostId shouldBe journalpostId
+        oppdatertBrev.status shouldBe Status.JOURNALFOERT
     }
 
     @Test
     fun `Oppdater bestilling ID`() {
-        val bestillingsId = UUID.randomUUID().toString()
-
         val brev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
 
-        assertTrue(db.settBrevDistribuert(brev.id, DistribuerJournalpostResponse(bestillingsId)))
+        val bestillingsId = UUID.randomUUID().toString()
+        val mottaker = brev.mottakere.single()
+
+        val response = DistribuerJournalpostResponse(bestillingsId)
+
+        db.lagreBestillingId(mottaker.id, response)
+        db.settBrevDistribuert(brev.id, listOf(DistribuerJournalpostResponse(bestillingsId)))
+
+        val oppdatertBrev = db.hentBrev(brev.id)
+
+        oppdatertBrev.status shouldBe Status.DISTRIBUERT
+        oppdatertBrev.mottakere.single().bestillingId shouldBe bestillingsId
     }
 
     @Test
@@ -207,10 +219,14 @@ internal class BrevRepositoryIntegrationTest(
         db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES))
         db.hentBrev(opprettetBrev.id).status shouldBe Status.FERDIGSTILT
 
-        db.settBrevJournalfoert(opprettetBrev.id, OpprettJournalpostResponse("id", journalpostferdigstilt = true))
+        db.settBrevJournalfoert(
+            opprettetBrev.id,
+            listOf(OpprettJournalpostResponse("id", journalpostferdigstilt = true)),
+        )
         db.hentBrev(opprettetBrev.id).status shouldBe Status.JOURNALFOERT
 
-        db.settBrevDistribuert(opprettetBrev.id, DistribuerJournalpostResponse("id"))
+        db.lagreBestillingId(opprettetBrev.mottakere.single().id, DistribuerJournalpostResponse("id"))
+        db.settBrevDistribuert(opprettetBrev.id, listOf(DistribuerJournalpostResponse("id")))
         db.hentBrev(opprettetBrev.id).status shouldBe Status.DISTRIBUERT
 
         val antallHendelser =
@@ -232,10 +248,9 @@ internal class BrevRepositoryIntegrationTest(
         db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES))
 
         val journalpostResponse = OpprettJournalpostResponse("id", journalpostferdigstilt = true)
-        db.settBrevJournalfoert(opprettetBrev.id, journalpostResponse)
+        db.settBrevJournalfoert(opprettetBrev.id, listOf(journalpostResponse))
 
         db.hentBrev(opprettetBrev.id).status shouldBe Status.JOURNALFOERT
-        db.hentJournalpostId(opprettetBrev.id) shouldBe journalpostResponse.journalpostId
     }
 
     @Test

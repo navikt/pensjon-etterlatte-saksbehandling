@@ -1,4 +1,4 @@
-import { Alert, Box, Heading, HStack } from '@navikt/ds-react'
+import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { erUnderBehandling, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { fattVedtak } from '~shared/api/tilbakekreving'
@@ -11,9 +11,9 @@ import styled from 'styled-components'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
 import { isFailure, isPending } from '~shared/api/apiUtils'
-import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 
 export function TilbakekrevingBrev({
   behandling,
@@ -59,31 +59,23 @@ export function TilbakekrevingBrev({
       <BrevContent>
         <Sidebar>
           <Box paddingInline="16" paddingBlock="16 4">
-            <Heading spacing size="large" level="1">
-              Vedtaksbrev
-            </Heading>
+            <VStack gap="4">
+              <Heading size="large" level="1">
+                Vedtaksbrev
+              </Heading>
 
-            <br />
-            <Alert variant="warning">
-              Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.
-            </Alert>
-            {vedtaksbrev && (
-              <>
-                <br />
-                <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
-                <br />
-                {vedtaksbrev.mottakere.map((mottaker) => (
-                  <BrevMottakerPanel
-                    key={mottaker.id}
-                    brevId={vedtaksbrev.id}
-                    behandlingId={vedtaksbrev.behandlingId}
-                    sakId={vedtaksbrev.sakId}
-                    mottaker={mottaker}
-                    kanRedigeres={redigerbar}
-                  />
-                ))}
-              </>
-            )}
+              <Alert variant="warning">
+                Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.
+              </Alert>
+
+              {vedtaksbrev && (
+                <>
+                  <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
+
+                  <BrevMottakerWrapper brev={vedtaksbrev} kanRedigeres={redigerbar} />
+                </>
+              )}
+            </VStack>
           </Box>
         </Sidebar>
 

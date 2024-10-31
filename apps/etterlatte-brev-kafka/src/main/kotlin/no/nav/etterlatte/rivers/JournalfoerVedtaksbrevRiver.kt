@@ -56,13 +56,12 @@ internal class JournalfoerVedtaksbrevRiver(
                 )
 
             val journalfoervedtaksbrevResponse = runBlocking { brevapiKlient.journalfoerVedtaksbrev(vedtak) }
-            if (journalfoervedtaksbrevResponse == null) {
+            if (journalfoervedtaksbrevResponse == null || journalfoervedtaksbrevResponse.opprettetJournalpost.isEmpty()) {
                 logger.warn("Jorunalføring ble ikke journalført, kan være pga status eller migrering.")
             } else {
                 rapidsConnection.svarSuksess(
                     packet,
                     journalfoervedtaksbrevResponse.brevId,
-                    journalfoervedtaksbrevResponse.opprettetJournalpost.journalpostId,
                 )
             }
         } catch (e: Exception) {
@@ -76,12 +75,14 @@ internal class JournalfoerVedtaksbrevRiver(
     private fun RapidsConnection.svarSuksess(
         packet: JsonMessage,
         brevId: BrevID,
-        journalpostId: String,
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
+
         packet.setEventNameForHendelseType(BrevHendelseType.JOURNALFOERT)
         packet[BREV_ID_KEY] = brevId
-        packet["journalpostId"] = journalpostId
+        // TODO: JournalpostID vil bli hentet direkte fra mottaker-objektet
+        //  Kan på sikt fjernes herfra og i [DistribuerBrevRiver.kt]
+        packet["journalpostId"] = "journalpostId"
         packet["distribusjonType"] =
             DistribusjonsType.VEDTAK.name
 

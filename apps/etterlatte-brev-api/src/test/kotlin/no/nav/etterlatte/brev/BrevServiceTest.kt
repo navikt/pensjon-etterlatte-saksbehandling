@@ -21,14 +21,17 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -254,6 +257,163 @@ internal class BrevServiceTest {
     }
 
     @Nested
+    inner class OpprettMottakerTest {
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Opprett mottaker på redigerbart brev`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
+
+            every { db.hentBrev(any()) } returns brev
+
+            val faktiskMottaker = brevService.opprettMottaker(brev.id)
+
+            faktiskMottaker.type shouldBe MottakerType.KOPI
+
+            verify {
+                db.hentBrev(brev.id)
+                db.opprettMottaker(brev.id, match { it.type == MottakerType.KOPI })
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Opprett mottaker på redigerbart brev, men maks antall er nådd`(status: Status) {
+            val brev =
+                opprettBrev(
+                    status,
+                    BrevProsessType.REDIGERBAR,
+                    mottakere = listOf(opprettMottaker(), opprettMottaker()), // Maks to mottakere
+                )
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<MaksAntallMottakere> { brevService.opprettMottaker(brev.id) }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `Opprett mottaker på brev som ikke kan endres`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<BrevKanIkkeEndres> {
+                brevService.opprettMottaker(brev.id)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+    }
+
+    @Nested
+    inner class OppdaterMottakerTest {
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Oppdater mottaker på redigerbart brev`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
+
+            every { db.hentBrev(any()) } returns brev
+
+            val nyMottaker =
+                Mottaker(
+                    id = brev.mottakere.single().id,
+                    navn = "NYTT NAVN",
+                    foedselsnummer = MottakerFoedselsnummer(VERGE_FOEDSELSNUMMER.value),
+                    adresse =
+                        Adresse(
+                            adresseType = "UTENLANDSKPOSTADRESSE",
+                            adresselinje1 = "NY ADRESSELINJE",
+                            postnummer = "12124",
+                            poststed = "STOCKHOLM",
+                            landkode = "SE",
+                            land = "SVERIGE",
+                        ),
+                )
+
+            brevService.oppdaterMottaker(brev.id, nyMottaker)
+
+            verify {
+                db.hentBrev(brev.id)
+                db.oppdaterMottaker(brev.id, nyMottaker)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `Oppdater mottaker på brev som ikke kan endres`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<BrevKanIkkeEndres> {
+                brevService.oppdaterMottaker(brev.id, tomMottaker())
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+    }
+
+    @Nested
+    inner class SlettMottakerTest {
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Slett KOPI-mottaker på redigerbart brev`(status: Status) {
+            val hovedmottaker = opprettMottaker(type = MottakerType.HOVED)
+            val kopimottaker = opprettMottaker(type = MottakerType.KOPI)
+
+            val brev = opprettBrev(status, BrevProsessType.REDIGERBAR, mottakere = listOf(hovedmottaker, kopimottaker))
+
+            every { db.hentBrev(any()) } returns brev
+
+            brevService.slettMottaker(brev.id, kopimottaker.id)
+
+            verify {
+                db.hentBrev(brev.id)
+                db.slettMottaker(brev.id, kopimottaker.id)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Slett HOVED-mottaker på redigerbart brev`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
+            val mottaker = brev.mottakere.single()
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<KanIkkeSletteHovedmottaker> { brevService.slettMottaker(brev.id, mottaker.id) }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `Sletting av mottaker på brev som ikke kan endres`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.REDIGERBAR)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<BrevKanIkkeEndres> {
+                brevService.slettMottaker(brev.id, mockk())
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+    }
+
+    @Nested
     inner class SlettingAvBrev {
         @ParameterizedTest
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
@@ -312,6 +472,7 @@ internal class BrevServiceTest {
         prosessType: BrevProsessType,
         behandlingId: UUID? = null,
         opprettet: Tidspunkt = Tidspunkt.now(),
+        mottakere: List<Mottaker> = listOf(opprettMottaker()),
     ) = Brev(
         id = Random.nextLong(10000),
         sakId = randomSakId(),
@@ -323,12 +484,12 @@ internal class BrevServiceTest {
         status = status,
         statusEndret = Tidspunkt.now(),
         opprettet = opprettet,
-        mottakere = listOf(opprettMottaker()),
+        mottakere = mottakere,
         brevtype = Brevtype.INFORMASJON,
         brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
     )
 
-    private fun opprettMottaker() =
+    private fun opprettMottaker(type: MottakerType = MottakerType.HOVED) =
         Mottaker(
             id = UUID.randomUUID(),
             navn = "Stor Snerk",
@@ -343,5 +504,6 @@ internal class BrevServiceTest {
                     land = "Norge",
                     landkode = "NOR",
                 ),
+            type = type,
         )
 }

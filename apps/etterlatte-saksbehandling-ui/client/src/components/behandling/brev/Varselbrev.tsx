@@ -15,7 +15,6 @@ import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
@@ -26,6 +25,7 @@ import BrevStatusTag from '~components/person/brev/BrevStatusTag'
 import { formaterDato } from '~utils/formatering/dato'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { logger } from '~utils/logger'
+import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -149,16 +149,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                 />
                 <br />
 
-                {varselbrev.mottakere.map((mottaker) => (
-                  <BrevMottakerPanel
-                    key={mottaker.id}
-                    brevId={varselbrev.id}
-                    behandlingId={behandlingId}
-                    sakId={sakId}
-                    mottaker={mottaker}
-                    kanRedigeres={redigerbar}
-                  />
-                ))}
+                <BrevMottakerWrapper brev={varselbrev} kanRedigeres={redigerbar} />
               </>
             )}
           </Box>

@@ -122,7 +122,7 @@ data class OpprettJournalfoerOgDistribuerRequest(
 
 data class JournalfoerVedtaksbrevResponseOgBrevid(
     val brevId: BrevID,
-    val opprettetJournalpost: OpprettJournalpostResponse,
+    val opprettetJournalpost: List<OpprettJournalpostResponse>,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

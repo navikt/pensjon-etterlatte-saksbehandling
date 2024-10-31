@@ -59,7 +59,7 @@ export function BrevMottakerPanel({
   }, [])
 
   useEffect(() => {
-    if (mottaker.foedselsnummer?.value) {
+    if (mottaker.foedselsnummer?.value && !mottaker.bestillingId) {
       hentKontaktinfo(mottaker.foedselsnummer.value)
     }
   }, [mottaker.foedselsnummer?.value])
@@ -147,6 +147,13 @@ export function BrevMottakerPanel({
           </Box>
         ),
       })}
+
+      {!!mottaker.bestillingId && (
+        <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="4 0" marginBlock="4 0">
+          <Info label="JournalpostID" tekst={mottaker.journalpostId} wide />
+          <Info label="DistribusjonID" tekst={mottaker.bestillingId} wide />
+        </Box>
+      )}
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="4 0" marginBlock="4 0">
         <Heading size="xsmall">Distribusjonsmetode</Heading>

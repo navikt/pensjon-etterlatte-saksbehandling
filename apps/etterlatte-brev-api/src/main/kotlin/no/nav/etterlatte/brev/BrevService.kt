@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.pdf.PDFGenerator
+import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -144,8 +145,11 @@ class BrevService(
     fun opprettMottaker(brevId: BrevID): Mottaker {
         val brev = sjekkOmBrevKanEndres(brevId)
 
-        val mottakerType = if (brev.mottakere.isNotEmpty()) MottakerType.KOPI else MottakerType.HOVED
-        val nyMottaker = tomMottaker(type = mottakerType)
+        if (brev.mottakere.size > 1) {
+            throw MaksAntallMottakere()
+        }
+
+        val nyMottaker = tomMottaker(type = MottakerType.KOPI)
 
         logger.info("Oppretter ny mottaker på brev=$brevId")
 
@@ -164,13 +168,15 @@ class BrevService(
 
         logger.info("Sletter mottaker (id=$mottakerId) fra brev=$brevId")
 
-        if (brev.mottakere.size > 1) {
-            db.slettMottaker(brevId, mottakerId)
+        val mottaker = brev.mottakere.find { it.id == mottakerId }
+        if (mottaker?.type == MottakerType.HOVED) {
+            throw KanIkkeSletteHovedmottaker()
+        } else if (brev.mottakere.size <= 1) {
+            throw MinstEnMottakerPaakrevd()
         } else {
-            throw UgyldigForespoerselException(
-                code = "KAN_IKKE_SLETTE_MOTTAKER",
-                detail = "Kan ikke slette mottaker. Det må finnes minst 1 mottaker på brevet!",
-            )
+            db.slettMottaker(brevId, mottakerId)
+
+            logger.info("Mottaker (id=$mottakerId) slettet fra brev=$brevId")
         }
     }
 
@@ -226,7 +232,10 @@ class BrevService(
     ) {
         val brev = sjekkOmBrevKanEndres(id)
 
-        if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
+        if (brev.mottakere.size !in 1..2) {
+            logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
+            throw UgyldigAntallMottakere()
+        } else if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottakere.toJson()}")
             throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottakere.flatMap { it.erGyldig() })
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
@@ -302,4 +311,18 @@ class BrevKanIkkeEndres(
                 "brevId" to brev.id,
                 "status" to brev.status,
             ),
+    )
+
+class MaksAntallMottakere : UgyldigForespoerselException("MAKS_ANTALL_MOTTAKERE", "Maks 2 mottakere tillatt")
+
+class KanIkkeSletteHovedmottaker :
+    UgyldigForespoerselException(
+        code = "KAN_IKKE_SLETTE_HOVEDMOTTAKER",
+        detail = "Kan ikke slette hovedmottakeren på et brev",
+    )
+
+class MinstEnMottakerPaakrevd :
+    UgyldigForespoerselException(
+        code = "MINST_EN_MOTTAKER_PAAKREVD",
+        detail = "Kan ikke slette mottaker. Det må finnes minst 1 mottaker på brevet!",
     )

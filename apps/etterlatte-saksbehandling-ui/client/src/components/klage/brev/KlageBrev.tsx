@@ -15,7 +15,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
-import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
+import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 
 function hentBrevId(klage: Klage | null): number | null {
   switch (klage?.utfall?.utfall) {
@@ -68,16 +68,7 @@ export function KlageBrev() {
               <VStack gap="4">
                 <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={redigerbar} />
 
-                {brev.mottakere.map((mottaker) => (
-                  <BrevMottakerPanel
-                    key={mottaker.id}
-                    brevId={brev.id}
-                    behandlingId={brev.behandlingId}
-                    sakId={brev.sakId}
-                    mottaker={mottaker}
-                    kanRedigeres={redigerbar}
-                  />
-                ))}
+                <BrevMottakerWrapper brev={brev} kanRedigeres={redigerbar} />
               </VStack>
             ))}
           </Box>

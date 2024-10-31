@@ -128,6 +128,9 @@ class VedtaksbrevService(
             return
         } else if (!brev.kanEndres()) {
             throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
+        } else if (brev.mottakere.size !in 1..2) {
+            logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
+            throw UgyldigAntallMottakere()
         } else if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
             sikkerlogger.error("Ugyldig mottaker(e): ${brev.mottakere.toJson()}")
             throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottakere.flatMap { it.erGyldig() })
@@ -257,6 +260,12 @@ class VedtaksbrevKanIkkeSlettes(
             mapOf(
                 "id" to brevId,
             ),
+    )
+
+class UgyldigAntallMottakere :
+    UgyldigForespoerselException(
+        code = "FOR_MANGE_MOTTAKERE",
+        detail = "Ugyldig antall mottakere på brevet. Må ma minst 1 og maks 2 mottakere per brev (hoved og kopi).",
     )
 
 class UgyldigMottakerKanIkkeFerdigstilles(

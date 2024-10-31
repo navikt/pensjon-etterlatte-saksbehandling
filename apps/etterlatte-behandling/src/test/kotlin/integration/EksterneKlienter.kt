@@ -365,13 +365,13 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): JournalpostIdDto = JournalpostIdDto(UUID.randomUUID().toString())
+    ): JournalpostIdDto = JournalpostIdDto(listOf(UUID.randomUUID().toString()))
 
     override suspend fun distribuerBrev(
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BestillingsIdDto = BestillingsIdDto(UUID.randomUUID().toString())
+    ): BestillingsIdDto = BestillingsIdDto(listOf(UUID.randomUUID().toString()))
 
     override suspend fun hentBrev(
         sakId: SakId,

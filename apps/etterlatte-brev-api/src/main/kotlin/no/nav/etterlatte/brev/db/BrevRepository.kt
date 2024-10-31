@@ -386,54 +386,48 @@ class BrevRepository(
             opprettBrevFra(id, ulagretBrev)
         }
 
+    fun lagreJournalpostId(
+        mottakerId: UUID,
+        journalpostResponse: OpprettJournalpostResponse,
+    ) = using(sessionOf(ds)) {
+        it
+            .run(
+                queryOf(
+                    "UPDATE mottaker SET journalpost_id = ? WHERE id = ?",
+                    journalpostResponse.journalpostId,
+                    mottakerId,
+                ).asUpdate,
+            ).also { oppdatert -> require(oppdatert == 1) }
+    }
+
     fun settBrevJournalfoert(
         brevId: BrevID,
-        journalpostResponse: OpprettJournalpostResponse,
+        journalpostResponse: List<OpprettJournalpostResponse>,
     ): Boolean =
-        ds.transaction { tx ->
-            tx
-                .run(
-                    // TODO EY-3627:
-                    //  Må settes med mottaker_id
-                    queryOf(
-                        "UPDATE mottaker SET journalpost_id = ? WHERE brev_id = ?",
-                        journalpostResponse.journalpostId,
-                        brevId,
-                    ).asUpdate,
-                ).also { oppdatert -> require(oppdatert == 1) }
-
-            tx.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
-        }
-
-    fun hentJournalpostId(brevId: BrevID): String? =
         using(sessionOf(ds)) {
-            it.run(
-                // TODO EY-3627:
-                //  Må hentes med mottaker_id
-                queryOf("SELECT journalpost_id FROM mottaker WHERE brev_id = ?", brevId)
-                    .map { row -> row.string("journalpost_id") }
-                    .asSingle,
-            )
+            it.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
         }
+
+    fun lagreBestillingId(
+        mottakerId: UUID,
+        distResponse: DistribuerJournalpostResponse,
+    ) = using(sessionOf(ds)) {
+        it
+            .run(
+                queryOf(
+                    "UPDATE mottaker SET bestilling_id = ? WHERE id = ?",
+                    distResponse.bestillingsId,
+                    mottakerId,
+                ).asUpdate,
+            ).also { oppdatert -> require(oppdatert == 1) }
+    }
 
     fun settBrevDistribuert(
-        brevId: Long,
-        distResponse: DistribuerJournalpostResponse,
-    ): Boolean =
-        ds.transaction { tx ->
-            tx
-                .run(
-                    // TODO EY-3627:
-                    //  Må settes med mottaker_id
-                    queryOf(
-                        "UPDATE mottaker SET bestilling_id = ? WHERE brev_id = ?",
-                        distResponse.bestillingsId,
-                        brevId,
-                    ).asUpdate,
-                ).also { oppdatert -> require(oppdatert == 1) }
-
-            tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
-        }
+        brevId: BrevID,
+        distResponse: List<DistribuerJournalpostResponse>,
+    ) = using(sessionOf(ds)) {
+        it.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson())
+    }
 
     fun settBrevSlettet(
         brevId: BrevID,

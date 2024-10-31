@@ -48,7 +48,7 @@ class OmregningKlassifikasjonskodeJobService(
 
         val sakerTilOmregning: List<Pair<SakId, KjoeringStatus>> =
             inTransaction {
-                omregningService.hentSakerTilOmregning(kjoering, antall)
+                omregningService.hentSakerTilOmregning(kjoering, antall, ekskluderteSaker)
             }
 
         logger.info("${sakerTilOmregning.size} sak(er) hentet for omregning")
@@ -138,6 +138,6 @@ class OmregningKlassifikasjonskodeJobService(
     companion object {
         val kjoering = "ENDRE_KLASSIFIKASJONSKODE_FOR_PERIODER_2023"
         val antall = 1
-        val ekskluderteSaker = emptyList<Long>() // TODO
+        val ekskluderteSaker = listOf<SakId>()
     }
 }

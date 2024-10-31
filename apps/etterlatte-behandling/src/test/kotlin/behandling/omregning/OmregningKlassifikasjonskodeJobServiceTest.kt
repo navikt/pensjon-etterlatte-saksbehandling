@@ -47,7 +47,13 @@ internal class OmregningKlassifikasjonskodeJobServiceTest {
 
     @BeforeEach
     fun beforeEach() {
-        every { omregningService.hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, any()) } returns
+        every {
+            omregningService.hentSakerTilOmregning(
+                OmregningKlassifikasjonskodeJobService.kjoering,
+                any(),
+                any(),
+            )
+        } returns
             listOf(Pair(SAK_ID, KjoeringStatus.FEILA))
         every { omregningService.oppdaterKjoering(any()) } just Runs
 
@@ -69,7 +75,13 @@ internal class OmregningKlassifikasjonskodeJobServiceTest {
     fun `skal hente en sak og og publisere hendelse på kafka`() {
         omregningKlassifikasjonskodeJobService.setupKontekstAndRun(kontekst)
 
-        verify { omregningService.hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, 1) }
+        verify {
+            omregningService.hentSakerTilOmregning(
+                OmregningKlassifikasjonskodeJobService.kjoering,
+                1,
+                any(),
+            )
+        }
         verify { behandlingService.hentFoerstegangsbehandling(SAK_ID) }
         verify { kafkaProdusent.publiser(any(), any()) }
 
@@ -97,7 +109,13 @@ internal class OmregningKlassifikasjonskodeJobServiceTest {
 
         omregningKlassifikasjonskodeJobService.setupKontekstAndRun(kontekst)
 
-        verify { omregningService.hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, 1) }
+        verify {
+            omregningService.hentSakerTilOmregning(
+                OmregningKlassifikasjonskodeJobService.kjoering,
+                1,
+                any(),
+            )
+        }
         verify { behandlingService.hentFoerstegangsbehandling(SAK_ID) }
         verify {
             omregningService.oppdaterKjoering(
@@ -113,7 +131,13 @@ internal class OmregningKlassifikasjonskodeJobServiceTest {
 
         omregningKlassifikasjonskodeJobService.setupKontekstAndRun(kontekst)
 
-        verify { omregningService.hentSakerTilOmregning(OmregningKlassifikasjonskodeJobService.kjoering, 1) }
+        verify {
+            omregningService.hentSakerTilOmregning(
+                OmregningKlassifikasjonskodeJobService.kjoering,
+                1,
+                any(),
+            )
+        }
         verify { behandlingService.hentFoerstegangsbehandling(SAK_ID) }
         verify {
             omregningService.oppdaterKjoering(

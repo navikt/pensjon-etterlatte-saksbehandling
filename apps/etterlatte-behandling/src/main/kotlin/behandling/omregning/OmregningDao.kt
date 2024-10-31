@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.omregning
 
-import no.nav.etterlatte.behandling.tilbakekreving.setInt
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
@@ -15,6 +14,7 @@ class OmregningDao(
     fun hentSakerTilOmregning(
         kjoering: String,
         antall: Int,
+        ekskluderteSaker: List<SakId>,
     ): List<Pair<SakId, KjoeringStatus>> =
         connection.hentConnection { connection ->
             with(connection) {
@@ -31,12 +31,17 @@ class OmregningDao(
                         JOIN siste_kjoeringer s
                         ON o.sak_id = s.sak_id
                         WHERE kjoering = ? AND status IN ('KLAR', 'FEILA') AND s.max_tid = o.tidspunkt
-                        
+                        ${if (ekskluderteSaker.isNotEmpty()) "AND o.sak_id <> ALL (?)" else ""}
                         LIMIT ?
                         """.trimIndent(),
                     )
                 statement.setString(1, kjoering)
-                statement.setInt(2, antall)
+                if (ekskluderteSaker.isNotEmpty()) {
+                    statement.setArray(2, createArrayOf("bigint", ekskluderteSaker.map { it.sakId }.toTypedArray()))
+                    statement.setInt(3, antall)
+                } else {
+                    statement.setInt(2, antall)
+                }
                 statement.executeQuery().toList {
                     Pair(
                         SakId(getLong("sak_id")),

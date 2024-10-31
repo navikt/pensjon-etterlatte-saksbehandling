@@ -82,8 +82,8 @@ class PDFGenerator(
             logger.info("Brev er en opplastet PDF – returnerer lagret innhold")
             return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke pdf for brev med id=${brev.id}" }
         }
-        val behandlingId = brev.behandlingId?.takeIf { brev.brevtype.erKobletTilEnBehandling() }
 
+        val behandlingId = brev.behandlingId?.takeIf { brev.brevtype.erKobletTilEnBehandling() }
         val generellBrevData =
             retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, behandlingId, brev.spraak, bruker) }
         val avsender =
@@ -178,7 +178,7 @@ class PDFGenerator(
         brev: Brev,
         generellBrevData: GenerellBrevData,
         avsender: Avsender,
-    ): Pdf {
+    ): Pdf =
         brevbakerService.genererPdf(
             brev.id,
             BrevbakerRequest.fra(
@@ -191,5 +191,4 @@ class PDFGenerator(
                 sak.sakType,
             ),
         )
-    }
 }

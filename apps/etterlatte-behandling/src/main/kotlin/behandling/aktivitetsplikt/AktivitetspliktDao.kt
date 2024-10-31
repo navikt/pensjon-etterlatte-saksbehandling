@@ -73,7 +73,7 @@ class AktivitetspliktDao(
         }
     }
 
-    fun hentAktiviteterForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitet> =
+    fun hentAktiviteterForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitetPeriode> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -90,7 +90,7 @@ class AktivitetspliktDao(
             }
         }
 
-    fun hentAktiviteterForSak(sakId: SakId): List<AktivitetspliktAktivitet> =
+    fun hentAktiviteterForSak(sakId: SakId): List<AktivitetspliktAktivitetPeriode> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -270,7 +270,7 @@ class AktivitetspliktDao(
     }
 
     private fun ResultSet.toAktivitet() =
-        AktivitetspliktAktivitet(
+        AktivitetspliktAktivitetPeriode(
             id = getUUID("id"),
             sakId = SakId(getLong("sak_id")),
             type = AktivitetspliktAktivitetType.valueOf(getString("aktivitet_type")),
@@ -283,6 +283,20 @@ class AktivitetspliktDao(
 }
 
 data class AktivitetspliktAktivitet(
+    val hendelser: List<AktivitetspliktAktivitetHendelse>,
+    val perioder: List<AktivitetspliktAktivitetPeriode>,
+)
+
+data class AktivitetspliktAktivitetHendelse(
+    val id: UUID,
+    val sakId: SakId,
+    val dato: LocalDate,
+    val opprettet: Grunnlagsopplysning.Kilde,
+    val endret: Grunnlagsopplysning.Kilde?,
+    val beskrivelse: String,
+)
+
+data class AktivitetspliktAktivitetPeriode(
     val id: UUID,
     val sakId: SakId,
     val type: AktivitetspliktAktivitetType,

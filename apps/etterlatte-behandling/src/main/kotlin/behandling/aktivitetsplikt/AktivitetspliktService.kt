@@ -169,7 +169,7 @@ class AktivitetspliktService(
     fun hentAktiviteter(
         behandlingId: UUID? = null,
         sakId: SakId? = null,
-    ): List<AktivitetspliktAktivitet> =
+    ): List<AktivitetspliktAktivitetPeriode> =
         (
             if (behandlingId != null) {
                 aktivitetspliktDao.hentAktiviteterForBehandling(behandlingId)

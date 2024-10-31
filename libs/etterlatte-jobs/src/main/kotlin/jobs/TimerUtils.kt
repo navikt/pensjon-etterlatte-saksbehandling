@@ -63,25 +63,25 @@ private fun run(
         action(correlationId)
     }
 } catch (leaderElectionDownException: LeaderElectionDownException) {
-    if (!shuttingDown.get()) {
-        logger.error("Jobb $name feilet siden leaderelection er nede", leaderElectionDownException)
+    if (shuttingDown.get()) {
+        logger.warn("Jobb $name feilet på vei ned siden leaderelection er nede", leaderElectionDownException)
     } else {
-        logger.error("Jobb $name feilet på vei ned siden leaderelection er nede", leaderElectionDownException)
+        logger.warn("Jobb $name feilet siden leaderelection er nede", leaderElectionDownException)
     }
 } catch (throwable: Throwable) {
-    if (!shuttingDown.get()) {
-        if (loggTilSikkerLogg) {
-            logger.error("Jobb $name feilet, se sikker logg for stacktrace")
-            sikkerLogg!!.error("Jobb $name feilet", throwable)
-        } else {
-            logger.error("Jobb $name feilet", throwable)
-        }
-    } else {
+    if (shuttingDown.get()) {
         if (loggTilSikkerLogg) {
             logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace")
             sikkerLogg!!.info("Jobb $name feilet mens applikasjonen avsluttet", throwable)
         } else {
             logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace", throwable)
+        }
+    } else {
+        if (loggTilSikkerLogg) {
+            logger.error("Jobb $name feilet, se sikker logg for stacktrace")
+            sikkerLogg!!.error("Jobb $name feilet", throwable)
+        } else {
+            logger.error("Jobb $name feilet", throwable)
         }
     }
 }

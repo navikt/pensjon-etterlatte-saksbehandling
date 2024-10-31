@@ -30,6 +30,8 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -55,7 +57,7 @@ class AvkortingTidligAlderspensjonServiceTest {
     }
 
     @Test
-    fun `Skal opprette oppgave hvis opphoer ved tidlig alderspensjon`() {
+    fun `Skal opprette oppgave hvis opphoer ved tidlig alderspensjon foerstegangsbehandling innevaerede aar`() {
         val behandlingId = UUID.randomUUID()
         val brukerTokenInfo = mockk<BrukerTokenInfo>(relaxed = true)
         val fom = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1))
@@ -63,7 +65,7 @@ class AvkortingTidligAlderspensjonServiceTest {
         val behandling =
             behandling(
                 id = behandlingId,
-                behandlingType = BehandlingType.REVURDERING,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 status = BehandlingStatus.IVERKSATT,
                 virkningstidspunkt = fom,
                 sak = SakId(123),
@@ -118,7 +120,159 @@ class AvkortingTidligAlderspensjonServiceTest {
         }
 
         val oppgaveFrist = slotTidspunkt.captured.toLocalDate()
-        oppgaveFrist.year shouldBe fom.dato.year
-        oppgaveFrist.month shouldBe fom.dato.month + grunnlag.innvilgaMaaneder.minus(2L)
+        oppgaveFrist shouldBe LocalDate.of(2024, Month.FEBRUARY, 1)
+    }
+
+    @Test
+    fun `Skal opprette oppgave hvis opphoer ved tidlig alderspensjon foerstegangsbehandling neste aar`() {
+        val behandlingId = UUID.randomUUID()
+        val brukerTokenInfo = mockk<BrukerTokenInfo>(relaxed = true)
+        val fom = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2025, 1))
+
+        val behandling =
+            behandling(
+                id = behandlingId,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = BehandlingStatus.IVERKSATT,
+                virkningstidspunkt = fom,
+                sak = SakId(123),
+            )
+
+        val grunnlag =
+            avkortinggrunnlag(
+                id = UUID.randomUUID(),
+                periode = Periode(fom = fom.dato, tom = null),
+                kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Tidspunkt.now()),
+                overstyrtInnvilgaMaanederAarsak = OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG,
+                innvilgaMaaneder = 3,
+            )
+
+        val inntektsavkorting = Inntektsavkorting(grunnlag = grunnlag)
+        val nesteAarsoppgjoer = aarsoppgjoer(aar = fom.dato.year, inntektsavkorting = listOf(inntektsavkorting))
+
+        val foesteAarsoppjoer =
+            aarsoppgjoer(
+                aar = 2024,
+                inntektsavkorting =
+                    listOf(
+                        Inntektsavkorting(
+                            grunnlag =
+                                avkortinggrunnlag(
+                                    id = UUID.randomUUID(),
+                                    periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
+                                    kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Tidspunkt.now()),
+                                    overstyrtInnvilgaMaanederAarsak = null,
+                                    innvilgaMaaneder = 12,
+                                ),
+                        ),
+                    ),
+            )
+
+        val avkorting = Avkorting(aarsoppgjoer = listOf(foesteAarsoppjoer, nesteAarsoppgjoer))
+
+        coEvery { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) } returns behandling
+        coEvery { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
+
+        coEvery {
+            behandlingKlient.opprettOppgave(
+                behandling.sak,
+                brukerTokenInfo,
+                OppgaveType.GENERELL_OPPGAVE,
+                "Opphør av ytelse på grunn av alderspensjon.",
+                any(),
+                any(),
+                any(),
+            )
+        } returns Unit
+
+        runBlocking {
+            service.opprettOppgaveHvisTidligAlderspensjon(behandlingId, brukerTokenInfo)
+        }
+
+        val slotTidspunkt = slot<Tidspunkt>()
+        coVerify(exactly = 1) {
+            behandlingKlient.opprettOppgave(
+                behandling.sak,
+                brukerTokenInfo,
+                OppgaveType.GENERELL_OPPGAVE,
+                "Opphør av ytelse på grunn av alderspensjon.",
+                capture(slotTidspunkt),
+                OppgaveKilde.BEHANDLING,
+                behandlingId.toString(),
+            )
+            avkortingRepository.hentAvkorting(behandlingId)
+            behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        }
+
+        val oppgaveFrist = slotTidspunkt.captured.toLocalDate()
+        oppgaveFrist shouldBe LocalDate.of(2025, Month.FEBRUARY, 1)
+    }
+
+    @Test
+    fun `Skal opprette oppgave hvis opphoer ved tidlig alderspensjon revurdering`() {
+        val behandlingId = UUID.randomUUID()
+        val brukerTokenInfo = mockk<BrukerTokenInfo>(relaxed = true)
+        val fom = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 5))
+
+        val behandling =
+            behandling(
+                id = behandlingId,
+                behandlingType = BehandlingType.REVURDERING,
+                status = BehandlingStatus.IVERKSATT,
+                virkningstidspunkt = fom,
+                sak = SakId(123),
+            )
+
+        val grunnlag =
+            avkortinggrunnlag(
+                id = UUID.randomUUID(),
+                periode = Periode(fom = fom.dato, tom = null),
+                kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", Tidspunkt.now()),
+                overstyrtInnvilgaMaanederAarsak = OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG,
+                innvilgaMaaneder = 3,
+            )
+
+        val inntektsavkorting = Inntektsavkorting(grunnlag = grunnlag)
+        val aarsoppgjoer =
+            aarsoppgjoer(aar = fom.dato.year, fom = fom.dato, inntektsavkorting = listOf(inntektsavkorting))
+
+        val avkorting = Avkorting(aarsoppgjoer = listOf(aarsoppgjoer))
+
+        coEvery { behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo) } returns behandling
+        coEvery { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
+
+        coEvery {
+            behandlingKlient.opprettOppgave(
+                behandling.sak,
+                brukerTokenInfo,
+                OppgaveType.GENERELL_OPPGAVE,
+                "Opphør av ytelse på grunn av alderspensjon.",
+                any(),
+                any(),
+                any(),
+            )
+        } returns Unit
+
+        runBlocking {
+            service.opprettOppgaveHvisTidligAlderspensjon(behandlingId, brukerTokenInfo)
+        }
+
+        val slotTidspunkt = slot<Tidspunkt>()
+        coVerify(exactly = 1) {
+            behandlingKlient.opprettOppgave(
+                behandling.sak,
+                brukerTokenInfo,
+                OppgaveType.GENERELL_OPPGAVE,
+                "Opphør av ytelse på grunn av alderspensjon.",
+                capture(slotTidspunkt),
+                OppgaveKilde.BEHANDLING,
+                behandlingId.toString(),
+            )
+            avkortingRepository.hentAvkorting(behandlingId)
+            behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        }
+
+        val oppgaveFrist = slotTidspunkt.captured.toLocalDate()
+        oppgaveFrist shouldBe LocalDate.of(2024, Month.JUNE, 1)
     }
 }

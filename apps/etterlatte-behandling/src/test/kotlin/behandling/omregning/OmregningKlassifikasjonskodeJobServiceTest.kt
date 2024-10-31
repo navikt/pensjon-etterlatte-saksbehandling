@@ -78,7 +78,7 @@ internal class OmregningKlassifikasjonskodeJobServiceTest {
         verify {
             omregningService.hentSakerTilOmregning(
                 OmregningKlassifikasjonskodeJobService.kjoering,
-                1,
+                any(),
                 any(),
             )
         }
@@ -112,7 +112,7 @@ internal class OmregningKlassifikasjonskodeJobServiceTest {
         verify {
             omregningService.hentSakerTilOmregning(
                 OmregningKlassifikasjonskodeJobService.kjoering,
-                1,
+                any(),
                 any(),
             )
         }
@@ -134,7 +134,7 @@ internal class OmregningKlassifikasjonskodeJobServiceTest {
         verify {
             omregningService.hentSakerTilOmregning(
                 OmregningKlassifikasjonskodeJobService.kjoering,
-                1,
+                any(),
                 any(),
             )
         }

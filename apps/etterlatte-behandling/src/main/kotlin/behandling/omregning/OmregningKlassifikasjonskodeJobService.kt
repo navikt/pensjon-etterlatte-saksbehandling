@@ -137,7 +137,7 @@ class OmregningKlassifikasjonskodeJobService(
 
     companion object {
         val kjoering = "ENDRE_KLASSIFIKASJONSKODE_FOR_PERIODER_2023"
-        val antall = 1
+        val antall = 10
         val ekskluderteSaker = listOf<SakId>()
     }
 }

@@ -667,6 +667,8 @@ internal class ApplicationContext(
             omregningKlassifikasjonskodeJobService = omregningKlassifikasjonskodeJobService,
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
+            // Simulering har åpningstid - kan ikke kjøre saker som krever simulering utenfor denne tiden
+            openingHours = OpeningHours(start = 7, slutt = 19),
         )
     }
 

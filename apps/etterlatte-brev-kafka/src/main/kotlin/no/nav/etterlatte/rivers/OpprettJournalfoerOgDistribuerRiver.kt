@@ -108,6 +108,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                 }
                 // TODO: @Andreas Balevik
                 Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
+                    // TODO: hvilke data skal vi ha her?
                     OmstillingsstoenadInntektsjusteringRedigerbar()
                 }
                 else -> throw Exception("Støtter ikke brevtype $brevKode i sak $sakId")

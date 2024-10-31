@@ -2,7 +2,7 @@ import { Journalpost, Journalposttype, Journalstatus } from '~shared/types/Journ
 import { Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { useState } from 'react'
-import { HStack, Table } from '@navikt/ds-react'
+import { Alert, Box, Button, Dropdown, HStack, Link, Table } from '@navikt/ds-react'
 import { JournalpostInnhold } from '~components/person/journalfoeringsoppgave/journalpost/JournalpostInnhold'
 import { formaterJournalpostStatus, formaterJournalpostType } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
@@ -12,6 +12,7 @@ import DokumentModal from '~components/person/dokumenter/DokumentModal'
 import { HaandterAvvikModal } from './avvik/HaandterAvvikModal'
 import { GosysTemaTag } from '~shared/tags/GosysTemaTag'
 import { GosysTema } from '~shared/types/Gosys'
+import { ChevronDownIcon, ExternalLinkIcon } from '@navikt/aksel-icons'
 
 export const DokumentRad = ({
   dokument,
@@ -56,6 +57,58 @@ export const DokumentRad = ({
           )}
 
           <HaandterAvvikModal journalpost={dokument} sakStatus={sakStatus} />
+
+          {dokument.dokumenter.length > 1 ? (
+            <Dropdown>
+              <Button icon={<ChevronDownIcon />} size="small" as={Dropdown.Toggle} variant="secondary">
+                Åpne
+              </Button>
+              <Dropdown.Menu>
+                <Dropdown.Menu.GroupedList>
+                  <Dropdown.Menu.GroupedList.Heading>Velg dokument</Dropdown.Menu.GroupedList.Heading>
+                  <Dropdown.Menu.Divider />
+                  {dokument.dokumenter.map((dok, index) => (
+                    <HStack key={index} gap="4">
+                      <Dropdown.Menu.GroupedList.Item
+                        key={dok.dokumentInfoId}
+                        disabled={!dok.dokumentvarianter[0]?.saksbehandlerHarTilgang}
+                      >
+                        <Link
+                          href={`/api/dokumenter/${dokument.journalpostId}/${dok.dokumentInfoId}`}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        >
+                          {dok.tittel}
+                          <ExternalLinkIcon aria-hidden title={dokument.tittel} />
+                        </Link>
+                      </Dropdown.Menu.GroupedList.Item>
+
+                      {!dok.dokumentvarianter[0]?.saksbehandlerHarTilgang && (
+                        <Box padding="4">
+                          <Alert variant="warning" size="small">
+                            Ikke Tilgang
+                          </Alert>
+                        </Box>
+                      )}
+                    </HStack>
+                  ))}
+                </Dropdown.Menu.GroupedList>
+              </Dropdown.Menu>
+            </Dropdown>
+          ) : (
+            <Button
+              as="a"
+              href={`/api/dokumenter/${dokument.journalpostId}/${dokument.dokumenter[0].dokumentInfoId}`}
+              target="_blank"
+              rel="noreferrer noopener"
+              size="small"
+              variant="secondary"
+              icon={<ExternalLinkIcon />}
+              title={dokument.dokumenter[0].tittel || dokument.tittel}
+            >
+              Åpne
+            </Button>
+          )}
 
           <DokumentModal journalpost={dokument} />
         </HStack>

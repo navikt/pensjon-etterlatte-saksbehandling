@@ -101,7 +101,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
                 onSuccess(behandlingId)
             } else {
                 logger.info("Har ikke tilgang til behandling")
-                throw GenerellIkkeFunnetException()
+                throw ManglerTilgang(skrivetilgang, "behandling")
             }
         }
 
@@ -131,7 +131,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
                 onSuccess(sakId)
             } else {
                 logger.info("Har ikke tilgang til sak")
-                throw GenerellIkkeFunnetException()
+                throw ManglerTilgang(skrivetilgang, "sak")
             }
         }
 
@@ -158,7 +158,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
                 onSuccess(foedselsnummer)
             } else {
                 logger.info("Har ikke tilgang til person")
-                throw GenerellIkkeFunnetException()
+                throw ManglerTilgang(skrivetilgang, "person")
             }
         }
 
@@ -234,6 +234,15 @@ class UgyldigDatoFormatException :
     UgyldigForespoerselException(
         code = "UGYLDIG-DATOFORMAT",
         detail = "Forventet format YYYY-MM-DD (ISO-8601)",
+    )
+
+class ManglerTilgang(
+    skrivetilgang: Boolean,
+    type: String,
+) : ForespoerselException(
+        status = HttpStatusCode.Forbidden.value,
+        code = "MANGLER_TILGANG",
+        detail = if (skrivetilgang) "Har ikke skrivetilgang til $type" else "Har ikke lesetilgang til $type",
     )
 
 fun ApplicationCall.dato(param: String) =

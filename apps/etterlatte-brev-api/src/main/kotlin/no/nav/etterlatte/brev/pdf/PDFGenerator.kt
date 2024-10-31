@@ -182,8 +182,8 @@ class PDFGenerator(
         brevbakerService.genererPdf(
             brev.id,
             BrevbakerRequest.fra(
-                EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_AARLIG_VEDTAK, // TODO: gjennbruke eller egen ny mal for vedtaksbrev
-                OmstillingsstoenadAarligInntektsjusteringJobb(), // TODO: må ha riktig data iht brevkode
+                EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_AARLIG_VEDTAK,
+                OmstillingsstoenadAarligInntektsjusteringJobb(), // TODO: legge til evnt. brevdata
                 avsender,
                 generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sak.id,

@@ -6,7 +6,7 @@ class OmstillingsstoenadAarligInntektsjusteringJobb : BrevDataRedigerbar {
     companion object {
         fun fra(): OmstillingsstoenadAarligInntektsjusteringJobb =
             OmstillingsstoenadAarligInntektsjusteringJobb(
-                // TODO: Implementere data og meldinger for inntektsjustering
+                // TODO: Implementere data og meldinger for årlig inntektsjustering jobb
             )
     }
 }

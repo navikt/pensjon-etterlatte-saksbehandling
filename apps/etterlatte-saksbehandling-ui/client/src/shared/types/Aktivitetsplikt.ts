@@ -13,10 +13,20 @@ export interface AktivitetspliktOppfolging {
 export interface IAktivitet {
   id: string
   sakId: number
-  behandlingId: string
+  behandlingId?: string
   type: AktivitetspliktType
   fom: string
   tom?: string
+  opprettet: KildeSaksbehandler
+  endret: KildeSaksbehandler
+  beskrivelse: string
+}
+
+export interface IAktivitetHendelse {
+  id: string
+  sakId: number
+  behandlingId?: string
+  dato: string
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler
   beskrivelse: string

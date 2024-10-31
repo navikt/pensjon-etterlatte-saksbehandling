@@ -101,7 +101,7 @@ class AktivitetspliktServiceTest {
         @Test
         fun `Skal returnere liste med aktiviteter`() {
             val behandlingId = UUID.randomUUID()
-            val aktivitet = mockk<AktivitetspliktAktivitet>()
+            val aktivitet = mockk<AktivitetspliktAktivitetPeriode>()
             every { aktivitetspliktDao.hentAktiviteterForBehandling(behandlingId) } returns listOf(aktivitet)
 
             val result = service.hentAktiviteter(behandlingId)

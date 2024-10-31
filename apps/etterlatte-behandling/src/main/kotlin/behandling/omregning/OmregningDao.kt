@@ -18,6 +18,8 @@ class OmregningDao(
     ): List<Pair<SakId, KjoeringStatus>> =
         connection.hentConnection { connection ->
             with(connection) {
+                val harEkskluderteSaker = ekskluderteSaker.isNotEmpty()
+
                 val statement =
                     prepareStatement(
                         """
@@ -31,17 +33,17 @@ class OmregningDao(
                         JOIN siste_kjoeringer s
                         ON o.sak_id = s.sak_id
                         WHERE kjoering = ? AND status IN ('KLAR', 'FEILA') AND s.max_tid = o.tidspunkt
-                        ${if (ekskluderteSaker.isNotEmpty()) "AND o.sak_id <> ALL (?)" else ""}
+                        ${if (harEkskluderteSaker) "AND o.sak_id <> ALL (?)" else ""}
                         LIMIT ?
                         """.trimIndent(),
                     )
+
                 statement.setString(1, kjoering)
-                if (ekskluderteSaker.isNotEmpty()) {
+                if (harEkskluderteSaker) {
                     statement.setArray(2, createArrayOf("bigint", ekskluderteSaker.map { it.sakId }.toTypedArray()))
-                    statement.setInt(3, antall)
-                } else {
-                    statement.setInt(2, antall)
                 }
+                statement.setInt(if (harEkskluderteSaker) 3 else 2, antall)
+
                 statement.executeQuery().toList {
                     Pair(
                         SakId(getLong("sak_id")),

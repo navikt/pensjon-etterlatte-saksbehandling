@@ -15,7 +15,8 @@ class OmregningService(
     fun hentSakerTilOmregning(
         kjoering: String,
         antall: Int,
-    ): List<Pair<SakId, KjoeringStatus>> = omregningDao.hentSakerTilOmregning(kjoering, antall)
+        ekskluderteSaker: List<SakId>,
+    ): List<Pair<SakId, KjoeringStatus>> = omregningDao.hentSakerTilOmregning(kjoering, antall, ekskluderteSaker)
 
     fun oppdaterKjoering(request: KjoeringRequest) = oppdaterKjoering(request, HardkodaSystembruker.omregning)
 

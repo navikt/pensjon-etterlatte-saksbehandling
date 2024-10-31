@@ -137,7 +137,7 @@ internal class BeregningRoutesTest {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
-                    it.status shouldBe HttpStatusCode.NotFound
+                    it.status shouldBe HttpStatusCode.Forbidden
                 }
         }
     }

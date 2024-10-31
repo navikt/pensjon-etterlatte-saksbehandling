@@ -3,6 +3,7 @@ package no.nav.etterlatte.jobs
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
+import no.nav.etterlatte.libs.jobs.LeaderElectionDownException
 import no.nav.etterlatte.shuttingDown
 import org.slf4j.Logger
 import java.util.Date
@@ -61,20 +62,26 @@ private fun run(
     withLogContext(correlationId) {
         action(correlationId)
     }
-} catch (throwable: Throwable) {
-    if (!shuttingDown.get()) {
-        if (loggTilSikkerLogg) {
-            logger.error("Jobb $name feilet, se sikker logg for stacktrace")
-            sikkerLogg!!.error("Jobb $name feilet", throwable)
-        } else {
-            logger.error("Jobb $name feilet", throwable)
-        }
+} catch (leaderElectionDownException: LeaderElectionDownException) {
+    if (shuttingDown.get()) {
+        logger.warn("Jobb $name feilet på vei ned siden leaderelection er nede", leaderElectionDownException)
     } else {
+        logger.warn("Jobb $name feilet siden leaderelection er nede", leaderElectionDownException)
+    }
+} catch (throwable: Throwable) {
+    if (shuttingDown.get()) {
         if (loggTilSikkerLogg) {
             logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace")
             sikkerLogg!!.info("Jobb $name feilet mens applikasjonen avsluttet", throwable)
         } else {
             logger.info("Jobb $name feilet mens applikasjonen avsluttet, se sikker logg for stacktrace", throwable)
+        }
+    } else {
+        if (loggTilSikkerLogg) {
+            logger.error("Jobb $name feilet, se sikker logg for stacktrace")
+            sikkerLogg!!.error("Jobb $name feilet", throwable)
+        } else {
+            logger.error("Jobb $name feilet", throwable)
         }
     }
 }

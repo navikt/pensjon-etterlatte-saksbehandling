@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.omregning.OmregningKlassifikasjonskodeJobSer
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -21,6 +22,7 @@ class OmregningKlassifikasjonskodeJob(
     private val omregningKlassifikasjonskodeJobService: OmregningKlassifikasjonskodeJobService,
     dataSource: DataSource,
     sakTilgangDao: SakTilgangDao,
+    private val openingHours: OpeningHours,
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -41,6 +43,7 @@ class OmregningKlassifikasjonskodeJob(
             initialDelay = initialDelay,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
+            openingHours = openingHours,
         ) {
             if (erLeader()) {
                 omregningKlassifikasjonskodeJobService.setupKontekstAndRun(jobContext)

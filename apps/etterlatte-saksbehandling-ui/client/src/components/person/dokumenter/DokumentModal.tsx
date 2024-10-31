@@ -8,7 +8,7 @@ import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { EyeIcon } from '@navikt/aksel-icons'
+import { ChevronDownIcon, EyeIcon } from '@navikt/aksel-icons'
 
 export default function DokumentModal({ journalpost }: { journalpost: Journalpost }) {
   const { tittel, journalpostId, dokumenter } = journalpost
@@ -36,8 +36,8 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
     <>
       {dokumenter.length > 1 ? (
         <Dropdown>
-          <Button icon={<EyeIcon />} size="small" as={Dropdown.Toggle}>
-            Åpne
+          <Button icon={<ChevronDownIcon />} size="small" as={Dropdown.Toggle}>
+            Vis
           </Button>
           <DropdownMenu>
             <Dropdown.Menu.GroupedList>
@@ -71,7 +71,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
           onClick={() => open(dokumenter[0].dokumentInfoId)}
           disabled={!dokumenter[0].dokumentvarianter[0]?.saksbehandlerHarTilgang}
         >
-          Åpne
+          Vis
         </Button>
       ) : (
         <Alert variant="warning" size="small">

@@ -5,7 +5,9 @@ import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.erForeldreloes
 import no.nav.etterlatte.brev.behandling.loependeIPesys
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
@@ -25,6 +27,7 @@ import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -140,30 +143,16 @@ class PDFGenerator(
                 sakType = sak.sakType,
             )
 
-        return brevbakerService
-            .genererPdf(brev.id, brevRequest)
-            .let {
-                // TODO: finne et bedre sted for dette?
-                when (brev.brevkoder) {
-                    Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
-                        val vedtaksbrev =
-                            brevbakerService.genererPdf(
-                                brev.id,
-                                BrevbakerRequest.fra(
-                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING, // TODO: gjennbruke eller egen ny mal for vedtaksbrev
-                                    OmstillingsstoenadInntektsjustering(), // TODO: må ha riktig data iht brevkode
-                                    avsender,
-                                    generellBrevData.personerISak.soekerOgEventuellVerge(),
-                                    sak.id,
-                                    generellBrevData.spraak,
-                                    sak.sakType,
-                                ),
-                            )
-                        PDFHelper.kombinerPdfListeTilEnPdf(listOf(vedtaksbrev, it))
-                    }
-                    else -> it
-                }
-            }
+        val brevPdf = brevbakerService.genererPdf(brev.id, brevRequest)
+
+        // TODO: ikke ideelt, bør finne en bedre måte å kombinere flere brev til en utsending
+        // Inntektsjustering skal ha varselbrev og vedtaksbrev i samme konvolutt. Hack for å kombinere brev til en pdf
+        if (brev.brevkoder == Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL) {
+            val vedtaksbrevPdf = opprettInntektsjusteringVedtaksbrevPdf(sak, brev, generellBrevData, avsender)
+            return PDFHelper.kombinerPdfListeTilEnPdf(listOf(brevPdf, vedtaksbrevPdf))
+        }
+
+        return brevPdf
     }
 
     private fun hentLagretInnhold(brev: Brev) =
@@ -182,5 +171,25 @@ class PDFGenerator(
             throw IllegalStateException("Brev med id=$brevID kan ikke endres, siden det har status ${brev.status}")
         }
         return brev
+    }
+
+    private suspend fun opprettInntektsjusteringVedtaksbrevPdf(
+        sak: Sak,
+        brev: Brev,
+        generellBrevData: GenerellBrevData,
+        avsender: Avsender,
+    ): Pdf {
+        brevbakerService.genererPdf(
+            brev.id,
+            BrevbakerRequest.fra(
+                EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING, // TODO: gjennbruke eller egen ny mal for vedtaksbrev
+                OmstillingsstoenadInntektsjustering(), // TODO: må ha riktig data iht brevkode
+                avsender,
+                generellBrevData.personerISak.soekerOgEventuellVerge(),
+                sak.id,
+                generellBrevData.spraak,
+                sak.sakType,
+            ),
+        )
     }
 }

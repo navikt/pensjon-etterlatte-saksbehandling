@@ -54,7 +54,7 @@ sealed class BrevParametereAutomatisk {
             )
     }
 
-    @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD")
+    @JsonTypeName("OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VARSEL")
     data class OmstillingsstoenadInntektsjusteringRedigerbar(
         override val brevkode: Brevkoder = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL,
     ) : BrevParametereAutomatisk() {

@@ -21,7 +21,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.OmstillingsstoenadInntektsjustering
+import no.nav.etterlatte.brev.model.OmstillingsstoenadAarligInntektsjusteringJobb
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -146,7 +146,7 @@ class PDFGenerator(
         val brevPdf = brevbakerService.genererPdf(brev.id, brevRequest)
 
         // TODO: ikke ideelt, bør finne en bedre måte å kombinere flere brev til en utsending
-        // Inntektsjustering skal ha varselbrev og vedtaksbrev i samme konvolutt. Hack for å kombinere brev til en pdf
+        // I forbindelse med årlig inntektsjustering jobb skal det sendes ut varsel og vedtak i samme brev.
         if (brev.brevkoder == Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL) {
             val vedtaksbrevPdf = opprettInntektsjusteringVedtaksbrevPdf(sak, brev, generellBrevData, avsender)
             return PDFHelper.kombinerPdfListeTilEnPdf(listOf(brevPdf, vedtaksbrevPdf))
@@ -182,8 +182,8 @@ class PDFGenerator(
         brevbakerService.genererPdf(
             brev.id,
             BrevbakerRequest.fra(
-                EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING, // TODO: gjennbruke eller egen ny mal for vedtaksbrev
-                OmstillingsstoenadInntektsjustering(), // TODO: må ha riktig data iht brevkode
+                EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_AARLIG_VEDTAK, // TODO: gjennbruke eller egen ny mal for vedtaksbrev
+                OmstillingsstoenadAarligInntektsjusteringJobb(), // TODO: må ha riktig data iht brevkode
                 avsender,
                 generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sak.id,

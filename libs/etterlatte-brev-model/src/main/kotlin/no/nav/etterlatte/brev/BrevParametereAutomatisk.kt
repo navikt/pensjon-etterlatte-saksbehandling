@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
+import no.nav.etterlatte.brev.model.OmstillingsstoenadAarligInntektsjusteringJobb
 import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
-import no.nav.etterlatte.brev.model.OmstillingsstoenadInntektsjustering
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class BrevParametereAutomatisk {
@@ -58,6 +58,6 @@ sealed class BrevParametereAutomatisk {
     data class OmstillingsstoenadInntektsjusteringRedigerbar(
         override val brevkode: Brevkoder = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL,
     ) : BrevParametereAutomatisk() {
-        override fun brevDataMapping(): BrevDataRedigerbar = OmstillingsstoenadInntektsjustering()
+        override fun brevDataMapping(): BrevDataRedigerbar = OmstillingsstoenadAarligInntektsjusteringJobb()
     }
 }

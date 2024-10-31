@@ -74,7 +74,7 @@ internal class VedtakAttestertRiver(
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
 
-        // inntektsjustering skal ha varsel og vedtak etter omregning er ferdig
+        // Årlig inntektsjustering jobb skal sende ut varsel og vedtak etter at sak er ferdig omregnet
         if (kjoering === AarligInntektsjusteringKjoering.getKjoering()) {
             packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
             packet.brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL.name

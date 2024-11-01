@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.model
+package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.behandling.Avdoed

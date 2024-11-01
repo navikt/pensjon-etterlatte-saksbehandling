@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
@@ -335,6 +336,14 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
 
 class BrevApiKlientTest : BrevApiKlient {
     private var brevId = 1L
+
+    override suspend fun opprettSpesifiktBrev(
+        sakId: SakId,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,

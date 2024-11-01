@@ -1,4 +1,4 @@
-import { Box, Heading, VStack } from '@navikt/ds-react'
+import { Box, Button, Heading, VStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import { Vurderinger } from '~components/aktivitetsplikt/vurdering/Vurderinger'
 import { mapResult } from '~shared/api/apiUtils'
@@ -9,10 +9,14 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { velgDoedsdato } from '~components/person/aktivitet/Aktivitet'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useNavigate } from 'react-router'
+import { handlinger } from '~components/behandling/handlinger/typer'
+import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 
 export function VurderAktivitet() {
   const oppgave = useAktivitetspliktOppgaveVurdering()
   const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
+  const navigate = useNavigate()
   useEffect(() => {
     familieOpplysningerFetch({ ident: oppgave.sak.ident, sakType: oppgave.sak.sakType })
   }, [])
@@ -34,6 +38,15 @@ export function VurderAktivitet() {
             ),
           })}
           <Vurderinger />
+          <Box width="6">
+            <Button
+              onClick={() => {
+                navigate(`../${AktivitetspliktSteg.BREV}`)
+              }}
+            >
+              {handlinger.NESTE.navn}
+            </Button>
+          </Box>
         </VStack>
       </Box>
     </>

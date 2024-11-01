@@ -48,6 +48,8 @@ export enum AktivitetspliktVurderingType {
   AKTIVITET_100 = 'AKTIVITET_100',
 }
 
+//enum class Aktivitetsgrad { IKKE_I_AKTIVITET, UNDER_50_PROSENT, OVER_50_PROSENT, UNDER_100_PROSENT, AKKURAT_100_PROSENT }
+
 export const tekstAktivitetspliktVurderingType: Record<AktivitetspliktVurderingType, string> = {
   AKTIVITET_UNDER_50: 'Under 50%',
   AKTIVITET_OVER_50: '50% - 100%',

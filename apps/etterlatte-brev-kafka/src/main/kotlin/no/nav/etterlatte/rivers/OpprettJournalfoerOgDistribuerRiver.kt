@@ -13,11 +13,11 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.mapAvdoede
-import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
-import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
 import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
-import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException

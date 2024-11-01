@@ -1,6 +1,6 @@
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { GridContainer, MainContent } from '~shared/styled'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import React, { createContext, useContext } from 'react'
 import { AktivitetspliktSidemeny } from '~components/aktivitetsplikt/sidemeny/AktivitetspliktSidemeny'
 import {
@@ -27,7 +27,6 @@ export function OppgaveVurderingRoute(props: { vurderingOgOppgave: Aktivitetspli
           <Routes>
             <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet />} />
             <Route path={AktivitetspliktSteg.BREV} element={<VurderingInfoBrev />} />
-            <Route path="*" element={<Navigate to={AktivitetspliktSteg.VURDERING} replace />} />
           </Routes>
         </MainContent>
         <AktivitetspliktSidemeny />

@@ -1,0 +1,1 @@
+ALTER TABLE aktivitetsplikt_brevdata ADD COLUMN brev_id BIGINT;

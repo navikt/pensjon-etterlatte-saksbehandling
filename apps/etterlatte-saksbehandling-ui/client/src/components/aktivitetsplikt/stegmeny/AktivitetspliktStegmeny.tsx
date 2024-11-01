@@ -2,6 +2,7 @@ import { StegMenyBox } from '~components/behandling/StegMeny/stegmeny'
 import { HStack } from '@navikt/ds-react'
 import React from 'react'
 import { AktivitetNavLenke } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktNavLenke'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 
 export enum AktivitetspliktSteg {
   VURDERING = 'vurdering',
@@ -9,7 +10,10 @@ export enum AktivitetspliktSteg {
 }
 
 export function AktivitetspliktStegmeny() {
-  const skalBrevVises = true // TODO: logikk for om man skal sende brev
+  const { aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+
+  const skalBrevVises =
+    (!!aktivtetspliktbrevdata && !!aktivtetspliktbrevdata.brevId) || !!aktivtetspliktbrevdata?.skalSendeBrev //Implisitt at utbetaling og redusertEtterInntekt er satt
 
   return (
     <StegMenyBox>

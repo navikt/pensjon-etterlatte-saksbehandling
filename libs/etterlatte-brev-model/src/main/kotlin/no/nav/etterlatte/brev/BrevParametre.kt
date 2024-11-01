@@ -2,15 +2,15 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import no.nav.etterlatte.brev.model.Aktivitetsgrad
-import no.nav.etterlatte.brev.model.AktivitetspliktInformasjon10mndBrevdata
-import no.nav.etterlatte.brev.model.AktivitetspliktInformasjon4MndBrevdata
-import no.nav.etterlatte.brev.model.AktivitetspliktInformasjon6MndBrevdata
-import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
-import no.nav.etterlatte.brev.model.NasjonalEllerUtland
-import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknad
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnhentingAvOpplysninger
+import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
+import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon10mndBrevdata
+import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon4MndBrevdata
+import no.nav.etterlatte.brev.model.oms.AktivitetspliktInformasjon6MndBrevdata
+import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonMottattSoeknad
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnhentingAvOpplysninger
 import java.time.LocalDate

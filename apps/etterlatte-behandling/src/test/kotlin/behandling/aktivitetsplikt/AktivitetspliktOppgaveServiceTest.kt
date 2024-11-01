@@ -29,6 +29,7 @@ class AktivitetspliktOppgaveServiceTest {
             oppgaveService = oppgaveService,
             sakService = sakService,
             mockk(relaxed = true),
+            mockk(relaxed = true),
         )
 
     private val sak =

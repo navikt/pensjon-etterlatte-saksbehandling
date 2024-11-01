@@ -147,6 +147,9 @@ class OmregningKlassifikasjonskodeJobService(
                 SakId(13096), // Denne har opphør - Feiler med etterbetaling
                 SakId(13115), // Denne har opphør - Feiler med etterbetaling
                 SakId(16123), // Feiler med etterbetaling
+                SakId(17419), // Feiler med etterbetaling
+                SakId(17506), // Feiler med etterbetaling
+                SakId(17507), // Feiler med etterbetaling
             )
     }
 }

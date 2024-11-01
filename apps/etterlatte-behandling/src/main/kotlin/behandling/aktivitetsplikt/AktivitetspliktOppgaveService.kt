@@ -82,6 +82,7 @@ class AktivitetspliktOppgaveService(
             AktivitetspliktAktivitetsgradType.AKTIVITET_100 -> Aktivitetsgrad.AKKURAT_100_PROSENT
         }
 
+    // TODO; ta inn noen tester her
     fun opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

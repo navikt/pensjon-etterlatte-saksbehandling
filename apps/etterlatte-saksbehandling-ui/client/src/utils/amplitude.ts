@@ -1,7 +1,6 @@
 import * as amplitude from '@amplitude/analytics-browser'
 
 export enum LogEvents {
-  PAGE_CHANGE = 'sidevisning',
   CLICK = 'klikk',
 }
 
@@ -41,4 +40,18 @@ export const initAmplitude = () => {
 
   window.amplitude = amplitudeInstance
   return amplitudeInstance
+}
+
+// Eksempelfunksjon for track av klikk
+export const trackClick = (name: string) => {
+  if (!amplitudeInstance) {
+    console.warn('Amplitude is not initialized. Ignoring')
+    return
+  }
+  amplitudeInstance.track({
+    event_type: LogEvents.CLICK,
+    event_properties: {
+      tekst: name,
+    },
+  })
 }

@@ -137,19 +137,19 @@ class OmregningKlassifikasjonskodeJobService(
 
     companion object {
         val kjoering = "ENDRE_KLASSIFIKASJONSKODE_FOR_PERIODER_2023"
-        val antall = 20
+        val antall = 1
         val ekskluderteSaker =
             listOf(
                 SakId(11958), // Denne har opphør - Overstyrt
                 SakId(12703), // Feiler med etterbetaling
-                SakId(12718), // Feiler med etterbetaling
-                SakId(12655), // Feiler med klassifikasjonskode UTBETALING
+                SakId(12718), // Feiler med etterbetaling - er allerede good?
                 SakId(13096), // Denne har opphør - Feiler med etterbetaling
                 SakId(13115), // Denne har opphør - Feiler med etterbetaling
                 SakId(16123), // Feiler med etterbetaling
                 SakId(17419), // Feiler med etterbetaling
                 SakId(17506), // Feiler med etterbetaling
                 SakId(17507), // Feiler med etterbetaling
+                SakId(17025), // Feiler med etterbetaling
             )
     }
 }

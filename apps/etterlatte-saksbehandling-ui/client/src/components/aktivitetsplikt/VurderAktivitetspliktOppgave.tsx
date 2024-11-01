@@ -30,7 +30,12 @@ export function VurderAktivitetspliktOppgave() {
       </ApiErrorAlert>
     ),
     pending: <Spinner visible label="Henter oppgave for vurdering" />,
-    success: (oppgave) => <OppgaveVurderingRoute vurderingOgOppgave={oppgave} />,
+    success: (oppgave) => (
+      <OppgaveVurderingRoute
+        vurderingOgOppgave={oppgave}
+        fetchOppgave={() => fetchOppgave({ oppgaveId: oppgave.oppgave.id })}
+      />
+    ),
     error: (e) => (
       <ApiErrorAlert>{e.detail || 'Kunne ikke hente oppgave for vurderingen av aktivitetsplikt'}</ApiErrorAlert>
     ),

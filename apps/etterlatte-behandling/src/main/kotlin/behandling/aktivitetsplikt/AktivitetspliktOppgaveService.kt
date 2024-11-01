@@ -5,7 +5,10 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevParametre
+import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
+import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -105,11 +108,11 @@ class AktivitetspliktOppgaveService(
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
             val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId) ?: throw GenerellIkkeFunnetException()
-            val sisteAktivtetsgrad = vurderingForOppgave.aktivitet.maxBy { it.fom }
+            // val sisteAktivtetsgrad = vurderingForOppgave.aktivitet.maxBy { it.fom } //TODO: endre tilbake
             val nasjonalEllerUtland = behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
             val brevParametreAktivitetsplikt10mnd =
                 BrevParametre.AktivitetspliktInformasjon10Mnd(
-                    aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
+                    aktivitetsgrad = Aktivitetsgrad.UNDER_50_PROSENT,
                     utbetaling = brevData.utbetaling!!,
                     redusertEtterInntekt = brevData.redusertEtterInntekt!!,
                     nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
@@ -146,6 +149,29 @@ class AktivitetspliktOppgaveService(
         } else {
             logger.info("Oppretter ikke brev for oppgaveid ${brevdata.oppgaveId} har ikke valgt å sende brev for oppgave")
             return false
+        }
+    }
+
+    fun ferdigstillBrevOgOppgave(
+        oppgaveId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+
+        val req =
+            FerdigstillJournalFoerOgDistribuerOpprettetBrev(
+                brevId = brevData.brevId!!,
+                sakId = sak.id,
+                enhetsnummer = sak.enhet,
+                avsenderRequest = SaksbehandlerOgAttestant(saksbehandlerIdent = brukerTokenInfo.ident()),
+            )
+        val distribusjonResponse: BrevDistribusjonResponse = runBlocking { brevApiKlient.ferdigstillBrev(req, brukerTokenInfo) }
+        if (distribusjonResponse.erDistribuert) {
+            oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
+        } else {
+            throw Exception("Brev er ikke distribusjon for oppgaveid ${brevData.oppgaveId}")
         }
     }
 }

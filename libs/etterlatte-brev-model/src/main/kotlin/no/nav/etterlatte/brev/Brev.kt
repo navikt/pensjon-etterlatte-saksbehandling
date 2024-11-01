@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.BrevParametereAutomatisk
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -118,6 +119,13 @@ data class OpprettJournalfoerOgDistribuerRequest(
     val brevParametereAutomatisk: BrevParametereAutomatisk,
     val avsenderRequest: SaksbehandlerOgAttestant,
     val sakId: SakId,
+)
+
+data class FerdigstillJournalFoerOgDistribuerOpprettetBrev(
+    val brevId: BrevID,
+    val sakId: SakId,
+    val enhetsnummer: Enhetsnummer,
+    val avsenderRequest: SaksbehandlerOgAttestant,
 )
 
 data class JournalfoerVedtaksbrevResponseOgBrevid(

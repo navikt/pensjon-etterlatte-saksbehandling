@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
@@ -78,7 +79,43 @@ class BrevService(
             logger.info("Brevid: $brevId er distribuert")
             return BrevDistribusjonResponse(brevId, true)
         } catch (e: Exception) {
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...", e)
+            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId...", e)
+            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
+            return BrevDistribusjonResponse(brevId, false)
+        }
+    }
+
+    suspend fun ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(
+        req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
+        bruker: BrukerTokenInfo,
+    ): BrevDistribusjonResponse {
+        val brevId = req.brevId
+        val hentBrev = db.hentBrev(brevId)
+        try {
+            pdfGenerator.ferdigstillOgGenererPDF(
+                brevId,
+                bruker,
+                avsenderRequest = { _, _, _ ->
+                    AvsenderRequest(
+                        saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
+                        attestantIdent = req.avsenderRequest.attestantIdent,
+                        sakenhet = req.enhetsnummer,
+                    )
+                },
+                brevKodeMapping = { hentBrev.brevkoder!! },
+                brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+            )
+
+            logger.info("Journalfører brev med id: $brevId")
+            journalfoerBrevService.journalfoer(brevId, bruker)
+
+            logger.info("Distribuerer brev med id: $brevId")
+            distribuerer.distribuer(brevId)
+
+            logger.info("Brevid: $brevId er distribuert")
+            return BrevDistribusjonResponse(brevId, true)
+        } catch (e: Exception) {
+            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId...", e)
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
             return BrevDistribusjonResponse(brevId, false)
         }

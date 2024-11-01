@@ -1,4 +1,4 @@
-import { Alert, Box, Heading, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React, { useEffect, useState } from 'react'
@@ -14,11 +14,9 @@ import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
-import BrevStatusPanel from '~components/person/brev/BrevStatusPanel'
-import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import styled from 'styled-components'
 import { isPending } from '@reduxjs/toolkit'
-import { opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
+import { ferdigstillJournalfoerOgDistribuerbrev, opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
 
 export function VurderingInfoBrev() {
   useSidetittel('Aktivitetsplikt brev')
@@ -73,7 +71,9 @@ export function VurderingInfoBrev() {
               {isFailure(opprettBrevStatus) && (
                 <ApiErrorAlert>Kunne ikke opprette brev {opprettBrevStatus.error.detail}</ApiErrorAlert>
               )}
-              {brevErKlart && brevId && <Aktivitetspliktbrev brevId={brevId} sakId={oppgave.sakId} />}
+              {brevErKlart && brevId && (
+                <Aktivitetspliktbrev brevId={brevId} sakId={oppgave.sakId} oppgaveid={oppgave.id} />
+              )}
             </>
           ) : (
             <>
@@ -98,12 +98,21 @@ const PanelWrapper = styled.div`
   max-height: 955px;
 `
 
-function Aktivitetspliktbrev({ brevId, sakId }: { brevId: number; sakId: number }) {
+function Aktivitetspliktbrev({
+  brevId,
+  sakId,
+  oppgaveid,
+}: {
+  brevId: number
+  sakId: number
+  oppgaveid: string
+}): JSX.Element {
   const [kanRedigeres, setKanRedigeres] = useState(false)
   const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
 
+  const [status, ferdigstillbrev] = useApiCall(ferdigstillJournalfoerOgDistribuerbrev)
   useEffect(() => {
     apiHentBrev({ brevId: Number(brevId), sakId: Number(sakId) }, (brev) => {
       if ([BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)) {
@@ -139,27 +148,17 @@ function Aktivitetspliktbrev({ brevId, sakId }: { brevId: number; sakId: number 
                   <ForhaandsvisningBrev brev={brev} />
                 </PanelWrapper>
               ) : (
-                <RedigerbartBrev
-                  brev={brev}
-                  kanRedigeres={kanRedigeres}
-                  tilbakestillingsaction={() => setTilbakestilt(true)}
-                />
+                <>
+                  <RedigerbartBrev
+                    brev={brev}
+                    kanRedigeres={kanRedigeres}
+                    tilbakestillingsaction={() => setTilbakestilt(true)}
+                  />
+                  {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
+                  {isPending(status) && <Spinner label="Ferdigstiller brev" />}
+                  <Button onClick={() => ferdigstillbrev({ oppgaveId: oppgaveid })}>Ferdigstill brev</Button>
+                </>
               )}
-            </Column>
-            <Column>
-              <BrevStatusPanel brev={brev} />
-              <Box padding="4" borderRadius="small">
-                <Heading spacing level="2" size="medium">
-                  Handlinger
-                </Heading>
-                <NyttBrevHandlingerPanel
-                  brev={brev}
-                  setKanRedigeres={setKanRedigeres}
-                  callback={() => {
-                    // TODO sett oppgave til ferdigstilt her, hele denne skal flyttes til backend som kan håndtere det.
-                  }}
-                />
-              </Box>
             </Column>
           </GridContainer>
         )

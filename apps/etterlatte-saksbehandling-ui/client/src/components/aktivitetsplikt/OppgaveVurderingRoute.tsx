@@ -1,6 +1,6 @@
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { GridContainer, MainContent } from '~shared/styled'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import React, { createContext, useContext } from 'react'
 import { AktivitetspliktSidemeny } from '~components/aktivitetsplikt/sidemeny/AktivitetspliktSidemeny'
 import {
@@ -15,8 +15,11 @@ const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurder
   {} as AktivitetspliktOppgaveVurdering
 )
 
-export function OppgaveVurderingRoute(props: { vurderingOgOppgave: AktivitetspliktOppgaveVurdering }) {
-  const { vurderingOgOppgave } = props
+export function OppgaveVurderingRoute(props: {
+  vurderingOgOppgave: AktivitetspliktOppgaveVurdering
+  fetchOppgave: () => void
+}) {
+  const { vurderingOgOppgave, fetchOppgave } = props
   return (
     <AktivitetspliktOppgaveContext.Provider value={vurderingOgOppgave}>
       <StatusBar ident={vurderingOgOppgave.oppgave.fnr} />
@@ -25,8 +28,9 @@ export function OppgaveVurderingRoute(props: { vurderingOgOppgave: Aktivitetspli
       <GridContainer>
         <MainContent>
           <Routes>
-            <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet />} />
+            <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet fetchOppgave={fetchOppgave} />} />
             <Route path={AktivitetspliktSteg.BREV} element={<VurderingInfoBrev />} />
+            <Route path="*" element={<Navigate to={AktivitetspliktSteg.VURDERING} replace />} />
           </Routes>
         </MainContent>
         <AktivitetspliktSidemeny />

@@ -9,6 +9,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -27,6 +28,7 @@ import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ping
@@ -53,6 +55,8 @@ interface PdlTjenesterKlient : Pingable {
     ): GeografiskTilknytning
 
     fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?>
+
+    suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator?
 
     suspend fun hentAdressebeskyttelseForPerson(hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest): AdressebeskyttelseGradering
 
@@ -157,6 +161,26 @@ class PdlTjenesterKlientImpl(
                     }.body<Map<String, String?>>()
             }
         return response
+    }
+
+    override suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
+        logger.info("Henter ident fra PDL for fnr=${ident.maskerFnr()}")
+
+        return retry<PdlIdentifikator?> {
+            client
+                .post("$url/pdlident") {
+                    contentType(ContentType.Application.Json)
+                    setBody(HentPdlIdentRequest(PersonIdent(ident)))
+                }.body()
+        }.let { result ->
+            when (result) {
+                is RetryResult.Success -> result.content
+                is RetryResult.Failure -> {
+                    logger.error("Feil ved henting av ident fra PDL for fnr=${ident.maskerFnr()}")
+                    throw result.samlaExceptions()
+                }
+            }
+        }
     }
 
     override suspend fun hentAktoerId(foedselsnummer: String): PdlIdentifikator.AktoerId? {

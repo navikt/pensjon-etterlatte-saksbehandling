@@ -603,6 +603,10 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
 
     override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> = emptyMap<String, String>()
 
+    override suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun hentAdressebeskyttelseForPerson(
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,
     ): AdressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT

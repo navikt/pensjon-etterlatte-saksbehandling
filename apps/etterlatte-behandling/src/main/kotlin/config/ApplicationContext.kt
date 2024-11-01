@@ -453,14 +453,6 @@ internal class ApplicationContext(
             omregningDao = omregningDao,
         )
 
-    val aarligInntektsjusteringJobbService =
-        AarligInntektsjusteringJobbService(
-            omregningService = omregningService,
-            vedtakKlient = vedtakKlient,
-            beregningKlient = beregningsKlient,
-            rapid = rapid,
-        )
-
     val tilgangService = TilgangServiceImpl(sakTilgangDao)
 
     val externalServices: List<Pingable> =
@@ -486,6 +478,17 @@ internal class ApplicationContext(
             pdlTjenesterKlient,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
+
+    val aarligInntektsjusteringJobbService =
+        AarligInntektsjusteringJobbService(
+            omregningService = omregningService,
+            sakService = sakService,
+            oppgaveService = oppgaveService,
+            vedtakKlient = vedtakKlient,
+            beregningKlient = beregningsKlient,
+            pdlTjenesterKlient = pdlTjenesterKlient,
+            rapid = rapid,
+        )
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
     val grunnlagsendringshendelseService =

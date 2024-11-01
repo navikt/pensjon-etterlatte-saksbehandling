@@ -7,6 +7,7 @@ import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
@@ -21,6 +22,12 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 interface BrevApiKlient {
+    suspend fun opprettSpesifiktBrev(
+        sakId: SakId,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev
+
     suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -103,6 +110,21 @@ class BrevApiKlientObo(
 
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
+
+    override suspend fun opprettSpesifiktBrev(
+        sakId: SakId,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev =
+        post(
+            url = "$resourceUrl/api/brev/sak/$sakId/spesifikk",
+            onSuccess = { resource ->
+                resource.response?.let { objectMapper.readValue(it.toJson()) }
+                    ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
+            },
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = brevParametre.toJson(),
+        )
 
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,

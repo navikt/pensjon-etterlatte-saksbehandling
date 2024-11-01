@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
@@ -238,6 +239,13 @@ internal fun Route.aktivitetspliktRoutes(
             inTransaction { aktivitetspliktOppgaveService.lagreBrevdata(oppgaveId, brevdata) }
             call.respond(HttpStatusCode.OK)
         }
+        post("opprettbrev") {
+            val brevId =
+                inTransaction {
+                    aktivitetspliktOppgaveService.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId = oppgaveId, brukerTokenInfo)
+                }
+            call.respond(BrevIdDto(brevId))
+        }
     }
 
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
@@ -340,6 +348,10 @@ internal fun Route.aktivitetspliktRoutes(
         }
     }
 }
+
+data class BrevIdDto(
+    val brevId: BrevID? = null,
+)
 
 class VurderingIkkeFunnetException(
     sakId: SakId,

@@ -2,10 +2,10 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfall
-import no.nav.etterlatte.brev.model.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
-import no.nav.etterlatte.brev.model.OmstillingsstoenadAarligInntektsjusteringJobb
-import no.nav.etterlatte.brev.model.OmstillingsstoenadInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAarligInntektsjusteringJobb
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class BrevParametereAutomatisk {

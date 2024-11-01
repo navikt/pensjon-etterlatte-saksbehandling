@@ -21,8 +21,8 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.OmstillingsstoenadAarligInntektsjusteringJobb
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAarligInntektsjusteringJobb
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.logging.sikkerlogger

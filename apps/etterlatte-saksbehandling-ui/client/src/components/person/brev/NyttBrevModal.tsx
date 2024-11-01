@@ -341,7 +341,7 @@ type FilledFormData = {
   borINorgeEllerIkkeAvtaleland?: JaNei
 }
 
-enum NasjonalEllerUtland {
+export enum NasjonalEllerUtland {
   NASJONAL = 'NASJONAL',
   UTLAND = 'UTLAND',
 }

@@ -5,7 +5,7 @@ import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
 import { isPending } from '@reduxjs/toolkit'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { IBrevAktivitetspliktDto, lagreAktivitetspliktBrevdata } from '~shared/api/aktivitetsplikt'
+import { IBrevAktivitetspliktRequest, lagreAktivitetspliktBrevdata } from '~shared/api/aktivitetsplikt'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { PencilIcon } from '@navikt/aksel-icons'
@@ -19,22 +19,21 @@ interface IBrevAktivitetsplikt {
   redusertEtterInntekt: JaNei
 }
 
-function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktDto {
+function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
   return {
     skalSendeBrev: brevdata.skalSendeBrev === JaNei.JA,
-    utbetaling: brevdata.utbetaling === JaNei.JA,
-    redusertEtterInntekt: brevdata.redusertEtterInntekt === JaNei.JA,
+    utbetaling: brevdata.utbetaling ? brevdata.utbetaling === JaNei.JA : undefined,
+    redusertEtterInntekt: brevdata.redusertEtterInntekt ? brevdata.redusertEtterInntekt === JaNei.JA : undefined,
   }
 }
 
 export const BrevAktivitetsplikt = () => {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
-  //Hvis jeg lagrer og kommer inn i ikke redigervisning så er aktivtetspliktbrevdata ikke hentet på nytt
   const { handleSubmit, watch, control, resetField } = useForm<IBrevAktivitetsplikt>({})
 
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
   const [redigeres, setRedigeres] = useState<boolean>(!aktivtetspliktbrevdata)
-  const [brevdata, oppdaterBrevdata] = useState<IBrevAktivitetspliktDto | undefined>(aktivtetspliktbrevdata)
+  const [brevdata, oppdaterBrevdata] = useState<IBrevAktivitetspliktRequest | undefined>(aktivtetspliktbrevdata)
 
   const lagreBrevutfall = (data: IBrevAktivitetsplikt) => {
     const brevdatamappedToDo = mapToDto(data)
@@ -127,12 +126,16 @@ export const BrevAktivitetsplikt = () => {
           <div>
             {!!brevdata && (
               <HStack gap="4">
-                <Info label="Skal sende brev" tekst={brevdata ? JaNeiRec.JA : JaNeiRec.NEI} />
-                <Info label="Utbetaling" tekst={brevdata.utbetaling ? JaNeiRec.JA : JaNeiRec.NEI} />
-                <Info
-                  label="Redusert etter inntekt "
-                  tekst={brevdata.redusertEtterInntekt ? JaNeiRec.JA : JaNeiRec.NEI}
-                />
+                <Info label="Skal sende brev" tekst={brevdata.skalSendeBrev ? JaNeiRec.JA : JaNeiRec.NEI} />
+                {brevdata.skalSendeBrev && (
+                  <>
+                    <Info label="Utbetaling" tekst={brevdata.utbetaling ? JaNeiRec.JA : JaNeiRec.NEI} />
+                    <Info
+                      label="Redusert etter inntekt"
+                      tekst={brevdata.redusertEtterInntekt ? JaNeiRec.JA : JaNeiRec.NEI}
+                    />
+                  </>
+                )}
               </HStack>
             )}
           </div>

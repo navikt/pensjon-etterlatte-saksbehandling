@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import no.nav.etterlatte.behandling.hendelse.getUUID
+import no.nav.etterlatte.behandling.hendelse.setLong
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -15,7 +17,7 @@ class AktivitetspliktBrevDao(
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT oppgave_id, sak_id, utbetaling, redusert_etter_inntekt, skal_sende_brev from aktivitetsplikt_brevdata
+                        SELECT oppgave_id, sak_id, utbetaling, redusert_etter_inntekt, skal_sende_brev, brev_id from aktivitetsplikt_brevdata
                         WHERE oppgave_id = ?
                         """.trimIndent(),
                     )
@@ -24,8 +26,16 @@ class AktivitetspliktBrevDao(
                     AktivitetspliktInformasjonBrevdata(
                         oppgaveId = getUUID("oppgave_id"),
                         sakid = SakId(getLong("sak_id")),
-                        utbetaling = getBoolean("utbetaling"),
-                        redusertEtterInntekt = getBoolean("redusert_etter_inntekt"),
+                        brevId = if (getObject("brev_id") == null) null else getLong("brev_id"),
+                        utbetaling = if (getObject("utbetaling") == null) null else getBoolean("utbetaling"),
+                        redusertEtterInntekt =
+                            if (getObject("redusert_etter_inntekt") ==
+                                null
+                            ) {
+                                null
+                            } else {
+                                getBoolean("redusert_etter_inntekt")
+                            },
                         skalSendeBrev = getBoolean("skal_sende_brev"),
                     )
                 }
@@ -52,4 +62,23 @@ class AktivitetspliktBrevDao(
                 stmt.executeUpdate()
             }
         }
+
+    fun lagreBrevId(
+        oppgaveId: UUID,
+        brevId: BrevID,
+    ) = connectionAutoclosing.hentConnection { connection ->
+        with(connection) {
+            val stmt =
+                prepareStatement(
+                    """
+                    UPDATE aktivitetsplikt_brevdata SET brev_id = ?
+                        WHERE oppgave_id = ? 
+                    
+                    """.trimIndent(),
+                )
+            stmt.setLong(1, brevId)
+            stmt.setObject(2, oppgaveId)
+            stmt.executeUpdate()
+        }
+    }
 }

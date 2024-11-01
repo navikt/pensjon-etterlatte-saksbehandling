@@ -5,8 +5,9 @@ import { ArrowUndoIcon } from '@navikt/aksel-icons'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
 import { differenceInWeeks } from 'date-fns'
-import { markerBrevSomUtgaar } from '~shared/api/brev'
+import { journalfoerBrev, markerBrevSomUtgaar } from '~shared/api/brev'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import Spinner from '~shared/Spinner'
 
 const EN_UKE = 1
 
@@ -25,6 +26,7 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [kommentar, setKommentar] = useState<string>()
   const [brevUtgaarResult, apiBrevUtgaar] = useApiCall(markerBrevSomUtgaar)
+  const [journalfoerResult, apiJournalfoerBrev] = useApiCall(journalfoerBrev)
 
   if (!kanMarkereSomUtgaar(brev)) {
     return null
@@ -35,6 +37,8 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
 
     apiBrevUtgaar({ brevId: brev.id, sakId: brev.sakId, kommentar }, () => window.location.reload())
   }
+
+  const journalfoer = () => apiJournalfoerBrev({ brevId: brev.id, sakId: brev.sakId })
 
   return (
     <>
@@ -50,6 +54,23 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
             <BodyShort spacing>
               Vær obs på at markering av brev med status <strong>UTGÅR</strong> ikke kan angres!
             </BodyShort>
+
+            {brev.status === BrevStatus.FERDIGSTILT &&
+              mapResult(journalfoerResult, {
+                initial: (
+                  <Alert variant="warning">
+                    <HStack gap="4" align="center">
+                      <BodyShort>Brevet er ikke journalført. Vil du journalføre brevet?</BodyShort>
+                      <Button size="small" variant="secondary" onClick={journalfoer}>
+                        Ja, journalfør
+                      </Button>
+                    </HStack>
+                  </Alert>
+                ),
+                pending: <Spinner label="Journalfører brevet" />,
+                error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                success: () => <Alert variant="success">Journalført OK</Alert>,
+              })}
 
             {brev.status === BrevStatus.JOURNALFOERT && (
               <Alert variant="warning">

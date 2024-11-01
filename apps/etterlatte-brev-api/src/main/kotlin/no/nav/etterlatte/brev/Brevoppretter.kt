@@ -55,7 +55,7 @@ class Brevoppretter(
                     brevkoder = brevkode,
                 )
 
-            return Pair(db.opprettBrev(nyttBrev), enhet)
+            return Pair(db.opprettBrev(nyttBrev, bruker), enhet)
         }
     }
 
@@ -88,7 +88,7 @@ class Brevoppretter(
                     brevtype = brevkode.brevtype,
                     brevkoder = brevkode,
                 )
-            return Pair(db.opprettBrev(nyttBrev), enhet)
+            return Pair(db.opprettBrev(nyttBrev, bruker), enhet)
         }
 
     suspend fun hentNyttInnhold(
@@ -113,16 +113,16 @@ class Brevoppretter(
             ),
         ) {
             if (innhold.payload != null) {
-                db.oppdaterPayload(brevId, innhold.payload)
+                db.oppdaterPayload(brevId, innhold.payload, bruker)
             }
 
             if (innholdVedlegg != null) {
-                db.oppdaterPayloadVedlegg(brevId, innholdVedlegg)
+                db.oppdaterPayloadVedlegg(brevId, innholdVedlegg, bruker)
             }
 
             if (opprinneligBrevkoder != brevkode) {
                 db.oppdaterBrevkoder(brevId, brevkode)
-                db.oppdaterTittel(brevId, innhold.tittel)
+                db.oppdaterTittel(brevId, innhold.tittel, bruker)
             }
 
             return BrevService.BrevPayload(

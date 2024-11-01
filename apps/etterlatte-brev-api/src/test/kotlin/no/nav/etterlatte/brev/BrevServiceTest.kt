@@ -176,11 +176,11 @@ internal class BrevServiceTest {
             every { db.hentBrev(any()) } returns brev
 
             val tittel = "En oppdatert tittel"
-            brevService.oppdaterTittel(brev.id, tittel)
+            brevService.oppdaterTittel(brev.id, tittel, bruker)
 
             verify {
                 db.hentBrev(brev.id)
-                db.oppdaterTittel(brev.id, tittel)
+                db.oppdaterTittel(brev.id, tittel, bruker)
             }
         }
 
@@ -192,7 +192,7 @@ internal class BrevServiceTest {
             every { db.hentBrev(any()) } returns brev
 
             assertThrows<BrevKanIkkeEndres> {
-                brevService.oppdaterTittel(brev.id, "Ny tittel skal feile")
+                brevService.oppdaterTittel(brev.id, "Ny tittel skal feile", bruker)
             }
 
             verify {
@@ -336,11 +336,11 @@ internal class BrevServiceTest {
                         ),
                 )
 
-            brevService.oppdaterMottaker(brev.id, nyMottaker)
+            brevService.oppdaterMottaker(brev.id, nyMottaker, bruker)
 
             verify {
                 db.hentBrev(brev.id)
-                db.oppdaterMottaker(brev.id, nyMottaker)
+                db.oppdaterMottaker(brev.id, nyMottaker, bruker)
             }
         }
 
@@ -352,7 +352,7 @@ internal class BrevServiceTest {
             every { db.hentBrev(any()) } returns brev
 
             assertThrows<BrevKanIkkeEndres> {
-                brevService.oppdaterMottaker(brev.id, tomMottaker())
+                brevService.oppdaterMottaker(brev.id, tomMottaker(), bruker)
             }
 
             verify {
@@ -373,11 +373,11 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
 
-            brevService.slettMottaker(brev.id, kopimottaker.id)
+            brevService.slettMottaker(brev.id, kopimottaker.id, bruker)
 
             verify {
                 db.hentBrev(brev.id)
-                db.slettMottaker(brev.id, kopimottaker.id)
+                db.slettMottaker(brev.id, kopimottaker.id, bruker)
             }
         }
 
@@ -389,7 +389,7 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
 
-            assertThrows<KanIkkeSletteHovedmottaker> { brevService.slettMottaker(brev.id, mottaker.id) }
+            assertThrows<KanIkkeSletteHovedmottaker> { brevService.slettMottaker(brev.id, mottaker.id, bruker) }
 
             verify {
                 db.hentBrev(brev.id)
@@ -404,7 +404,7 @@ internal class BrevServiceTest {
             every { db.hentBrev(any()) } returns brev
 
             assertThrows<BrevKanIkkeEndres> {
-                brevService.slettMottaker(brev.id, mockk())
+                brevService.slettMottaker(brev.id, mockk(), bruker)
             }
 
             verify {

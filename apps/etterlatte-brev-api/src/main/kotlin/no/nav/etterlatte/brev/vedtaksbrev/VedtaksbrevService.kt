@@ -154,7 +154,7 @@ class VedtaksbrevService(
             if (db.hentPdf(brev.id) == null) {
                 throw BrevManglerPDF(brev.id)
             } else {
-                db.settBrevFerdigstilt(brev.id)
+                db.settBrevFerdigstilt(brev.id, brukerTokenInfo)
             }
         } else {
             throw SaksbehandlerOgAttestantSammePerson(saksbehandlerIdent, brukerTokenInfo.ident())

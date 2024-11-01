@@ -73,7 +73,7 @@ class BrevService(
             journalfoerBrevService.journalfoer(brevId, bruker)
 
             logger.info("Distribuerer brev med id: $brevId")
-            distribuerer.distribuer(brevId)
+            distribuerer.distribuer(brevId, bruker = bruker)
 
             logger.info("Brevid: $brevId er distribuert")
             return BrevDistribusjonResponse(brevId, true)
@@ -125,20 +125,22 @@ class BrevService(
     fun lagreBrevPayload(
         id: BrevID,
         payload: Slate,
+        bruker: BrukerTokenInfo,
     ): Int {
         sjekkOmBrevKanEndres(id)
         return db
-            .oppdaterPayload(id, payload)
+            .oppdaterPayload(id, payload, bruker)
             .also { logger.info("Payload for brev (id=$id) oppdatert") }
     }
 
     fun lagreBrevPayloadVedlegg(
         id: BrevID,
         payload: List<BrevInnholdVedlegg>,
+        bruker: BrukerTokenInfo,
     ): Int {
         sjekkOmBrevKanEndres(id)
         return db
-            .oppdaterPayloadVedlegg(id, payload)
+            .oppdaterPayloadVedlegg(id, payload, bruker)
             .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
     }
 
@@ -163,6 +165,7 @@ class BrevService(
     fun slettMottaker(
         brevId: BrevID,
         mottakerId: UUID,
+        bruker: BrukerTokenInfo,
     ) {
         val brev = sjekkOmBrevKanEndres(brevId)
 
@@ -174,7 +177,7 @@ class BrevService(
         } else if (brev.mottakere.size <= 1) {
             throw MinstEnMottakerPaakrevd()
         } else {
-            db.slettMottaker(brevId, mottakerId)
+            db.slettMottaker(brevId, mottakerId, bruker)
 
             logger.info("Mottaker (id=$mottakerId) slettet fra brev=$brevId")
         }
@@ -183,34 +186,37 @@ class BrevService(
     fun oppdaterMottaker(
         brevId: BrevID,
         mottaker: Mottaker,
+        bruker: BrukerTokenInfo,
     ): Int {
         sjekkOmBrevKanEndres(brevId)
 
         logger.info("Oppdaterer mottaker (id=${mottaker.id}) på brev=$brevId")
 
         return db
-            .oppdaterMottaker(brevId, mottaker)
+            .oppdaterMottaker(brevId, mottaker, bruker)
             .also { logger.info("Mottaker på brev (id=$brevId) oppdatert") }
     }
 
     fun oppdaterTittel(
         id: BrevID,
         tittel: String,
+        bruker: BrukerTokenInfo,
     ): Int {
         sjekkOmBrevKanEndres(id)
         return db
-            .oppdaterTittel(id, tittel)
+            .oppdaterTittel(id, tittel, bruker)
             .also { logger.info("Tittel på brev (id=$id) oppdatert") }
     }
 
     fun oppdaterSpraak(
         id: BrevID,
         spraak: Spraak,
+        bruker: BrukerTokenInfo,
     ) {
         sjekkOmBrevKanEndres(id)
 
         db
-            .oppdaterSpraak(id, spraak)
+            .oppdaterSpraak(id, spraak, bruker)
             .also { logger.info("Språk i brev (id=$id) endret til $spraak") }
     }
 
@@ -239,10 +245,10 @@ class BrevService(
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottakere.toJson()}")
             throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottakere.flatMap { it.erGyldig() })
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
-            db.settBrevFerdigstilt(id)
+            db.settBrevFerdigstilt(id, bruker)
         } else {
             val pdf = genererPdf(id, bruker)
-            db.lagrePdfOgFerdigstillBrev(id, pdf)
+            db.lagrePdfOgFerdigstillBrev(id, pdf, bruker)
         }
     }
 

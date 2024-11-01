@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -37,6 +38,8 @@ internal class BrevdistribuererTest {
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
+
+    private val bruker = simpleSaksbehandler("Z123456")
 
     @BeforeEach
     fun beforeEach() {
@@ -64,14 +67,14 @@ internal class BrevdistribuererTest {
             )
         } returns response
 
-        val bestillingsID = brevdistribuerer.distribuer(brev.id)
+        val bestillingsID = brevdistribuerer.distribuer(brev.id, bruker = bruker)
         bestillingsID shouldBe listOf(response.bestillingsId)
 
         verify {
             db.hentBrev(brev.id)
             db.lagreBestillingId(brev.mottakere.single().id, response)
 
-            db.settBrevDistribuert(brev.id, listOf(response))
+            db.settBrevDistribuert(brev.id, listOf(response), bruker)
 
             distribusjonService.distribuerJournalpost(
                 brev.id,
@@ -99,7 +102,7 @@ internal class BrevdistribuererTest {
             distribusjonService.distribuerJournalpost(any(), any(), match { it.id == mottaker2.id })
         } returns response2
 
-        brevdistribuerer.distribuer(brev.id) shouldBe listOf(response1.bestillingsId, response2.bestillingsId)
+        brevdistribuerer.distribuer(brev.id, bruker = bruker) shouldBe listOf(response1.bestillingsId, response2.bestillingsId)
 
         verify(exactly = 1) {
             db.hentBrev(brev.id)
@@ -107,7 +110,7 @@ internal class BrevdistribuererTest {
             db.lagreBestillingId(brev.mottakere[0].id, DistribuerJournalpostResponse("1"))
             db.lagreBestillingId(brev.mottakere[1].id, DistribuerJournalpostResponse("2"))
 
-            db.settBrevDistribuert(brev.id, listOf(response1, response2))
+            db.settBrevDistribuert(brev.id, listOf(response1, response2), bruker)
 
             distribusjonService.distribuerJournalpost(brev.id, DistribusjonsType.ANNET, brev.mottakere[0])
             distribusjonService.distribuerJournalpost(brev.id, DistribusjonsType.ANNET, brev.mottakere[1])
@@ -121,7 +124,7 @@ internal class BrevdistribuererTest {
         every { db.hentBrev(any()) } returns brev
 
         assertThrows<JournalpostIdMangler> {
-            brevdistribuerer.distribuer(brev.id)
+            brevdistribuerer.distribuer(brev.id, bruker = bruker)
         }
 
         verify {
@@ -141,7 +144,7 @@ internal class BrevdistribuererTest {
         every { db.hentBrev(any()) } returns brev
 
         assertThrows<FeilStatusForDistribusjon> {
-            brevdistribuerer.distribuer(brev.id)
+            brevdistribuerer.distribuer(brev.id, bruker = bruker)
         }
 
         verify {

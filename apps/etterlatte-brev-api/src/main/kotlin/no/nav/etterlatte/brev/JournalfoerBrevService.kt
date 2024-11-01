@@ -93,7 +93,7 @@ class JournalfoerBrevService(
 
         return brev.mottakere
             .map { mottaker -> journalfoerPaaMottaker(brev.id, brev.soekerFnr, mottaker, sak, bruker) }
-            .also { db.settBrevJournalfoert(brev.id, it) }
+            .also { db.settBrevJournalfoert(brev.id, it, bruker) }
     }
 
     private suspend fun journalfoerPaaMottaker(

@@ -140,12 +140,13 @@ class OmregningKlassifikasjonskodeJobService(
         val antall = 20
         val ekskluderteSaker =
             listOf(
-                SakId(11958), // Overstyrt
+                SakId(11958), // Denne har opphør - Overstyrt
                 SakId(12703), // Feiler med etterbetaling
                 SakId(12718), // Feiler med etterbetaling
                 SakId(12655), // Feiler med klassifikasjonskode UTBETALING
-                SakId(13096),
-                SakId(13115),
+                SakId(13096), // Denne har opphør - Feiler med etterbetaling
+                SakId(13115), // Denne har opphør - Feiler med etterbetaling
+                SakId(16123), // Feiler med etterbetaling
             )
     }
 }

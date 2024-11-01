@@ -82,7 +82,6 @@ class AktivitetspliktOppgaveService(
             AktivitetspliktAktivitetsgradType.AKTIVITET_100 -> Aktivitetsgrad.AKKURAT_100_PROSENT
         }
 
-    // TODO; ta inn noen tester her
     fun opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -93,16 +92,16 @@ class AktivitetspliktOppgaveService(
             return brevData.brevId
         }
         val skalOppretteBrev = skalOppretteBrev(brevData)
-        val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId) ?: throw GenerellIkkeFunnetException()
-        val sisteAktivtetsgrad = vurderingForOppgave.aktivitet.maxBy { it.fom }
-        val brevParametreAktivitetsplikt10mnd =
-            BrevParametre.AktivitetspliktInformasjon10Mnd(
-                aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
-                utbetaling = brevData.utbetaling!!,
-                redusertEtterInntekt = brevData.redusertEtterInntekt!!,
-                nasjonalEllerUtland = NasjonalEllerUtland.UTLAND, // TODO: ikke lagret enda noe sted?
-            )
         if (skalOppretteBrev) {
+            val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId) ?: throw GenerellIkkeFunnetException()
+            val sisteAktivtetsgrad = vurderingForOppgave.aktivitet.maxBy { it.fom }
+            val brevParametreAktivitetsplikt10mnd =
+                BrevParametre.AktivitetspliktInformasjon10Mnd(
+                    aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
+                    utbetaling = brevData.utbetaling!!,
+                    redusertEtterInntekt = brevData.redusertEtterInntekt!!,
+                    nasjonalEllerUtland = NasjonalEllerUtland.UTLAND, // TODO: ikke lagret enda noe sted?
+                )
             val opprettetBrev =
                 runBlocking {
                     brevApiKlient.opprettSpesifiktBrev(

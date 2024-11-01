@@ -17,13 +17,15 @@ class SamordningHendelseHandler(
      */
     fun handleSamordningHendelse(hendelse: SamordningVedtakHendelse) {
         logger.info("Behandler {}", hendelse)
-        if (hendelse.fagomrade != FAGOMRADE_OMS) {
-            logger.info("Skipper hendelse")
+        if (hendelse.fagomrade != FAGOMRADE_OMS || hendelse.artTypeKode != SAKSTYPE_OMS) {
+            logger.info("Skipper hendelse {}", hendelse)
             return
-        }
-
-        if (hendelse.artTypeKode == SAKSTYPE_OMS) {
+        } else if (hendelse.vedtakId == null) {
+            logger.warn("Mottar tom vedtaksId samordning hendelse {}", hendelse)
+            return
+        } else {
             hendelse.vedtakId?.let {
+                logger.info("Publiserer hendelse {}", hendelse)
                 kafkaProduser.publiser(
                     noekkel = UUID.randomUUID().toString(),
                     verdi =

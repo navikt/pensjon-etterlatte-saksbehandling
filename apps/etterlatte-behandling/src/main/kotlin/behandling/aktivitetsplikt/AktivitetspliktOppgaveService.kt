@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
@@ -95,7 +96,7 @@ class AktivitetspliktOppgaveService(
     fun opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BrevID? {
+    ): BrevID {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
         if (brevData.brevId != null) {
@@ -124,8 +125,7 @@ class AktivitetspliktOppgaveService(
             aktivitetspliktBrevDao.lagreBrevId(oppgaveId, opprettetBrev.id)
             return opprettetBrev.id
         } else {
-            logger.warn("Oppretter ikke brev for oppgaveid $oppgaveId")
-            return null
+            throw BrevFeil("Kunne ikke opprette brev for $oppgaveId se data: ${brevData.toJson()}")
         }
     }
 
@@ -149,6 +149,13 @@ class AktivitetspliktOppgaveService(
         }
     }
 }
+
+class BrevFeil(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "FEIL_I_BREV_FORESPØRSEL",
+        detail = msg,
+    )
 
 class ManglerBrevdata(
     msg: String,

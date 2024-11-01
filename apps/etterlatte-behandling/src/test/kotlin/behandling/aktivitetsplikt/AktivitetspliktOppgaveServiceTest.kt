@@ -140,7 +140,9 @@ class AktivitetspliktOppgaveServiceTest {
 
         val skalIkkeSendebrev = AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, false)
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalIkkeSendebrev
-        service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
+        assertThrows<BrevFeil> {
+            service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
+        }
         verify(exactly = 0) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
         verify(exactly = 0) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
     }
@@ -158,6 +160,8 @@ class AktivitetspliktOppgaveServiceTest {
         val skalIkkeSendebrev = AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, true, redusertEtterInntekt = true)
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalIkkeSendebrev
         assertThrows<ManglerBrevdata> { service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler) }
+        verify(exactly = 0) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
+        verify(exactly = 0) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
     }
 
     @Test

@@ -40,21 +40,18 @@ export function VurderingInfoBrev() {
 
     TODO: håndtere sette oppgave til ferdigstilt på onclick lagre brev
      */
-  const skalBrevVises =
-    (!!aktivtetspliktbrevdata && !!aktivtetspliktbrevdata.brevId) || !!aktivtetspliktbrevdata?.skalSendeBrev //Implisitt at utbetaling og redusertEtterInntekt er satt
 
   useEffect(() => {
     if (brevdataFinnes) {
       if (aktivtetspliktbrevdata?.skalSendeBrev) {
-        if (!aktivtetspliktbrevdata.brevId) {
-          //TODO: sløye denne ifen eller ikke?
+        if (aktivtetspliktbrevdata.brevId) {
+          setBrevid(aktivtetspliktbrevdata.brevId)
+          setBrevErKlart(true)
+        } else {
           opprettBrevApiCall({ oppgaveId: oppgave.id }, (brevIdDto) => {
             setBrevid(brevIdDto.brevId)
             setBrevErKlart(true)
           })
-        } else {
-          setBrevid(aktivtetspliktbrevdata.brevId)
-          setBrevErKlart(true)
         }
       } else {
         //Skal ikke sende brev for denne oppgave, brevløs oppgave, bare å vise skal ikke ha brev blabla
@@ -76,11 +73,7 @@ export function VurderingInfoBrev() {
               {isFailure(opprettBrevStatus) && (
                 <ApiErrorAlert>Kunne ikke opprette brev {opprettBrevStatus.error.detail}</ApiErrorAlert>
               )}
-              {skalBrevVises && brevErKlart ? (
-                <Aktivitetspliktbrev brevId={brevId!} sakId={oppgave.sakId} />
-              ) : (
-                <>Hvorfor skal brev ikke vises? blablabla</>
-              )}
+              {brevErKlart && brevId && <Aktivitetspliktbrev brevId={brevId} sakId={oppgave.sakId} />}
             </>
           ) : (
             <>

@@ -22,7 +22,9 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
@@ -342,6 +344,13 @@ class BrevApiKlientTest : BrevApiKlient {
         brevParametre: BrevParametre,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun ferdigstillBrev(
+        req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevDistribusjonResponse {
         TODO("Not yet implemented")
     }
 

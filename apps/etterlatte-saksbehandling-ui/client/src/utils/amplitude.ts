@@ -26,7 +26,7 @@ export const initAmplitude = () => {
   }
   amplitudeInstance = amplitude.createInstance()
   amplitudeInstance.init(getAmplitudeKey(), '', {
-    serverUrl: 'amplitude.nav.no/collect',
+    serverUrl: 'https://amplitude.nav.no/collect',
     ingestionMetadata: {
       sourceName: window.location.toString(),
     },

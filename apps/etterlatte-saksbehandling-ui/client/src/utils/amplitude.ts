@@ -21,13 +21,12 @@ const getAmplitudeKey = () => {
 
 export const initAmplitude = () => {
   if (!import.meta.env.PROD) return
-  console.log(import.meta.env)
   if (window.amplitude) {
     return
   }
   amplitudeInstance = amplitude.createInstance()
   amplitudeInstance.init(getAmplitudeKey(), '', {
-    serverUrl: 'amplitude.nav.no/collect-auto',
+    serverUrl: 'amplitude.nav.no/collect',
     ingestionMetadata: {
       sourceName: window.location.toString(),
     },

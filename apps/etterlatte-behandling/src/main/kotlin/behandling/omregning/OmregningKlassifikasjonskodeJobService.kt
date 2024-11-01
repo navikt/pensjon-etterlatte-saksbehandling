@@ -144,6 +144,8 @@ class OmregningKlassifikasjonskodeJobService(
                 SakId(12703), // Feiler med etterbetaling
                 SakId(12718), // Feiler med etterbetaling
                 SakId(12655), // Feiler med klassifikasjonskode UTBETALING
+                SakId(13096),
+                SakId(13115),
             )
     }
 }

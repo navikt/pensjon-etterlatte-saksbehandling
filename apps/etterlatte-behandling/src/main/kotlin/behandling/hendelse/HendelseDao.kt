@@ -283,5 +283,9 @@ fun PreparedStatement.setLong(
 
 fun ResultSet.getUUID(name: String) = getObject(name) as UUID
 
-// TODO: denne går på resultsettet ikke kolonnen og vil mappe feil om spørringen har treff på andre kolonner i selecten
-fun ResultSet.getLongOrNull(name: String) = getLong(name).takeUnless { wasNull() }
+fun ResultSet.getLongOrNull(name: String): Long? =
+    if (getObject(name) == null) {
+        null
+    } else {
+        getLong(name)
+    }

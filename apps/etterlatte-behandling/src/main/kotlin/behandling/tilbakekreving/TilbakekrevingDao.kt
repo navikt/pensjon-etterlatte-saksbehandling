@@ -330,5 +330,9 @@ fun PreparedStatement.setInt(
     value: Int?,
 ) = if (value == null) setNull(index, Types.BIGINT) else setInt(index, value)
 
-// TODO: denne går på resultsettet ikke kolonnen og vil mappe feil om spørringen har treff på andre kolonner i selecten
-fun ResultSet.getIntOrNull(name: String) = getInt(name).takeUnless { wasNull() }
+fun ResultSet.getIntOrNull(name: String): Int? =
+    if (getObject(name) == null) {
+        null
+    } else {
+        getInt(name)
+    }

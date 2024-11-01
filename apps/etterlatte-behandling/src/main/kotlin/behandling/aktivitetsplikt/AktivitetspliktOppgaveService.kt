@@ -1,12 +1,14 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -26,6 +28,7 @@ class AktivitetspliktOppgaveService(
     private val sakService: SakService,
     private val aktivitetspliktBrevDao: AktivitetspliktBrevDao,
     private val brevApiKlient: BrevApiKlient,
+    private val behandlingService: BehandlingService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -82,6 +85,13 @@ class AktivitetspliktOppgaveService(
             AktivitetspliktAktivitetsgradType.AKTIVITET_100 -> Aktivitetsgrad.AKKURAT_100_PROSENT
         }
 
+    private fun mapNasjonalEllerUtland(utland: UtlandstilknytningType): NasjonalEllerUtland =
+        when (utland) {
+            UtlandstilknytningType.NASJONAL -> NasjonalEllerUtland.NASJONAL
+            UtlandstilknytningType.UTLANDSTILSNITT -> NasjonalEllerUtland.UTLAND
+            UtlandstilknytningType.BOSATT_UTLAND -> NasjonalEllerUtland.UTLAND
+        }
+
     fun opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -95,12 +105,13 @@ class AktivitetspliktOppgaveService(
         if (skalOppretteBrev) {
             val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId) ?: throw GenerellIkkeFunnetException()
             val sisteAktivtetsgrad = vurderingForOppgave.aktivitet.maxBy { it.fom }
+            val nasjonalEllerUtland = behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
             val brevParametreAktivitetsplikt10mnd =
                 BrevParametre.AktivitetspliktInformasjon10Mnd(
                     aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
                     utbetaling = brevData.utbetaling!!,
                     redusertEtterInntekt = brevData.redusertEtterInntekt!!,
-                    nasjonalEllerUtland = NasjonalEllerUtland.UTLAND, // TODO: ikke lagret enda noe sted?
+                    nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
                 )
             val opprettetBrev =
                 runBlocking {

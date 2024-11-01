@@ -39,6 +39,7 @@ class AktivitetspliktOppgaveServiceTest {
             sakService = sakService,
             aktivitetspliktBrevDao,
             mockk(relaxed = true),
+            mockk(relaxed = true),
         )
 
     private val sak =
@@ -67,6 +68,7 @@ class AktivitetspliktOppgaveServiceTest {
         every { oppgaveService.hentOppgave(oppgave.id) } returns oppgave
         every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns null
         every { aktivitetspliktService.kopierInnTilOppgave(sak.id, oppgave.id) } returns null
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgave.id) } returns null
 
         service.hentVurderingForOppgave(oppgave.id)
 
@@ -84,7 +86,7 @@ class AktivitetspliktOppgaveServiceTest {
 
         every { oppgaveService.hentOppgave(oppgave.id) } returns oppgave
         every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns null
-
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgave.id) } returns null
         service.hentVurderingForOppgave(oppgave.id)
 
         verify(exactly = 0) { aktivitetspliktService.kopierInnTilOppgave(sak.id, oppgave.id) }
@@ -105,6 +107,7 @@ class AktivitetspliktOppgaveServiceTest {
                 emptyList(),
             )
 
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgave.id) } returns null
         service.hentVurderingForOppgave(oppgave.id)
         verify(exactly = 0) { aktivitetspliktService.kopierInnTilOppgave(sak.id, oppgave.id) }
     }

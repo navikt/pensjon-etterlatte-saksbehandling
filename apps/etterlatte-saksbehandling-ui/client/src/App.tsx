@@ -26,7 +26,9 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { setDefaultOptions } from 'date-fns'
 import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
 import { VurderAktivitetspliktOppgave } from '~components/aktivitetsplikt/VurderAktivitetspliktOppgave'
+import { initAmplitude } from '~utils/amplitude'
 
+initAmplitude()
 function App() {
   const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
   setDefaultOptions({ locale: nb })

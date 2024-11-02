@@ -23,6 +23,8 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -31,10 +33,14 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS) // Needed for non-static method source in Kotlin
 class AarligInntektsjusteringJobbServiceTest {
     private val omregningService: OmregningService = mockk()
     private val sakService: SakService = mockk()
@@ -92,6 +98,28 @@ class AarligInntektsjusteringJobbServiceTest {
         every { rapid.publiser(any(), any()) } returns Pair(1, 1L)
     }
 
+    private fun endrePersonopplysninger() =
+        listOf(
+            personPdl.copy(fornavn = OpplysningDTO("endret fornavn", "")),
+            personPdl.copy(mellomnavn = OpplysningDTO("endret mellomnavn ", "")),
+            personPdl.copy(etternavn = OpplysningDTO("endret etternavn", "")),
+            personPdl.copy(foedselsdato = OpplysningDTO(LocalDate.of(1990, 2, 25), "")),
+            personPdl.copy(doedsdato = OpplysningDTO(LocalDate.of(1990, 2, 25), "")),
+            personPdl.copy(
+                vergemaalEllerFremtidsfullmakt =
+                    listOf(
+                        OpplysningDTO(
+                            VergemaalEllerFremtidsfullmakt(
+                                embete = null,
+                                type = null,
+                                vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
+                            ),
+                            "",
+                        ),
+                    ),
+            ),
+        )
+
     @Test
     fun `starter jobb for gyldig sak`() {
         val request =
@@ -124,6 +152,8 @@ class AarligInntektsjusteringJobbServiceTest {
     fun `Sak som allerede har inntekt neste aar skal ferdigstilles`() {
         // TODO
     }
+
+    // TODO unittest samordnign
 
     @Test
     fun `Sak hvor ident har endret seg skal gjoeres manuelt`() {
@@ -167,6 +197,58 @@ class AarligInntektsjusteringJobbServiceTest {
         }
     }
 
+    @ParameterizedTest(
+        name = "Sak hvor {0} har endret seg skal gjoeres manuelt",
+    )
+    @MethodSource("endrePersonopplysninger")
+    fun `Sak hvor personopplysninger har endret seg skal gjoeres manuelt`(endretOpplysningPdl: PersonDTO) {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                any(),
+                any(),
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns endretOpplysningPdl
+
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        // TODO verifiser satt status og begrunnelse kjøring..
+        verify {
+            oppgaveService.opprettOppgave(
+                "123",
+                SakId(123L),
+                null,
+                OppgaveType.REVURDERING,
+                merknad = "",
+            )
+        }
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        sakId shouldBe SakId(123L)
+                    }
+                },
+            )
+        }
+    }
+
+    // TODO unittest vergemål
+
     @Test
     fun `et eller annet feilhaandtering`() {
         // TODO
@@ -206,16 +288,6 @@ class AarligInntektsjusteringJobbServiceTest {
                 vergemaalEllerFremtidsfullmakt = null,
             )
 
-        /*
-        val personPdl = mockk<PersonDTO> {
-            every { fornavn } returns OpplysningDTO("fornavn", "")
-            every { mellomnavn } returns null
-            every { etternavn } returns OpplysningDTO("etternavn", "")
-            every { foedselsdato } returns OpplysningDTO(LocalDate.of(1980, 2, 24), "")
-            every { doedsdato } returns OpplysningDTO(LocalDate.of(2024, 2, 24), "")
-            every { vergemaalEllerFremtidsfullmakt } returns null
-        }
-         */
         val personGjenny =
             Person(
                 fornavn = "fornavn",
@@ -242,16 +314,6 @@ class AarligInntektsjusteringJobbServiceTest {
                 vergemaalEllerFremtidsfullmakt = null,
             )
 
-        /*
-        val personGjenny = mockk<Person> {
-            every { fornavn } returns "fornavn"
-            every { mellomnavn } returns null
-            every { etternavn } returns "etternavn"
-            every { foedselsdato } returns LocalDate.of(1980, 2, 24)
-            every { doedsdato } returns LocalDate.of(2024, 2, 24)
-            every { vergemaalEllerFremtidsfullmakt } returns null
-        }
-         */
         val sisteBehandling = UUID.randomUUID()
 
         fun loependeYtdelseDto() =

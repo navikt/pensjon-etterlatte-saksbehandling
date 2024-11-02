@@ -7,6 +7,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
@@ -32,6 +34,8 @@ import java.time.YearMonth
 class AarligInntektsjusteringJobbServiceTest {
     private val omregningService: OmregningService = mockk()
     private val sakService: SakService = mockk()
+    private val behandlingService: BehandlingService = mockk()
+    private val grunnlagService: GrunnlagService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val vedtakKlient: VedtakKlient = mockk()
     private val beregningKlient: BeregningKlient = mockk()
@@ -42,7 +46,9 @@ class AarligInntektsjusteringJobbServiceTest {
         AarligInntektsjusteringJobbService(
             omregningService,
             sakService,
+            behandlingService,
             oppgaveService,
+            grunnlagService,
             vedtakKlient,
             beregningKlient,
             pdlTjenesterKlient,

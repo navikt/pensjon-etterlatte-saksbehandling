@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -55,6 +56,11 @@ interface GrunnlagService {
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
 
     suspend fun hentAlleSakerForPerson(fnr: String): PersonMedSakerOgRoller
+
+    suspend fun hentPersonopplysninger(
+        behandlingId: UUID,
+        sakType: SakType,
+    ): PersonopplysningerResponse
 }
 
 class GrunnlagServiceImpl(
@@ -116,6 +122,13 @@ class GrunnlagServiceImpl(
     ) = grunnlagKlient.laasTilGrunnlagIBehandling(revurdering.id, forrigeBehandling)
 
     override suspend fun hentAlleSakerForPerson(fnr: String) = grunnlagKlient.hentPersonSakOgRolle(fnr)
+
+    override suspend fun hentPersonopplysninger(
+        behandlingId: UUID,
+        sakType: SakType,
+    ): PersonopplysningerResponse {
+        TODO("Not yet implemented")
+    }
 
     private fun grunnlagsbehovSak(
         sak: Sak,

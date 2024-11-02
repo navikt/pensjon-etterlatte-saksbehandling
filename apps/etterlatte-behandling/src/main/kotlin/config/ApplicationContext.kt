@@ -483,8 +483,10 @@ internal class ApplicationContext(
         AarligInntektsjusteringJobbService(
             omregningService = omregningService,
             sakService = sakService,
+            behandlingService = behandlingService,
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
+            grunnlagService = grunnlagsService,
             beregningKlient = beregningsKlient,
             pdlTjenesterKlient = pdlTjenesterKlient,
             rapid = rapid,

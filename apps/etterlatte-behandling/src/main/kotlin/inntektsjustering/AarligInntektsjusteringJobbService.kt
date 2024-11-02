@@ -1,5 +1,7 @@
 package no.nav.etterlatte.inntektsjustering
 
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
@@ -7,12 +9,14 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringKjoering
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
@@ -31,7 +35,9 @@ import java.time.YearMonth
 class AarligInntektsjusteringJobbService(
     private val omregningService: OmregningService,
     private val sakService: SakService,
+    private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
+    private val grunnlagService: GrunnlagService,
     private val vedtakKlient: VedtakKlient,
     private val beregningKlient: BeregningKlient,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
@@ -91,7 +97,30 @@ class AarligInntektsjusteringJobbService(
                 sak.ident == sisteIdent
             } ?: throw InternfeilException("Fant ikke ident fra PDL for sak ${sak.id}")
 
-        val opplysningerErUendretIPdl = true // TODO
+        val opplysningerErUendretIPdl =
+            pdlTjenesterKlient
+                .hentPdlModellFlereSaktyper(
+                    sak.ident,
+                    PersonRolle.INNSENDER,
+                    SakType.OMSTILLINGSSTOENAD,
+                ).let { opplysningerPdl ->
+                    val sisteIverksatteBehandling =
+                        behandlingService.hentSisteIverksatte(sakId)
+                            ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
+                    val opplysningerGjenny =
+                        grunnlagService.hentPersonopplysninger(sisteIverksatteBehandling.id, sak.sakType).innsender
+                            ?: throw InternfeilException("Fant ikke opplysninger for behandling=${sisteIverksatteBehandling.id}")
+
+                    with(opplysningerGjenny.opplysning) {
+                        fornavn == opplysningerPdl.fornavn.verdi &&
+                            mellomnavn == opplysningerPdl.mellomnavn?.verdi &&
+                            etternavn == opplysningerPdl.etternavn.verdi &&
+                            foedselsdato == opplysningerPdl.foedselsdato?.verdi &&
+                            doedsdato == opplysningerPdl.doedsdato?.verdi &&
+                            vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt // TODO test i dev nøye..
+                    }
+                }
+
         val ingenVergemaalEllerFremtidsfullmakt = true // TODO
         val erIkkeUnderSamordning = true // TODO
         return identErUendretPdl && opplysningerErUendretIPdl && ingenVergemaalEllerFremtidsfullmakt && erIkkeUnderSamordning

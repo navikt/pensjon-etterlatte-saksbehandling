@@ -18,8 +18,11 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -30,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 class AarligInntektsjusteringJobbServiceTest {
     private val omregningService: OmregningService = mockk()
@@ -66,6 +70,25 @@ class AarligInntektsjusteringJobbServiceTest {
             PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of(fnrGyldigSak),
             )
+        coEvery {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                any(),
+                any(),
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns personPdl
+        every { behandlingService.hentSisteIverksatte(any()) } returns
+            mockk {
+                every { id } returns sisteBehandling
+            }
+        coEvery { grunnlagService.hentPersonopplysninger(any(), any()) } returns
+            mockk {
+                every { innsender } returns
+                    mockk {
+                        every { opplysning } returns personGjenny
+                    }
+            }
+
         every { rapid.publiser(any(), any()) } returns Pair(1, 1L)
     }
 
@@ -121,6 +144,7 @@ class AarligInntektsjusteringJobbServiceTest {
             service.startAarligInntektsjustering(request)
         }
 
+        // TODO verifiser satt status og begrunnelse kjøring..
         verify {
             oppgaveService.opprettOppgave(
                 "123",
@@ -157,6 +181,78 @@ class AarligInntektsjusteringJobbServiceTest {
                 SakId(123L),
                 Enhetsnummer("1234"),
             )
+        val personPdl =
+            PersonDTO(
+                fornavn = OpplysningDTO("fornavn", ""),
+                mellomnavn = null,
+                etternavn = OpplysningDTO("etternavn", ""),
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(fnrGyldigSak), ""),
+                foedselsdato = OpplysningDTO(LocalDate.of(1980, 2, 24), ""),
+                foedselsaar = OpplysningDTO(1080, ""),
+                foedeland = null,
+                doedsdato = OpplysningDTO(LocalDate.of(2024, 2, 24), ""),
+                adressebeskyttelse = null,
+                bostedsadresse = null,
+                deltBostedsadresse = null,
+                kontaktadresse = null,
+                oppholdsadresse = null,
+                sivilstatus = null,
+                sivilstand = null,
+                statsborgerskap = null,
+                pdlStatsborgerskap = null,
+                utland = null,
+                familieRelasjon = null,
+                avdoedesBarn = null,
+                vergemaalEllerFremtidsfullmakt = null,
+            )
+
+        /*
+        val personPdl = mockk<PersonDTO> {
+            every { fornavn } returns OpplysningDTO("fornavn", "")
+            every { mellomnavn } returns null
+            every { etternavn } returns OpplysningDTO("etternavn", "")
+            every { foedselsdato } returns OpplysningDTO(LocalDate.of(1980, 2, 24), "")
+            every { doedsdato } returns OpplysningDTO(LocalDate.of(2024, 2, 24), "")
+            every { vergemaalEllerFremtidsfullmakt } returns null
+        }
+         */
+        val personGjenny =
+            Person(
+                fornavn = "fornavn",
+                mellomnavn = null,
+                etternavn = "etternavn",
+                foedselsnummer = Folkeregisteridentifikator.of(fnrGyldigSak),
+                foedselsdato = LocalDate.of(1980, 2, 24),
+                foedselsaar = 1080,
+                foedeland = null,
+                doedsdato = LocalDate.of(2024, 2, 24),
+                adressebeskyttelse = null,
+                bostedsadresse = null,
+                deltBostedsadresse = null,
+                kontaktadresse = null,
+                oppholdsadresse = null,
+                sivilstatus = null,
+                sivilstand = null,
+                statsborgerskap = null,
+                pdlStatsborgerskap = null,
+                utland = null,
+                familieRelasjon = null,
+                avdoedesBarn = null,
+                avdoedesBarnUtenIdent = null,
+                vergemaalEllerFremtidsfullmakt = null,
+            )
+
+        /*
+        val personGjenny = mockk<Person> {
+            every { fornavn } returns "fornavn"
+            every { mellomnavn } returns null
+            every { etternavn } returns "etternavn"
+            every { foedselsdato } returns LocalDate.of(1980, 2, 24)
+            every { doedsdato } returns LocalDate.of(2024, 2, 24)
+            every { vergemaalEllerFremtidsfullmakt } returns null
+        }
+         */
+        val sisteBehandling = UUID.randomUUID()
 
         fun loependeYtdelseDto() =
             LoependeYtelseDTO(

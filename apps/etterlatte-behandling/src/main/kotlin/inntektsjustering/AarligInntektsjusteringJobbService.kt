@@ -61,7 +61,10 @@ class AarligInntektsjusteringJobbService(
             if (!skalBehandlingOmregnes(sakId, loependeFom)) {
                 // TODO Legge til en begrunnelse
                 omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FERDIGSTILT, sakId))
-            } else if (!kanKjoeresAutomatisk(sakId)) {
+                return
+            }
+            val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId)
+            if (aarsakTilManuell != null) {
                 // TODO bør opprette behandling for dette ikke bare oppgave..
                 val oppgave =
                     oppgaveService.opprettOppgave(
@@ -74,17 +77,23 @@ class AarligInntektsjusteringJobbService(
                     )
                 // TODO Legge til en begrunnelse og oppgave id
                 omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FERDIGSTILT, sakId))
-            } else {
-                // TODO status KLAR_FOR_OMREGNING
-                publiserKlarForOmregning(sakId, loependeFom)
+                return
             }
+            // TODO status KLAR_FOR_OMREGNING
+            publiserKlarForOmregning(sakId, loependeFom)
         } catch (e: Exception) {
             // TODO begrunnese!
-            omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FEILA, sakId))
+            throw e
+            // omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FEILA, sakId))
         }
     }
 
-    private suspend fun kanKjoeresAutomatisk(sakId: SakId): Boolean {
+    private suspend fun kanIkkeKjoereAutomatisk(sakId: SakId): String? {
+        val erIkkeUnderSamordning = true // TODO
+        if (!erIkkeUnderSamordning) {
+            return "Sak er under samordning"
+        }
+
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
 
         val identErUendretPdl =
@@ -96,6 +105,9 @@ class AarligInntektsjusteringJobbService(
                     }
                 sak.ident == sisteIdent
             } ?: throw InternfeilException("Fant ikke ident fra PDL for sak ${sak.id}")
+        if (!identErUendretPdl) {
+            return "Ident har endret seg i PDL"
+        }
 
         val opplysningerErUendretIPdl =
             pdlTjenesterKlient
@@ -120,10 +132,16 @@ class AarligInntektsjusteringJobbService(
                             vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt // TODO test i dev nøye..
                     }
                 }
+        if (!opplysningerErUendretIPdl) {
+            return "Personopplysninger har endret seg i PDL"
+        }
 
         val ingenVergemaalEllerFremtidsfullmakt = true // TODO
-        val erIkkeUnderSamordning = true // TODO
-        return identErUendretPdl && opplysningerErUendretIPdl && ingenVergemaalEllerFremtidsfullmakt && erIkkeUnderSamordning
+        if (!ingenVergemaalEllerFremtidsfullmakt) {
+            return "Sak har vergemål eller fremtidsfullmakt"
+        }
+
+        return null
     }
 
     private fun publiserKlarForOmregning(

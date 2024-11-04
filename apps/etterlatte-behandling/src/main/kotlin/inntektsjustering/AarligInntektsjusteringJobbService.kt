@@ -134,8 +134,7 @@ class AarligInntektsjusteringJobbService(
             return AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONOPPLYSNINGER
         }
 
-        val ingenVergemaalEllerFremtidsfullmakt = true // TODO
-        if (!ingenVergemaalEllerFremtidsfullmakt) {
+        if (opplysningerGjenny.opplysning.vergemaalEllerFremtidsfullmakt?.isNotEmpty() == true) {
             return AarligInntektsjusteringAarsakManuell.VERGEMAAL
         }
 

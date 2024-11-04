@@ -289,7 +289,65 @@ class AarligInntektsjusteringJobbServiceTest {
         }
     }
 
-    // TODO unittest vergemål
+    @Test
+    fun `Sak som har verge eller fremtidsfullmakt skal gjoeres mauelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                any(),
+                any(),
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns
+            personPdl.copy(
+                vergemaalEllerFremtidsfullmakt =
+                    listOf(
+                        OpplysningDTO(
+                            VergemaalEllerFremtidsfullmakt(
+                                embete = null,
+                                type = null,
+                                vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
+                            ),
+                            "",
+                        ),
+                    ),
+            )
+
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        // TODO verifiser satt status og begrunnelse kjøring..
+        verify {
+            oppgaveService.opprettOppgave(
+                "123",
+                SakId(123L),
+                null,
+                OppgaveType.REVURDERING,
+                merknad = "",
+            )
+        }
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        sakId shouldBe SakId(123L)
+                    }
+                },
+            )
+        }
+    }
 
     @Test
     fun `et eller annet feilhaandtering`() {

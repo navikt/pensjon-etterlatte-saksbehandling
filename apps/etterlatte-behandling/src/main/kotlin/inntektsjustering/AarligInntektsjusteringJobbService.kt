@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.OmregningData
@@ -57,13 +58,16 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
     ) {
         try {
+            val vedtak =
+                vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
+
             logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
-            if (!skalBehandlingOmregnes(sakId, loependeFom)) {
+            if (!skalBehandlingOmregnes(sakId, vedtak, loependeFom)) {
                 // TODO Legge til en begrunnelse
                 omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FERDIGSTILT, sakId))
                 return
             }
-            val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId)
+            val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, vedtak)
             if (aarsakTilManuell != null) {
                 // TODO bør opprette behandling for dette ikke bare oppgave..
                 val oppgave =
@@ -88,9 +92,11 @@ class AarligInntektsjusteringJobbService(
         }
     }
 
-    private suspend fun kanIkkeKjoereAutomatisk(sakId: SakId): AarligInntektsjusteringAarsakManuell? {
-        val erIkkeUnderSamordning = true // TODO
-        if (!erIkkeUnderSamordning) {
+    private suspend fun kanIkkeKjoereAutomatisk(
+        sakId: SakId,
+        vedtak: LoependeYtelseDTO,
+    ): AarligInntektsjusteringAarsakManuell? {
+        if (vedtak.underSamordning) {
             return AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING
         }
 
@@ -183,12 +189,11 @@ class AarligInntektsjusteringJobbService(
     // Skal inntektjusteres hvis: 1) er løpende fom dato, 2) ikke har oppgitt inntekt fra 1.1 neste inntektsår
     private suspend fun skalBehandlingOmregnes(
         sakId: SakId,
+        vedtak: LoependeYtelseDTO,
         loependeFom: YearMonth,
-    ): Boolean {
-        val fomDato = loependeFom.atDay(1)
-        return vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, fomDato, HardkodaSystembruker.omregning).erLoepende &&
-            !beregningKlient.sakHarInntektForAar(sakId, fomDato.year, HardkodaSystembruker.omregning)
-    }
+    ): Boolean =
+        vedtak.erLoepende &&
+            !beregningKlient.sakHarInntektForAar(sakId, loependeFom.year, HardkodaSystembruker.omregning)
 }
 
 enum class AarligInntektsjusteringAarsakManuell {

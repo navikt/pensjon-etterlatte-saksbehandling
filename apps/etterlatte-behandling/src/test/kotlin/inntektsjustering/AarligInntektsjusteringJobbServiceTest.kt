@@ -4,7 +4,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
@@ -95,6 +97,7 @@ class AarligInntektsjusteringJobbServiceTest {
                     }
             }
 
+        every { omregningService.oppdaterKjoering(any()) } just runs
         every { rapid.publiser(any(), any()) } returns Pair(1, 1L)
     }
 
@@ -133,6 +136,18 @@ class AarligInntektsjusteringJobbServiceTest {
             service.startAarligInntektsjustering(request)
         }
 
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.KLAR_FOR_OMREGNING
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe null
+                    }
+                },
+            )
+        }
         verify {
             rapid.publiser(
                 "aarlig-inntektsjustering-123",

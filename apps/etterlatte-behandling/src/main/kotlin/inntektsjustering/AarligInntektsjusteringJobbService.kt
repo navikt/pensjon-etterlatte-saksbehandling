@@ -88,7 +88,6 @@ class AarligInntektsjusteringJobbService(
                         merknad = "", // TODO
                         // frist =  TODO
                     )
-                // TODO Legge til en begrunnelse og oppgave id
                 omregningService.oppdaterKjoering(
                     KjoeringRequest(
                         kjoering,
@@ -99,12 +98,23 @@ class AarligInntektsjusteringJobbService(
                 )
                 return
             }
-            // TODO status KLAR_FOR_OMREGNING
+            omregningService.oppdaterKjoering(
+                KjoeringRequest(
+                    kjoering,
+                    KjoeringStatus.KLAR_FOR_OMREGNING,
+                    sakId,
+                ),
+            )
             publiserKlarForOmregning(sakId, loependeFom)
         } catch (e: Exception) {
-            // TODO begrunnese!
-            throw e
-            // omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FEILA, sakId))
+            omregningService.oppdaterKjoering(
+                KjoeringRequest(
+                    kjoering,
+                    KjoeringStatus.FEILA,
+                    sakId,
+                    begrunnelse = e.message ?: e.toString(),
+                ),
+            )
         }
     }
 

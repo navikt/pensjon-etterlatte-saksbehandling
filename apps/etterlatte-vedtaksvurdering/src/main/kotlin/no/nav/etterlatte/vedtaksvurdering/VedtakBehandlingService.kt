@@ -466,13 +466,13 @@ class VedtakBehandlingService(
                 "32728cab-773e-4506-9df7-de721434ea06", // sak 16490
                 "71224dbc-c2bd-4bb6-83f6-3616c74b67d1", // sak 16794
                 "9451ea21-6fa5-40ef-8921-8357810bbdc7", // sak 16946
-                //"6aea67f4-d361-4ebb-823e-1a4013f7d03e",
-                //"aa0e9fc0-168a-4722-8f76-e8cc56c8771c",
-                //"d134905f-e6ac-4a5e-b0df-86267c55a72d",
-                //"989d4930-5752-4b07-84e9-d747f912708c",
+                "6aea67f4-d361-4ebb-823e-1a4013f7d03e", // sak 17444
+                "aa0e9fc0-168a-4722-8f76-e8cc56c8771c", // sak 17780
+                "d134905f-e6ac-4a5e-b0df-86267c55a72d", // sak 18100
+                // "989d4930-5752-4b07-84e9-d747f912708c", // sak 18106
                 "b66404a7-1d28-400d-b70b-a29abec13472", // sak 18360
-                //"03a17bf9-28f6-4630-99c8-b3828162e26f",
-                //"ef84c8c4-c37d-4273-9531-9783a85790ab",
+                "03a17bf9-28f6-4630-99c8-b3828162e26f", // sak 18504
+                "ef84c8c4-c37d-4273-9531-9783a85790ab", // sak 18967
                 "6f9e8895-f725-4323-b1f2-da094bad1118", // sak 19069
             )
         return behandlingerSomErStuck.find { it == behandlingId.toString() } != null

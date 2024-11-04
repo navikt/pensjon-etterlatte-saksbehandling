@@ -2,20 +2,24 @@ package no.nav.etterlatte.inntektsjustering
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringKjoering
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -26,20 +30,22 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
-import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
+import java.time.LocalTime
 import java.time.YearMonth
+import java.util.UUID
 
 class AarligInntektsjusteringJobbService(
     private val omregningService: OmregningService,
     private val sakService: SakService,
     private val behandlingService: BehandlingService,
-    private val oppgaveService: OppgaveService,
+    private val revurderingService: RevurderingService,
     private val grunnlagService: GrunnlagService,
     private val vedtakKlient: VedtakKlient,
     private val beregningKlient: BeregningKlient,
@@ -76,18 +82,13 @@ class AarligInntektsjusteringJobbService(
                 )
                 return
             }
-            val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, vedtak)
+            val forrigeBehandling =
+                behandlingService.hentSisteIverksatte(sakId)
+                    ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
+
+            val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, forrigeBehandling.id, vedtak)
             if (aarsakTilManuell != null) {
-                // TODO bør opprette behandling for dette ikke bare oppgave..
-                val oppgave =
-                    oppgaveService.opprettOppgave(
-                        sakId.sakId.toString(),
-                        sakId,
-                        kilde = null,
-                        type = OppgaveType.REVURDERING,
-                        merknad = "", // TODO
-                        // frist =  TODO
-                    )
+                opprettRevurderingOgOppgave(sakId, loependeFom, forrigeBehandling)
                 omregningService.oppdaterKjoering(
                     KjoeringRequest(
                         kjoering,
@@ -120,6 +121,7 @@ class AarligInntektsjusteringJobbService(
 
     private suspend fun kanIkkeKjoereAutomatisk(
         sakId: SakId,
+        sisteBehandlingId: UUID,
         vedtak: LoependeYtelseDTO,
     ): AarligInntektsjusteringAarsakManuell? {
         if (vedtak.underSamordning) {
@@ -141,7 +143,7 @@ class AarligInntektsjusteringJobbService(
             return AarligInntektsjusteringAarsakManuell.UTDATERT_IDENT
         }
 
-        val opplysningerGjenny = hentOpplysningerGjenny(sak)
+        val opplysningerGjenny = hentOpplysningerGjenny(sak, sisteBehandlingId)
 
         val opplysningerErUendretIPdl =
             hentPdlPersonopplysning(sak).let { opplysningerPdl ->
@@ -163,6 +165,31 @@ class AarligInntektsjusteringJobbService(
         }
 
         return null
+    }
+
+    private suspend fun opprettRevurderingOgOppgave(
+        sakId: SakId,
+        loependeFom: YearMonth,
+        forrigeBehandling: Behandling,
+    ) {
+        val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
+        revurderingService
+            .opprettRevurdering(
+                sakId = sakId,
+                persongalleri = persongalleri,
+                forrigeBehandling = forrigeBehandling.id,
+                mottattDato = null,
+                prosessType = Prosesstype.MANUELL,
+                kilde = Vedtaksloesning.GJENNY,
+                revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING, // TODO ny årsak
+                virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt("Årlig inntektsjustering"),
+                utlandstilknytning = forrigeBehandling.utlandstilknytning,
+                boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
+                begrunnelse = "Årlig inntektsjustering",
+                saksbehandlerIdent = Fagsaksystem.EY.navn, // TODO Hvordan fjerne tildeling?
+                frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
+                opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
+            ).oppdater()
     }
 
     private fun publiserKlarForOmregning(
@@ -217,18 +244,17 @@ class AarligInntektsjusteringJobbService(
         pdlTjenesterKlient.hentPdlIdentifikator(sak.ident)
             ?: throw InternfeilException("Fant ikke ident fra PDL for sak ${sak.id}")
 
-    private suspend fun hentOpplysningerGjenny(sak: Sak): Personopplysning {
-        val sisteIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(sak.id)
-                ?: throw InternfeilException("Fant ikke iverksatt behandling sak=${sak.id}")
-        return grunnlagService
+    private suspend fun hentOpplysningerGjenny(
+        sak: Sak,
+        sisteBehandlingId: UUID,
+    ): Personopplysning =
+        grunnlagService
             .hentPersonopplysninger(
-                sisteIverksatteBehandling.id,
+                sisteBehandlingId,
                 sak.sakType,
                 HardkodaSystembruker.omregning,
             ).innsender
-            ?: throw InternfeilException("Fant ikke opplysninger for behandling=${sisteIverksatteBehandling.id}")
-    }
+            ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
 }
 
 enum class AarligInntektsjusteringAarsakManuell {

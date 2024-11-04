@@ -264,6 +264,8 @@ class RevurderingService(
             )
         }
 
+    // TODO fjern oppgavetildeling..
+
     private fun lagreRevurderingsaarsakFritekst(
         fritekstAarsak: String,
         behandlingId: UUID,

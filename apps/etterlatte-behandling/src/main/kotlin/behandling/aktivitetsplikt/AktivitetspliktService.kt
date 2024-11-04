@@ -527,6 +527,7 @@ class AktivitetspliktService(
             }
     }
 
+    // TODO flytt til revurderingservice
     private fun fjernSaksbehandlerFraRevurderingsOppgave(revurdering: Revurdering) {
         val revurderingsOppgave =
             oppgaveService

@@ -17,13 +17,16 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import styled from 'styled-components'
 import { isPending } from '@reduxjs/toolkit'
 import { ferdigstillJournalfoerOgDistribuerbrev, opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
+import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
+import { handlinger } from '~components/behandling/handlinger/typer'
+import { useNavigate } from 'react-router-dom'
 
 export function VurderingInfoBrev() {
   useSidetittel('Aktivitetsplikt brev')
 
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettAktivitetspliktsbrev)
-
+  const navigate = useNavigate()
   const brevdataFinnes = !!aktivtetspliktbrevdata
 
   const [brevId, setBrevid] = useState<number | undefined>(aktivtetspliktbrevdata?.brevId)
@@ -75,6 +78,15 @@ export function VurderingInfoBrev() {
           </Alert>
         </>
       )}
+      <Box width="6">
+        <Button
+          onClick={() => {
+            navigate(`../${AktivitetspliktSteg.VURDERING}`)
+          }}
+        >
+          {handlinger.TILBAKE.navn}
+        </Button>
+      </Box>
     </Box>
   )
 }

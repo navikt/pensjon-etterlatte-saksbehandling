@@ -118,7 +118,7 @@ class BrevService(
 
             if (brevStatus.ikkeDistribuert()) {
                 logger.info("Distribuerer brev med id: $brevId")
-                distribuerer.distribuer(brevId)
+                distribuerer.distribuer(brevId, bruker = bruker)
             }
 
             logger.info("Brevid: $brevId er distribuert")

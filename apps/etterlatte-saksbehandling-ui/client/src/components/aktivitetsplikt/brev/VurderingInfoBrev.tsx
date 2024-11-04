@@ -167,7 +167,7 @@ function Aktivitetspliktbrev({
                     tilbakestillingsaction={() => setTilbakestilt(true)}
                   />
                   {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
-                  {isPending(status) && <Spinner label="Ferdigstiller brev" />}
+                  {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
                   <Button onClick={ferdigstillBrev}>Ferdigstill brev</Button>
                 </>
               )}

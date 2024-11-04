@@ -199,7 +199,7 @@ internal class BehandlingRoutesTest {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 
-        mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
+        mockBehandlingService(bodyVirkningstidspunkt)
 
         coEvery {
             behandlingService.erGyldigVirkningstidspunkt(any(), any(), any(), any())
@@ -211,7 +211,7 @@ internal class BehandlingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
                     contentType(ContentType.Application.Json)
                     setBody(
-                        """
+                        """ 
                         {
                         "dato":"$bodyVirkningstidspunkt",
                         "begrunnelse":"$bodyBegrunnelse"
@@ -260,7 +260,7 @@ internal class BehandlingRoutesTest {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 
-        mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
+        mockBehandlingService(bodyVirkningstidspunkt)
 
         coEvery {
             behandlingService.erGyldigVirkningstidspunkt(any(), any(), any(), any())
@@ -341,7 +341,8 @@ internal class BehandlingRoutesTest {
         val sakId = SakId(133)
         coEvery {
             behandlingService.finnAnnenBehandlingMedTrygdetidForAvdoede(any())
-        } returns foerstegangsbehandling(sakId = sakId)
+        } returns
+            detaljertBehandlingDto(foerstegangsbehandling(sakId = sakId))
 
         withTestApplication { client ->
             val response =
@@ -351,9 +352,34 @@ internal class BehandlingRoutesTest {
                 }
 
             assertEquals(200, response.status.value)
-            assertEquals(sakId, response.body<Foerstegangsbehandling>().sak.id)
+            assertEquals(sakId, response.body<DetaljertBehandlingDto>().sakId)
         }
     }
+
+    private fun detaljertBehandlingDto(foerstegangsbehandling: Foerstegangsbehandling): DetaljertBehandlingDto =
+        DetaljertBehandlingDto(
+            id = foerstegangsbehandling.id,
+            sakId = foerstegangsbehandling.sak.id,
+            sakType = foerstegangsbehandling.sak.sakType,
+            sakEnhetId = foerstegangsbehandling.sak.enhet,
+            gyldighetsprøving = foerstegangsbehandling.gyldighetsproeving,
+            soeknadMottattDato = foerstegangsbehandling.soeknadMottattDato,
+            virkningstidspunkt = foerstegangsbehandling.virkningstidspunkt,
+            utlandstilknytning = foerstegangsbehandling.utlandstilknytning,
+            boddEllerArbeidetUtlandet = foerstegangsbehandling.boddEllerArbeidetUtlandet,
+            status = foerstegangsbehandling.status,
+            hendelser = emptyList(),
+            behandlingType = foerstegangsbehandling.type,
+            kommerBarnetTilgode = foerstegangsbehandling.kommerBarnetTilgode,
+            revurderingsaarsak = foerstegangsbehandling.revurderingsaarsak(),
+            revurderinginfo = foerstegangsbehandling.revurderingInfo(),
+            begrunnelse = foerstegangsbehandling.begrunnelse(),
+            kilde = foerstegangsbehandling.kilde,
+            sendeBrev = foerstegangsbehandling.sendeBrev,
+            viderefoertOpphoer = null,
+            tidligereFamiliepleier = foerstegangsbehandling.tidligereFamiliepleier,
+            erSluttbehandling = foerstegangsbehandling.erSluttbehandling,
+        )
 
     private fun withTestApplication(
         testUser: User? = null,
@@ -381,10 +407,7 @@ internal class BehandlingRoutesTest {
         }
     }
 
-    private fun mockBehandlingService(
-        bodyVirkningstidspunkt: Tidspunkt,
-        bodyBegrunnelse: String,
-    ) {
+    private fun mockBehandlingService(bodyVirkningstidspunkt: Tidspunkt) {
         val parsetVirkningstidspunkt =
             YearMonth.from(
                 bodyVirkningstidspunkt.toNorskTid().let {
@@ -395,14 +418,14 @@ internal class BehandlingRoutesTest {
             Virkningstidspunkt(
                 parsetVirkningstidspunkt,
                 Grunnlagsopplysning.Saksbehandler.create(NAV_IDENT),
-                bodyBegrunnelse,
+                "begrunnelse",
             )
         coEvery {
             behandlingService.oppdaterVirkningstidspunkt(
                 behandlingId,
                 parsetVirkningstidspunkt,
                 any(),
-                bodyBegrunnelse,
+                "begrunnelse",
                 any(),
             )
         } returns virkningstidspunkt

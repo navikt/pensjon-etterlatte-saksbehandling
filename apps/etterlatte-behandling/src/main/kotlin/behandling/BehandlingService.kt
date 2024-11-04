@@ -272,7 +272,7 @@ interface BehandlingService {
 
     fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier?
 
-    suspend fun finnAnnenBehandlingMedTrygdetidForAvdoede(behandlingId: UUID): Behandling?
+    suspend fun finnAnnenBehandlingMedTrygdetidForAvdoede(behandlingId: UUID): DetaljertBehandlingDto?
 }
 
 internal class BehandlingServiceImpl(
@@ -902,12 +902,29 @@ internal class BehandlingServiceImpl(
     override fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
 
-    override suspend fun finnAnnenBehandlingMedTrygdetidForAvdoede(behandlingId: UUID): Behandling? {
+    override suspend fun finnAnnenBehandlingMedTrygdetidForAvdoede(behandlingId: UUID): DetaljertBehandlingDto? {
         val avdoede: List<String>? = grunnlagKlient.hentPersongalleri(behandlingId)?.opplysning?.avdoed
         if (avdoede.isNullOrEmpty()) {
             return null
         }
 
+        val sakerMedAmmeAvdoede = sakerMedSammeAvdoede(avdoede)
+
+        val behandling =
+            inTransaction {
+                val behandlingerPaaSakene =
+                    sakerMedAmmeAvdoede.flatMap { sakId -> hentBehandlingerForSakId(sakId) }
+                behandlingerPaaSakene
+                    .filter { it.id != behandlingId }
+                    .filter {
+                        it.status in listOf(IVERKSATT, BEREGNET, FATTET_VEDTAK, ATTESTERT, TIL_SAMORDNING, SAMORDNET)
+                    }.maxByOrNull { it.behandlingOpprettet }
+            }
+        return behandling
+            ?.let { hentDetaljertBehandlingMedTilbehoer(it.id, Kontekst.get().brukerTokenInfo!!) }
+    }
+
+    private suspend fun sakerMedSammeAvdoede(avdoede: List<String>): Set<SakId> {
         val sakerPerAvdoed: List<Set<SakId>> =
             avdoede.map { avdoed ->
                 grunnlagKlient
@@ -921,13 +938,7 @@ internal class BehandlingServiceImpl(
         val sakerMedAlleAvdoede =
             sakerPerAvdoed
                 .reduce { acc, next -> acc.intersect(next) }
-
-        val behandlingList = sakerMedAlleAvdoede.flatMap { sakId -> hentBehandlingerForSakId(sakId) }
-
-        return behandlingList
-            .filter { it.id != behandlingId }
-            .filter { it.status in listOf(IVERKSATT, BEREGNET, FATTET_VEDTAK, ATTESTERT, TIL_SAMORDNING, SAMORDNET) }
-            .maxBy { it.behandlingOpprettet }
+        return sakerMedAlleAvdoede
     }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =

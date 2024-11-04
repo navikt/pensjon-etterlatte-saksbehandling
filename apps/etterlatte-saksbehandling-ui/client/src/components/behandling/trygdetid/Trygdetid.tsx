@@ -3,16 +3,17 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   hentTrygdetider,
   ITrygdetid,
+  kopierTrygdetidFraAnnenBehandling,
   opprettTrygdetider,
   opprettTrygdetidOverstyrtMigrering,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
@@ -23,10 +24,11 @@ import { formaterNavn } from '~shared/types/Person'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { TrygdetidMelding } from '~components/behandling/trygdetid/components/TrygdetidMelding'
-import { hentAlleLand } from '~shared/api/behandling'
+import { hentAlleLand, hentBehandlingMedTrygdetidForSammeAvdoede } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { formaterDato } from '~utils/formatering/dato'
 
 interface Props {
   redigerbar: boolean
@@ -56,6 +58,10 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
+  const [trygdetidSammeAvdoedeStatus, finnTrygdetidSammeAvdoedeReq] = useApiCall(
+    hentBehandlingMedTrygdetidForSammeAvdoede
+  )
+  const [kopierTrygdetidStatus, kopierTrygdetidReq] = useApiCall(kopierTrygdetidFraAnnenBehandling)
 
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
@@ -121,6 +127,18 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     })
   }
 
+  const kopierTrygdetidFra = (kildeBehandlingId: string) => {
+    kopierTrygdetidReq(
+      {
+        behandlingId: behandling.id,
+        kildeBehandlingId: kildeBehandlingId,
+      },
+      () => {
+        setTimeout(() => window.location.reload(), 1000)
+      }
+    )
+  }
+
   useEffect(() => {
     if (!behandling?.id) {
       setBehandlingsIdMangler(true)
@@ -134,6 +152,10 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     fetchAlleLand(null, (landListe: ILand[]) => {
       setLandListe(sorterLand(landListe))
     })
+  }, [])
+
+  useEffect(() => {
+    finnTrygdetidSammeAvdoedeReq(behandling.id)
   }, [])
 
   if (harPilotTrygdetid) {
@@ -156,6 +178,41 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   return (
     <Box paddingInline="16" maxWidth="69rem">
+      {mapResult(trygdetidSammeAvdoedeStatus, {
+        success: (behandling) => (
+          <>
+            {behandling ? (
+              <>
+                <BodyShort>
+                  Det finnes en annen behandling tilknyttet samme avdøde. Ønsker du å benytte den samme trygdetiden i
+                  denne behandlingen? Dette overskriver det du eventuelt har registrert allerede.
+                </BodyShort>
+                <BodyShort>
+                  <strong>SaksID:</strong>
+                  {behandling?.sakId}, <strong>Type: </strong> {behandling?.sakType}, <strong>Status: </strong>{' '}
+                  {behandling?.status},{' '}
+                  {behandling.soeknadMottattDato && (
+                    <>
+                      <strong>Søknad mottatt dato: </strong> {formaterDato(behandling.soeknadMottattDato)}{' '}
+                    </>
+                  )}
+                </BodyShort>
+
+                <Box paddingBlock="2 4">
+                  <Button variant="primary" onClick={() => kopierTrygdetidFra(behandling.id)}>
+                    Kopier trygdetid
+                  </Button>
+                </Box>
+              </>
+            ) : (
+              <></>
+            )}
+          </>
+        ),
+        error: (error) => (
+          <ApiErrorAlert>En feil har oppstått ved henting av trygdetid for samme avdøde. {error.detail}</ApiErrorAlert>
+        ),
+      })}
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
 
@@ -238,11 +295,15 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         })}
         {isFailureHandler({
           apiResult: hentAlleLandRequest,
-          errorMessage: 'Hent feil har oppstått ved henting av landliste',
+          errorMessage: 'En feil har oppstått ved henting av landliste',
         })}
         {isFailureHandler({
           apiResult: overstyrTrygdetidStatus,
-          errorMessage: 'Hent feil har oppstått ved opprettelse av overstyrt trygdetid',
+          errorMessage: 'En feil har oppstått ved opprettelse av overstyrt trygdetid',
+        })}
+        {isFailureHandler({
+          apiResult: kopierTrygdetidStatus,
+          errorMessage: 'En feil har oppstått ved kopiering av trygdetid fra annen behandling',
         })}
 
         {behandlingsIdMangler && <ApiErrorAlert>Finner ikke behandling - ID mangler</ApiErrorAlert>}

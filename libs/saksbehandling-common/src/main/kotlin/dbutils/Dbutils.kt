@@ -1,5 +1,6 @@
-package no.nav.etterlatte.libs.common.tidspunkt
+package no.nav.etterlatte.libs.common.dbutils
 
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp

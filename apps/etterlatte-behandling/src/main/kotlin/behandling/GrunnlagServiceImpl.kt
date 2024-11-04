@@ -60,6 +60,7 @@ interface GrunnlagService {
     suspend fun hentPersonopplysninger(
         behandlingId: UUID,
         sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
     ): PersonopplysningerResponse
 }
 
@@ -126,9 +127,8 @@ class GrunnlagServiceImpl(
     override suspend fun hentPersonopplysninger(
         behandlingId: UUID,
         sakType: SakType,
-    ): PersonopplysningerResponse {
-        TODO("Not yet implemented")
-    }
+        brukerTokenInfo: BrukerTokenInfo,
+    ): PersonopplysningerResponse = grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo, sakType)
 
     private fun grunnlagsbehovSak(
         sak: Sak,

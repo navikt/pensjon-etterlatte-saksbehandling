@@ -87,7 +87,7 @@ class AarligInntektsjusteringJobbServiceTest {
             mockk {
                 every { id } returns sisteBehandling
             }
-        coEvery { grunnlagService.hentPersonopplysninger(any(), any()) } returns
+        coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
             mockk {
                 every { innsender } returns
                     mockk {

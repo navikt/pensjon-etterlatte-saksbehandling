@@ -120,7 +120,12 @@ class AarligInntektsjusteringJobbService(
                         behandlingService.hentSisteIverksatte(sakId)
                             ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
                     val opplysningerGjenny =
-                        grunnlagService.hentPersonopplysninger(sisteIverksatteBehandling.id, sak.sakType).innsender
+                        grunnlagService
+                            .hentPersonopplysninger(
+                                sisteIverksatteBehandling.id,
+                                sak.sakType,
+                                HardkodaSystembruker.omregning,
+                            ).innsender
                             ?: throw InternfeilException("Fant ikke opplysninger for behandling=${sisteIverksatteBehandling.id}")
 
                     with(opplysningerGjenny.opplysning) {

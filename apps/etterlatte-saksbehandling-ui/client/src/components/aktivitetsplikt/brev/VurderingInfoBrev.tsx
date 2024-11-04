@@ -24,20 +24,10 @@ export function VurderingInfoBrev() {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettAktivitetspliktsbrev)
 
-  //const redigerbar = erOppgaveRedigerbar(oppgave.status)
   const brevdataFinnes = !!aktivtetspliktbrevdata
 
   const [brevId, setBrevid] = useState<number | undefined>(aktivtetspliktbrevdata?.brevId)
   const [brevErKlart, setBrevErKlart] = useState<boolean>(false)
-  /*TODO: kalle backend her og sjekke om
-    1. brevid finnes
-    finnes ikke -> sjekk om oppgave kan redigeres og om det var valgt at brev skulle sendes JA/NEI
-    finnes -> vise brev .. fikset brevkomponenten det automatisk?
-     Bad state altså at brevid ikke finnes og sb ikke har tatt stilling til brevvalg må reroutes tilkbake til vurderingssiden
-    hvis bad state her ha med tilbakeknapp
-
-    TODO: håndtere sette oppgave til ferdigstilt på onclick lagre brev
-     */
 
   useEffect(() => {
     if (brevdataFinnes) {
@@ -52,11 +42,8 @@ export function VurderingInfoBrev() {
           })
         }
       } else {
-        //Skal ikke sende brev for denne oppgave, brevløs oppgave, bare å vise skal ikke ha brev blabla
         setBrevErKlart(false)
       }
-    } else {
-      //Håndtere manglende brevdata.... vise generell mangler utfylling av brevdata feil
     }
   }, [])
 

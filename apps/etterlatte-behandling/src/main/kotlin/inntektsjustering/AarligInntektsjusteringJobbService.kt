@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -103,46 +105,31 @@ class AarligInntektsjusteringJobbService(
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
 
         val identErUendretPdl =
-            pdlTjenesterKlient.hentPdlIdentifikator(sak.ident)?.let { sisteIdentifikatorPdl ->
+            hentPdlPersonident(sak).let { sisteIdentifikatorPdl ->
                 val sisteIdent =
                     when (sisteIdentifikatorPdl) {
                         is PdlIdentifikator.FolkeregisterIdent -> sisteIdentifikatorPdl.folkeregisterident.value
                         is PdlIdentifikator.Npid -> sisteIdentifikatorPdl.npid.ident
                     }
                 sak.ident == sisteIdent
-            } ?: throw InternfeilException("Fant ikke ident fra PDL for sak ${sak.id}")
+            }
         if (!identErUendretPdl) {
             return AarligInntektsjusteringAarsakManuell.UTDATERT_IDENT
         }
 
-        val opplysningerErUendretIPdl =
-            pdlTjenesterKlient
-                .hentPdlModellFlereSaktyper(
-                    sak.ident,
-                    PersonRolle.INNSENDER,
-                    SakType.OMSTILLINGSSTOENAD,
-                ).let { opplysningerPdl ->
-                    val sisteIverksatteBehandling =
-                        behandlingService.hentSisteIverksatte(sakId)
-                            ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
-                    val opplysningerGjenny =
-                        grunnlagService
-                            .hentPersonopplysninger(
-                                sisteIverksatteBehandling.id,
-                                sak.sakType,
-                                HardkodaSystembruker.omregning,
-                            ).innsender
-                            ?: throw InternfeilException("Fant ikke opplysninger for behandling=${sisteIverksatteBehandling.id}")
+        val opplysningerGjenny = hentOpplysningerGjenny(sak)
 
-                    with(opplysningerGjenny.opplysning) {
-                        fornavn == opplysningerPdl.fornavn.verdi &&
-                            mellomnavn == opplysningerPdl.mellomnavn?.verdi &&
-                            etternavn == opplysningerPdl.etternavn.verdi &&
-                            foedselsdato == opplysningerPdl.foedselsdato?.verdi &&
-                            doedsdato == opplysningerPdl.doedsdato?.verdi &&
-                            vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt // TODO test i dev nøye..
-                    }
+        val opplysningerErUendretIPdl =
+            hentPdlPersonopplysning(sak).let { opplysningerPdl ->
+                with(opplysningerGjenny.opplysning) {
+                    fornavn == opplysningerPdl.fornavn.verdi &&
+                        mellomnavn == opplysningerPdl.mellomnavn?.verdi &&
+                        etternavn == opplysningerPdl.etternavn.verdi &&
+                        foedselsdato == opplysningerPdl.foedselsdato?.verdi &&
+                        doedsdato == opplysningerPdl.doedsdato?.verdi &&
+                        vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt // TODO test i dev nøye..
                 }
+            }
         if (!opplysningerErUendretIPdl) {
             return AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONOPPLYSNINGER
         }
@@ -194,6 +181,26 @@ class AarligInntektsjusteringJobbService(
     ): Boolean =
         vedtak.erLoepende &&
             !beregningKlient.sakHarInntektForAar(sakId, loependeFom.year, HardkodaSystembruker.omregning)
+
+    private fun hentPdlPersonopplysning(sak: Sak) =
+        pdlTjenesterKlient.hentPdlModellFlereSaktyper(sak.ident, PersonRolle.INNSENDER, SakType.OMSTILLINGSSTOENAD)
+
+    private suspend fun hentPdlPersonident(sak: Sak) =
+        pdlTjenesterKlient.hentPdlIdentifikator(sak.ident)
+            ?: throw InternfeilException("Fant ikke ident fra PDL for sak ${sak.id}")
+
+    private suspend fun hentOpplysningerGjenny(sak: Sak): Personopplysning {
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatte(sak.id)
+                ?: throw InternfeilException("Fant ikke iverksatt behandling sak=${sak.id}")
+        return grunnlagService
+            .hentPersonopplysninger(
+                sisteIverksatteBehandling.id,
+                sak.sakType,
+                HardkodaSystembruker.omregning,
+            ).innsender
+            ?: throw InternfeilException("Fant ikke opplysninger for behandling=${sisteIverksatteBehandling.id}")
+    }
 }
 
 enum class AarligInntektsjusteringAarsakManuell {

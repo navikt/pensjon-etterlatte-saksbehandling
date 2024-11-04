@@ -36,12 +36,12 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.SanksjonType
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.regler.FaktumNode

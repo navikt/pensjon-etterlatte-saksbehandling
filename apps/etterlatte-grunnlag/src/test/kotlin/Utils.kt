@@ -1,8 +1,6 @@
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.grunnlag.OpplysningDao
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
-import no.nav.etterlatte.libs.common.dbutils.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -13,6 +11,8 @@ import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDate
 import java.util.UUID
 

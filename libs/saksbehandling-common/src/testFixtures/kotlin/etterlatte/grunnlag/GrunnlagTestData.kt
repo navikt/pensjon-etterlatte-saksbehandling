@@ -7,7 +7,6 @@ import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -21,6 +20,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.I
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import java.time.LocalDateTime

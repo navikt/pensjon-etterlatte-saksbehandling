@@ -2,8 +2,8 @@ package no.nav.etterlatte.utbetaling.avstemming
 
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming

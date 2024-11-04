@@ -18,10 +18,6 @@ import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
-import no.nav.etterlatte.libs.common.dbutils.fixedNorskTid
-import no.nav.etterlatte.libs.common.dbutils.toLocalDatetimeNorskTid
-import no.nav.etterlatte.libs.common.dbutils.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -29,6 +25,10 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.ManuellVurdering
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.sak.SakSkrivDao
 import org.junit.jupiter.api.AfterEach

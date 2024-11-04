@@ -1,10 +1,10 @@
 package no.nav.etterlatte.tidspunkt
-import no.nav.etterlatte.libs.common.dbutils.norskTidssone
-import no.nav.etterlatte.libs.common.dbutils.toLocalDatetimeNorskTid
-import no.nav.etterlatte.libs.common.dbutils.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.dbutils.toNorskTid
-import no.nav.etterlatte.libs.common.dbutils.toNorskTidspunkt
-import no.nav.etterlatte.libs.common.dbutils.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

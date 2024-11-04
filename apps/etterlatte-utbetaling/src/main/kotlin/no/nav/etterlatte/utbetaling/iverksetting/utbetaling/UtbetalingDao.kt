@@ -8,10 +8,10 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.Enhetsnummer
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
-import no.nav.etterlatte.libs.common.dbutils.toTidspunkt
-import no.nav.etterlatte.libs.common.dbutils.toTimestamp
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.utbetaling.common.UUID30

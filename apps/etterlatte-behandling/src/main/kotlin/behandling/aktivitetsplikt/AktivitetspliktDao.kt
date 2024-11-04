@@ -7,10 +7,10 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
-import no.nav.etterlatte.libs.common.dbutils.getTidspunkt
-import no.nav.etterlatte.libs.common.dbutils.getUUID
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getUUID
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date

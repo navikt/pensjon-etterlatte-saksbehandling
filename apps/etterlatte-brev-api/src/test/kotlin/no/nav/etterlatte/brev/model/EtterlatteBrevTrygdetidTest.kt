@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto

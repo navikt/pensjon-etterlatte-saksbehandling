@@ -1,8 +1,8 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
-import no.nav.etterlatte.libs.common.dbutils.toNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeParseException

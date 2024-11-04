@@ -1,8 +1,8 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 
 data class StatistikkTilbakekrevingDto(

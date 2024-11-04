@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.dbutils
+package no.nav.etterlatte.libs.common.tidspunkt
 
 import java.time.Clock
 

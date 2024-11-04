@@ -1,8 +1,8 @@
 package no.nav.etterlatte.statistikk.service
 
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.statistikk.database.AktivitetspliktRepo
 import no.nav.etterlatte.statistikk.database.StatistikkAktivitet
 import no.nav.etterlatte.statistikk.database.VurdertAktivitet

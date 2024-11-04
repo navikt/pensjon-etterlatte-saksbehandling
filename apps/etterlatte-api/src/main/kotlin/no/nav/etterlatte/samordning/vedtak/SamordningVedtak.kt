@@ -1,9 +1,9 @@
 package no.nav.etterlatte.samordning.vedtak
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.time.YearMonth
 

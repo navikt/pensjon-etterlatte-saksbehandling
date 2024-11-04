@@ -3,9 +3,9 @@ package no.nav.etterlatte.libs.common.behandling
 import io.kotest.matchers.equals.shouldBeEqual
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow

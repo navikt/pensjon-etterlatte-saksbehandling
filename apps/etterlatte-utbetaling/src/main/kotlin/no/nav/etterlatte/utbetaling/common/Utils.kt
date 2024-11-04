@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.common
 
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
-import no.nav.etterlatte.libs.common.dbutils.utcKlokke
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime

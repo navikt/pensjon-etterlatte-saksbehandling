@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata
 
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
-import no.nav.etterlatte.libs.common.dbutils.toNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.avstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.common.ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults

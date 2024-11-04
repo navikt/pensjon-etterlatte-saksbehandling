@@ -2,7 +2,7 @@ package no.nav.etterlatte.libs.common.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.time.Period
 import java.util.UUID

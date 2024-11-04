@@ -4,10 +4,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
-import no.nav.etterlatte.libs.common.dbutils.setTidspunkt
-import no.nav.etterlatte.libs.common.dbutils.toTidspunkt
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode

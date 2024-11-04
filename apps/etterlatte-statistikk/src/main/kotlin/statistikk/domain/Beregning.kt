@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth

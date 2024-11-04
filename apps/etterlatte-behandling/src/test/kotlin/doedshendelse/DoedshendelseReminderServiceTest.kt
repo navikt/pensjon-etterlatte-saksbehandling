@@ -11,11 +11,11 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.dbutils.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

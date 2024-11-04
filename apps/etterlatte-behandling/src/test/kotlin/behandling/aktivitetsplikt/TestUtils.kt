@@ -5,9 +5,9 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAkt
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
 import no.nav.etterlatte.behandling.sakId1
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
 

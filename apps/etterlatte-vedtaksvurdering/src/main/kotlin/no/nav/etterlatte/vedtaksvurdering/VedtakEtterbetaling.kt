@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
-import no.nav.etterlatte.libs.common.dbutils.norskKlokke
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import java.math.BigDecimal

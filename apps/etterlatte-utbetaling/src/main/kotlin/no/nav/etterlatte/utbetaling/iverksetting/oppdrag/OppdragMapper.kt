@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
-import no.nav.etterlatte.libs.common.dbutils.toNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.OppdragslinjeDefaults
 import no.nav.etterlatte.utbetaling.common.toXMLDate

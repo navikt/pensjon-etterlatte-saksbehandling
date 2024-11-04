@@ -3,8 +3,8 @@ package no.nav.etterlatte.statistikk.jobs
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
-import no.nav.etterlatte.libs.common.dbutils.norskKlokke
-import no.nav.etterlatte.libs.common.dbutils.utcKlokke
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.service.StatistikkService

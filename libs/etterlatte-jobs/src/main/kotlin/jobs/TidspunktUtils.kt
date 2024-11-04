@@ -1,6 +1,6 @@
 package no.nav.etterlatte.jobs
 
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import java.util.Date

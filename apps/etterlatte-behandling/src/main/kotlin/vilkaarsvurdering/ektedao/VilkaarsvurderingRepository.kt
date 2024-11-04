@@ -4,10 +4,10 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.libs.common.dbutils.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.dbutils.toTidspunkt
-import no.nav.etterlatte.libs.common.dbutils.toTimestamp
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData

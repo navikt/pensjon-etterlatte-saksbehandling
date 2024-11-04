@@ -4,9 +4,9 @@ import no.nav.etterlatte.beregning.regler.overstyr.RegulerManuellBeregningGrunnl
 import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloepUtenGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.regulerOverstyrtKroneavrundet
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag

@@ -2,8 +2,8 @@ package no.nav.etterlatte.trygdetid.regler
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.FaktiskTrygdetid
 import no.nav.etterlatte.libs.common.trygdetid.FremtidigTrygdetid

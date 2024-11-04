@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
 data class GenerellKilde(
     val type: String,

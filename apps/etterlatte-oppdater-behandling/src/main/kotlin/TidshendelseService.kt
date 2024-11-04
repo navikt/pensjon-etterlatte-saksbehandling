@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT
@@ -10,6 +9,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_INFORMA
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_REVURDERING
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.REVURDERING
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import org.slf4j.LoggerFactory
 import java.time.LocalTime

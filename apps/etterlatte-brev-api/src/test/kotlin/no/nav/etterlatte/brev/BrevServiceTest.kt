@@ -27,9 +27,9 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
-import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach

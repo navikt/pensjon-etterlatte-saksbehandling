@@ -6,6 +6,7 @@ data class KjoeringRequest(
     val kjoering: String,
     val status: KjoeringStatus,
     val sakId: SakId,
+    val begrunnelse: String? = null,
 )
 
 data class LagreKjoeringRequest(
@@ -29,4 +30,5 @@ enum class KjoeringStatus {
     FEILA,
     IKKE_LOEPENDE,
     FERDIGSTILT,
+    TIL_MANUELL,
 }

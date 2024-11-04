@@ -64,9 +64,16 @@ class AarligInntektsjusteringJobbService(
                 vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
 
             logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
-            if (!skalBehandlingOmregnes(sakId, vedtak, loependeFom)) {
-                // TODO Legge til en begrunnelse
-                omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FERDIGSTILT, sakId))
+            val skalIkkeGjennomfoereJobb = skalIkkeGjennomfoereJobb(sakId, vedtak, loependeFom)
+            if (skalIkkeGjennomfoereJobb != null) {
+                omregningService.oppdaterKjoering(
+                    KjoeringRequest(
+                        kjoering,
+                        KjoeringStatus.FERDIGSTILT,
+                        sakId,
+                        begrunnelse = skalIkkeGjennomfoereJobb,
+                    ),
+                )
                 return
             }
             val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, vedtak)
@@ -82,7 +89,14 @@ class AarligInntektsjusteringJobbService(
                         // frist =  TODO
                     )
                 // TODO Legge til en begrunnelse og oppgave id
-                omregningService.oppdaterKjoering(KjoeringRequest(kjoering, KjoeringStatus.FERDIGSTILT, sakId))
+                omregningService.oppdaterKjoering(
+                    KjoeringRequest(
+                        kjoering,
+                        KjoeringStatus.TIL_MANUELL,
+                        sakId,
+                        begrunnelse = aarsakTilManuell.name,
+                    ),
+                )
                 return
             }
             // TODO status KLAR_FOR_OMREGNING
@@ -127,7 +141,7 @@ class AarligInntektsjusteringJobbService(
                         etternavn == opplysningerPdl.etternavn.verdi &&
                         foedselsdato == opplysningerPdl.foedselsdato?.verdi &&
                         doedsdato == opplysningerPdl.doedsdato?.verdi &&
-                        vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt // TODO test i dev nøye..
+                        vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt?.map { it.verdi }
                 }
             }
         if (!opplysningerErUendretIPdl) {
@@ -173,13 +187,18 @@ class AarligInntektsjusteringJobbService(
     }
 
     // Skal inntektjusteres hvis: 1) er løpende fom dato, 2) ikke har oppgitt inntekt fra 1.1 neste inntektsår
-    private suspend fun skalBehandlingOmregnes(
+    private suspend fun skalIkkeGjennomfoereJobb(
         sakId: SakId,
         vedtak: LoependeYtelseDTO,
         loependeFom: YearMonth,
-    ): Boolean =
-        vedtak.erLoepende &&
-            !beregningKlient.sakHarInntektForAar(sakId, loependeFom.year, HardkodaSystembruker.omregning)
+    ): String? =
+        if (!vedtak.erLoepende) {
+            "Sak er ikke løpende"
+        } else if (beregningKlient.sakHarInntektForAar(sakId, loependeFom.year, HardkodaSystembruker.omregning)) {
+            "Sak har allerede oppgitt inntekt for ${loependeFom.year}"
+        } else {
+            null
+        }
 
     private fun hentPdlPersonopplysning(sak: Sak) =
         pdlTjenesterKlient.hentPdlModellFlereSaktyper(sak.ident, PersonRolle.INNSENDER, SakType.OMSTILLINGSSTOENAD)

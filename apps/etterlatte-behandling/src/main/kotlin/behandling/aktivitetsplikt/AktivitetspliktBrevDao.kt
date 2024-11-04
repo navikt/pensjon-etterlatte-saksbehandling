@@ -1,10 +1,9 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
-import no.nav.etterlatte.behandling.hendelse.getUUID
-import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.getUUID
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.util.UUID
 

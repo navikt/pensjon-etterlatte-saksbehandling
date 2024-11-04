@@ -8,17 +8,18 @@ import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendel
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getLongOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
+import no.nav.etterlatte.libs.common.tidspunkt.getUUID
+import no.nav.etterlatte.libs.common.tidspunkt.setLongOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.sql.Types
 import java.util.UUID
 
 class HendelseDao(
@@ -261,7 +262,7 @@ class HendelseDao(
                     )
                 stmt.setString(1, hendelse.hendelse)
                 stmt.setTidspunkt(2, hendelse.inntruffet)
-                stmt.setLong(3, hendelse.vedtakId)
+                stmt.setLongOrNull(3, hendelse.vedtakId)
                 stmt.setObject(4, hendelse.behandlingId)
                 stmt.setSakId(5, hendelse.sakId)
                 stmt.setString(6, hendelse.ident)
@@ -275,17 +276,3 @@ class HendelseDao(
             }
         }
 }
-
-fun PreparedStatement.setLong(
-    index: Int,
-    value: Long?,
-) = if (value == null) setNull(index, Types.BIGINT) else setLong(index, value)
-
-fun ResultSet.getUUID(name: String) = getObject(name) as UUID
-
-fun ResultSet.getLongOrNull(name: String): Long? =
-    if (getObject(name) == null) {
-        null
-    } else {
-        getLong(name)
-    }

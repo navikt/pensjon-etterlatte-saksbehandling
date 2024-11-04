@@ -1,13 +1,15 @@
 package no.nav.etterlatte.behandling.tilbakekreving
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.getIntOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getUUID
+import no.nav.etterlatte.libs.common.tidspunkt.setIntOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
@@ -22,9 +24,7 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
-import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.sql.Types
 import java.time.YearMonth
 import java.util.UUID
 
@@ -264,14 +264,14 @@ class TilbakekrevingDao(
             statement.setInt(5, beloeper.bruttoUtbetaling)
             statement.setInt(6, beloeper.nyBruttoUtbetaling)
             statement.setBigDecimal(7, beloeper.skatteprosent)
-            statement.setInt(8, beloeper.beregnetFeilutbetaling)
-            statement.setInt(9, beloeper.bruttoTilbakekreving)
-            statement.setInt(10, beloeper.nettoTilbakekreving)
-            statement.setInt(11, beloeper.skatt)
+            statement.setIntOrNull(8, beloeper.beregnetFeilutbetaling)
+            statement.setIntOrNull(9, beloeper.bruttoTilbakekreving)
+            statement.setIntOrNull(10, beloeper.nettoTilbakekreving)
+            statement.setIntOrNull(11, beloeper.skatt)
             statement.setString(12, beloeper.skyld?.name)
             statement.setString(13, beloeper.resultat?.name)
-            statement.setInt(14, beloeper.tilbakekrevingsprosent)
-            statement.setInt(15, beloeper.rentetillegg)
+            statement.setIntOrNull(14, beloeper.tilbakekrevingsprosent)
+            statement.setIntOrNull(15, beloeper.rentetillegg)
             statement.setObject(16, tilbakekrevingBehandling.id)
             statement.addBatch()
         }
@@ -324,15 +324,3 @@ class TilbakekrevingDao(
             ),
         )
 }
-
-fun PreparedStatement.setInt(
-    index: Int,
-    value: Int?,
-) = if (value == null) setNull(index, Types.BIGINT) else setInt(index, value)
-
-fun ResultSet.getIntOrNull(name: String): Int? =
-    if (getObject(name) == null) {
-        null
-    } else {
-        getInt(name)
-    }

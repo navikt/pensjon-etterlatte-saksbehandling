@@ -1,12 +1,12 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.getUUID
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId

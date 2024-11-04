@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -174,16 +175,17 @@ class AktivitetspliktOppgaveService(
             oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
         } else {
             logger.warn("Brev ble ikke ferdig for oppgaveid ${brevData.oppgaveId} status på brev ${brevrespons.status}")
-            throw BrevBleIkkeFerdig()
+            throw BrevBleIkkeFerdig(brevrespons.status)
         }
     }
 }
 
-class BrevBleIkkeFerdig :
-    ForespoerselException(
+class BrevBleIkkeFerdig(
+    status: Status,
+) : ForespoerselException(
         status = HttpStatusCode.InternalServerError.value,
         code = "BREV_BLE_IKKE_FERDIG",
-        detail = "Brevet ble ikke helt ferdig, prøv igjen. Om det ikke går kontakt support",
+        detail = "Brevet ble ikke helt ferdig, prøv igjen. Om det ikke går kontakt support. Brevstatus: ${status.name}",
     )
 
 class BrevFeil(

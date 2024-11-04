@@ -153,7 +153,49 @@ class AarligInntektsjusteringJobbServiceTest {
         // TODO
     }
 
-    // TODO unittest samordnign
+    @Test
+    fun `Sak som er under samordning skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
+            loependeYtdelseDto().copy(
+                underSamordning = true,
+            )
+
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        // TODO verifiser satt status og begrunnelse kjøring..
+        verify {
+            oppgaveService.opprettOppgave(
+                "123",
+                SakId(123L),
+                null,
+                OppgaveType.REVURDERING,
+                merknad = "",
+            )
+        }
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        sakId shouldBe SakId(123L)
+                    }
+                },
+            )
+        }
+    }
 
     @Test
     fun `Sak hvor ident har endret seg skal gjoeres manuelt`() {

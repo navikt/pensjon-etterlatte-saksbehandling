@@ -26,7 +26,6 @@ export function VurderingInfoBrev() {
 
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettAktivitetspliktsbrev)
-  const navigate = useNavigate()
   const brevdataFinnes = !!aktivtetspliktbrevdata
 
   const [brevId, setBrevid] = useState<number | undefined>(aktivtetspliktbrevdata?.brevId)
@@ -78,19 +77,6 @@ export function VurderingInfoBrev() {
           </Alert>
         </>
       )}
-      <VStack gap="4">
-        <HStack gap="4" justify="center">
-          <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-            <Button
-              onClick={() => {
-                navigate(`../${AktivitetspliktSteg.VURDERING}`)
-              }}
-            >
-              {handlinger.TILBAKE.navn}
-            </Button>
-          </Box>
-        </HStack>
-      </VStack>
     </Box>
   )
 }
@@ -112,6 +98,7 @@ function Aktivitetspliktbrev({
 }): JSX.Element {
   const [kanRedigeres, setKanRedigeres] = useState(false)
   const [tilbakestilt, setTilbakestilt] = useState(false)
+  const navigate = useNavigate()
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
   const [status, ferdigstillbrevApi] = useApiCall(ferdigstillJournalfoerOgDistribuerbrev)
@@ -171,19 +158,29 @@ function Aktivitetspliktbrev({
                       tilbakestillingsaction={() => setTilbakestilt(true)}
                     />
                   </HStack>
-                  <VStack gap="4">
-                    <HStack gap="4" justify="center">
-                      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-                        {isFailure(status) && (
-                          <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>
-                        )}
-                        {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
-                        <Button onClick={ferdigstillBrev}>Ferdigstill brev</Button>
-                      </Box>
-                    </HStack>
-                  </VStack>
                 </>
               )}
+              <VStack gap="4">
+                <HStack gap="4" justify="center">
+                  <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+                    {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
+                    {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
+                    <HStack gap="4" justify="center">
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          navigate(`../${AktivitetspliktSteg.VURDERING}`)
+                        }}
+                      >
+                        {handlinger.TILBAKE.navn}
+                      </Button>
+                      {!(
+                        brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT
+                      ) && <Button onClick={ferdigstillBrev}>Ferdigstill brev</Button>}
+                    </HStack>
+                  </Box>
+                </HStack>
+              </VStack>
             </Column>
           </GridContainer>
         )

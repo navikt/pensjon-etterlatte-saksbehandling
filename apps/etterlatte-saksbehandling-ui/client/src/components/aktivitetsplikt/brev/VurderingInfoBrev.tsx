@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Heading, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React, { useEffect, useState } from 'react'
@@ -78,15 +78,19 @@ export function VurderingInfoBrev() {
           </Alert>
         </>
       )}
-      <Box width="6">
-        <Button
-          onClick={() => {
-            navigate(`../${AktivitetspliktSteg.VURDERING}`)
-          }}
-        >
-          {handlinger.TILBAKE.navn}
-        </Button>
-      </Box>
+      <VStack gap="4">
+        <HStack gap="4" justify="center">
+          <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+            <Button
+              onClick={() => {
+                navigate(`../${AktivitetspliktSteg.VURDERING}`)
+              }}
+            >
+              {handlinger.TILBAKE.navn}
+            </Button>
+          </Box>
+        </HStack>
+      </VStack>
     </Box>
   )
 }
@@ -160,14 +164,24 @@ function Aktivitetspliktbrev({
                 </PanelWrapper>
               ) : (
                 <>
-                  <RedigerbartBrev
-                    brev={brev}
-                    kanRedigeres={kanRedigeres}
-                    tilbakestillingsaction={() => setTilbakestilt(true)}
-                  />
-                  {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
-                  {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
-                  <Button onClick={ferdigstillBrev}>Ferdigstill brev</Button>
+                  <HStack wrap={false}>
+                    <RedigerbartBrev
+                      brev={brev}
+                      kanRedigeres={kanRedigeres}
+                      tilbakestillingsaction={() => setTilbakestilt(true)}
+                    />
+                  </HStack>
+                  <VStack gap="4">
+                    <HStack gap="4" justify="center">
+                      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+                        {isFailure(status) && (
+                          <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>
+                        )}
+                        {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
+                        <Button onClick={ferdigstillBrev}>Ferdigstill brev</Button>
+                      </Box>
+                    </HStack>
+                  </VStack>
                 </>
               )}
             </Column>

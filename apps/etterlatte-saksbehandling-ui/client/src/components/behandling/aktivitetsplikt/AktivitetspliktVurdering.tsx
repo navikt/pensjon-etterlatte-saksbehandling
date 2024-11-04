@@ -110,6 +110,8 @@ export const AktivitetspliktVurdering = ({
             beskrivelse: data.beskrivelse,
             fom: data.fom ? new Date(data.fom).toISOString() : new Date().toISOString(),
             tom: data.tom ? new Date(data.tom).toISOString() : undefined,
+            vurdertFra12Mnd: false,
+            skjoennsmessigVurdering: undefined,
           },
         },
         () => {

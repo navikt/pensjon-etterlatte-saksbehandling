@@ -145,12 +145,66 @@ class AarligInntektsjusteringJobbServiceTest {
 
     @Test
     fun `Sak som ikke er loepende skal ferdigstilles`() {
-        // TODO
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
+            loependeYtdelseDto().copy(
+                erLoepende = false,
+            )
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe "Sak er ikke løpende"
+                    }
+                },
+            )
+        }
     }
 
     @Test
     fun `Sak som allerede har inntekt neste aar skal ferdigstilles`() {
-        // TODO
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery { beregningKlient.sakHarInntektForAar(any(), any(), any()) } returns true
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe "Sak har allerede oppgitt inntekt for 2025"
+                    }
+                },
+            )
+        }
     }
 
     @Test
@@ -174,7 +228,6 @@ class AarligInntektsjusteringJobbServiceTest {
             service.startAarligInntektsjustering(request)
         }
 
-        // TODO verifiser satt status og begrunnelse kjøring..
         verify {
             oppgaveService.opprettOppgave(
                 "123",
@@ -189,8 +242,9 @@ class AarligInntektsjusteringJobbServiceTest {
                 withArg {
                     with(it) {
                         kjoering shouldBe "kjoering"
-                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING.name
                     }
                 },
             )
@@ -231,8 +285,9 @@ class AarligInntektsjusteringJobbServiceTest {
                 withArg {
                     with(it) {
                         kjoering shouldBe "kjoering"
-                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.UTDATERT_IDENT.name
                     }
                 },
             )
@@ -266,7 +321,6 @@ class AarligInntektsjusteringJobbServiceTest {
             service.startAarligInntektsjustering(request)
         }
 
-        // TODO verifiser satt status og begrunnelse kjøring..
         verify {
             oppgaveService.opprettOppgave(
                 "123",
@@ -281,8 +335,9 @@ class AarligInntektsjusteringJobbServiceTest {
                 withArg {
                     with(it) {
                         kjoering shouldBe "kjoering"
-                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONOPPLYSNINGER.name
                     }
                 },
             )
@@ -297,6 +352,23 @@ class AarligInntektsjusteringJobbServiceTest {
                 loependeFom = YearMonth.of(2025, 1),
                 saker = listOf(SakId(123L)),
             )
+        val vergemaal =
+            VergemaalEllerFremtidsfullmakt(
+                embete = null,
+                type = null,
+                vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
+            )
+
+        coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
+            mockk {
+                every { innsender } returns
+                    mockk {
+                        every { opplysning } returns
+                            personGjenny.copy(
+                                vergemaalEllerFremtidsfullmakt = listOf(vergemaal),
+                            )
+                    }
+            }
 
         coEvery {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -309,11 +381,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 vergemaalEllerFremtidsfullmakt =
                     listOf(
                         OpplysningDTO(
-                            VergemaalEllerFremtidsfullmakt(
-                                embete = null,
-                                type = null,
-                                vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
-                            ),
+                            vergemaal,
                             "",
                         ),
                     ),
@@ -326,7 +394,6 @@ class AarligInntektsjusteringJobbServiceTest {
             service.startAarligInntektsjustering(request)
         }
 
-        // TODO verifiser satt status og begrunnelse kjøring..
         verify {
             oppgaveService.opprettOppgave(
                 "123",
@@ -341,8 +408,9 @@ class AarligInntektsjusteringJobbServiceTest {
                 withArg {
                     with(it) {
                         kjoering shouldBe "kjoering"
-                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.VERGEMAAL.name
                     }
                 },
             )

@@ -54,6 +54,7 @@ class OmregningDao(
         }
 
     fun oppdaterKjoering(request: KjoeringRequest) {
+        // TODO begrunnelse
         connection.hentConnection { connection ->
             with(connection) {
                 val statement =

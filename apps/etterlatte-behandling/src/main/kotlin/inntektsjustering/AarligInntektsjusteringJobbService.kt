@@ -88,10 +88,10 @@ class AarligInntektsjusteringJobbService(
         }
     }
 
-    private suspend fun kanIkkeKjoereAutomatisk(sakId: SakId): String? {
+    private suspend fun kanIkkeKjoereAutomatisk(sakId: SakId): AarligInntektsjusteringAarsakManuell? {
         val erIkkeUnderSamordning = true // TODO
         if (!erIkkeUnderSamordning) {
-            return "Sak er under samordning"
+            return AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING
         }
 
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
@@ -106,7 +106,7 @@ class AarligInntektsjusteringJobbService(
                 sak.ident == sisteIdent
             } ?: throw InternfeilException("Fant ikke ident fra PDL for sak ${sak.id}")
         if (!identErUendretPdl) {
-            return "Ident har endret seg i PDL"
+            return AarligInntektsjusteringAarsakManuell.UTDATERT_IDENT
         }
 
         val opplysningerErUendretIPdl =
@@ -138,12 +138,12 @@ class AarligInntektsjusteringJobbService(
                     }
                 }
         if (!opplysningerErUendretIPdl) {
-            return "Personopplysninger har endret seg i PDL"
+            return AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONOPPLYSNINGER
         }
 
         val ingenVergemaalEllerFremtidsfullmakt = true // TODO
         if (!ingenVergemaalEllerFremtidsfullmakt) {
-            return "Sak har vergemål eller fremtidsfullmakt"
+            return AarligInntektsjusteringAarsakManuell.VERGEMAAL
         }
 
         return null
@@ -189,4 +189,11 @@ class AarligInntektsjusteringJobbService(
         return vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, fomDato, HardkodaSystembruker.omregning).erLoepende &&
             !beregningKlient.sakHarInntektForAar(sakId, fomDato.year, HardkodaSystembruker.omregning)
     }
+}
+
+enum class AarligInntektsjusteringAarsakManuell {
+    UTDATERT_IDENT,
+    UTDATERTE_PERSONOPPLYSNINGER,
+    VERGEMAAL,
+    TIL_SAMORDNING,
 }

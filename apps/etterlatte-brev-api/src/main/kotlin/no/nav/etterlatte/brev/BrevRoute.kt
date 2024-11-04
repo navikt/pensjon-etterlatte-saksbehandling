@@ -87,7 +87,7 @@ fun Route.brevRoute(
             put {
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val body = call.receive<OppdaterMottakerRequest>()
-                    service.oppdaterMottaker(brevId, body.mottaker)
+                    service.oppdaterMottaker(brevId, body.mottaker, brukerTokenInfo)
 
                     call.respond(HttpStatusCode.OK)
                 }
@@ -97,7 +97,7 @@ fun Route.brevRoute(
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val mottakerId = UUID.fromString(call.parameters["mottakerId"])
 
-                    service.slettMottaker(brevId, mottakerId)
+                    service.slettMottaker(brevId, mottakerId, brukerTokenInfo)
 
                     call.respond(HttpStatusCode.OK)
                 }
@@ -108,7 +108,7 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 val request = call.receive<OppdaterTittelRequest>()
 
-                service.oppdaterTittel(brevId, request.tittel)
+                service.oppdaterTittel(brevId, request.tittel, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)
             }
@@ -118,7 +118,7 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 val request = call.receive<OppdaterSpraakRequest>()
 
-                service.oppdaterSpraak(brevId, request.spraak)
+                service.oppdaterSpraak(brevId, request.spraak, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)
             }
@@ -136,8 +136,8 @@ fun Route.brevRoute(
                     val brevId = brevId
                     val body = call.receive<OppdaterPayloadRequest>()
 
-                    service.lagreBrevPayload(brevId, body.payload)
-                    body.payload_vedlegg?.let { service.lagreBrevPayloadVedlegg(brevId, it) }
+                    service.lagreBrevPayload(brevId, body.payload, brukerTokenInfo)
+                    body.payload_vedlegg?.let { service.lagreBrevPayloadVedlegg(brevId, it, brukerTokenInfo) }
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -173,7 +173,8 @@ fun Route.brevRoute(
                 val bestillingsIder =
                     distribuerer.distribuer(
                         brevId,
-                        distribusjonsType = distribusjonsType,
+                        distribusjonsType,
+                        brukerTokenInfo,
                     )
 
                 call.respond(BestillingsIdDto(bestillingsIder))
@@ -272,7 +273,7 @@ fun Route.brevRoute(
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
-                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts())
+                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts(), brukerTokenInfo)
                     brev.onSuccess {
                         call.respond(brev)
                     }

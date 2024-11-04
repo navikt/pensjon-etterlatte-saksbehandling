@@ -62,7 +62,7 @@ class PDFGenerator(
                 brevKodeMapping,
                 brevDataMapping,
             )
-        db.lagrePdfOgFerdigstillBrev(id, pdf)
+        db.lagrePdfOgFerdigstillBrev(id, pdf, bruker)
         return pdf
     }
 

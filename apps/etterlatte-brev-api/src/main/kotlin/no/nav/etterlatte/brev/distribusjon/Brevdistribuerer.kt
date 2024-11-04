@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -17,6 +18,7 @@ class Brevdistribuerer(
     fun distribuer(
         brevId: BrevID,
         distribusjonsType: DistribusjonsType = DistribusjonsType.ANNET,
+        bruker: BrukerTokenInfo,
     ): List<BestillingsID> {
         logger.info("Starter distribuering av brev $brevId.")
 
@@ -33,7 +35,7 @@ class Brevdistribuerer(
         return brev.mottakere
             .filter { it.bestillingId.isNullOrBlank() }
             .map { mottaker -> sendTilMottaker(brevId, mottaker, distribusjonsType) }
-            .also { db.settBrevDistribuert(brevId, it) }
+            .also { db.settBrevDistribuert(brevId, it, bruker) }
             .map { it.bestillingsId }
     }
 

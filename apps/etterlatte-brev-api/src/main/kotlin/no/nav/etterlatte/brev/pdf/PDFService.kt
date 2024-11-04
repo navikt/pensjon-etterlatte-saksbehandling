@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 class PDFService(
@@ -31,6 +32,7 @@ class PDFService(
     suspend fun lagreOpplastaPDF(
         sakId: SakId,
         multiPart: List<PartData>,
+        bruker: BrukerTokenInfo,
     ): Result<Brev> {
         val request =
             multiPart
@@ -56,7 +58,7 @@ class PDFService(
             return Result.failure(IllegalArgumentException("Virussjekken feila for ${request.innhold.tittel}"))
         }
 
-        return Result.success(lagrePdf(sakId, fil, request.innhold, request.sak))
+        return Result.success(lagrePdf(sakId, fil, request.innhold, request.sak, bruker))
     }
 
     private fun lagrePdf(
@@ -64,6 +66,7 @@ class PDFService(
         fil: ByteArray,
         innhold: BrevInnhold,
         sak: Sak,
+        bruker: BrukerTokenInfo,
     ): Brev {
         val brev =
             db.opprettBrev(
@@ -79,6 +82,7 @@ class PDFService(
                     brevtype = Brevtype.OPPLASTET_PDF,
                     brevkoder = Brevkoder.OPPLASTET_PDF,
                 ),
+                bruker,
             )
 
         db.lagrePdf(brev.id, Pdf(fil))

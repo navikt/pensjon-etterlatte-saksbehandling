@@ -41,6 +41,7 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import org.postgresql.util.PSQLException
 import java.util.UUID
 import javax.sql.DataSource
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRepositoryIntegrationTest(
@@ -54,6 +55,8 @@ internal class BrevRepositoryIntegrationTest(
 
         private val PDF_BYTES = "Hello world!".toByteArray()
         private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
+
+        private val bruker = simpleSaksbehandler("Z123456")
     }
 
     @AfterEach
@@ -67,7 +70,7 @@ internal class BrevRepositoryIntegrationTest(
 
         val brevListe =
             (1..antall).map {
-                db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
+                db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()), simpleSaksbehandler())
             }
 
         brevListe.size shouldBeExactly 10
@@ -86,7 +89,7 @@ internal class BrevRepositoryIntegrationTest(
         assertEquals(emptyList<Brev>(), db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK))
 
         val ulagretBrev = ulagretBrev(behandlingId = behandlingId)
-        val nyttBrev = db.opprettBrev(ulagretBrev)
+        val nyttBrev = db.opprettBrev(ulagretBrev, bruker)
 
         val brevTilBehandling = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).first()
         assertEquals(nyttBrev.status, brevTilBehandling.status)
@@ -103,14 +106,14 @@ internal class BrevRepositoryIntegrationTest(
 
         repeat(10) {
             // Opprette brev for andre saker
-            db.opprettBrev(ulagretBrev(randomSakId()))
+            db.opprettBrev(ulagretBrev(randomSakId()), bruker)
         }
 
         db.hentBrevForSak(sakId) shouldBe emptyList()
 
         val forventetAntall = 7
         repeat(forventetAntall) {
-            db.opprettBrev(ulagretBrev(sakId = sakId))
+            db.opprettBrev(ulagretBrev(sakId = sakId), bruker)
         }
 
         val brevForSak = db.hentBrevForSak(sakId)
@@ -120,12 +123,12 @@ internal class BrevRepositoryIntegrationTest(
     @Test
     fun `Lagring av pdf skal ferdigstille brev`() {
         val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
-        val brev = db.opprettBrev(ulagretBrev)
+        val brev = db.opprettBrev(ulagretBrev, bruker)
 
         brev.status shouldBe Status.OPPRETTET
 
         db.hentBrevInnhold(brev.id) shouldBe ulagretBrev.innhold
-        db.lagrePdfOgFerdigstillBrev(brev.id, Pdf(PDF_BYTES))
+        db.lagrePdfOgFerdigstillBrev(brev.id, Pdf(PDF_BYTES), bruker)
 
         val pdf = db.hentPdf(brev.id)!!
         pdf.bytes.contentEquals(PDF_BYTES) shouldBe true
@@ -136,14 +139,14 @@ internal class BrevRepositoryIntegrationTest(
 
         shouldThrow<PSQLException> {
             // Skal kun være mulig å lagre ETT pdf-dokument pr brev
-            db.lagrePdfOgFerdigstillBrev(brev.id, Pdf(PDF_BYTES))
+            db.lagrePdfOgFerdigstillBrev(brev.id, Pdf(PDF_BYTES), bruker)
         }
     }
 
     @Test
     fun `Lagring av pdf separat`() {
         val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
-        val brev = db.opprettBrev(ulagretBrev)
+        val brev = db.opprettBrev(ulagretBrev, bruker)
 
         brev.status shouldBe Status.OPPRETTET
 
@@ -161,12 +164,12 @@ internal class BrevRepositoryIntegrationTest(
     @Test
     fun `Sette status ferdigstilt`() {
         val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
-        val brev = db.opprettBrev(ulagretBrev)
+        val brev = db.opprettBrev(ulagretBrev, bruker)
 
         brev.status shouldBe Status.OPPRETTET
 
-        db.oppdaterPayload(brev.id, Slate())
-        db.settBrevFerdigstilt(brev.id)
+        db.oppdaterPayload(brev.id, Slate(), bruker)
+        db.settBrevFerdigstilt(brev.id, bruker)
 
         val hentetBrev = db.hentBrev(brev.id)
         hentetBrev.status shouldBe Status.FERDIGSTILT
@@ -177,12 +180,12 @@ internal class BrevRepositoryIntegrationTest(
         val journalpostId = UUID.randomUUID().toString()
         val journalpostResponse = OpprettJournalpostResponse(journalpostId, journalpostferdigstilt = true)
 
-        val brev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
+        val brev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()), bruker)
 
         brev.status shouldBe Status.OPPRETTET
 
         db.lagreJournalpostId(brev.mottakere.single().id, journalpostResponse)
-        db.settBrevJournalfoert(brev.id, listOf(journalpostResponse))
+        db.settBrevJournalfoert(brev.id, listOf(journalpostResponse), bruker)
 
         val oppdatertBrev = db.hentBrev(brev.id)
 
@@ -192,7 +195,7 @@ internal class BrevRepositoryIntegrationTest(
 
     @Test
     fun `Oppdater bestilling ID`() {
-        val brev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
+        val brev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()), bruker)
 
         val bestillingsId = UUID.randomUUID().toString()
         val mottaker = brev.mottakere.single()
@@ -200,7 +203,7 @@ internal class BrevRepositoryIntegrationTest(
         val response = DistribuerJournalpostResponse(bestillingsId)
 
         db.lagreBestillingId(mottaker.id, response)
-        db.settBrevDistribuert(brev.id, listOf(DistribuerJournalpostResponse(bestillingsId)))
+        db.settBrevDistribuert(brev.id, listOf(DistribuerJournalpostResponse(bestillingsId)), bruker)
 
         val oppdatertBrev = db.hentBrev(brev.id)
 
@@ -210,23 +213,24 @@ internal class BrevRepositoryIntegrationTest(
 
     @Test
     fun `Oppdater status`() {
-        val opprettetBrev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
+        val opprettetBrev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()), bruker)
         db.hentBrev(opprettetBrev.id).status shouldBe Status.OPPRETTET
 
-        db.oppdaterPayload(opprettetBrev.id, Slate())
+        db.oppdaterPayload(opprettetBrev.id, Slate(), bruker)
         db.hentBrev(opprettetBrev.id).status shouldBe Status.OPPDATERT
 
-        db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES))
+        db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES), bruker)
         db.hentBrev(opprettetBrev.id).status shouldBe Status.FERDIGSTILT
 
         db.settBrevJournalfoert(
             opprettetBrev.id,
             listOf(OpprettJournalpostResponse("id", journalpostferdigstilt = true)),
+            bruker,
         )
         db.hentBrev(opprettetBrev.id).status shouldBe Status.JOURNALFOERT
 
         db.lagreBestillingId(opprettetBrev.mottakere.single().id, DistribuerJournalpostResponse("id"))
-        db.settBrevDistribuert(opprettetBrev.id, listOf(DistribuerJournalpostResponse("id")))
+        db.settBrevDistribuert(opprettetBrev.id, listOf(DistribuerJournalpostResponse("id")), bruker)
         db.hentBrev(opprettetBrev.id).status shouldBe Status.DISTRIBUERT
 
         val antallHendelser =
@@ -244,23 +248,23 @@ internal class BrevRepositoryIntegrationTest(
 
     @Test
     fun `Hent journalpost_id`() {
-        val opprettetBrev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
-        db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES))
+        val opprettetBrev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()), bruker)
+        db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES), bruker)
 
         val journalpostResponse = OpprettJournalpostResponse("id", journalpostferdigstilt = true)
-        db.settBrevJournalfoert(opprettetBrev.id, listOf(journalpostResponse))
+        db.settBrevJournalfoert(opprettetBrev.id, listOf(journalpostResponse), bruker)
 
         db.hentBrev(opprettetBrev.id).status shouldBe Status.JOURNALFOERT
     }
 
     @Test
     fun `Oppdater tittel`() {
-        val nyttBrev = db.opprettBrev(ulagretBrev())
+        val nyttBrev = db.opprettBrev(ulagretBrev(), bruker)
 
         val nyTittel = "En helt ny tittel"
         assertNotEquals(nyTittel, nyttBrev.tittel)
 
-        db.oppdaterTittel(nyttBrev.id, tittel = nyTittel)
+        db.oppdaterTittel(nyttBrev.id, tittel = nyTittel, bruker)
 
         val brevMedOppdatertTittel = db.hentBrev(nyttBrev.id)
 
@@ -272,10 +276,10 @@ internal class BrevRepositoryIntegrationTest(
         val sakId = randomSakId()
 
         repeat(9) {
-            db.opprettBrev(ulagretBrev(sakId))
+            db.opprettBrev(ulagretBrev(sakId), bruker)
         }
 
-        val brevSkalSlettes = db.opprettBrev(ulagretBrev(sakId))
+        val brevSkalSlettes = db.opprettBrev(ulagretBrev(sakId), bruker)
 
         val brevForSak = db.hentBrevForSak(sakId)
         assertEquals(10, brevForSak.size)
@@ -294,7 +298,7 @@ internal class BrevRepositoryIntegrationTest(
         val saksbehandler = simpleSaksbehandler("Z123456")
         val kommentar = "En generell kommentar"
 
-        val brev = db.opprettBrev(ulagretBrev())
+        val brev = db.opprettBrev(ulagretBrev(), bruker)
 
         db.settBrevUtgaatt(brev.id, kommentar, saksbehandler)
 
@@ -319,6 +323,25 @@ internal class BrevRepositoryIntegrationTest(
         assertEquals("${saksbehandler.ident}: $kommentar", deserialize<String>(hendelse.second))
     }
 
+    @Test
+    fun `Hendelse lagrer saksbehandler`() {
+        val saksbehandler = simpleSaksbehandler(ident = Random.nextLong().toString())
+
+        val brev = db.opprettBrev(ulagretBrev(), saksbehandler)
+
+        val saksbehandlerFraHendelse =
+            using(sessionOf(dataSource)) {
+                it.run(
+                    queryOf(
+                        "SELECT saksbehandler FROM hendelse WHERE brev_id = ? LIMIT 1",
+                        brev.id,
+                    ).map { row -> row.string(1) }.asSingle,
+                )
+            }
+
+        saksbehandlerFraHendelse shouldBe saksbehandler.ident()
+    }
+
     @Nested
     inner class TestInnholdPayload {
         @Test
@@ -328,7 +351,7 @@ internal class BrevRepositoryIntegrationTest(
                     behandlingId = UUID.randomUUID(),
                     innhold = BrevInnhold("tittel", Spraak.NB, payload = null),
                 )
-            val brevUtenPayload = db.opprettBrev(ulagretBrevUtenPayload)
+            val brevUtenPayload = db.opprettBrev(ulagretBrevUtenPayload, bruker)
 
             brevUtenPayload.status shouldBe Status.OPPRETTET
 
@@ -345,7 +368,7 @@ internal class BrevRepositoryIntegrationTest(
                             payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH))),
                         ),
                 )
-            val brevMedPayload = db.opprettBrev(ulagretBrevMedPayload)
+            val brevMedPayload = db.opprettBrev(ulagretBrevMedPayload, bruker)
 
             brevMedPayload.status shouldBe Status.OPPRETTET
 
@@ -356,9 +379,9 @@ internal class BrevRepositoryIntegrationTest(
         @Test
         fun `Oppdatering av payload`() {
             val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
-            val opprettetBrev = db.opprettBrev(ulagretBrev)
+            val opprettetBrev = db.opprettBrev(ulagretBrev, bruker)
 
-            db.oppdaterPayload(opprettetBrev.id, Slate(emptyList()))
+            db.oppdaterPayload(opprettetBrev.id, Slate(emptyList()), bruker)
 
             val initialPayload = db.hentBrevPayload(opprettetBrev.id)
 
@@ -376,6 +399,7 @@ internal class BrevRepositoryIntegrationTest(
                         ),
                     ),
                 ),
+                bruker,
             )
 
             val payload = db.hentBrevPayload(opprettetBrev.id)!!
@@ -391,7 +415,7 @@ internal class BrevRepositoryIntegrationTest(
                     innhold = BrevInnhold("tittel", Spraak.NB, payload = null),
                     innhold_vedlegg = null,
                 )
-            val brevUtenPayload = db.opprettBrev(ulagretBrevUtenPayload)
+            val brevUtenPayload = db.opprettBrev(ulagretBrevUtenPayload, bruker)
 
             brevUtenPayload.status shouldBe Status.OPPRETTET
 
@@ -410,7 +434,7 @@ internal class BrevRepositoryIntegrationTest(
                             ),
                         ),
                 )
-            val brevMedPayload = db.opprettBrev(ulagretBrevMedPayload)
+            val brevMedPayload = db.opprettBrev(ulagretBrevMedPayload, bruker)
 
             brevMedPayload.status shouldBe Status.OPPRETTET
 
@@ -432,9 +456,9 @@ internal class BrevRepositoryIntegrationTest(
                             ),
                         ),
                 )
-            val opprettetBrev = db.opprettBrev(ulagretBrev)
+            val opprettetBrev = db.opprettBrev(ulagretBrev, bruker)
 
-            db.oppdaterPayload(opprettetBrev.id, Slate(emptyList()))
+            db.oppdaterPayload(opprettetBrev.id, Slate(emptyList()), bruker)
 
             val initialPayload = db.hentBrevPayloadVedlegg(opprettetBrev.id)
 
@@ -459,6 +483,7 @@ internal class BrevRepositoryIntegrationTest(
                             ),
                     ),
                 ),
+                bruker,
             )
 
             val vedleggPayload = db.hentBrevPayloadVedlegg(opprettetBrev.id)!!

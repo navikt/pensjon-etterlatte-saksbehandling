@@ -9,6 +9,8 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevStatusResponse
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -27,6 +29,11 @@ interface BrevApiKlient {
         brevParametre: BrevParametre,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
+
+    suspend fun ferdigstillBrev(
+        req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevStatusResponse
 
     suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
@@ -110,6 +117,20 @@ class BrevApiKlientObo(
 
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
+
+    override suspend fun ferdigstillBrev(
+        req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevStatusResponse =
+        post(
+            url = "$resourceUrl/api/brev/sak/${req.sakId}/ferdigstill-journalfoer-og-distribuer",
+            onSuccess = { resource ->
+                resource.response?.let { objectMapper.readValue(it.toJson()) }
+                    ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
+            },
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = req,
+        )
 
     override suspend fun opprettSpesifiktBrev(
         sakId: SakId,

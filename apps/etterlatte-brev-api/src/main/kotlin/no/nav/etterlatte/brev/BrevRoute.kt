@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Spraak
@@ -28,6 +29,7 @@ import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
+import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
@@ -267,6 +269,14 @@ fun Route.brevRoute(
                     val brevErDistribuert = service.opprettJournalfoerOgDistribuerRiver(systembruker, req)
                     call.respond(brevErDistribuert)
                 }
+            }
+        }
+
+        post("ferdigstill-journalfoer-og-distribuer") {
+            kunSaksbehandler { sb ->
+                val req = call.receive<FerdigstillJournalFoerOgDistribuerOpprettetBrev>()
+                val brevStatusResponse = service.ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(req, sb)
+                call.respond(brevStatusResponse)
             }
         }
 

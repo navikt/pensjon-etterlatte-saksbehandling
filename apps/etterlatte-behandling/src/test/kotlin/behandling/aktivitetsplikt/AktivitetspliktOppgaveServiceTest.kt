@@ -1,12 +1,17 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
+import io.mockk.Runs
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.randomSakId
+import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -32,13 +37,14 @@ class AktivitetspliktOppgaveServiceTest {
     private val oppgaveService: OppgaveService = mockk()
     private val sakService: SakService = mockk()
     private val aktivitetspliktBrevDao: AktivitetspliktBrevDao = mockk()
+    private val brevApiKlient: BrevApiKlient = mockk()
     private val service =
         AktivitetspliktOppgaveService(
             aktivitetspliktService = aktivitetspliktService,
             oppgaveService = oppgaveService,
             sakService = sakService,
             aktivitetspliktBrevDao,
-            mockk(relaxed = true),
+            brevApiKlient,
             mockk(relaxed = true),
         )
 
@@ -228,9 +234,68 @@ class AktivitetspliktOppgaveServiceTest {
         val skalSendeBrev =
             AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, true, utbetaling = true, redusertEtterInntekt = true)
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalSendeBrev
-
+        coEvery { brevApiKlient.opprettSpesifiktBrev(any(), any(), any()) } returns
+            mockk {
+                every { id } returns 1L
+            }
         service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         verify(exactly = 1) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
         verify(exactly = 1) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
+    }
+
+    @Test
+    fun `Skal kun ferdigstille oppgave hvis brev blir distribuert`() {
+        val simpleSaksbehandler = simpleSaksbehandler()
+        val oppgaveId = UUID.randomUUID()
+        val sakIdForOppgave = sak.id
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            mockk {
+                every { sakId } returns sakIdForOppgave
+            }
+
+        val brevId = 1234L
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                brevId,
+                true,
+                utbetaling = true,
+                redusertEtterInntekt = true,
+            )
+        every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } just Runs
+        coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
+            BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.DISTRIBUERT)
+        service.ferdigstillBrevOgOppgave(oppgaveId, simpleSaksbehandler)
+        verify(exactly = 1) { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) }
+    }
+
+    @Test
+    fun `Skal ikke ferdigstille oppgave hvis brev ikke blir distribuert`() {
+        val simpleSaksbehandler = simpleSaksbehandler()
+        val oppgaveId = UUID.randomUUID()
+        val sakIdForOppgave = sak.id
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            mockk {
+                every { sakId } returns sakIdForOppgave
+            }
+
+        val brevId = 1234L
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                brevId,
+                true,
+                utbetaling = true,
+                redusertEtterInntekt = true,
+            )
+        every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } just Runs
+        coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
+            BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.JOURNALFOERT)
+        assertThrows<BrevBleIkkeFerdig> {
+            service.ferdigstillBrevOgOppgave(oppgaveId, simpleSaksbehandler)
+        }
+        verify(exactly = 0) { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) }
     }
 }

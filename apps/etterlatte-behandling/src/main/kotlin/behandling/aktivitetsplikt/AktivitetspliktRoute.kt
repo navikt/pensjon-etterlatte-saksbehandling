@@ -246,6 +246,9 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             call.respond(BrevIdDto(brevId))
         }
+        post("ferdigstillbrev-og-oppgave") {
+            aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo)
+        }
     }
 
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {

@@ -120,6 +120,11 @@ export const lagreAktivitetspliktBrevdata = async (args: {
 export const opprettAktivitetspliktsbrev = async (args: { oppgaveId: string }): Promise<ApiResponse<BrevId>> =>
   apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/opprettbrev`, {})
 
+export const ferdigstillJournalfoerOgDistribuerbrev = async (args: {
+  oppgaveId: string
+}): Promise<ApiResponse<BrevId>> =>
+  apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/ferdigstillbrev-og-oppgave`, {})
+
 interface BrevId {
   brevId: number
 }

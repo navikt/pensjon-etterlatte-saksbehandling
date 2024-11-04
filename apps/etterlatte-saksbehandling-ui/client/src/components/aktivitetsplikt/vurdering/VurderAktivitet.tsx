@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 
-export function VurderAktivitet() {
+export function VurderAktivitet({ fetchOppgave }: { fetchOppgave: () => void }) {
   const oppgave = useAktivitetspliktOppgaveVurdering()
   const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
   const navigate = useNavigate()
@@ -41,6 +41,7 @@ export function VurderAktivitet() {
           <Box width="6">
             <Button
               onClick={() => {
+                fetchOppgave()
                 navigate(`../${AktivitetspliktSteg.BREV}`)
               }}
             >

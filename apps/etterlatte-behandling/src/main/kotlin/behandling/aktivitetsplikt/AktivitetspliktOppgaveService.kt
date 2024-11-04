@@ -5,11 +5,16 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevParametre
+import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevStatusResponse
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -148,7 +153,36 @@ class AktivitetspliktOppgaveService(
             return false
         }
     }
+
+    fun ferdigstillBrevOgOppgave(
+        oppgaveId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+        val brevId = brevData.brevId ?: throw ManglerBrevdata("Brevid er ikke registrert på oppgaveid $oppgaveId")
+        val req =
+            FerdigstillJournalFoerOgDistribuerOpprettetBrev(
+                brevId = brevId,
+                sakId = sak.id,
+                enhetsnummer = sak.enhet,
+                avsenderRequest = SaksbehandlerOgAttestant(saksbehandlerIdent = brukerTokenInfo.ident()),
+            )
+        val brevrespons: BrevStatusResponse = runBlocking { brevApiKlient.ferdigstillBrev(req, brukerTokenInfo) }
+        if (brevrespons.status.erDistribuert()) {
+            oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
+        } else {
+            throw BrevBleIkkeFerdig(brevrespons.status)
+        }
+    }
 }
+
+class BrevBleIkkeFerdig(
+    status: Status,
+) : InternfeilException(
+        detail = "Brevet ble ikke helt ferdig, prøv igjen. Om det ikke går kontakt support. Brevstatus: ${status.name}",
+    )
 
 class BrevFeil(
     msg: String,

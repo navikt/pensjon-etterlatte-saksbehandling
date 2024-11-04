@@ -1,4 +1,4 @@
-import { Alert, Box, Heading, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React, { useEffect, useState } from 'react'
@@ -14,32 +14,22 @@ import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
-import BrevStatusPanel from '~components/person/brev/BrevStatusPanel'
-import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import styled from 'styled-components'
 import { isPending } from '@reduxjs/toolkit'
-import { opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
+import { ferdigstillJournalfoerOgDistribuerbrev, opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
+import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
+import { handlinger } from '~components/behandling/handlinger/typer'
+import { useNavigate } from 'react-router-dom'
 
 export function VurderingInfoBrev() {
   useSidetittel('Aktivitetsplikt brev')
 
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettAktivitetspliktsbrev)
-
-  //const redigerbar = erOppgaveRedigerbar(oppgave.status)
   const brevdataFinnes = !!aktivtetspliktbrevdata
 
   const [brevId, setBrevid] = useState<number | undefined>(aktivtetspliktbrevdata?.brevId)
   const [brevErKlart, setBrevErKlart] = useState<boolean>(false)
-  /*TODO: kalle backend her og sjekke om
-    1. brevid finnes
-    finnes ikke -> sjekk om oppgave kan redigeres og om det var valgt at brev skulle sendes JA/NEI
-    finnes -> vise brev .. fikset brevkomponenten det automatisk?
-     Bad state altså at brevid ikke finnes og sb ikke har tatt stilling til brevvalg må reroutes tilkbake til vurderingssiden
-    hvis bad state her ha med tilbakeknapp
-
-    TODO: håndtere sette oppgave til ferdigstilt på onclick lagre brev
-     */
 
   useEffect(() => {
     if (brevdataFinnes) {
@@ -54,11 +44,8 @@ export function VurderingInfoBrev() {
           })
         }
       } else {
-        //Skal ikke sende brev for denne oppgave, brevløs oppgave, bare å vise skal ikke ha brev blabla
         setBrevErKlart(false)
       }
-    } else {
-      //Håndtere manglende brevdata.... vise generell mangler utfylling av brevdata feil
     }
   }, [])
 
@@ -73,7 +60,9 @@ export function VurderingInfoBrev() {
               {isFailure(opprettBrevStatus) && (
                 <ApiErrorAlert>Kunne ikke opprette brev {opprettBrevStatus.error.detail}</ApiErrorAlert>
               )}
-              {brevErKlart && brevId && <Aktivitetspliktbrev brevId={brevId} sakId={oppgave.sakId} />}
+              {brevErKlart && brevId && (
+                <Aktivitetspliktbrev brevId={brevId} sakId={oppgave.sakId} oppgaveid={oppgave.id} />
+              )}
             </>
           ) : (
             <>
@@ -98,13 +87,31 @@ const PanelWrapper = styled.div`
   max-height: 955px;
 `
 
-function Aktivitetspliktbrev({ brevId, sakId }: { brevId: number; sakId: number }) {
+function Aktivitetspliktbrev({
+  brevId,
+  sakId,
+  oppgaveid,
+}: {
+  brevId: number
+  sakId: number
+  oppgaveid: string
+}): JSX.Element {
   const [kanRedigeres, setKanRedigeres] = useState(false)
   const [tilbakestilt, setTilbakestilt] = useState(false)
+  const navigate = useNavigate()
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
+  const [status, ferdigstillbrevApi] = useApiCall(ferdigstillJournalfoerOgDistribuerbrev)
 
-  useEffect(() => {
+  const ferdigstillBrev = () => {
+    ferdigstillbrevApi(
+      { oppgaveId: oppgaveid },
+      () => hentBrevOgSetStatus(),
+      () => hentBrevOgSetStatus()
+    )
+  }
+
+  const hentBrevOgSetStatus = () => {
     apiHentBrev({ brevId: Number(brevId), sakId: Number(sakId) }, (brev) => {
       if ([BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)) {
         setKanRedigeres(true)
@@ -112,6 +119,10 @@ function Aktivitetspliktbrev({ brevId, sakId }: { brevId: number; sakId: number 
         setKanRedigeres(false)
       }
     })
+  }
+
+  useEffect(() => {
+    hentBrevOgSetStatus()
   }, [brevId, sakId, tilbakestilt])
 
   return (
@@ -139,27 +150,37 @@ function Aktivitetspliktbrev({ brevId, sakId }: { brevId: number; sakId: number 
                   <ForhaandsvisningBrev brev={brev} />
                 </PanelWrapper>
               ) : (
-                <RedigerbartBrev
-                  brev={brev}
-                  kanRedigeres={kanRedigeres}
-                  tilbakestillingsaction={() => setTilbakestilt(true)}
-                />
+                <>
+                  <HStack wrap={false}>
+                    <RedigerbartBrev
+                      brev={brev}
+                      kanRedigeres={kanRedigeres}
+                      tilbakestillingsaction={() => setTilbakestilt(true)}
+                    />
+                  </HStack>
+                </>
               )}
-            </Column>
-            <Column>
-              <BrevStatusPanel brev={brev} />
-              <Box padding="4" borderRadius="small">
-                <Heading spacing level="2" size="medium">
-                  Handlinger
-                </Heading>
-                <NyttBrevHandlingerPanel
-                  brev={brev}
-                  setKanRedigeres={setKanRedigeres}
-                  callback={() => {
-                    // TODO sett oppgave til ferdigstilt her, hele denne skal flyttes til backend som kan håndtere det.
-                  }}
-                />
-              </Box>
+              <VStack gap="4">
+                <HStack gap="4" justify="center">
+                  <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+                    {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
+                    {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
+                    <HStack gap="4" justify="center">
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          navigate(`../${AktivitetspliktSteg.VURDERING}`)
+                        }}
+                      >
+                        {handlinger.TILBAKE.navn}
+                      </Button>
+                      {!(
+                        brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT
+                      ) && <Button onClick={ferdigstillBrev}>Ferdigstill brev</Button>}
+                    </HStack>
+                  </Box>
+                </HStack>
+              </VStack>
             </Column>
           </GridContainer>
         )

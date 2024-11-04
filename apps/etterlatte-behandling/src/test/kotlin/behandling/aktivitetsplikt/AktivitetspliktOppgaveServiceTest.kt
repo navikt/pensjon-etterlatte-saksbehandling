@@ -234,7 +234,10 @@ class AktivitetspliktOppgaveServiceTest {
         val skalSendeBrev =
             AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, true, utbetaling = true, redusertEtterInntekt = true)
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalSendeBrev
-
+        coEvery { brevApiKlient.opprettSpesifiktBrev(any(), any(), any()) } returns
+            mockk {
+                every { id } returns 1L
+            }
         service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         verify(exactly = 1) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
         verify(exactly = 1) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }

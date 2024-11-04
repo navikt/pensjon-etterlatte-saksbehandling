@@ -66,7 +66,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 beskrivelse = "Beskrivelse",
             )
 
-        dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, oppgave.id, behandlingId)
+        dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde, oppgave.id, behandlingId)
 
         dao.hentAktivitetsgradForOppgave(oppgave.id).single().asClue {
             it.sakId shouldBe sak.id
@@ -96,7 +96,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 vurdertFra12Mnd = true,
             )
 
-        dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, oppgave.id, behandlingId)
+        dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde, oppgave.id, behandlingId)
 
         dao.hentAktivitetsgradForOppgave(oppgave.id).single().asClue {
             it.sakId shouldBe sak.id
@@ -163,8 +163,8 @@ class AktivitetspliktAktivitetsgradDaoTest(
         oppgaveDao.opprettOppgave(oppgave)
 
         val behandlingId = behandling.id
-        dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde1, null, behandlingId)
-        dao.opprettAktivitetsgrad(
+        dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde1, null, behandlingId)
+        dao.upsertAktivitetsgradForOppgave(
             aktivitetsgrad.copy(
                 aktivitetsgrad = AKTIVITET_100,
                 fom = LocalDate.of(2024, 7, 1),
@@ -174,7 +174,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
             null,
             behandlingId,
         )
-        dao.opprettAktivitetsgrad(
+        dao.upsertAktivitetsgradForOppgave(
             aktivitetsgrad.copy(
                 aktivitetsgrad = AKTIVITET_UNDER_50,
                 fom = LocalDate.of(2024, 4, 1),
@@ -225,7 +225,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 beskrivelse = "Beskrivelse",
             )
 
-        dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
+        dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
 
         dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single().asClue {
             it.sakId shouldBe sak.id
@@ -259,7 +259,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 vurdertFra12Mnd = true,
             )
 
-        dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
+        dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
 
         dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single().asClue {
             it.sakId shouldBe sak.id
@@ -293,7 +293,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                     beskrivelse = "Beskrivelse",
                 )
 
-            dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
+            dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
 
             val aktivitet = dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single()
 
@@ -333,7 +333,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                     beskrivelse = "Beskrivelse",
                 )
 
-            dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
+            dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
 
             val aktivitet = dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single()
 
@@ -379,10 +379,10 @@ class AktivitetspliktAktivitetsgradDaoTest(
         fun `skal slette aktivitetsgrad`() {
             behandlingDao.opprettBehandling(opprettBehandling)
 
-            dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
+            dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
 
             val aktivitet = dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single()
-            dao.slettAktivitetsgrad(aktivitet.id, opprettBehandling.id)
+            dao.slettAktivitetsgradForBehandling(aktivitet.id, opprettBehandling.id)
 
             dao.hentAktivitetsgradForBehandling(opprettBehandling.id) shouldBe emptyList()
         }
@@ -391,10 +391,10 @@ class AktivitetspliktAktivitetsgradDaoTest(
         fun `skal ikke slette aktivitetsgrad hvis behandling id ikke stemmer`() {
             behandlingDao.opprettBehandling(opprettBehandling)
 
-            dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
+            dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
 
             val aktivitet = dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single()
-            dao.slettAktivitetsgrad(aktivitet.id, UUID.randomUUID())
+            dao.slettAktivitetsgradForBehandling(aktivitet.id, UUID.randomUUID())
 
             dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single().asClue {
                 it.id shouldBe aktivitet.id
@@ -435,7 +435,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
             behandlingDao.opprettBehandling(forrigeBehandling)
             behandlingDao.opprettBehandling(nyBehandling)
 
-            dao.opprettAktivitetsgrad(lagreAktivitetsgrad, sak.id, kilde, null, forrigeBehandling.id)
+            dao.upsertAktivitetsgradForOppgave(lagreAktivitetsgrad, sak.id, kilde, null, forrigeBehandling.id)
 
             val aktivitetsgrad = dao.hentAktivitetsgradForBehandling(forrigeBehandling.id).single()
             dao.hentAktivitetsgradForBehandling(nyBehandling.id) shouldBe emptyList()
@@ -458,7 +458,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
         @Test
         fun `skal kopiere nyeste aktivitetsgrad til oppgave`() {
             behandlingDao.opprettBehandling(forrigeBehandling)
-            dao.opprettAktivitetsgrad(lagreAktivitetsgrad, sak.id, kilde, null, forrigeBehandling.id)
+            dao.upsertAktivitetsgradForOppgave(lagreAktivitetsgrad, sak.id, kilde, null, forrigeBehandling.id)
 
             val aktivitetsgrad = dao.hentAktivitetsgradForBehandling(forrigeBehandling.id).single()
             val oppgave =

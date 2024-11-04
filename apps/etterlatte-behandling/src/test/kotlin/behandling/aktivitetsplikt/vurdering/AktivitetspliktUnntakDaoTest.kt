@@ -75,7 +75,7 @@ class AktivitetspliktUnntakDaoTest(
                 tom = LocalDate.now().plusMonths(6),
             )
 
-        dao.opprettUnntak(unntak, sak.id, kilde, oppgave.id, behandlingId)
+        dao.upsertUnntak(unntak, sak.id, kilde, oppgave.id, behandlingId)
 
         dao.hentUnntakForOppgave(oppgave.id).single().asClue {
             it.sakId shouldBe sak.id
@@ -143,9 +143,9 @@ class AktivitetspliktUnntakDaoTest(
             )
         oppgaveDao.opprettOppgave(oppgave)
 
-        dao.opprettUnntak(unntak.copy(unntak = GRADERT_UFOERETRYGD), sak.id, kilde1, null, behandling.id)
-        dao.opprettUnntak(unntak, sak.id, kilde2, null, behandling.id)
-        dao.opprettUnntak(unntak.copy(unntak = MIDLERTIDIG_SYKDOM), sak.id, kilde3, oppgave.id, null)
+        dao.upsertUnntak(unntak.copy(unntak = GRADERT_UFOERETRYGD), sak.id, kilde1, null, behandling.id)
+        dao.upsertUnntak(unntak, sak.id, kilde2, null, behandling.id)
+        dao.upsertUnntak(unntak.copy(unntak = MIDLERTIDIG_SYKDOM), sak.id, kilde3, oppgave.id, null)
 
         val nyesteUnntak = dao.hentNyesteUnntak(sak.id)
 
@@ -181,7 +181,7 @@ class AktivitetspliktUnntakDaoTest(
                 tom = LocalDate.now().plusMonths(6),
             )
 
-        dao.opprettUnntak(unntak, sak.id, kilde, null, opprettBehandling.id)
+        dao.upsertUnntak(unntak, sak.id, kilde, null, opprettBehandling.id)
 
         dao.hentUnntakForBehandling(opprettBehandling.id).single().asClue {
             it.sakId shouldBe sak.id
@@ -216,7 +216,7 @@ class AktivitetspliktUnntakDaoTest(
                     tom = LocalDate.now().plusMonths(6),
                 )
 
-            dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
+            dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
             val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
 
@@ -262,7 +262,7 @@ class AktivitetspliktUnntakDaoTest(
         fun `skal slette unntak`() {
             behandlingDao.opprettBehandling(opprettBehandling)
 
-            dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
+            dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
             val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
             dao.slettUnntak(unntak.id, opprettBehandling.id)
@@ -274,7 +274,7 @@ class AktivitetspliktUnntakDaoTest(
         fun `skal ikke slette unntak hvis behandling id ikke stemmer`() {
             behandlingDao.opprettBehandling(opprettBehandling)
 
-            dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
+            dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
             val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
             dao.slettUnntak(unntak.id, UUID.randomUUID())
@@ -321,7 +321,7 @@ class AktivitetspliktUnntakDaoTest(
             behandlingDao.opprettBehandling(forrigeBehandling)
             behandlingDao.opprettBehandling(nyBehandling)
 
-            dao.opprettUnntak(lagreUnntak, sak.id, kilde, null, forrigeBehandling.id)
+            dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, forrigeBehandling.id)
 
             val unntak = dao.hentUnntakForBehandling(forrigeBehandling.id).single()
             dao.hentUnntakForBehandling(nyBehandling.id) shouldBe emptyList()

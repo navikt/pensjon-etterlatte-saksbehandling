@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.oppgave.OppgaveKanIkkeEndres
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
@@ -242,20 +243,20 @@ class AktivitetspliktService(
         }
     }
 
-    fun opprettAktivitetsgradForOppgave(
+    fun upsertAktivitetsgradForOppgave(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         oppgaveId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): AktivitetspliktVurdering {
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        require(
-            aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId).isEmpty(),
-        ) { "Aktivitetsgrad finnes allerede for oppgave $oppgaveId" }
         sjekkOmAktivitetsgradErGyldig(aktivitetsgrad)
-        aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
+        aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sakId, kilde, oppgaveId)
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId = UUID.fromString(oppgave.referanse)) }
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
+
+        return hentVurderingForOppgave(oppgaveId)!!
     }
 
     private fun sjekkOmAktivitetsgradErGyldig(aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad) {
@@ -294,7 +295,7 @@ class AktivitetspliktService(
                 aktivitetspliktUnntakDao.slettUnntak(it.id, behandlingId)
             }
 
-            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+            aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(
                 aktivitetsgrad,
                 sakId,
                 kilde,
@@ -305,22 +306,22 @@ class AktivitetspliktService(
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
     }
 
-    fun opprettUnntakForOpppgave(
+    fun upsertUnntakForOppgave(
         unntak: LagreAktivitetspliktUnntak,
         oppgaveId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): AktivitetspliktVurdering {
         if (unntak.fom != null && unntak.tom != null && unntak.fom > unntak.tom) {
             throw TomErFoerFomException()
         }
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        if (oppgave.erAvsluttet()) {
+            throw OppgaveKanIkkeEndres(oppgaveId, oppgave.status)
+        }
 
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        require(
-            aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId).isEmpty(),
-        ) { "Unntak finnes allerede for oppgave $oppgaveId" }
-        aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, oppgaveId)
-        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, kilde, oppgaveId)
         runBlocking {
             sendDtoTilStatistikk(
                 sakId = sakId,
@@ -328,6 +329,47 @@ class AktivitetspliktService(
                 behandlingId = UUID.fromString(oppgave.referanse),
             )
         }
+
+        return hentVurderingForOppgave(oppgaveId)!!
+    }
+
+    fun slettAktivitetsgradForOppgave(
+        oppgaveId: UUID,
+        aktivitetsgradId: UUID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AktivitetspliktVurdering? {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        if (oppgave.sakId != sakId) {
+            throw SakidTilhoererIkkeOppgaveException()
+        }
+        if (oppgave.erAvsluttet()) {
+            throw OppgaveKanIkkeEndres(oppgaveId, oppgave.status)
+        }
+
+        aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForOppgave(aktivitetsgradId, oppgaveId)
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
+        return hentVurderingForOppgave(oppgaveId)
+    }
+
+    fun slettUnntakForOppgave(
+        oppgaveId: UUID,
+        unntakId: UUID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AktivitetspliktVurdering? {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        if (oppgave.sakId != sakId) {
+            throw SakidTilhoererIkkeOppgaveException()
+        }
+        if (oppgave.erAvsluttet()) {
+            throw OppgaveKanIkkeEndres(oppgaveId, oppgave.status)
+        }
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
+        aktivitetspliktUnntakDao.slettUnntakForOppgave(oppgaveId, unntakId)
+        return hentVurderingForOppgave(oppgaveId)
     }
 
     fun upsertUnntakForBehandling(
@@ -359,10 +401,10 @@ class AktivitetspliktService(
             val aktivitetsgrad =
                 aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
             aktivitetsgrad.forEach {
-                aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(it.id, behandlingId)
+                aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForBehandling(it.id, behandlingId)
             }
 
-            aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
+            aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
         }
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
@@ -543,7 +585,7 @@ class AktivitetspliktService(
     private suspend fun sendDtoTilStatistikk(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID,
+        behandlingId: UUID?,
     ) {
         try {
             val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId)
@@ -711,10 +753,18 @@ data class AktivitetspliktVurderingGammel(
 data class AktivitetspliktVurdering(
     val aktivitet: List<AktivitetspliktAktivitetsgrad>,
     val unntak: List<AktivitetspliktUnntak>,
-)
+) {
+    val relevantAktivitet = aktivitet.maxByOrNull { it.fom }?.aktivitetsgrad
+}
 
 interface AktivitetspliktVurderingOpprettetDato {
     val opprettet: Grunnlagsopplysning.Kilde
 }
 
 fun Grunnlagsopplysning.Kilde.endretDatoOrNull(): Tidspunkt? = if (this is Grunnlagsopplysning.Saksbehandler) this.tidspunkt else null
+
+class SakidTilhoererIkkeOppgaveException :
+    UgyldigForespoerselException(
+        "OPPGAVE_TILHOERER_IKKE_SAK",
+        "OppgaveId peker på en oppgave som har en annen sak enn angitt SakId",
+    )

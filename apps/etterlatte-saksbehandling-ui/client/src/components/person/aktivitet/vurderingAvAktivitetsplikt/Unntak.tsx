@@ -22,12 +22,14 @@ export const Unntak = ({ unntaker }: { unntaker: IAktivitetspliktUnntak[] | unde
 
       <Table size="small">
         <Table.Header>
-          <Table.HeaderCell />
-          <Table.HeaderCell scope="col">Unntak</Table.HeaderCell>
-          <Table.HeaderCell scope="col">Type</Table.HeaderCell>
-          <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
-          <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
-          <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
+          <Table.Row>
+            <Table.HeaderCell />
+            <Table.HeaderCell scope="col">Unntak</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Type</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
+          </Table.Row>
         </Table.Header>
         <Table.Body>
           {!!unntaker?.length ? (

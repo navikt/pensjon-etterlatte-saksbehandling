@@ -7,11 +7,14 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -20,13 +23,22 @@ import java.util.UUID
 class AktivitetspliktUnntakDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun opprettUnntak(
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
+    fun upsertUnntak(
         unntak: LagreAktivitetspliktUnntak,
         sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
     ) = connectionAutoclosing.hentConnection {
+        if (oppgaveId == null && behandlingId == null) {
+            throw InternfeilException("")
+        }
+        if (oppgaveId != null && behandlingId != null) {
+            throw InternfeilException("")
+        }
+
         with(it) {
             val stmt =
                 prepareStatement(
@@ -92,6 +104,28 @@ class AktivitetspliktUnntakDao(
             stmt.setObject(2, behandlingId)
 
             stmt.executeUpdate()
+        }
+    }
+
+    fun slettUnntakForOppgave(
+        oppgaveId: UUID,
+        unntakId: UUID,
+    ) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        DELETE FROM aktivitetsplikt_unntak
+                        WHERE id = ? AND oppgave_id = ?
+                        """.trimIndent(),
+                    )
+                stmt.setObject(1, unntakId)
+                stmt.setObject(2, oppgaveId)
+
+                val endret = stmt.executeUpdate()
+                logger.info("Slettet $endret unntak for oppgaveId=$oppgaveId")
+            }
         }
     }
 

@@ -161,10 +161,10 @@ class AktivitetspliktOppgaveService(
         val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-
+        val brevId = brevData.brevId ?: throw ManglerBrevdata("Brevid er ikke registrert på oppgaveid $oppgaveId")
         val req =
             FerdigstillJournalFoerOgDistribuerOpprettetBrev(
-                brevId = brevData.brevId!!,
+                brevId = brevId,
                 sakId = sak.id,
                 enhetsnummer = sak.enhet,
                 avsenderRequest = SaksbehandlerOgAttestant(saksbehandlerIdent = brukerTokenInfo.ident()),

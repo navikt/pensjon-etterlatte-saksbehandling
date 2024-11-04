@@ -1,9 +1,9 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import io.kotest.matchers.equals.shouldBeEqual
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

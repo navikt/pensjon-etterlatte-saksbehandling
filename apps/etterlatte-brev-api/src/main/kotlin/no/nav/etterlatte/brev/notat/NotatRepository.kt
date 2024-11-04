@@ -7,10 +7,10 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
+import no.nav.etterlatte.libs.common.dbutils.toTimestamp
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction

@@ -15,11 +15,11 @@ import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.virusskanning.VirusScanRequest
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.brev.virusskanning.filErForStor
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 
 class PDFService(

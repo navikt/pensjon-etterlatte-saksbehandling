@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.tidspunkt
+package no.nav.etterlatte.libs.common.dbutils
 
 import java.time.ZoneId
 import java.time.ZoneOffset

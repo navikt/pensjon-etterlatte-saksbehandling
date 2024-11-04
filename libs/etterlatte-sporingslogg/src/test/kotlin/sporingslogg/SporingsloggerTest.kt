@@ -1,6 +1,6 @@
 package no.nav.etterlatte.libs.sporingslogg
 
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.dbutils.toTidspunkt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

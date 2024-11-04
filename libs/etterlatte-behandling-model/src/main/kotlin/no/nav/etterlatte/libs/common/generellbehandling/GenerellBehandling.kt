@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common.generellbehandling
 
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 
 data class Behandler(

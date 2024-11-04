@@ -4,8 +4,8 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

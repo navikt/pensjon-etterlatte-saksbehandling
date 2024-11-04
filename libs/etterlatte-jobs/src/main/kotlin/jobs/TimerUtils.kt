@@ -1,8 +1,8 @@
 package no.nav.etterlatte.jobs
 
 import no.nav.etterlatte.libs.common.OpeningHours
+import no.nav.etterlatte.libs.common.dbutils.norskKlokke
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElectionDownException
 import no.nav.etterlatte.shuttingDown
 import org.slf4j.Logger

@@ -3,9 +3,9 @@ package no.nav.etterlatte.statistikk.jobs
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
-import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
+import no.nav.etterlatte.libs.common.dbutils.fixedNorskTid
+import no.nav.etterlatte.libs.common.dbutils.toNorskTidspunkt
+import no.nav.etterlatte.libs.common.dbutils.utcKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.statistikk.database.KjoertStatus
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk

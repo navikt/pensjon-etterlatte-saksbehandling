@@ -1,6 +1,6 @@
 package no.nav.etterlatte.libs.sporingslogg
 
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 
 enum class Format {
     CEF,

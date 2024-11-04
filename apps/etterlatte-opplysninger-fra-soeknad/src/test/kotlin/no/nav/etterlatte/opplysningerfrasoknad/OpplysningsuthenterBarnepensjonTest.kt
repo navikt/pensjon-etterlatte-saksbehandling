@@ -1,6 +1,7 @@
 package no.nav.etterlatte.opplysningerfrasoknad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.libs.common.dbutils.toTidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -11,7 +12,6 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Samtykke
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoekerBarnSoeknad

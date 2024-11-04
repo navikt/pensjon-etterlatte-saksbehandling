@@ -2,6 +2,7 @@ package no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.libs.common.dbutils.toTidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
@@ -11,7 +12,6 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Samtykke
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoekerOmstillingSoeknad
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoeknadstypeOpplysning

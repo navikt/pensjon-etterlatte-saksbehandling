@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata
 
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.mq.DummyJmsConnectionFactory
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.avstemming.UUIDBase64

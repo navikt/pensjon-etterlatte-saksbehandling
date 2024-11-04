@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.dbutils.norskTidssone
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

@@ -3,7 +3,7 @@ package no.nav.etterlatte.utbetaling.avstemming
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.junit.jupiter.api.Assertions.assertFalse

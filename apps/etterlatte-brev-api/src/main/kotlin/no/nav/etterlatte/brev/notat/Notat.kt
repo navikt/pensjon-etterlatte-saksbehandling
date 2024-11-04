@@ -1,8 +1,8 @@
 package no.nav.etterlatte.brev.notat
 
 import no.nav.etterlatte.brev.Slate
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
 typealias NotatID = Long
 

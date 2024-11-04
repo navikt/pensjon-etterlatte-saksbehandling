@@ -2,8 +2,8 @@ package no.nav.etterlatte.oppgaveGosys
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.dbutils.Tidspunkt
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
 data class GosysOppgave(
     val id: Long,

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.tidspunkt
+package no.nav.etterlatte.libs.common.dbutils
 
 import java.sql.PreparedStatement
 import java.sql.ResultSet

@@ -274,8 +274,8 @@ fun Route.brevRoute(
         post("ferdigstill-journalfoer-og-distribuer") {
             kunSaksbehandler { sb ->
                 val req = call.receive<FerdigstillJournalFoerOgDistribuerOpprettetBrev>()
-                val brevErDistribuert = service.ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(req, sb)
-                call.respond(brevErDistribuert)
+                val brevStatusResponse = service.ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(req, sb)
+                call.respond(brevStatusResponse)
             }
         }
 

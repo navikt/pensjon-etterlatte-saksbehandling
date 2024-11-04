@@ -9,7 +9,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
+import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
@@ -33,7 +33,7 @@ interface BrevApiKlient {
     suspend fun ferdigstillBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BrevDistribusjonResponse
+    ): BrevStatusResponse
 
     suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
@@ -121,7 +121,7 @@ class BrevApiKlientObo(
     override suspend fun ferdigstillBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BrevDistribusjonResponse =
+    ): BrevStatusResponse =
         post(
             url = "$resourceUrl/api/brev/sak/${req.sakId}/ferdigstill-journalfoer-og-distribuer",
             onSuccess = { resource ->

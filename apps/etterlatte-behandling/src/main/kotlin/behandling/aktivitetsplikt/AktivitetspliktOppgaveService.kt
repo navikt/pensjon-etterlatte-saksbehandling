@@ -1,17 +1,19 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
-import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -167,14 +169,22 @@ class AktivitetspliktOppgaveService(
                 enhetsnummer = sak.enhet,
                 avsenderRequest = SaksbehandlerOgAttestant(saksbehandlerIdent = brukerTokenInfo.ident()),
             )
-        val distribusjonResponse: BrevDistribusjonResponse = runBlocking { brevApiKlient.ferdigstillBrev(req, brukerTokenInfo) }
-        if (distribusjonResponse.erDistribuert) {
+        val brevrespons: BrevStatusResponse = runBlocking { brevApiKlient.ferdigstillBrev(req, brukerTokenInfo) }
+        if (brevrespons.status.erDistribuert()) {
             oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
         } else {
-            throw Exception("Brev er ikke distribusjon for oppgaveid ${brevData.oppgaveId}")
+            logger.warn("Brev ble ikke ferdig for oppgaveid ${brevData.oppgaveId} status på brev ${brevrespons.status}")
+            throw BrevBleIkkeFerdig()
         }
     }
 }
+
+class BrevBleIkkeFerdig :
+    ForespoerselException(
+        status = HttpStatusCode.InternalServerError.value,
+        code = "BREV_BLE_IKKE_FERDIG",
+        detail = "Brevet ble ikke helt ferdig, prøv igjen. Om det ikke går kontakt support",
+    )
 
 class BrevFeil(
     msg: String,

@@ -117,7 +117,7 @@ function Aktivitetspliktbrev({
     ferdigstillbrevApi(
       { oppgaveId: oppgaveid },
       () => hentBrevOgSetStatus(),
-      () => {}
+      () => hentBrevOgSetStatus()
     )
   }
 

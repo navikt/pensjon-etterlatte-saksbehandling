@@ -28,6 +28,8 @@ enum class Status {
     fun ikkeJournalfoert(): Boolean = this in listOf(OPPRETTET, OPPDATERT, FERDIGSTILT)
 
     fun ikkeDistribuert(): Boolean = this != DISTRIBUERT
+
+    fun erDistribuert(): Boolean = this == DISTRIBUERT
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -126,6 +128,11 @@ data class FerdigstillJournalFoerOgDistribuerOpprettetBrev(
     val sakId: SakId,
     val enhetsnummer: Enhetsnummer,
     val avsenderRequest: SaksbehandlerOgAttestant,
+)
+
+data class BrevStatusResponse(
+    val brevId: BrevID,
+    val status: Status,
 )
 
 data class JournalfoerVedtaksbrevResponseOgBrevid(

@@ -1,4 +1,17 @@
-import { Button, Heading, HGrid, HStack, Modal, Radio, Select, TextField, ToggleGroup, VStack } from '@navikt/ds-react'
+import {
+  Alert,
+  Button,
+  Heading,
+  HGrid,
+  HStack,
+  Label,
+  Modal,
+  Radio,
+  Select,
+  TextField,
+  ToggleGroup,
+  VStack,
+} from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { AdresseType, Mottaker } from '~shared/types/Brev'
 import { isPending, Result } from '~shared/api/apiUtils'
@@ -144,47 +157,64 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
                 )}
               />
 
-              <TextField
-                {...register('adresse.adresselinje1', {
-                  required: {
-                    value: true,
-                    message: 'Det må være minst én adresselinje',
-                  },
-                })}
-                label="Adresselinje 1"
-                error={errors?.adresse?.adresselinje1?.message}
-              />
-              <TextField {...register('adresse.adresselinje2')} label="Adresselinje 2" />
-              <TextField {...register('adresse.adresselinje3')} label="Adresselinje 3" />
+              {!erNorskAdresse && (
+                <Alert variant="warning" size="small">
+                  OBS: På utenlandske adresser må du kun bruke adresselinjer, land og landkode
+                </Alert>
+              )}
+
+              <VStack>
+                <Label>Adresselinjer</Label>
+                <TextField
+                  {...register('adresse.adresselinje1', {
+                    required: {
+                      value: true,
+                      message: 'Det må være minst én adresselinje',
+                    },
+                  })}
+                  label=""
+                  placeholder="Adresselinje 1"
+                  error={errors?.adresse?.adresselinje1?.message}
+                />
+                <TextField {...register('adresse.adresselinje2')} label="" placeholder="Adresselinje 2" />
+                <TextField {...register('adresse.adresselinje3')} label="" placeholder="Adresselinje 3" />
+              </VStack>
+
+              {erNorskAdresse && (
+                <HGrid columns={2} gap="4 4">
+                  <TextField
+                    {...register('adresse.postnummer', {
+                      shouldUnregister: true,
+                      required: {
+                        value: erNorskAdresse,
+                        message: 'Postnummer må være satt på norsk adresse',
+                      },
+                      pattern: erNorskAdresse
+                        ? {
+                            value: /^\d{4}$/,
+                            message: 'Ugyldig tegn i postnummeret. Norske postnummer kan kun bestå av fire siffer.',
+                          }
+                        : undefined,
+                    })}
+                    label="Postnummer"
+                    error={errors?.adresse?.postnummer?.message}
+                  />
+
+                  <TextField
+                    {...register('adresse.poststed', {
+                      shouldUnregister: true,
+                      required: {
+                        value: erNorskAdresse,
+                        message: 'Poststed må være satt på norsk adresse',
+                      },
+                    })}
+                    label="Poststed"
+                    error={errors?.adresse?.poststed?.message}
+                  />
+                </HGrid>
+              )}
 
               <HGrid columns={2} gap="4 4">
-                <TextField
-                  {...register('adresse.postnummer', {
-                    required: {
-                      value: erNorskAdresse,
-                      message: 'Postnummer må være satt på norsk adresse',
-                    },
-                    pattern: erNorskAdresse
-                      ? {
-                          value: /^\d{4}$/,
-                          message: 'Ugyldig tegn i postnummeret. Norske postnummer kan kun bestå av fire siffer.',
-                        }
-                      : undefined,
-                  })}
-                  label="Postnummer"
-                  error={errors?.adresse?.postnummer?.message}
-                />
-                <TextField
-                  {...register('adresse.poststed', {
-                    required: {
-                      value: erNorskAdresse,
-                      message: 'Poststed må være satt på norsk adresse',
-                    },
-                  })}
-                  label="Poststed"
-                  error={errors?.adresse?.poststed?.message}
-                />
-
                 <TextField
                   {...register('adresse.landkode', {
                     required: {

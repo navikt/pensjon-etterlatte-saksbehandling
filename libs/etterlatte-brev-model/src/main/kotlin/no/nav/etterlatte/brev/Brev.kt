@@ -50,10 +50,12 @@ data class Adresse(
                 listOf("Postnummer eller poststed er null eller blank")
             }
         } else if (adresseType == "UTENLANDSKPOSTADRESSE") {
-            if (!adresselinje1.isNullOrBlank()) {
-                listOf()
-            } else {
+            if (adresselinje1.isNullOrBlank()) {
                 listOf("Adresselinje1 er null eller blank")
+            } else if (!postnummer.isNullOrBlank() || !poststed.isNullOrBlank()) {
+                listOf("Postnummer og poststed skal ikke brukes på utenlandsk adresse")
+            } else {
+                listOf()
             }
         } else {
             listOf()

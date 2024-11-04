@@ -111,9 +111,17 @@ function Aktivitetspliktbrev({
   const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
+  const [status, ferdigstillbrevApi] = useApiCall(ferdigstillJournalfoerOgDistribuerbrev)
 
-  const [status, ferdigstillbrev] = useApiCall(ferdigstillJournalfoerOgDistribuerbrev)
-  useEffect(() => {
+  const ferdigstillBrev = () => {
+    ferdigstillbrevApi(
+      { oppgaveId: oppgaveid },
+      () => hentBrevOgSetStatus(),
+      () => {}
+    )
+  }
+
+  const hentBrevOgSetStatus = () => {
     apiHentBrev({ brevId: Number(brevId), sakId: Number(sakId) }, (brev) => {
       if ([BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)) {
         setKanRedigeres(true)
@@ -121,6 +129,10 @@ function Aktivitetspliktbrev({
         setKanRedigeres(false)
       }
     })
+  }
+
+  useEffect(() => {
+    hentBrevOgSetStatus()
   }, [brevId, sakId, tilbakestilt])
 
   return (
@@ -156,7 +168,7 @@ function Aktivitetspliktbrev({
                   />
                   {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
                   {isPending(status) && <Spinner label="Ferdigstiller brev" />}
-                  <Button onClick={() => ferdigstillbrev({ oppgaveId: oppgaveid })}>Ferdigstill brev</Button>
+                  <Button onClick={ferdigstillBrev}>Ferdigstill brev</Button>
                 </>
               )}
             </Column>

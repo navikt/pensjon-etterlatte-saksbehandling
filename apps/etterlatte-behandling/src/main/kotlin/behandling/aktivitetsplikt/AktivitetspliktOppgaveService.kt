@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -16,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -80,7 +82,11 @@ class AktivitetspliktOppgaveService(
     ): AktivitetspliktInformasjonBrevdata? {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-        aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id))
+        val saksbehandler =
+            Kontekst.get().brukerTokenInfo
+                ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
+        aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
         return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
     }
 
@@ -178,6 +184,13 @@ class AktivitetspliktOppgaveService(
     }
 }
 
+class IngenSaksbehandler(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "INGEN_SAKSBEHANDLER",
+        detail = msg,
+    )
+
 class BrevBleIkkeFerdig(
     status: Status,
 ) : InternfeilException(
@@ -206,10 +219,12 @@ data class AktivitetspliktInformasjonBrevdataRequest(
     fun toDaoObjektBrevutfall(
         oppgaveId: UUID,
         sakid: SakId,
+        kilde: Grunnlagsopplysning.Kilde,
     ): AktivitetspliktInformasjonBrevdata =
         AktivitetspliktInformasjonBrevdata(
             oppgaveId = oppgaveId,
             sakid = sakid,
+            kilde = kilde,
             utbetaling = this.utbetaling,
             redusertEtterInntekt = this.redusertEtterInntekt,
             skalSendeBrev = this.skalSendeBrev,
@@ -223,6 +238,7 @@ data class AktivitetspliktInformasjonBrevdata(
     val skalSendeBrev: Boolean,
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
+    val kilde: Grunnlagsopplysning.Kilde,
 )
 
 data class AktivitetspliktOppgaveVurdering(

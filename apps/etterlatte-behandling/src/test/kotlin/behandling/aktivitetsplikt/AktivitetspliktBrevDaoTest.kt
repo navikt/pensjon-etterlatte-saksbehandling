@@ -6,6 +6,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.lagNyOppgave
 import no.nav.etterlatte.sak.SakSkrivDao
@@ -35,6 +36,7 @@ class AktivitetspliktBrevDaoTest(
                 skalSendeBrev = true,
                 utbetaling = true,
                 redusertEtterInntekt = true,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
             )
 
         dao.lagreBrevdata(brevdata)
@@ -61,6 +63,7 @@ class AktivitetspliktBrevDaoTest(
                 skalSendeBrev = true,
                 utbetaling = false,
                 redusertEtterInntekt = false,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
             )
 
         dao.lagreBrevdata(brevdata)
@@ -83,6 +86,7 @@ class AktivitetspliktBrevDaoTest(
                 sakid = sak.id,
                 oppgaveId = oppgave.id,
                 skalSendeBrev = false,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
             )
 
         dao.lagreBrevdata(brevdata)

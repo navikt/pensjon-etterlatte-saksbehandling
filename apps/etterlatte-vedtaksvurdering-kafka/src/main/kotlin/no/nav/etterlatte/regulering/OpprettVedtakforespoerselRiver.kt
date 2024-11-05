@@ -91,18 +91,18 @@ internal class OpprettVedtakforespoerselRiver(
         val tilbakekreving = tilbakekrevingSum.compareTo(BigDecimal.ZERO) != 0
 
         if (etterbetaling) {
-            val msg = "Omregningen fører til etterbetaling på $etterbetalingSum kr, avbryter behandlingen"
+            val msg = "Omregningen fører til etterbetaling på $etterbetalingSum kr"
             if (skalAvbryte) {
-                throw Exception(msg)
+                throw Exception("$msg, avbryter behandlingen")
             } else {
                 logger.info(msg)
             }
         }
 
         if (tilbakekreving) {
-            val msg = "Omregningen fører til tilbakekreving på $tilbakekrevingSum, avbryter behandlingen"
+            val msg = "Omregningen fører til tilbakekreving på $tilbakekrevingSum kr"
             if (skalAvbryte) {
-                throw Exception(msg)
+                throw Exception("$msg, avbryter behandlingen")
             } else {
                 logger.info(msg)
             }

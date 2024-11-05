@@ -700,6 +700,7 @@ class AktivitetspliktServiceTest {
                         every { id } returns UUID.randomUUID()
                     },
                 )
+            every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
 
             val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
 
@@ -710,7 +711,7 @@ class AktivitetspliktServiceTest {
                 nyBehandlingId shouldBe revurdering.id
                 forrigeBehandlingId shouldBe forrigeBehandling.id
             }
-            verify(exactly = 1) { oppgaveService.fjernSaksbehandler(any()) }
+            verify(exactly = 1) { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) }
         }
 
         @Test

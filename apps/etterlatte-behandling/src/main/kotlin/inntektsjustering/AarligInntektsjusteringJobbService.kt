@@ -54,6 +54,10 @@ class AarligInntektsjusteringJobbService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    companion object {
+        const val BEGRUNNELSE_AUTOMATISK_JOBB = "Årlig inntektsjustering." // TODO må avklares med fag
+    }
+
     suspend fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest) {
         request.saker.forEach { sakId ->
             startEnkeltSak(request.kjoering, request.loependeFom, sakId)
@@ -182,14 +186,17 @@ class AarligInntektsjusteringJobbService(
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
                 revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING, // TODO ny årsak
-                virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt("Årlig inntektsjustering"),
+                virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
                 utlandstilknytning = forrigeBehandling.utlandstilknytning,
                 boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-                begrunnelse = "Årlig inntektsjustering",
-                saksbehandlerIdent = Fagsaksystem.EY.navn, // TODO Hvordan fjerne tildeling?
+                begrunnelse = BEGRUNNELSE_AUTOMATISK_JOBB,
+                saksbehandlerIdent = Fagsaksystem.EY.navn,
                 frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
                 opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
             ).oppdater()
+            .also {
+                revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)
+            }
     }
 
     private fun publiserKlarForOmregning(

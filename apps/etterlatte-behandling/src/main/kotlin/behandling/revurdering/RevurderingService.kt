@@ -264,7 +264,18 @@ class RevurderingService(
             )
         }
 
-    // TODO fjern oppgavetildeling..
+    fun fjernSaksbehandlerFraRevurderingsOppgave(revurdering: Revurdering) {
+        val revurderingsOppgave =
+            oppgaveService
+                .hentOppgaverForReferanse(revurdering.id.toString())
+                .find { it.type == OppgaveType.REVURDERING }
+
+        if (revurderingsOppgave != null) {
+            oppgaveService.fjernSaksbehandler(revurderingsOppgave.id)
+        } else {
+            logger.warn("Fant ikke oppgave for revurdering av aktivitetsplikt for sak ${revurdering.sak.id}")
+        }
+    }
 
     private fun lagreRevurderingsaarsakFritekst(
         fritekstAarsak: String,

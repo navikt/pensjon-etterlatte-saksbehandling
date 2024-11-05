@@ -126,6 +126,7 @@ class AarligInntektsjusteringJobbServiceTest {
             mockk {
                 every { oppdater() } returns mockk()
             }
+        every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
 
         every { omregningService.oppdaterKjoering(any()) } just runs
         every { rapid.publiser(any(), any()) } returns Pair(1, 1L)

@@ -1,16 +1,17 @@
 import { AdresseType, Mottaker, MottakerType } from '~shared/types/Brev'
-import { Alert, BodyShort, Box, Heading, HStack, Loader, Tag, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Loader, Tag, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { RedigerMottakerModal } from '~components/person/brev/mottaker/RedigerMottakerModal'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { mapResult } from '~shared/api/apiUtils'
+import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { DigitalKontaktinformasjon, hentKontaktinformasjonKRR } from '~shared/api/krr'
-import { oppdaterMottaker } from '~shared/api/brev'
+import { oppdaterMottaker, settHovedmottaker } from '~shared/api/brev'
 import { SlettMottakerModal } from '~components/person/brev/mottaker/SlettMottakerModal'
+import { PersonCheckmarkIcon } from '@navikt/aksel-icons'
 
 interface MottakerProps {
   brevId: number
@@ -43,6 +44,7 @@ export function BrevMottakerPanel({
   const [mottaker, setMottaker] = useState(initialMottaker)
 
   const [oppdaterMottakerResult, apiOppdaterMottaker] = useApiCall(oppdaterMottaker)
+  const [settHovedmottakerResult, apiSettHovedmottaker] = useApiCall(settHovedmottaker)
   const [soeker, getSoekerFraGrunnlag] = useApiCall(getGrunnlagsAvOpplysningstype)
   const [kontaktinfoResult, hentKontaktinfo] = useApiCall(hentKontaktinformasjonKRR)
 
@@ -159,6 +161,26 @@ export function BrevMottakerPanel({
         <Heading size="xsmall">Distribusjonsmetode</Heading>
         <BodyShort>{mottaker.tvingSentralPrint ? 'Tving sentral print' : 'Automatisk'}</BodyShort>
       </Box>
+
+      {mapFailure(settHovedmottakerResult, (error) => (
+        <ApiErrorAlert>{error.detail}</ApiErrorAlert>
+      ))}
+
+      {mottaker.type === MottakerType.KOPI && (
+        <HStack justify="center" marginBlock="4 0">
+          <Button
+            variant="secondary"
+            icon={<PersonCheckmarkIcon />}
+            size="small"
+            onClick={() =>
+              apiSettHovedmottaker({ brevId, sakId, mottakerId: mottaker.id }, () => window.location.reload())
+            }
+            loading={isPending(settHovedmottakerResult)}
+          >
+            Sett som hovedmottaker
+          </Button>
+        </HStack>
+      )}
     </Box>
   )
 }

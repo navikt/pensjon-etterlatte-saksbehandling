@@ -461,7 +461,7 @@ class BrevRepository(
 
     private fun Session.hentMottakere(brevId: BrevID) =
         list(
-            queryOf("SELECT * FROM mottaker WHERE brev_id = ?", brevId),
+            queryOf("SELECT * FROM mottaker WHERE brev_id = ? ORDER BY type", brevId),
             tilMottaker,
         )
 

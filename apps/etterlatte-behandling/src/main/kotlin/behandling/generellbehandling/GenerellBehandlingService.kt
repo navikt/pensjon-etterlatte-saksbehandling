@@ -140,7 +140,7 @@ class GenerellBehandlingService(
         val hentetBehandling = hentBehandlingMedId(generellBehandling.id)
         require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: ${generellBehandling.id}" }
         check(hentetBehandling!!.kanEndres()) {
-            "Behandlingen må ha status opprettet, hadde ${generellBehandling.status}"
+            "Behandlingen må ha status opprettet, hadde ${generellBehandling.status} id: ${generellBehandling.id}"
         }
         when (generellBehandling.innhold) {
             is Innhold.KravpakkeUtland -> validerUtland(generellBehandling.innhold as Innhold.KravpakkeUtland)
@@ -174,10 +174,10 @@ class GenerellBehandlingService(
         val hentetBehandling = hentBehandlingMedId(generellbehandlingId)
         require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: $generellbehandlingId" }
         require(hentetBehandling?.status === GenerellBehandling.Status.FATTET) {
-            "Behandlingen må ha status FATTET, hadde: ${hentetBehandling?.status}"
+            "Behandlingen må ha status FATTET, hadde: ${hentetBehandling?.status} id: $generellbehandlingId"
         }
         requireNotNull(hentetBehandling?.behandler) {
-            "Behandlingen har ikke fått satt en saksbehandler i fattingen"
+            "Behandlingen har ikke fått satt en saksbehandler i fattingen, id $generellbehandlingId"
         }
 
         verifiserRiktigSaksbehandler(saksbehandler, hentetBehandling!!)

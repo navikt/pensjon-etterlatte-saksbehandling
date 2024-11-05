@@ -90,9 +90,39 @@ class AktivitetspliktAktivitetsgradDaoTest(
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
         val aktivitetsgrad =
             LagreAktivitetspliktAktivitetsgrad(
-                aktivitetsgrad = AKTIVITET_OVER_50,
+                aktivitetsgrad = AKTIVITET_UNDER_50,
                 beskrivelse = "Beskrivelse",
+                vurdertFra12Mnd = false,
+                skjoennsmessigVurdering = null,
             )
+
+        dao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sak.id, kilde, oppgave.id, behandlingId)
+
+        val lagretOppgave = dao.hentAktivitetsgradForOppgave(oppgave.id).single()
+
+        val oppdatertAktivitetsgrad =
+            aktivitetsgrad.copy(
+                id = lagretOppgave.id,
+                aktivitetsgrad = AKTIVITET_OVER_50,
+                beskrivelse = "Ny beskrivelse",
+                fom = aktivitetsgrad.fom.plusMonths(2L),
+                tom = aktivitetsgrad.fom.plusMonths(5L),
+                vurdertFra12Mnd = true,
+                skjoennsmessigVurdering = AktivitetspliktSkjoennsmessigVurdering.JA,
+            )
+        dao.upsertAktivitetsgradForOppgave(oppdatertAktivitetsgrad, sak.id, kilde, oppgave.id, behandlingId)
+        val oppdatertLagretOppgave = dao.hentAktivitetsgradForOppgave(oppgave.id).single()
+
+        oppdatertLagretOppgave.asClue {
+            it.sakId shouldBe sak.id
+            it.id shouldBe lagretOppgave.id
+            it.aktivitetsgrad shouldBe oppdatertAktivitetsgrad.aktivitetsgrad
+            it.beskrivelse shouldBe oppdatertAktivitetsgrad.beskrivelse
+            it.fom shouldBe oppdatertAktivitetsgrad.fom
+            it.tom shouldBe oppdatertAktivitetsgrad.tom
+            it.vurdertFra12Mnd shouldBe oppdatertAktivitetsgrad.vurdertFra12Mnd
+            it.skjoennsmessigVurdering shouldBe oppdatertAktivitetsgrad.skjoennsmessigVurdering
+        }
     }
 
     @Test

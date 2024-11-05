@@ -99,6 +99,7 @@ class PDFGenerator(
                     erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
                     generellBrevData.sak.sakType,
                     generellBrevData.forenkletVedtak?.type,
+                    generellBrevData.revurderingsaarsak,
                 ),
             )
 
@@ -182,7 +183,7 @@ class PDFGenerator(
         brevbakerService.genererPdf(
             brev.id,
             BrevbakerRequest.fra(
-                EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_AARLIG_VEDTAK,
+                EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VEDTAK,
                 OmstillingsstoenadAarligInntektsjusteringJobb(), // TODO: legge til evnt. brevdata
                 avsender,
                 generellBrevData.personerISak.soekerOgEventuellVerge(),

@@ -41,6 +41,7 @@ enum class Revurderingaarsak(
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
     OMREGNING(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = false), // TODO
     INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
+    AARLIG_INNTEKTSJUSTERING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),

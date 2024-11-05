@@ -28,7 +28,7 @@ export const Attesteringmodal = (props: {
         Godkjenn kravpakken
       </Button>
       {isSuccess(attesterStatus) && (
-        <Alert variant="success">Behandlingen ble attestert, vi sender deg straks til saksoversikten</Alert>
+        <Alert variant="success">Behandlingen ble attestert, du blir straks sendt til saksoversikten</Alert>
       )}
       {isFailureHandler({
         apiResult: attesterStatus,

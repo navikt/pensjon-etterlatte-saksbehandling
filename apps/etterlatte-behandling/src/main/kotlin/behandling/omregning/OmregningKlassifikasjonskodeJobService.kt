@@ -23,6 +23,7 @@ import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.UtbetalingVerifikasjon
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -72,7 +73,7 @@ class OmregningKlassifikasjonskodeJobService(
                             sakId = sakId,
                             revurderingaarsak = Revurderingaarsak.OMREGNING,
                             fradato = foersteVirkningstidspunktForSak,
-                            // verifiserUtbetalingUendret = true, fjernes for å få gjennom saker som har forventet etterbetaling
+                            utbetalingVerifikasjon = UtbetalingVerifikasjon.SIMULERING,
                         )
 
                     logger.info("Publiserer omregningshendelse for sak $sakId på kafka")

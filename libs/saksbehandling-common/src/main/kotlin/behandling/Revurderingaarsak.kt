@@ -105,7 +105,11 @@ enum class Revurderingaarsak(
 
     fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
 
-    fun erStoettaRevurdering(sakType: SakType) = kanBrukesIMiljo() && gyldigForSakType(sakType) && this != NY_SOEKNAD
+    fun erStoettaRevurdering(sakType: SakType): Boolean {
+        if (this == NY_SOEKNAD) return false
+        if (this == AARLIG_INNTEKTSJUSTERING) return false
+        return kanBrukesIMiljo() && gyldigForSakType(sakType)
+    }
 }
 
 enum class GcpEnv(

@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -41,7 +42,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.oppgave.OppgaveKanIkkeEndres
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
@@ -250,9 +250,10 @@ class AktivitetspliktService(
         brukerTokenInfo: BrukerTokenInfo,
     ): AktivitetspliktVurdering {
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
         sjekkOmAktivitetsgradErGyldig(aktivitetsgrad)
         aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sakId, kilde, oppgaveId)
-        val oppgave = oppgaveService.hentOppgave(oppgaveId)
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
 
@@ -316,9 +317,7 @@ class AktivitetspliktService(
             throw TomErFoerFomException()
         }
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        if (oppgave.erAvsluttet()) {
-            throw OppgaveKanIkkeEndres(oppgaveId, oppgave.status)
-        }
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, kilde, oppgaveId)
@@ -340,12 +339,7 @@ class AktivitetspliktService(
         brukerTokenInfo: BrukerTokenInfo,
     ): AktivitetspliktVurdering? {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        if (oppgave.sakId != sakId) {
-            throw SakidTilhoererIkkeOppgaveException()
-        }
-        if (oppgave.erAvsluttet()) {
-            throw OppgaveKanIkkeEndres(oppgaveId, oppgave.status)
-        }
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
         aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForOppgave(aktivitetsgradId, oppgaveId)
 
@@ -360,12 +354,7 @@ class AktivitetspliktService(
         brukerTokenInfo: BrukerTokenInfo,
     ): AktivitetspliktVurdering? {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        if (oppgave.sakId != sakId) {
-            throw SakidTilhoererIkkeOppgaveException()
-        }
-        if (oppgave.erAvsluttet()) {
-            throw OppgaveKanIkkeEndres(oppgaveId, oppgave.status)
-        }
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
         aktivitetspliktUnntakDao.slettUnntakForOppgave(oppgaveId, unntakId)
@@ -613,16 +602,7 @@ class AktivitetspliktService(
         oppgaveId: UUID,
     ): AktivitetspliktVurdering? {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        if (oppgave.sakId != sakId) {
-            throw OppgaveTilhoererIkkeSakException(sakId, oppgaveId)
-        }
-
-        if (oppgave.erAvsluttet()) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_ER_AVSLUTTET",
-                "Kan ikke kopiere inn vurderinger på aktivitetsplikt på en oppgave som er avsluttet",
-            )
-        }
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
         when (oppgave.type) {
             OppgaveType.AKTIVITETSPLIKT,
@@ -639,6 +619,22 @@ class AktivitetspliktService(
 
         aktivitetspliktKopierService.kopierVurderingTilOppgave(sakId, oppgaveId)
         return hentVurderingForOppgave(oppgaveId)
+    }
+
+    private fun sjekkOppgaveTilhoererSakOgErRedigerbar(
+        oppgave: OppgaveIntern,
+        sakId: SakId,
+    ) {
+        if (oppgave.sakId != sakId) {
+            throw OppgaveTilhoererIkkeSakException(sakId, oppgave.id)
+        }
+
+        if (oppgave.erAvsluttet()) {
+            throw UgyldigForespoerselException(
+                "OPPGAVE_ER_AVSLUTTET",
+                "Kan ikke kopiere inn vurderinger på aktivitetsplikt på en oppgave som er avsluttet",
+            )
+        }
     }
 }
 

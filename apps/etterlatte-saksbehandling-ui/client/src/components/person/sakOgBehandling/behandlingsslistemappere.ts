@@ -81,6 +81,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Utsendelse av SED'
     case Revurderingaarsak.AKTIVITETSPLIKT:
       return 'Aktivitetsplikt'
+    case Revurderingaarsak.AARLIG_INNTEKTSJUSTERING:
+      return 'Årlig inntektsjustering'
   }
 }
 

@@ -152,6 +152,8 @@ class BrevDataMapperFerdigstillingVedtak(
                         utlandstilknytningType,
                     )
 
+                // TODO: legg til OMS_INNTEKTSJUSTERING_VARSEL
+
                 OMS_REVURDERING ->
                     omstillingsstoenadRevurdering(
                         bruker,

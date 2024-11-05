@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -11,6 +12,7 @@ data class BrevkodeRequest(
     val erForeldreloes: Boolean,
     val sakType: SakType,
     val vedtakType: VedtakType?,
+    val revurderingaarsak: Revurderingaarsak?,
 )
 
 class BrevKodeMapperVedtak {
@@ -45,7 +47,14 @@ class BrevKodeMapperVedtak {
                 when (request.vedtakType) {
                     VedtakType.INNVILGELSE -> Brevkoder.OMS_INNVILGELSE
                     VedtakType.AVSLAG -> Brevkoder.OMS_AVSLAG
-                    VedtakType.ENDRING -> Brevkoder.OMS_REVURDERING
+
+                    VedtakType.ENDRING -> {
+                        when (request.revurderingaarsak) {
+                            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL
+                            else -> Brevkoder.OMS_REVURDERING
+                        }
+                    }
+
                     VedtakType.OPPHOER -> Brevkoder.OMS_OPPHOER
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE

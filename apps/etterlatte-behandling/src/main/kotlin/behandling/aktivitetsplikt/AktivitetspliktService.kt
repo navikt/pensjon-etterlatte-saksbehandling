@@ -256,7 +256,10 @@ class AktivitetspliktService(
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
 
-        return hentVurderingForOppgave(oppgaveId)!!
+        return hentVurderingForOppgave(oppgaveId) ?: throw InternfeilException(
+            "Vi har ingen vurderinger men vi " +
+                "oppdaterte nettopp en vurdering i en oppgave. Gjelder oppgave med id=$oppgaveId i sak $sakId",
+        )
     }
 
     private fun sjekkOmAktivitetsgradErGyldig(aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad) {
@@ -328,7 +331,10 @@ class AktivitetspliktService(
             )
         }
 
-        return hentVurderingForOppgave(oppgaveId)!!
+        return hentVurderingForOppgave(oppgaveId) ?: throw InternfeilException(
+            "Vi har ingen vurderinger men vi " +
+                "oppdaterte nettopp en vurdering i en oppgave. Gjelder oppgave med id=$oppgaveId i sak $sakId",
+        )
     }
 
     fun slettAktivitetsgradForOppgave(

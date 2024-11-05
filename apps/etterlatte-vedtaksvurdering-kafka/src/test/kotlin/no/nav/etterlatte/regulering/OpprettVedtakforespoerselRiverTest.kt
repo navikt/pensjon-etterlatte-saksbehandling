@@ -16,6 +16,7 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
+import no.nav.etterlatte.rapidsandrivers.UtbetalingVerifikasjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -30,7 +31,7 @@ internal class OpprettVedtakforespoerselRiverTest {
     private fun genererOpprettVedtakforespoersel(
         behandlingId: UUID,
         revurderingaarsak: Revurderingaarsak = Revurderingaarsak.REGULERING,
-        verifiserUtbetaling: Boolean = false,
+        utbetalingVerifikasjon: UtbetalingVerifikasjon = UtbetalingVerifikasjon.INGEN,
     ) = JsonMessage.newMessage(
         mapOf(
             OmregningHendelseType.BEREGNA.lagParMedEventNameKey(),
@@ -41,7 +42,7 @@ internal class OpprettVedtakforespoerselRiverTest {
                     fradato = foersteMai2023,
                     revurderingaarsak = revurderingaarsak,
                     behandlingId = behandlingId,
-                    verifiserUtbetalingUendret = verifiserUtbetaling,
+                    utbetalingVerifikasjon = utbetalingVerifikasjon,
                 ).toPacket(),
         ),
     )
@@ -118,7 +119,12 @@ internal class OpprettVedtakforespoerselRiverTest {
     @Test
     fun `skal opprette vedtak, simulere og attestere ved uendret utbetaling`() {
         val behandlingId = UUID.randomUUID()
-        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING, true)
+        val melding =
+            genererOpprettVedtakforespoersel(
+                behandlingId,
+                Revurderingaarsak.OMREGNING,
+                UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING,
+            )
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val utbetalingKlientMock =
             mockk<UtbetalingKlient> {
@@ -156,7 +162,12 @@ internal class OpprettVedtakforespoerselRiverTest {
     @Test
     fun `skal opprette vedtak, simulere og feile fordi det finnes etterbetaling`() {
         val behandlingId = UUID.randomUUID()
-        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING, true)
+        val melding =
+            genererOpprettVedtakforespoersel(
+                behandlingId,
+                Revurderingaarsak.OMREGNING,
+                UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING,
+            )
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val utbetalingKlientMock =
             mockk<UtbetalingKlient> {
@@ -189,7 +200,12 @@ internal class OpprettVedtakforespoerselRiverTest {
     @Test
     fun `skal opprette vedtak, simulere og feile fordi det finnes tilbakekreving`() {
         val behandlingId = UUID.randomUUID()
-        val melding = genererOpprettVedtakforespoersel(behandlingId, Revurderingaarsak.OMREGNING, true)
+        val melding =
+            genererOpprettVedtakforespoersel(
+                behandlingId,
+                Revurderingaarsak.OMREGNING,
+                UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING,
+            )
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val utbetalingKlientMock =
             mockk<UtbetalingKlient> {

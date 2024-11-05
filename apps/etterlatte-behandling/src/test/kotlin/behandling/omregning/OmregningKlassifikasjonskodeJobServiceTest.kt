@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.OmregningData
+import no.nav.etterlatte.rapidsandrivers.UtbetalingVerifikasjon
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -97,7 +98,7 @@ internal class OmregningKlassifikasjonskodeJobServiceTest {
                 sakId shouldBe SAK_ID
                 kjoering shouldBe OmregningKlassifikasjonskodeJobService.kjoering
                 revurderingaarsak shouldBe Revurderingaarsak.OMREGNING
-                verifiserUtbetalingUendret shouldBe false
+                utbetalingVerifikasjon shouldBe UtbetalingVerifikasjon.SIMULERING
                 hentFraDato() shouldBe LocalDate.of(2023, Month.NOVEMBER, 1)
             }
         }

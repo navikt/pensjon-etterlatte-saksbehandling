@@ -753,9 +753,7 @@ data class AktivitetspliktVurderingGammel(
 data class AktivitetspliktVurdering(
     val aktivitet: List<AktivitetspliktAktivitetsgrad>,
     val unntak: List<AktivitetspliktUnntak>,
-) {
-    val relevantAktivitet = aktivitet.maxByOrNull { it.fom }?.aktivitetsgrad
-}
+)
 
 interface AktivitetspliktVurderingOpprettetDato {
     val opprettet: Grunnlagsopplysning.Kilde

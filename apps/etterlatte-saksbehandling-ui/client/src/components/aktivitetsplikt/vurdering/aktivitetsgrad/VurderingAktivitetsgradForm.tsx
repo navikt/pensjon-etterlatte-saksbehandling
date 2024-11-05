@@ -62,7 +62,6 @@ export function VurderingAktivitetsgradForm(props: {
   }, [aktivitet])
 
   function lagreOgOppdater(formdata: Partial<NyVurdering>) {
-    console.log(formdata) // TODO
     if (!formdata.vurderingAvAktivitet?.aktivitetsgrad || !formdata.vurderingAvAktivitet.fom) {
       return
     }
@@ -114,7 +113,7 @@ export function VurderingAktivitetsgradForm(props: {
           }
         />
 
-        {watch('typeVurdering') === 'TOLV_MAANEDER' &&
+        {watch('typeVurdering') === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER &&
           watch('vurderingAvAktivitet.aktivitetsgrad') === AktivitetspliktVurderingType.AKTIVITET_OVER_50 && (
             <ControlledRadioGruppe
               control={control}

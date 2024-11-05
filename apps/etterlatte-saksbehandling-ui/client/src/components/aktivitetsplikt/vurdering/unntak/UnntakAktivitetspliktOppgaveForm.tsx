@@ -1,7 +1,6 @@
 import {
   AktivitetspliktUnntakType,
   IAktivitetspliktUnntak,
-  IOpprettAktivitetspliktUnntak,
   tekstAktivitetspliktUnntakType,
 } from '~shared/types/Aktivitetsplikt'
 import { useForm } from 'react-hook-form'
@@ -9,19 +8,54 @@ import { Button, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { FloppydiskIcon } from '@navikt/aksel-icons'
 import React from 'react'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { opprettAktivitetspliktUnntak } from '~shared/api/aktivitetsplikt'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { isFailure, isPending } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
+
+export interface IOpprettAktivitetspliktUnntak {
+  id: string | undefined
+  unntak: AktivitetspliktUnntakType
+  fom: string
+  tom?: string
+  beskrivelse: string
+}
+
+function formdataErUtfylt(formdata: Partial<IOpprettAktivitetspliktUnntak>): formdata is IOpprettAktivitetspliktUnntak {
+  return !!formdata.fom && !!formdata.unntak
+}
 
 export function UnntakAktivitetspliktOppgaveForm(props: {
   unntak?: IAktivitetspliktUnntak
   onSuccess: () => void
   onAvbryt?: () => void
 }) {
+  const { oppgave } = useAktivitetspliktOppgaveVurdering()
+  const [lagreUnntakStatus, lagreUnntak] = useApiCall(opprettAktivitetspliktUnntak)
+
   const { control, register, handleSubmit } = useForm<Partial<IOpprettAktivitetspliktUnntak>>({
     defaultValues: props.unntak,
   })
 
   function sendInn(formdata: Partial<IOpprettAktivitetspliktUnntak>) {
-    console.log(formdata)
-    props.onSuccess()
+    if (!formdataErUtfylt(formdata)) {
+      return
+    }
+
+    lagreUnntak(
+      {
+        oppgaveId: oppgave.id,
+        request: {
+          id: formdata.id,
+          unntak: formdata.unntak,
+          fom: formdata.fom,
+          beskrivelse: formdata.beskrivelse || '',
+        },
+        sakId: oppgave.sakId,
+      },
+      props.onSuccess
+    )
   }
 
   return (
@@ -64,10 +98,13 @@ export function UnntakAktivitetspliktOppgaveForm(props: {
               Avbryt
             </Button>
           )}
-          <Button variant="primary" type="submit" icon={<FloppydiskIcon />}>
+          <Button variant="primary" type="submit" icon={<FloppydiskIcon />} loading={isPending(lagreUnntakStatus)}>
             Lagre
           </Button>
         </HStack>
+        {isFailure(lagreUnntakStatus) && (
+          <ApiErrorAlert>Kunne ikke lagre unntak: {lagreUnntakStatus.error.detail}</ApiErrorAlert>
+        )}
       </VStack>
     </form>
   )

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.trygdetid
 
 import io.kotest.matchers.shouldBe
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -100,6 +102,26 @@ internal class TrygdetidRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
             response.status shouldBe HttpStatusCode.OK
+        }
+        coVerify { trygdetidService.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, any()) }
+    }
+
+    @Test
+    fun `skal returnere behandling-id for annen behandling med trygdetid for samme avdøde`() {
+        val behandlingId = randomUUID()
+        val kildeBehandlingId = randomUUID()
+        coEvery {
+            trygdetidService.finnBehandlingMedTrygdetidForSammeAvdoede(behandlingId, any())
+        } returns kildeBehandlingId
+
+        testApplication {
+            val response =
+                client.get("/api/trygdetid_v2/$behandlingId/behandling-med-trygdetid-for-avdoede") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+            response.status shouldBe HttpStatusCode.OK
+            response.body<UUID>() shouldBe kildeBehandlingId
         }
         coVerify { trygdetidService.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, any()) }
     }

@@ -2,7 +2,14 @@ package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.SAMORDNET
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.TIL_SAMORDNING
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -16,6 +23,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -125,6 +133,11 @@ interface TrygdetidService {
         fnr: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): TrygdetidsperioderPesys
+
+    suspend fun finnBehandlingMedTrygdetidForSammeAvdoede(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): UUID?
 }
 
 data class TrygdetidsperioderPesys(
@@ -899,6 +912,45 @@ class TrygdetidServiceImpl(
                 )
             }
     }
+
+    override suspend fun finnBehandlingMedTrygdetidForSammeAvdoede(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): UUID? {
+        logger.debug("Finner trygdetid med samme avdøde som i $")
+        val avdoede: List<Folkeregisteridentifikator> =
+            grunnlagKlient
+                .hentGrunnlag(behandlingId, brukerTokenInfo)
+                .hentAvdoede()
+                .mapNotNull { it.hentFoedselsnummer()?.verdi }
+        if (avdoede.isEmpty()) {
+            return null
+        }
+
+        return trygdetidRepository
+            .hentBehandlingerMedTrygdetiderForAvdoede(avdoede)
+            .filter { it.behandlingId != behandlingId }
+            .filter { it.trygdetiderGjelderEksaktSammeAvdoede(avdoede) }
+            .sortedByDescending { it.maxOpprettet() }
+            .firstOrNull { statusOkForKopieringAvTrygdetid(it.behandlingId, brukerTokenInfo) }
+            ?.behandlingId
+    }
+
+    private fun statusOkForKopieringAvTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean =
+        runBlocking {
+            behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).status in
+                listOf(
+                    IVERKSATT,
+                    BEREGNET,
+                    FATTET_VEDTAK,
+                    ATTESTERT,
+                    TIL_SAMORDNING,
+                    SAMORDNET,
+                )
+        }
 }
 
 class ManglerForrigeTrygdetidMaaReguleresManuelt :

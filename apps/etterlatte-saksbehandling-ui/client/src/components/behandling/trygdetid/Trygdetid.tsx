@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
+  hentKandidatForKopieringAvTrygdetid,
   hentTrygdetider,
   ITrygdetid,
   kopierTrygdetidFraAnnenBehandling,
@@ -8,7 +9,7 @@ import {
   opprettTrygdetidOverstyrtMigrering,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { Alert, BodyShort, Box, Button, Heading, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Link, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -24,11 +25,11 @@ import { formaterNavn } from '~shared/types/Person'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { TrygdetidMelding } from '~components/behandling/trygdetid/components/TrygdetidMelding'
-import { hentAlleLand, hentBehandlingMedTrygdetidForSammeAvdoede } from '~shared/api/behandling'
+import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { formaterDato } from '~utils/formatering/dato'
+import { ExternalLinkIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 
 interface Props {
   redigerbar: boolean
@@ -58,9 +59,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
-  const [trygdetidSammeAvdoedeStatus, finnTrygdetidSammeAvdoedeReq] = useApiCall(
-    hentBehandlingMedTrygdetidForSammeAvdoede
-  )
   const [kopierTrygdetidStatus, kopierTrygdetidReq] = useApiCall(kopierTrygdetidFraAnnenBehandling)
 
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
@@ -72,7 +70,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   const personopplysninger = usePersonopplysninger()
 
-  const mapNavn = (fnr: string): string => {
+  const mapNavn = (fnr: string, visFnr: boolean = true): string => {
     const opplysning = personopplysninger?.avdoede?.find(
       (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
     )?.opplysning
@@ -81,7 +79,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       return fnr
     }
 
-    return `${formaterNavn(opplysning)} (${fnr})`
+    return `${formaterNavn(opplysning)} ${visFnr ? ` (${fnr})` : ''}`
   }
 
   const tidligereFamiliepleier =
@@ -127,7 +125,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     })
   }
 
-  const kopierTrygdetidFra = (kildeBehandlingId: string) => {
+  const kopierTrygdetid = (kildeBehandlingId: string) => {
     kopierTrygdetidReq(
       {
         behandlingId: behandling.id,
@@ -154,10 +152,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     })
   }, [])
 
-  useEffect(() => {
-    finnTrygdetidSammeAvdoedeReq(behandling.id)
-  }, [])
-
   if (harPilotTrygdetid) {
     return (
       <TrygdetidMelding
@@ -178,41 +172,11 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   return (
     <Box paddingInline="16" maxWidth="69rem">
-      {mapResult(trygdetidSammeAvdoedeStatus, {
-        success: (behandling) => (
-          <>
-            {behandling ? (
-              <>
-                <BodyShort>
-                  Det finnes en annen behandling tilknyttet samme avdøde. Ønsker du å benytte den samme trygdetiden i
-                  denne behandlingen? Dette overskriver det du eventuelt har registrert allerede.
-                </BodyShort>
-                <BodyShort>
-                  <strong>SaksID:</strong>
-                  {behandling?.sakId}, <strong>Type: </strong> {behandling?.sakType}, <strong>Status: </strong>{' '}
-                  {behandling?.status},{' '}
-                  {behandling.soeknadMottattDato && (
-                    <>
-                      <strong>Søknad mottatt dato: </strong> {formaterDato(behandling.soeknadMottattDato)}{' '}
-                    </>
-                  )}
-                </BodyShort>
-
-                <Box paddingBlock="2 4">
-                  <Button variant="primary" onClick={() => kopierTrygdetidFra(behandling.id)}>
-                    Kopier trygdetid
-                  </Button>
-                </Box>
-              </>
-            ) : (
-              <></>
-            )}
-          </>
-        ),
-        error: (error) => (
-          <ApiErrorAlert>En feil har oppstått ved henting av trygdetid for samme avdøde. {error.detail}</ApiErrorAlert>
-        ),
-      })}
+      <TrygdetidMedSammeAvdoed
+        behandlingId={behandling.id}
+        kopierTrygdetid={kopierTrygdetid}
+        avdoedesNavn={trygdetider.map((t) => mapNavn(t.ident, false)).join(' og ')}
+      ></TrygdetidMedSammeAvdoed>
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
 
@@ -316,5 +280,68 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         )}
       </VStack>
     </Box>
+  )
+}
+
+const TrygdetidMedSammeAvdoed = ({
+  behandlingId,
+  kopierTrygdetid,
+  avdoedesNavn,
+}: {
+  behandlingId: string
+  kopierTrygdetid: (behandlingId: string) => void
+  avdoedesNavn: string
+}) => {
+  const [hentKandidatForKopieringAvTrygdetidStatus, hentKandidatForKopieringAvTrygdetidReq] = useApiCall(
+    hentKandidatForKopieringAvTrygdetid
+  )
+
+  useEffect(() => {
+    hentKandidatForKopieringAvTrygdetidReq(behandlingId)
+  }, [])
+
+  return (
+    <>
+      {mapResult(hentKandidatForKopieringAvTrygdetidStatus, {
+        success: (behandlingId) => (
+          <>
+            {behandlingId ? (
+              <Box paddingBlock="2 2">
+                <Alert variant="info">
+                  <Heading size="small" level="2">
+                    Det finnes en annen behandling tilknyttet samme avdøde
+                  </Heading>
+                  <VStack gap="3">
+                    <BodyShort>
+                      Det finnes en annen behandling tilknyttet avdøde {avdoedesNavn}, der trygdetiden allerede er fylt
+                      inn. Ønsker du å benytte den samme trygdetiden i denne behandlingen? Dette overskriver det du
+                      eventuelt har registrert allerede.
+                    </BodyShort>
+                    <Link href={`/behandling/${behandlingId}/trygdetid`} as="a" target="_blank">
+                      Gå til behandlingen
+                      <ExternalLinkIcon>Gå til behandlingen</ExternalLinkIcon>
+                    </Link>
+                    <HStack gap="4" justify="space-between">
+                      <Button
+                        variant="secondary"
+                        icon={<PlusCircleIcon fontSize="1.5rem" />}
+                        onClick={() => kopierTrygdetid(behandlingId)}
+                      >
+                        Ja, kopier og legg til trygdetid
+                      </Button>
+                    </HStack>
+                  </VStack>
+                </Alert>
+              </Box>
+            ) : (
+              <></>
+            )}
+          </>
+        ),
+        error: (error) => (
+          <ApiErrorAlert>En feil har oppstått ved henting av trygdetid for samme avdøde. {error.detail}</ApiErrorAlert>
+        ),
+      })}
+    </>
   )
 }

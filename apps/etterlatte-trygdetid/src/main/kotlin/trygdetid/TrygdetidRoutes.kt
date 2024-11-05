@@ -5,6 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
@@ -152,6 +153,20 @@ fun Route.trygdetid(
                             )!!
                             .toDto(),
                     )
+                }
+            }
+
+            get("/behandling-med-trygdetid-for-avdoede") {
+                withBehandlingId(behandlingKlient) {
+                    val kandidatBehandlingId =
+                        trygdetidService.finnBehandlingMedTrygdetidForSammeAvdoede(
+                            behandlingId,
+                            brukerTokenInfo,
+                        )
+                    when (kandidatBehandlingId) {
+                        null -> call.respond(HttpStatusCode.NoContent)
+                        else -> call.respondText(kandidatBehandlingId.toString())
+                    }
                 }
             }
 

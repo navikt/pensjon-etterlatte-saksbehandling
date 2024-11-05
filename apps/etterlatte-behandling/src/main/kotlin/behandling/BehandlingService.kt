@@ -26,12 +26,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.SAMORDNET
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.TIL_SAMORDNING
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -42,7 +37,6 @@ import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -271,8 +265,6 @@ interface BehandlingService {
     )
 
     fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier?
-
-    suspend fun finnAnnenBehandlingMedTrygdetidForAvdoede(behandlingId: UUID): DetaljertBehandlingDto?
 }
 
 internal class BehandlingServiceImpl(
@@ -901,45 +893,6 @@ internal class BehandlingServiceImpl(
 
     override fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
-
-    override suspend fun finnAnnenBehandlingMedTrygdetidForAvdoede(behandlingId: UUID): DetaljertBehandlingDto? {
-        val avdoede: List<String>? = grunnlagKlient.hentPersongalleri(behandlingId)?.opplysning?.avdoed
-        if (avdoede.isNullOrEmpty()) {
-            return null
-        }
-
-        val sakerMedAmmeAvdoede = sakerMedSammeAvdoede(avdoede)
-
-        val behandling =
-            inTransaction {
-                val behandlingerPaaSakene =
-                    sakerMedAmmeAvdoede.flatMap { sakId -> hentBehandlingerForSakId(sakId) }
-                behandlingerPaaSakene
-                    .filter { it.id != behandlingId }
-                    .filter {
-                        it.status in listOf(IVERKSATT, BEREGNET, FATTET_VEDTAK, ATTESTERT, TIL_SAMORDNING, SAMORDNET)
-                    }.maxByOrNull { it.behandlingOpprettet }
-            }
-        return behandling
-            ?.let { hentDetaljertBehandlingMedTilbehoer(it.id, Kontekst.get().brukerTokenInfo!!) }
-    }
-
-    private suspend fun sakerMedSammeAvdoede(avdoede: List<String>): Set<SakId> {
-        val sakerPerAvdoed: List<Set<SakId>> =
-            avdoede.map { avdoed ->
-                grunnlagKlient
-                    .hentPersonSakOgRolle(avdoed)
-                    .sakiderOgRoller
-                    .filter { sakidOgRolle -> sakidOgRolle.rolle == Saksrolle.AVDOED }
-                    .map { it.sakId }
-                    .toSet()
-            }
-
-        val sakerMedAlleAvdoede =
-            sakerPerAvdoed
-                .reduce { acc, next -> acc.intersect(next) }
-        return sakerMedAlleAvdoede
-    }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

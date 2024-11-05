@@ -5,12 +5,17 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -63,4 +68,22 @@ class GrunnlagKlient(
             }
         }
     }
+
+    suspend fun hentPersonSakOgRolle(
+        fnr: Folkeregisteridentifikator,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): PersonMedSakerOgRoller =
+        downstreamResourceClient
+            .post(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/grunnlag/person/roller",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = FoedselsnummerDTO(fnr.value).toJson(),
+            ).mapBoth(
+                success = { resource -> deserialize(resource.response.toString()) },
+                failure = { errorResponse -> throw errorResponse },
+            )
 }

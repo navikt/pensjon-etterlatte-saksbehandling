@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
-import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.put
@@ -25,10 +24,8 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -44,7 +41,6 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
@@ -335,51 +331,6 @@ internal class BehandlingRoutesTest {
             assertEquals(200, response.status.value)
         }
     }
-
-    @Test
-    fun `kan finne behandlinger med trygdetid for samme avdoede`() {
-        val sakId = SakId(133)
-        coEvery {
-            behandlingService.finnAnnenBehandlingMedTrygdetidForAvdoede(any())
-        } returns
-            detaljertBehandlingDto(foerstegangsbehandling(sakId = sakId))
-
-        withTestApplication { client ->
-            val response =
-                client.get("/api/behandling/${UUID.randomUUID()}/med-trygdetid-for-samme-avdoede") {
-                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
-                    contentType(ContentType.Application.Json)
-                }
-
-            assertEquals(200, response.status.value)
-            assertEquals(sakId, response.body<DetaljertBehandlingDto>().sakId)
-        }
-    }
-
-    private fun detaljertBehandlingDto(foerstegangsbehandling: Foerstegangsbehandling): DetaljertBehandlingDto =
-        DetaljertBehandlingDto(
-            id = foerstegangsbehandling.id,
-            sakId = foerstegangsbehandling.sak.id,
-            sakType = foerstegangsbehandling.sak.sakType,
-            sakEnhetId = foerstegangsbehandling.sak.enhet,
-            gyldighetsprøving = foerstegangsbehandling.gyldighetsproeving,
-            soeknadMottattDato = foerstegangsbehandling.soeknadMottattDato,
-            virkningstidspunkt = foerstegangsbehandling.virkningstidspunkt,
-            utlandstilknytning = foerstegangsbehandling.utlandstilknytning,
-            boddEllerArbeidetUtlandet = foerstegangsbehandling.boddEllerArbeidetUtlandet,
-            status = foerstegangsbehandling.status,
-            hendelser = emptyList(),
-            behandlingType = foerstegangsbehandling.type,
-            kommerBarnetTilgode = foerstegangsbehandling.kommerBarnetTilgode,
-            revurderingsaarsak = foerstegangsbehandling.revurderingsaarsak(),
-            revurderinginfo = foerstegangsbehandling.revurderingInfo(),
-            begrunnelse = foerstegangsbehandling.begrunnelse(),
-            kilde = foerstegangsbehandling.kilde,
-            sendeBrev = foerstegangsbehandling.sendeBrev,
-            viderefoertOpphoer = null,
-            tidligereFamiliepleier = foerstegangsbehandling.tidligereFamiliepleier,
-            erSluttbehandling = foerstegangsbehandling.erSluttbehandling,
-        )
 
     private fun withTestApplication(
         testUser: User? = null,

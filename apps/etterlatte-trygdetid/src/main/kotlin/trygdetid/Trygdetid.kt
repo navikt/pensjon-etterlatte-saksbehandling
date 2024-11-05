@@ -5,6 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -31,6 +32,7 @@ data class Trygdetid(
     val overstyrtNorskPoengaar: Int? = null,
     val opplysningerDifferanse: OpplysningerDifferanse? = null,
     val yrkesskade: Boolean,
+    val opprettet: Tidspunkt = Tidspunkt.now(),
 ) {
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
         val normalisertNyttTrygdetidGrunnlag = listOf(nyttTrygdetidGrunnlag).normaliser().first()
@@ -215,3 +217,16 @@ private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =
                 else -> throw Exception("Mangler gyldig kilde for opplysning $id")
             },
     )
+
+data class BehandlingMedTrygdetider(
+    val behandlingId: UUID,
+    val trygdetider: List<Trygdetid>,
+) {
+    fun maxOpprettet() = trygdetider.maxBy { it.opprettet }.opprettet
+
+    fun trygdetiderGjelderEksaktSammeAvdoede(avdoede: List<Folkeregisteridentifikator>): Boolean =
+        trygdetider.map(Trygdetid::ident).sorted() ==
+            avdoede.map {
+                it.value
+            }
+}

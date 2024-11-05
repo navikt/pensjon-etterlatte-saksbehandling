@@ -164,6 +164,12 @@ export const kopierTrygdetidFraAnnenBehandling = async (args: {
 }): Promise<ApiResponse<Trygdeavtale>> =>
   apiClient.post<Trygdeavtale>(`/trygdetid_v2/${args.behandlingId}/kopier-grunnlag/${args.kildeBehandlingId}`, {})
 
+export const hentKandidatForKopieringAvTrygdetid = async (
+  behandlingId: string
+): Promise<ApiResponse<string | null>> => {
+  return apiClient.get(`/trygdetid_v2/${behandlingId}/behandling-med-trygdetid-for-avdoede`)
+}
+
 export interface ITrygdetid {
   id: string
   ident: string

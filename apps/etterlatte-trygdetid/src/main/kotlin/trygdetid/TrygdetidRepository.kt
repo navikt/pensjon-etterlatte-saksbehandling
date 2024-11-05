@@ -8,6 +8,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -64,7 +65,8 @@ class TrygdetidRepository(
                         beregnet_trygdetid_overstyrt,
                         poengaar_overstyrt,
                         yrkesskade,
-                        beregnet_samlet_trygdetid_norge
+                        beregnet_samlet_trygdetid_norge,
+                        opprettet
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                     """.trimIndent(),
@@ -164,6 +166,27 @@ class TrygdetidRepository(
                 tx.update(query)
             }
         }
+
+    fun hentBehandlingerMedTrygdetiderForAvdoede(avdoede: List<Folkeregisteridentifikator>): List<BehandlingMedTrygdetider> =
+        behandlingerSomHarAlleAvdoede(avdoede)
+            .map { behandlingId -> BehandlingMedTrygdetider(behandlingId, hentTrygdetiderForBehandling(behandlingId)) }
+            .toList()
+
+    private fun behandlingerSomHarAlleAvdoede(avdoede: List<Folkeregisteridentifikator>): Set<UUID> {
+        val behandlingerPerAvdoed: List<Set<UUID>> =
+            using(sessionOf(dataSource)) { session ->
+                avdoede.map { ident ->
+                    session
+                        .run(
+                            queryOf(
+                                statement = "SELECT DISTINCT behandling_id FROM trygdetid WHERE ident = :ident",
+                                paramMap = mapOf("ident" to ident.value),
+                            ).map { it.uuid("behandling_id") }.asList,
+                        ).toSet()
+                }
+            }
+        return behandlingerPerAvdoed.reduce { acc, next -> acc.intersect(next) }
+    }
 
     private fun opprettTrygdetid(
         trygdetid: Trygdetid,
@@ -602,6 +625,7 @@ class TrygdetidRepository(
         overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
         ident = string("ident"),
         yrkesskade = boolean("yrkesskade"),
+        opprettet = tidspunkt("opprettet"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

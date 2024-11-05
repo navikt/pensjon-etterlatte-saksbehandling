@@ -97,7 +97,7 @@ internal class OmregningKlassifikasjonskodeJobServiceTest {
                 sakId shouldBe SAK_ID
                 kjoering shouldBe OmregningKlassifikasjonskodeJobService.kjoering
                 revurderingaarsak shouldBe Revurderingaarsak.OMREGNING
-                verifiserUtbetalingUendret shouldBe true
+                verifiserUtbetalingUendret shouldBe false
                 hentFraDato() shouldBe LocalDate.of(2023, Month.NOVEMBER, 1)
             }
         }

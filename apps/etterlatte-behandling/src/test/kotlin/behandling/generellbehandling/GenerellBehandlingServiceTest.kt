@@ -447,7 +447,7 @@ internal class GenerellBehandlingServiceTest(
         val behandlingUtfylt =
             opprettBehandling.copy(innhold = kravpakkeUtlandInnhold, status = GenerellBehandling.Status.FATTET)
         val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt, sak.id)
-        assertThrows<IllegalStateException> {
+        assertThrows<FeilStatusGenerellBehandling> {
             service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         }
     }

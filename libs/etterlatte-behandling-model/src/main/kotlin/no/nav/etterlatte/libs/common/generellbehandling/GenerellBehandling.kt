@@ -40,6 +40,8 @@ data class GenerellBehandling(
             Status.AVBRUTT, Status.ATTESTERT, Status.FATTET -> false
         }
 
+    fun erFattet() = this.status === Status.FATTET
+
     init {
         if (innhold !== null) {
             when (type) {

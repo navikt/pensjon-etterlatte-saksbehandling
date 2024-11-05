@@ -41,6 +41,7 @@ enum class Revurderingaarsak(
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
     OMREGNING(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = false), // TODO
     INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
+    AARLIG_INNTEKTSJUSTERING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
@@ -104,7 +105,10 @@ enum class Revurderingaarsak(
 
     fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
 
-    fun erStoettaRevurdering(sakType: SakType) = kanBrukesIMiljo() && gyldigForSakType(sakType) && this != NY_SOEKNAD
+    fun erStoettaRevurdering(sakType: SakType): Boolean {
+        val erIkkeStoetta = listOf(NY_SOEKNAD, AARLIG_INNTEKTSJUSTERING)
+        return kanBrukesIMiljo() && gyldigForSakType(sakType) && !erIkkeStoetta.contains(this)
+    }
 }
 
 enum class GcpEnv(

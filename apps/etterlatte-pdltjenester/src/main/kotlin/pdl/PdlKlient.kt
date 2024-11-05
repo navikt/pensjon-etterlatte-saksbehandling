@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.behandlingsnummer
-import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
 
@@ -48,12 +47,7 @@ class PdlKlient(
         }.let {
             when (it) {
                 is RetryResult.Success ->
-                    it.content.also { result ->
-                        result.errors?.joinToString(",")?.let { feil ->
-                            logger.error("Fikk data fra PDL, men også feil. Se sikkerlogg for feilmelding")
-                            sikkerLogg.error("Request: $hentPersonRequest \n PDL feil $feil")
-                        }
-                    }
+                    it.content.also { loggDelvisReturnerteData(it, request) }
 
                 is RetryResult.Failure -> throw it.samlaExceptions()
             }

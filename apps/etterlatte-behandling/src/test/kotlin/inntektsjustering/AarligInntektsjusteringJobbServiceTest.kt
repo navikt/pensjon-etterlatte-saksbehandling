@@ -4,7 +4,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
@@ -12,12 +14,13 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -29,7 +32,6 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,7 +48,7 @@ class AarligInntektsjusteringJobbServiceTest {
     private val sakService: SakService = mockk()
     private val behandlingService: BehandlingService = mockk()
     private val grunnlagService: GrunnlagService = mockk()
-    private val oppgaveService: OppgaveService = mockk()
+    private val revurderingService: RevurderingService = mockk()
     private val vedtakKlient: VedtakKlient = mockk()
     private val beregningKlient: BeregningKlient = mockk()
     private val pdlTjenesterKlient: PdlTjenesterKlient = mockk()
@@ -57,7 +59,7 @@ class AarligInntektsjusteringJobbServiceTest {
             omregningService,
             sakService,
             behandlingService,
-            oppgaveService,
+            revurderingService,
             grunnlagService,
             vedtakKlient,
             beregningKlient,
@@ -86,6 +88,9 @@ class AarligInntektsjusteringJobbServiceTest {
         every { behandlingService.hentSisteIverksatte(any()) } returns
             mockk {
                 every { id } returns sisteBehandling
+                every { utlandstilknytning } returns mockk()
+                every { boddEllerArbeidetUtlandet } returns mockk()
+                every { opphoerFraOgMed } returns mockk()
             }
         coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
             mockk {
@@ -95,6 +100,35 @@ class AarligInntektsjusteringJobbServiceTest {
                     }
             }
 
+        coEvery { grunnlagService.hentPersongalleri(any()) } returns persongalleri
+        coEvery {
+            revurderingService.opprettRevurdering(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            mockk {
+                every { oppdater() } returns mockk()
+            }
+        every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
+
+        every { omregningService.oppdaterKjoering(any()) } just runs
         every { rapid.publiser(any(), any()) } returns Pair(1, 1L)
     }
 
@@ -133,6 +167,18 @@ class AarligInntektsjusteringJobbServiceTest {
             service.startAarligInntektsjustering(request)
         }
 
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.KLAR_FOR_OMREGNING
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe null
+                    }
+                },
+            )
+        }
         verify {
             rapid.publiser(
                 "aarlig-inntektsjustering-123",
@@ -221,22 +267,13 @@ class AarligInntektsjusteringJobbServiceTest {
                 underSamordning = true,
             )
 
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
             service.startAarligInntektsjustering(request)
         }
 
-        verify {
-            oppgaveService.opprettOppgave(
-                "123",
-                SakId(123L),
-                null,
-                OppgaveType.REVURDERING,
-                merknad = "",
-            )
-        }
+        // TODO verifer opprettelse rev
         verify {
             omregningService.oppdaterKjoering(
                 withArg {
@@ -263,23 +300,13 @@ class AarligInntektsjusteringJobbServiceTest {
         val nyttFnr = Folkeregisteridentifikator.of("22511075258")
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns PdlIdentifikator.FolkeregisterIdent(nyttFnr)
 
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
             service.startAarligInntektsjustering(request)
         }
 
-        // TODO verifiser satt status og begrunnelse kjøring..
-        verify {
-            oppgaveService.opprettOppgave(
-                "123",
-                SakId(123L),
-                null,
-                OppgaveType.REVURDERING,
-                merknad = "",
-            )
-        }
+        // TODO verifer opprettelse rev
         verify {
             omregningService.oppdaterKjoering(
                 withArg {
@@ -314,22 +341,13 @@ class AarligInntektsjusteringJobbServiceTest {
             )
         } returns endretOpplysningPdl
 
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
             service.startAarligInntektsjustering(request)
         }
 
-        verify {
-            oppgaveService.opprettOppgave(
-                "123",
-                SakId(123L),
-                null,
-                OppgaveType.REVURDERING,
-                merknad = "",
-            )
-        }
+        // TODO verifer opprettelse rev
         verify {
             omregningService.oppdaterKjoering(
                 withArg {
@@ -387,22 +405,13 @@ class AarligInntektsjusteringJobbServiceTest {
                     ),
             )
 
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
             service.startAarligInntektsjustering(request)
         }
 
-        verify {
-            oppgaveService.opprettOppgave(
-                "123",
-                SakId(123L),
-                null,
-                OppgaveType.REVURDERING,
-                merknad = "",
-            )
-        }
+        // TODO verifer opprettelse rev
         verify {
             omregningService.oppdaterKjoering(
                 withArg {
@@ -483,6 +492,7 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         val sisteBehandling = UUID.randomUUID()
+        val persongalleri = mockk<Persongalleri>()
 
         fun loependeYtdelseDto() =
             LoependeYtelseDTO(

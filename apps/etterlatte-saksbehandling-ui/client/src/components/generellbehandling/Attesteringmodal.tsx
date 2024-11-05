@@ -27,7 +27,9 @@ export const Attesteringmodal = (props: {
       <Button style={{ marginTop: '1rem' }} onClick={() => attesterWrapper()} loading={isPending(attesterStatus)}>
         Godkjenn kravpakken
       </Button>
-      {isSuccess(attesterStatus) && <Alert variant="success">Behandlingen ble attestert</Alert>}
+      {isSuccess(attesterStatus) && (
+        <Alert variant="success">Behandlingen ble attestert, du blir straks sendt til saksoversikten</Alert>
+      )}
       {isFailureHandler({
         apiResult: attesterStatus,
         errorMessage: 'Behandlingen ble ikke attestert',

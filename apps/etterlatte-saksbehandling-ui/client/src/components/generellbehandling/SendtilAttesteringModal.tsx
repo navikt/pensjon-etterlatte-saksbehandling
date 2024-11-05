@@ -43,7 +43,9 @@ export const SendtilAttesteringModal = ({
             Nei, avbryt
           </Button>
           {isSuccess(sendTilAttesteringStatus) && (
-            <Alert variant="success">Behandlingen ble sendt til attestering</Alert>
+            <Alert variant="success">
+              Behandlingen ble sendt til attestering, du blir straks sendt til saksoversikten
+            </Alert>
           )}
           {isFailureHandler({
             apiResult: sendTilAttesteringStatus,

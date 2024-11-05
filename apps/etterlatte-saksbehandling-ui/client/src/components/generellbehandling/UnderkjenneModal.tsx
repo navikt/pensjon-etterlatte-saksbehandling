@@ -54,7 +54,9 @@ export const UnderkjenneModal = ({
       >
         Bekreft og send i retur
       </Button>
-      {isSuccess(underkjennStatus) && <Alert variant="success">Behandlingen ble underkjent</Alert>}
+      {isSuccess(underkjennStatus) && (
+        <Alert variant="success">Behandlingen ble underkjent, du blir straks sendt til saksoversikten</Alert>
+      )}
       {isFailureHandler({
         apiResult: underkjennStatus,
         errorMessage: 'Behandlingen ble ikke underkjent',

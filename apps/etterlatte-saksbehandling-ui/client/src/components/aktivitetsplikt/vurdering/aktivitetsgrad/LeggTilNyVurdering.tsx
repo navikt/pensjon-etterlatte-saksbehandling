@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { VurderingAktivitetsgradForm } from './VurderingAktivitetsgradForm'
-import { PencilIcon } from '@navikt/aksel-icons'
+import { PlusIcon } from '@navikt/aksel-icons'
 
-export function LeggTilNyVurdering() {
+export function LeggTilNyVurdering(props: { doedsdato?: Date }) {
   const [leggerTilVurdering, setLeggerTilVurdering] = useState(false)
 
   function oppdaterStateVedLagring() {
@@ -14,7 +14,7 @@ export function LeggTilNyVurdering() {
   if (!leggerTilVurdering) {
     return (
       <Box>
-        <Button icon={<PencilIcon />} onClick={() => setLeggerTilVurdering(true)}>
+        <Button size="small" icon={<PlusIcon />} onClick={() => setLeggerTilVurdering(true)}>
           Legg til ny vurdering av aktivitetsplikt
         </Button>
       </Box>
@@ -24,7 +24,11 @@ export function LeggTilNyVurdering() {
   return (
     <VStack gap="4">
       <Heading size="small">Ny vurdering av aktivitetsplikt</Heading>
-      <VurderingAktivitetsgradForm onSuccess={oppdaterStateVedLagring} onAvbryt={() => setLeggerTilVurdering(false)} />
+      <VurderingAktivitetsgradForm
+        doedsdato={props.doedsdato}
+        onSuccess={oppdaterStateVedLagring}
+        onAvbryt={() => setLeggerTilVurdering(false)}
+      />
     </VStack>
   )
 }

@@ -33,19 +33,19 @@ function maanederForVurdering(typeVurdering: AktivitetspliktOppgaveVurderingType
 
 export function VurderingAktivitetsgradForm(props: {
   aktivitet?: IAktivitetspliktAktivitetsgrad
-  doedsmaaned?: Date
+  doedsdato?: Date
   onAvbryt?: () => void
   onSuccess: () => void
 }) {
-  const { aktivitet, onSuccess, onAvbryt, doedsmaaned } = props
+  const { aktivitet, onSuccess, onAvbryt, doedsdato } = props
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
   const typeVurdering =
     oppgave.type === 'AKTIVITETSPLIKT'
       ? AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
       : AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
 
-  const defaultFom = doedsmaaned
-    ? addMonths(doedsmaaned, maanederForVurdering(typeVurdering))
+  const defaultFom = doedsdato
+    ? startOfMonth(addMonths(doedsdato, maanederForVurdering(typeVurdering)))
     : startOfMonth(new Date())
 
   const [lagreStatus, lagreVurdering, reset] = useApiCall(opprettAktivitetspliktAktivitetsgrad)

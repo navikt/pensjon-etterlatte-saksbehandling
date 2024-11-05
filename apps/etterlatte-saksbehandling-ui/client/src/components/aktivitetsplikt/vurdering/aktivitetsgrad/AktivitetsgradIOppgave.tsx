@@ -10,7 +10,7 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-export function AktivitetsgradIOppgave() {
+export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
   const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
   const [aktivitetForRedigering, setAktivitetForRedigering] = useState<IAktivitetspliktAktivitetsgrad | undefined>()
   const [slettStatus, slettSpesifikkAktivitet] = useApiCall(slettAktivitetspliktVurdering)
@@ -79,6 +79,7 @@ export function AktivitetsgradIOppgave() {
                   content={
                     <VurderingAktivitetsgradForm
                       aktivitet={aktivitet}
+                      doedsdato={props.doedsdato}
                       onAvbryt={() => setAktivitetForRedigering(undefined)}
                       onSuccess={oppdaterTilstandLagretVurdering}
                     />

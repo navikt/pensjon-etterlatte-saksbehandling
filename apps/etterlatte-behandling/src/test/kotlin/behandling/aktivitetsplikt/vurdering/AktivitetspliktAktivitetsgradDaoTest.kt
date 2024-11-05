@@ -83,6 +83,19 @@ class AktivitetspliktAktivitetsgradDaoTest(
     }
 
     @Test
+    fun `skal kunne oppdatere aktivitetsgraden i en eksisterende vurdering for oppgave`() {
+        val behandlingId = null
+        val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
+        val aktivitetsgrad =
+            LagreAktivitetspliktAktivitetsgrad(
+                aktivitetsgrad = AKTIVITET_OVER_50,
+                beskrivelse = "Beskrivelse",
+            )
+    }
+
+    @Test
     fun `skal lagre ned og hente opp en aktivitetsgrad for 12 mnd`() {
         val behandlingId = null
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Button, Heading, VStack } from '@navikt/ds-react'
-import { PencilIcon } from '@navikt/aksel-icons'
+import { PlusIcon } from '@navikt/aksel-icons'
 import { UnntakAktivitetspliktOppgaveForm } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgaveForm'
 
 export function LeggTilUnntak() {
@@ -14,7 +14,7 @@ export function LeggTilUnntak() {
   if (!leggerTilUnntak) {
     return (
       <Box>
-        <Button variant="secondary" icon={<PencilIcon />} size="small" onClick={() => setLeggerTilUnntak(true)}>
+        <Button variant="secondary" icon={<PlusIcon />} size="small" onClick={() => setLeggerTilUnntak(true)}>
           Legg til nytt unntak
         </Button>
       </Box>

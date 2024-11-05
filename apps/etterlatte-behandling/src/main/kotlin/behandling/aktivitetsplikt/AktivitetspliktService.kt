@@ -133,8 +133,8 @@ class AktivitetspliktService(
                     (it.tom ?: aktivitetspliktDato) <= aktivitetspliktDato
             }
 
-        val oppfyllerAktivitet = relevantVurdering?.let { oppfyllerAktivitet(it) } ?: false
-        val harUnntak = relevantUnntak?.let { harUnntakPaaDato(it, aktivitetspliktDato) } ?: false
+        val oppfyllerAktivitet = relevantVurdering?.let { oppfyllerAktivitet(it) } == true
+        val harUnntak = relevantUnntak?.let { harUnntakPaaDato(it, aktivitetspliktDato) } == true
         return oppfyllerAktivitet || harUnntak
     }
 
@@ -632,7 +632,7 @@ class AktivitetspliktService(
         if (oppgave.erAvsluttet()) {
             throw UgyldigForespoerselException(
                 "OPPGAVE_ER_AVSLUTTET",
-                "Kan ikke kopiere inn vurderinger på aktivitetsplikt på en oppgave som er avsluttet",
+                "Kan ikke endre på unntak / vurderinger i en oppgave som er avsluttet",
             )
         }
     }

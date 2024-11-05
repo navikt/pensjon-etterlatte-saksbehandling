@@ -33,10 +33,13 @@ class AktivitetspliktUnntakDao(
         behandlingId: UUID? = null,
     ) = connectionAutoclosing.hentConnection {
         if (oppgaveId == null && behandlingId == null) {
-            throw InternfeilException("")
+            throw InternfeilException(
+                "Mottok både oppgaveId og behandlingId for oppdatering av unntak. " +
+                    "Unntak er koblet på enten oppgave eller behandling.",
+            )
         }
         if (oppgaveId != null && behandlingId != null) {
-            throw InternfeilException("")
+            throw InternfeilException("Må koble unntak på en behandling eller en oppgave")
         }
 
         with(it) {
@@ -45,9 +48,15 @@ class AktivitetspliktUnntakDao(
                     """
                         INSERT INTO aktivitetsplikt_unntak(id, sak_id, behandling_id, oppgave_id, unntak, fom, tom, opprettet, endret, beskrivelse) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT (id) DO UPDATE SET
+                        unntak = excluded.unntak,
+                        fom = excluded.fom,
+                        tom = excluded.tom,
+                        endret = excluded.endret,
+                        beskrivelse = excluded.beskrivelse
                     """.trimMargin(),
                 )
-            stmt.setObject(1, UUID.randomUUID())
+            stmt.setObject(1, unntak.id ?: UUID.randomUUID())
             stmt.setSakId(2, sakId)
             stmt.setObject(3, behandlingId)
             stmt.setObject(4, oppgaveId)

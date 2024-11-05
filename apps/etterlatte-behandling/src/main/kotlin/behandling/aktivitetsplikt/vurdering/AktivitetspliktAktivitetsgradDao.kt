@@ -53,7 +53,7 @@ class AktivitetspliktAktivitetsgradDao(
                             
                     """.trimMargin(),
                 )
-            stmt.setObject(1, UUID.randomUUID())
+            stmt.setObject(1, aktivitetsgrad.id ?: UUID.randomUUID())
             stmt.setSakId(2, sakId)
             stmt.setObject(3, behandlingId)
             stmt.setObject(4, oppgaveId)

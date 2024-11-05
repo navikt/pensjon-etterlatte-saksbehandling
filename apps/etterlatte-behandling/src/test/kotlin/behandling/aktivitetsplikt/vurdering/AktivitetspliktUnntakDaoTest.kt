@@ -54,7 +54,8 @@ class AktivitetspliktUnntakDaoTest(
             RevurderingDao(ConnectionAutoclosingTest(ds)),
             (ConnectionAutoclosingTest(ds)),
         )
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
+    private val user =
+        mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
     @BeforeEach
     fun setup() {
@@ -87,6 +88,48 @@ class AktivitetspliktUnntakDaoTest(
             it.opprettet shouldBe kilde
             it.endret shouldBe kilde
             it.beskrivelse shouldBe unntak.beskrivelse
+        }
+    }
+
+    @Test
+    fun `skal kunne oppdatere et eksisterende unntak for oppgave`() {
+        val behandlingId = null
+        val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
+        val unntak =
+            LagreAktivitetspliktUnntak(
+                unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                beskrivelse = "Beskrivelse",
+                fom = LocalDate.now(),
+                tom = LocalDate.now().plusMonths(6),
+            )
+
+        dao.upsertUnntak(unntak, sak.id, kilde, oppgave.id, behandlingId)
+
+        val lagretUnntak = dao.hentUnntakForOppgave(oppgave.id).single()
+
+        val oppdatertUnntak =
+            unntak.copy(
+                id = lagretUnntak.id,
+                unntak = AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM,
+                fom = unntak.fom?.plusMonths(1L),
+                tom = unntak.tom?.plusMonths(1L),
+                beskrivelse = "Ny beskrivelse",
+            )
+
+        dao.upsertUnntak(oppdatertUnntak, sak.id, kilde, oppgave.id, behandlingId)
+        val oppdatertLagretUnntak = dao.hentUnntakForOppgave(oppgave.id).single()
+        oppdatertLagretUnntak.asClue {
+            it.sakId shouldBe sak.id
+            it.behandlingId shouldBe behandlingId
+            it.oppgaveId shouldBe oppgave.id
+            it.unntak shouldBe oppdatertUnntak.unntak
+            it.fom shouldBe oppdatertUnntak.fom
+            it.tom shouldBe oppdatertUnntak.tom
+            it.opprettet shouldBe kilde
+            it.endret shouldBe kilde
+            it.beskrivelse shouldBe oppdatertUnntak.beskrivelse
         }
     }
 

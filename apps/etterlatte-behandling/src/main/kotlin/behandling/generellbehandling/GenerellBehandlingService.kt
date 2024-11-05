@@ -146,11 +146,12 @@ class GenerellBehandlingService(
         generellBehandling: GenerellBehandling,
         saksbehandler: Saksbehandler,
     ) {
-        val hentetBehandling = hentBehandlingMedId(generellBehandling.id) ?: throw GenerellIkkeFunnetException()
-        if (!hentetBehandling.kanEndres()) {
-            throw FeilStatusGenerellBehandling(
-                "Behandlingen må ha status opprettet eller returnert, hadde ${hentetBehandling.status} id: ${generellBehandling.id}",
-            )
+        with(hentBehandlingMedId(generellBehandling.id) ?: throw GenerellIkkeFunnetException()) {
+            if (!kanEndres()) {
+                throw FeilStatusGenerellBehandling(
+                    "Behandlingen må ha status opprettet eller returnert, hadde $status id: $id",
+                )
+            }
         }
 
         when (generellBehandling.innhold) {

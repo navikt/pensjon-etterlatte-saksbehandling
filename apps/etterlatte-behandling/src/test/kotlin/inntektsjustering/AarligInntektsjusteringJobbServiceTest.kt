@@ -20,6 +20,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -72,7 +73,19 @@ class AarligInntektsjusteringJobbServiceTest {
         clearAllMocks()
 
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
-        coEvery { beregningKlient.sakHarInntektForAar(any(), any(), any()) } returns false
+        coEvery {
+            beregningKlient.aarligInntektsjusteringSjekk(
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            AarligInntektsjusteringAvkortingSjekkResponse(
+                SakId(123L),
+                aar = 2025,
+                harInntektForAar = false,
+                harSanksjon = false,
+            )
         every { sakService.finnSak(SakId(123L)) } returns gyldigSak
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns
@@ -232,7 +245,19 @@ class AarligInntektsjusteringJobbServiceTest {
                 saker = listOf(SakId(123L)),
             )
 
-        coEvery { beregningKlient.sakHarInntektForAar(any(), any(), any()) } returns true
+        coEvery {
+            beregningKlient.aarligInntektsjusteringSjekk(
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            AarligInntektsjusteringAvkortingSjekkResponse(
+                SakId(123L),
+                aar = 2025,
+                harInntektForAar = true,
+                harSanksjon = false,
+            )
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 

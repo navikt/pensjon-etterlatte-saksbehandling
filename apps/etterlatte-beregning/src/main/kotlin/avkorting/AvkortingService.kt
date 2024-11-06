@@ -10,10 +10,11 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -87,8 +88,15 @@ class AvkortingService(
         }
     }
 
-    fun hentHarSakInntektForAar(harInntektForAarDto: AvkortingHarInntektForAarDto): Boolean =
-        avkortingRepository.harSakInntektForAar(harInntektForAarDto)
+    fun hentSjekkAarligInntektsjustering(
+        request: AarligInntektsjusteringAvkortingSjekkRequest,
+    ): AarligInntektsjusteringAvkortingSjekkResponse =
+        AarligInntektsjusteringAvkortingSjekkResponse(
+            sakId = request.sakId,
+            aar = request.aar,
+            harInntektForAar = avkortingRepository.harSakInntektForAar(request),
+            harSanksjon = false,
+        )
 
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,

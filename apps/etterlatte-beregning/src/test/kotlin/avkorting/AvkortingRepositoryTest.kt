@@ -9,7 +9,7 @@ import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
-import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -31,7 +31,12 @@ internal class AvkortingRepositoryTest(
         val aarsoppgjoer = nyAvkorting(2024)
         val sakId = randomSakId()
 
-        avkortingRepository.harSakInntektForAar(AvkortingHarInntektForAarDto(sakId, aarsoppgjoer.aar)) shouldBe false
+        avkortingRepository.harSakInntektForAar(
+            AarligInntektsjusteringAvkortingSjekkRequest(
+                sakId,
+                aarsoppgjoer.aar,
+            ),
+        ) shouldBe false
         avkortingRepository.lagreAvkorting(
             behandlingId,
             sakId,
@@ -40,7 +45,12 @@ internal class AvkortingRepositoryTest(
             ),
         )
 
-        avkortingRepository.harSakInntektForAar(AvkortingHarInntektForAarDto(sakId, aarsoppgjoer.aar)) shouldBe true
+        avkortingRepository.harSakInntektForAar(
+            AarligInntektsjusteringAvkortingSjekkRequest(
+                sakId,
+                aarsoppgjoer.aar,
+            ),
+        ) shouldBe true
     }
 
     @Test

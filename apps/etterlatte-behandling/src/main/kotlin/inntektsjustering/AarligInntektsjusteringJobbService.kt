@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringKjoering
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
@@ -69,13 +70,16 @@ class AarligInntektsjusteringJobbService(
         loependeFom: YearMonth,
         sakId: SakId,
     ) {
+        logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
         try {
             val vedtak =
                 vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
+            val avkortingSjekk =
+                beregningKlient.aarligInntektsjusteringSjekk(sakId, loependeFom.year, HardkodaSystembruker.omregning)
 
-            logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
-            val skalIkkeGjennomfoereJobb = skalIkkeGjennomfoereJobb(sakId, vedtak, loependeFom)
+            val skalIkkeGjennomfoereJobb = skalIkkeGjennomfoereJobb(avkortingSjekk, vedtak, loependeFom)
             if (skalIkkeGjennomfoereJobb != null) {
+                // TODO flytt opp..
                 omregningService.oppdaterKjoering(
                     KjoeringRequest(
                         kjoering,
@@ -236,14 +240,14 @@ class AarligInntektsjusteringJobbService(
     }
 
     // Skal inntektjusteres hvis: 1) er løpende fom dato, 2) ikke har oppgitt inntekt fra 1.1 neste inntektsår
-    private suspend fun skalIkkeGjennomfoereJobb(
-        sakId: SakId,
+    private fun skalIkkeGjennomfoereJobb(
+        avkortingSjekkResponse: AarligInntektsjusteringAvkortingSjekkResponse,
         vedtak: LoependeYtelseDTO,
         loependeFom: YearMonth,
     ): String? =
         if (!vedtak.erLoepende) {
             "Sak er ikke løpende"
-        } else if (beregningKlient.sakHarInntektForAar(sakId, loependeFom.year, HardkodaSystembruker.omregning)) {
+        } else if (avkortingSjekkResponse.harInntektForAar) {
             "Sak har allerede oppgitt inntekt for ${loependeFom.year}"
         } else {
             null

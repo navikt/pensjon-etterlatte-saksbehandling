@@ -4,7 +4,8 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.beregning.AvkortingHarInntektForAarDto
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -26,11 +27,11 @@ interface BeregningKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 
-    suspend fun sakHarInntektForAar(
+    suspend fun aarligInntektsjusteringSjekk(
         sakId: SakId,
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean
+    ): AarligInntektsjusteringAvkortingSjekkResponse
 }
 
 class BeregningKlientImpl(
@@ -73,17 +74,21 @@ class BeregningKlientImpl(
             )
     }
 
-    override suspend fun sakHarInntektForAar(
+    override suspend fun aarligInntektsjusteringSjekk(
         sakId: SakId,
         aar: Int,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean {
+    ): AarligInntektsjusteringAvkortingSjekkResponse {
         logger.info("Sjekker om sakId=$sakId har inntekt for aar=$aar")
         val response =
             downstreamResourceClient.post(
-                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/har-inntekt-for-aar"),
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/beregning/avkorting/aarlig-inntektsjustering-sjekk",
+                    ),
                 brukerTokenInfo = brukerTokenInfo,
-                postBody = AvkortingHarInntektForAarDto(sakId = sakId, aar = aar),
+                postBody = AarligInntektsjusteringAvkortingSjekkRequest(sakId = sakId, aar = aar),
             )
 
         return response.mapBoth(

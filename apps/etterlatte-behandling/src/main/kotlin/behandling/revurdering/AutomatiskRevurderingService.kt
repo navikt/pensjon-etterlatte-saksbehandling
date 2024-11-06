@@ -102,6 +102,8 @@ class AutomatiskRevurderingService(
                 // TODO utfører per nå sjekkene i egne Rivers før dette gjør derfor ingenting her
             }
 
+            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {}
+
             /*
              * Skal ikke automatisk revurdere by default hvis:
              * Det ikke er en løpende sak

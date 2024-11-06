@@ -64,6 +64,7 @@ internal class BrevdistribuererTest {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         } returns response
 
@@ -80,6 +81,7 @@ internal class BrevdistribuererTest {
                 brev.id,
                 DistribusjonsType.ANNET,
                 brev.mottakere.single(),
+                any(),
             )
         }
     }
@@ -96,10 +98,10 @@ internal class BrevdistribuererTest {
 
         every { db.hentBrev(any()) } returns brev
         every {
-            distribusjonService.distribuerJournalpost(any(), any(), match { it.id == mottaker1.id })
+            distribusjonService.distribuerJournalpost(any(), any(), match { it.id == mottaker1.id }, any())
         } returns response1
         every {
-            distribusjonService.distribuerJournalpost(any(), any(), match { it.id == mottaker2.id })
+            distribusjonService.distribuerJournalpost(any(), any(), match { it.id == mottaker2.id }, any())
         } returns response2
 
         brevdistribuerer.distribuer(brev.id, bruker = bruker) shouldBe listOf(response1.bestillingsId, response2.bestillingsId)
@@ -112,8 +114,8 @@ internal class BrevdistribuererTest {
 
             db.settBrevDistribuert(brev.id, listOf(response1, response2), bruker)
 
-            distribusjonService.distribuerJournalpost(brev.id, DistribusjonsType.ANNET, brev.mottakere[0])
-            distribusjonService.distribuerJournalpost(brev.id, DistribusjonsType.ANNET, brev.mottakere[1])
+            distribusjonService.distribuerJournalpost(brev.id, DistribusjonsType.ANNET, brev.mottakere[0], any())
+            distribusjonService.distribuerJournalpost(brev.id, DistribusjonsType.ANNET, brev.mottakere[1], any())
         }
     }
 

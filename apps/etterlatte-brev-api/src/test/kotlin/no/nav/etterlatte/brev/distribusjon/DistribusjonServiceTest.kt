@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -32,19 +33,19 @@ internal class DistribusjonServiceTest {
     fun `Distribusjon fungerer som forventet`() {
         val forventetRespons = DistribuerJournalpostResponse(UUID.randomUUID().toString())
 
-        coEvery { mockKlient.distribuerJournalpost(any()) } returns forventetRespons
+        coEvery { mockKlient.distribuerJournalpost(any(), any()) } returns forventetRespons
 
         val brevId = 1L
         val journalpostId = UUID.randomUUID().toString()
         val type = DistribusjonsType.VEDTAK
         val mottaker = opprettMottaker(journalpostId)
 
-        val faktiskRespons = service.distribuerJournalpost(brevId, type, mottaker)
+        val faktiskRespons = service.distribuerJournalpost(brevId, type, mottaker, simpleSaksbehandler())
 
         assertEquals(forventetRespons, faktiskRespons)
 
         val requestSlot = slot<DistribuerJournalpostRequest>()
-        coVerify(exactly = 1) { mockKlient.distribuerJournalpost(capture(requestSlot)) }
+        coVerify(exactly = 1) { mockKlient.distribuerJournalpost(capture(requestSlot), any()) }
         val faktiskRequest = requestSlot.captured
 
         assertEquals(journalpostId, faktiskRequest.journalpostId)

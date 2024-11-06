@@ -97,8 +97,8 @@ spec:
       value: prod-fss.teamdokumenthandtering.dokarkiv
     - name: DOKDIST_URL
       value: https://dokdistfordeling.prod-fss-pub.nais.io/rest/v1
-    - name: DOKDIST_SCOPE
-      value: api://prod-fss.teamdokumenthandtering.saf/.default
+    - name: DOKDIST_CLIENT_ID
+      value: prod-fss.teamdokumenthandtering.saf
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
     - name: REGOPPSLAG_SCOPE

@@ -78,6 +78,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         } returns
             AarligInntektsjusteringAvkortingSjekkResponse(
@@ -250,6 +251,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         } returns
             AarligInntektsjusteringAvkortingSjekkResponse(
@@ -340,6 +342,50 @@ class AarligInntektsjusteringJobbServiceTest {
                         status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
                         begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING.name
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `Sak som har sanksjon skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery {
+            beregningKlient.aarligInntektsjusteringSjekk(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            AarligInntektsjusteringAvkortingSjekkResponse(
+                SakId(123L),
+                aar = 2025,
+                harInntektForAar = false,
+                harSanksjon = true,
+            )
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.HAR_SANKSJON.name
                     }
                 },
             )

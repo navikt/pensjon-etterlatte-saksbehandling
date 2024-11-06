@@ -74,12 +74,21 @@ class AarligInntektsjusteringJobbService(
         try {
             val vedtak =
                 vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
+
+            val forrigeBehandling =
+                behandlingService.hentSisteIverksatte(sakId)
+                    ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
+
             val avkortingSjekk =
-                beregningKlient.aarligInntektsjusteringSjekk(sakId, loependeFom.year, HardkodaSystembruker.omregning)
+                beregningKlient.aarligInntektsjusteringSjekk(
+                    sakId,
+                    loependeFom.year,
+                    forrigeBehandling.id,
+                    HardkodaSystembruker.omregning,
+                )
 
             val skalIkkeGjennomfoereJobb = skalIkkeGjennomfoereJobb(avkortingSjekk, vedtak, loependeFom)
             if (skalIkkeGjennomfoereJobb != null) {
-                // TODO flytt opp..
                 omregningService.oppdaterKjoering(
                     KjoeringRequest(
                         kjoering,
@@ -90,11 +99,8 @@ class AarligInntektsjusteringJobbService(
                 )
                 return
             }
-            val forrigeBehandling =
-                behandlingService.hentSisteIverksatte(sakId)
-                    ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 
-            val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, forrigeBehandling.id, vedtak)
+            val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, forrigeBehandling.id, vedtak, avkortingSjekk)
             if (aarsakTilManuell != null) {
                 opprettRevurderingOgOppgave(sakId, loependeFom, forrigeBehandling)
                 omregningService.oppdaterKjoering(
@@ -131,9 +137,14 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
         sisteBehandlingId: UUID,
         vedtak: LoependeYtelseDTO,
+        avkortingSjekkResponse: AarligInntektsjusteringAvkortingSjekkResponse,
     ): AarligInntektsjusteringAarsakManuell? {
         if (vedtak.underSamordning) {
             return AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING
+        }
+
+        if (avkortingSjekkResponse.harSanksjon) {
+            return AarligInntektsjusteringAarsakManuell.HAR_SANKSJON
         }
 
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
@@ -279,4 +290,5 @@ enum class AarligInntektsjusteringAarsakManuell {
     VERGEMAAL,
     TIL_SAMORDNING,
     AAPEN_BEHANDLING,
+    HAR_SANKSJON,
 }

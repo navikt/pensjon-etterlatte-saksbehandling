@@ -35,6 +35,7 @@ internal class AvkortingRepositoryTest(
             AarligInntektsjusteringAvkortingSjekkRequest(
                 sakId,
                 aarsoppgjoer.aar,
+                sisteBehandling = UUID.randomUUID(),
             ),
         ) shouldBe false
         avkortingRepository.lagreAvkorting(
@@ -49,6 +50,7 @@ internal class AvkortingRepositoryTest(
             AarligInntektsjusteringAvkortingSjekkRequest(
                 sakId,
                 aarsoppgjoer.aar,
+                sisteBehandling = UUID.randomUUID(),
             ),
         ) shouldBe true
     }

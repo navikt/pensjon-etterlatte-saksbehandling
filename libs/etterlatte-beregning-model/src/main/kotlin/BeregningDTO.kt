@@ -147,6 +147,7 @@ enum class OverstyrtBeregningKategori {
 data class AarligInntektsjusteringAvkortingSjekkRequest(
     val sakId: SakId,
     val aar: Int,
+    val sisteBehandling: UUID,
 )
 
 data class AarligInntektsjusteringAvkortingSjekkResponse(

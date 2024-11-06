@@ -232,6 +232,7 @@ class BeregningKlientTest :
     override suspend fun aarligInntektsjusteringSjekk(
         sakId: SakId,
         aar: Int,
+        sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AarligInntektsjusteringAvkortingSjekkResponse = mockk()
 

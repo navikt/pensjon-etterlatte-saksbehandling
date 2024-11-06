@@ -90,13 +90,15 @@ class AvkortingService(
 
     fun hentSjekkAarligInntektsjustering(
         request: AarligInntektsjusteringAvkortingSjekkRequest,
-    ): AarligInntektsjusteringAvkortingSjekkResponse =
-        AarligInntektsjusteringAvkortingSjekkResponse(
+    ): AarligInntektsjusteringAvkortingSjekkResponse {
+        val sanksjoner = sanksjonService.hentSanksjon(request.sisteBehandling)
+        return AarligInntektsjusteringAvkortingSjekkResponse(
             sakId = request.sakId,
             aar = request.aar,
             harInntektForAar = avkortingRepository.harSakInntektForAar(request),
-            harSanksjon = false,
+            harSanksjon = sanksjoner?.any { it.tom == null } ?: false,
         )
+    }
 
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,

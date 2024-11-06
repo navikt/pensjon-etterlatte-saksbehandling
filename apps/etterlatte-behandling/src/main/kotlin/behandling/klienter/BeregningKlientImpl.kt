@@ -30,6 +30,7 @@ interface BeregningKlient {
     suspend fun aarligInntektsjusteringSjekk(
         sakId: SakId,
         aar: Int,
+        sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AarligInntektsjusteringAvkortingSjekkResponse
 }
@@ -77,6 +78,7 @@ class BeregningKlientImpl(
     override suspend fun aarligInntektsjusteringSjekk(
         sakId: SakId,
         aar: Int,
+        sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AarligInntektsjusteringAvkortingSjekkResponse {
         logger.info("Sjekker om sakId=$sakId har inntekt for aar=$aar")
@@ -88,7 +90,12 @@ class BeregningKlientImpl(
                         url = "$resourceUrl/api/beregning/avkorting/aarlig-inntektsjustering-sjekk",
                     ),
                 brukerTokenInfo = brukerTokenInfo,
-                postBody = AarligInntektsjusteringAvkortingSjekkRequest(sakId = sakId, aar = aar),
+                postBody =
+                    AarligInntektsjusteringAvkortingSjekkRequest(
+                        sakId = sakId,
+                        aar = aar,
+                        sisteBehandling = sisteBehandling,
+                    ),
             )
 
         return response.mapBoth(

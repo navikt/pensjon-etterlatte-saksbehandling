@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -63,7 +64,9 @@ class AktivitetspliktOppgaveService(
 
         val brevdata = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
 
+        val sistEndret = listOfNotNull(brevdata?.kilde?.tidspunkt, vurderinger?.aktivitet?.maxOf { it.endret.tidspunkt }).maxOrNull()
         return AktivitetspliktOppgaveVurdering(
+            sistEndret = sistEndret,
             aktivtetspliktbrevdata = brevdata,
             vurderingType = vurderingType,
             oppgave = oppgave,
@@ -219,7 +222,7 @@ data class AktivitetspliktInformasjonBrevdataRequest(
     fun toDaoObjektBrevutfall(
         oppgaveId: UUID,
         sakid: SakId,
-        kilde: Grunnlagsopplysning.Kilde,
+        kilde: Grunnlagsopplysning.Saksbehandler,
     ): AktivitetspliktInformasjonBrevdata =
         AktivitetspliktInformasjonBrevdata(
             oppgaveId = oppgaveId,
@@ -238,7 +241,7 @@ data class AktivitetspliktInformasjonBrevdata(
     val skalSendeBrev: Boolean,
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
-    val kilde: Grunnlagsopplysning.Kilde,
+    val kilde: Grunnlagsopplysning.Saksbehandler,
 )
 
 data class AktivitetspliktOppgaveVurdering(
@@ -247,6 +250,7 @@ data class AktivitetspliktOppgaveVurdering(
     val sak: Sak,
     val vurdering: AktivitetspliktVurdering,
     val aktivtetspliktbrevdata: AktivitetspliktInformasjonBrevdata?,
+    val sistEndret: Tidspunkt?,
 )
 
 enum class VurderingType {

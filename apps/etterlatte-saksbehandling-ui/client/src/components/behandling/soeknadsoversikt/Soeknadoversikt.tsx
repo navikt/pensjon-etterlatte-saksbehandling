@@ -31,7 +31,6 @@ import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsov
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
 import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import SluttBehandlingOmgjoering from '~components/behandling/soeknadsoversikt/SluttbehandlingOmgjoering'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
@@ -46,8 +45,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   const personopplysninger = usePersonopplysninger()
   const erBosattUtland = behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
   const erForeldreloes = (personopplysninger?.avdoede || []).length >= 2
-
-  const toggleTidligereFamiliepleier = useFeatureEnabledMedDefault('tidligere-familiepleier', false)
 
   const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
     switch (sakType) {
@@ -130,7 +127,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             </Virkningstidspunkt>
             <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
-            {behandling.sakType == SakType.OMSTILLINGSSTOENAD && toggleTidligereFamiliepleier && (
+            {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
               <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
             )}
           </>

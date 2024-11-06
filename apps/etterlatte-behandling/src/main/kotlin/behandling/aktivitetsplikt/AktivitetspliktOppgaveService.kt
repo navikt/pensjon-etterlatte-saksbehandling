@@ -116,7 +116,9 @@ class AktivitetspliktOppgaveService(
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
             val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId) ?: throw GenerellIkkeFunnetException()
-            val sisteAktivtetsgrad = vurderingForOppgave.aktivitet.maxBy { it.fom }
+            val sisteAktivtetsgrad =
+                vurderingForOppgave.aktivitet.maxByOrNull { it.fom }
+                    ?: throw ManglerAktivitetsgrad("Mangler aktivitetsgrad for oppgave: $oppgaveId")
             val nasjonalEllerUtland = behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
             val brevParametreAktivitetsplikt10mnd =
                 BrevParametre.AktivitetspliktInformasjon10Mnd(
@@ -208,6 +210,13 @@ class ManglerBrevdata(
     msg: String,
 ) : UgyldigForespoerselException(
         code = "MANGLER_BREVDATA",
+        detail = msg,
+    )
+
+class ManglerAktivitetsgrad(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "MANGLER_AKITIVITETSGRAD",
         detail = msg,
     )
 

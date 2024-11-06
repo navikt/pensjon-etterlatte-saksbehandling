@@ -34,7 +34,7 @@ class Brevdistribuerer(
 
         return brev.mottakere
             .filter { it.bestillingId.isNullOrBlank() }
-            .map { mottaker -> sendTilMottaker(brevId, mottaker, distribusjonsType) }
+            .map { mottaker -> sendTilMottaker(brevId, mottaker, distribusjonsType, bruker) }
             .also { db.settBrevDistribuert(brevId, it, bruker) }
             .map { it.bestillingsId }
     }
@@ -43,6 +43,7 @@ class Brevdistribuerer(
         brevId: BrevID,
         mottaker: Mottaker,
         distribusjonsType: DistribusjonsType,
+        bruker: BrukerTokenInfo,
     ): DistribuerJournalpostResponse {
         if (mottaker.journalpostId == null) {
             throw JournalpostIdMangler(brevId, mottaker.id)
@@ -53,6 +54,7 @@ class Brevdistribuerer(
                 brevId = brevId,
                 type = distribusjonsType,
                 mottaker = mottaker,
+                bruker = bruker,
             ).also {
                 db.lagreBestillingId(mottaker.id, it)
 

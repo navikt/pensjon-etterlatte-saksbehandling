@@ -1,53 +1,62 @@
 package no.nav.etterlatte.brev.distribusjon
 
-import io.ktor.client.HttpClient
+import com.github.michaelbull.result.mapBoth
+import com.typesafe.config.Config
 import io.ktor.client.call.body
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.ResponseException
-import io.ktor.client.request.accept
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 class DistribusjonKlient(
-    private val client: HttpClient,
-    private val url: String,
+    config: Config,
 ) {
     private val logger = LoggerFactory.getLogger(DistribusjonKlient::class.java)
 
-    internal suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse =
-        try {
-            client
-                .post("$url/distribuerjournalpost") {
-                    accept(ContentType.Application.Json)
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
-                }.let {
-                    when (it.status) {
-                        HttpStatusCode.OK -> it.body()
-                        HttpStatusCode.Conflict -> it.body()
-                        else -> {
-                            logger.error("Fikk statuskode ${it.status} fra dokdist: ${it.bodyAsText()}")
+    private val downstreamResourceClient = DownstreamResourceClient(AzureAdClient(config))
 
-                            throw ForespoerselException(
-                                status = it.status.value,
-                                code = "UKJENT_FEIL_DOKDIST",
-                                detail = "Ukjent respons fra dokumentdistribusjon",
-                                meta =
-                                    mapOf(
-                                        "journalpostId" to request.journalpostId,
-                                    ),
-                                cause = ResponseException(it, "Ukjent feil fra dokdist"),
-                            )
+    private val url = config.getString("dokdist.resource.url")
+    private val clientId = config.getString("dokdist.client.id")
+
+    internal suspend fun distribuerJournalpost(
+        request: DistribuerJournalpostRequest,
+        bruker: BrukerTokenInfo,
+    ): DistribuerJournalpostResponse =
+        try {
+            downstreamResourceClient
+                .post(Resource(clientId, "$url/distribuerjournalpost"), bruker, request)
+                .mapBoth(
+                    success = { deserialize(it.response!!.toString()) },
+                    failure = {
+                        if (it is ResponseException) {
+                            when (it.response.status) {
+                                HttpStatusCode.OK -> it.response.body()
+                                HttpStatusCode.Conflict -> it.response.body()
+                                else -> {
+                                    logger.error("Fikk statuskode ${it.response.status} fra dokdist: ${it.response.bodyAsText()}")
+
+                                    throw ForespoerselException(
+                                        status = it.response.status.value,
+                                        code = "UKJENT_FEIL_DOKDIST",
+                                        detail = "Ukjent respons fra dokumentdistribusjon",
+                                        meta = mapOf("journalpostId" to request.journalpostId),
+                                        cause = ResponseException(it.response, "Ukjent feil fra dokdist"),
+                                    )
+                                }
+                            }
+                        } else {
+                            throw it
                         }
-                    }
-                }
+                    },
+                )
         } catch (ex: SocketTimeoutException) {
             logger.warn("Timeout mot dokdist (journalpostId=${request.journalpostId})", ex)
 

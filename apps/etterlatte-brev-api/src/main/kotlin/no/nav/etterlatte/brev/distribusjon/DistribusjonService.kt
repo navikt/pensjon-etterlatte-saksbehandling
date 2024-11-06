@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.distribusjon
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.brev.distribusjon.Adresse as DistAdresse
 
@@ -10,6 +11,7 @@ interface DistribusjonService {
         brevId: Long,
         type: DistribusjonsType,
         mottaker: Mottaker,
+        bruker: BrukerTokenInfo,
     ): DistribuerJournalpostResponse
 }
 
@@ -20,6 +22,7 @@ internal class DistribusjonServiceImpl(
         brevId: Long,
         type: DistribusjonsType,
         mottaker: Mottaker,
+        bruker: BrukerTokenInfo,
     ): DistribuerJournalpostResponse =
         runBlocking {
             val request =
@@ -42,6 +45,6 @@ internal class DistribusjonServiceImpl(
                     tvingSentralPrint = mottaker.tvingSentralPrint,
                 )
 
-            klient.distribuerJournalpost(request)
+            klient.distribuerJournalpost(request, bruker)
         }
 }

@@ -2,13 +2,16 @@ import { Alert, AlertProps, Box, Button, Heading, HStack, VStack } from '@navikt
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
+import { ferdigstillJournalfoerOgDistribuerbrev } from '~shared/api/aktivitetsplikt'
 import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
 import { isFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Column, GridContainer } from '~shared/styled'
+import { Box, Button, HStack, VStack } from '@navikt/ds-react'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
@@ -84,7 +87,15 @@ export function VurderingInfoBrev() {
   return <ViHarIkkeBrev variant="warning" message="Brev skal ikke sendes for denne oppgaven" />
 }
 
-function Aktivitetspliktbrev({ brevId, sakId, oppgaveid }: { brevId: number; sakId: number; oppgaveid: string }) {
+export function Aktivitetspliktbrev({
+  brevId,
+  sakId,
+  oppgaveid,
+}: {
+  brevId: number
+  sakId: number
+  oppgaveid: string
+}) {
   const [kanRedigeres, setKanRedigeres] = useState(false)
   const [tilbakestilt, setTilbakestilt] = useState(false)
 

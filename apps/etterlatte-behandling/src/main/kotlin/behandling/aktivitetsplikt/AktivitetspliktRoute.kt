@@ -263,7 +263,7 @@ internal fun Route.aktivitetspliktRoutes(
             call.respond(BrevIdDto(brevId))
         }
         post("ferdigstillbrev-og-oppgave") {
-            aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo)
+            inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
         }
     }
 

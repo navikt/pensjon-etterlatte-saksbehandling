@@ -98,7 +98,7 @@ function NesteEllerOpprettEllerFerdigstill(props: { fetchOppgave: () => void }) 
         <Button
           onClick={() => {
             fetchOppgave()
-            navigate(`../${AktivitetspliktSteg.BREV}`)
+            navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)
           }}
         >
           {/*  TODO: Vis ferdigstilling av oppgave som en mulighet hvis vi har valgt at vi ikke skal sende brevet */}

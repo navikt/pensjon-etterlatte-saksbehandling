@@ -6,20 +6,25 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 
 export enum AktivitetspliktSteg {
   VURDERING = 'vurdering',
-  BREV = 'brev',
+  OPPSUMMERING_OG_BREV = 'oppsummering',
 }
 
 export function AktivitetspliktStegmeny() {
   const { aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
 
-  const skalBrevVises =
-    (!!aktivtetspliktbrevdata && !!aktivtetspliktbrevdata.brevId) || !!aktivtetspliktbrevdata?.skalSendeBrev //Implisitt at utbetaling og redusertEtterInntekt er satt
+  const skalOppsummeringVises =
+    (!!aktivtetspliktbrevdata && !!aktivtetspliktbrevdata.brevId) || aktivtetspliktbrevdata?.skalSendeBrev !== undefined
 
   return (
     <StegMenyBox>
       <HStack gap="6" align="center">
         <AktivitetNavLenke path={AktivitetspliktSteg.VURDERING} description="Oppfølging av aktivitet" enabled={true} />
-        <AktivitetNavLenke path={AktivitetspliktSteg.BREV} description="Brev" enabled={skalBrevVises} erSisteRoute />
+        <AktivitetNavLenke
+          path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV}
+          description="Brev og oppsummering"
+          enabled={skalOppsummeringVises}
+          erSisteRoute
+        />
       </HStack>
     </StegMenyBox>
   )

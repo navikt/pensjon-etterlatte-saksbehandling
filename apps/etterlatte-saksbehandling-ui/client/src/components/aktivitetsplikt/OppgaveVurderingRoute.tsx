@@ -8,7 +8,7 @@ import {
   AktivitetspliktStegmeny,
 } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAktivitet'
-import { VurderingInfoBrev } from '~components/aktivitetsplikt/brev/VurderingInfoBrev'
+import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
 
 const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurdering>(
@@ -29,7 +29,10 @@ export function OppgaveVurderingRoute(props: {
         <MainContent>
           <Routes>
             <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet fetchOppgave={fetchOppgave} />} />
-            <Route path={AktivitetspliktSteg.BREV} element={<VurderingInfoBrev />} />
+            <Route
+              path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV}
+              element={<VurderingInfoBrevOgOppsummering fetchOppgave={fetchOppgave} />}
+            />
             <Route path="*" element={<Navigate to={AktivitetspliktSteg.VURDERING} replace />} />
           </Routes>
         </MainContent>

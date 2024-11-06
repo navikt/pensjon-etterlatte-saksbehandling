@@ -1,85 +1,23 @@
-import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
+import { ferdigstillJournalfoerOgDistribuerbrev } from '~shared/api/aktivitetsplikt'
 import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
 import { isFailure, mapApiResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Column, GridContainer } from '~shared/styled'
+import { Box, Button, HStack, VStack } from '@navikt/ds-react'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
-import styled from 'styled-components'
 import { isPending } from '@reduxjs/toolkit'
-import { ferdigstillJournalfoerOgDistribuerbrev, opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { useNavigate } from 'react-router-dom'
-
-export function VurderingInfoBrev() {
-  useSidetittel('Aktivitetsplikt brev')
-
-  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
-  const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettAktivitetspliktsbrev)
-  const brevdataFinnes = !!aktivtetspliktbrevdata
-
-  const [brevId, setBrevid] = useState<number | undefined>(aktivtetspliktbrevdata?.brevId)
-  const [brevErKlart, setBrevErKlart] = useState<boolean>(false)
-
-  useEffect(() => {
-    if (brevdataFinnes) {
-      if (aktivtetspliktbrevdata?.skalSendeBrev) {
-        if (aktivtetspliktbrevdata.brevId) {
-          setBrevid(aktivtetspliktbrevdata.brevId)
-          setBrevErKlart(true)
-        } else {
-          opprettBrevApiCall({ oppgaveId: oppgave.id }, (brevIdDto) => {
-            setBrevid(brevIdDto.brevId)
-            setBrevErKlart(true)
-          })
-        }
-      } else {
-        setBrevErKlart(false)
-      }
-    }
-  }, [])
-
-  return (
-    <Box paddingInline="16" paddingBlock="16">
-      <Heading size="large">Vurdering infobrev her</Heading>
-      {brevdataFinnes ? (
-        <>
-          {aktivtetspliktbrevdata?.skalSendeBrev ? (
-            <>
-              {isPending(opprettBrevStatus) && <Spinner label="Oppretter brev" />}
-              {isFailure(opprettBrevStatus) && (
-                <ApiErrorAlert>Kunne ikke opprette brev {opprettBrevStatus.error.detail}</ApiErrorAlert>
-              )}
-              {brevErKlart && brevId && (
-                <Aktivitetspliktbrev brevId={brevId} sakId={oppgave.sakId} oppgaveid={oppgave.id} />
-              )}
-            </>
-          ) : (
-            <>
-              <div>Brev skal ikke sendes for denne oppgaven</div>
-            </>
-          )}
-        </>
-      ) : (
-        <>
-          <Alert variant="error">
-            Brevdata finnes ikke for denne oppgaven, gå tilbake til vurderingssiden for å endre dette
-          </Alert>
-        </>
-      )}
-    </Box>
-  )
-}
+import styled from 'styled-components'
 
 const PanelWrapper = styled.div`
   height: 100%;
@@ -87,7 +25,7 @@ const PanelWrapper = styled.div`
   max-height: 955px;
 `
 
-function Aktivitetspliktbrev({
+export function Aktivitetspliktbrev({
   brevId,
   sakId,
   oppgaveid,
@@ -95,7 +33,7 @@ function Aktivitetspliktbrev({
   brevId: number
   sakId: number
   oppgaveid: string
-}): JSX.Element {
+}) {
   const [kanRedigeres, setKanRedigeres] = useState(false)
   const [tilbakestilt, setTilbakestilt] = useState(false)
   const navigate = useNavigate()

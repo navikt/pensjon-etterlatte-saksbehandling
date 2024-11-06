@@ -190,7 +190,7 @@ class AarligInntektsjusteringJobbService(
                 mottattDato = null,
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
-                revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING, // TODO ny årsak
+                revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                 virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
                 utlandstilknytning = forrigeBehandling.utlandstilknytning,
                 boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
@@ -222,7 +222,7 @@ class AarligInntektsjusteringJobbService(
                                 OmregningData(
                                     kjoering = AarligInntektsjusteringKjoering.getKjoering(),
                                     sakId = sakId,
-                                    revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING, // TODO egen årsak?
+                                    revurderingaarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                                     fradato = loependeFom.atDay(1),
                                 ).toPacket(),
                         ),

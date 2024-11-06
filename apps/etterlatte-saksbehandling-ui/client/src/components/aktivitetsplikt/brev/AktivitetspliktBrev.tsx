@@ -2,23 +2,20 @@ import { Alert, AlertProps, Box, Button, Heading, HStack, VStack } from '@navikt
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
 import { ferdigstillJournalfoerOgDistribuerbrev } from '~shared/api/aktivitetsplikt'
 import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
-import { isFailure, mapResult } from '~shared/api/apiUtils'
+import { isFailure, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Column, GridContainer } from '~shared/styled'
-import { Box, Button, HStack, VStack } from '@navikt/ds-react'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { isPending } from '@reduxjs/toolkit'
-import { ferdigstillJournalfoerOgDistribuerbrev } from '~shared/api/aktivitetsplikt'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { useNavigate } from 'react-router-dom'
@@ -157,9 +154,9 @@ export function Aktivitetspliktbrev({
             </>
           )}
           <InfobrevKnapperad
-            ferdigstillBrev={
+            ferdigstill={
               !(brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT)
-                ? ferdigstillBrev
+                ? { ferdigstillBrev, status }
                 : undefined
             }
           >
@@ -174,10 +171,14 @@ export function Aktivitetspliktbrev({
   })
 }
 
-function InfobrevKnapperad(props: { ferdigstillBrev?: () => void; children?: React.ReactElement }) {
+export function InfobrevKnapperad(props: {
+  ferdigstill?: { ferdigstillBrev: () => void; status: Result<unknown> }
+  children?: React.ReactElement
+}) {
   const navigate = useNavigate()
   return (
     <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      {props.children}
       <HStack gap="4" justify="center">
         <Button
           variant="secondary"
@@ -187,7 +188,11 @@ function InfobrevKnapperad(props: { ferdigstillBrev?: () => void; children?: Rea
         >
           {handlinger.TILBAKE.navn}
         </Button>
-        {props.ferdigstillBrev && <Button onClick={props.ferdigstillBrev}>Ferdigstill brev</Button>}
+        {props.ferdigstill && (
+          <Button onClick={props.ferdigstill.ferdigstillBrev} loading={isPending(props.ferdigstill.status)}>
+            Ferdigstill brev
+          </Button>
+        )}
       </HStack>
     </Box>
   )

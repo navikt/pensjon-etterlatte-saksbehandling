@@ -11,8 +11,12 @@ import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAkt
 import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
 
-const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurdering>(
-  {} as AktivitetspliktOppgaveVurdering
+interface AktivitetspliktOppgaveVurderingMedOppdatering extends AktivitetspliktOppgaveVurdering {
+  oppdater: () => void
+}
+
+const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurderingMedOppdatering>(
+  {} as AktivitetspliktOppgaveVurderingMedOppdatering
 )
 
 export function OppgaveVurderingRoute(props: {
@@ -20,8 +24,9 @@ export function OppgaveVurderingRoute(props: {
   fetchOppgave: () => void
 }) {
   const { vurderingOgOppgave, fetchOppgave } = props
+
   return (
-    <AktivitetspliktOppgaveContext.Provider value={vurderingOgOppgave}>
+    <AktivitetspliktOppgaveContext.Provider value={{ ...vurderingOgOppgave, oppdater: fetchOppgave }}>
       <StatusBar ident={vurderingOgOppgave.oppgave.fnr} />
       <AktivitetspliktStegmeny />
 
@@ -42,7 +47,7 @@ export function OppgaveVurderingRoute(props: {
   )
 }
 
-export const useAktivitetspliktOppgaveVurdering = (): AktivitetspliktOppgaveVurdering => {
+export const useAktivitetspliktOppgaveVurdering = (): AktivitetspliktOppgaveVurderingMedOppdatering => {
   try {
     const oppgave = useContext(AktivitetspliktOppgaveContext)
     if (!oppgave) {

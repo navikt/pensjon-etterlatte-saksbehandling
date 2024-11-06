@@ -11,15 +11,15 @@ import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
-  const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, vurdering, oppdater } = useAktivitetspliktOppgaveVurdering()
   const [aktivitetForRedigering, setAktivitetForRedigering] = useState<IAktivitetspliktAktivitetsgrad | undefined>()
   const [slettStatus, slettSpesifikkAktivitet] = useApiCall(slettAktivitetspliktVurdering)
 
   const aktiviteter = vurdering.aktivitet
 
   function oppdaterTilstandLagretVurdering() {
-    // TODO: oppdater state
     setAktivitetForRedigering(undefined)
+    oppdater()
   }
 
   function slettAktivitetsgradIOppgave(aktivitet: IAktivitetspliktAktivitetsgrad) {
@@ -30,8 +30,8 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
         vurderingId: aktivitet.id,
       },
       () => {
-        // TODO: oppdater state
         setAktivitetForRedigering(undefined)
+        oppdater()
       }
     )
   }

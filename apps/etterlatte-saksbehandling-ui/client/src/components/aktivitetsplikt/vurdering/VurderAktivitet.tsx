@@ -1,7 +1,7 @@
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import { Vurderinger } from '~components/aktivitetsplikt/vurdering/Vurderinger'
-import { mapResult } from '~shared/api/apiUtils'
+import { mapFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
@@ -10,16 +10,14 @@ import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { velgDoedsdato } from '~components/person/aktivitet/Aktivitet'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { useNavigate } from 'react-router'
-import { handlinger } from '~components/behandling/handlinger/typer'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { IBrevAktivitetspliktDto, opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
+import { opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export function VurderAktivitet({ fetchOppgave }: { fetchOppgave: () => void }) {
-  const { sak, oppgave } = useAktivitetspliktOppgaveVurdering()
+  const { sak } = useAktivitetspliktOppgaveVurdering()
   const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
 
-  const navigate = useNavigate()
   useEffect(() => {
     familieOpplysningerFetch({ ident: sak.ident, sakType: sak.sakType })
   }, [])
@@ -37,73 +35,53 @@ export function VurderAktivitet({ fetchOppgave }: { fetchOppgave: () => void }) 
             pending: <Spinner label="Henter opplysninger om avdød" />,
             error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger om avdød'}</ApiErrorAlert>,
             success: ({ avdoede }) => (
-              <>{avdoede && <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={sak.id} />}</>
+              <>
+                {avdoede && (
+                  <>
+                    <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={sak.id} />
+
+                    <Vurderinger doedsdato={velgDoedsdato(avdoede)} />
+                  </>
+                )}
+              </>
             ),
           })}
-          <Vurderinger />
         </VStack>
       </Box>
-      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-        <HStack gap="4" justify="center">
-          <Button
-            onClick={() => {
-              fetchOppgave()
-              navigate(`../${AktivitetspliktSteg.BREV}`)
-            }}
-          >
-            {handlinger.NESTE.navn}
-          </Button>
-        </HStack>
-      </Box>
+      <NesteEllerOpprettBrev fetchOppgave={fetchOppgave}></NesteEllerOpprettBrev>
     </>
   )
 }
 
-function hvorErVi(
-  brevdata?: IBrevAktivitetspliktDto,
-  redigerbar: boolean
-): 'SKAL_OPPRETTE' | 'NESTE' | 'SKAL_FERDIGSTILLE' | 'MANGLER_UTFYLLING' {
-  if (!redigerbar) {
-    return 'NESTE'
-  }
-  if (!brevdata) {
-    return 'MANGLER_UTFYLLING'
-  }
-  if (brevdata.skalSendeBrev) {
-    if (brevdata.brevId) {
-      return 'NESTE'
-    } else {
-      return 'SKAL_OPPRETTE'
-    }
-  } else {
-    return 'SKAL_FERDIGSTILLE'
-  }
-}
-
-// TODO: bruk denne for å velge handling / knapp i stedet for default neste
-function NesteEllerOpprettEllerFerdigstill(props: { fetchOppgave: () => void }) {
-  const { fetchOppgave } = props
-  const { sak, oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+function NesteEllerOpprettBrev() {
+  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const navigate = useNavigate()
 
-  const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettAktivitetspliktsbrev)
-  const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
+  const [opprettBrevStatus, opprettBrevCall] = useApiCall(opprettAktivitetspliktsbrev)
 
-  const hvor = hvorErVi(aktivtetspliktbrevdata, erRedigerbar)
+  const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
+  const skalOppretteBrev = erRedigerbar && aktivtetspliktbrevdata?.skalSendeBrev && !aktivtetspliktbrevdata.brevId
+
+  function opprettBrev() {
+    opprettBrevCall(
+      {
+        oppgaveId: oppgave.id,
+      },
+      () => navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)
+    )
+  }
 
   return (
     <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
       <HStack gap="4" justify="center">
-        {hvor === 'SKAL_OPPRETTE' && <Button onClick={}>Opprett infobrev</Button>}
-        <Button
-          onClick={() => {
-            fetchOppgave()
-            navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)
-          }}
-        >
-          {/*  TODO: Vis ferdigstilling av oppgave som en mulighet hvis vi har valgt at vi ikke skal sende brevet */}
-          Ferdigstill
-        </Button>
+        {mapFailure(opprettBrevStatus, (error) => (
+          <ApiErrorAlert>Kunne ikke opprette brev: {error.detail}</ApiErrorAlert>
+        ))}
+        {skalOppretteBrev ? (
+          <Button onClick={opprettBrev}>Opprett og gå til brev</Button>
+        ) : (
+          <Button onClick={() => navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)}>Neste</Button>
+        )}
       </HStack>
     </Box>
   )

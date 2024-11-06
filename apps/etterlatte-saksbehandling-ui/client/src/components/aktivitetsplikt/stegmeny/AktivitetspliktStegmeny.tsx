@@ -6,7 +6,7 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 
 export enum AktivitetspliktSteg {
   VURDERING = 'vurdering',
-  OPPSUMMERING_OG_BREV = 'oppsummering', //Kalle denne noe annet?
+  OPPSUMMERING_OG_BREV = 'oppsummering',
 }
 
 export function AktivitetspliktStegmeny() {

@@ -3,7 +3,7 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { isFailure } from '~shared/api/apiUtils'
+import { mapFailure } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isPending } from '@reduxjs/toolkit'
@@ -47,9 +47,9 @@ export function VurderingInfoBrevOgOppsummering({ fetchOppgave }: { fetchOppgave
           {aktivtetspliktbrevdata?.skalSendeBrev ? (
             <>
               {isPending(opprettBrevStatus) && <Spinner label="Oppretter brev" />}
-              {isFailure(opprettBrevStatus) && (
-                <ApiErrorAlert>Kunne ikke opprette brev {opprettBrevStatus.error.detail}</ApiErrorAlert>
-              )}
+              {mapFailure(opprettBrevStatus, (err) => (
+                <ApiErrorAlert>Kunne ikke opprette brev {err.detail}</ApiErrorAlert>
+              ))}
               {brevErKlart && brevId && (
                 <Aktivitetspliktbrev brevId={brevId} sakId={oppgave.sakId} oppgaveid={oppgave.id} />
               )}

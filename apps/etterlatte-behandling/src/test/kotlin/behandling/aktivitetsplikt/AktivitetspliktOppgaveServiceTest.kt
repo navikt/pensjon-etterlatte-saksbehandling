@@ -155,6 +155,36 @@ class AktivitetspliktOppgaveServiceTest {
     }
 
     @Test
+    fun `Skal ikke opprette brev hvis man mangler aktivitetsgrad`() {
+        val simpleSaksbehandler = simpleSaksbehandler()
+        val oppgaveId = UUID.randomUUID()
+        val sakIdForOppgave = SakId(1L)
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            mockk {
+                every { sakId } returns sakIdForOppgave
+            }
+        val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
+
+        val skalsendeBrev =
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                null,
+                true,
+                redusertEtterInntekt = true,
+                utbetaling = true,
+                kilde = kilde,
+            )
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalsendeBrev
+        every { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) } returns null
+        assertThrows<ManglerAktivitetsgrad> {
+            service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
+        }
+        verify(exactly = 0) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
+        verify(exactly = 0) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
+    }
+
+    @Test
     fun `Skal ikke opprette brev da skal sende brev hvis mangler utbeatling`() {
         val simpleSaksbehandler = simpleSaksbehandler()
         val oppgaveId = UUID.randomUUID()

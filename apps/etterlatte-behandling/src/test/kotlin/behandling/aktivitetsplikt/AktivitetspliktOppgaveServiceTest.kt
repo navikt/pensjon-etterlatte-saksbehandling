@@ -176,12 +176,13 @@ class AktivitetspliktOppgaveServiceTest {
                 kilde = kilde,
             )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalsendeBrev
-        every { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) } returns null
+
+        every { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) } returns AktivitetspliktVurdering(emptyList(), emptyList())
         assertThrows<ManglerAktivitetsgrad> {
             service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         }
         verify(exactly = 0) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
-        verify(exactly = 0) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
+        verify(exactly = 1) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
     }
 
     @Test

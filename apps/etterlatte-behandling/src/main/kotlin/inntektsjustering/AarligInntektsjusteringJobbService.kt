@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlag.Personopplysning
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -89,46 +90,25 @@ class AarligInntektsjusteringJobbService(
 
             val skalIkkeGjennomfoereJobb = skalIkkeGjennomfoereJobb(avkortingSjekk, vedtak, loependeFom)
             if (skalIkkeGjennomfoereJobb != null) {
-                omregningService.oppdaterKjoering(
-                    KjoeringRequest(
-                        kjoering,
-                        KjoeringStatus.FERDIGSTILT,
-                        sakId,
-                        begrunnelse = skalIkkeGjennomfoereJobb,
-                    ),
-                )
+                oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, skalIkkeGjennomfoereJobb)
                 return
             }
 
             val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, forrigeBehandling.id, vedtak, avkortingSjekk)
             if (aarsakTilManuell != null) {
                 opprettRevurderingOgOppgave(sakId, loependeFom, forrigeBehandling)
-                omregningService.oppdaterKjoering(
-                    KjoeringRequest(
-                        kjoering,
-                        KjoeringStatus.TIL_MANUELL,
-                        sakId,
-                        begrunnelse = aarsakTilManuell.name,
-                    ),
-                )
+                oppdaterKjoering(kjoering, KjoeringStatus.TIL_MANUELL, sakId, aarsakTilManuell.name)
                 return
             }
-            omregningService.oppdaterKjoering(
-                KjoeringRequest(
-                    kjoering,
-                    KjoeringStatus.KLAR_FOR_OMREGNING,
-                    sakId,
-                ),
-            )
+            oppdaterKjoering(kjoering, KjoeringStatus.KLAR_FOR_OMREGNING, sakId)
             publiserKlarForOmregning(sakId, loependeFom)
         } catch (e: Exception) {
-            omregningService.oppdaterKjoering(
-                KjoeringRequest(
-                    kjoering,
-                    KjoeringStatus.FEILA,
-                    sakId,
-                    begrunnelse = e.message ?: e.toString(),
-                ),
+            // TODO logg feilmelding
+            oppdaterKjoering(
+                kjoering,
+                KjoeringStatus.FEILA,
+                sakId,
+                begrunnelse = e.message ?: e.toString(),
             )
         }
     }
@@ -197,26 +177,28 @@ class AarligInntektsjusteringJobbService(
         forrigeBehandling: Behandling,
     ) {
         val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
-        revurderingService
-            .opprettRevurdering(
-                sakId = sakId,
-                persongalleri = persongalleri,
-                forrigeBehandling = forrigeBehandling.id,
-                mottattDato = null,
-                prosessType = Prosesstype.MANUELL,
-                kilde = Vedtaksloesning.GJENNY,
-                revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
-                virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
-                utlandstilknytning = forrigeBehandling.utlandstilknytning,
-                boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-                begrunnelse = BEGRUNNELSE_AUTOMATISK_JOBB,
-                saksbehandlerIdent = Fagsaksystem.EY.navn,
-                frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
-                opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
-            ).oppdater()
-            .also {
-                revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)
-            }
+        inTransaction {
+            revurderingService
+                .opprettRevurdering(
+                    sakId = sakId,
+                    persongalleri = persongalleri,
+                    forrigeBehandling = forrigeBehandling.id,
+                    mottattDato = null,
+                    prosessType = Prosesstype.MANUELL,
+                    kilde = Vedtaksloesning.GJENNY,
+                    revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+                    virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
+                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
+                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
+                    begrunnelse = BEGRUNNELSE_AUTOMATISK_JOBB,
+                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
+                    opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
+                ).oppdater()
+                .also {
+                    revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)
+                }
+        }
     }
 
     private fun publiserKlarForOmregning(
@@ -264,6 +246,24 @@ class AarligInntektsjusteringJobbService(
             null
         }
 
+    private fun oppdaterKjoering(
+        kjoering: String,
+        status: KjoeringStatus,
+        sakId: SakId,
+        begrunnelse: String? = null,
+    ) {
+        inTransaction {
+            omregningService.oppdaterKjoering(
+                KjoeringRequest(
+                    kjoering,
+                    status,
+                    sakId,
+                    begrunnelse,
+                ),
+            )
+        }
+    }
+
     private fun hentPdlPersonopplysning(sak: Sak) =
         pdlTjenesterKlient.hentPdlModellFlereSaktyper(sak.ident, PersonRolle.INNSENDER, SakType.OMSTILLINGSSTOENAD)
 
@@ -280,8 +280,7 @@ class AarligInntektsjusteringJobbService(
                 sisteBehandlingId,
                 sak.sakType,
                 HardkodaSystembruker.omregning,
-            ).innsender
-            ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
+            ).innsender ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
 }
 
 enum class AarligInntektsjusteringAarsakManuell {

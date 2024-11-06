@@ -20,7 +20,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 
-enum MottakerType {
+enum JuridiskEnhet {
   PRIVATPERSON = 'PRIVATPERSON',
   BEDRIFT = 'BEDRIFT',
 }
@@ -35,8 +35,8 @@ interface Props {
 
 export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker, lagre, lagreResult }: Props) {
   const [isOpen, setIsOpen] = useState(false)
-  const [mottakerType, setMottakerType] = useState(
-    initialMottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
+  const [juridiskEnhet, setJuridiskEnhet] = useState(
+    initialMottaker.orgnummer ? JuridiskEnhet.BEDRIFT : JuridiskEnhet.PRIVATPERSON
   )
 
   const {
@@ -52,9 +52,9 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
   })
 
   useEffect(() => {
-    if (mottakerType == MottakerType.BEDRIFT) setValue('foedselsnummer', undefined)
-    else if (mottakerType == MottakerType.PRIVATPERSON) setValue('orgnummer', undefined)
-  }, [mottakerType])
+    if (juridiskEnhet == JuridiskEnhet.BEDRIFT) setValue('foedselsnummer', undefined)
+    else if (juridiskEnhet == JuridiskEnhet.PRIVATPERSON) setValue('orgnummer', undefined)
+  }, [juridiskEnhet])
 
   const lagreEndringer = (mottaker: Mottaker) => {
     if (!isDirty) {
@@ -87,15 +87,15 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
               </Heading>
 
               <ToggleGroup
-                defaultValue={mottakerType}
-                onChange={(value) => setMottakerType(value as MottakerType)}
+                defaultValue={juridiskEnhet}
+                onChange={(value) => setJuridiskEnhet(value as JuridiskEnhet)}
                 size="small"
               >
-                <ToggleGroup.Item value={MottakerType.PRIVATPERSON}>Privatperson</ToggleGroup.Item>
-                <ToggleGroup.Item value={MottakerType.BEDRIFT}>Bedrift</ToggleGroup.Item>
+                <ToggleGroup.Item value={JuridiskEnhet.PRIVATPERSON}>Privatperson</ToggleGroup.Item>
+                <ToggleGroup.Item value={JuridiskEnhet.BEDRIFT}>Bedrift</ToggleGroup.Item>
               </ToggleGroup>
 
-              {mottakerType == MottakerType.BEDRIFT && (
+              {juridiskEnhet == JuridiskEnhet.BEDRIFT && (
                 <TextField
                   {...register('orgnummer', {
                     required: {
@@ -111,7 +111,7 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
                   error={errors?.orgnummer?.message}
                 />
               )}
-              {mottakerType == MottakerType.PRIVATPERSON && (
+              {juridiskEnhet == JuridiskEnhet.PRIVATPERSON && (
                 <TextField
                   {...register('foedselsnummer.value', {
                     required: {

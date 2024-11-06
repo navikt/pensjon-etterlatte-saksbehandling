@@ -95,6 +95,18 @@ fun Route.brevRoute(
                 }
             }
 
+            put("{mottakerId}/hoved") {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val mottakerId =
+                        call.parameters["mottakerId"]?.let(UUID::fromString)
+                            ?: throw UgyldigForespoerselException("MOTTAKER_ID_MANGLER", "MottakerID mangler")
+
+                    service.settHovedmottaker(brevId, mottakerId, brukerTokenInfo)
+
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
             delete("{mottakerId}") {
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val mottakerId = UUID.fromString(call.parameters["mottakerId"])

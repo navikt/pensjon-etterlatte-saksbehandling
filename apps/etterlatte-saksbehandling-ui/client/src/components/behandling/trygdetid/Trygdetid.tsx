@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
-  hentKandidatForKopieringAvTrygdetid,
   hentTrygdetider,
   ITrygdetid,
-  kopierTrygdetidFraAnnenBehandling,
   opprettTrygdetider,
   opprettTrygdetidOverstyrtMigrering,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Link, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
@@ -29,7 +27,7 @@ import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { ExternalLinkIcon, PlusCircleIcon } from '@navikt/aksel-icons'
+import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
 
 interface Props {
   redigerbar: boolean
@@ -59,7 +57,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
-  const [kopierTrygdetidStatus, kopierTrygdetidReq] = useApiCall(kopierTrygdetidFraAnnenBehandling)
 
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
@@ -125,18 +122,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     })
   }
 
-  const kopierTrygdetid = (kildeBehandlingId: string) => {
-    kopierTrygdetidReq(
-      {
-        behandlingId: behandling.id,
-        kildeBehandlingId: kildeBehandlingId,
-      },
-      () => {
-        setTimeout(() => window.location.reload(), 1000)
-      }
-    )
-  }
-
   useEffect(() => {
     if (!behandling?.id) {
       setBehandlingsIdMangler(true)
@@ -172,11 +157,12 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   return (
     <Box paddingInline="16" maxWidth="69rem">
-      <TrygdetidMedSammeAvdoed
+      <TrygdetidIAnnenBehandlingMedSammeAvdoede
         behandlingId={behandling.id}
-        kopierTrygdetid={kopierTrygdetid}
-        avdoedesNavn={trygdetider.map((t) => mapNavn(t.ident, false)).join(' og ')}
-      ></TrygdetidMedSammeAvdoed>
+        setTrygdetider={setTrygdetider}
+        trygdetider={trygdetider}
+        mapNavn={mapNavn}
+      ></TrygdetidIAnnenBehandlingMedSammeAvdoede>
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
 
@@ -265,10 +251,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           apiResult: overstyrTrygdetidStatus,
           errorMessage: 'En feil har oppstått ved opprettelse av overstyrt trygdetid',
         })}
-        {isFailureHandler({
-          apiResult: kopierTrygdetidStatus,
-          errorMessage: 'En feil har oppstått ved kopiering av trygdetid fra annen behandling',
-        })}
 
         {behandlingsIdMangler && <ApiErrorAlert>Finner ikke behandling - ID mangler</ApiErrorAlert>}
         {trygdetidIdMangler && (
@@ -280,68 +262,5 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         )}
       </VStack>
     </Box>
-  )
-}
-
-const TrygdetidMedSammeAvdoed = ({
-  behandlingId,
-  kopierTrygdetid,
-  avdoedesNavn,
-}: {
-  behandlingId: string
-  kopierTrygdetid: (behandlingId: string) => void
-  avdoedesNavn: string
-}) => {
-  const [hentKandidatForKopieringAvTrygdetidStatus, hentKandidatForKopieringAvTrygdetidReq] = useApiCall(
-    hentKandidatForKopieringAvTrygdetid
-  )
-
-  useEffect(() => {
-    hentKandidatForKopieringAvTrygdetidReq(behandlingId)
-  }, [])
-
-  return (
-    <>
-      {mapResult(hentKandidatForKopieringAvTrygdetidStatus, {
-        success: (behandlingId) => (
-          <>
-            {behandlingId ? (
-              <Box paddingBlock="2 2">
-                <Alert variant="info">
-                  <Heading size="small" level="2">
-                    Det finnes en annen behandling tilknyttet samme avdøde
-                  </Heading>
-                  <VStack gap="3">
-                    <BodyShort>
-                      Det finnes en annen behandling tilknyttet avdøde {avdoedesNavn}, der trygdetiden allerede er fylt
-                      inn. Ønsker du å benytte den samme trygdetiden i denne behandlingen? Dette overskriver det du
-                      eventuelt har registrert allerede.
-                    </BodyShort>
-                    <Link href={`/behandling/${behandlingId}/trygdetid`} as="a" target="_blank">
-                      Gå til behandlingen
-                      <ExternalLinkIcon>Gå til behandlingen</ExternalLinkIcon>
-                    </Link>
-                    <HStack gap="4" justify="space-between">
-                      <Button
-                        variant="secondary"
-                        icon={<PlusCircleIcon fontSize="1.5rem" />}
-                        onClick={() => kopierTrygdetid(behandlingId)}
-                      >
-                        Ja, kopier og legg til trygdetid
-                      </Button>
-                    </HStack>
-                  </VStack>
-                </Alert>
-              </Box>
-            ) : (
-              <></>
-            )}
-          </>
-        ),
-        error: (error) => (
-          <ApiErrorAlert>En feil har oppstått ved henting av trygdetid for samme avdøde. {error.detail}</ApiErrorAlert>
-        ),
-      })}
-    </>
   )
 }

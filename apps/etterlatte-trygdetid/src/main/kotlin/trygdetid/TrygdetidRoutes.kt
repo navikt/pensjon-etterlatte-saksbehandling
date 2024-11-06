@@ -252,7 +252,11 @@ fun Route.trygdetid(
                             kildeBehandlingId = kildeBehandlingId,
                             brukerTokenInfo = brukerTokenInfo,
                         )
-                        call.respond(HttpStatusCode.OK)
+                        call.respond(
+                            trygdetidService
+                                .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                                .map { it.toDto() },
+                        )
                     }
                 }
             }

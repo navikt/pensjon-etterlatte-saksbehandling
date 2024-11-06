@@ -33,7 +33,9 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.sak.SakService
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -67,6 +69,11 @@ class AarligInntektsjusteringJobbServiceTest {
             pdlTjenesterKlient,
             rapid,
         )
+
+    @BeforeAll
+    fun setup() {
+        nyKontekstMedBruker(mockk())
+    }
 
     @BeforeEach
     fun beforeEach() {

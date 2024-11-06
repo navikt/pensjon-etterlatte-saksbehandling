@@ -13,6 +13,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -96,14 +97,24 @@ class AarligInntektsjusteringJobbService(
 
             val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, forrigeBehandling.id, vedtak, avkortingSjekk)
             if (aarsakTilManuell != null) {
-                opprettRevurderingOgOppgave(sakId, loependeFom, forrigeBehandling)
-                oppdaterKjoering(kjoering, KjoeringStatus.TIL_MANUELL, sakId, aarsakTilManuell.name)
+                val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
+                inTransaction {
+                    opprettRevurderingOgOppgave(sakId, loependeFom, forrigeBehandling, persongalleri)
+                    omregningService.oppdaterKjoering(
+                        KjoeringRequest(
+                            kjoering,
+                            KjoeringStatus.TIL_MANUELL,
+                            sakId,
+                            aarsakTilManuell.name,
+                        ),
+                    )
+                }
                 return
             }
             oppdaterKjoering(kjoering, KjoeringStatus.KLAR_FOR_OMREGNING, sakId)
             publiserKlarForOmregning(sakId, loependeFom)
         } catch (e: Exception) {
-            // TODO logg feilmelding
+            logger.warn("Automatisk jobb feilet! kjøring:$kjoering sak:$sakId", e)
             oppdaterKjoering(
                 kjoering,
                 KjoeringStatus.FEILA,
@@ -171,35 +182,31 @@ class AarligInntektsjusteringJobbService(
         return null
     }
 
-    private suspend fun opprettRevurderingOgOppgave(
+    private fun opprettRevurderingOgOppgave(
         sakId: SakId,
         loependeFom: YearMonth,
         forrigeBehandling: Behandling,
-    ) {
-        val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
-        inTransaction {
-            revurderingService
-                .opprettRevurdering(
-                    sakId = sakId,
-                    persongalleri = persongalleri,
-                    forrigeBehandling = forrigeBehandling.id,
-                    mottattDato = null,
-                    prosessType = Prosesstype.MANUELL,
-                    kilde = Vedtaksloesning.GJENNY,
-                    revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
-                    virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
-                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
-                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-                    begrunnelse = BEGRUNNELSE_AUTOMATISK_JOBB,
-                    saksbehandlerIdent = Fagsaksystem.EY.navn,
-                    frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
-                    opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
-                ).oppdater()
-                .also {
-                    revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)
-                }
+        persongalleri: Persongalleri,
+    ) = revurderingService
+        .opprettRevurdering(
+            sakId = sakId,
+            persongalleri = persongalleri,
+            forrigeBehandling = forrigeBehandling.id,
+            mottattDato = null,
+            prosessType = Prosesstype.MANUELL,
+            kilde = Vedtaksloesning.GJENNY,
+            revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+            virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
+            utlandstilknytning = forrigeBehandling.utlandstilknytning,
+            boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
+            begrunnelse = BEGRUNNELSE_AUTOMATISK_JOBB,
+            saksbehandlerIdent = Fagsaksystem.EY.navn,
+            frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
+            opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
+        ).oppdater()
+        .also {
+            revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)
         }
-    }
 
     private fun publiserKlarForOmregning(
         sakId: SakId,

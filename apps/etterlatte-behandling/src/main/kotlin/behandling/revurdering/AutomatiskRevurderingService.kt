@@ -133,7 +133,7 @@ class AutomatiskRevurderingService(
         }
     } ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
 
-    fun opprettAutomatiskRevurdering(
+    private fun opprettAutomatiskRevurdering(
         sakId: SakId,
         forrigeBehandling: Behandling,
         revurderingAarsak: Revurderingaarsak,

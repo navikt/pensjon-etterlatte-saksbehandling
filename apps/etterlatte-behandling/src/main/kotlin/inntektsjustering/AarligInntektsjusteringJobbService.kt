@@ -134,6 +134,11 @@ class AarligInntektsjusteringJobbService(
 
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
 
+        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak)
+        if (aapneBehandlinger.isNotEmpty()) {
+            return AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING
+        }
+
         val identErUendretPdl =
             hentPdlPersonident(sak).let { sisteIdentifikatorPdl ->
                 val sisteIdent =
@@ -269,4 +274,5 @@ enum class AarligInntektsjusteringAarsakManuell {
     UTDATERTE_PERSONOPPLYSNINGER,
     VERGEMAAL,
     TIL_SAMORDNING,
+    AAPEN_BEHANDLING,
 }

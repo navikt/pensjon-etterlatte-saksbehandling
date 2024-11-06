@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringKjoering
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
@@ -69,12 +70,24 @@ class AarligInntektsjusteringJobbService(
         loependeFom: YearMonth,
         sakId: SakId,
     ) {
+        logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
         try {
             val vedtak =
                 vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
 
-            logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
-            val skalIkkeGjennomfoereJobb = skalIkkeGjennomfoereJobb(sakId, vedtak, loependeFom)
+            val forrigeBehandling =
+                behandlingService.hentSisteIverksatte(sakId)
+                    ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
+
+            val avkortingSjekk =
+                beregningKlient.aarligInntektsjusteringSjekk(
+                    sakId,
+                    loependeFom.year,
+                    forrigeBehandling.id,
+                    HardkodaSystembruker.omregning,
+                )
+
+            val skalIkkeGjennomfoereJobb = skalIkkeGjennomfoereJobb(avkortingSjekk, vedtak, loependeFom)
             if (skalIkkeGjennomfoereJobb != null) {
                 omregningService.oppdaterKjoering(
                     KjoeringRequest(
@@ -86,11 +99,8 @@ class AarligInntektsjusteringJobbService(
                 )
                 return
             }
-            val forrigeBehandling =
-                behandlingService.hentSisteIverksatte(sakId)
-                    ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 
-            val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, forrigeBehandling.id, vedtak)
+            val aarsakTilManuell = kanIkkeKjoereAutomatisk(sakId, forrigeBehandling.id, vedtak, avkortingSjekk)
             if (aarsakTilManuell != null) {
                 opprettRevurderingOgOppgave(sakId, loependeFom, forrigeBehandling)
                 omregningService.oppdaterKjoering(
@@ -127,9 +137,14 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
         sisteBehandlingId: UUID,
         vedtak: LoependeYtelseDTO,
+        avkortingSjekkResponse: AarligInntektsjusteringAvkortingSjekkResponse,
     ): AarligInntektsjusteringAarsakManuell? {
         if (vedtak.underSamordning) {
             return AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING
+        }
+
+        if (avkortingSjekkResponse.harSanksjon) {
+            return AarligInntektsjusteringAarsakManuell.HAR_SANKSJON
         }
 
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
@@ -236,14 +251,14 @@ class AarligInntektsjusteringJobbService(
     }
 
     // Skal inntektjusteres hvis: 1) er løpende fom dato, 2) ikke har oppgitt inntekt fra 1.1 neste inntektsår
-    private suspend fun skalIkkeGjennomfoereJobb(
-        sakId: SakId,
+    private fun skalIkkeGjennomfoereJobb(
+        avkortingSjekkResponse: AarligInntektsjusteringAvkortingSjekkResponse,
         vedtak: LoependeYtelseDTO,
         loependeFom: YearMonth,
     ): String? =
         if (!vedtak.erLoepende) {
             "Sak er ikke løpende"
-        } else if (beregningKlient.sakHarInntektForAar(sakId, loependeFom.year, HardkodaSystembruker.omregning)) {
+        } else if (avkortingSjekkResponse.harInntektForAar) {
             "Sak har allerede oppgitt inntekt for ${loependeFom.year}"
         } else {
             null
@@ -275,4 +290,5 @@ enum class AarligInntektsjusteringAarsakManuell {
     VERGEMAAL,
     TIL_SAMORDNING,
     AAPEN_BEHANDLING,
+    HAR_SANKSJON,
 }

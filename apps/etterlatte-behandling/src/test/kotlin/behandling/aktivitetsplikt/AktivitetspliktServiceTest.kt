@@ -208,17 +208,34 @@ class AktivitetspliktServiceTest {
                     beskrivelse = "Beskrivelse",
                 )
             every {
-                aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+                aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(
                     aktivitetsgrad,
                     sakId,
                     any(),
                     oppgaveId,
                 )
             } returns 1
-            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns emptyList()
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns
+                listOf(
+                    AktivitetspliktAktivitetsgrad(
+                        aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
+                        oppgaveId = oppgaveId,
+                        behandlingId = null,
+                        beskrivelse = "",
+                        sakId = sakId,
+                        endret = Grunnlagsopplysning.automatiskSaksbehandler,
+                        opprettet = Grunnlagsopplysning.automatiskSaksbehandler,
+                        vurdertFra12Mnd = false,
+                        skjoennsmessigVurdering = null,
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now().plusMonths(3L),
+                        id = UUID.randomUUID(),
+                    ),
+                )
+            every { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) } returns emptyList()
             every { oppgaveService.hentOppgave(oppgaveId) } returns
                 OppgaveIntern(
-                    id = UUID.randomUUID(),
+                    id = oppgaveId,
                     status = Status.NY,
                     enhet = Enheter.defaultEnhet.enhetNr,
                     sakId = sakId,
@@ -229,37 +246,23 @@ class AktivitetspliktServiceTest {
                     sakType = SakType.OMSTILLINGSSTOENAD,
                     frist = null,
                 )
-            service.opprettAktivitetsgradForOppgave(aktivitetsgrad, oppgaveId, sakId, brukerTokenInfo)
+            service.upsertAktivitetsgradForOppgave(aktivitetsgrad, oppgaveId, sakId, brukerTokenInfo)
 
-            verify { aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, any(), oppgaveId) }
-            verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) }
-        }
-
-        @Test
-        fun `Skal ikke opprette en ny aktivitetsgrad hvis det finnes fra foer`() {
-            val aktivitetsgrad =
-                LagreAktivitetspliktAktivitetsgrad(
-                    aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
-                    beskrivelse = "Beskrivelse",
-                )
-            every {
-                aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+            verify {
+                aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(
                     aktivitetsgrad,
                     sakId,
                     any(),
                     oppgaveId,
                 )
-            } returns 1
-            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns listOf(mockk())
-
-            assertThrows<IllegalArgumentException> {
-                service.opprettAktivitetsgradForOppgave(aktivitetsgrad, oppgaveId, sakId, brukerTokenInfo)
             }
+            verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) }
         }
 
         @Test
         fun `Skal hente en vurdering med aktivitetsgrad basert paa oppgaveId`() {
-            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns listOf(mockk())
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns
+                listOf(mockk { every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50 })
             every { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) } returns emptyList()
 
             val vurdering = service.hentVurderingForOppgave(oppgaveId)
@@ -287,8 +290,12 @@ class AktivitetspliktServiceTest {
                     fom = null,
                     tom = LocalDate.now().plusMonths(6),
                 )
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) } returns 1
+            every { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), oppgaveId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) } returns emptyList()
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns
+                listOf(
+                    mockk { every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50 },
+                )
             every { oppgaveService.hentOppgave(oppgaveId) } returns
                 OppgaveIntern(
                     id = UUID.randomUUID(),
@@ -302,27 +309,10 @@ class AktivitetspliktServiceTest {
                     sakType = SakType.OMSTILLINGSSTOENAD,
                     frist = null,
                 )
-            service.opprettUnntakForOpppgave(unntak, oppgaveId, sakId, brukerTokenInfo)
+            service.upsertUnntakForOppgave(unntak, oppgaveId, sakId, brukerTokenInfo)
 
-            verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) }
+            verify { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), oppgaveId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) }
-        }
-
-        @Test
-        fun `Skal ikke opprette en et nytt unntak hvis det finnes fra foer`() {
-            val unntak =
-                LagreAktivitetspliktUnntak(
-                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
-                    beskrivelse = "Beskrivelse",
-                    fom = LocalDate.now(),
-                    tom = LocalDate.now().plusMonths(6),
-                )
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) } returns 1
-            every { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) } returns listOf(mockk())
-
-            assertThrows<IllegalArgumentException> {
-                service.opprettUnntakForOpppgave(unntak, oppgaveId, sakId, brukerTokenInfo)
-            }
         }
 
         @Test
@@ -334,11 +324,11 @@ class AktivitetspliktServiceTest {
                     fom = LocalDate.now().plusMonths(6),
                     tom = LocalDate.now().plusMonths(0),
                 )
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) } returns 1
+            every { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), oppgaveId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) } returns emptyList()
 
             assertThrows<TomErFoerFomException> {
-                service.opprettUnntakForOpppgave(unntak, oppgaveId, sakId, brukerTokenInfo)
+                service.upsertUnntakForOppgave(unntak, oppgaveId, sakId, brukerTokenInfo)
             }
         }
 
@@ -372,14 +362,14 @@ class AktivitetspliktServiceTest {
                     fom = null,
                     tom = LocalDate.now().plusMonths(6),
                 )
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns emptyList()
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns emptyList()
             every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
             service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
 
-            verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) }
+            verify { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), null, behandlingId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
         }
 
@@ -406,17 +396,22 @@ class AktivitetspliktServiceTest {
                 behandling.apply {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT
                 }
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns emptyList()
             every {
-                aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+                aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(
                     aktivitetsgrad,
                     sakId,
                     any(),
                     behandlingId = behandlingId,
                 )
             } returns 1
-            every { aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(aktivitetsgradId, behandlingId) } returns 1
+            every {
+                aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForBehandling(
+                    aktivitetsgradId,
+                    behandlingId,
+                )
+            } returns 1
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns
                 listOf(
                     AktivitetspliktAktivitetsgrad(
@@ -433,7 +428,7 @@ class AktivitetspliktServiceTest {
                     ),
                 )
 
-            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+            aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(
                 aktivitetsgrad,
                 sakId,
                 kilde,
@@ -441,9 +436,9 @@ class AktivitetspliktServiceTest {
             )
             service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
 
-            verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) }
+            verify { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), null, behandlingId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
-            verify { aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(aktivitetsgradId, behandlingId) }
+            verify { aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForBehandling(aktivitetsgradId, behandlingId) }
         }
 
         @Test
@@ -455,7 +450,7 @@ class AktivitetspliktServiceTest {
                     fom = LocalDate.now(),
                     tom = LocalDate.now().plusMonths(6),
                 )
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns listOf(mockk())
             every { behandlingService.hentBehandling(behandlingId) } returns
                 behandling.apply {
@@ -476,11 +471,11 @@ class AktivitetspliktServiceTest {
                     fom = LocalDate.now().plusMonths(6),
                     tom = LocalDate.now().plusMonths(0),
                 )
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns emptyList()
 
             assertThrows<TomErFoerFomException> {
-                service.opprettUnntakForOpppgave(unntak, behandlingId, sakId, brukerTokenInfo)
+                service.upsertUnntakForOppgave(unntak, behandlingId, sakId, brukerTokenInfo)
             }
         }
 
@@ -523,7 +518,7 @@ class AktivitetspliktServiceTest {
                     fom = null,
                     tom = LocalDate.now().plusMonths(6),
                 )
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.oppdaterUnntak(unntakMedId, any(), behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns emptyList()
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns emptyList()
@@ -532,7 +527,7 @@ class AktivitetspliktServiceTest {
             service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
             service.upsertUnntakForBehandling(unntakMedId, behandlingId, sakId, brukerTokenInfo)
 
-            verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) }
+            verify { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), null, behandlingId) }
             verify { aktivitetspliktUnntakDao.oppdaterUnntak(unntakMedId, any(), behandlingId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
         }

@@ -52,7 +52,7 @@ export enum AktivitetspliktVurderingType {
 
 export const tekstAktivitetspliktVurderingType: Record<AktivitetspliktVurderingType, string> = {
   AKTIVITET_UNDER_50: 'Under 50%',
-  AKTIVITET_OVER_50: '50% - 100%',
+  AKTIVITET_OVER_50: '50% - 99%',
   AKTIVITET_100: '100%',
 }
 
@@ -97,6 +97,14 @@ export interface IAktivitetspliktAktivitetsgrad {
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler
   beskrivelse: string
+  skjoennsmessigVurdering?: AktivitetspliktSkjoennsmessigVurdering
+  vurdertFra12Mnd?: boolean
+}
+
+export enum AktivitetspliktSkjoennsmessigVurdering {
+  JA = 'JA',
+  MED_OPPFOELGING = 'MED_OPPFOELGING',
+  NEI = 'NEI',
 }
 
 export interface IAktivitetspliktUnntak {
@@ -118,6 +126,13 @@ export interface IOpprettAktivitetspliktAktivitetsgrad {
   fom: string
   tom?: string
   beskrivelse: string
+  skjoennsmessigVurdering?: AktivitetspliktSkjoennsmessigVurdering
+  vurdertFra12Mnd: boolean
+}
+
+export enum AktivitetspliktOppgaveVurderingType {
+  SEKS_MAANEDER = 'SEKS_MAANEDER',
+  TOLV_MAANEDER = 'TOLV_MAANEDER',
 }
 
 export interface IOpprettAktivitetspliktUnntak {

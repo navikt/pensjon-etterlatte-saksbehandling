@@ -60,7 +60,7 @@ export const BrevAktivitetsplikt = () => {
   return (
     <VStack gap="4" maxWidth="30rem">
       <HStack gap="4" align="center">
-        <Heading size="small">Brev data</Heading>
+        <Heading size="small">Valg for infobrev</Heading>
       </HStack>
       {redigeres ? (
         <form onSubmit={handleSubmit(lagreBrevutfall)}>
@@ -115,10 +115,10 @@ export const BrevAktivitetsplikt = () => {
 
           {isFailureHandler({
             apiResult: lagrebrevdataStatus,
-            errorMessage: 'Kan ikke lagre brevdata',
+            errorMessage: 'Kan ikke lagre valg for infobrevet',
           })}
           <Button type="submit" loading={isPending(lagrebrevdataStatus)} variant="primary">
-            Lagre brevvurdering
+            Lagre valg for infobrev
           </Button>
         </form>
       ) : (

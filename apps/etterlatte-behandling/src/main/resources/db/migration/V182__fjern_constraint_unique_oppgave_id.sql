@@ -1,0 +1,2 @@
+alter table aktivitetsplikt_aktivitetsgrad drop constraint unique_oppgave_id;
+alter table aktivitetsplikt_unntak drop constraint aktivitetsplikt_unntak_oppgave_id_key;

@@ -13,6 +13,8 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -21,7 +23,9 @@ import java.util.UUID
 class AktivitetspliktAktivitetsgradDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun opprettAktivitetsgrad(
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
+    fun upsertAktivitetsgradForOppgave(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
@@ -38,9 +42,18 @@ class AktivitetspliktAktivitetsgradDao(
                     """
                         INSERT INTO aktivitetsplikt_aktivitetsgrad(id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, tom, opprettet, endret, beskrivelse, skjoennsmessig_vurdering, vurdert_fra_12_mnd) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT (id) DO UPDATE SET 
+                            aktivitetsgrad = EXCLUDED.aktivitetsgrad,
+                            endret = excluded.endret,
+                            beskrivelse = excluded.beskrivelse,
+                            skjoennsmessig_vurdering = excluded.skjoennsmessig_vurdering,
+                            fom = excluded.fom,
+                            tom = excluded.tom,
+                            vurdert_fra_12_mnd = excluded.vurdert_fra_12_mnd
+                            
                     """.trimMargin(),
                 )
-            stmt.setObject(1, UUID.randomUUID())
+            stmt.setObject(1, aktivitetsgrad.id ?: UUID.randomUUID())
             stmt.setSakId(2, sakId)
             stmt.setObject(3, behandlingId)
             stmt.setObject(4, oppgaveId)
@@ -199,7 +212,7 @@ class AktivitetspliktAktivitetsgradDao(
         }
     }
 
-    fun slettAktivitetsgrad(
+    fun slettAktivitetsgradForBehandling(
         aktivitetId: UUID,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
@@ -215,6 +228,25 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(2, behandlingId)
 
             stmt.executeUpdate()
+        }
+    }
+
+    fun slettAktivitetsgradForOppgave(
+        aktivitetId: UUID,
+        oppgaveId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                    DELETE FROM aktivitetsplikt_aktivitetsgrad
+                    WHERE id = ? AND oppgave_id = ?
+                    """.trimIndent(),
+                )
+            stmt.setObject(1, aktivitetId)
+            stmt.setObject(2, oppgaveId)
+            val slettet = stmt.executeUpdate()
+            logger.info("Slettet $slettet aktivitetsgrader for oppgave $oppgaveId")
         }
     }
 

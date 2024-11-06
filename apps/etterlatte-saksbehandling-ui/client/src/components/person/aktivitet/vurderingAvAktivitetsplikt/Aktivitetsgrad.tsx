@@ -23,11 +23,13 @@ export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktA
 
       <Table size="small">
         <Table.Header>
-          <Table.HeaderCell />
-          <Table.HeaderCell scope="col">Aktivitetsgrad</Table.HeaderCell>
-          <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
-          <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
-          <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
+          <Table.Row>
+            <Table.HeaderCell />
+            <Table.HeaderCell scope="col">Aktivitetsgrad</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Fra og med</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Til og med</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
+          </Table.Row>
         </Table.Header>
         <Table.Body>
           {!!aktiviteter?.length ? (

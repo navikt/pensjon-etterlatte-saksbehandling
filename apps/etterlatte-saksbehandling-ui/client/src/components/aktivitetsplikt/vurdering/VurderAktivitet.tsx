@@ -42,7 +42,7 @@ export function VurderAktivitet({ fetchOppgave }: { fetchOppgave: () => void }) 
             <Button
               onClick={() => {
                 fetchOppgave()
-                navigate(`../${AktivitetspliktSteg.BREV}`)
+                navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)
               }}
             >
               {handlinger.NESTE.navn}

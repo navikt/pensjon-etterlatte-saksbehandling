@@ -77,9 +77,7 @@ class AarligInntektsjusteringJobbService(
             val vedtak =
                 vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
 
-            val forrigeBehandling =
-                behandlingService.hentSisteIverksatte(sakId)
-                    ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
+            val forrigeBehandling = hentForrigeBehandling(sakId)
 
             val avkortingSjekk =
                 beregningKlient.aarligInntektsjusteringSjekk(
@@ -270,6 +268,12 @@ class AarligInntektsjusteringJobbService(
             )
         }
     }
+
+    private fun hentForrigeBehandling(sakId: SakId) =
+        inTransaction {
+            behandlingService.hentSisteIverksatte(sakId)
+                ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
+        }
 
     private fun hentPdlPersonopplysning(sak: Sak) =
         pdlTjenesterKlient.hentPdlModellFlereSaktyper(sak.ident, PersonRolle.INNSENDER, SakType.OMSTILLINGSSTOENAD)

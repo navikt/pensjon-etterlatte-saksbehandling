@@ -282,7 +282,7 @@ data class AktivitetspliktAktivitetsgrad(
     val fom: LocalDate,
     val tom: LocalDate?,
     override val opprettet: Grunnlagsopplysning.Kilde,
-    val endret: Grunnlagsopplysning.Kilde?,
+    val endret: Grunnlagsopplysning.Saksbehandler,
     val beskrivelse: String,
     val vurdertFra12Mnd: Boolean = false,
 ) : AktivitetspliktVurderingOpprettetDato {

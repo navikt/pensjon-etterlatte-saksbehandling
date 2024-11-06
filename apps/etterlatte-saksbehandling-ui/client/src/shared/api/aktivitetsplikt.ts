@@ -9,6 +9,7 @@ import {
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
 } from '~shared/types/Aktivitetsplikt'
+import { KildeSaksbehandler } from '~shared/types/kilde'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
 export const hentAktivitetspliktOppfolging = async (args: {
@@ -145,4 +146,5 @@ export interface IBrevAktivitetspliktDto {
   skalSendeBrev: boolean
   utbetaling?: boolean
   redusertEtterInntekt?: boolean
+  kilde: KildeSaksbehandler
 }

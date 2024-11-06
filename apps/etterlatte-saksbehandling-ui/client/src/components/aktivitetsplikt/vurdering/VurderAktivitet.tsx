@@ -65,7 +65,7 @@ function NesteKnapp() {
   }, [vurdering.aktivitet])
 
   return (
-    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle" marginBlock="4">
       <HStack gap="4" justify="center">
         <Button onClick={gaaTilNeste}>Neste</Button>
         {manglerAktiviteter && <Alert variant="error">Du må registrere en aktivitet for å gå videre</Alert>}

@@ -359,6 +359,59 @@ internal class BrevServiceTest {
                 db.hentBrev(brev.id)
             }
         }
+
+        @Test
+        fun `Sett ny hovedmottaker på brev - kopimottaker blir hovedmottaker`() {
+            val hovedmottaker = opprettMottaker(type = MottakerType.HOVED)
+            val kopimottaker = opprettMottaker(type = MottakerType.KOPI)
+
+            val brev =
+                opprettBrev(
+                    status = Status.OPPDATERT,
+                    prosessType = BrevProsessType.REDIGERBAR,
+                    mottakere = listOf(hovedmottaker, kopimottaker),
+                )
+
+            every { db.hentBrev(any()) } returns brev
+
+            brevService.settHovedmottaker(brev.id, kopimottaker.id, bruker)
+
+            verify {
+                db.hentBrev(brev.id)
+
+                db.oppdaterMottaker(
+                    brev.id,
+                    match { it.id == hovedmottaker.id && it.type == MottakerType.KOPI },
+                    bruker,
+                )
+
+                db.oppdaterMottaker(
+                    brev.id,
+                    match { it.id == kopimottaker.id && it.type == MottakerType.HOVED },
+                    bruker,
+                )
+            }
+        }
+
+        @Test
+        fun `Sett hovedmottaker som hovedmottaker gjør ingenting`() {
+            val hovedmottaker = opprettMottaker(type = MottakerType.HOVED)
+            val kopimottaker = opprettMottaker(type = MottakerType.KOPI)
+
+            val brev =
+                opprettBrev(
+                    status = Status.OPPDATERT,
+                    prosessType = BrevProsessType.REDIGERBAR,
+                    mottakere = listOf(hovedmottaker, kopimottaker),
+                )
+
+            every { db.hentBrev(any()) } returns brev
+
+            brevService.settHovedmottaker(brev.id, hovedmottaker.id, bruker)
+
+            verify { db.hentBrev(brev.id) }
+            verify(exactly = 0) { db.oppdaterMottaker(any(), any(), any()) }
+        }
     }
 
     @Nested

@@ -40,6 +40,13 @@ export const oppdaterMottaker = async (props: {
 }): Promise<ApiResponse<void>> =>
   apiClient.put(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, { mottaker: props.mottaker })
 
+export const settHovedmottaker = async (props: {
+  brevId: number
+  sakId: number
+  mottakerId: string
+}): Promise<ApiResponse<void>> =>
+  apiClient.put(`/brev/${props.brevId}/mottaker/${props.mottakerId}/hoved?sakId=${props.sakId}`, {})
+
 export const slettMottaker = async (props: {
   brevId: number
   mottakerId: string

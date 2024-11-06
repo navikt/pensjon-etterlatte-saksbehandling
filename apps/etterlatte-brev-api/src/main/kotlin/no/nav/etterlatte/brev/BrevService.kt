@@ -21,6 +21,7 @@ import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -236,13 +237,39 @@ class BrevService(
         mottaker: Mottaker,
         bruker: BrukerTokenInfo,
     ): Int {
-        sjekkOmBrevKanEndres(brevId)
+        val brev = sjekkOmBrevKanEndres(brevId)
+
+        val lagretMottaker = brev.mottakere.single { it.id == mottaker.id }
+        if (lagretMottaker.type != mottaker.type) {
+            throw InternfeilException("Kan ikke sette hoved-/kopimottaker på vanlig oppdatering av mottaker")
+        }
 
         logger.info("Oppdaterer mottaker (id=${mottaker.id}) på brev=$brevId")
 
         return db
             .oppdaterMottaker(brevId, mottaker, bruker)
             .also { logger.info("Mottaker på brev (id=$brevId) oppdatert") }
+    }
+
+    fun settHovedmottaker(
+        brevId: BrevID,
+        mottakerId: UUID,
+        bruker: BrukerTokenInfo,
+    ) {
+        val brev = sjekkOmBrevKanEndres(brevId)
+
+        if (brev.mottakere.find { it.id == mottakerId }?.type == MottakerType.HOVED) {
+            return // Ikke gjør noe hvis mottakeren allerede er hovedmottaker
+        }
+
+        brev.mottakere
+            .forEach {
+                if (it.id == mottakerId) {
+                    db.oppdaterMottaker(brevId, it.copy(type = MottakerType.HOVED), bruker)
+                } else {
+                    db.oppdaterMottaker(brevId, it.copy(type = MottakerType.KOPI), bruker)
+                }
+            }
     }
 
     fun oppdaterTittel(

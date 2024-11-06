@@ -74,6 +74,7 @@ class AarligInntektsjusteringJobbServiceTest {
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
         coEvery { beregningKlient.sakHarInntektForAar(any(), any(), any()) } returns false
         every { sakService.finnSak(SakId(123L)) } returns gyldigSak
+        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns
             PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of(fnrGyldigSak),
@@ -282,6 +283,38 @@ class AarligInntektsjusteringJobbServiceTest {
                         status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
                         begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING.name
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `Sak som har aapen behandling skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns listOf(mockk())
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        // TODO verifer opprettelse rev
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING.name
                     }
                 },
             )

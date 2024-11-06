@@ -134,6 +134,11 @@ class AarligInntektsjusteringJobbService(
 
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
 
+        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak)
+        if (aapneBehandlinger.isNotEmpty()) {
+            return AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING
+        }
+
         val identErUendretPdl =
             hentPdlPersonident(sak).let { sisteIdentifikatorPdl ->
                 val sisteIdent =
@@ -185,7 +190,7 @@ class AarligInntektsjusteringJobbService(
                 mottattDato = null,
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
-                revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING, // TODO ny årsak
+                revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                 virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
                 utlandstilknytning = forrigeBehandling.utlandstilknytning,
                 boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
@@ -217,7 +222,7 @@ class AarligInntektsjusteringJobbService(
                                 OmregningData(
                                     kjoering = AarligInntektsjusteringKjoering.getKjoering(),
                                     sakId = sakId,
-                                    revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING, // TODO egen årsak?
+                                    revurderingaarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                                     fradato = loependeFom.atDay(1),
                                 ).toPacket(),
                         ),
@@ -269,4 +274,5 @@ enum class AarligInntektsjusteringAarsakManuell {
     UTDATERTE_PERSONOPPLYSNINGER,
     VERGEMAAL,
     TIL_SAMORDNING,
+    AAPEN_BEHANDLING,
 }

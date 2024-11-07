@@ -34,17 +34,13 @@ export function VurderAktivitet() {
           {mapResult(familieOpplysningerResult, {
             pending: <Spinner label="Henter opplysninger om avdød" />,
             error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger om avdød'}</ApiErrorAlert>,
-            success: ({ avdoede }) => (
-              <>
-                {avdoede && (
-                  <>
-                    <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={sak.id} />
-
-                    <Vurderinger doedsdato={velgDoedsdato(avdoede)} />
-                  </>
-                )}
-              </>
-            ),
+            success: ({ avdoede }) =>
+              avdoede && (
+                <>
+                  <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={sak.id} />
+                  <Vurderinger doedsdato={velgDoedsdato(avdoede)} />
+                </>
+              ),
           })}
         </VStack>
       </Box>

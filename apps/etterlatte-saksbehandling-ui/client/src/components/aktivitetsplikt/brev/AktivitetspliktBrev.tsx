@@ -77,15 +77,13 @@ export function Aktivitetspliktbrev({
               <ForhaandsvisningBrev brev={brev} />
             </Box>
           ) : (
-            <>
-              <HStack wrap={false}>
-                <RedigerbartBrev
-                  brev={brev}
-                  kanRedigeres={kanRedigeres}
-                  tilbakestillingsaction={() => setTilbakestilt(true)}
-                />
-              </HStack>
-            </>
+            <HStack wrap={false}>
+              <RedigerbartBrev
+                brev={brev}
+                kanRedigeres={kanRedigeres}
+                tilbakestillingsaction={() => setTilbakestilt(true)}
+              />
+            </HStack>
           )}
           <InfobrevKnapperad
             ferdigstill={

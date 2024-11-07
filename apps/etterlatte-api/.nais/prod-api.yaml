@@ -107,7 +107,7 @@ spec:
           cluster: prod-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-sak-for-person
         - application: arbeid-og-inntekt
           namespace: team-inntekt
           cluster: prod-fss

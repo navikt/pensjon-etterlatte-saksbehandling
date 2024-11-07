@@ -51,17 +51,11 @@ fun Route.behandlingSakRoutes(
             accessPolicyRolesEllerAdGrupper = setOf("les-bp-sak", "les-oms-sak")
         }
 
-        route("oms/har_sak") {
-            install(AuthorizationPlugin) {
-                accessPolicyRolesEllerAdGrupper = setOf("les-oms-sak-for-person")
-            }
-
-            get {
+        get ("oms/har_sak") {
             val foedselsnummer = call.receive<FoedselsnummerDTO>()
             val saker = behandlingService.hentSakforPerson(foedselsnummer)
 
             call.respond(HarOMSSakIGjenny(saker.isNotEmpty()))
-            }
         }
 
         get("/{$SAKID_CALL_PARAMETER}") {

@@ -109,7 +109,7 @@ spec:
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-sak-for-person
+              - les-oms-sak
         - application: arbeid-og-inntekt
           namespace: team-inntekt
           cluster: dev-fss

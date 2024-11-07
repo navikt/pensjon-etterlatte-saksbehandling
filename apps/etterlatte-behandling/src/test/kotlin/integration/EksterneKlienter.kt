@@ -628,8 +628,6 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         saktype: SakType,
     ): GeografiskTilknytning = GeografiskTilknytning(kommune = "0301")
 
-    override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> = emptyMap<String, String>()
-
     override suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
         TODO("Not yet implemented")
     }

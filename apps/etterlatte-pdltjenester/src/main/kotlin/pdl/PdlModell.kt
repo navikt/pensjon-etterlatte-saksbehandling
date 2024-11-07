@@ -517,14 +517,6 @@ data class IdenterBolkVariables(
     val grupper: Set<IdentGruppe>,
 )
 
-data class PdlFoedselsnumreFraAktoerIdResponse(
-    val data: PdlFoedselsnumreFraAktoerIdData,
-)
-
-data class PdlFoedselsnumreFraAktoerIdData(
-    val hentIdenterBolk: Set<HentIdenterBolkResult>,
-)
-
 data class HentIdenterBolkResult(
     val ident: String,
     val identer: Set<IdentInformasjon>?,

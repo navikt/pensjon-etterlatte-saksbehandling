@@ -2,6 +2,7 @@ import { createAction, createReducer } from '@reduxjs/toolkit'
 import { AktivitetspliktOppgaveVurdering, IAktivitetspliktVurderingNy } from '~shared/types/Aktivitetsplikt'
 import { useAppSelector } from '~store/Store'
 import { IBrevAktivitetspliktDto } from '~shared/api/aktivitetsplikt'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 const initialState: AktivitetspliktOppgaveVurdering = {} as AktivitetspliktOppgaveVurdering
 
@@ -13,6 +14,7 @@ export const setAktivtetspliktbrevdata = createAction<IBrevAktivitetspliktDto>(
 export const setAktivitetspliktVurdering = createAction<IAktivitetspliktVurderingNy>(
   'set/AktivitetspliktOppgaveVurdering/aktivitetspliktVurdering'
 )
+export const setAktivitetspliktOppgave = createAction<OppgaveDTO>('set/AktivitetspliktOppgaveVurdering/oppgave')
 
 export const Aktivitetsplikt12mndReducer = createReducer(initialState, (builder) => {
   builder.addCase(setStartdata, (_, action) => action.payload)
@@ -29,6 +31,11 @@ export const Aktivitetsplikt12mndReducer = createReducer(initialState, (builder)
   builder.addCase(setAktivitetspliktVurdering, (state, action) => {
     if (state.vurdering) {
       state.vurdering = action.payload
+    }
+  })
+  builder.addCase(setAktivitetspliktOppgave, (state, action) => {
+    if (state.oppgave) {
+      state.oppgave = action.payload
     }
   })
 })

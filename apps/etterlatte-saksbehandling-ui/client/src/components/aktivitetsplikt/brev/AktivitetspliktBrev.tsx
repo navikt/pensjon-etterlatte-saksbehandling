@@ -18,16 +18,20 @@ import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/Aktivi
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { useNavigate } from 'react-router-dom'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useDispatch } from 'react-redux'
+import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
 
 export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
-  const { oppgave, oppdater } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave } = useAktivitetspliktOppgaveVurdering()
   const [kanRedigeres, setKanRedigeres] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
   const [status, ferdigstillOppgaveOgBrev] = useApiCall(ferdigstillBrevOgOppgaveAktivitetsplikt)
-
+  const dispatch = useDispatch()
   const ferdigstill = () => {
-    ferdigstillOppgaveOgBrev({ oppgaveId: oppgave.id }, () => oppdater()) //TODO: replace oppdater her
+    ferdigstillOppgaveOgBrev({ oppgaveId: oppgave.id }, (oppgave) => {
+      dispatch(setAktivitetspliktOppgave(oppgave))
+    })
   }
 
   const hentBrevOgSetStatus = () => {

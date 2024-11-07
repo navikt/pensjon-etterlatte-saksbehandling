@@ -9,6 +9,7 @@ import {
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
 } from '~shared/types/Aktivitetsplikt'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string
@@ -132,7 +133,7 @@ export const opprettAktivitetspliktsbrev = async (args: { oppgaveId: string }): 
 
 export const ferdigstillBrevOgOppgaveAktivitetsplikt = async (args: {
   oppgaveId: string
-}): Promise<ApiResponse<void>> =>
+}): Promise<ApiResponse<OppgaveDTO>> =>
   apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/ferdigstillbrev-og-oppgave`, {})
 
 interface BrevId {

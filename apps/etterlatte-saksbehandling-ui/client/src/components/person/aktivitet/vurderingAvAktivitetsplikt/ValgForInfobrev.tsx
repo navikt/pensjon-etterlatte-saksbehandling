@@ -26,8 +26,8 @@ function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
   }
 }
 
-export const BrevAktivitetsplikt = () => {
-  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+export const ValgForInfobrev = () => {
+  const { oppgave, aktivtetspliktbrevdata, oppdater } = useAktivitetspliktOppgaveVurdering()
   const { handleSubmit, watch, control, resetField } = useForm<IBrevAktivitetsplikt>({})
 
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
@@ -41,6 +41,7 @@ export const BrevAktivitetsplikt = () => {
       () => {
         oppdaterBrevdata(brevdatamappedToDo)
         setRedigeres(false)
+        oppdater()
       },
       () => {}
     )

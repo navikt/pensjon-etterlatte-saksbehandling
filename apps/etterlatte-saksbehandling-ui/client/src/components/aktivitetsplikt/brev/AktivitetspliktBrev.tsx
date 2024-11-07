@@ -17,32 +17,21 @@ import { isPending } from '@reduxjs/toolkit'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { useNavigate } from 'react-router-dom'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 
-export function Aktivitetspliktbrev({
-  brevId,
-  sakId,
-  oppgaveid,
-}: {
-  brevId: number
-  sakId: number
-  oppgaveid: string
-}) {
+export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
+  const { oppgave, oppdater } = useAktivitetspliktOppgaveVurdering()
   const [kanRedigeres, setKanRedigeres] = useState(false)
-  const [tilbakestilt, setTilbakestilt] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
   const [status, ferdigstillbrevApi] = useApiCall(ferdigstillJournalfoerOgDistribuerbrev)
 
   const ferdigstillBrev = () => {
-    ferdigstillbrevApi(
-      { oppgaveId: oppgaveid },
-      () => hentBrevOgSetStatus(),
-      () => hentBrevOgSetStatus()
-    )
+    ferdigstillbrevApi({ oppgaveId: oppgave.id }, () => oppdater())
   }
 
   const hentBrevOgSetStatus = () => {
-    apiHentBrev({ brevId: brevId, sakId: sakId }, (brev) => {
+    apiHentBrev({ brevId: brevId, sakId: oppgave.sakId }, (brev) => {
       if ([BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)) {
         setKanRedigeres(true)
       } else {
@@ -53,53 +42,47 @@ export function Aktivitetspliktbrev({
 
   useEffect(() => {
     hentBrevOgSetStatus()
-  }, [brevId, sakId, tilbakestilt])
+  }, [brevId])
 
   return mapResult(brevStatus, {
     pending: <Spinner label="Henter brev ..." />,
     error: (error) => <ApiErrorAlert>En feil oppsto ved henting av brev: {error.detail}</ApiErrorAlert>,
-    success: (brev) => (
-      <GridContainer>
-        <Column>
-          <VStack gap="4" margin="4">
-            <Box marginInline="0 8">
-              <Heading size="large">Infobrev aktivitetsplikt</Heading>
-            </Box>
-            <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
-            <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
+    success: (brev) => {
+      const brevErFerdigstilt =
+        brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT
+      return (
+        <GridContainer>
+          <Column>
+            <VStack gap="4" margin="4">
+              <Box marginInline="0 8">
+                <Heading size="large">Infobrev aktivitetsplikt</Heading>
+              </Box>
+              <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
+              <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
 
-            <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
-          </VStack>
-        </Column>
-        <Column>
-          {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (
-            <Box maxHeight="955px" width="100%" height="100%">
-              <ForhaandsvisningBrev brev={brev} />
-            </Box>
-          ) : (
-            <HStack wrap={false}>
-              <RedigerbartBrev
-                brev={brev}
-                kanRedigeres={kanRedigeres}
-                tilbakestillingsaction={() => setTilbakestilt(true)}
-              />
-            </HStack>
-          )}
-          <InfobrevKnapperad
-            ferdigstill={
-              !(brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT)
-                ? { ferdigstillBrev, status }
-                : undefined
-            }
-          >
-            <>
-              {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
-              {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
-            </>
-          </InfobrevKnapperad>
-        </Column>
-      </GridContainer>
-    ),
+              <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
+            </VStack>
+          </Column>
+          <Column>
+            {brevErFerdigstilt ? (
+              <Box maxHeight="955px" width="100%" height="100%">
+                <ForhaandsvisningBrev brev={brev} />
+              </Box>
+            ) : (
+              <HStack wrap={false}>
+                <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} tilbakestillingsaction={() => undefined} />
+              </HStack>
+            )}
+            <InfobrevKnapperad ferdigstill={!brevErFerdigstilt ? { ferdigstillBrev, status } : undefined}>
+              <>
+                {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
+                {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
+              </>
+            </InfobrevKnapperad>
+          </Column>
+        </GridContainer>
+      )
+    },
   })
 }
 

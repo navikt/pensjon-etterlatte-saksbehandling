@@ -1,7 +1,7 @@
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import { Vurderinger } from '~components/aktivitetsplikt/vurdering/Vurderinger'
-import { mapFailure, mapResult } from '~shared/api/apiUtils'
+import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
@@ -50,7 +50,7 @@ export function VurderAktivitet() {
 }
 
 function NesteEllerOpprettBrev() {
-  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, aktivtetspliktbrevdata, oppdater } = useAktivitetspliktOppgaveVurdering()
   const navigate = useNavigate()
 
   const [opprettBrevStatus, opprettBrevCall] = useApiCall(opprettAktivitetspliktsbrev)
@@ -63,7 +63,10 @@ function NesteEllerOpprettBrev() {
       {
         oppgaveId: oppgave.id,
       },
-      () => navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)
+      () => {
+        oppdater()
+        navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)
+      }
     )
   }
 
@@ -74,7 +77,9 @@ function NesteEllerOpprettBrev() {
           <ApiErrorAlert>Kunne ikke opprette brev: {error.detail}</ApiErrorAlert>
         ))}
         {skalOppretteBrev ? (
-          <Button onClick={opprettBrev}>Opprett og gå til brev</Button>
+          <Button onClick={opprettBrev} loading={isPending(opprettBrevStatus)}>
+            Opprett og gå til brev
+          </Button>
         ) : (
           <Button onClick={() => navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)}>Neste</Button>
         )}

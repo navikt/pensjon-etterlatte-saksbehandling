@@ -264,6 +264,7 @@ internal fun Route.aktivitetspliktRoutes(
         }
         post("ferdigstillbrev-og-oppgave") {
             inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
+            call.respond(HttpStatusCode.NoContent)
         }
     }
 

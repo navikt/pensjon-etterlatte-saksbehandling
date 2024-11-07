@@ -3,10 +3,12 @@ package no.nav.etterlatte.behandling.aktivitetsplikt
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -23,6 +25,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.lagNyOppgave
 import no.nav.etterlatte.sak.SakService
@@ -376,5 +379,104 @@ class AktivitetspliktOppgaveServiceTest {
         assertThrows<OppgaveErAvsluttet> {
             service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
         }
+    }
+
+    @Test
+    fun `Skal fjerne brevid og slette brev om man lagrer nei til å sende brev etter å ha lagret med brevid`() {
+        nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
+        val oppgaveId = UUID.randomUUID()
+        val sakIdForOppgave = sak.id
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            mockk {
+                every { sakId } returns sakIdForOppgave
+                every { status } returns Status.UNDER_BEHANDLING
+            }
+
+        val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
+        every { aktivitetspliktBrevDao.lagreBrevdata(any()) } returns 1
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                1234,
+                false,
+                utbetaling = true,
+                redusertEtterInntekt = true,
+                kilde = kilde,
+            )
+        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
+        coEvery { brevApiKlient.slettBrev(any(), any()) } just Runs
+        val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
+
+        service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
+
+        coVerify(exactly = 1) { brevApiKlient.slettBrev(any(), any()) }
+        verify(exactly = 1) { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
+    }
+
+    @Test
+    fun `Fjerner ikke brev id om den ikke finnes selvom bruker har valgt nei til å sende brev`() {
+        nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
+        val oppgaveId = UUID.randomUUID()
+        val sakIdForOppgave = sak.id
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            mockk {
+                every { sakId } returns sakIdForOppgave
+                every { status } returns Status.UNDER_BEHANDLING
+            }
+
+        val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
+        every { aktivitetspliktBrevDao.lagreBrevdata(any()) } returns 1
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                brevId = null,
+                false,
+                utbetaling = true,
+                redusertEtterInntekt = true,
+                kilde = kilde,
+            )
+        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
+        coEvery { brevApiKlient.slettBrev(any(), any()) } just Runs
+        val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
+
+        service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
+
+        coVerify(exactly = 0) { brevApiKlient.slettBrev(any(), any()) }
+        verify(exactly = 0) { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
+    }
+
+    @Test
+    fun `Skal ikke fjerne brevid om valgt skal sende brev`() {
+        nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
+        val oppgaveId = UUID.randomUUID()
+        val sakIdForOppgave = sak.id
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            mockk {
+                every { sakId } returns sakIdForOppgave
+                every { status } returns Status.UNDER_BEHANDLING
+            }
+
+        val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
+        every { aktivitetspliktBrevDao.lagreBrevdata(any()) } returns 1
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                1234,
+                true,
+                utbetaling = true,
+                redusertEtterInntekt = true,
+                kilde = kilde,
+            )
+        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
+        coEvery { brevApiKlient.slettBrev(any(), any()) } just Runs
+        val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(true)
+
+        service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
+
+        coVerify(exactly = 0) { brevApiKlient.slettBrev(any(), any()) }
+        verify(exactly = 0) { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
     }
 }

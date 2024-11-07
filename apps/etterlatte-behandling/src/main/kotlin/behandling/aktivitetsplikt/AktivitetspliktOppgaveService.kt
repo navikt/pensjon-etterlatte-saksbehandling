@@ -90,10 +90,10 @@ class AktivitetspliktOppgaveService(
                     ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
             val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
             aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
-            val oppdatertBrevdata = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
-            if (!data.skalSendeBrev && oppdatertBrevdata?.brevId != null) {
+            val hentBrevId = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
+            if (!data.skalSendeBrev && hentBrevId?.brevId != null) {
                 aktivitetspliktBrevDao.fjernBrevId(oppgaveId, kilde)
-                runBlocking { brevApiKlient.slettBrev(brevId = oppdatertBrevdata.brevId, brukerTokenInfo = saksbehandler) }
+                runBlocking { brevApiKlient.slettBrev(brevId = hentBrevId.brevId, brukerTokenInfo = saksbehandler) }
             }
             return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
         }

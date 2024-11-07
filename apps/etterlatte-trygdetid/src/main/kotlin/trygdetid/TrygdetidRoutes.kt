@@ -247,15 +247,12 @@ fun Route.trygdetid(
                             "Kopierer trygdetidsgrunnlag fra behandling $behandlingId " +
                                 "til behandling $kildeBehandlingId",
                         )
-                        trygdetidService.kopierTrygdetidsgrunnlag(
-                            behandlingId = behandlingId,
-                            kildeBehandlingId = kildeBehandlingId,
-                            brukerTokenInfo = brukerTokenInfo,
-                        )
                         call.respond(
-                            trygdetidService
-                                .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-                                .map { it.toDto() },
+                            trygdetidService.kopierTrygdetidsgrunnlag(
+                                behandlingId = behandlingId,
+                                kildeBehandlingId = kildeBehandlingId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            ),
                         )
                     }
                 }

@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -99,7 +100,7 @@ interface TrygdetidService {
         behandlingId: UUID,
         kildeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): List<TrygdetidDto>
 
     fun overstyrBeregnetTrygdetidForAvdoed(
         behandlingId: UUID,
@@ -891,7 +892,7 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         kildeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): List<TrygdetidDto> {
         val trygdetiderKilde = trygdetidRepository.hentTrygdetiderForBehandling(kildeBehandlingId)
         val trygdetiderMaal = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
 
@@ -911,6 +912,8 @@ class TrygdetidServiceImpl(
                     ),
                 )
             }
+        return hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+            .map { it.toDto() }
     }
 
     override suspend fun finnBehandlingMedTrygdetidForSammeAvdoede(

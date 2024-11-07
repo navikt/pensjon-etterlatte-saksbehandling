@@ -27,7 +27,7 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
   const [status, ferdigstillOppgaveOgBrev] = useApiCall(ferdigstillBrevOgOppgaveAktivitetsplikt)
 
   const ferdigstill = () => {
-    ferdigstillOppgaveOgBrev({ oppgaveId: oppgave.id }, () => oppdater())
+    ferdigstillOppgaveOgBrev({ oppgaveId: oppgave.id }, () => oppdater()) //TODO: replace oppdater her
   }
 
   const hentBrevOgSetStatus = () => {

@@ -2,15 +2,17 @@ import React, { useState } from 'react'
 import { Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { VurderingAktivitetsgradForm } from './VurderingAktivitetsgradForm'
 import { PlusIcon } from '@navikt/aksel-icons'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useDispatch } from 'react-redux'
+import { IAktivitetspliktVurderingNy } from '~shared/types/Aktivitetsplikt'
+import { setAktivitetspliktVurdering } from '~store/reducers/Aktivitetsplikt12mnd'
 
 export function LeggTilNyVurdering(props: { doedsdato?: Date }) {
-  const { oppdater } = useAktivitetspliktOppgaveVurdering()
+  const dispatch = useDispatch()
   const [leggerTilVurdering, setLeggerTilVurdering] = useState(false)
 
-  function oppdaterStateVedLagring() {
+  function oppdaterStateVedLagring(data: IAktivitetspliktVurderingNy) {
+    dispatch(setAktivitetspliktVurdering(data))
     setLeggerTilVurdering(false)
-    oppdater()
   }
 
   if (!leggerTilVurdering) {

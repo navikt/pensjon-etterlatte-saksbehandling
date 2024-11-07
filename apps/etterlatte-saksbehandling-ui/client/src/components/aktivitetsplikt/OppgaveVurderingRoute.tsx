@@ -10,6 +10,7 @@ import {
 import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAktivitet'
 import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
+import { useAktivitetspliktOppgaveVurderingState } from '~store/reducers/Aktivitetsplikt12mnd'
 
 interface AktivitetspliktOppgaveVurderingProvider extends AktivitetspliktOppgaveVurdering {
   oppdater: () => void
@@ -26,7 +27,10 @@ export function OppgaveVurderingRoute(props: {
   const { vurderingOgOppgave, fetchOppgave } = props
 
   return (
-    <AktivitetspliktOppgaveContext.Provider value={{ ...vurderingOgOppgave, oppdater: fetchOppgave }}>
+    //TODO: bli kvitt fetchOppgave her?
+    <AktivitetspliktOppgaveContext.Provider
+      value={{ ...useAktivitetspliktOppgaveVurderingState(), oppdater: fetchOppgave }}
+    >
       <StatusBar ident={vurderingOgOppgave.oppgave.fnr} />
       <AktivitetspliktStegmeny />
 

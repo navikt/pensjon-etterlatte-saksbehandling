@@ -290,15 +290,16 @@ internal fun Route.aktivitetspliktRoutes(
                 kunSkrivetilgang {
                     logger.info("Oppretter aktivitetsgrad for sakId=$sakId og oppgaveId=$oppgaveId")
                     val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>()
-                    inTransaction {
-                        aktivitetspliktService.upsertAktivitetsgradForOppgave(
-                            aktivitetsgrad = aktivitetsgrad,
-                            oppgaveId = oppgaveId,
-                            sakId = sakId,
-                            brukerTokenInfo = brukerTokenInfo,
-                        )
-                    }
-                    call.respond(HttpStatusCode.Created)
+                    val aktivitetspliktVurdering =
+                        inTransaction {
+                            aktivitetspliktService.upsertAktivitetsgradForOppgave(
+                                aktivitetsgrad = aktivitetsgrad,
+                                oppgaveId = oppgaveId,
+                                sakId = sakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(aktivitetspliktVurdering)
                 }
             }
 
@@ -324,15 +325,16 @@ internal fun Route.aktivitetspliktRoutes(
                 kunSkrivetilgang {
                     logger.info("Oppretter unntak for sakId=$sakId og oppgaveId=$oppgaveId")
                     val unntak = call.receive<LagreAktivitetspliktUnntak>()
-                    inTransaction {
-                        aktivitetspliktService.upsertUnntakForOppgave(
-                            unntak = unntak,
-                            oppgaveId = oppgaveId,
-                            sakId = sakId,
-                            brukerTokenInfo = brukerTokenInfo,
-                        )
-                    }
-                    call.respond(HttpStatusCode.Created)
+                    val aktivitetspliktVurdering =
+                        inTransaction {
+                            aktivitetspliktService.upsertUnntakForOppgave(
+                                unntak = unntak,
+                                oppgaveId = oppgaveId,
+                                sakId = sakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(aktivitetspliktVurdering)
                 }
             }
 

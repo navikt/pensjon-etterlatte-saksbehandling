@@ -11,6 +11,8 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { useDispatch } from 'react-redux'
+import { setAktivtetspliktbrevdata } from '~store/reducers/Aktivitetsplikt12mnd'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
@@ -27,21 +29,21 @@ function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
 }
 
 export const ValgForInfobrev = () => {
-  const { oppgave, aktivtetspliktbrevdata, oppdater } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const { handleSubmit, watch, control, resetField } = useForm<IBrevAktivitetsplikt>({})
 
+  const dispatch = useDispatch()
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
   const [redigeres, setRedigeres] = useState<boolean>(!aktivtetspliktbrevdata)
-  const [brevdata, oppdaterBrevdata] = useState<IBrevAktivitetspliktRequest | undefined>(aktivtetspliktbrevdata)
+  const brevdata = aktivtetspliktbrevdata
 
   const lagreBrevutfall = (data: IBrevAktivitetsplikt) => {
     const brevdatamappedToDo = mapToDto(data)
     lagrebrevdata(
       { oppgaveId: oppgave.id, brevdata: brevdatamappedToDo },
-      () => {
-        oppdaterBrevdata(brevdatamappedToDo)
+      (brevdata) => {
+        dispatch(setAktivtetspliktbrevdata(brevdata))
         setRedigeres(false)
-        oppdater()
       },
       () => {}
     )

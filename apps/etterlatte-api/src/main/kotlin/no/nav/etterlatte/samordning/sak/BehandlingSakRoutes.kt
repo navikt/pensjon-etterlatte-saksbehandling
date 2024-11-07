@@ -44,11 +44,7 @@ fun Route.behandlingSakRoutes(
             val foedselsnummer = call.receive<FoedselsnummerDTO>()
             val saker = behandlingService.hentSakforPerson(foedselsnummer)
 
-            if (saker.isNotEmpty()) {
-                call.respond(HarOMSSakIGjenny(true))
-            } else {
-                call.respond(HarOMSSakIGjenny(false))
-            }
+            call.respond(HarOMSSakIGjenny(saker.isNotEmpty()))
         }
 
         post("/person/sak") {

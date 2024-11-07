@@ -2,8 +2,10 @@ package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
@@ -30,6 +32,7 @@ internal class OmregningFeiletRiver(
             validate { it.requireKey(OmregningDataPacket.KJOERING) }
             validate { it.requireAny(KONTEKST_KEY, listOf(Kontekst.REGULERING.name, Kontekst.OMREGNING.name)) }
             validate { it.interestedIn(FEILMELDING_KEY) }
+            validate { it.interestedIn(FEILENDE_STEG) }
             validate { it.interestedIn(CORRELATION_ID_KEY) }
         }
     }
@@ -47,6 +50,7 @@ internal class OmregningFeiletRiver(
             status = KjoeringStatus.FEILA,
             begrunnelse = packet.feilmelding,
             corrId = packet.correlationId,
+            feilendeSteg = packet.feilendeSteg,
         )
     }
 }

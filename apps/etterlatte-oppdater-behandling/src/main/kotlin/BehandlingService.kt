@@ -122,6 +122,8 @@ interface BehandlingService {
         sakId: SakId,
         status: KjoeringStatus,
         kjoering: String,
+        begrunnelse: String? = null,
+        corrId: String? = null,
     )
 
     fun lagreFullfoertKjoering(request: LagreKjoeringRequest)
@@ -368,6 +370,8 @@ class BehandlingServiceImpl(
         sakId: SakId,
         status: KjoeringStatus,
         kjoering: String,
+        begrunnelse: String?,
+        corrId: String?,
     ) {
         runBlocking {
             behandlingKlient.put("$url/omregning/kjoering") {
@@ -377,6 +381,8 @@ class BehandlingServiceImpl(
                         kjoering = kjoering,
                         status = status,
                         sakId = sakId,
+                        begrunnelse = begrunnelse,
+                        corrId = corrId,
                     ),
                 )
             }

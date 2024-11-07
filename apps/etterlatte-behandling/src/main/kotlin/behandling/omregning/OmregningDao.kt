@@ -59,14 +59,15 @@ class OmregningDao(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO omregningskjoering (kjoering, status, sak_id, begrunnelse)
-                        VALUES (?, ?, ?, ?)
+                        INSERT INTO omregningskjoering (kjoering, status, sak_id, begrunnelse, corrId)
+                        VALUES (?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setString(1, request.kjoering)
                 statement.setString(2, request.status.name)
                 statement.setSakId(3, request.sakId)
                 statement.setString(4, request.begrunnelse ?: "")
+                statement.setString(5, request.corrId ?: "")
                 statement.executeUpdate().also { require(it == 1) }
             }
         }

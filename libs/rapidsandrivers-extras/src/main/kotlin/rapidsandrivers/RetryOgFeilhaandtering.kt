@@ -33,7 +33,10 @@ internal fun withRetryOgFeilhaandtering(
         }
     } catch (e: Exception) {
         feilhaandteringLogger.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
-        sikkerLogg.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}", e)
+        sikkerLogg.error(
+            "Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}",
+            e,
+        )
 
         publiserFeilamelding(packet, feilendeSteg, kontekst, e, context)
         feilhaandteringLogger.warn("Fikk feil, sendte ut på feilkø, returnerer nå failure-result")
@@ -52,7 +55,7 @@ private fun publiserFeilamelding(
         packet.setEventNameForHendelseType(EventNames.FEILA)
         packet.feilendeSteg = feilendeSteg
         packet[KONTEKST_KEY] = kontekst.name
-        packet.feilmelding = e.stackTraceToString()
+        packet.feilmelding = e.message ?: ""
         context.publish(packet.toJson())
         feilhaandteringLogger.info("Publiserte feila-melding")
     } catch (e2: Exception) {

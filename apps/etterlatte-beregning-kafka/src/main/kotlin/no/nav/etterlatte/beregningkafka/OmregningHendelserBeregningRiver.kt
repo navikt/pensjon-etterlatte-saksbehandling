@@ -95,9 +95,20 @@ internal class OmregningHendelserBeregningRiver(
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
-                beregningService
-                    .omregnAvkorting(behandlingId, behandlingViOmregnerFra)
-                    .body<AvkortingDto>()
+                when (revurderingaarsak) {
+                    Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {
+                        beregningService
+                            .omregnAarligInntektsjustering(behandlingId, behandlingViOmregnerFra)
+                            .body<AvkortingDto>()
+                    }
+
+                    else -> {
+                        beregningService
+                            .omregnAvkorting(behandlingId, behandlingViOmregnerFra)
+                            .body<AvkortingDto>()
+                    }
+                }
+
             val forrigeAvkorting =
                 beregningService
                     .hentAvkorting(behandlingViOmregnerFra)

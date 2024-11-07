@@ -1,8 +1,7 @@
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'
-import { Alert, BodyShort, Button, VStack } from '@navikt/ds-react'
-import { isPending } from '@reduxjs/toolkit'
+import { Alert, BodyShort, VStack } from '@navikt/ds-react'
 import { mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
@@ -24,9 +23,6 @@ export function UtenBrevVisning({ oppgave, fetchOppgave }: { oppgave: OppgaveDTO
       ) : (
         <>
           <BodyShort>Brev skal ikke sendes for denne oppgaven, du kan nå ferdigstille oppgaven.</BodyShort>
-          <Button onClick={ferdigstillOppgaveWrapper} loading={isPending(ferdigstillOppgaveStatus)}>
-            Ferdigstill oppgave
-          </Button>
         </>
       )}
       <InfobrevKnapperad
@@ -36,6 +32,7 @@ export function UtenBrevVisning({ oppgave, fetchOppgave }: { oppgave: OppgaveDTO
             : {
                 ferdigstillBrev: ferdigstillOppgaveWrapper,
                 status: ferdigstillOppgaveStatus,
+                tekst: 'Ferdigstill oppgave',
               }
         }
       >

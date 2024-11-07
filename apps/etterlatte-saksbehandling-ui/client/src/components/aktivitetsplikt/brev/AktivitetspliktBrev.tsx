@@ -172,7 +172,7 @@ export function Aktivitetspliktbrev({
 }
 
 export function InfobrevKnapperad(props: {
-  ferdigstill?: { ferdigstillBrev: () => void; status: Result<unknown> }
+  ferdigstill?: { ferdigstillBrev: () => void; status: Result<unknown>; tekst?: string }
   children?: React.ReactElement
 }) {
   const navigate = useNavigate()
@@ -190,7 +190,7 @@ export function InfobrevKnapperad(props: {
         </Button>
         {props.ferdigstill && (
           <Button onClick={props.ferdigstill.ferdigstillBrev} loading={isPending(props.ferdigstill.status)}>
-            Ferdigstill brev
+            {props.ferdigstill.tekst ? props.ferdigstill.tekst : 'Ferdigstill brev'}
           </Button>
         )}
       </HStack>

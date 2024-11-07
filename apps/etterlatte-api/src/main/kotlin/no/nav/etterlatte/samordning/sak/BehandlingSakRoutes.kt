@@ -39,9 +39,21 @@ fun Route.behandlingSakRoutes(
             accessPolicyRolesEllerAdGrupper = generateRoles(config)
             issuers = setOf(Issuer.AZURE.issuerName)
         }
+
+        get("/har_sak") {
+            val foedselsnummer = call.receive<FoedselsnummerDTO>()
+            val saker = behandlingService.hentSakforPerson(foedselsnummer)
+
+            if (saker.isNotEmpty()) {
+                call.respond(HarOMSSakIGjenny(true))
+            } else {
+                call.respond(HarOMSSakIGjenny(false))
+            }
+        }
+
         post("/person/sak") {
-            val fnrOgSaktype = call.receive<FoedselsnummerDTO>()
-            call.respond(behandlingService.hentSakforPerson(fnrOgSaktype))
+            val foedselsnummer = call.receive<FoedselsnummerDTO>()
+            call.respond(behandlingService.hentSakforPerson(foedselsnummer))
         }
     }
 
@@ -62,3 +74,7 @@ fun Route.behandlingSakRoutes(
         }
     }
 }
+
+data class HarOMSSakIGjenny(
+    val harOMSSak: Boolean,
+)

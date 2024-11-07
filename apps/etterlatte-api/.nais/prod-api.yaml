@@ -102,6 +102,12 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: selvbetjening-backend
+          namespace: etterlatte
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: arbeid-og-inntekt
           namespace: team-inntekt
           cluster: prod-fss

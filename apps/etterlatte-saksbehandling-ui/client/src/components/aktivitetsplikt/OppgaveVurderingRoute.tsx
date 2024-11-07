@@ -33,7 +33,7 @@ export function OppgaveVurderingRoute(props: {
       <GridContainer>
         <MainContent>
           <Routes>
-            <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet fetchOppgave={fetchOppgave} />} />
+            <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet />} />
             <Route
               path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV}
               element={<VurderingInfoBrevOgOppsummering fetchOppgave={fetchOppgave} />}

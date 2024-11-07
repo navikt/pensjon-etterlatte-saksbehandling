@@ -14,7 +14,7 @@ import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/Aktivi
 import { opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
-export function VurderAktivitet({ fetchOppgave }: { fetchOppgave: () => void }) {
+export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
   const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
 
@@ -48,7 +48,7 @@ export function VurderAktivitet({ fetchOppgave }: { fetchOppgave: () => void }) 
           })}
         </VStack>
       </Box>
-      <NesteEllerOpprettBrev fetchOppgave={fetchOppgave}></NesteEllerOpprettBrev>
+      <NesteEllerOpprettBrev />
     </>
   )
 }

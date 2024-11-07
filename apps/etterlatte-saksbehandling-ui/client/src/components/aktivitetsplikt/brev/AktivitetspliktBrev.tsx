@@ -42,7 +42,7 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
 
   useEffect(() => {
     hentBrevOgSetStatus()
-  }, [brevId])
+  }, [brevId, oppgave.status])
 
   return mapResult(brevStatus, {
     pending: <Spinner label="Henter brev ..." />,

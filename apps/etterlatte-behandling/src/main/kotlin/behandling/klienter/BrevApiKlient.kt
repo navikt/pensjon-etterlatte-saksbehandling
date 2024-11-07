@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -32,6 +33,7 @@ interface BrevApiKlient {
 
     suspend fun slettBrev(
         brevId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
@@ -125,11 +127,12 @@ class BrevApiKlientObo(
 
     override suspend fun slettBrev(
         brevId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         downstreamResourceClient
             .delete(
-                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/$brevId"),
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/$brevId?${SAKID_CALL_PARAMETER}=${sakId.sakId}"),
                 brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
                 success = { },

@@ -405,12 +405,12 @@ class AktivitetspliktOppgaveServiceTest {
                 kilde = kilde,
             )
         every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
-        coEvery { brevApiKlient.slettBrev(any(), any()) } just Runs
+        coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
 
         service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
 
-        coVerify(exactly = 1) { brevApiKlient.slettBrev(any(), any()) }
+        coVerify(exactly = 1) { brevApiKlient.slettBrev(any(), any(), any()) }
         verify(exactly = 1) { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
     }
 
@@ -438,12 +438,12 @@ class AktivitetspliktOppgaveServiceTest {
                 kilde = kilde,
             )
         every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
-        coEvery { brevApiKlient.slettBrev(any(), any()) } just Runs
+        coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
 
         service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
 
-        coVerify(exactly = 0) { brevApiKlient.slettBrev(any(), any()) }
+        coVerify(exactly = 0) { brevApiKlient.slettBrev(any(), any(), any()) }
         verify(exactly = 0) { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
     }
 
@@ -471,12 +471,12 @@ class AktivitetspliktOppgaveServiceTest {
                 kilde = kilde,
             )
         every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
-        coEvery { brevApiKlient.slettBrev(any(), any()) } just Runs
+        coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(true)
 
         service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
 
-        coVerify(exactly = 0) { brevApiKlient.slettBrev(any(), any()) }
+        coVerify(exactly = 0) { brevApiKlient.slettBrev(any(), any(), any()) }
         verify(exactly = 0) { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
     }
 }

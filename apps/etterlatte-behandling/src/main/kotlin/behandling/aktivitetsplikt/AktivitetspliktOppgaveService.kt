@@ -79,7 +79,7 @@ class AktivitetspliktOppgaveService(
     fun lagreBrevdata(
         oppgaveId: UUID,
         data: AktivitetspliktInformasjonBrevdataRequest,
-    ): AktivitetspliktInformasjonBrevdata? {
+    ): AktivitetspliktInformasjonBrevdata {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         if (oppgave.status.erAvsluttet()) {
             throw OppgaveErAvsluttet("Oppgave er avsluttet, id $oppgaveId. Kan ikke fjerne brevid")
@@ -93,9 +93,9 @@ class AktivitetspliktOppgaveService(
             val hentBrevId = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
             if (!data.skalSendeBrev && hentBrevId?.brevId != null) {
                 aktivitetspliktBrevDao.fjernBrevId(oppgaveId, kilde)
-                runBlocking { brevApiKlient.slettBrev(brevId = hentBrevId.brevId, brukerTokenInfo = saksbehandler) }
+                runBlocking { brevApiKlient.slettBrev(brevId = hentBrevId.brevId, sakId = sak.id, brukerTokenInfo = saksbehandler) }
             }
-            return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
+            return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)!!
         }
     }
 

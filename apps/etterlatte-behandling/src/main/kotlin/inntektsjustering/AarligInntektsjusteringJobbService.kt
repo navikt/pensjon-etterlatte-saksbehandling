@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringKjoering
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
@@ -155,7 +154,7 @@ class AarligInntektsjusteringJobbService(
             }
 
             oppdaterKjoering(kjoering, KjoeringStatus.KLAR_FOR_OMREGNING, sakId)
-            publiserKlarForOmregning(sakId, loependeFom)
+            publiserKlarForOmregning(sakId, loependeFom, kjoering)
         } catch (e: Exception) {
             logger.warn("Automatisk jobb feilet! kjøring:$kjoering sak:$sakId", e)
             oppdaterKjoering(
@@ -223,6 +222,7 @@ class AarligInntektsjusteringJobbService(
     private fun publiserKlarForOmregning(
         sakId: SakId,
         loependeFom: YearMonth,
+        kjoering: String,
     ) {
         val correlationId = getCorrelationId()
         rapid
@@ -236,7 +236,7 @@ class AarligInntektsjusteringJobbService(
                             TEKNISK_TID_KEY to Tidspunkt.now(),
                             OmregningDataPacket.KEY to
                                 OmregningData(
-                                    kjoering = AarligInntektsjusteringKjoering.getKjoering(),
+                                    kjoering = kjoering,
                                     sakId = sakId,
                                     revurderingaarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                                     fradato = loependeFom.atDay(1),

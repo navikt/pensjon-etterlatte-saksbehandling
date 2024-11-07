@@ -6,9 +6,13 @@ import io.mockk.slot
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
@@ -19,6 +23,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 internal class OmregningFeiletRiverTest {
     @Test
@@ -27,6 +32,10 @@ internal class OmregningFeiletRiverTest {
         val status = slot<KjoeringStatus>()
         val sakIdSlot = slot<SakId>()
         val sakId = randomSakId()
+        val begrunnelse = slot<String>()
+        val corrId = UUID.randomUUID().toString()
+        val corrIdSlot = slot<String>()
+        val feilendeSteg = slot<String>()
 
         val melding =
             JsonMessage.newMessage(
@@ -40,11 +49,23 @@ internal class OmregningFeiletRiverTest {
                             sakId = sakId,
                             revurderingaarsak = Revurderingaarsak.OMREGNING,
                         ).toPacket(),
+                    FEILMELDING_KEY to "feilmelding",
+                    CORRELATION_ID_KEY to corrId,
+                    FEILENDE_STEG to "feilende steg",
                 ),
             )
 
         val behandlingService = mockk<BehandlingService>(relaxed = true)
-        every { behandlingService.lagreKjoering(capture(sakIdSlot), capture(status), capture(kjoering)) } returns Unit
+        every {
+            behandlingService.lagreKjoering(
+                capture(sakIdSlot),
+                capture(status),
+                capture(kjoering),
+                capture(begrunnelse),
+                capture(corrIdSlot),
+                capture(feilendeSteg),
+            )
+        } returns Unit
         val inspector = TestRapid().apply { OmregningFeiletRiver(this, behandlingService) }
 
         inspector.sendTestMessage(melding.toJson())
@@ -53,6 +74,9 @@ internal class OmregningFeiletRiverTest {
         Assertions.assertEquals("OmregningKjoering", kjoering.captured)
         Assertions.assertEquals(sakId, sakIdSlot.captured)
         Assertions.assertEquals(KjoeringStatus.FEILA, status.captured)
+        Assertions.assertEquals("feilmelding".toJson(), begrunnelse.captured)
+        Assertions.assertEquals(corrId, corrIdSlot.captured)
+        Assertions.assertEquals("feilende steg", feilendeSteg.captured)
     }
 
     @Test
@@ -70,6 +94,8 @@ internal class OmregningFeiletRiverTest {
                             sakId = sakId,
                             revurderingaarsak = Revurderingaarsak.REGULERING,
                         ).toPacket(),
+                    FEILMELDING_KEY to "",
+                    FEILENDE_STEG to "",
                 ),
             )
 

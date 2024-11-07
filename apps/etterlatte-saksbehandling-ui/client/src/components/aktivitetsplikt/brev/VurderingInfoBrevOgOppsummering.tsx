@@ -8,7 +8,7 @@ import { UtenBrevVisning } from '~components/aktivitetsplikt/brev/UtenBrevVisnin
 export function VurderingInfoBrevOgOppsummering() {
   useSidetittel('Aktivitetsplikt brev og oppsummering')
 
-  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+  const { aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
 
   if (!aktivtetspliktbrevdata?.brevId) {
     return (
@@ -19,5 +19,5 @@ export function VurderingInfoBrevOgOppsummering() {
     )
   }
 
-  return <Aktivitetspliktbrev brevId={aktivtetspliktbrevdata.brevId} sakId={oppgave.sakId} oppgaveid={oppgave.id} />
+  return <Aktivitetspliktbrev brevId={aktivtetspliktbrevdata.brevId} />
 }

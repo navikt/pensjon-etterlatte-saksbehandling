@@ -30,6 +30,11 @@ interface BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
 
+    suspend fun slettBrev(
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
     suspend fun ferdigstillBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
@@ -117,6 +122,20 @@ class BrevApiKlientObo(
 
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
+
+    override suspend fun slettBrev(
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient
+            .delete(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/$brevId"),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { },
+                failure = { errorResponse -> throw errorResponse },
+            )
+    }
 
     override suspend fun ferdigstillBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,

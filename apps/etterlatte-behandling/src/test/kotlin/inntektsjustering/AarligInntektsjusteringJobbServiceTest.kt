@@ -466,7 +466,7 @@ class AarligInntektsjusteringJobbServiceTest {
                         kjoering shouldBe "kjoering"
                         status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
-                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONOPPLYSNINGER.name
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONO_INFO.name
                     }
                 },
             )

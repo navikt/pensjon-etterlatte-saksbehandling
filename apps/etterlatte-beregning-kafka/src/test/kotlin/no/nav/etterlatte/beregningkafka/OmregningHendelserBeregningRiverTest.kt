@@ -16,13 +16,16 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -54,10 +57,15 @@ class OmregningHendelserBeregningRiverTest {
 
         runBlocking {
             river.beregn(
-                SakType.BARNEPENSJON,
-                revurderingaarsak = Revurderingaarsak.REGULERING,
-                behandlingId = nyBehandling,
-                behandlingViOmregnerFra = gammelBehandling,
+                OmregningData(
+                    kjoering = "",
+                    sakId = SakId(123L),
+                    sakType = SakType.BARNEPENSJON,
+                    revurderingaarsak = Revurderingaarsak.REGULERING,
+                    behandlingId = nyBehandling,
+                    forrigeBehandlingId = gammelBehandling,
+                    fradato = LocalDate.of(2024, 1, 1),
+                ),
             )
         }
     }
@@ -89,10 +97,15 @@ class OmregningHendelserBeregningRiverTest {
         runBlocking {
             assertThrows<MindreEnnForrigeBehandling> {
                 river.beregn(
-                    SakType.BARNEPENSJON,
-                    revurderingaarsak = Revurderingaarsak.REGULERING,
-                    behandlingId = nyBehandling,
-                    behandlingViOmregnerFra = gammelBehandling,
+                    OmregningData(
+                        kjoering = "",
+                        sakId = SakId(123L),
+                        sakType = SakType.BARNEPENSJON,
+                        revurderingaarsak = Revurderingaarsak.REGULERING,
+                        behandlingId = nyBehandling,
+                        forrigeBehandlingId = gammelBehandling,
+                        fradato = LocalDate.of(2024, 1, 1),
+                    ),
                 )
             }
         }
@@ -126,10 +139,15 @@ class OmregningHendelserBeregningRiverTest {
 
         runBlocking {
             river.beregn(
-                SakType.BARNEPENSJON,
-                revurderingaarsak = Revurderingaarsak.REGULERING,
-                behandlingId = nyBehandling,
-                behandlingViOmregnerFra = gammelBehandling,
+                OmregningData(
+                    kjoering = "",
+                    sakId = SakId(123L),
+                    sakType = SakType.BARNEPENSJON,
+                    revurderingaarsak = Revurderingaarsak.REGULERING,
+                    behandlingId = nyBehandling,
+                    forrigeBehandlingId = gammelBehandling,
+                    fradato = LocalDate.of(2024, 1, 1),
+                ),
             )
         }
     }
@@ -161,10 +179,15 @@ class OmregningHendelserBeregningRiverTest {
         runBlocking {
             assertThrows<ForStorOekning> {
                 river.beregn(
-                    SakType.BARNEPENSJON,
-                    revurderingaarsak = Revurderingaarsak.REGULERING,
-                    behandlingId = nyBehandling,
-                    behandlingViOmregnerFra = gammelBehandling,
+                    OmregningData(
+                        kjoering = "",
+                        sakId = SakId(123L),
+                        sakType = SakType.BARNEPENSJON,
+                        revurderingaarsak = Revurderingaarsak.REGULERING,
+                        behandlingId = nyBehandling,
+                        forrigeBehandlingId = gammelBehandling,
+                        fradato = LocalDate.of(2024, 1, 1),
+                    ),
                 )
             }
         }
@@ -197,10 +220,15 @@ class OmregningHendelserBeregningRiverTest {
         runBlocking {
             val resultat =
                 river.beregn(
-                    SakType.BARNEPENSJON,
-                    revurderingaarsak = Revurderingaarsak.REGULERING,
-                    behandlingId = nyBehandling,
-                    behandlingViOmregnerFra = gammelBehandling,
+                    OmregningData(
+                        kjoering = "",
+                        sakId = SakId(123L),
+                        sakType = SakType.BARNEPENSJON,
+                        revurderingaarsak = Revurderingaarsak.REGULERING,
+                        behandlingId = nyBehandling,
+                        forrigeBehandlingId = gammelBehandling,
+                        fradato = LocalDate.of(2024, 1, 1),
+                    ),
                 )
 
             assertNotNull(resultat)

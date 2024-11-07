@@ -130,6 +130,7 @@ data class OmregningDataPacket(
         val FRA_DATO = "$HENDELSE_DATA_KEY.${OmregningDataPacket::fradato.name}"
         val BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::behandlingId.name}"
         val FORRIGE_BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::forrigeBehandlingId.name}"
+        val REV_AARSAK = "$HENDELSE_DATA_KEY.${OmregningDataPacket::revurderingaarsak.name}"
     }
 }
 

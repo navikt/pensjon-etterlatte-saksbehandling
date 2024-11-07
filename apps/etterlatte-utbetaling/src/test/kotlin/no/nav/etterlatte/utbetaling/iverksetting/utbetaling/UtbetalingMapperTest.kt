@@ -31,7 +31,6 @@ class UtbetalingMapperTest {
                             ),
                         sakType = Saktype.BARNEPENSJON,
                     ),
-                skalBrukeRegelverk = true,
             )
 
         val utbetaling = mapper.opprettUtbetaling()
@@ -60,7 +59,6 @@ class UtbetalingMapperTest {
                             ),
                         sakType = Saktype.BARNEPENSJON,
                     ),
-                skalBrukeRegelverk = true,
             )
 
         val utbetaling = mapper.opprettUtbetaling()
@@ -87,7 +85,6 @@ class UtbetalingMapperTest {
                             ),
                         sakType = Saktype.OMSTILLINGSSTOENAD,
                     ),
-                skalBrukeRegelverk = true,
             )
 
         val utbetaling = mapper.opprettUtbetaling()

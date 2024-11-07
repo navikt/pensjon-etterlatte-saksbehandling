@@ -11,8 +11,12 @@ import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAkt
 import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
 
-const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurdering>(
-  {} as AktivitetspliktOppgaveVurdering
+interface AktivitetspliktOppgaveVurderingProvider extends AktivitetspliktOppgaveVurdering {
+  oppdater: () => void
+}
+
+const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurderingProvider>(
+  {} as AktivitetspliktOppgaveVurderingProvider
 )
 
 export function OppgaveVurderingRoute(props: {
@@ -20,19 +24,17 @@ export function OppgaveVurderingRoute(props: {
   fetchOppgave: () => void
 }) {
   const { vurderingOgOppgave, fetchOppgave } = props
+
   return (
-    <AktivitetspliktOppgaveContext.Provider value={vurderingOgOppgave}>
+    <AktivitetspliktOppgaveContext.Provider value={{ ...vurderingOgOppgave, oppdater: fetchOppgave }}>
       <StatusBar ident={vurderingOgOppgave.oppgave.fnr} />
       <AktivitetspliktStegmeny />
 
       <GridContainer>
         <MainContent>
           <Routes>
-            <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet fetchOppgave={fetchOppgave} />} />
-            <Route
-              path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV}
-              element={<VurderingInfoBrevOgOppsummering fetchOppgave={fetchOppgave} />}
-            />
+            <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet />} />
+            <Route path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV} element={<VurderingInfoBrevOgOppsummering />} />
             <Route path="*" element={<Navigate to={AktivitetspliktSteg.VURDERING} replace />} />
           </Routes>
         </MainContent>
@@ -42,7 +44,7 @@ export function OppgaveVurderingRoute(props: {
   )
 }
 
-export const useAktivitetspliktOppgaveVurdering = (): AktivitetspliktOppgaveVurdering => {
+export const useAktivitetspliktOppgaveVurdering = (): AktivitetspliktOppgaveVurderingProvider => {
   try {
     const oppgave = useContext(AktivitetspliktOppgaveContext)
     if (!oppgave) {

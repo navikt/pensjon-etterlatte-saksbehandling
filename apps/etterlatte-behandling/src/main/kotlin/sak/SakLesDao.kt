@@ -80,7 +80,7 @@ class SakLesDao(
                     ${if (spesifikkeSaker.isEmpty()) "" else " AND id = ANY(?)"}
                     ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(id = ANY(?))"}
                     ${if (sakType == null) "" else " AND s.saktype = ?"}
-                    ${if (loependeFom == null) "" else " AND EXISTS (SELECT 1 FROM behandling b WHERE b.sak_id = s.id AND b.opphoer_fom > ?)"}
+                    
                     ORDER BY id ASC
                     LIMIT $antall
                         """.trimMargin(),
@@ -96,10 +96,6 @@ class SakLesDao(
                 }
                 if (sakType != null) {
                     statement.setString(paramIndex, sakType.name)
-                    paramIndex += 1
-                }
-                if (loependeFom != null) {
-                    statement.setString(paramIndex, loependeFom.toString())
                     paramIndex += 1
                 }
 
@@ -122,7 +118,8 @@ class SakLesDao(
 
     fun finnSakMedGraderingOgSkjerming(id: SakId): SakMedGraderingOgSkjermet =
         connectionAutoclosing.hentConnection { connection ->
-            val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
+            val statement =
+                connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
             statement.setSakId(1, id)
             statement.executeQuery().single {
                 SakMedGraderingOgSkjermet(

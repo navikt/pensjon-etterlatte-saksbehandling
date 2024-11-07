@@ -10,7 +10,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.ktor.runServer
@@ -25,7 +24,6 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingToggles
 import no.nav.etterlatte.utbetaling.klienter.BehandlingKlient
 import no.nav.etterlatte.utbetaling.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.utbetalingRoutes
@@ -62,10 +60,6 @@ class SimuleringOsRouteTest {
             vedtaksvurderingKlient,
             simuleringDao,
             simuleringOsKlient,
-            featureToggleService =
-                mockk {
-                    every { isEnabled(UtbetalingToggles.BRUK_REGELVERK_FOR_KLASSIFIKASJONSKODE, any()) } returns true
-                },
         )
 
     @BeforeAll

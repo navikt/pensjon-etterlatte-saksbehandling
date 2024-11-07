@@ -9,17 +9,20 @@ import { slettAktivitetspliktVurdering } from '~shared/api/aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
-  const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, vurdering, oppdater } = useAktivitetspliktOppgaveVurdering()
   const [aktivitetForRedigering, setAktivitetForRedigering] = useState<IAktivitetspliktAktivitetsgrad | undefined>()
   const [slettStatus, slettSpesifikkAktivitet] = useApiCall(slettAktivitetspliktVurdering)
+
+  const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
   const aktiviteter = vurdering.aktivitet
 
   function oppdaterTilstandLagretVurdering() {
-    // TODO: oppdater state
     setAktivitetForRedigering(undefined)
+    oppdater()
   }
 
   function slettAktivitetsgradIOppgave(aktivitet: IAktivitetspliktAktivitetsgrad) {
@@ -30,8 +33,8 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
         vurderingId: aktivitet.id,
       },
       () => {
-        // TODO: oppdater state
         setAktivitetForRedigering(undefined)
+        oppdater()
       }
     )
   }
@@ -93,25 +96,27 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
                     <Detail>Saksbehandler: {formaterDato(aktivitet.endret.tidspunkt)}</Detail>
                   </Table.DataCell>
                   <Table.DataCell>
-                    <HStack gap="4">
-                      <Button
-                        size="xsmall"
-                        variant="secondary"
-                        onClick={() => setAktivitetForRedigering(aktivitet)}
-                        icon={<PencilIcon />}
-                      >
-                        Rediger
-                      </Button>
-                      <Button
-                        size="xsmall"
-                        variant="secondary"
-                        icon={<TrashIcon />}
-                        loading={isPending(slettStatus)}
-                        onClick={() => slettAktivitetsgradIOppgave(aktivitet)}
-                      >
-                        Slett
-                      </Button>
-                    </HStack>
+                    {erRedigerbar && (
+                      <HStack gap="4">
+                        <Button
+                          size="xsmall"
+                          variant="secondary"
+                          onClick={() => setAktivitetForRedigering(aktivitet)}
+                          icon={<PencilIcon />}
+                        >
+                          Rediger
+                        </Button>
+                        <Button
+                          size="xsmall"
+                          variant="secondary"
+                          icon={<TrashIcon />}
+                          loading={isPending(slettStatus)}
+                          onClick={() => slettAktivitetsgradIOppgave(aktivitet)}
+                        >
+                          Slett
+                        </Button>
+                      </HStack>
+                    )}
                   </Table.DataCell>
                 </Table.ExpandableRow>
               ))}

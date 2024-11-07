@@ -2,13 +2,15 @@ import React, { useState } from 'react'
 import { Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { PlusIcon } from '@navikt/aksel-icons'
 import { UnntakAktivitetspliktOppgaveForm } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgaveForm'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 
 export function LeggTilUnntak() {
+  const { oppdater } = useAktivitetspliktOppgaveVurdering()
   const [leggerTilUnntak, setLeggerTilUnntak] = useState(false)
 
   function oppdaterTilstandVedLagring() {
-    // TODO: oppdater tilstand også
     setLeggerTilUnntak(false)
+    oppdater()
   }
 
   if (!leggerTilUnntak) {

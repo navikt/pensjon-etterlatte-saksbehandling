@@ -13,7 +13,7 @@ import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 export function UnntakIOppgave() {
-  const { vurdering, oppgave } = useAktivitetspliktOppgaveVurdering()
+  const { vurdering, oppgave, oppdater } = useAktivitetspliktOppgaveVurdering()
   const [unntakForRedigering, setUnntakForRedigering] = useState<IAktivitetspliktUnntak | undefined>()
   const [slettUnntakStatus, slettSpesifiktUnntak, resetSlettStatus] = useApiCall(slettAktivitetspliktUnntak)
   const unntaker = vurdering.unntak
@@ -28,16 +28,16 @@ export function UnntakIOppgave() {
         unntakId: unntak.id,
       },
       () => {
-        // TODO oppdater faktisk state
         setUnntakForRedigering(undefined)
+        oppdater()
       }
     )
   }
 
   function oppdaterStateEtterRedigertUnntak() {
     resetSlettStatus()
-    // TODO faktisk oppdater state
     setUnntakForRedigering(undefined)
+    oppdater()
   }
 
   return (

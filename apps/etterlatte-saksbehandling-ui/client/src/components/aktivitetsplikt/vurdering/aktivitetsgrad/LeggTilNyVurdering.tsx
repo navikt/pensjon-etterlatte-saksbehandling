@@ -2,13 +2,15 @@ import React, { useState } from 'react'
 import { Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { VurderingAktivitetsgradForm } from './VurderingAktivitetsgradForm'
 import { PlusIcon } from '@navikt/aksel-icons'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 
 export function LeggTilNyVurdering(props: { doedsdato?: Date }) {
+  const { oppdater } = useAktivitetspliktOppgaveVurdering()
   const [leggerTilVurdering, setLeggerTilVurdering] = useState(false)
 
   function oppdaterStateVedLagring() {
-    // TODO: Oppdatere state også med ny vurdering
     setLeggerTilVurdering(false)
+    oppdater()
   }
 
   if (!leggerTilVurdering) {

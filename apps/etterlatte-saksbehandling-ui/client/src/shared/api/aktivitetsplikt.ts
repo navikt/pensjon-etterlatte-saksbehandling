@@ -136,9 +136,9 @@ export const lagreAktivitetspliktBrevdata = async (args: {
 export const opprettAktivitetspliktsbrev = async (args: { oppgaveId: string }): Promise<ApiResponse<BrevId>> =>
   apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/opprettbrev`, {})
 
-export const ferdigstillJournalfoerOgDistribuerbrev = async (args: {
+export const ferdigstillBrevOgOppgaveAktivitetsplikt = async (args: {
   oppgaveId: string
-}): Promise<ApiResponse<BrevId>> =>
+}): Promise<ApiResponse<void>> =>
   apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/ferdigstillbrev-og-oppgave`, {})
 
 interface BrevId {

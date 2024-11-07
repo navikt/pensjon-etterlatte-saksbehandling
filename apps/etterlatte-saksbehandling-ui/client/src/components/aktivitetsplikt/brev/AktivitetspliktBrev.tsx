@@ -1,6 +1,4 @@
-import { Alert, AlertProps, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
@@ -19,70 +17,6 @@ import { isPending } from '@reduxjs/toolkit'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { useNavigate } from 'react-router-dom'
-import { erOppgaveRedigerbar } from '~shared/types/oppgave'
-
-function ViHarIkkeBrev(props: { variant: AlertProps['variant']; message: string }) {
-  return (
-    <VStack gap="4">
-      <Box paddingInline="16" paddingBlock="16" maxWidth="120rem">
-        <Heading level="1" size="large">
-          Infobrev aktivitetsplikt
-        </Heading>
-      </Box>
-      <Box paddingInline="16" maxWidth="70rem">
-        <Alert variant={props.variant}>{props.message}</Alert>
-      </Box>
-      <InfobrevKnapperad />
-    </VStack>
-  )
-}
-
-export function VurderingInfoBrev() {
-  useSidetittel('Aktivitetsplikt brev')
-
-  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
-  const brevdataFinnes = !!aktivtetspliktbrevdata
-
-  const oppgaveErRedigerbar = erOppgaveRedigerbar(oppgave.status)
-
-  if (!brevdataFinnes) {
-    if (oppgaveErRedigerbar) {
-      return (
-        <ViHarIkkeBrev
-          variant="error"
-          message="Brevdata finnes ikke for denne oppgaven, gå tilbake til vurderingssiden for å endre dette"
-        />
-      )
-    } else {
-      return (
-        <ViHarIkkeBrev
-          variant="info"
-          message="Oppgaven ble ferdigstilt før ny vurderingsside for aktivitetspliktoppgaver, så et eventuelt ligger i
-          brevoversikten."
-        />
-      )
-    }
-  }
-
-  if (aktivtetspliktbrevdata?.skalSendeBrev) {
-    if (!aktivtetspliktbrevdata.brevId) {
-      return (
-        <ViHarIkkeBrev
-          variant="error"
-          message="Brev for denne oppgaven er ikke opprettet. Gå tilbake til forrige steg og trykk opprett brev."
-        />
-      )
-    } else {
-      return (
-        <>
-          <Aktivitetspliktbrev brevId={aktivtetspliktbrevdata.brevId} sakId={oppgave.sakId} oppgaveid={oppgave.id} />
-        </>
-      )
-    }
-  }
-
-  return <ViHarIkkeBrev variant="warning" message="Brev skal ikke sendes for denne oppgaven" />
-}
 
 export function Aktivitetspliktbrev({
   brevId,

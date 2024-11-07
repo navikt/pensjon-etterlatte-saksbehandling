@@ -34,10 +34,7 @@ export function OppgaveVurderingRoute(props: {
         <MainContent>
           <Routes>
             <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet />} />
-            <Route
-              path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV}
-              element={<VurderingInfoBrevOgOppsummering fetchOppgave={fetchOppgave} />}
-            />
+            <Route path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV} element={<VurderingInfoBrevOgOppsummering />} />
             <Route path="*" element={<Navigate to={AktivitetspliktSteg.VURDERING} replace />} />
           </Routes>
         </MainContent>

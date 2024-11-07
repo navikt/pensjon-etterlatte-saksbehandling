@@ -5,7 +5,7 @@ import React from 'react'
 import { Aktivitetspliktbrev } from '~components/aktivitetsplikt/brev/AktivitetspliktBrev'
 import { UtenBrevVisning } from '~components/aktivitetsplikt/brev/UtenBrevVisning'
 
-export function VurderingInfoBrevOgOppsummering({ fetchOppgave }: { fetchOppgave: () => void }) {
+export function VurderingInfoBrevOgOppsummering() {
   useSidetittel('Aktivitetsplikt brev og oppsummering')
 
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
@@ -14,7 +14,7 @@ export function VurderingInfoBrevOgOppsummering({ fetchOppgave }: { fetchOppgave
     return (
       <Box paddingInline="16" paddingBlock="16">
         <Heading size="large">Vurdering av {aktivtetspliktbrevdata?.skalSendeBrev ? 'brev' : 'oppgave'}</Heading>
-        <UtenBrevVisning oppgave={oppgave} fetchOppgave={fetchOppgave} />
+        <UtenBrevVisning />
       </Box>
     )
   }

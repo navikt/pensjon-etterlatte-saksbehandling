@@ -5,10 +5,14 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
 import java.util.UUID
 
 class BeregningService(
@@ -59,6 +63,24 @@ class BeregningService(
     fun hentAvkorting(behandlingId: UUID) =
         runBlocking {
             beregningApp.get("$url/api/beregning/avkorting/$behandlingId/ferdig")
+        }
+
+    fun omregnAarligInntektsjustering(
+        aar: Int,
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+    ): HttpResponse =
+        runBlocking {
+            beregningApp.post("$url/api/beregning/avkorting/aarlig-inntektsjustering") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    AarligInntektsjusteringAvkortingRequest(
+                        aar = aar,
+                        nyBehandling = behandlingId,
+                        forrigeBehandling = forrigeBehandlingId,
+                    ),
+                )
+            }
         }
 
     suspend fun hentGrunnbeloep(): Grunnbeloep =

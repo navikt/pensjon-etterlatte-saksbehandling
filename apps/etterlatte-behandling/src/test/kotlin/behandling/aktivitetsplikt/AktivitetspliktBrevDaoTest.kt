@@ -6,6 +6,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.lagNyOppgave
 import no.nav.etterlatte.sak.SakSkrivDao
@@ -35,6 +36,7 @@ class AktivitetspliktBrevDaoTest(
                 skalSendeBrev = true,
                 utbetaling = true,
                 redusertEtterInntekt = true,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
             )
 
         dao.lagreBrevdata(brevdata)
@@ -61,6 +63,7 @@ class AktivitetspliktBrevDaoTest(
                 skalSendeBrev = true,
                 utbetaling = false,
                 redusertEtterInntekt = false,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
             )
 
         dao.lagreBrevdata(brevdata)
@@ -83,10 +86,44 @@ class AktivitetspliktBrevDaoTest(
                 sakid = sak.id,
                 oppgaveId = oppgave.id,
                 skalSendeBrev = false,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
             )
 
         dao.lagreBrevdata(brevdata)
         val lagretBrevdata = dao.hentBrevdata(oppgave.id)
         lagretBrevdata shouldBe brevdata
+    }
+
+    @Test
+    fun `Kan fjerne brevid og kilde oppdaterer seg`() {
+        val sak = sakSkrivDao.opprettSak("person", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
+
+        val sbIdent = "ident"
+        val brevdata =
+            AktivitetspliktInformasjonBrevdata(
+                sakid = sak.id,
+                oppgaveId = oppgave.id,
+                skalSendeBrev = true,
+                utbetaling = false,
+                redusertEtterInntekt = false,
+                kilde = Grunnlagsopplysning.Saksbehandler.create(sbIdent),
+            )
+
+        dao.lagreBrevdata(brevdata)
+        val lagretBrevdata = dao.hentBrevdata(oppgave.id)
+        lagretBrevdata shouldBe brevdata
+
+        val brevId = 1L
+        dao.lagreBrevId(oppgave.id, brevId)
+        val brevdataMedBrevId = dao.hentBrevdata(oppgave.id)
+        brevdataMedBrevId?.brevId shouldBe brevId
+
+        val nyKilde = Grunnlagsopplysning.Saksbehandler.create(sbIdent)
+        dao.fjernBrevId(oppgave.id, nyKilde)
+
+        val dataMedFjernetBrevidOgNyKilde = dao.hentBrevdata(oppgave.id)
+        dataMedFjernetBrevidOgNyKilde?.kilde shouldBe nyKilde
+        dataMedFjernetBrevidOgNyKilde?.brevId shouldBe null
     }
 }

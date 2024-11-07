@@ -6,8 +6,6 @@ import io.ktor.client.plugins.auth.Auth
 import no.nav.etterlatte.BrevKey.BREVBAKER_SCOPE
 import no.nav.etterlatte.BrevKey.BREVBAKER_URL
 import no.nav.etterlatte.BrevKey.CLAMAV_ENDPOINT_URL
-import no.nav.etterlatte.BrevKey.DOKDIST_SCOPE
-import no.nav.etterlatte.BrevKey.DOKDIST_URL
 import no.nav.etterlatte.BrevKey.REGOPPSLAG_SCOPE
 import no.nav.etterlatte.BrevKey.REGOPPSLAG_URL
 import no.nav.etterlatte.BrevKey.SAF_BASE_URL
@@ -130,8 +128,7 @@ internal class ApplicationContext {
 
     val dokarkivService = DokarkivServiceImpl(dokarkivKlient)
 
-    val distribusjonKlient =
-        DistribusjonKlient(httpClient(DOKDIST_SCOPE, false), env.requireEnvValue(DOKDIST_URL))
+    val distribusjonKlient = DistribusjonKlient(config)
 
     val distribusjonService = DistribusjonServiceImpl(distribusjonKlient)
 
@@ -250,8 +247,6 @@ enum class BrevKey : EnvEnum {
     BREVBAKER_SCOPE,
     BREVBAKER_URL,
     CLAMAV_ENDPOINT_URL,
-    DOKDIST_SCOPE,
-    DOKDIST_URL,
     REGOPPSLAG_SCOPE,
     REGOPPSLAG_URL,
     SAF_BASE_URL,

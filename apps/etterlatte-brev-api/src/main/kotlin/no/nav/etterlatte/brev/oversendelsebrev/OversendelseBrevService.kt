@@ -111,6 +111,7 @@ class OversendelseBrevServiceImpl(
                     brevtype = Brevtype.OVERSENDELSE_KLAGE,
                     brevkoder = Brevkoder.OVERSENDELSE_KLAGE,
                 ),
+                brukerTokenInfo,
             )
         return brev
     }

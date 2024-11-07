@@ -55,7 +55,7 @@ class AktivitetspliktKopierServiceTest {
                     tom = LocalDate.now().plusMonths(6),
                 )
 
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns emptyList()
             every { aktivitetspliktUnntakDao.kopierUnntakTilBehandling(unntakId, behandlingId) } returns 1
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns emptyList()

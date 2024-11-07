@@ -7,6 +7,85 @@
   resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.4.0.tgz#728c484f4e10df03d5a3acd0d8adcbbebff8ad63"
   integrity sha512-Ff9+ksdQQB3rMncgqDK78uLznstjyfIf2Arnh22pW8kBpLs6rpKDwgnZT46hin5Hl1WzazzK64DOrhSwYpS7bQ==
 
+"@amplitude/analytics-browser@^2.11.8":
+  version "2.11.8"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-browser/-/analytics-browser-2.11.8.tgz#ab084a0b1e647ed3ceb4ba112d97cf25ddb58684"
+  integrity sha512-lFv8deROLwBfSlg92+r1NitWJ6BN45IKwpPLoixA0fZytScXEJqc0Gl5O+BY4qScbFECYt9PFKblhB+jC+IvPg==
+  dependencies:
+    "@amplitude/analytics-client-common" "^2.3.4"
+    "@amplitude/analytics-core" "^2.5.3"
+    "@amplitude/analytics-remote-config" "^0.4.0"
+    "@amplitude/analytics-types" "^2.8.3"
+    "@amplitude/plugin-autocapture-browser" "^1.0.2"
+    "@amplitude/plugin-page-view-tracking-browser" "^2.3.4"
+    tslib "^2.4.1"
+
+"@amplitude/analytics-client-common@>=1 <3", "@amplitude/analytics-client-common@^2.3.4":
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-client-common/-/analytics-client-common-2.3.4.tgz#c17c853e2d7c0158f8fdbbc514973df9ab57db0d"
+  integrity sha512-3oqdvca5W4BPblTaxf60YRtlh2uC+N3rA99wowDAhTBJoMJJaauOBoXu5BbiQO1u8Zw/c8ymyr8E20+glyptUg==
+  dependencies:
+    "@amplitude/analytics-connector" "^1.4.8"
+    "@amplitude/analytics-core" "^2.5.3"
+    "@amplitude/analytics-types" "^2.8.3"
+    tslib "^2.4.1"
+
+"@amplitude/analytics-connector@^1.4.8":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-connector/-/analytics-connector-1.6.0.tgz#faf6f3b432a87a85f9239ba609e15bfde58ab3fb"
+  integrity sha512-hDDCEzJWhuGqsStGNPCPT1trPSps4f7XmKFrkmqJIsdvBOPIeh6DWCyEDIXF7jyFX1EzxNZPzvayhj7mIMw//Q==
+  dependencies:
+    "@amplitude/experiment-core" "^0.9.0"
+
+"@amplitude/analytics-core@>=1 <3", "@amplitude/analytics-core@^2.5.3":
+  version "2.5.3"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-core/-/analytics-core-2.5.3.tgz#73eabb5b79bf76bc4a5b519f75340791caba1697"
+  integrity sha512-dvx3PS0adnHRS22VbuP9YtWg//bQGF2c61Pj5IYXVsemtRRHqiS7XJ860brk3WeQgOkqf3Gyc023DoYcsWGoNQ==
+  dependencies:
+    "@amplitude/analytics-types" "^2.8.3"
+    tslib "^2.4.1"
+
+"@amplitude/analytics-remote-config@^0.4.0":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-remote-config/-/analytics-remote-config-0.4.1.tgz#b62cf8aa82290f68b314197e20351b10ea44ae3e"
+  integrity sha512-BYl6kQ9qjztrCACsugpxO+foLaQIC0aSEzoXEAb/gwOzInmqkyyI+Ub+aWTBih4xgB/lhWlOcidWHAmNiTJTNw==
+  dependencies:
+    "@amplitude/analytics-client-common" ">=1 <3"
+    "@amplitude/analytics-core" ">=1 <3"
+    "@amplitude/analytics-types" ">=1 <3"
+    tslib "^2.4.1"
+
+"@amplitude/analytics-types@>=1 <3", "@amplitude/analytics-types@^2.8.2", "@amplitude/analytics-types@^2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-types/-/analytics-types-2.8.3.tgz#a5a4e1d6f1f02bc2c17d9460c95fc0e449f94351"
+  integrity sha512-HNmKVd0ACoi3xTi86xi+is7WgqKT78JA4fYLcM25/ckFkZ1zVCqD1AubaADEh26m34nJ3qDLK5Pob4QptQNPAg==
+
+"@amplitude/experiment-core@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@amplitude/experiment-core/-/experiment-core-0.9.0.tgz#aaa6813a4fb022a7c7fc80f1ffd22004ddb19360"
+  integrity sha512-Ofl5EhVK0TznqUaoq+JyXK4GiIAHX03t/oAlY47yrdclWRKjs6xK8QV/wdIitti5d45iT3ywrqQDSyA74tkPaA==
+  dependencies:
+    js-base64 "^3.7.5"
+
+"@amplitude/plugin-autocapture-browser@^1.0.2":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@amplitude/plugin-autocapture-browser/-/plugin-autocapture-browser-1.0.3.tgz#cd14a1a5f10a570f1e2b08465e42bc4d38eee0b5"
+  integrity sha512-XUQWUAw9VqtJPlmOyWjnhsEspyVakd9LuSjVNtLjhwlWv+f/yZM1AAQVUdq/Os1+b5OptSgJQ2pPfRJJHZDXTw==
+  dependencies:
+    "@amplitude/analytics-client-common" ">=1 <3"
+    "@amplitude/analytics-types" "^2.8.2"
+    rxjs "^7.8.1"
+    tslib "^2.4.1"
+
+"@amplitude/plugin-page-view-tracking-browser@^2.3.4":
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/@amplitude/plugin-page-view-tracking-browser/-/plugin-page-view-tracking-browser-2.3.4.tgz#96002cb4331d5c3e5fe7ea70f73ca274bce0d600"
+  integrity sha512-l7RS5gssG0BPYlgirV0NQ94EPzTOdDkp0z2jqU45D3DQAJXkoloUyw5lw/cbUXYwNulHZTG/BExcERfdvVWkLA==
+  dependencies:
+    "@amplitude/analytics-client-common" "^2.3.4"
+    "@amplitude/analytics-types" "^2.8.3"
+    tslib "^2.4.1"
+
 "@babel/runtime@^7.12.5":
   version "7.25.6"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.25.6.tgz#9afc3289f7184d8d7f98b099884c26317b9264d2"
@@ -193,14 +272,7 @@
     "@floating-ui/core" "^1.6.0"
     "@floating-ui/utils" "^0.2.7"
 
-"@floating-ui/react-dom@^2.0.2", "@floating-ui/react-dom@^2.0.9":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-2.1.1.tgz#cca58b6b04fc92b4c39288252e285e0422291fb0"
-  integrity sha512-4h84MJt3CHrtG18mGsXuLCHMrug49d7DFkU0RMIyshRveBeyV2hmV/pDaF2Uxtu8kgq5r46llp5E5FQiR0K2Yg==
-  dependencies:
-    "@floating-ui/dom" "^1.0.0"
-
-"@floating-ui/react-dom@^2.1.2":
+"@floating-ui/react-dom@^2.0.2", "@floating-ui/react-dom@^2.0.9", "@floating-ui/react-dom@^2.1.2":
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-2.1.2.tgz#a1349bbf6a0e5cb5ded55d023766f20a4d439a31"
   integrity sha512-06okr5cgPzMNBy+Ycse2A6udMi4bqwW/zgBF/rwjcNqWkyr82Mcg8b0vjX8OJpZFy/FKjJmw6wV7t44kK6kW7A==
@@ -281,33 +353,33 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^7.1.0":
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.1.0.tgz#01f80ff249d8a5ea0158c737026860fd4b59c08b"
-  integrity sha512-1dwuT6KraLJyfeNQDVjzzZAPy/bBWlAP+ufHcrPGoTMuZHTWYj9db8wKgwqesZkHRwUCmqzOMDPk9lr+0Pczng==
+"@navikt/aksel-icons@^7.4.3":
+  version "7.4.3"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.4.3.tgz#28ae69c2846fc92b0f67cce5f1941aadab60a192"
+  integrity sha512-tRSQLBhwE5jusOrN2DMq0J3n3yy7tkHx0pCZLd7fZvgT/ds7DgNzicUs+horJAIlRd7g8A4N89Lna3f+IiEv8g==
 
-"@navikt/ds-css@~7.1.0":
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-7.1.0.tgz#a4f5f25784152646f450c5518563f1e89f667a6a"
-  integrity sha512-Qlf3fl/EpAs5bvfIICbPWQwmQEHQf/uowN6ggNXJ5o4jcQafY02AwztNTujb0B4zfVdCqbLhjBet+9Ttvd9/MA==
+"@navikt/ds-css@~7.4.3":
+  version "7.4.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-7.4.3.tgz#5b678e1cfc4cadff54f77cff5e7e6098a4f5c3c2"
+  integrity sha512-Snz4FfQtOzfU3YPOvSxivjz5mhkoozMHpcTR2/HiNoI+E8CyDJJTuzPl6e5vjEVfUzL7Pyl7EZDkFBEmeDJKwg==
 
-"@navikt/ds-react@~7.1.0":
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.1.0.tgz#b1bb093a8a5fc78f57b4e1bc671bf40de85eae4c"
-  integrity sha512-xhmVRIIaR+rs8PIdXqRHVT6WueC4yjuCx9V2qCDN8C1mDausWDRZMRjTEVO+CXNrwUN1pBMTrEPGkCgps5F0xQ==
+"@navikt/ds-react@~7.4.3":
+  version "7.4.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.4.3.tgz#6a29d3918c08205d6a49658371ebbe6f55691bc7"
+  integrity sha512-xMtdoVnzYRejxAGxNCevk1CADboTfyu+UUvV5Dg3rW4BTB2Nbep4B2kLwrmjt9hndnz+E1prJB0zcfbGVda58Q==
   dependencies:
     "@floating-ui/react" "0.25.4"
     "@floating-ui/react-dom" "^2.0.9"
-    "@navikt/aksel-icons" "^7.1.0"
-    "@navikt/ds-tokens" "^7.1.0"
+    "@navikt/aksel-icons" "^7.4.3"
+    "@navikt/ds-tokens" "^7.4.3"
     clsx "^2.1.0"
     date-fns "^3.0.0"
-    react-day-picker "8.10.0"
+    react-day-picker "8.10.1"
 
-"@navikt/ds-tokens@^7.1.0", "@navikt/ds-tokens@~7.1.0":
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.1.0.tgz#c03dd5e1c9656faf78474c65c9d2c9ee76143695"
-  integrity sha512-ThLWiis1lU7TxJutwsF33f6CxPKNFEnMHidV35Yoe/bF93ebLJEdSSwcdhtJ+CMJizpKZOXw1AMXh4ADVfj+dA==
+"@navikt/ds-tokens@^7.4.3", "@navikt/ds-tokens@~7.4.3":
+  version "7.4.3"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.4.3.tgz#6fe0934795d8fdabfb2632498fd1d351ddcbb604"
+  integrity sha512-y8RTI86pZUUm9wDbORQXFCLzDiYz4sl/F7OBlEBltJ3qJBJSJsz8PYwDpEtPm+Qo4AZNYOa+6CG/d/PsFZBEyw==
 
 "@navikt/navspa@^6.0.1":
   version "6.0.1"
@@ -581,10 +653,10 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
-"@types/lodash@^4.17.9":
-  version "4.17.9"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.9.tgz#0dc4902c229f6b8e2ac5456522104d7b1a230290"
-  integrity sha512-w9iWudx1XWOHW5lQRS9iKpK/XuRhnN+0T7HvdCCd802FYkT1AMTnxndJHGrNJwRoRHkslGr4S29tjm1cT7x/7w==
+"@types/lodash@^4.17.13":
+  version "4.17.13"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.13.tgz#786e2d67cfd95e32862143abe7463a7f90c300eb"
+  integrity sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg==
 
 "@types/node@^22.7.4":
   version "22.7.4"
@@ -2257,6 +2329,11 @@ jackspeak@^3.1.2:
   optionalDependencies:
     "@pkgjs/parseargs" "^0.11.0"
 
+js-base64@^3.7.5:
+  version "3.7.7"
+  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-3.7.7.tgz#e51b84bf78fbf5702b9541e2cb7bfcb893b43e79"
+  integrity sha512-7rCnleh0z2CkXhH67J8K1Ytz0b2Y+yxTPL+/KOJoa20hfnVQ/3/T6W/KflYI4bRHRagNeXeU2bkNGI3v1oS/lw==
+
 "js-tokens@^3.0.0 || ^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -2764,10 +2841,10 @@ react-datepicker@*, react-datepicker@^7.4.0:
     date-fns "^3.6.0"
     prop-types "^15.8.1"
 
-react-day-picker@8.10.0:
-  version "8.10.0"
-  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-8.10.0.tgz#729c5b9564967a924213978fb9c0751884a60595"
-  integrity sha512-mz+qeyrOM7++1NCb1ARXmkjMkzWVh2GL9YiPbRjKe0zHccvekk4HE+0MPOZOrosn8r8zTHIIeOUXTmXRqmkRmg==
+react-day-picker@8.10.1:
+  version "8.10.1"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-8.10.1.tgz#4762ec298865919b93ec09ba69621580835b8e80"
+  integrity sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==
 
 react-dom@^18.3.1:
   version "18.3.1"
@@ -2968,6 +3045,13 @@ run-parallel@^1.1.9:
   integrity sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==
   dependencies:
     queue-microtask "^1.2.2"
+
+rxjs@^7.8.1:
+  version "7.8.1"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
+  integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==
+  dependencies:
+    tslib "^2.1.0"
 
 safe-array-concat@^1.1.2:
   version "1.1.2"
@@ -3454,6 +3538,11 @@ tslib@2.6.2:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.6.2.tgz#703ac29425e7b37cd6fd456e92404d46d1f3e4ae"
   integrity sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==
+
+tslib@^2.1.0, tslib@^2.4.1:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.8.0.tgz#d124c86c3c05a40a91e6fdea4021bd31d377971b"
+  integrity sha512-jWVzBLplnCmoaTr13V9dYbiQ99wvZRd0vNWaDRg+aVYRcjDF3nDksxFDE/+fkXnKhpnUUkmx5pK/v8mCtLVqZA==
 
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"

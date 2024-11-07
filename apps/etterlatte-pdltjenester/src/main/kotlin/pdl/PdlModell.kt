@@ -66,29 +66,29 @@ data class PdlAdressebeskyttelseVariables(
 )
 
 data class PdlPersonResponse(
-    val data: PdlPersonResponseData? = null,
-    val errors: List<PdlResponseError>? = null,
-)
+    override val data: PdlPersonResponseData? = null,
+    override val errors: List<PdlResponseError>? = null,
+) : PdlDataErrorResponse<PdlPersonResponseData>
 
 data class PdlPersonNavnFoedselResponse(
-    val data: PdlPersonNavnFoedselResponseData? = null,
-    val errors: List<PdlResponseError>? = null,
-)
+    override val data: PdlPersonNavnFoedselResponseData? = null,
+    override val errors: List<PdlResponseError>? = null,
+) : PdlDataErrorResponse<PdlPersonNavnFoedselResponseData>
 
 data class PdlPersonResponseBolk(
-    val data: PdlPersonResponseBulkData? = null,
-    val errors: List<PdlResponseError>? = null,
-)
+    override val data: PdlPersonResponseBulkData? = null,
+    override val errors: List<PdlResponseError>? = null,
+) : PdlDataErrorResponse<PdlPersonResponseBulkData>
 
 data class PdlIdentResponse(
-    val data: PdlFolkegisterIdentData? = null,
-    val errors: List<PdlResponseError>? = null,
-)
+    override val data: PdlFolkegisterIdentData? = null,
+    override val errors: List<PdlResponseError>? = null,
+) : PdlDataErrorResponse<PdlFolkegisterIdentData>
 
 data class PdlAdressebeskyttelseResponse(
-    val data: PdlAdressebeskyttelseData? = null,
-    val errors: List<PdlResponseError>? = null,
-)
+    override val data: PdlAdressebeskyttelseData? = null,
+    override val errors: List<PdlResponseError>? = null,
+) : PdlDataErrorResponse<PdlAdressebeskyttelseData>
 
 data class PdlFolkegisterIdentData(
     val hentIdenter: PdlFolkeregisterIdentResult? = null,
@@ -503,9 +503,9 @@ data class PdlGeografiskTilknytningData(
 )
 
 data class PdlGeografiskTilknytningResponse(
-    val data: PdlGeografiskTilknytningData? = null,
-    val errors: List<PdlResponseError>? = null,
-)
+    override val data: PdlGeografiskTilknytningData? = null,
+    override val errors: List<PdlResponseError>? = null,
+) : PdlDataErrorResponse<PdlGeografiskTilknytningData>
 
 data class PdlFoedselsnumreFraAktoerIdRequest(
     val query: String,
@@ -555,9 +555,9 @@ data class PdlHentForeldreansvarHistorikkRequest(
 )
 
 data class PdlHentForeldreansvarHistorikkResponse(
-    val data: PdlHentForeldreansvarHistorikkHentPerson? = null,
-    val errors: List<PdlResponseError>? = null,
-)
+    override val data: PdlHentForeldreansvarHistorikkHentPerson? = null,
+    override val errors: List<PdlResponseError>? = null,
+) : PdlDataErrorResponse<PdlHentForeldreansvarHistorikkHentPerson>
 
 data class PdlHentForeldreansvarHistorikkHentPerson(
     val hentPerson: PdlHistorikkForeldreansvar? = null,

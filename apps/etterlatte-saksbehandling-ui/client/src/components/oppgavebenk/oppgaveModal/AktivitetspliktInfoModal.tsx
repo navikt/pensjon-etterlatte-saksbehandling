@@ -31,8 +31,8 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import {
   hentAktivitspliktVurderingForOppgave,
-  opprettAktivitspliktAktivitetsgrad,
-  opprettAktivitspliktUnntak,
+  opprettAktivitetspliktAktivitetsgrad,
+  opprettAktivitetspliktUnntak,
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { Toast } from '~shared/alerts/Toast'
@@ -55,8 +55,8 @@ export const AktivitetspliktInfoModal = ({
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
 
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
-  const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitspliktAktivitetsgrad)
-  const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitspliktUnntak)
+  const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitetspliktAktivitetsgrad)
+  const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitetspliktUnntak)
   const [hentet, hent] = useApiCall(hentAktivitspliktVurderingForOppgave)
   const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
 
@@ -110,6 +110,8 @@ export const AktivitetspliktInfoModal = ({
             beskrivelse: data.beskrivelse,
             fom: data.fom ? new Date(data.fom).toISOString() : new Date().toISOString(),
             tom: data.tom ? new Date(data.tom).toISOString() : undefined,
+            vurdertFra12Mnd: false,
+            skjoennsmessigVurdering: undefined,
           },
         },
         () => {

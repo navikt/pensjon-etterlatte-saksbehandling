@@ -44,7 +44,7 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
     case Revurderingaarsak.UT_AV_FENGSEL:
       return 'Ut av fengsel'
     case Revurderingaarsak.ANNEN:
-      return 'Annen (med brev)'
+      return 'Annen'
     case Revurderingaarsak.ANNEN_UTEN_BREV:
       return 'Annen (uten brev)'
     case Revurderingaarsak.RETT_UTEN_TIDSBEGRENSNING:
@@ -81,6 +81,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Utsendelse av SED'
     case Revurderingaarsak.AKTIVITETSPLIKT:
       return 'Aktivitetsplikt'
+    case Revurderingaarsak.AARLIG_INNTEKTSJUSTERING:
+      return 'Årlig inntektsjustering'
   }
 }
 

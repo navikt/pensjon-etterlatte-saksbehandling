@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnn
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -34,6 +33,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -132,8 +132,8 @@ class AktivitetspliktService(
                     (it.tom ?: aktivitetspliktDato) <= aktivitetspliktDato
             }
 
-        val oppfyllerAktivitet = relevantVurdering?.let { oppfyllerAktivitet(it) } ?: false
-        val harUnntak = relevantUnntak?.let { harUnntakPaaDato(it, aktivitetspliktDato) } ?: false
+        val oppfyllerAktivitet = relevantVurdering?.let { oppfyllerAktivitet(it) } == true
+        val harUnntak = relevantUnntak?.let { harUnntakPaaDato(it, aktivitetspliktDato) } == true
         return oppfyllerAktivitet || harUnntak
     }
 
@@ -242,20 +242,24 @@ class AktivitetspliktService(
         }
     }
 
-    fun opprettAktivitetsgradForOppgave(
+    fun upsertAktivitetsgradForOppgave(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         oppgaveId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): AktivitetspliktVurdering {
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        require(
-            aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId).isEmpty(),
-        ) { "Aktivitetsgrad finnes allerede for oppgave $oppgaveId" }
-        sjekkOmAktivitetsgradErGyldig(aktivitetsgrad)
-        aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId = UUID.fromString(oppgave.referanse)) }
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
+        sjekkOmAktivitetsgradErGyldig(aktivitetsgrad)
+        aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(aktivitetsgrad, sakId, kilde, oppgaveId)
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
+
+        return hentVurderingForOppgave(oppgaveId) ?: throw InternfeilException(
+            "Vi har ingen vurderinger men vi " +
+                "oppdaterte nettopp en vurdering i en oppgave. Gjelder oppgave med id=$oppgaveId i sak $sakId",
+        )
     }
 
     private fun sjekkOmAktivitetsgradErGyldig(aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad) {
@@ -294,7 +298,7 @@ class AktivitetspliktService(
                 aktivitetspliktUnntakDao.slettUnntak(it.id, behandlingId)
             }
 
-            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+            aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(
                 aktivitetsgrad,
                 sakId,
                 kilde,
@@ -305,22 +309,20 @@ class AktivitetspliktService(
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
     }
 
-    fun opprettUnntakForOpppgave(
+    fun upsertUnntakForOppgave(
         unntak: LagreAktivitetspliktUnntak,
         oppgaveId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): AktivitetspliktVurdering {
         if (unntak.fom != null && unntak.tom != null && unntak.fom > unntak.tom) {
             throw TomErFoerFomException()
         }
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        require(
-            aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId).isEmpty(),
-        ) { "Unntak finnes allerede for oppgave $oppgaveId" }
-        aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, oppgaveId)
-        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, kilde, oppgaveId)
         runBlocking {
             sendDtoTilStatistikk(
                 sakId = sakId,
@@ -328,6 +330,40 @@ class AktivitetspliktService(
                 behandlingId = UUID.fromString(oppgave.referanse),
             )
         }
+
+        return hentVurderingForOppgave(oppgaveId) ?: throw InternfeilException(
+            "Vi har ingen vurderinger men vi " +
+                "oppdaterte nettopp en vurdering i en oppgave. Gjelder oppgave med id=$oppgaveId i sak $sakId",
+        )
+    }
+
+    fun slettAktivitetsgradForOppgave(
+        oppgaveId: UUID,
+        aktivitetsgradId: UUID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AktivitetspliktVurdering? {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
+
+        aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForOppgave(aktivitetsgradId, oppgaveId)
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
+        return hentVurderingForOppgave(oppgaveId)
+    }
+
+    fun slettUnntakForOppgave(
+        oppgaveId: UUID,
+        unntakId: UUID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AktivitetspliktVurdering? {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
+        aktivitetspliktUnntakDao.slettUnntakForOppgave(oppgaveId, unntakId)
+        return hentVurderingForOppgave(oppgaveId)
     }
 
     fun upsertUnntakForBehandling(
@@ -359,10 +395,10 @@ class AktivitetspliktService(
             val aktivitetsgrad =
                 aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
             aktivitetsgrad.forEach {
-                aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(it.id, behandlingId)
+                aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForBehandling(it.id, behandlingId)
             }
 
-            aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
+            aktivitetspliktUnntakDao.upsertUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
         }
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
@@ -518,7 +554,7 @@ class AktivitetspliktService(
                 opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
             ).oppdater()
             .let { revurdering ->
-                fjernSaksbehandlerFraRevurderingsOppgave(revurdering)
+                revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(revurdering)
                 OpprettRevurderingForAktivitetspliktResponse(
                     opprettetRevurdering = true,
                     nyBehandlingId = revurdering.id,
@@ -527,23 +563,10 @@ class AktivitetspliktService(
             }
     }
 
-    private fun fjernSaksbehandlerFraRevurderingsOppgave(revurdering: Revurdering) {
-        val revurderingsOppgave =
-            oppgaveService
-                .hentOppgaverForReferanse(revurdering.id.toString())
-                .find { it.type == OppgaveType.REVURDERING }
-
-        if (revurderingsOppgave != null) {
-            oppgaveService.fjernSaksbehandler(revurderingsOppgave.id)
-        } else {
-            logger.warn("Fant ikke oppgave for revurdering av aktivitetsplikt for sak ${revurdering.sak.id}")
-        }
-    }
-
     private suspend fun sendDtoTilStatistikk(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID,
+        behandlingId: UUID?,
     ) {
         try {
             val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId)
@@ -571,16 +594,7 @@ class AktivitetspliktService(
         oppgaveId: UUID,
     ): AktivitetspliktVurdering? {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        if (oppgave.sakId != sakId) {
-            throw OppgaveTilhoererIkkeSakException(sakId, oppgaveId)
-        }
-
-        if (oppgave.erAvsluttet()) {
-            throw UgyldigForespoerselException(
-                "OPPGAVE_ER_AVSLUTTET",
-                "Kan ikke kopiere inn vurderinger på aktivitetsplikt på en oppgave som er avsluttet",
-            )
-        }
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
         when (oppgave.type) {
             OppgaveType.AKTIVITETSPLIKT,
@@ -597,6 +611,22 @@ class AktivitetspliktService(
 
         aktivitetspliktKopierService.kopierVurderingTilOppgave(sakId, oppgaveId)
         return hentVurderingForOppgave(oppgaveId)
+    }
+
+    private fun sjekkOppgaveTilhoererSakOgErRedigerbar(
+        oppgave: OppgaveIntern,
+        sakId: SakId,
+    ) {
+        if (oppgave.sakId != sakId) {
+            throw OppgaveTilhoererIkkeSakException(sakId, oppgave.id)
+        }
+
+        if (oppgave.erAvsluttet()) {
+            throw UgyldigForespoerselException(
+                "OPPGAVE_ER_AVSLUTTET",
+                "Kan ikke endre på unntak / vurderinger i en oppgave som er avsluttet",
+            )
+        }
     }
 }
 
@@ -718,3 +748,9 @@ interface AktivitetspliktVurderingOpprettetDato {
 }
 
 fun Grunnlagsopplysning.Kilde.endretDatoOrNull(): Tidspunkt? = if (this is Grunnlagsopplysning.Saksbehandler) this.tidspunkt else null
+
+class SakidTilhoererIkkeOppgaveException :
+    UgyldigForespoerselException(
+        "OPPGAVE_TILHOERER_IKKE_SAK",
+        "OppgaveId peker på en oppgave som har en annen sak enn angitt SakId",
+    )

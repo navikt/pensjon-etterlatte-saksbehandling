@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -68,6 +69,14 @@ class ManglerRinanummerException(
 class KanIkkeEndreGenerellBehandling(
     message: String,
 ) : IkkeTillattException("KAN_IKKE_ENDRE_GENERELL_BEHANDLING", message)
+
+class FeilStatusGenerellBehandling(
+    message: String,
+) : IkkeTillattException("FEIL_STATUS_BEHANDLING", message)
+
+class ManglerSaksbehandler(
+    message: String,
+) : IkkeTillattException("MANGLER_SAKSBEHANDLER", message)
 
 class UgyldigAttesteringsForespoersel(
     message: String,
@@ -137,11 +146,13 @@ class GenerellBehandlingService(
         generellBehandling: GenerellBehandling,
         saksbehandler: Saksbehandler,
     ) {
-        val hentetBehandling = hentBehandlingMedId(generellBehandling.id)
-        require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: ${generellBehandling.id}" }
-        check(hentetBehandling!!.kanEndres()) {
-            "Behandlingen må ha status opprettet, hadde ${generellBehandling.status}"
+        val hentetBehandling = hentBehandlingMedId(generellBehandling.id) ?: throw GenerellIkkeFunnetException()
+        if (!hentetBehandling.kanEndres()) {
+            throw FeilStatusGenerellBehandling(
+                "Behandlingen må ha status opprettet eller returnert, hadde ${generellBehandling.status} id: ${generellBehandling.id}",
+            )
         }
+
         when (generellBehandling.innhold) {
             is Innhold.KravpakkeUtland -> validerUtland(generellBehandling.innhold as Innhold.KravpakkeUtland)
             is Innhold.Annen -> throw NotImplementedError("Ikke implementert")
@@ -171,16 +182,18 @@ class GenerellBehandlingService(
         generellbehandlingId: UUID,
         saksbehandler: Saksbehandler,
     ) {
-        val hentetBehandling = hentBehandlingMedId(generellbehandlingId)
-        require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: $generellbehandlingId" }
-        require(hentetBehandling?.status === GenerellBehandling.Status.FATTET) {
-            "Behandlingen må ha status FATTET, hadde: ${hentetBehandling?.status}"
-        }
-        requireNotNull(hentetBehandling?.behandler) {
-            "Behandlingen har ikke fått satt en saksbehandler i fattingen"
+        val hentetBehandling = hentBehandlingMedId(generellbehandlingId) ?: throw GenerellIkkeFunnetException()
+        if (!hentetBehandling.erFattet()) {
+            throw FeilStatusGenerellBehandling(
+                "Behandlingen er ikke attester, hadde: ${hentetBehandling.status}. Id ${hentetBehandling.id}",
+            )
         }
 
-        verifiserRiktigSaksbehandler(saksbehandler, hentetBehandling!!)
+        if (hentetBehandling.behandler == null) {
+            throw ManglerSaksbehandler("Behandlingen har ikke fått satt en saksbehandler i fattingen, id $generellbehandlingId")
+        }
+
+        verifiserRiktigSaksbehandler(saksbehandler, hentetBehandling)
         harRiktigTilstandIOppgave(generellbehandlingId)
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             referanse = generellbehandlingId.toString(),
@@ -230,11 +243,11 @@ class GenerellBehandlingService(
         kommentar: Kommentar,
         sakId: SakId,
     ) {
-        val behandling = hentBehandlingMedId(generellbehandlingId)
-        require(behandling != null) { "Behandlingen må finnes, fant ikke id: $generellbehandlingId" }
-        require(behandling.status === GenerellBehandling.Status.FATTET) {
-            "Behandlingen må ha status FATTET, hadde: ${behandling.status}"
+        val behandling = hentBehandlingMedId(generellbehandlingId) ?: throw GenerellIkkeFunnetException()
+        if (!behandling.erFattet()) {
+            throw FeilStatusGenerellBehandling("Behandlingen er ikke attester, hadde: ${behandling.status}. Id ${behandling.id}")
         }
+
         if (sakId != behandling.sakId) {
             throw SakParameterStemmerIkkeException(
                 "Behandlingen med id $generellbehandlingId" +
@@ -314,7 +327,7 @@ class GenerellBehandlingService(
             )
         }
         finnesOgErRedigerbar(generellBehandling)
-        generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling!!.copy(status = GenerellBehandling.Status.AVBRUTT))
+        generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling.copy(status = GenerellBehandling.Status.AVBRUTT))
         oppgaveService.avbrytOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
     }
 

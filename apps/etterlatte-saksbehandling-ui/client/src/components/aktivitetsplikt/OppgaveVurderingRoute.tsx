@@ -1,6 +1,6 @@
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { GridContainer, MainContent } from '~shared/styled'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import React, { createContext, useContext } from 'react'
 import { AktivitetspliktSidemeny } from '~components/aktivitetsplikt/sidemeny/AktivitetspliktSidemeny'
 import {
@@ -8,17 +8,25 @@ import {
   AktivitetspliktStegmeny,
 } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAktivitet'
-import { VurderingInfoBrev } from '~components/aktivitetsplikt/brev/VurderingInfoBrev'
+import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
 
-const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurdering>(
-  {} as AktivitetspliktOppgaveVurdering
+interface AktivitetspliktOppgaveVurderingProvider extends AktivitetspliktOppgaveVurdering {
+  oppdater: () => void
+}
+
+const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurderingProvider>(
+  {} as AktivitetspliktOppgaveVurderingProvider
 )
 
-export function OppgaveVurderingRoute(props: { vurderingOgOppgave: AktivitetspliktOppgaveVurdering }) {
-  const { vurderingOgOppgave } = props
+export function OppgaveVurderingRoute(props: {
+  vurderingOgOppgave: AktivitetspliktOppgaveVurdering
+  fetchOppgave: () => void
+}) {
+  const { vurderingOgOppgave, fetchOppgave } = props
+
   return (
-    <AktivitetspliktOppgaveContext.Provider value={vurderingOgOppgave}>
+    <AktivitetspliktOppgaveContext.Provider value={{ ...vurderingOgOppgave, oppdater: fetchOppgave }}>
       <StatusBar ident={vurderingOgOppgave.oppgave.fnr} />
       <AktivitetspliktStegmeny />
 
@@ -26,7 +34,8 @@ export function OppgaveVurderingRoute(props: { vurderingOgOppgave: Aktivitetspli
         <MainContent>
           <Routes>
             <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet />} />
-            <Route path={AktivitetspliktSteg.BREV} element={<VurderingInfoBrev />} />
+            <Route path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV} element={<VurderingInfoBrevOgOppsummering />} />
+            <Route path="*" element={<Navigate to={AktivitetspliktSteg.VURDERING} replace />} />
           </Routes>
         </MainContent>
         <AktivitetspliktSidemeny />
@@ -35,7 +44,7 @@ export function OppgaveVurderingRoute(props: { vurderingOgOppgave: Aktivitetspli
   )
 }
 
-export const useAktivitetspliktOppgaveVurdering = (): AktivitetspliktOppgaveVurdering => {
+export const useAktivitetspliktOppgaveVurdering = (): AktivitetspliktOppgaveVurderingProvider => {
   try {
     const oppgave = useContext(AktivitetspliktOppgaveContext)
     if (!oppgave) {

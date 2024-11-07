@@ -23,6 +23,7 @@ import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.UtbetalingVerifikasjon
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -72,7 +73,7 @@ class OmregningKlassifikasjonskodeJobService(
                             sakId = sakId,
                             revurderingaarsak = Revurderingaarsak.OMREGNING,
                             fradato = foersteVirkningstidspunktForSak,
-                            verifiserUtbetalingUendret = true,
+                            utbetalingVerifikasjon = UtbetalingVerifikasjon.SIMULERING,
                         )
 
                     logger.info("Publiserer omregningshendelse for sak $sakId på kafka")
@@ -138,19 +139,6 @@ class OmregningKlassifikasjonskodeJobService(
     companion object {
         val kjoering = "ENDRE_KLASSIFIKASJONSKODE_FOR_PERIODER_2023"
         val antall = 1
-        val ekskluderteSaker =
-            listOf(
-                SakId(11958), // Denne har opphør - Overstyrt
-                SakId(12703), // Feiler med etterbetaling
-                SakId(12718), // Feiler med etterbetaling - er allerede good?
-                SakId(13096), // Denne har opphør - Feiler med etterbetaling
-                SakId(13115), // Denne har opphør - Feiler med etterbetaling
-                SakId(16123), // Feiler med etterbetaling
-                SakId(17419), // Feiler med etterbetaling
-                SakId(17506), // Feiler med etterbetaling
-                SakId(17507), // Feiler med etterbetaling
-                SakId(17025), // Feiler med etterbetaling
-                SakId(17190), // Feiler med etterbetaling
-            )
+        val ekskluderteSaker = listOf<SakId>()
     }
 }

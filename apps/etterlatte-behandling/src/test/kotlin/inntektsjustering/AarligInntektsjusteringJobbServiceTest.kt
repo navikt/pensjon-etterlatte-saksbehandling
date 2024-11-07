@@ -4,7 +4,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
@@ -12,12 +14,14 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -29,8 +33,9 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.sak.SakService
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -46,7 +51,7 @@ class AarligInntektsjusteringJobbServiceTest {
     private val sakService: SakService = mockk()
     private val behandlingService: BehandlingService = mockk()
     private val grunnlagService: GrunnlagService = mockk()
-    private val oppgaveService: OppgaveService = mockk()
+    private val revurderingService: RevurderingService = mockk()
     private val vedtakKlient: VedtakKlient = mockk()
     private val beregningKlient: BeregningKlient = mockk()
     private val pdlTjenesterKlient: PdlTjenesterKlient = mockk()
@@ -57,7 +62,7 @@ class AarligInntektsjusteringJobbServiceTest {
             omregningService,
             sakService,
             behandlingService,
-            oppgaveService,
+            revurderingService,
             grunnlagService,
             vedtakKlient,
             beregningKlient,
@@ -65,13 +70,32 @@ class AarligInntektsjusteringJobbServiceTest {
             rapid,
         )
 
+    @BeforeAll
+    fun setup() {
+        nyKontekstMedBruker(mockk())
+    }
+
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
 
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
-        coEvery { beregningKlient.sakHarInntektForAar(any(), any(), any()) } returns false
+        coEvery {
+            beregningKlient.aarligInntektsjusteringSjekk(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            AarligInntektsjusteringAvkortingSjekkResponse(
+                SakId(123L),
+                aar = 2025,
+                harInntektForAar = false,
+                harSanksjon = false,
+            )
         every { sakService.finnSak(SakId(123L)) } returns gyldigSak
+        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns
             PdlIdentifikator.FolkeregisterIdent(
                 Folkeregisteridentifikator.of(fnrGyldigSak),
@@ -86,6 +110,9 @@ class AarligInntektsjusteringJobbServiceTest {
         every { behandlingService.hentSisteIverksatte(any()) } returns
             mockk {
                 every { id } returns sisteBehandling
+                every { utlandstilknytning } returns mockk()
+                every { boddEllerArbeidetUtlandet } returns mockk()
+                every { opphoerFraOgMed } returns mockk()
             }
         coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
             mockk {
@@ -95,6 +122,35 @@ class AarligInntektsjusteringJobbServiceTest {
                     }
             }
 
+        coEvery { grunnlagService.hentPersongalleri(any()) } returns persongalleri
+        coEvery {
+            revurderingService.opprettRevurdering(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            mockk {
+                every { oppdater() } returns mockk()
+            }
+        every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
+
+        every { omregningService.oppdaterKjoering(any()) } just runs
         every { rapid.publiser(any(), any()) } returns Pair(1, 1L)
     }
 
@@ -134,6 +190,18 @@ class AarligInntektsjusteringJobbServiceTest {
         }
 
         verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.KLAR_FOR_OMREGNING
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe null
+                    }
+                },
+            )
+        }
+        verify {
             rapid.publiser(
                 "aarlig-inntektsjustering-123",
                 withArg {
@@ -145,15 +213,191 @@ class AarligInntektsjusteringJobbServiceTest {
 
     @Test
     fun `Sak som ikke er loepende skal ferdigstilles`() {
-        // TODO
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
+            loependeYtdelseDto().copy(
+                erLoepende = false,
+            )
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe "Sak er ikke løpende"
+                    }
+                },
+            )
+        }
     }
 
     @Test
     fun `Sak som allerede har inntekt neste aar skal ferdigstilles`() {
-        // TODO
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery {
+            beregningKlient.aarligInntektsjusteringSjekk(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            AarligInntektsjusteringAvkortingSjekkResponse(
+                SakId(123L),
+                aar = 2025,
+                harInntektForAar = true,
+                harSanksjon = false,
+            )
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe "Sak har allerede oppgitt inntekt for 2025"
+                    }
+                },
+            )
+        }
     }
 
-    // TODO unittest samordnign
+    @Test
+    fun `Sak som er under samordning skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns
+            loependeYtdelseDto().copy(
+                underSamordning = true,
+            )
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        // TODO verifer opprettelse rev
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING.name
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `Sak som har aapen behandling skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns listOf(mockk())
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        // TODO verifer opprettelse rev
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING.name
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `Sak som har sanksjon skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery {
+            beregningKlient.aarligInntektsjusteringSjekk(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            AarligInntektsjusteringAvkortingSjekkResponse(
+                SakId(123L),
+                aar = 2025,
+                harInntektForAar = false,
+                harSanksjon = true,
+            )
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.HAR_SANKSJON.name
+                    }
+                },
+            )
+        }
+    }
 
     @Test
     fun `Sak hvor ident har endret seg skal gjoeres manuelt`() {
@@ -167,30 +411,21 @@ class AarligInntektsjusteringJobbServiceTest {
         val nyttFnr = Folkeregisteridentifikator.of("22511075258")
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns PdlIdentifikator.FolkeregisterIdent(nyttFnr)
 
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
             service.startAarligInntektsjustering(request)
         }
 
-        // TODO verifiser satt status og begrunnelse kjøring..
-        verify {
-            oppgaveService.opprettOppgave(
-                "123",
-                SakId(123L),
-                null,
-                OppgaveType.REVURDERING,
-                merknad = "",
-            )
-        }
+        // TODO verifer opprettelse rev
         verify {
             omregningService.oppdaterKjoering(
                 withArg {
                     with(it) {
                         kjoering shouldBe "kjoering"
-                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.UTDATERT_IDENT.name
                     }
                 },
             )
@@ -217,37 +452,90 @@ class AarligInntektsjusteringJobbServiceTest {
             )
         } returns endretOpplysningPdl
 
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
         runBlocking {
             service.startAarligInntektsjustering(request)
         }
 
-        // TODO verifiser satt status og begrunnelse kjøring..
-        verify {
-            oppgaveService.opprettOppgave(
-                "123",
-                SakId(123L),
-                null,
-                OppgaveType.REVURDERING,
-                merknad = "",
-            )
-        }
+        // TODO verifer opprettelse rev
         verify {
             omregningService.oppdaterKjoering(
                 withArg {
                     with(it) {
                         kjoering shouldBe "kjoering"
-                        status shouldBe KjoeringStatus.FERDIGSTILT
+                        status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONO_INFO.name
                     }
                 },
             )
         }
     }
 
-    // TODO unittest vergemål
+    @Test
+    fun `Sak som har verge eller fremtidsfullmakt skal gjoeres mauelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+        val vergemaal =
+            VergemaalEllerFremtidsfullmakt(
+                embete = null,
+                type = null,
+                vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
+            )
+
+        coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
+            mockk {
+                every { innsender } returns
+                    mockk {
+                        every { opplysning } returns
+                            personGjenny.copy(
+                                vergemaalEllerFremtidsfullmakt = listOf(vergemaal),
+                            )
+                    }
+            }
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                any(),
+                any(),
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns
+            personPdl.copy(
+                vergemaalEllerFremtidsfullmakt =
+                    listOf(
+                        OpplysningDTO(
+                            vergemaal,
+                            "",
+                        ),
+                    ),
+            )
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        // TODO verifer opprettelse rev
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.VERGEMAAL.name
+                    }
+                },
+            )
+        }
+    }
 
     @Test
     fun `et eller annet feilhaandtering`() {
@@ -315,6 +603,7 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         val sisteBehandling = UUID.randomUUID()
+        val persongalleri = mockk<Persongalleri>()
 
         fun loependeYtdelseDto() =
             LoependeYtelseDTO(

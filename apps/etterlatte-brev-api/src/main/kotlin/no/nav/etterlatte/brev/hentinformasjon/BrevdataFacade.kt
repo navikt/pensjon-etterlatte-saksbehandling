@@ -96,28 +96,29 @@ class BrevdataFacade(
                 }
 
             val forenkletVedtak =
-                vedtakOgRevurderingsaarsak(vedtak, sak, saksbehandlerIdent, attestantIdent, brukerTokenInfo, relatertKlageId)
+                forenkletVedtak(vedtak, sak, saksbehandlerIdent, attestantIdent, brukerTokenInfo, relatertKlageId)
+            val revurderingaarsak = behandling?.revurderingsaarsak
 
             GenerellBrevData(
                 sak = sak,
                 personerISak = personerISak,
                 behandlingId = behandlingId,
-                forenkletVedtak = forenkletVedtak.first,
+                forenkletVedtak = forenkletVedtak,
                 spraak = spraak,
-                revurderingsaarsak = forenkletVedtak.second,
+                revurderingsaarsak = revurderingaarsak,
                 systemkilde = systemkilde,
                 utlandstilknytning = behandling?.utlandstilknytning,
             )
         }
 
-    private suspend fun vedtakOgRevurderingsaarsak(
+    private suspend fun forenkletVedtak(
         vedtak: VedtakDto?,
         sak: Sak,
         saksbehandlerIdent: String,
         attestantIdent: String?,
         bruker: BrukerTokenInfo,
         relatertKlageId: String?,
-    ): Pair<ForenkletVedtak?, Revurderingaarsak?> =
+    ): ForenkletVedtak? =
         when (vedtak?.type) {
             VedtakType.INNVILGELSE,
             VedtakType.OPPHOER,
@@ -125,37 +126,6 @@ class BrevdataFacade(
             VedtakType.ENDRING,
             ->
                 (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
-                    Pair(
-                        ForenkletVedtak(
-                            vedtak.id,
-                            vedtak.status,
-                            vedtak.type,
-                            sak.enhet,
-                            saksbehandlerIdent,
-                            attestantIdent,
-                            vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
-                            virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
-                            revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
-                            klage =
-                                if (vedtakInnhold.behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
-                                    val klageId = UUID.fromString(relatertKlageId)
-                                    val klage = behandlingService.hentKlage(klageId, bruker)
-                                    logger.info(
-                                        "Hentet klage med id=$klageId fra behandling for revurdering " +
-                                            "omgjøring etter klage i sak ${sak.id}, og fikk klage med status=" +
-                                            "${klage.status} fra behandling",
-                                    )
-                                    klage
-                                } else {
-                                    null
-                                },
-                        ),
-                        vedtakInnhold.behandling.revurderingsaarsak,
-                    )
-                }
-
-            VedtakType.TILBAKEKREVING ->
-                Pair(
                     ForenkletVedtak(
                         vedtak.id,
                         vedtak.status,
@@ -164,32 +134,53 @@ class BrevdataFacade(
                         saksbehandlerIdent,
                         attestantIdent,
                         vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
-                        tilbakekreving =
-                            objectMapper.readValue(
-                                (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
-                            ),
-                    ),
-                    null,
+                        virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
+                        revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
+                        klage =
+                            if (vedtakInnhold.behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+                                val klageId = UUID.fromString(relatertKlageId)
+                                val klage = behandlingService.hentKlage(klageId, bruker)
+                                logger.info(
+                                    "Hentet klage med id=$klageId fra behandling for revurdering " +
+                                        "omgjøring etter klage i sak ${sak.id}, og fikk klage med status=" +
+                                        "${klage.status} fra behandling",
+                                )
+                                klage
+                            } else {
+                                null
+                            },
+                    )
+                }
+
+            VedtakType.TILBAKEKREVING ->
+                ForenkletVedtak(
+                    vedtak.id,
+                    vedtak.status,
+                    vedtak.type,
+                    sak.enhet,
+                    saksbehandlerIdent,
+                    attestantIdent,
+                    vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                    tilbakekreving =
+                        objectMapper.readValue(
+                            (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
+                        ),
                 )
 
             VedtakType.AVVIST_KLAGE ->
-                Pair(
-                    ForenkletVedtak(
-                        vedtak.id,
-                        vedtak.status,
-                        vedtak.type,
-                        sak.enhet,
-                        saksbehandlerIdent,
-                        null,
-                        vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
-                        klage =
-                            objectMapper.readValue(
-                                (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
-                            ),
-                    ),
+                ForenkletVedtak(
+                    vedtak.id,
+                    vedtak.status,
+                    vedtak.type,
+                    sak.enhet,
+                    saksbehandlerIdent,
                     null,
+                    vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                    klage =
+                        objectMapper.readValue(
+                            (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
+                        ),
                 )
-
-            null -> Pair(null, null)
+            null -> null
         }
 }

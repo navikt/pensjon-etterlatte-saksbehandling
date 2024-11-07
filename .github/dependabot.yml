@@ -54,10 +54,6 @@ updates:
         patterns:
           - "io.micrometer*"
 
-    automerged-updates:
-      - match:
-          update-type: "patch"
-
   # =============
   # FRONTEND
   # =============
@@ -118,10 +114,6 @@ updates:
           - "unleash-client"
           - "license-checker-rseidelsohn"
 
-    automerged-updates:
-      - match:
-          update-type: "patch"
-
   # =============
   # FRONTEND ROOT
   # =============
@@ -139,10 +131,6 @@ updates:
           - "husky"
           - "lint-staged"
           - "@typescript-eslint/*"
-
-    automerged-updates:
-      - match:
-          update-type: "patch"
 
   # ==============
   # GITHUB ACTIONS

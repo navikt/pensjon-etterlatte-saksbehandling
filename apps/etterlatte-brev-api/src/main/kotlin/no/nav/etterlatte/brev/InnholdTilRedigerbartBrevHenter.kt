@@ -61,6 +61,7 @@ class InnholdTilRedigerbartBrevHenter(
                 erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
                 generellBrevData.sak.sakType,
                 generellBrevData.forenkletVedtak?.type,
+                generellBrevData.revurderingsaarsak,
             )
 
         val kode = brevKodeMapping(brevkodeRequest)

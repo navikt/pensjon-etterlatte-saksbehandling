@@ -11,6 +11,7 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
+import no.nav.etterlatte.rapidsandrivers.UtbetalingVerifikasjon
 import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.etterlatte.vedtaksvurdering.RapidUtsender
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
@@ -57,12 +58,18 @@ internal class OpprettVedtakforespoerselRiver(
             if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
                 vedtak.opprettVedtakOgFatt(sakId, behandlingId)
             } else {
-                if (omregningData.verifiserUtbetalingUendret) {
-                    vedtak.opprettVedtakOgFatt(sakId, behandlingId)
-                    verifiserUendretUtbetaling(behandlingId)
-                    vedtak.attesterVedtak(sakId, behandlingId)
-                } else {
-                    vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
+                when (omregningData.utbetalingVerifikasjon) {
+                    UtbetalingVerifikasjon.INGEN -> vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
+                    UtbetalingVerifikasjon.SIMULERING -> {
+                        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
+                        verifiserUendretUtbetaling(behandlingId, skalAvbryte = false)
+                        vedtak.attesterVedtak(sakId, behandlingId)
+                    }
+                    UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING -> {
+                        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
+                        verifiserUendretUtbetaling(behandlingId, skalAvbryte = true)
+                        vedtak.attesterVedtak(sakId, behandlingId)
+                    }
                 }
             }
 
@@ -71,17 +78,39 @@ internal class OpprettVedtakforespoerselRiver(
         RapidUtsender.sendUt(respons, packet, context)
     }
 
-    private fun verifiserUendretUtbetaling(behandlingId: UUID) {
+    private fun verifiserUendretUtbetaling(
+        behandlingId: UUID,
+        skalAvbryte: Boolean,
+    ) {
         val simulertBeregning = utbetalingKlient.simuler(behandlingId)
+
         val etterbetalingSum = simulertBeregning.etterbetaling.sumOf { it.beloep }
+        val etterbetaling = etterbetalingSum.compareTo(BigDecimal.ZERO) != 0
+
         val tilbakekrevingSum = simulertBeregning.tilbakekreving.sumOf { it.beloep }
-        if (etterbetalingSum.compareTo(BigDecimal.ZERO) != 0) {
-            throw Exception("Omregningen fører til etterbetaling på $etterbetalingSum kr, avbryter behandlingen")
+        val tilbakekreving = tilbakekrevingSum.compareTo(BigDecimal.ZERO) != 0
+
+        if (etterbetaling) {
+            val msg = "Omregningen fører til etterbetaling på $etterbetalingSum kr"
+            if (skalAvbryte) {
+                throw Exception("$msg, avbryter behandlingen")
+            } else {
+                logger.info(msg)
+            }
         }
-        if (tilbakekrevingSum.compareTo(BigDecimal.ZERO) != 0) {
-            throw Exception("Omregningen fører til tilbakekreving på $tilbakekrevingSum, avbryter behandlingen")
+
+        if (tilbakekreving) {
+            val msg = "Omregningen fører til tilbakekreving på $tilbakekrevingSum kr"
+            if (skalAvbryte) {
+                throw Exception("$msg, avbryter behandlingen")
+            } else {
+                logger.info(msg)
+            }
         }
-        logger.info("Omregningen førte ikke til tilbakekreving eller etterbetaling")
+
+        if (!etterbetaling && !tilbakekreving) {
+            logger.info("Omregningen førte ikke til tilbakekreving eller etterbetaling")
+        }
     }
 
     private fun hentBeloep(

@@ -484,7 +484,7 @@ internal class ApplicationContext(
             omregningService = omregningService,
             sakService = sakService,
             behandlingService = behandlingService,
-            oppgaveService = oppgaveService,
+            revurderingService = revurderingService,
             vedtakKlient = vedtakKlient,
             grunnlagService = grunnlagsService,
             beregningKlient = beregningsKlient,

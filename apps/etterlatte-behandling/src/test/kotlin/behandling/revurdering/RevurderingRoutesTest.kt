@@ -135,11 +135,13 @@ internal class RevurderingRoutesTest {
 
             val revurderingAarsak: List<Revurderingaarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
+
             assertTrue(
                 revurderingAarsak.containsAll(
                     Revurderingaarsak.entries
                         .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
-                        .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },
+                        .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() }
+                        .filter { it.name !== Revurderingaarsak.AARLIG_INNTEKTSJUSTERING.toString() },
                 ),
             )
         }

@@ -1,6 +1,5 @@
-import { Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
 import { isPending } from '@reduxjs/toolkit'
@@ -27,8 +26,8 @@ function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
   }
 }
 
-export const BrevAktivitetsplikt = () => {
-  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+export const ValgForInfobrev = () => {
+  const { oppgave, aktivtetspliktbrevdata, oppdater } = useAktivitetspliktOppgaveVurdering()
   const { handleSubmit, watch, control, resetField } = useForm<IBrevAktivitetsplikt>({})
 
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
@@ -42,6 +41,7 @@ export const BrevAktivitetsplikt = () => {
       () => {
         oppdaterBrevdata(brevdatamappedToDo)
         setRedigeres(false)
+        oppdater()
       },
       () => {}
     )
@@ -60,11 +60,11 @@ export const BrevAktivitetsplikt = () => {
   return (
     <VStack gap="4" maxWidth="30rem">
       <HStack gap="4" align="center">
-        <Heading size="small">Brev data</Heading>
+        <Heading size="small">Valg for infobrev</Heading>
       </HStack>
       {redigeres ? (
         <form onSubmit={handleSubmit(lagreBrevutfall)}>
-          <RadioGroupWrapper>
+          <VStack gap="4">
             <ControlledRadioGruppe
               name="skalSendeBrev"
               control={control}
@@ -77,15 +77,13 @@ export const BrevAktivitetsplikt = () => {
                 </>
               }
             />
-          </RadioGroupWrapper>
 
-          {skalsendebrev === JaNei.JA && (
-            <>
-              <RadioGroupWrapper>
+            {skalsendebrev === JaNei.JA && (
+              <>
                 <ControlledRadioGruppe
                   name="utbetaling"
                   control={control}
-                  legend="Skal bruker få utbetaling"
+                  legend="Har bruker utbetaling?"
                   errorVedTomInput="Du må velge ja eller nei"
                   radios={
                     <>
@@ -94,13 +92,11 @@ export const BrevAktivitetsplikt = () => {
                     </>
                   }
                 />
-              </RadioGroupWrapper>
 
-              <RadioGroupWrapper>
                 <ControlledRadioGruppe
                   name="redusertEtterInntekt"
                   control={control}
-                  legend="Skal bruker få redusert inntekt "
+                  legend="Er ytelsen til bruker redusert på grunn av inntekt?"
                   errorVedTomInput="Du må velge ja eller nei"
                   radios={
                     <>
@@ -109,48 +105,50 @@ export const BrevAktivitetsplikt = () => {
                     </>
                   }
                 />
-              </RadioGroupWrapper>
-            </>
-          )}
+              </>
+            )}
 
-          {isFailureHandler({
-            apiResult: lagrebrevdataStatus,
-            errorMessage: 'Kan ikke lagre brevdata',
-          })}
-          <Button type="submit" loading={isPending(lagrebrevdataStatus)} variant="primary">
-            Lagre brevvurdering
-          </Button>
+            {isFailureHandler({
+              apiResult: lagrebrevdataStatus,
+              errorMessage: 'Kan ikke lagre valg for infobrevet',
+            })}
+            <Box>
+              <Button size="small" type="submit" loading={isPending(lagrebrevdataStatus)} variant="primary">
+                Lagre valg for infobrev
+              </Button>
+            </Box>
+          </VStack>
         </form>
       ) : (
-        <div>
-          <div>
-            {!!brevdata && (
-              <HStack gap="4">
-                <Info label="Skal sende brev" tekst={brevdata.skalSendeBrev ? JaNeiRec.JA : JaNeiRec.NEI} />
-                {brevdata.skalSendeBrev && (
-                  <>
-                    <Info label="Utbetaling" tekst={brevdata.utbetaling ? JaNeiRec.JA : JaNeiRec.NEI} />
-                    <Info
-                      label="Redusert etter inntekt"
-                      tekst={brevdata.redusertEtterInntekt ? JaNeiRec.JA : JaNeiRec.NEI}
-                    />
-                  </>
-                )}
-              </HStack>
-            )}
-          </div>
-          {erOppgaveRedigerbar(oppgave.status) && (
-            <Button
-              type="button"
-              size="small"
-              icon={<PencilIcon />}
-              variant="secondary"
-              onClick={() => setRedigeres(true)}
-            >
-              Rediger
-            </Button>
+        <VStack gap="4">
+          {!!brevdata && (
+            <HStack gap="4">
+              <Info label="Skal sende brev" tekst={brevdata.skalSendeBrev ? JaNeiRec.JA : JaNeiRec.NEI} />
+              {brevdata.skalSendeBrev && (
+                <>
+                  <Info label="Utbetaling" tekst={brevdata.utbetaling ? JaNeiRec.JA : JaNeiRec.NEI} />
+                  <Info
+                    label="Redusert etter inntekt"
+                    tekst={brevdata.redusertEtterInntekt ? JaNeiRec.JA : JaNeiRec.NEI}
+                  />
+                </>
+              )}
+            </HStack>
           )}
-        </div>
+          {erOppgaveRedigerbar(oppgave.status) && (
+            <Box>
+              <Button
+                type="button"
+                size="small"
+                icon={<PencilIcon />}
+                variant="secondary"
+                onClick={() => setRedigeres(true)}
+              >
+                Rediger
+              </Button>
+            </Box>
+          )}
+        </VStack>
       )}
     </VStack>
   )

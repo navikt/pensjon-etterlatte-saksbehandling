@@ -84,7 +84,7 @@ internal class JournalfoerBrevServiceTest {
         coEvery { behandlingService.hentSak(any(), any()) } returns sak
         coEvery { dokarkivService.journalfoer(any(), any()) } returns journalpostResponse
         every { db.hentBrev(any()) } returns brev
-        every { db.settBrevJournalfoert(any(), any()) } returns true
+        every { db.settBrevJournalfoert(any(), any(), any()) } returns true
 
         val faktiskJournalpostId =
             runBlocking {
@@ -98,7 +98,7 @@ internal class JournalfoerBrevServiceTest {
             db.hentBrevInnhold(brev.id)
             db.hentPdf(brev.id)
             db.lagreJournalpostId(brev.mottakere.single().id, journalpostResponse)
-            db.settBrevJournalfoert(brev.id, listOf(journalpostResponse))
+            db.settBrevJournalfoert(brev.id, listOf(journalpostResponse), bruker)
         }
         coVerify {
             behandlingService.hentSak(sak.id, bruker)
@@ -125,7 +125,7 @@ internal class JournalfoerBrevServiceTest {
         coEvery { dokarkivService.journalfoer(any(), any()) } returns response1 andThen response2
 
         every { db.hentBrev(any()) } returns brev
-        every { db.settBrevJournalfoert(any(), any()) } returns true
+        every { db.settBrevJournalfoert(any(), any(), any()) } returns true
 
         val faktiskResponse =
             runBlocking {
@@ -142,7 +142,7 @@ internal class JournalfoerBrevServiceTest {
             db.lagreJournalpostId(brev.mottakere[0].id, response1)
             db.lagreJournalpostId(brev.mottakere[1].id, response2)
 
-            db.settBrevJournalfoert(brev.id, listOf(response1, response2))
+            db.settBrevJournalfoert(brev.id, listOf(response1, response2), bruker)
         }
         coVerify {
             behandlingService.hentSak(sak.id, bruker)
@@ -227,6 +227,7 @@ internal class JournalfoerBrevServiceTest {
     fun `Journalfoeringsrequest for vedtaksbrev mappes korrekt`(type: SakType) {
         val behandlingId = UUID.randomUUID()
         val forventetBrevMottakerFnr = SOEKER_FOEDSELSNUMMER.value
+        val systembruker = systembruker()
 
         val sak = Sak(forventetBrevMottakerFnr, type, randomSakId(), Enheter.defaultEnhet.enhetNr)
 
@@ -270,13 +271,13 @@ internal class JournalfoerBrevServiceTest {
             )
         coEvery { dokarkivService.journalfoer(any(), any()) } returns journalpostResponse
 
-        runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker()) }
+        runBlocking { service.journalfoerVedtaksbrev(vedtak, systembruker) }
 
         verify(exactly = 1) {
             db.hentBrevInnhold(forventetBrev.id)
             db.hentPdf(forventetBrev.id)
             db.lagreJournalpostId(forventetBrev.mottakere.single().id, journalpostResponse)
-            db.settBrevJournalfoert(forventetBrev.id, listOf(journalpostResponse))
+            db.settBrevJournalfoert(forventetBrev.id, listOf(journalpostResponse), systembruker)
         }
 
         val requestSlot = slot<JournalpostRequest>()
@@ -352,7 +353,7 @@ internal class JournalfoerBrevServiceTest {
             db.hentPdf(forventetBrev.id)
             db.hentBrev(forventetBrev.id)
             db.lagreJournalpostId(forventetBrev.mottakere.single().id, journalpostResponse)
-            db.settBrevJournalfoert(forventetBrev.id, listOf(journalpostResponse))
+            db.settBrevJournalfoert(forventetBrev.id, listOf(journalpostResponse), bruker)
         }
 
         val requestSlot = slot<JournalpostRequest>()

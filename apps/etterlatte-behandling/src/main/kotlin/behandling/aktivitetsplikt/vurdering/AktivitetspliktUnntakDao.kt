@@ -7,11 +7,14 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -20,22 +23,40 @@ import java.util.UUID
 class AktivitetspliktUnntakDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun opprettUnntak(
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
+    fun upsertUnntak(
         unntak: LagreAktivitetspliktUnntak,
         sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
     ) = connectionAutoclosing.hentConnection {
+        if (oppgaveId == null && behandlingId == null) {
+            throw InternfeilException(
+                "Mottok både oppgaveId og behandlingId for oppdatering av unntak. " +
+                    "Unntak er koblet på enten oppgave eller behandling.",
+            )
+        }
+        if (oppgaveId != null && behandlingId != null) {
+            throw InternfeilException("Må koble unntak på en behandling eller en oppgave")
+        }
+
         with(it) {
             val stmt =
                 prepareStatement(
                     """
                         INSERT INTO aktivitetsplikt_unntak(id, sak_id, behandling_id, oppgave_id, unntak, fom, tom, opprettet, endret, beskrivelse) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT (id) DO UPDATE SET
+                        unntak = excluded.unntak,
+                        fom = excluded.fom,
+                        tom = excluded.tom,
+                        endret = excluded.endret,
+                        beskrivelse = excluded.beskrivelse
                     """.trimMargin(),
                 )
-            stmt.setObject(1, UUID.randomUUID())
+            stmt.setObject(1, unntak.id ?: UUID.randomUUID())
             stmt.setSakId(2, sakId)
             stmt.setObject(3, behandlingId)
             stmt.setObject(4, oppgaveId)
@@ -92,6 +113,28 @@ class AktivitetspliktUnntakDao(
             stmt.setObject(2, behandlingId)
 
             stmt.executeUpdate()
+        }
+    }
+
+    fun slettUnntakForOppgave(
+        oppgaveId: UUID,
+        unntakId: UUID,
+    ) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        DELETE FROM aktivitetsplikt_unntak
+                        WHERE id = ? AND oppgave_id = ?
+                        """.trimIndent(),
+                    )
+                stmt.setObject(1, unntakId)
+                stmt.setObject(2, oppgaveId)
+
+                val endret = stmt.executeUpdate()
+                logger.info("Slettet $endret unntak for oppgaveId=$oppgaveId")
+            }
         }
     }
 

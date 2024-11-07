@@ -81,11 +81,6 @@ data class AvkortingGrunnlagDto(
     val overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
 )
 
-data class AvkortingHarInntektForAarDto(
-    val sakId: SakId,
-    val aar: Int,
-)
-
 data class AvkortingGrunnlagLagreDto(
     val id: UUID = UUID.randomUUID(),
     val inntektTom: Int,
@@ -148,3 +143,16 @@ enum class OverstyrtBeregningKategori {
     FENGSELSOPPHOLD,
     UKJENT_KATEGORI, // for å kunne håndtere tidligere overstyringer som ikke har kategori
 }
+
+data class AarligInntektsjusteringAvkortingSjekkRequest(
+    val sakId: SakId,
+    val aar: Int,
+    val sisteBehandling: UUID,
+)
+
+data class AarligInntektsjusteringAvkortingSjekkResponse(
+    val sakId: SakId,
+    val aar: Int,
+    val harInntektForAar: Boolean,
+    val harSanksjon: Boolean,
+)

@@ -42,6 +42,7 @@ export enum Revurderingaarsak {
   UTSENDELSE_AV_KRAVPAKKE = 'UTSENDELSE_AV_KRAVPAKKE',
   UTSENDELSE_AV_SED = 'UTSENDELSE_AV_SED',
   AKTIVITETSPLIKT = 'AKTIVITETSPLIKT',
+  AARLIG_INNTEKTSJUSTERING = 'AARLIG_INNTEKTSJUSTERING',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
@@ -86,4 +87,5 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   UTSENDELSE_AV_KRAVPAKKE: 'Utsendelse av kravpakke',
   UTSENDELSE_AV_SED: 'Utsendelse av SED',
   AKTIVITETSPLIKT: 'Aktivitetsplikt',
+  AARLIG_INNTEKTSJUSTERING: 'Årlig inntektsjustering',
 } as const

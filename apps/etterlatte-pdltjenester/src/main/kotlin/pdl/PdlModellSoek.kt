@@ -41,9 +41,9 @@ enum class SearchRule(
 }
 
 data class PdlPersonSoekResponse(
-    val data: PdlSoekPerson? = null,
-    val errors: List<PdlResponseError>? = null,
-)
+    override val data: PdlSoekPerson? = null,
+    override val errors: List<PdlResponseError>? = null,
+) : PdlDataErrorResponse<PdlSoekPerson>
 
 data class PdlSoekPerson(
     val sokPerson: PersonSearchResult? = null,

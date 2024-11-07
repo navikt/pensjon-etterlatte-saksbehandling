@@ -275,7 +275,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify {
-                db.opprettBrev(capture(brevSlot))
+                db.opprettBrev(capture(brevSlot), ATTESTANT)
                 brevbaker wasNot Called
                 dokarkivService wasNot Called
             }
@@ -343,7 +343,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify {
-                db.opprettBrev(capture(brevSlot))
+                db.opprettBrev(capture(brevSlot), ATTESTANT)
                 dokarkivService wasNot Called
             }
 
@@ -441,7 +441,7 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrevForBehandling(brev.behandlingId!!, Brevtype.VEDTAK)
-                db.settBrevFerdigstilt(brev.id)
+                db.settBrevFerdigstilt(brev.id, ATTESTANT)
                 db.hentPdf(brev.id)
             }
 
@@ -472,7 +472,7 @@ internal class VedtaksbrevServiceTest {
                 db.hentBrevForBehandling(brev.behandlingId!!, Brevtype.VEDTAK)
                 db.hentPdf(brev.id)
             }
-            verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
+            verify(exactly = 0) { db.settBrevFerdigstilt(any(), ATTESTANT) }
 
             coVerify {
                 vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
@@ -649,8 +649,8 @@ internal class VedtaksbrevServiceTest {
                 )
 
             runBlocking {
-                db.oppdaterPayload(brev.id, tomPayload)
-                db.oppdaterPayloadVedlegg(brev.id, listOf(vedleggPayload(tomPayload)))
+                db.oppdaterPayload(brev.id, tomPayload, SAKSBEHANDLER)
+                db.oppdaterPayloadVedlegg(brev.id, listOf(vedleggPayload(tomPayload)), SAKSBEHANDLER)
             }
 
             val nyttInnhold =
@@ -674,13 +674,13 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrevInnhold(brev.id)
-                db.oppdaterPayload(brev.id, opphoerPayload)
-                db.oppdaterPayload(brev.id, tomPayload)
-                db.oppdaterPayloadVedlegg(brev.id, listOf(vedleggPayload(opprettVedleggPayload())))
-                db.oppdaterPayloadVedlegg(brev.id, listOf(vedleggPayload(tomPayload)))
+                db.oppdaterPayload(brev.id, opphoerPayload, SAKSBEHANDLER)
+                db.oppdaterPayload(brev.id, tomPayload, SAKSBEHANDLER)
+                db.oppdaterPayloadVedlegg(brev.id, listOf(vedleggPayload(opprettVedleggPayload())), SAKSBEHANDLER)
+                db.oppdaterPayloadVedlegg(brev.id, listOf(vedleggPayload(tomPayload)), SAKSBEHANDLER)
                 db.hentBrevkoder(brev.id)
                 db.oppdaterBrevkoder(brev.id, Brevkoder.OMS_OPPHOER)
-                db.oppdaterTittel(brev.id, Brevkoder.OMS_OPPHOER.tittel)
+                db.oppdaterTittel(brev.id, Brevkoder.OMS_OPPHOER.tittel, SAKSBEHANDLER)
             }
 
             coVerify {

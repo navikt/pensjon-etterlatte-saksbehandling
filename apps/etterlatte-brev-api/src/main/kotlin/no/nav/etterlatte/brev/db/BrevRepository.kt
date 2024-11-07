@@ -105,6 +105,7 @@ class BrevRepository(
     fun oppdaterPayload(
         id: BrevID,
         payload: Slate,
+        bruker: BrukerTokenInfo,
     ) = ds.transaction { tx ->
         tx
             .run(
@@ -119,13 +120,14 @@ class BrevRepository(
             ).also { require(it == 1) }
 
         tx
-            .lagreHendelse(id, Status.OPPDATERT, payload.toJson())
+            .lagreHendelse(id, Status.OPPDATERT, payload.toJson(), bruker)
             .also { require(it == 1) }
     }
 
     fun oppdaterPayloadVedlegg(
         id: BrevID,
         payload: List<BrevInnholdVedlegg>,
+        bruker: BrukerTokenInfo,
     ) = ds.transaction { tx ->
         tx
             .run(
@@ -140,7 +142,7 @@ class BrevRepository(
             ).also { require(it == 1) }
 
         tx
-            .lagreHendelse(id, Status.OPPDATERT, payload.toJson())
+            .lagreHendelse(id, Status.OPPDATERT, payload.toJson(), bruker)
             .also { require(it == 1) }
     }
 
@@ -185,6 +187,7 @@ class BrevRepository(
     fun oppdaterMottaker(
         id: BrevID,
         mottaker: Mottaker,
+        bruker: BrukerTokenInfo,
     ) = ds.transaction { tx ->
         tx
             .run(
@@ -211,26 +214,28 @@ class BrevRepository(
             ).also { require(it == 1) }
 
         tx
-            .lagreHendelse(id, Status.OPPDATERT, mottaker.toJson())
+            .lagreHendelse(id, Status.OPPDATERT, mottaker.toJson(), bruker)
             .also { require(it == 1) }
     }
 
     fun slettMottaker(
         brevId: BrevID,
         mottakerId: UUID,
+        bruker: BrukerTokenInfo,
     ) = ds.transaction { tx ->
         tx
             .run(queryOf("DELETE FROM mottaker WHERE id = ? AND brev_id = ?", mottakerId, brevId).asUpdate)
             .also { require(it == 1) }
 
         tx
-            .lagreHendelse(brevId, Status.OPPDATERT, "mottaker med id=$mottakerId fjernet fra brevet ")
+            .lagreHendelse(brevId, Status.OPPDATERT, "mottaker med id=$mottakerId fjernet fra brevet ", bruker)
             .also { require(it == 1) }
     }
 
     fun oppdaterTittel(
         id: BrevID,
         tittel: String,
+        bruker: BrukerTokenInfo,
     ) = ds.transaction { tx ->
         tx
             .run(
@@ -244,13 +249,14 @@ class BrevRepository(
             ).also { require(it == 1) }
 
         tx
-            .lagreHendelse(id, Status.OPPDATERT, tittel.toJson())
+            .lagreHendelse(id, Status.OPPDATERT, tittel.toJson(), bruker)
             .also { require(it == 1) }
     }
 
     fun oppdaterSpraak(
         id: BrevID,
         spraak: Spraak,
+        bruker: BrukerTokenInfo,
     ) = ds.transaction { tx ->
         tx
             .run(
@@ -264,13 +270,14 @@ class BrevRepository(
             ).also { require(it == 1) }
 
         tx
-            .lagreHendelse(id, Status.OPPDATERT, spraak.toJson())
+            .lagreHendelse(id, Status.OPPDATERT, spraak.toJson(), bruker)
             .also { require(it == 1) }
     }
 
     fun lagrePdfOgFerdigstillBrev(
         id: BrevID,
         pdf: Pdf,
+        bruker: BrukerTokenInfo,
     ) {
         ds.transaction { tx ->
             tx
@@ -284,7 +291,7 @@ class BrevRepository(
                     ).asUpdate,
                 ).also { oppdatert -> require(oppdatert == 1) }
 
-            tx.lagreHendelse(id, Status.FERDIGSTILT)
+            tx.lagreHendelse(id, Status.FERDIGSTILT, bruker = bruker)
         }
     }
 
@@ -306,9 +313,12 @@ class BrevRepository(
         }
     }
 
-    fun settBrevFerdigstilt(id: BrevID) {
+    fun settBrevFerdigstilt(
+        id: BrevID,
+        bruker: BrukerTokenInfo,
+    ) {
         using(sessionOf(ds)) {
-            it.lagreHendelse(id, Status.FERDIGSTILT)
+            it.lagreHendelse(id, Status.FERDIGSTILT, bruker = bruker)
         }
     }
 
@@ -318,11 +328,14 @@ class BrevRepository(
         bruker: BrukerTokenInfo,
     ) {
         using(sessionOf(ds)) {
-            it.lagreHendelse(id, Status.UTGAATT, "${bruker.ident()}: $kommentar".toJson())
+            it.lagreHendelse(id, Status.UTGAATT, "${bruker.ident()}: $kommentar".toJson(), bruker)
         }
     }
 
-    fun opprettBrev(ulagretBrev: OpprettNyttBrev): Brev =
+    fun opprettBrev(
+        ulagretBrev: OpprettNyttBrev,
+        bruker: BrukerTokenInfo,
+    ): Brev =
         ds.transaction(true) { tx ->
             val id =
                 tx.run(
@@ -380,7 +393,7 @@ class BrevRepository(
                 ).also { opprettet -> require(opprettet == 1) }
 
             tx
-                .lagreHendelse(id, Status.OPPRETTET, ulagretBrev.opprettet)
+                .lagreHendelse(id, Status.OPPRETTET, ulagretBrev.opprettet, bruker = bruker)
                 .also { oppdatert -> require(oppdatert == 1) }
 
             opprettBrevFra(id, ulagretBrev)
@@ -403,9 +416,10 @@ class BrevRepository(
     fun settBrevJournalfoert(
         brevId: BrevID,
         journalpostResponse: List<OpprettJournalpostResponse>,
+        bruker: BrukerTokenInfo,
     ): Boolean =
         using(sessionOf(ds)) {
-            it.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
+            it.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson(), bruker) > 0
         }
 
     fun lagreBestillingId(
@@ -425,8 +439,9 @@ class BrevRepository(
     fun settBrevDistribuert(
         brevId: BrevID,
         distResponse: List<DistribuerJournalpostResponse>,
+        bruker: BrukerTokenInfo,
     ) = using(sessionOf(ds)) {
-        it.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson())
+        it.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson(), bruker)
     }
 
     fun settBrevSlettet(
@@ -434,18 +449,19 @@ class BrevRepository(
         bruker: BrukerTokenInfo,
     ): Boolean =
         ds.transaction { tx ->
-            tx.lagreHendelse(brevId, Status.SLETTET, bruker.ident()) > 0
+            tx.lagreHendelse(brevId, Status.SLETTET, bruker.ident(), bruker) > 0
         }
 
     private fun Session.lagreHendelse(
         brevId: BrevID,
         status: Status,
         payload: String = "{}",
-    ) = lagreHendelse(brevId, status, Tidspunkt.now(), payload)
+        bruker: BrukerTokenInfo,
+    ) = lagreHendelse(brevId, status, Tidspunkt.now(), payload, bruker)
 
     private fun Session.hentMottakere(brevId: BrevID) =
         list(
-            queryOf("SELECT * FROM mottaker WHERE brev_id = ?", brevId),
+            queryOf("SELECT * FROM mottaker WHERE brev_id = ? ORDER BY type", brevId),
             tilMottaker,
         )
 
@@ -454,6 +470,7 @@ class BrevRepository(
         status: Status,
         opprettet: Tidspunkt = Tidspunkt.now(),
         payload: String = "{}",
+        bruker: BrukerTokenInfo,
     ) = run(
         queryOf(
             OPPRETT_HENDELSE_QUERY,
@@ -462,6 +479,7 @@ class BrevRepository(
                 "status_id" to status.name,
                 "payload" to payload,
                 "opprettet" to opprettet.toTimestamp(),
+                "saksbehandler" to bruker.ident(),
             ),
         ).asUpdate,
     )
@@ -664,8 +682,8 @@ class BrevRepository(
         """
 
         const val OPPRETT_HENDELSE_QUERY = """
-            INSERT INTO hendelse (brev_id, status_id, payload, opprettet) 
-            VALUES (:brev_id, :status_id, :payload, :opprettet)
+            INSERT INTO hendelse (brev_id, status_id, payload, opprettet, saksbehandler) 
+            VALUES (:brev_id, :status_id, :payload, :opprettet, :saksbehandler)
         """
     }
 }

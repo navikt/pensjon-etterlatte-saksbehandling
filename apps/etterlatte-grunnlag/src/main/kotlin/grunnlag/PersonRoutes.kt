@@ -6,7 +6,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 
 fun Route.personRoute(
@@ -22,11 +21,9 @@ fun Route.personRoute(
         }
 
         post("/roller") {
-            kunSystembruker {
-                withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
-                    val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
-                    call.respond(personMedSakOgRoller)
-                }
+            withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
+                val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
+                call.respond(personMedSakOgRoller)
             }
         }
     }

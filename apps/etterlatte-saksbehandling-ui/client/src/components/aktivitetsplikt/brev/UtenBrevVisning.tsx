@@ -36,7 +36,7 @@ export function UtenBrevVisning() {
         </>
       )}
       <InfobrevKnapperad
-        ferdigstill={!oppgaveKanFerdigstilles ? ferdigstillOppgaveWrapper : undefined}
+        ferdigstill={oppgaveKanFerdigstilles ? ferdigstillOppgaveWrapper : undefined}
         status={ferdigstillOppgaveStatus}
         tekst="Ferdigstill oppgave"
       >

@@ -51,7 +51,7 @@ fun Route.behandlingSakRoutes(
             accessPolicyRolesEllerAdGrupper = setOf("les-bp-sak", "les-oms-sak")
         }
 
-        get ("oms/har_sak") {
+        post("oms/har_sak") {
             val foedselsnummer = call.receive<FoedselsnummerDTO>()
             val saker = behandlingService.hentSakforPerson(foedselsnummer)
 

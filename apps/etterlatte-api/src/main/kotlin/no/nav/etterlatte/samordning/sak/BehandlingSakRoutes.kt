@@ -47,26 +47,32 @@ fun Route.behandlingSakRoutes(
     }
 
     route("api/sak") {
-        install(AuthorizationPlugin) {
-            accessPolicyRolesEllerAdGrupper = setOf("les-bp-sak", "les-oms-sak")
+        route("oms/har_sak") {
+            install(AuthorizationPlugin) {
+                accessPolicyRolesEllerAdGrupper = setOf("les-oms-sak")
+            }
+            post {
+                val foedselsnummer = call.receive<FoedselsnummerDTO>()
+                val saker = behandlingService.hentSakforPerson(foedselsnummer)
+
+                call.respond(HarOMSSakIGjenny(saker.isNotEmpty()))
+            }
         }
 
-        post("oms/har_sak") {
-            val foedselsnummer = call.receive<FoedselsnummerDTO>()
-            val saker = behandlingService.hentSakforPerson(foedselsnummer)
+        route("/${SAKID_CALL_PARAMETER}") {
+            install(AuthorizationPlugin) {
+                accessPolicyRolesEllerAdGrupper = setOf("les-bp-sak", "les-oms-sak")
+            }
+            get {
+                val sak =
+                    behandlingService.hentSak(sakId)
+                        ?: throw IkkeFunnetException(
+                            code = "SAK_IKKE_FUNNET",
+                            detail = "Sak med id=$sakId finnes ikke",
+                        )
 
-            call.respond(HarOMSSakIGjenny(saker.isNotEmpty()))
-        }
-
-        get("/{$SAKID_CALL_PARAMETER}") {
-            val sak =
-                behandlingService.hentSak(sakId)
-                    ?: throw IkkeFunnetException(
-                        code = "SAK_IKKE_FUNNET",
-                        detail = "Sak med id=$sakId finnes ikke",
-                    )
-
-            call.respond(sak)
+                call.respond(sak)
+            }
         }
     }
 }

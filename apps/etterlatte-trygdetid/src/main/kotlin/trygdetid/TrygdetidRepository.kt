@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -169,19 +170,21 @@ class TrygdetidRepository(
 
     fun hentBehandlingerMedTrygdetiderForAvdoede(avdoede: List<Folkeregisteridentifikator>): List<BehandlingMedTrygdetider> =
         behandlingerSomHarAlleAvdoede(avdoede)
+            .sortedByDescending { it.second }
+            .map { it.first }
             .map { behandlingId -> BehandlingMedTrygdetider(behandlingId, hentTrygdetiderForBehandling(behandlingId)) }
-            .toList()
 
-    private fun behandlingerSomHarAlleAvdoede(avdoede: List<Folkeregisteridentifikator>): Set<UUID> {
-        val behandlingerPerAvdoed: List<Set<UUID>> =
+    private fun behandlingerSomHarAlleAvdoede(avdoede: List<Folkeregisteridentifikator>): Set<Pair<UUID, Tidspunkt>> {
+        val select = "SELECT DISTINCT behandling_id, opprettet FROM trygdetid WHERE ident = :ident"
+        val behandlingerPerAvdoed: List<Set<Pair<UUID, Tidspunkt>>> =
             using(sessionOf(dataSource)) { session ->
                 avdoede.map { ident ->
+                    val paramMap = mapOf("ident" to ident.value)
                     session
                         .run(
-                            queryOf(
-                                statement = "SELECT DISTINCT behandling_id FROM trygdetid WHERE ident = :ident",
-                                paramMap = mapOf("ident" to ident.value),
-                            ).map { it.uuid("behandling_id") }.asList,
+                            queryOf(select, paramMap)
+                                .map { Pair(it.uuid("behandling_id"), it.tidspunkt("opprettet")) }
+                                .asList,
                         ).toSet()
                 }
             }
@@ -625,7 +628,6 @@ class TrygdetidRepository(
         overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
         ident = string("ident"),
         yrkesskade = boolean("yrkesskade"),
-        opprettet = tidspunkt("opprettet"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

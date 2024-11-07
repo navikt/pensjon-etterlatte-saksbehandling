@@ -32,7 +32,6 @@ data class Trygdetid(
     val overstyrtNorskPoengaar: Int? = null,
     val opplysningerDifferanse: OpplysningerDifferanse? = null,
     val yrkesskade: Boolean,
-    val opprettet: Tidspunkt = Tidspunkt.now(),
 ) {
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
         val normalisertNyttTrygdetidGrunnlag = listOf(nyttTrygdetidGrunnlag).normaliser().first()
@@ -222,8 +221,6 @@ data class BehandlingMedTrygdetider(
     val behandlingId: UUID,
     val trygdetider: List<Trygdetid>,
 ) {
-    fun maxOpprettet() = trygdetider.maxBy { it.opprettet }.opprettet
-
     fun trygdetiderGjelderEksaktSammeAvdoede(avdoede: List<Folkeregisteridentifikator>): Boolean =
         trygdetider.map(Trygdetid::ident).sorted() ==
             avdoede.map {

@@ -931,12 +931,11 @@ class TrygdetidServiceImpl(
             .hentBehandlingerMedTrygdetiderForAvdoede(avdoede)
             .filter { it.behandlingId != behandlingId }
             .filter { it.trygdetiderGjelderEksaktSammeAvdoede(avdoede) }
-            .sortedByDescending { it.maxOpprettet() }
-            .firstOrNull { statusOkForKopieringAvTrygdetid(it.behandlingId, brukerTokenInfo) }
+            .firstOrNull { behandlingStatusOkForKopieringAvTrygdetid(it.behandlingId, brukerTokenInfo) }
             ?.behandlingId
     }
 
-    private fun statusOkForKopieringAvTrygdetid(
+    private fun behandlingStatusOkForKopieringAvTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =

@@ -36,15 +36,9 @@ export function UtenBrevVisning() {
         </>
       )}
       <InfobrevKnapperad
-        ferdigstill={
-          oppgaveKanFerdigstilles
-            ? undefined
-            : {
-                ferdigstillBrev: ferdigstillOppgaveWrapper,
-                status: ferdigstillOppgaveStatus,
-                tekst: 'Ferdigstill oppgave',
-              }
-        }
+        ferdigstill={!oppgaveKanFerdigstilles ? ferdigstillOppgaveWrapper : undefined}
+        status={ferdigstillOppgaveStatus}
+        tekst="Ferdigstill oppgave"
       >
         <>
           {mapFailure(ferdigstillOppgaveStatus, (error) => (

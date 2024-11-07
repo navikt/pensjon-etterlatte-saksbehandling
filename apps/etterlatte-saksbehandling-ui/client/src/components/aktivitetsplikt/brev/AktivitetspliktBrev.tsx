@@ -2,7 +2,7 @@ import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
-import { ferdigstillJournalfoerOgDistribuerbrev } from '~shared/api/aktivitetsplikt'
+import { ferdigstillBrevOgOppgaveAktivitetsplikt } from '~shared/api/aktivitetsplikt'
 import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
 import { isFailure, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -24,10 +24,10 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
   const [kanRedigeres, setKanRedigeres] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
-  const [status, ferdigstillbrevApi] = useApiCall(ferdigstillJournalfoerOgDistribuerbrev)
+  const [status, ferdigstillOppgaveOgBrev] = useApiCall(ferdigstillBrevOgOppgaveAktivitetsplikt)
 
-  const ferdigstillBrev = () => {
-    ferdigstillbrevApi({ oppgaveId: oppgave.id }, () => oppdater())
+  const ferdigstill = () => {
+    ferdigstillOppgaveOgBrev({ oppgaveId: oppgave.id }, () => oppdater())
   }
 
   const hentBrevOgSetStatus = () => {
@@ -65,7 +65,7 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
           </Column>
           <Column>
             {brevErFerdigstilt ? (
-              <Box maxHeight="955px" width="100%" height="100%">
+              <Box maxHeight="955px" width="100%" height="100%" marginBlock="0 16">
                 <ForhaandsvisningBrev brev={brev} />
               </Box>
             ) : (
@@ -73,7 +73,7 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
                 <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} tilbakestillingsaction={() => undefined} />
               </HStack>
             )}
-            <InfobrevKnapperad ferdigstill={!brevErFerdigstilt ? { ferdigstillBrev, status } : undefined}>
+            <InfobrevKnapperad ferdigstill={!brevErFerdigstilt ? ferdigstill : undefined} status={status}>
               <>
                 {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
                 {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
@@ -87,7 +87,9 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
 }
 
 export function InfobrevKnapperad(props: {
-  ferdigstill?: { ferdigstillBrev: () => void; status: Result<unknown>; tekst?: string }
+  ferdigstill?: () => void
+  status?: Result<unknown>
+  tekst?: string
   children?: React.ReactElement
 }) {
   const navigate = useNavigate()
@@ -104,8 +106,8 @@ export function InfobrevKnapperad(props: {
           {handlinger.TILBAKE.navn}
         </Button>
         {props.ferdigstill && (
-          <Button onClick={props.ferdigstill.ferdigstillBrev} loading={isPending(props.ferdigstill.status)}>
-            {props.ferdigstill.tekst ? props.ferdigstill.tekst : 'Ferdigstill brev'}
+          <Button onClick={props.ferdigstill} loading={isPending(props.status)}>
+            {props.tekst ? props.tekst : 'Ferdigstill brev'}
           </Button>
         )}
       </HStack>

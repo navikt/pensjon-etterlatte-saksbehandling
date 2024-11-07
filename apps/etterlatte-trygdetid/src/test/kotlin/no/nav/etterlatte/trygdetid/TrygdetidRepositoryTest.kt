@@ -1,12 +1,14 @@
 package no.nav.etterlatte.trygdetid
 
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -381,6 +383,81 @@ internal class TrygdetidRepositoryTest(
                 trygdetidMedBeregnetTrygdetid.nullstillBeregnetTrygdetid(),
             )
         trygdetidUtenBeregning.beregnetTrygdetid shouldBe null
+    }
+
+    @Test
+    fun `hentBehandlingerMedTrygdetiderForAvdoede finner behandling med trygdetid for samme avdøde`() {
+        val behandling1 = behandlingMock()
+        val behandling2 = behandlingMock()
+        val behandling3 = behandlingMock()
+        val fnr1 = "02438311109"
+        val fnr2 = "18498248795"
+        val (trygdetid1, _, trygdetid3) =
+            listOf(
+                repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr1)),
+                repository.opprettTrygdetid(trygdetid(behandling2.id, behandling1.sak, ident = fnr2)),
+                repository.opprettTrygdetid(trygdetid(behandling3.id, behandling1.sak, ident = fnr1)),
+            )
+
+        val behandlinger: List<BehandlingMedTrygdetider> =
+            repository.hentBehandlingerMedTrygdetiderForAvdoede(
+                listOf(Folkeregisteridentifikator.of(fnr1)),
+            )
+
+        behandlinger shouldHaveSize 2
+        behandlinger[0].behandlingId shouldBe behandling3.id
+        behandlinger[1].behandlingId shouldBe behandling1.id
+        behandlinger[0].trygdetider shouldHaveSize 1
+        behandlinger[1].trygdetider shouldHaveSize 1
+        behandlinger[0].trygdetider[0].id shouldBe trygdetid3.id
+        behandlinger[1].trygdetider[0].id shouldBe trygdetid1.id
+    }
+
+    @Test
+    fun `hentBehandlingerMedTrygdetiderForAvdoede finner behandling med trygdetid for to avdøde`() {
+        val behandling1 = behandlingMock()
+        val behandling2 = behandlingMock()
+        val fnr1 = "02438311109"
+        val fnr2 = "18498248795"
+        val (t1, t2) =
+            listOf(
+                repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr1)),
+                repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr2)),
+                repository.opprettTrygdetid(trygdetid(behandling2.id, behandling2.sak, ident = fnr1)),
+            )
+
+        val behandlinger: List<BehandlingMedTrygdetider> =
+            repository.hentBehandlingerMedTrygdetiderForAvdoede(
+                listOf(
+                    Folkeregisteridentifikator.of(fnr1),
+                    Folkeregisteridentifikator.of(fnr2),
+                ),
+            )
+        behandlinger shouldHaveSize 1
+        behandlinger[0].behandlingId shouldBe behandling1.id
+        val trygdetider = behandlinger[0].trygdetider
+        trygdetider shouldHaveSize 2
+        trygdetider[0].id shouldBe t1.id
+        trygdetider[0].ident shouldBe fnr1
+        trygdetider[1].id shouldBe t2.id
+        trygdetider[1].ident shouldBe fnr2
+    }
+
+    @Test
+    fun `hentBehandlingerMedTrygdetiderForAvdoede returnerer tom liste hvis ingen matchende`() {
+        val behandling1 = behandlingMock()
+
+        val fnr1 = "02438311109"
+        val fnr2 = "18498248795"
+        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr1))
+
+        val behandlinger: List<BehandlingMedTrygdetider> =
+            repository.hentBehandlingerMedTrygdetiderForAvdoede(
+                listOf(
+                    Folkeregisteridentifikator.of(fnr2),
+                ),
+            )
+        behandlinger shouldBe emptyList()
     }
 
     private fun behandlingMock() =

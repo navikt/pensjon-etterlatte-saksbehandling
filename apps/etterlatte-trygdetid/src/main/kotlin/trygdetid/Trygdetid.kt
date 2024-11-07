@@ -223,7 +223,5 @@ data class BehandlingMedTrygdetider(
 ) {
     fun trygdetiderGjelderEksaktSammeAvdoede(avdoede: List<Folkeregisteridentifikator>): Boolean =
         trygdetider.map(Trygdetid::ident).sorted() ==
-            avdoede.map {
-                it.value
-            }
+            avdoede.map(Folkeregisteridentifikator::value).sorted()
 }

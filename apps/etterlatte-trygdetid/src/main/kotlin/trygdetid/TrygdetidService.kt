@@ -917,7 +917,6 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): UUID? {
-        logger.debug("Finner trygdetid med samme avdøde som i $")
         val avdoede: List<Folkeregisteridentifikator> =
             grunnlagKlient
                 .hentGrunnlag(behandlingId, brukerTokenInfo)

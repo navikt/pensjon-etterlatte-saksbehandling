@@ -1,7 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
 import io.kotest.matchers.shouldBe
-import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -26,7 +25,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -121,7 +119,7 @@ internal class TrygdetidRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
             response.status shouldBe HttpStatusCode.OK
-            response.body<UUID>() shouldBe kildeBehandlingId
+            response.bodyAsText() shouldBe kildeBehandlingId.toString()
         }
         coVerify { trygdetidService.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, any()) }
     }

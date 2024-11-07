@@ -16,6 +16,7 @@ import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
@@ -59,11 +60,8 @@ internal class OmregningHendelserBeregningRiver(
     ) {
         logger.info("Mottatt omregninghendelse")
         val omregningData = packet.omregningData
-        val behandlingId = omregningData.hentBehandlingId()
-        val behandlingViOmregnerFra = omregningData.hentForrigeBehandlingid()
-        val sakType = omregningData.hentSakType()
         runBlocking {
-            val beregning = beregn(sakType, omregningData.revurderingaarsak, behandlingId, behandlingViOmregnerFra)
+            val beregning = beregn(omregningData)
             packet[BEREGNING_KEY] = beregning.beregning
 
             // TODO bør vi ha slike ting her?
@@ -76,12 +74,12 @@ internal class OmregningHendelserBeregningRiver(
         logger.info("Publiserte oppdatert omregningshendelse")
     }
 
-    internal suspend fun beregn(
-        sakType: SakType,
-        revurderingaarsak: Revurderingaarsak,
-        behandlingId: UUID,
-        behandlingViOmregnerFra: UUID,
-    ): BeregningOgAvkorting {
+    internal suspend fun beregn(omregningData: OmregningData): BeregningOgAvkorting {
+        val behandlingId = omregningData.hentBehandlingId()
+        val behandlingViOmregnerFra = omregningData.hentForrigeBehandlingid()
+        val sakType = omregningData.hentSakType()
+        val fraDato = omregningData.hentFraDato()
+        val revurderingaarsak = omregningData.revurderingaarsak
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
@@ -98,8 +96,11 @@ internal class OmregningHendelserBeregningRiver(
                 when (revurderingaarsak) {
                     Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {
                         beregningService
-                            .omregnAarligInntektsjustering(behandlingId, behandlingViOmregnerFra)
-                            .body<AvkortingDto>()
+                            .omregnAarligInntektsjustering(
+                                aar = fraDato.year,
+                                behandlingId = behandlingId,
+                                forrigeBehandlingId = behandlingViOmregnerFra,
+                            ).body<AvkortingDto>()
                     }
 
                     else -> {

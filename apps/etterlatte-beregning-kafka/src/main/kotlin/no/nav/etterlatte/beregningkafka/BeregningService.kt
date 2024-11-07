@@ -66,6 +66,7 @@ class BeregningService(
         }
 
     fun omregnAarligInntektsjustering(
+        aar: Int,
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
     ): HttpResponse =
@@ -74,6 +75,7 @@ class BeregningService(
                 contentType(ContentType.Application.Json)
                 setBody(
                     AarligInntektsjusteringAvkortingRequest(
+                        aar = aar,
                         nyBehandling = behandlingId,
                         forrigeBehandling = forrigeBehandlingId,
                     ),

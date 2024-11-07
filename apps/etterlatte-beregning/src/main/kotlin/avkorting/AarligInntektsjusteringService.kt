@@ -3,6 +3,7 @@ package no.nav.etterlatte.avkorting
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
@@ -29,6 +30,7 @@ class AarligInntektsjusteringService(
     }
 
     suspend fun kopierAarligInntektsjustering(
+        aar: Int,
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -43,6 +45,13 @@ class AarligInntektsjusteringService(
                 .inntektsavkorting
                 .last()
                 .grunnlag
+
+        with(siseInntekt.periode) {
+            if (fom.year != aar - 1 || (tom != null && tom?.year != aar - 1)) {
+                throw InternfeilException("Årlig inntektsjustering feilet - inntekt som overføres er i feil år")
+            }
+        }
+
         val nyttGrunnlag =
             AvkortingGrunnlagLagreDto(
                 inntektTom = siseInntekt.inntektTom,
@@ -50,7 +59,7 @@ class AarligInntektsjusteringService(
                 inntektUtlandTom = siseInntekt.inntektUtlandTom,
                 fratrekkInnAarUtland = 0,
                 spesifikasjon = siseInntekt.spesifikasjon,
-                fom = YearMonth.of(siseInntekt.periode.fom.year + 1, 1),
+                fom = YearMonth.of(aar, 1),
             )
 
         avkortingService.beregnAvkortingMedNyttGrunnlag(behandlingId, brukerTokenInfo, nyttGrunnlag)

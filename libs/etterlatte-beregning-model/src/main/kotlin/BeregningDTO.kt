@@ -158,6 +158,7 @@ data class AarligInntektsjusteringAvkortingSjekkResponse(
 )
 
 data class AarligInntektsjusteringAvkortingRequest(
+    val aar: Int,
     val forrigeBehandling: UUID,
     val nyBehandling: UUID,
 )

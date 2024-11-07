@@ -101,11 +101,12 @@ fun Route.avkorting(
             logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")
             val respons =
                 aarligInntektsjusteringService.kopierAarligInntektsjustering(
+                    aar = request.aar,
                     behandlingId = request.nyBehandling,
                     forrigeBehandlingId = request.forrigeBehandling,
                     brukerTokenInfo = brukerTokenInfo,
                 )
-            call.respond(respons)
+            call.respond(respons.toDto())
         }
     }
 }

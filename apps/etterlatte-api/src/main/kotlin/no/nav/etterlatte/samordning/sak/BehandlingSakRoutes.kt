@@ -40,13 +40,6 @@ fun Route.behandlingSakRoutes(
             issuers = setOf(Issuer.AZURE.issuerName)
         }
 
-        get("/har_sak") {
-            val foedselsnummer = call.receive<FoedselsnummerDTO>()
-            val saker = behandlingService.hentSakforPerson(foedselsnummer)
-
-            call.respond(HarOMSSakIGjenny(saker.isNotEmpty()))
-        }
-
         post("/person/sak") {
             val foedselsnummer = call.receive<FoedselsnummerDTO>()
             call.respond(behandlingService.hentSakforPerson(foedselsnummer))
@@ -56,6 +49,19 @@ fun Route.behandlingSakRoutes(
     route("api/sak") {
         install(AuthorizationPlugin) {
             accessPolicyRolesEllerAdGrupper = setOf("les-bp-sak", "les-oms-sak")
+        }
+
+        route("oms/har_sak") {
+            install(AuthorizationPlugin) {
+                accessPolicyRolesEllerAdGrupper = setOf("les-oms-sak-for-person")
+            }
+
+            get {
+            val foedselsnummer = call.receive<FoedselsnummerDTO>()
+            val saker = behandlingService.hentSakforPerson(foedselsnummer)
+
+            call.respond(HarOMSSakIGjenny(saker.isNotEmpty()))
+            }
         }
 
         get("/{$SAKID_CALL_PARAMETER}") {

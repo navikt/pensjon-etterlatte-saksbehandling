@@ -349,4 +349,32 @@ class AktivitetspliktOppgaveServiceTest {
         }
         verify(exactly = 0) { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) }
     }
+
+    @Test
+    fun `Kan ikke lagre om oppgave er avsluttet`() {
+        val oppgaveId = UUID.randomUUID()
+        val sakIdForOppgave = sak.id
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            mockk {
+                every { sakId } returns sakIdForOppgave
+                every { status } returns Status.FERDIGSTILT
+            }
+
+        val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
+
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                1234,
+                true,
+                utbetaling = true,
+                redusertEtterInntekt = true,
+                kilde = kilde,
+            )
+        val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
+        assertThrows<OppgaveErAvsluttet> {
+            service.lagreBrevdata(oppgaveId, aktivitetspliktInformasjonBrevdataRequest)
+        }
+    }
 }

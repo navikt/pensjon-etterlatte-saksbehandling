@@ -81,13 +81,22 @@ class AktivitetspliktOppgaveService(
         data: AktivitetspliktInformasjonBrevdataRequest,
     ): AktivitetspliktInformasjonBrevdata? {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-        val saksbehandler =
-            Kontekst.get().brukerTokenInfo
-                ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
-        val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
-        aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
-        return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
+        if (oppgave.status.erAvsluttet()) {
+            throw OppgaveErAvsluttet("Oppgave er avsluttet, id $oppgaveId. Kan ikke fjerne brevid")
+        } else {
+            val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+            val saksbehandler =
+                Kontekst.get().brukerTokenInfo
+                    ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
+            val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
+            aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
+            val oppdatertBrevdata = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
+            if (!data.skalSendeBrev && oppdatertBrevdata?.brevId != null) {
+                aktivitetspliktBrevDao.fjernBrevId(oppgaveId, kilde)
+                runBlocking { brevApiKlient.slettBrev(brevId = oppdatertBrevdata.brevId, brukerTokenInfo = saksbehandler) }
+            }
+            return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
+        }
     }
 
     private fun mapAktivitetsgradstypeTilAktivtetsgrad(aktivitetsgrad: AktivitetspliktAktivitetsgradType): Aktivitetsgrad =
@@ -185,6 +194,13 @@ class AktivitetspliktOppgaveService(
         }
     }
 }
+
+class OppgaveErAvsluttet(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "OPPGAVE_AVSLUTTET",
+        detail = msg,
+    )
 
 class IngenSaksbehandler(
     msg: String,

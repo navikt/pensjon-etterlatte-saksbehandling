@@ -4,20 +4,20 @@ versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
 [versions]
-jackson-version = "2.18.0"
-jupiter-version = "5.11.1"
+jackson-version = "2.18.1"
+jupiter-version = "5.11.3"
 ktor2-version = "2.3.12"
-navfelles-token-version = "5.0.5"
+navfelles-token-version = "5.0.8"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.20.2"
+testcontainer-version = "1.20.3"
 tjenestespesifikasjoner-version = "1.1436e29"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
-database-hikaricp = { module = "com.zaxxer:HikariCP", version = "6.0.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.18.2" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.18.2" }
+database-hikaricp = { module = "com.zaxxer:HikariCP", version = "6.1.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.20.1" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.20.1" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.4" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -61,7 +61,7 @@ etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "20
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.8" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.12" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.0" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.13.6" }
@@ -79,20 +79,20 @@ navfelles-tjenestespesifikasjoner-oppdragsimulering = { module = "com.github.nav
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.9" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.10" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.9.1" }
-test-mockk = { module = "io.mockk:mockk", version = "1.13.12" }
+test-mockk = { module = "io.mockk:mockk", version = "1.13.13" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }
 
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.27.1" }
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.4" }
-openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "3.4.0" }
+openapi = { module = "io.github.smiley4:ktor-swagger-ui", version = "4.0.0" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

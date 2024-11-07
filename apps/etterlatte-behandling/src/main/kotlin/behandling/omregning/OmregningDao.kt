@@ -66,9 +66,9 @@ class OmregningDao(
                 statement.setString(1, request.kjoering)
                 statement.setString(2, request.status.name)
                 statement.setSakId(3, request.sakId)
-                statement.setString(4, request.begrunnelse ?: "")
-                statement.setString(5, request.corrId ?: "")
-                statement.setString(6, request.feilendeSteg ?: "")
+                statement.setString(4, request.begrunnelse)
+                statement.setString(5, request.corrId)
+                statement.setString(6, request.feilendeSteg)
                 statement.executeUpdate().also { require(it == 1) }
             }
         }

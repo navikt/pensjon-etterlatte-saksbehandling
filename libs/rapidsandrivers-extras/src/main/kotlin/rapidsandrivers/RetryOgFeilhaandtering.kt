@@ -55,7 +55,7 @@ private fun publiserFeilamelding(
         packet.setEventNameForHendelseType(EventNames.FEILA)
         packet.feilendeSteg = feilendeSteg
         packet[KONTEKST_KEY] = kontekst.name
-        packet.feilmelding = e.message ?: ""
+        packet.feilmelding = e.stackTraceToString()
         context.publish(packet.toJson())
         feilhaandteringLogger.info("Publiserte feila-melding")
     } catch (e2: Exception) {

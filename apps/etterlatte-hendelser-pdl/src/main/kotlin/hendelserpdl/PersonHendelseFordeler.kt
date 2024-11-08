@@ -75,7 +75,7 @@ class PersonHendelseFordeler(
 
                 is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
                 is PdlIdentifikator.FolkeregisterIdent -> {
-                    logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
+                    logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId}, type=${hendelse.opplysningstype})")
 
                     when (LeesahOpplysningstype.valueOf(hendelse.opplysningstype)) {
                         VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 -> haandterVergemaal(hendelse, ident)

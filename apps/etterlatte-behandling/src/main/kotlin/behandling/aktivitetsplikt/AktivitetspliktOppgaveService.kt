@@ -54,7 +54,7 @@ class AktivitetspliktOppgaveService(
         val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
         val vurderingerPaaOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId)
         val vurderinger =
-            if (vurderingerPaaOppgave == null && !oppgave.erAvsluttet()) {
+            if (vurderingerPaaOppgave.erTom() && !oppgave.erAvsluttet()) {
                 // kopier de inn fra sak
                 aktivitetspliktService.kopierInnTilOppgave(sak.id, oppgaveId)
             } else {

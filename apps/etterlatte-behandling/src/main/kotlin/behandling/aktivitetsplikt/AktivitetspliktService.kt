@@ -734,7 +734,9 @@ data class AktivitetspliktVurderingGammel(
 data class AktivitetspliktVurdering(
     val aktivitet: List<AktivitetspliktAktivitetsgrad>,
     val unntak: List<AktivitetspliktUnntak>,
-)
+) {
+    fun erTom() = aktivitet.isEmpty() && unntak.isEmpty()
+}
 
 interface AktivitetspliktVurderingOpprettetDato {
     val opprettet: Grunnlagsopplysning.Kilde

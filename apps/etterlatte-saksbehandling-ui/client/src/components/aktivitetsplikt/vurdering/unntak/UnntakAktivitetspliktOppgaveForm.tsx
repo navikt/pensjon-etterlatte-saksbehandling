@@ -44,7 +44,6 @@ export function UnntakAktivitetspliktOppgaveForm(props: {
     if (!formdataErUtfylt(formdata)) {
       return
     }
-    console.log('formdata: ', formdata)
     lagreUnntak(
       {
         oppgaveId: oppgave.id,

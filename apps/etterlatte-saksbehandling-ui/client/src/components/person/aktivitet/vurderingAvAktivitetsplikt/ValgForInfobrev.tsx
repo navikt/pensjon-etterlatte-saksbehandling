@@ -2,7 +2,6 @@ import { Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
-import { isPending } from '@reduxjs/toolkit'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   IBrevAktivitetspliktRequest,
@@ -19,7 +18,7 @@ import { useDispatch } from 'react-redux'
 import { setAktivtetspliktbrevdata, setBrevid } from '~store/reducers/Aktivitetsplikt12mnd'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { mapFailure } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { handlinger } from '~components/behandling/handlinger/typer'
 
@@ -57,7 +56,6 @@ export const ValgForInfobrev = () => {
       () => {}
     )
   }
-  console.log('oppgave: ', oppgave.status)
 
   const skalsendebrev = watch('skalSendeBrev')
 

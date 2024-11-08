@@ -174,7 +174,7 @@ class AktivitetspliktOppgaveService(
     fun ferdigstillBrevOgOppgave(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): OppgaveIntern {
         val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
@@ -189,6 +189,7 @@ class AktivitetspliktOppgaveService(
         val brevrespons: BrevStatusResponse = runBlocking { brevApiKlient.ferdigstillBrev(req, brukerTokenInfo) }
         if (brevrespons.status.erDistribuert()) {
             oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
+            return oppgaveService.hentOppgave(oppgaveId)
         } else {
             throw BrevBleIkkeFerdig(brevrespons.status)
         }

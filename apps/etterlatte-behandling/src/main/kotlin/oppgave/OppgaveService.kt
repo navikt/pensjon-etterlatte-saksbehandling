@@ -347,12 +347,13 @@ class OppgaveService(
         id: UUID,
         saksbehandler: BrukerTokenInfo,
         merknad: String? = null,
-    ) {
+    ): OppgaveIntern {
         val oppgave =
             checkNotNull(oppgaveDao.hentOppgave(id)) {
                 "Oppgave med id=$id finnes ikke – avbryter ferdigstilling av oppgaven"
             }
         ferdigstillOppgave(oppgave, saksbehandler, merknad)
+        return hentOppgave(id)
     }
 
     private fun ferdigstillOppgave(

@@ -1,4 +1,8 @@
-import { IAktivitetspliktAktivitetsgrad, tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
+import {
+  IAktivitetspliktAktivitetsgrad,
+  IAktivitetspliktVurderingNy,
+  tekstAktivitetspliktVurderingType,
+} from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Box, Button, Detail, Heading, HStack, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { ClockDashedIcon, PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
@@ -10,19 +14,22 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { useDispatch } from 'react-redux'
+import { setAktivitetspliktVurdering } from '~store/reducers/Aktivitetsplikt12mnd'
 
 export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
-  const { oppgave, vurdering, oppdater } = useAktivitetspliktOppgaveVurdering()
-  const [aktivitetForRedigering, setAktivitetForRedigering] = useState<IAktivitetspliktAktivitetsgrad | undefined>()
+  const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
+
   const [slettStatus, slettSpesifikkAktivitet] = useApiCall(slettAktivitetspliktVurdering)
+  const [aktivitetForRedigering, setAktivitetForRedigering] = useState<IAktivitetspliktAktivitetsgrad | undefined>()
 
+  const dispatch = useDispatch()
   const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
-
   const aktiviteter = vurdering.aktivitet
 
-  function oppdaterTilstandLagretVurdering() {
+  function oppdaterTilstandLagretVurdering(data: IAktivitetspliktVurderingNy) {
+    dispatch(setAktivitetspliktVurdering(data))
     setAktivitetForRedigering(undefined)
-    oppdater()
   }
 
   function slettAktivitetsgradIOppgave(aktivitet: IAktivitetspliktAktivitetsgrad) {
@@ -32,9 +39,9 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
         oppgaveId: oppgave.id,
         vurderingId: aktivitet.id,
       },
-      () => {
+      (data) => {
+        dispatch(setAktivitetspliktVurdering(data))
         setAktivitetForRedigering(undefined)
-        oppdater()
       }
     )
   }

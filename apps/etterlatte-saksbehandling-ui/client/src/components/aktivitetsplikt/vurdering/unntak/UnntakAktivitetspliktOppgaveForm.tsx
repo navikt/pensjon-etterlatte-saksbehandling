@@ -1,6 +1,7 @@
 import {
   AktivitetspliktUnntakType,
   IAktivitetspliktUnntak,
+  IAktivitetspliktVurderingNy,
   tekstAktivitetspliktUnntakType,
 } from '~shared/types/Aktivitetsplikt'
 import { useForm } from 'react-hook-form'
@@ -29,7 +30,7 @@ function formdataErUtfylt(formdata: Partial<IOpprettAktivitetspliktUnntak>): for
 
 export function UnntakAktivitetspliktOppgaveForm(props: {
   unntak?: IAktivitetspliktUnntak
-  onSuccess: () => void
+  onSuccess: (data: IAktivitetspliktVurderingNy) => void
   onAvbryt?: () => void
 }) {
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
@@ -43,7 +44,7 @@ export function UnntakAktivitetspliktOppgaveForm(props: {
     if (!formdataErUtfylt(formdata)) {
       return
     }
-
+    console.log('formdata: ', formdata)
     lagreUnntak(
       {
         oppgaveId: oppgave.id,

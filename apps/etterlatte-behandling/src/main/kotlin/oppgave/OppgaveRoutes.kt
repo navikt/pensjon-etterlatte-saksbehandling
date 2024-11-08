@@ -185,10 +185,11 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             put("ferdigstill") {
                 kunSkrivetilgang {
                     val merknad = call.receive<FerdigstillRequest>().merknad
-                    inTransaction {
-                        service.ferdigstillOppgave(oppgaveId, brukerTokenInfo, merknad)
-                    }
-                    call.respond(HttpStatusCode.OK)
+                    val oppgave =
+                        inTransaction {
+                            service.ferdigstillOppgave(oppgaveId, brukerTokenInfo, merknad)
+                        }
+                    call.respond(oppgave)
                 }
             }
 

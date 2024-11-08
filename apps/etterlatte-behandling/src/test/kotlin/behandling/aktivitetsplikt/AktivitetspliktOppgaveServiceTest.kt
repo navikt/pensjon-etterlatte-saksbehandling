@@ -19,6 +19,7 @@ import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -314,7 +315,7 @@ class AktivitetspliktOppgaveServiceTest {
                 redusertEtterInntekt = true,
                 kilde = kilde,
             )
-        every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } just Runs
+        every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
         coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
             BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.DISTRIBUERT)
         service.ferdigstillBrevOgOppgave(oppgaveId, simpleSaksbehandler)
@@ -344,7 +345,7 @@ class AktivitetspliktOppgaveServiceTest {
                 redusertEtterInntekt = true,
                 kilde = kilde,
             )
-        every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } just Runs
+        every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
         coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
             BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.JOURNALFOERT)
         assertThrows<BrevBleIkkeFerdig> {

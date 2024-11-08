@@ -7,14 +7,17 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/AktivitetspliktBrev'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useDispatch } from 'react-redux'
+import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
 
 export function UtenBrevVisning() {
-  const { oppgave, oppdater, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
+  const dispatch = useDispatch()
 
   const ferdigstillOppgaveWrapper = () => {
-    apiFerdigstillOppgave(oppgave.id, () => {
-      oppdater()
+    apiFerdigstillOppgave(oppgave.id, (oppgave) => {
+      dispatch(setAktivitetspliktOppgave(oppgave))
     })
   }
   const oppgaveErFerdigstilt = oppgave.status === Oppgavestatus.FERDIGSTILT

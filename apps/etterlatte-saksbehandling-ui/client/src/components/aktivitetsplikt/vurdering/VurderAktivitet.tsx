@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { useDispatch } from 'react-redux'
+import { setBrevid } from '~store/reducers/Aktivitetsplikt12mnd'
 
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
@@ -50,11 +52,11 @@ export function VurderAktivitet() {
 }
 
 function NesteEllerOpprettBrev() {
-  const { oppgave, aktivtetspliktbrevdata, oppdater } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const navigate = useNavigate()
 
   const [opprettBrevStatus, opprettBrevCall] = useApiCall(opprettAktivitetspliktsbrev)
-
+  const dispatch = useDispatch()
   const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
   const skalOppretteBrev = erRedigerbar && aktivtetspliktbrevdata?.skalSendeBrev && !aktivtetspliktbrevdata.brevId
 
@@ -63,8 +65,8 @@ function NesteEllerOpprettBrev() {
       {
         oppgaveId: oppgave.id,
       },
-      () => {
-        oppdater()
+      (brevId) => {
+        dispatch(setBrevid(brevId.brevId))
         navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)
       }
     )

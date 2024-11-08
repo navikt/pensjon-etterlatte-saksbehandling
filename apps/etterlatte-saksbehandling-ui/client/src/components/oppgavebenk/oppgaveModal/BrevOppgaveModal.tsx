@@ -37,8 +37,8 @@ export const BrevOppgaveModal = ({
   const avslutt = ({ kommentar }: { kommentar: string }) => {
     const nyMerknad = `${oppgave.merknad} – \nKommentar (${formaterDatoMedKlokkeslett(new Date())}): ${kommentar}`
 
-    avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, () => {
-      oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+    avsluttOppgave({ id: oppgave.id, merknad: nyMerknad }, (oppgave) => {
+      oppdaterStatus(oppgave.id, oppgave.status)
       setIsOpen(false)
     })
   }

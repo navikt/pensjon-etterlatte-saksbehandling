@@ -1,10 +1,10 @@
-import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
 import { ferdigstillBrevOgOppgaveAktivitetsplikt } from '~shared/api/aktivitetsplikt'
 import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
-import { isFailure, mapResult, Result } from '~shared/api/apiUtils'
+import { isFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Column, GridContainer } from '~shared/styled'
@@ -14,12 +14,10 @@ import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottak
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { isPending } from '@reduxjs/toolkit'
-import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { handlinger } from '~components/behandling/handlinger/typer'
-import { useNavigate } from 'react-router-dom'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { useDispatch } from 'react-redux'
 import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
+import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 
 export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
@@ -88,33 +86,4 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
       )
     },
   })
-}
-
-export function InfobrevKnapperad(props: {
-  ferdigstill?: () => void
-  status?: Result<unknown>
-  tekst?: string
-  children?: React.ReactElement
-}) {
-  const navigate = useNavigate()
-  return (
-    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-      {props.children}
-      <HStack gap="4" justify="center">
-        <Button
-          variant="secondary"
-          onClick={() => {
-            navigate(`../${AktivitetspliktSteg.VURDERING}`)
-          }}
-        >
-          {handlinger.TILBAKE.navn}
-        </Button>
-        {props.ferdigstill && (
-          <Button onClick={props.ferdigstill} loading={isPending(props.status)}>
-            {props.tekst ? props.tekst : 'Ferdigstill brev'}
-          </Button>
-        )}
-      </HStack>
-    </Box>
-  )
 }

@@ -5,10 +5,10 @@ import { Alert, BodyShort, VStack } from '@navikt/ds-react'
 import { mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
-import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/AktivitetspliktBrev'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { useDispatch } from 'react-redux'
 import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
+import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 
 export function UtenBrevVisning() {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()

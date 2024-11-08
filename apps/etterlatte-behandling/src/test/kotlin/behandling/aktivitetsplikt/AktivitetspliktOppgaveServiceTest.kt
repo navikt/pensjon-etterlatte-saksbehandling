@@ -76,7 +76,7 @@ class AktivitetspliktOppgaveServiceTest {
             )
 
         every { oppgaveService.hentOppgave(oppgave.id) } returns oppgave
-        every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns null
+        every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns AktivitetspliktVurdering(emptyList(), emptyList())
         every { aktivitetspliktService.kopierInnTilOppgave(sak.id, oppgave.id) } returns null
         every { aktivitetspliktBrevDao.hentBrevdata(oppgave.id) } returns null
 
@@ -95,7 +95,7 @@ class AktivitetspliktOppgaveServiceTest {
             ).copy(status = Status.AVBRUTT)
 
         every { oppgaveService.hentOppgave(oppgave.id) } returns oppgave
-        every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns null
+        every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns AktivitetspliktVurdering(emptyList(), emptyList())
         every { aktivitetspliktBrevDao.hentBrevdata(oppgave.id) } returns null
         service.hentVurderingForOppgave(oppgave.id)
 
@@ -111,9 +111,21 @@ class AktivitetspliktOppgaveServiceTest {
                 oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
             )
         every { oppgaveService.hentOppgave(oppgave.id) } returns oppgave
+
+        val grad =
+            aktivitetsgrad(
+                id = UUID.randomUUID(),
+                sakId = sak.id,
+                behandlingId = null,
+                oppgaveId = null,
+                aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
+                fom = LocalDate.now(),
+                beskrivelse = "Beskrivelse",
+            )
+
         every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns
             AktivitetspliktVurdering(
-                emptyList(),
+                listOf(grad),
                 emptyList(),
             )
 

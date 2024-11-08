@@ -7,7 +7,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarRequest
@@ -64,17 +63,6 @@ fun Route.personRoute(service: PersonService) {
             logger.info("Henter identer for ident=${hentPdlIdentRequest.ident}")
 
             service.hentPdlIdentifikator(hentPdlIdentRequest).let { call.respond(it) }
-        }
-    }
-
-    route("folkeregisteridenter") {
-        post {
-            val personIdenterForAktoerIdRequest = call.receive<HentFolkeregisterIdenterForAktoerIdBolkRequest>()
-
-            service
-                .hentFolkeregisterIdenterForAktoerIdBolk(
-                    personIdenterForAktoerIdRequest,
-                ).let { call.respond(it) }
         }
     }
 

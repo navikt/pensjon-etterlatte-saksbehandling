@@ -315,7 +315,7 @@ internal fun Route.aktivitetspliktRoutes(
                                 brukerTokenInfo = brukerTokenInfo,
                             )
                         }
-                    call.respond(aktivitetsgrad ?: HttpStatusCode.NoContent)
+                    call.respond(aktivitetsgrad)
                 }
             }
         }

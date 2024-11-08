@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
@@ -685,7 +686,7 @@ class KlageServiceImpl(
     ) {
         val utfall = klage.utfall as KlageUtfallMedData.Avvist
         if (vedtakId != utfall.vedtak.vedtakId) {
-            throw IllegalStateException(
+            throw InternfeilException(
                 "VedtakId=$vedtakId er forskjellig fra det som ligger i utfall=$vedtakId",
             )
         }

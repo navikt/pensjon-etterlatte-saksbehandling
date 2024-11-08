@@ -280,7 +280,7 @@ class OppgaveService(
             hentOppgaverForReferanse(referanse)
                 .filter { it.type == type }
                 .singleOrNull { it.erAttestering() }
-                ?: throw IllegalStateException("Fant ikke oppgave med referanse: $referanse")
+                ?: throw InternfeilException("Fant ikke oppgave med referanse: $referanse")
 
         val oppdatertMerknad = merknad ?: oppgave.merknad ?: ""
         val oppgaveId = oppgave.id

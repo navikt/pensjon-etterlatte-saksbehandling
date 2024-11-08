@@ -113,6 +113,15 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
             }
         }
 
+        post("/ufoeretrygd") {
+            kunSystembruker {
+                val hendelse = call.receive<UfoeretrygdHendelse>()
+                logger.info("Mottar en uføretrygd-hendelse")
+                grunnlagsendringshendelseService.opprettUfoeretrygdhendelse(hendelse)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         route("/{$SAKID_CALL_PARAMETER}") {
             get {
                 call.respond(GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)))
@@ -135,4 +144,9 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
 
 data class GrunnlagsendringsListe(
     val hendelser: List<Grunnlagsendringshendelse>,
+)
+
+data class UfoeretrygdHendelse(
+    val hendelseId: Long,
+    val ident: String,
 )

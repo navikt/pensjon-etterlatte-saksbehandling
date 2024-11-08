@@ -111,9 +111,21 @@ class AktivitetspliktOppgaveServiceTest {
                 oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
             )
         every { oppgaveService.hentOppgave(oppgave.id) } returns oppgave
+
+        val grad =
+            aktivitetsgrad(
+                id = UUID.randomUUID(),
+                sakId = sak.id,
+                behandlingId = null,
+                oppgaveId = null,
+                aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
+                fom = LocalDate.now(),
+                beskrivelse = "Beskrivelse",
+            )
+
         every { aktivitetspliktService.hentVurderingForOppgave(oppgave.id) } returns
             AktivitetspliktVurdering(
-                emptyList(),
+                listOf(grad),
                 emptyList(),
             )
 

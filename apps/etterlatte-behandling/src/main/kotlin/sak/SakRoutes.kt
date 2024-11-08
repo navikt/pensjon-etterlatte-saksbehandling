@@ -151,10 +151,12 @@ internal fun Route.sakSystemRoutes(
         withFoedselsnummerInternal(tilgangService) { fnr ->
             val type: SakType =
                 enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
+
+            requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/getsak/{type}")
+
             val sak =
-                inTransaction { sakService.finnSak(fnr.value, type) }.also {
-                    requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak")
-                } ?: throw GenerellIkkeFunnetException()
+                inTransaction { sakService.finnSak(fnr.value, type) } ?: throw GenerellIkkeFunnetException()
+
             call.respond(sak)
         }
     }
@@ -272,18 +274,18 @@ internal fun Route.sakWebRoutes(
 
             post("/behandlingerforsak") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
+                    requestLogger.loggRequest(
+                        brukerTokenInfo,
+                        Folkeregisteridentifikator.of(fnr),
+                        "behandlinger",
+                    )
+
                     val sakMedBehandlinger =
                         inTransaction {
                             val saker = sakService.finnSaker(fnr.value)
 
                             behandlingService.hentSakMedBehandlinger(saker)
                         }
-
-                    requestLogger.loggRequest(
-                        brukerTokenInfo,
-                        Folkeregisteridentifikator.of(sakMedBehandlinger.sak.ident),
-                        "behandlinger",
-                    )
 
                     call.respond(sakMedBehandlinger)
                 }
@@ -298,6 +300,8 @@ internal fun Route.sakWebRoutes(
                             "Mangler påkrevd parameter {type} for å hente sak på bruker"
                         }.let { enumValueOf(it) }
 
+                    requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type")
+
                     val sak =
                         inTransaction {
                             if (opprettHvisIkkeFinnes) {
@@ -305,17 +309,17 @@ internal fun Route.sakWebRoutes(
                             } else {
                                 sakService.finnSak(fnr.value, type)
                             }
-                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type") }
+                        }
+
                     call.respond(sak ?: HttpStatusCode.NoContent)
                 }
             }
 
             post("/getsak/oms") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val saker =
-                        inTransaction { sakService.finnSakerOmsOgHvisAvdoed(fnr.value) }.also {
-                            requestLogger.loggRequest(brukerTokenInfo, fnr, "api/personer/getsak/oms")
-                        }
+                    requestLogger.loggRequest(brukerTokenInfo, fnr, "api/personer/getsak/oms")
+
+                    val saker = inTransaction { sakService.finnSakerOmsOgHvisAvdoed(fnr.value) }
 
                     call.respond(saker)
                 }

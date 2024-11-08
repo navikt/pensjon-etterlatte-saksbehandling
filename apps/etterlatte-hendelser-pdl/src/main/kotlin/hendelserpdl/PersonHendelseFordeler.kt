@@ -75,41 +75,17 @@ class PersonHendelseFordeler(
 
                 is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
                 is PdlIdentifikator.FolkeregisterIdent -> {
+                    logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
+
                     when (LeesahOpplysningstype.valueOf(hendelse.opplysningstype)) {
-                        VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 ->
-                            haandterVergemaal(hendelse, ident).also {
-                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
-                            }
-                        ADRESSEBESKYTTELSE_V1 ->
-                            haandterAdressebeskyttelse(hendelse, ident).also {
-                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
-                            }
-                        FORELDERBARNRELASJON_V1 ->
-                            haandterForelderBarnRelasjon(hendelse, ident).also {
-                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
-                            }
-                        DOEDSFALL_V1 ->
-                            haandterDoedsHendelse(
-                                hendelse,
-                                ident,
-                            ).also { logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})") }
-                        UTFLYTTING_FRA_NORGE ->
-                            haandterUtflyttingFraNorge(hendelse, ident).also {
-                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
-                            }
-                        SIVILSTAND_V1 ->
-                            haandterSivilstand(
-                                hendelse,
-                                ident,
-                            ).also { logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})") }
-                        BOSTEDSADRESSE_V1 ->
-                            haandterBostedsadresse(hendelse, ident).also {
-                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
-                            }
-                        FOLKEREGISTERIDENTIFIKATOR_V1 ->
-                            haandterFolkeregisteridentifikator(hendelse, ident).also {
-                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
-                            }
+                        VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 -> haandterVergemaal(hendelse, ident)
+                        ADRESSEBESKYTTELSE_V1 -> haandterAdressebeskyttelse(hendelse, ident)
+                        FORELDERBARNRELASJON_V1 -> haandterForelderBarnRelasjon(hendelse, ident)
+                        DOEDSFALL_V1 -> haandterDoedsHendelse(hendelse, ident)
+                        UTFLYTTING_FRA_NORGE -> haandterUtflyttingFraNorge(hendelse, ident)
+                        SIVILSTAND_V1 -> haandterSivilstand(hendelse, ident)
+                        BOSTEDSADRESSE_V1 -> haandterBostedsadresse(hendelse, ident)
+                        FOLKEREGISTERIDENTIFIKATOR_V1 -> haandterFolkeregisteridentifikator(hendelse, ident)
                     }
                 }
             }

@@ -146,21 +146,27 @@ class PdlKlient(
         }
     }
 
-    suspend fun hentPdlIdentifikator(request: HentPdlIdentRequest): PdlIdentResponse {
+    suspend fun hentPdlIdentifikator(
+        request: HentPdlIdentRequest,
+        grupper: List<PDLIdentGruppeTyper> = listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT, PDLIdentGruppeTyper.NPID),
+    ): PdlIdentResponse {
         val graphqlRequest =
             PdlIdentRequest(
-                query = getQuery("/pdl/hentIdent.graphql"),
+                query = getQuery("/pdl/hentIdenter.graphql"),
                 variables =
                     PdlIdentVariables(
                         ident = request.ident.value,
-                        grupper = listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn, PDLIdentGruppeTyper.NPID.navn),
+                        grupper = grupper.map { it.navn },
                         historikk = true,
                     ),
             )
         logger.info("Henter PdlIdentifikator for ident = ${request.ident} fra PDL")
+
         return retry<PdlIdentResponse> {
             httpClient
                 .post(apiUrl) {
+                    behandlingsnummer(SakType.entries)
+                    header(HEADER_TEMA, HEADER_TEMA_VALUE)
                     accept(Json)
                     contentType(Json)
                     setBody(graphqlRequest)
@@ -204,7 +210,7 @@ class PdlKlient(
     suspend fun hentAktoerId(request: HentPdlIdentRequest): PdlIdentResponse {
         val graphqlRequest =
             PdlIdentRequest(
-                query = getQuery("/pdl/hentIdent.graphql"),
+                query = getQuery("/pdl/hentIdenter.graphql"),
                 variables =
                     PdlIdentVariables(
                         ident = request.ident.value,
@@ -238,6 +244,5 @@ class PdlKlient(
     companion object {
         const val HEADER_TEMA = "Tema"
         const val HEADER_TEMA_VALUE = "PEN"
-        const val PDL_BULK_SIZE = 100
     }
 }

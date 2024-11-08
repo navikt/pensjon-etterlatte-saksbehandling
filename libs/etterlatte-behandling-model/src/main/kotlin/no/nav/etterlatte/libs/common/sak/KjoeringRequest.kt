@@ -32,7 +32,6 @@ enum class KjoeringStatus {
     STARTA,
     FEILA,
     IKKE_LOEPENDE,
-    OMREGNET_UTEN_BREV, // skal ha brev derfor ikke ferdigstilt selv om omregnet
     FERDIGSTILT,
     TIL_MANUELL,
 }

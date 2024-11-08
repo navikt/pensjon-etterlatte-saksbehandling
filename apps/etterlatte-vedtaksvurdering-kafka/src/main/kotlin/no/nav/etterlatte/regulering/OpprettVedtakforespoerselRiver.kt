@@ -1,8 +1,17 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.brev.BrevParametereAutomatisk
+import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
+import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.no.nav.etterlatte.klienter.BrevKlient
 import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
@@ -29,6 +38,7 @@ internal class OpprettVedtakforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService,
     private val utbetalingKlient: UtbetalingKlient,
+    private val brevKlient: BrevKlient,
     private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -54,8 +64,9 @@ internal class OpprettVedtakforespoerselRiver(
         val behandlingId = omregningData.hentBehandlingId()
         val dato = omregningData.hentFraDato()
 
+        val skalAttestere = featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)
         val respons =
-            if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
+            if (!skalAttestere) {
                 vedtak.opprettVedtakOgFatt(sakId, behandlingId)
             } else {
                 when (omregningData.utbetalingVerifikasjon) {
@@ -65,6 +76,7 @@ internal class OpprettVedtakforespoerselRiver(
                         verifiserUendretUtbetaling(behandlingId, skalAvbryte = false)
                         vedtak.attesterVedtak(sakId, behandlingId)
                     }
+
                     UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING -> {
                         vedtak.opprettVedtakOgFatt(sakId, behandlingId)
                         verifiserUendretUtbetaling(behandlingId, skalAvbryte = true)
@@ -72,6 +84,15 @@ internal class OpprettVedtakforespoerselRiver(
                     }
                 }
             }
+
+        val skalSendeBrev =
+            when (omregningData.revurderingaarsak) {
+                Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> true
+                else -> false
+            }
+        if (skalSendeBrev) {
+            opprettBrev(sakId, skalAttestere, omregningData.revurderingaarsak)
+        }
 
         hentBeloep(respons, dato)?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
         logger.info("Opprettet vedtak ${respons.vedtak.id} for sak: $sakId og behandling: $behandlingId")
@@ -110,6 +131,30 @@ internal class OpprettVedtakforespoerselRiver(
 
         if (!etterbetaling && !tilbakekreving) {
             logger.info("Omregningen førte ikke til tilbakekreving eller etterbetaling")
+        }
+    }
+
+    private fun opprettBrev(
+        sakId: SakId,
+        skalAttestere: Boolean,
+        revurderingaarsak: Revurderingaarsak,
+    ) {
+        val brevRequest =
+            when (revurderingaarsak) {
+                Revurderingaarsak.AARLIG_INNTEKTSJUSTERING ->
+                    OpprettJournalfoerOgDistribuerRequest(
+                        brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL,
+                        brevParametereAutomatisk = BrevParametereAutomatisk.OmstillingsstoenadInntektsjusteringRedigerbar(),
+                        avsenderRequest = SaksbehandlerOgAttestant(Fagsaksystem.EY.navn, Fagsaksystem.EY.navn),
+                        sakId = sakId,
+                    )
+
+                else -> throw InternfeilException("Støtter ikke brev under automatisk omregning for $revurderingaarsak")
+            }
+        if (!skalAttestere) {
+            brevKlient.opprettBrev(sakId, brevRequest)
+        } else {
+            brevKlient.opprettJournalFoerOgDistribuer(sakId, brevRequest)
         }
     }
 

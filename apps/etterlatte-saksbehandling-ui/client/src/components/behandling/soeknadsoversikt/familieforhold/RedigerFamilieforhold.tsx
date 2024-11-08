@@ -4,13 +4,14 @@ import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFamilieforhold } from '~shared/api/behandling'
-import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { fnrErGyldig } from '~utils/fnr'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { SakType } from '~shared/types/sak'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
   behandling: IDetaljertBehandling
@@ -149,10 +150,10 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
 
           <br />
 
-          {isSuccess(status) && <Alert variant="success">Lagret redigert familieforhold</Alert>}
-          {mapFailure(status, (error) => (
-            <Alert variant="error">{error.detail}</Alert>
-          ))}
+          {mapResult(status, {
+            error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+            success: () => <Alert variant="success">Lagret redigert familieforhold</Alert>,
+          })}
         </Modal.Body>
 
         <Modal.Footer>

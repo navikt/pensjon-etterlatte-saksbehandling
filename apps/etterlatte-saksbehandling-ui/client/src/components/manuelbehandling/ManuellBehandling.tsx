@@ -10,9 +10,8 @@ import {
 } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
-import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapAllApiResult, mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useParams } from 'react-router-dom'
 import { hentOppgave } from '~shared/api/oppgaver'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
@@ -40,7 +39,6 @@ export default function ManuellBehandling() {
   useSidetittel('Manuell behandling')
 
   const [opprettBehandlingStatus, opprettNyBehandling] = useApiCall(opprettBehandling)
-  const [nyBehandlingId, setNyId] = useState('')
   const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
 
   const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
@@ -94,7 +92,6 @@ export default function ManuellBehandling() {
         if (data.overstyrTrygdetid) {
           opprettOverstyrtTrygdetidReq({ behandlingId: nyBehandlingRespons })
         }
-        setNyId(nyBehandlingRespons)
       }
     )
   }
@@ -200,12 +197,13 @@ export default function ManuellBehandling() {
           </Knapp>
         )}
 
-        {isSuccess(opprettBehandlingStatus) && (
-          <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>
-        )}
-        {isFailureHandler({
-          apiResult: opprettBehandlingStatus,
-          errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
+        {mapResult(opprettBehandlingStatus, {
+          error: (error) => (
+            <ApiErrorAlert>Det oppsto en feil ved oppretting av behandlingen: {error.detail}</ApiErrorAlert>
+          ),
+          success: (nyBehandlingId) => (
+            <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>
+          ),
         })}
 
         {mapAllApiResult(

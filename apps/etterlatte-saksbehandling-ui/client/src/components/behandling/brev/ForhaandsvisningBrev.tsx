@@ -5,8 +5,8 @@ import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { genererPdf } from '~shared/api/brev'
 
-import { isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { mapResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
   const [fileURL, setFileURL] = useState<string>()
@@ -32,11 +32,10 @@ export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
 
   return (
     <Container>
-      {isPendingOrInitial(pdf) && <Spinner label="Klargjør forhåndsvisning av PDF ..." />}
-      {isSuccess(pdf) && !!fileURL && <PdfViewer src={fileURL} />}
-      {isFailureHandler({
-        apiResult: pdf,
-        errorMessage: 'En feil har oppstått ved henting av PDF',
+      {mapResult(pdf, {
+        pending: <Spinner label="Klargjør forhåndsvisning av PDF ..." />,
+        error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+        success: () => !!fileURL && <PdfViewer src={fileURL} />,
       })}
     </Container>
   )

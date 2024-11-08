@@ -1,6 +1,7 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -19,7 +20,6 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGN
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP
-import no.nav.etterlatte.rapidsandrivers.brevKode
 import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -73,12 +73,18 @@ internal class VedtakAttestertRiver(
                 avkortingFoer = bigDecimal(packet, AVKORTING_FOER),
                 avkortingEtter = bigDecimal(packet, AVKORTING_ETTER),
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
+                // TODO diff på inntekt??
             )
 
         // Årlig inntektsjustering jobb skal sende ut varsel og vedtak etter at sak er ferdig omregnet
         if (packet.omregningData.revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
+            behandlingService.lagreFullfoertKjoering(
+                request.copy(
+                    status = KjoeringStatus.OMREGNET_UTEN_BREV,
+                ),
+            )
             packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
-            packet.brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL.name
+            packet[BREVMAL_RIVER_KEY] = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL.name
             packet.sakId = packet.omregningData.sakId
             context.publish(packet.toJson())
         } else {

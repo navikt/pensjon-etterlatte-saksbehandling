@@ -47,7 +47,7 @@ export function InfobrevKnapperad(props: {
         </Button>
         {props.ferdigstill && props.status && (
           <Button onClick={props.ferdigstill} loading={isPending(props.status)}>
-            {props.tekst ? props.tekst : 'Ferdigstill brev'}
+            {props.tekst ? props.tekst : 'Ferdigstill brev og oppgave'}
           </Button>
         )}
       </HStack>

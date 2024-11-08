@@ -356,6 +356,27 @@ class OppgaveService(
         return hentOppgave(id)
     }
 
+    fun sjekkOmKanFerdigstilleOppgave(
+        oppgave: OppgaveIntern,
+        saksbehandler: BrukerTokenInfo,
+    ): Boolean {
+        try {
+            sikreAtOppgaveIkkeErAvsluttet(oppgave = oppgave)
+        } catch (e: OppgaveKanIkkeEndres) {
+            logger.warn("Oppgaven er i feil state: ${oppgave.status}", e)
+            return false
+        }
+        try {
+            sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgave, saksbehandler)
+            return true
+        } catch (e: OppgaveTilhoererAnnenSaksbehandler) {
+            return false
+        } catch (e: Exception) {
+            logger.error("Kan ikke sjekke om kan ferdigstille oppgave exception: ", e)
+            return false
+        }
+    }
+
     private fun ferdigstillOppgave(
         oppgave: OppgaveIntern,
         saksbehandler: BrukerTokenInfo,

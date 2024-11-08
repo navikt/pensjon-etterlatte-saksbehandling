@@ -351,6 +351,7 @@ class BrevApiKlientTest : BrevApiKlient {
 
     override suspend fun slettBrev(
         brevId: Long,
+        sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         TODO("Not yet implemented")

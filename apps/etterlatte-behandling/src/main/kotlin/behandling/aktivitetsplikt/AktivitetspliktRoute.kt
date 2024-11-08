@@ -252,8 +252,8 @@ internal fun Route.aktivitetspliktRoutes(
         }
         post("brevdata") {
             val brevdata = call.receive<AktivitetspliktInformasjonBrevdataRequest>()
-            inTransaction { aktivitetspliktOppgaveService.lagreBrevdata(oppgaveId, brevdata) }
-            call.respond(HttpStatusCode.OK)
+            val oppdaterBrevdata = inTransaction { aktivitetspliktOppgaveService.lagreBrevdata(oppgaveId, brevdata) }
+            call.respond(oppdaterBrevdata)
         }
         post("opprettbrev") {
             val brevId =

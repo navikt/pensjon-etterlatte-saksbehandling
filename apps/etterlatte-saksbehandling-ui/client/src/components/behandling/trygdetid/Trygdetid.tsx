@@ -28,6 +28,7 @@ import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 interface Props {
   redigerbar: boolean
@@ -53,6 +54,7 @@ const manglerTrygdetid = (
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
 
+  const kopierTrygdetidsgrunnlagEnabled = useFeatureEnabledMedDefault('kopier-trygdetidsgrunnlag', false)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
@@ -157,12 +159,14 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   return (
     <Box paddingInline="16" maxWidth="69rem">
-      <TrygdetidIAnnenBehandlingMedSammeAvdoede
-        behandlingId={behandling.id}
-        setTrygdetider={setTrygdetider}
-        trygdetider={trygdetider}
-        mapNavn={mapNavn}
-      ></TrygdetidIAnnenBehandlingMedSammeAvdoede>
+      {kopierTrygdetidsgrunnlagEnabled && (
+        <TrygdetidIAnnenBehandlingMedSammeAvdoede
+          behandlingId={behandling.id}
+          setTrygdetider={setTrygdetider}
+          trygdetider={trygdetider}
+          mapNavn={mapNavn}
+        ></TrygdetidIAnnenBehandlingMedSammeAvdoede>
+      )}
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
 

@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -274,11 +273,7 @@ internal fun Route.sakWebRoutes(
 
             post("/behandlingerforsak") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
-                    requestLogger.loggRequest(
-                        brukerTokenInfo,
-                        Folkeregisteridentifikator.of(fnr),
-                        "behandlinger",
-                    )
+                    requestLogger.loggRequest(brukerTokenInfo, fnr, "behandlinger")
 
                     val sakMedBehandlinger =
                         inTransaction {

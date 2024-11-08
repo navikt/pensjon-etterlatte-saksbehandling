@@ -284,6 +284,27 @@ fun Route.brevRoute(
             }
         }
 
+        post("opprett-for-omregning") {
+            kunSystembruker { systembruker ->
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
+                    val brevErDistribuert = service.opprettOgFerdigstillOmregning(systembruker, req)
+                    call.respond(brevErDistribuert)
+                }
+            }
+        }
+
+        post("opprett-journalfoer-og-distribuer-for-omregning") {
+            kunSystembruker { systembruker ->
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
+
+                    val brevErDistribuert = service.opprettJournalfoerOgDistribuerOmregning(systembruker, req)
+                    call.respond(brevErDistribuert)
+                }
+            }
+        }
+
         post("ferdigstill-journalfoer-og-distribuer") {
             kunSaksbehandler { sb ->
                 val req = call.receive<FerdigstillJournalFoerOgDistribuerOpprettetBrev>()
@@ -295,7 +316,8 @@ fun Route.brevRoute(
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
-                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts(), brukerTokenInfo)
+                    val brev =
+                        pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts(), brukerTokenInfo)
                     brev.onSuccess {
                         call.respond(brev)
                     }

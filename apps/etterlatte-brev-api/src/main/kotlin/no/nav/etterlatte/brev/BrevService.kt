@@ -82,10 +82,61 @@ class BrevService(
             return BrevDistribusjonResponse(brevId, true)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
+            logger.error(
+                "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
+                e,
+            )
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
             return BrevDistribusjonResponse(brevId, false)
         }
+    }
+
+    suspend fun opprettOgFerdigstillOmregning(
+        bruker: BrukerTokenInfo,
+        req: OpprettJournalfoerOgDistribuerRequest,
+    ): BrevDistribusjonResponse {
+        val (brev, enhetsnummer) =
+            brevoppretter.opprettBrevSomHarInnhold(
+                sakId = req.sakId,
+                behandlingId = null,
+                bruker = bruker,
+                brevKode = req.brevKode,
+                brevData = req.brevParametereAutomatisk.brevDataMapping(),
+            )
+        val brevId = brev.id
+
+        pdfGenerator.ferdigstillOgGenererPDF(
+            brevId,
+            bruker,
+            avsenderRequest = { _, _, _ ->
+                AvsenderRequest(
+                    saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
+                    attestantIdent = req.avsenderRequest.attestantIdent,
+                    sakenhet = enhetsnummer,
+                )
+            },
+            brevKodeMapping = { req.brevKode },
+            brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+        )
+
+        return BrevDistribusjonResponse(brevId, false)
+    }
+
+    suspend fun opprettJournalfoerOgDistribuerOmregning(
+        bruker: BrukerTokenInfo,
+        req: OpprettJournalfoerOgDistribuerRequest,
+    ): BrevDistribusjonResponse {
+        val response = opprettOgFerdigstillOmregning(bruker, req)
+        val brevId = response.brevId
+
+        logger.info("Journalfører brev med id: $brevId")
+        journalfoerBrevService.journalfoer(brevId, bruker)
+
+        logger.info("Distribuerer brev med id: $brevId")
+        distribuerer.distribuer(brevId, bruker = bruker)
+
+        logger.info("Brevid: $brevId er distribuert")
+        return BrevDistribusjonResponse(brevId, true)
     }
 
     suspend fun ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(
@@ -127,7 +178,10 @@ class BrevService(
             return BrevStatusResponse(brevId, oppdatertBrev.status)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
+            logger.error(
+                "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
+                e,
+            )
 
             return BrevStatusResponse(brevId, oppdatertBrev.status)
         }

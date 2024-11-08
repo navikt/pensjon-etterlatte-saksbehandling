@@ -1,5 +1,4 @@
 plugins {
-    alias(libs.plugins.avro)
     id("etterlatte.common")
 }
 repositories {
@@ -11,9 +10,6 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-kafka"))
 
-    implementation(libs.kafka.avro) {
-        exclude("org.apache.commons", "commons-compress")
-    }
     implementation(libs.commons.compress)
     implementation(libs.kafka.avroserializer)
 

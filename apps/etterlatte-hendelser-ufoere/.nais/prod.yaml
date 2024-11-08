@@ -43,8 +43,6 @@ spec:
       value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY
       value: latest
-    - name: KAFKA_CONSUMER_GROUP_ID
-      value: ''
     - name: UFOERE_KAFKA_GROUP_ID
       value: ""
     - name: UFOERE_TOPIC

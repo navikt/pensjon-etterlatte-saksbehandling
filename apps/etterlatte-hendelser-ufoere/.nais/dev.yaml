@@ -43,12 +43,10 @@ spec:
       value: etterlatte.dodsmelding
     - name: KAFKA_RESET_POLICY
       value: latest
-    - name: KAFKA_CONSUMER_GROUP_ID
-      value: ''
     - name: UFOERE_KAFKA_GROUP_ID
-      value: ""
+      value: "etterlatte-v1"
     - name: UFOERE_TOPIC
-      value: ""
+      value: "uforevedtak-q2"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

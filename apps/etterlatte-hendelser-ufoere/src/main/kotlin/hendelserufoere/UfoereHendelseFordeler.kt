@@ -12,9 +12,11 @@ class UfoereHendelseFordeler(
 
     suspend fun haandterHendelse(hendelse: UfoereHendelse) {
         try {
-            val ageInYears = hendelse.alderVedVirkningstidspunkt / 12
-            if (ageInYears in 18..21) {
-                logger.info("Bruker er mellom 18 og 21 på på virkningstidspunktet. Sender ufoerehendelse til behandling?")
+            val attenAarIMaaneder = 12 * 18
+            val tjueenAarIMaaneder = 12 * 21
+
+            if (hendelse.alderVedVirkningstidspunkt in attenAarIMaaneder..tjueenAarIMaaneder) {
+                logger.info("Bruker er mellom 18 og 21 på på virkningstidspunktet. Sender ufoerehendelse til behandling")
                 behandlingKlient.postTilBehandling(
                     ufoereHendelse =
                         UfoeretrygdHendelse(

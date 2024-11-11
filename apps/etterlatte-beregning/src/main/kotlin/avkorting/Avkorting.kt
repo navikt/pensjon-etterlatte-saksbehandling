@@ -161,7 +161,7 @@ data class Avkorting(
             } else if (it.year == nyttGrunnlag.fom.year) {
                 it
             } else {
-                throw InternfeilException(
+                throw OpphoerErTilbakeITid(
                     "Opphøer er tilbake i tid, opphør: $opphoerFom nyttgrunnlag er fra: ${nyttGrunnlag.fom} id: ${nyttGrunnlag.id}",
                 )
             }
@@ -453,6 +453,10 @@ data class Avkorting(
         return (aarsoppgjoer + listOf(nytt)).sortedBy { it.aar }
     }
 }
+
+class OpphoerErTilbakeITid(
+    msg: String,
+) : InternfeilException(msg)
 
 /**
  * Kan være forventet årsinntekt oppgitt av bruker eller faktisk årsinntekt etter skatteoppgjør.

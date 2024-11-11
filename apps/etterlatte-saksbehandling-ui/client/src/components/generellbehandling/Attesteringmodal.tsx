@@ -5,8 +5,8 @@ import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/
 import { useNavigate } from 'react-router-dom'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { isPending, mapResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const Attesteringmodal = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
@@ -27,12 +27,12 @@ export const Attesteringmodal = (props: {
       <Button style={{ marginTop: '1rem' }} onClick={() => attesterWrapper()} loading={isPending(attesterStatus)}>
         Godkjenn kravpakken
       </Button>
-      {isSuccess(attesterStatus) && (
-        <Alert variant="success">Behandlingen ble attestert, du blir straks sendt til saksoversikten</Alert>
-      )}
-      {isFailureHandler({
-        apiResult: attesterStatus,
-        errorMessage: 'Behandlingen ble ikke attestert',
+
+      {mapResult(attesterStatus, {
+        error: (error) => <ApiErrorAlert>Behandlingen ble ikke attestert: {error.detail}</ApiErrorAlert>,
+        success: () => (
+          <Alert variant="success">Behandlingen ble attestert, du blir straks sendt til saksoversikten</Alert>
+        ),
       })}
     </>
   )

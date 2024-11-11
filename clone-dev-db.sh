@@ -82,6 +82,9 @@ DUMP_FILE="${PROXY_DB}_$(date +%s).dump"
 DOCKER_HOST="host.docker.internal"
 CURRENT_CONTEXT=$(kubectl config current-context)
 
+# Ensure the dump file is deleted on exit
+trap "rm $DUMP_FILE 2> /dev/null" EXIT
+
 nais device status | grep -q -i "naisdevice status: Disconnected" &> /dev/null
 if [ $? -eq 0 ]; then # Grep returns 0 if there is a match
   error "Naisdevice is not connected. Please run:\n\n\t$ nais device connect \n\nOr use the naisdevice.app"
@@ -120,8 +123,6 @@ pg_dump \
 wait $!
 PG_DUMP_EXIT_STATUS=$?
 
-ps_loader
-
 if [ $PG_DUMP_EXIT_STATUS -eq 0 ]; then
   info "pg_dump was successful!"
 else
@@ -149,14 +150,9 @@ pg_restore \
 wait $!
 PG_RESTORE_EXIT_STATUS=$?
 
-ps_loader
-
 if [ $PG_RESTORE_EXIT_STATUS -eq 0 ]; then
   info "pg_restore was successful!"
   info "Database cloning from dev-gcp completed!"
 else
-  rm $DUMP_FILE 2> /dev/null
   error "Unexpected error occurred while running pg_restore"
 fi
-
-rm $DUMP_FILE 2> /dev/null

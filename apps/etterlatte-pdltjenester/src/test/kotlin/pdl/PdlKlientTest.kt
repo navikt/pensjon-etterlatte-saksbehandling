@@ -13,7 +13,6 @@ import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -176,43 +175,6 @@ internal class PdlKlientTest {
             val errors = personResponse.errors
 
             assertEquals("Fant ikke person", errors?.first()?.message)
-        }
-    }
-
-    @Test
-    fun `hentFolkregisterIdentBolk returnerer bolk`() {
-        mockEndpoint("/pdl/folkeregisteridentBolk.json")
-
-        runBlocking {
-            val identResponse =
-                pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(
-                    HentFolkeregisterIdenterForAktoerIdBolkRequest(setOf("2082995739063")),
-                )
-            assertEquals("2082995739063", identResponse.first().ident)
-            assertEquals(
-                "03486048831",
-                identResponse
-                    .first()
-                    .identer!!
-                    .first()
-                    .ident,
-            )
-            assertEquals(
-                false,
-                identResponse
-                    .first()
-                    .identer!!
-                    .first()
-                    .historisk,
-            )
-            assertEquals(
-                "FOLKEREGISTERIDENT",
-                identResponse
-                    .first()
-                    .identer!!
-                    .first()
-                    .gruppe.name,
-            )
         }
     }
 

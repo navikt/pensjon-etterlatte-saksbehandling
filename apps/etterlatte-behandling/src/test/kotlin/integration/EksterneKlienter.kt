@@ -349,6 +349,14 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
+    override suspend fun slettBrev(
+        brevId: Long,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun ferdigstillBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
@@ -620,8 +628,6 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         foedselsnummer: String,
         saktype: SakType,
     ): GeografiskTilknytning = GeografiskTilknytning(kommune = "0301")
-
-    override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> = emptyMap<String, String>()
 
     override suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
         TODO("Not yet implemented")

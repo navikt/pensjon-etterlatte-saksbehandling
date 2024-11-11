@@ -93,4 +93,37 @@ class AktivitetspliktBrevDaoTest(
         val lagretBrevdata = dao.hentBrevdata(oppgave.id)
         lagretBrevdata shouldBe brevdata
     }
+
+    @Test
+    fun `Kan fjerne brevid og kilde oppdaterer seg`() {
+        val sak = sakSkrivDao.opprettSak("person", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
+
+        val sbIdent = "ident"
+        val brevdata =
+            AktivitetspliktInformasjonBrevdata(
+                sakid = sak.id,
+                oppgaveId = oppgave.id,
+                skalSendeBrev = true,
+                utbetaling = false,
+                redusertEtterInntekt = false,
+                kilde = Grunnlagsopplysning.Saksbehandler.create(sbIdent),
+            )
+
+        dao.lagreBrevdata(brevdata)
+        val lagretBrevdata = dao.hentBrevdata(oppgave.id)
+        lagretBrevdata shouldBe brevdata
+
+        val brevId = 1L
+        dao.lagreBrevId(oppgave.id, brevId)
+        val brevdataMedBrevId = dao.hentBrevdata(oppgave.id)
+        brevdataMedBrevId?.brevId shouldBe brevId
+
+        val nyKilde = Grunnlagsopplysning.Saksbehandler.create(sbIdent)
+        dao.fjernBrevId(oppgave.id, nyKilde)
+
+        val dataMedFjernetBrevidOgNyKilde = dao.hentBrevdata(oppgave.id)
+        dataMedFjernetBrevidOgNyKilde?.kilde shouldBe nyKilde
+        dataMedFjernetBrevidOgNyKilde?.brevId shouldBe null
+    }
 }

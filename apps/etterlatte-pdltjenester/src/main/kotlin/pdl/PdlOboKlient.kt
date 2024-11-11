@@ -60,7 +60,7 @@ class PdlOboKlient(
         }.let {
             when (it) {
                 is RetryResult.Success ->
-                    it.content.also { loggDelvisReturnerteData(it, request) }
+                    it.content.also { result -> loggDelvisReturnerteData(result, request) }
 
                 is RetryResult.Failure -> throw it.samlaExceptions()
             }

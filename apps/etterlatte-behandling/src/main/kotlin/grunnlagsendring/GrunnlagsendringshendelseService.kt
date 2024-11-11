@@ -399,7 +399,7 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    internal fun opprettRelevantHendelse(
+    private fun opprettRelevantHendelse(
         hendelse: Grunnlagsendringshendelse,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {

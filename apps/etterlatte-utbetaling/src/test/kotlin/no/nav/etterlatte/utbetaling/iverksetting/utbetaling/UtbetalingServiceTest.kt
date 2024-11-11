@@ -40,10 +40,6 @@ internal class UtbetalingServiceTest {
             utbetalingDao = utbetalingDao,
             clock = utcKlokke(),
             vedtaksverifiserer = vedtaksverifiserer,
-            featureToggleService =
-                mockk {
-                    every { isEnabled(UtbetalingToggles.BRUK_REGELVERK_FOR_KLASSIFIKASJONSKODE, any()) } returns true
-                },
         )
 
     /**

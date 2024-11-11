@@ -33,7 +33,10 @@ internal fun withRetryOgFeilhaandtering(
         }
     } catch (e: Exception) {
         feilhaandteringLogger.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
-        sikkerLogg.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}", e)
+        sikkerLogg.error(
+            "Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}",
+            e,
+        )
 
         publiserFeilamelding(packet, feilendeSteg, kontekst, e, context)
         feilhaandteringLogger.warn("Fikk feil, sendte ut på feilkø, returnerer nå failure-result")

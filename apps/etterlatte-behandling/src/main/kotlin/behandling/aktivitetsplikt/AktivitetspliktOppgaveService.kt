@@ -54,7 +54,7 @@ class AktivitetspliktOppgaveService(
         val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
         val vurderingerPaaOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId)
         val vurderinger =
-            if (vurderingerPaaOppgave == null && !oppgave.erAvsluttet()) {
+            if (vurderingerPaaOppgave.erTom() && !oppgave.erAvsluttet()) {
                 // kopier de inn fra sak
                 aktivitetspliktService.kopierInnTilOppgave(sak.id, oppgaveId)
             } else {
@@ -79,15 +79,24 @@ class AktivitetspliktOppgaveService(
     fun lagreBrevdata(
         oppgaveId: UUID,
         data: AktivitetspliktInformasjonBrevdataRequest,
-    ): AktivitetspliktInformasjonBrevdata? {
+    ): AktivitetspliktInformasjonBrevdata {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-        val saksbehandler =
-            Kontekst.get().brukerTokenInfo
-                ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
-        val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
-        aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
-        return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
+        if (oppgave.status.erAvsluttet()) {
+            throw OppgaveErAvsluttet("Oppgave er avsluttet, id $oppgaveId. Kan ikke fjerne brevid")
+        } else {
+            val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+            val saksbehandler =
+                Kontekst.get().brukerTokenInfo
+                    ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
+            val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
+            aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
+            val hentBrevId = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
+            if (!data.skalSendeBrev && hentBrevId?.brevId != null) {
+                aktivitetspliktBrevDao.fjernBrevId(oppgaveId, kilde)
+                runBlocking { brevApiKlient.slettBrev(brevId = hentBrevId.brevId, sakId = sak.id, brukerTokenInfo = saksbehandler) }
+            }
+            return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)!!
+        }
     }
 
     private fun mapAktivitetsgradstypeTilAktivtetsgrad(aktivitetsgrad: AktivitetspliktAktivitetsgradType): Aktivitetsgrad =
@@ -116,7 +125,9 @@ class AktivitetspliktOppgaveService(
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
             val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId) ?: throw GenerellIkkeFunnetException()
-            val sisteAktivtetsgrad = vurderingForOppgave.aktivitet.maxBy { it.fom }
+            val sisteAktivtetsgrad =
+                vurderingForOppgave.aktivitet.maxByOrNull { it.fom }
+                    ?: throw ManglerAktivitetsgrad("Mangler aktivitetsgrad for oppgave: $oppgaveId")
             val nasjonalEllerUtland = behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
             val brevParametreAktivitetsplikt10mnd =
                 BrevParametre.AktivitetspliktInformasjon10Mnd(
@@ -163,9 +174,15 @@ class AktivitetspliktOppgaveService(
     fun ferdigstillBrevOgOppgave(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): OppgaveIntern {
         val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        try {
+            oppgaveService.sjekkOmKanFerdigstilleOppgave(oppgave, brukerTokenInfo)
+        } catch (e: Exception) {
+            throw FeilIOppgave("Kan ikke ferdigstille oppgave for oppgaveid $oppgaveId", e)
+        }
+
         val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
         val brevId = brevData.brevId ?: throw ManglerBrevdata("Brevid er ikke registrert på oppgaveid $oppgaveId")
         val req =
@@ -178,11 +195,28 @@ class AktivitetspliktOppgaveService(
         val brevrespons: BrevStatusResponse = runBlocking { brevApiKlient.ferdigstillBrev(req, brukerTokenInfo) }
         if (brevrespons.status.erDistribuert()) {
             oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
+            return oppgaveService.hentOppgave(oppgaveId)
         } else {
             throw BrevBleIkkeFerdig(brevrespons.status)
         }
     }
 }
+
+class FeilIOppgave(
+    msg: String,
+    override val cause: Throwable? = null,
+) : UgyldigForespoerselException(
+        code = "OPPGAVE_AVSLUTTET",
+        detail = msg,
+        cause = cause,
+    )
+
+class OppgaveErAvsluttet(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "OPPGAVE_AVSLUTTET",
+        detail = msg,
+    )
 
 class IngenSaksbehandler(
     msg: String,
@@ -208,6 +242,13 @@ class ManglerBrevdata(
     msg: String,
 ) : UgyldigForespoerselException(
         code = "MANGLER_BREVDATA",
+        detail = msg,
+    )
+
+class ManglerAktivitetsgrad(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "MANGLER_AKITIVITETSGRAD",
         detail = msg,
     )
 

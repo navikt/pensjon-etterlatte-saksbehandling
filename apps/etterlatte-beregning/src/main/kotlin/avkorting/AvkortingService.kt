@@ -10,8 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
@@ -56,7 +54,6 @@ class AvkortingService(
                     val reberegnetAvkorting =
                         reberegnOgLagreAvkorting(
                             behandling,
-                            behandling.sak,
                             eksisterendeAvkorting,
                             brukerTokenInfo,
                             BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -71,13 +68,12 @@ class AvkortingService(
         val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
         return if (eksisterendeAvkorting == null) {
             val nyAvkorting =
-                kopierOgReberegnAvkorting(behandling, behandling.sak, forrigeAvkorting, brukerTokenInfo)
+                kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
             avkortingMedTillegg(nyAvkorting, behandling, forrigeAvkorting)
         } else if (behandling.status == BehandlingStatus.BEREGNET) {
             val reberegnetAvkorting =
                 reberegnOgLagreAvkorting(
                     behandling,
-                    behandling.sak,
                     eksisterendeAvkorting,
                     brukerTokenInfo,
                     BehandlingType.REVURDERING,
@@ -86,18 +82,6 @@ class AvkortingService(
         } else {
             avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
         }
-    }
-
-    fun hentSjekkAarligInntektsjustering(
-        request: AarligInntektsjusteringAvkortingSjekkRequest,
-    ): AarligInntektsjusteringAvkortingSjekkResponse {
-        val sanksjoner = sanksjonService.hentSanksjon(request.sisteBehandling)
-        return AarligInntektsjusteringAvkortingSjekkResponse(
-            sakId = request.sakId,
-            aar = request.aar,
-            harInntektForAar = avkortingRepository.harSakInntektForAar(request),
-            harSanksjon = sanksjoner?.any { it.tom == null } ?: false,
-        )
     }
 
     suspend fun hentFullfoertAvkorting(
@@ -184,12 +168,11 @@ class AvkortingService(
         logger.info("Kopierer avkorting fra forrige behandling med behandlingId=$forrigeBehandlingId")
         val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        return kopierOgReberegnAvkorting(behandling, behandling.sak, forrigeAvkorting, brukerTokenInfo)
+        return kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
     }
 
     private suspend fun kopierOgReberegnAvkorting(
         behandling: DetaljertBehandling,
-        sakId: SakId,
         forrigeAvkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
@@ -197,7 +180,6 @@ class AvkortingService(
         val kopiertAvkorting = forrigeAvkorting.kopierAvkorting(opphoerFraOgMed)
         return reberegnOgLagreAvkorting(
             behandling,
-            sakId,
             kopiertAvkorting,
             brukerTokenInfo,
             behandling.behandlingType,
@@ -206,7 +188,6 @@ class AvkortingService(
 
     private suspend fun reberegnOgLagreAvkorting(
         behandling: DetaljertBehandling,
-        sakId: SakId,
         avkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
         behandlingType: BehandlingType,
@@ -215,7 +196,7 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
         val sanksjoner = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
         val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning, sanksjoner)
-        avkortingRepository.lagreAvkorting(behandling.id, sakId, beregnetAvkorting)
+        avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         settBehandlingStatusAvkortet(brukerTokenInfo, behandling, behandlingType, lagretAvkorting)
         return lagretAvkorting
@@ -258,11 +239,11 @@ class AvkortingService(
         return hentForrigeAvkorting(forrigeBehandlingId)
     }
 
-    private fun hentForrigeAvkorting(forrigeBehandlingId: UUID): Avkorting =
+    fun hentForrigeAvkorting(forrigeBehandlingId: UUID): Avkorting =
         avkortingRepository.hentAvkorting(forrigeBehandlingId)
             ?: throw TidligereAvkortingFinnesIkkeException(forrigeBehandlingId)
 
-    private suspend fun tilstandssjekk(
+    suspend fun tilstandssjekk(
         behandlingId: UUID,
         bruker: BrukerTokenInfo,
     ) {

@@ -1,5 +1,9 @@
 import React, { useState } from 'react'
-import { IAktivitetspliktUnntak, tekstAktivitetspliktUnntakType } from '~shared/types/Aktivitetsplikt'
+import {
+  IAktivitetspliktUnntak,
+  IAktivitetspliktVurderingNy,
+  tekstAktivitetspliktUnntakType,
+} from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Box, Button, Detail, Heading, HStack, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { HandShakeHeartIcon, PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
@@ -11,13 +15,15 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { slettAktivitetspliktUnntak } from '~shared/api/aktivitetsplikt'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { setAktivitetspliktVurdering } from '~store/reducers/Aktivitetsplikt12mnd'
+import { useDispatch } from 'react-redux'
 
 export function UnntakIOppgave() {
   const { vurdering, oppgave } = useAktivitetspliktOppgaveVurdering()
   const [unntakForRedigering, setUnntakForRedigering] = useState<IAktivitetspliktUnntak | undefined>()
   const [slettUnntakStatus, slettSpesifiktUnntak, resetSlettStatus] = useApiCall(slettAktivitetspliktUnntak)
   const unntaker = vurdering.unntak
-
+  const dispatch = useDispatch()
   const oppgaveErRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
   function slettUnntak(unntak: IAktivitetspliktUnntak) {
@@ -27,17 +33,17 @@ export function UnntakIOppgave() {
         sakId: unntak.sakId,
         unntakId: unntak.id,
       },
-      () => {
-        // TODO oppdater faktisk state
+      (data) => {
+        dispatch(setAktivitetspliktVurdering(data))
         setUnntakForRedigering(undefined)
       }
     )
   }
 
-  function oppdaterStateEtterRedigertUnntak() {
-    resetSlettStatus()
-    // TODO faktisk oppdater state
+  function oppdaterStateEtterRedigertUnntak(data: IAktivitetspliktVurderingNy) {
+    dispatch(setAktivitetspliktVurdering(data))
     setUnntakForRedigering(undefined)
+    resetSlettStatus()
   }
 
   return (
@@ -76,6 +82,7 @@ export function UnntakIOppgave() {
                   key={unntak.id}
                   content={
                     <UnntakAktivitetspliktOppgaveForm
+                      unntak={unntak}
                       onSuccess={oppdaterStateEtterRedigertUnntak}
                       onAvbryt={() => setUnntakForRedigering(undefined)}
                     />

@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -53,8 +52,6 @@ interface PdlTjenesterKlient : Pingable {
         foedselsnummer: String,
         saktype: SakType,
     ): GeografiskTilknytning
-
-    fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?>
 
     suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator?
 
@@ -147,19 +144,6 @@ class PdlTjenesterKlientImpl(
                     }.body<GeografiskTilknytning>()
             }
 
-        return response
-    }
-
-    override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> {
-        val request = HentFolkeregisterIdenterForAktoerIdBolkRequest(aktoerIds)
-        val response =
-            runBlocking {
-                client
-                    .post("$url/folkeregisteridenter") {
-                        contentType(ContentType.Application.Json)
-                        setBody(request)
-                    }.body<Map<String, String?>>()
-            }
         return response
     }
 

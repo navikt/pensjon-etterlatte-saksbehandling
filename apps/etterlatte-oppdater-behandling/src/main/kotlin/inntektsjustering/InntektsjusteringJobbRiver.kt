@@ -44,13 +44,13 @@ internal class InntektsjusteringJobbRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        val kjoering = packet.kjoering
+        logger.info("$kjoering: Starter ")
+
         if (!featureToggleService.isEnabled(InntektsjusterinFeatureToggle.START_INNTEKTSJUSTERING_JOBB, false)) {
             logger.info("Inntektsjustering jobb er deaktivert. Avbryter forespørsel.")
             return
         }
-
-        val kjoering = packet.kjoering
-        logger.info("$kjoering: Starter ")
 
         val antall = packet.antall
         val sakType = SakType.OMSTILLINGSSTOENAD

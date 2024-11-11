@@ -6,7 +6,7 @@ import { Person } from '~components/person/Person'
 import useHentInnloggetSaksbehandler from 'src/shared/hooks/useSettInnloggetSaksbehandler'
 import { nb } from 'date-fns/locale'
 import { registerLocale } from 'react-datepicker'
-import ErrorBoundary from '~ErrorBoundary'
+import ErrorBoundary, { ApiErrorAlert } from '~ErrorBoundary'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -21,8 +21,7 @@ import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekre
 import GenerellBehandling from '~components/generellbehandling/GenerellBehandling'
 import ManuellBehandling from '~components/manuelbehandling/ManuellBehandling'
 import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
-import { isSuccess } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { mapResult } from '~shared/api/apiUtils'
 import { setDefaultOptions } from 'date-fns'
 import GenerellOppgave from '~components/generelloppgave/GenerellOppgave'
 import { VurderAktivitetspliktOppgave } from '~components/aktivitetsplikt/VurderAktivitetspliktOppgave'
@@ -43,14 +42,15 @@ function App() {
     })
   }, [])
 
-  return (
-    <>
-      {isSuccess(hentConfigStatus) && innloggetbrukerHentet && (
+  return mapResult(hentConfigStatus, {
+    error: () => <ApiErrorAlert>Kunne ikke hente konfigurasjonsverdier</ApiErrorAlert>,
+    success: (config) =>
+      innloggetbrukerHentet && (
         <div className="app">
           <Versioncheck />
           <BrowserRouter basename="/">
             <ScrollToTop />
-            <ConfigContext.Provider value={hentConfigStatus.data}>
+            <ConfigContext.Provider value={config}>
               <HeaderBanner />
               <ErrorBoundary>
                 <Routes>
@@ -71,13 +71,8 @@ function App() {
             </ConfigContext.Provider>
           </BrowserRouter>
         </div>
-      )}
-      {isFailureHandler({
-        apiResult: hentConfigStatus,
-        errorMessage: 'Kunne ikke hente konfigurasjonsverdier',
-      })}
-    </>
-  )
+      ),
+  })
 }
 
 export default App

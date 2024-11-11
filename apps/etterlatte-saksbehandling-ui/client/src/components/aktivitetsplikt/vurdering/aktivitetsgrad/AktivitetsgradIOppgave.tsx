@@ -1,4 +1,8 @@
-import { IAktivitetspliktAktivitetsgrad, tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
+import {
+  IAktivitetspliktAktivitetsgrad,
+  IAktivitetspliktVurderingNy,
+  tekstAktivitetspliktVurderingType,
+} from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Box, Button, Detail, Heading, HStack, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { ClockDashedIcon, PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
@@ -9,16 +13,22 @@ import { slettAktivitetspliktVurdering } from '~shared/api/aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { useDispatch } from 'react-redux'
+import { setAktivitetspliktVurdering } from '~store/reducers/Aktivitetsplikt12mnd'
 
 export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
   const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
-  const [aktivitetForRedigering, setAktivitetForRedigering] = useState<IAktivitetspliktAktivitetsgrad | undefined>()
-  const [slettStatus, slettSpesifikkAktivitet] = useApiCall(slettAktivitetspliktVurdering)
 
+  const [slettStatus, slettSpesifikkAktivitet] = useApiCall(slettAktivitetspliktVurdering)
+  const [aktivitetForRedigering, setAktivitetForRedigering] = useState<IAktivitetspliktAktivitetsgrad | undefined>()
+
+  const dispatch = useDispatch()
+  const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
   const aktiviteter = vurdering.aktivitet
 
-  function oppdaterTilstandLagretVurdering() {
-    // TODO: oppdater state
+  function oppdaterTilstandLagretVurdering(data: IAktivitetspliktVurderingNy) {
+    dispatch(setAktivitetspliktVurdering(data))
     setAktivitetForRedigering(undefined)
   }
 
@@ -29,8 +39,8 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
         oppgaveId: oppgave.id,
         vurderingId: aktivitet.id,
       },
-      () => {
-        // TODO: oppdater state
+      (data) => {
+        dispatch(setAktivitetspliktVurdering(data))
         setAktivitetForRedigering(undefined)
       }
     )
@@ -93,25 +103,27 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
                     <Detail>Saksbehandler: {formaterDato(aktivitet.endret.tidspunkt)}</Detail>
                   </Table.DataCell>
                   <Table.DataCell>
-                    <HStack gap="4">
-                      <Button
-                        size="xsmall"
-                        variant="secondary"
-                        onClick={() => setAktivitetForRedigering(aktivitet)}
-                        icon={<PencilIcon />}
-                      >
-                        Rediger
-                      </Button>
-                      <Button
-                        size="xsmall"
-                        variant="secondary"
-                        icon={<TrashIcon />}
-                        loading={isPending(slettStatus)}
-                        onClick={() => slettAktivitetsgradIOppgave(aktivitet)}
-                      >
-                        Slett
-                      </Button>
-                    </HStack>
+                    {erRedigerbar && (
+                      <HStack gap="4">
+                        <Button
+                          size="xsmall"
+                          variant="secondary"
+                          onClick={() => setAktivitetForRedigering(aktivitet)}
+                          icon={<PencilIcon />}
+                        >
+                          Rediger
+                        </Button>
+                        <Button
+                          size="xsmall"
+                          variant="secondary"
+                          icon={<TrashIcon />}
+                          loading={isPending(slettStatus)}
+                          onClick={() => slettAktivitetsgradIOppgave(aktivitet)}
+                        >
+                          Slett
+                        </Button>
+                      </HStack>
+                    )}
                   </Table.DataCell>
                 </Table.ExpandableRow>
               ))}

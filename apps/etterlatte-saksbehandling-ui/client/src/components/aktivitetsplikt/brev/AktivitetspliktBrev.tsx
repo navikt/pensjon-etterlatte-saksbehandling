@@ -1,9 +1,9 @@
-import { Box, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
 import { ferdigstillBrevOgOppgaveAktivitetsplikt } from '~shared/api/aktivitetsplikt'
-import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
+import { BrevProsessType, BrevStatus, IBrev } from '~shared/types/Brev'
 import { isFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -20,7 +20,7 @@ import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 
 export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
-  const { oppgave } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, sistEndret } = useAktivitetspliktOppgaveVurdering()
   const [kanRedigeres, setKanRedigeres] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
@@ -42,6 +42,14 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
     })
   }
 
+  const endringerHarKommetEtterBrevOpprettelse = (brev: IBrev) => {
+    if (sistEndret) {
+      return new Date(sistEndret).getTime() > new Date(brev.statusEndret).getTime()
+    } else {
+      return false
+    }
+  }
+
   useEffect(() => {
     hentBrevOgSetStatus()
   }, [brevId, oppgave.status])
@@ -55,6 +63,12 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
       return (
         <GridContainer>
           <Column>
+            {endringerHarKommetEtterBrevOpprettelse(brev) && (
+              <Alert variant="warning">
+                Vurdering av aktivitet eller valgene for infobrevet er oppdatert etter at brevet ble opprettet. Se nøye
+                over brevet for å se om innholdet stemmer med nåværende verdier.
+              </Alert>
+            )}
             <VStack gap="4" margin="4">
               <Box marginInline="0 8">
                 <Heading size="large">Infobrev aktivitetsplikt</Heading>

@@ -169,6 +169,7 @@ export interface AktivitetspliktOppgaveVurdering {
   sak: ISak
   vurdering: IAktivitetspliktVurderingNy
   aktivtetspliktbrevdata?: IBrevAktivitetspliktDto
+  sistEndret?: string
 }
 
 export enum AktivitetspliktOppgaveType {

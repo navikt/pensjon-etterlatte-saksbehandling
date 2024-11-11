@@ -56,7 +56,12 @@ private data class Vedtaksbehandling(
             when (type) {
                 BehandlingType.BEHANDLING -> BehandlingStatus.valueOf(status).kanEndres()
                 BehandlingType.TILBAKEKREVING -> TilbakekrevingStatus.valueOf(status).kanEndres()
-                BehandlingType.KLAGE -> KlageStatus.kanEndres(KlageStatus.valueOf(status))
+                BehandlingType.KLAGE -> {
+                    val klageStatus = KlageStatus.valueOf(status)
+                    // I konteksten av vedtak så er klager også mulig å endre når formkravene ikke er oppfylt,
+                    // siden det er da man oppretter vedtak om avvist klage
+                    KlageStatus.kanEndres(klageStatus) || klageStatus == KlageStatus.FORMKRAV_IKKE_OPPFYLT
+                }
             }
         logger.info(
             "Fikk henvendelse om vedtak til behandling $id av type $type var redigerbar. " +

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.Sanksjon
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -155,9 +156,10 @@ data class Avkorting(
         opphoerFom: YearMonth? = null,
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
     ): YearMonth? =
+        // opphoerFom kan maks være ett år frem
         opphoerFom?.let {
-            if (it.year > nyttGrunnlag.fom.year) {
-                null
+            if (it.year.minus(nyttGrunnlag.fom.year) == 1) {
+                YearMonth.of(nyttGrunnlag.fom.year, Month.DECEMBER)
             } else if (it.year == nyttGrunnlag.fom.year) {
                 it
             } else {
@@ -203,9 +205,6 @@ data class Avkorting(
                             ),
                     ),
                 )
-        oppdatert
-            .first()
-            .grunnlag.periode.tom
 
         val oppdatertAarsoppjoer =
             aarsoppgjoer.copy(

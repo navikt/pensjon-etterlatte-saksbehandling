@@ -151,31 +151,48 @@ data class Avkorting(
         return oppdatertMedNyInntekt.beregnAvkortingRevurdering(beregning, sanksjoner)
     }
 
+    private fun haandterOpphoerDato(
+        opphoerFom: YearMonth? = null,
+        nyttGrunnlag: AvkortingGrunnlagLagreDto,
+    ): YearMonth? =
+        opphoerFom?.let {
+            if (it.year > nyttGrunnlag.fom.year) {
+                null
+            } else if (it.year == nyttGrunnlag.fom.year) {
+                it
+            } else {
+                throw InternfeilException(
+                    "Opphøer er tilbake i tid, opphør: $opphoerFom nyttgrunnlag er fra: ${nyttGrunnlag.fom} id: ${nyttGrunnlag.id}",
+                )
+            }
+        }
+
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
         bruker: BrukerTokenInfo,
         opphoerFom: YearMonth? = null,
         aldersovergang: YearMonth? = null,
     ): Avkorting {
+        val nyttOpphoerFom = haandterOpphoerDato(opphoerFom, nyttGrunnlag)
         val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom)
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
-                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom, opphoerFom) } +
+                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom, nyttOpphoerFom) } +
                 listOf(
                     Inntektsavkorting(
                         grunnlag =
                             AvkortingGrunnlag(
                                 id = nyttGrunnlag.id,
-                                periode = Periode(fom = nyttGrunnlag.fom, tom = opphoerFom?.minusMonths(1)),
+                                periode = Periode(fom = nyttGrunnlag.fom, tom = nyttOpphoerFom?.minusMonths(1)),
                                 inntektTom = nyttGrunnlag.inntektTom,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
                                 inntektUtlandTom = nyttGrunnlag.inntektUtlandTom,
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
                                 innvilgaMaaneder =
                                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, opphoerFom, aldersovergang),
+                                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, nyttOpphoerFom, aldersovergang),
                                 overstyrtInnvilgaMaanederAarsak =
                                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
@@ -186,6 +203,9 @@ data class Avkorting(
                             ),
                     ),
                 )
+        oppdatert
+            .first()
+            .grunnlag.periode.tom
 
         val oppdatertAarsoppjoer =
             aarsoppgjoer.copy(

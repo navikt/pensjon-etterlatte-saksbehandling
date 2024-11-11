@@ -606,6 +606,61 @@ internal class AvkortingTest {
                     }
                 }
             }
+
+            @Test
+            fun `Skal opprette nytt årsoppgjør med angitt foventet inntekt og droppe fom da den er i neste år`() {
+                val fomAar = 2024
+                val forventetInntekt =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 200000,
+                        fom = YearMonth.of(fomAar, Month.MARCH),
+                    )
+
+                val opprettaAvkorting =
+                    Avkorting().oppdaterMedInntektsgrunnlag(
+                        forventetInntekt,
+                        bruker,
+                        opphoerFom = YearMonth.of(fomAar.plus(1), Month.MARCH),
+                    )
+
+                opprettaAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
+                    aarsoppgjoer(
+                        aar = 2024,
+                        fom = YearMonth.of(2024, 3),
+                    ),
+                    Aarsoppgjoer::id,
+                    Aarsoppgjoer::inntektsavkorting,
+                )
+                with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting) {
+                    size shouldBe 1
+                    with(get(0).grunnlag) {
+                        inntektTom shouldBe forventetInntekt.inntektTom
+                        fratrekkInnAar shouldBe forventetInntekt.fratrekkInnAar
+                        inntektUtlandTom shouldBe forventetInntekt.inntektUtlandTom
+                        fratrekkInnAarUtland shouldBe forventetInntekt.fratrekkInnAarUtland
+                        spesifikasjon shouldBe forventetInntekt.spesifikasjon
+                    }
+                }
+            }
+
+            @Test
+            fun `Skal feile hvis opphøer er satt tilbake i tid `() {
+                val fomAar = 2024
+                val fom = YearMonth.of(fomAar, Month.MARCH)
+                val forventetInntekt =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 200000,
+                        fom = fom,
+                    )
+
+                assertThrows<InternfeilException> {
+                    Avkorting().oppdaterMedInntektsgrunnlag(
+                        forventetInntekt,
+                        bruker,
+                        opphoerFom = YearMonth.of(fomAar.minus(1), Month.MARCH),
+                    )
+                }
+            }
         }
 
         @Nested

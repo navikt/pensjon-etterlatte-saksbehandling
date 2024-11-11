@@ -34,7 +34,7 @@ export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
     <Container>
       {mapResult(pdf, {
         pending: <Spinner label="Klargjør forhåndsvisning av PDF ..." />,
-        error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+        error: (error) => <ApiErrorAlert>En feil har oppstått ved henting av PDF: {error.detail}</ApiErrorAlert>,
         success: () => !!fileURL && <PdfViewer src={fileURL} />,
       })}
     </Container>

@@ -6,6 +6,7 @@ import {
   IAktivitetspliktVurderingNy,
   IOpprettAktivitetspliktAktivitetsgrad,
   tekstAktivitetspliktVurderingType,
+  teksterAktivitetspliktSkjoennsmessigVurdering,
 } from '~shared/types/Aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -123,9 +124,19 @@ export function VurderingAktivitetsgradForm(props: {
               errorVedTomInput="Du må vurdere om bruker vil være selvforsørget ved 50-99 % grad aktivitet"
               radios={
                 <>
-                  <Radio value={AktivitetspliktSkjoennsmessigVurdering.JA}>Ja</Radio>
-                  <Radio value={AktivitetspliktSkjoennsmessigVurdering.MED_OPPFOELGING}>Med oppfølging</Radio>
-                  <Radio value={AktivitetspliktSkjoennsmessigVurdering.NEI}>Nei</Radio>
+                  <Radio value={AktivitetspliktSkjoennsmessigVurdering.JA}>
+                    {teksterAktivitetspliktSkjoennsmessigVurdering[AktivitetspliktSkjoennsmessigVurdering.JA]}
+                  </Radio>
+                  <Radio value={AktivitetspliktSkjoennsmessigVurdering.MED_OPPFOELGING}>
+                    {
+                      teksterAktivitetspliktSkjoennsmessigVurdering[
+                        AktivitetspliktSkjoennsmessigVurdering.MED_OPPFOELGING
+                      ]
+                    }
+                  </Radio>
+                  <Radio value={AktivitetspliktSkjoennsmessigVurdering.NEI}>
+                    {teksterAktivitetspliktSkjoennsmessigVurdering[AktivitetspliktSkjoennsmessigVurdering.NEI]}
+                  </Radio>
                 </>
               }
             />

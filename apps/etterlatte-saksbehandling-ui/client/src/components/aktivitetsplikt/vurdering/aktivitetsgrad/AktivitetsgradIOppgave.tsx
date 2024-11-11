@@ -1,50 +1,14 @@
-import {
-  IAktivitetspliktAktivitetsgrad,
-  IAktivitetspliktVurderingNy,
-  tekstAktivitetspliktVurderingType,
-} from '~shared/types/Aktivitetsplikt'
-import { BodyShort, Box, Button, Detail, Heading, HStack, ReadMore, Table, VStack } from '@navikt/ds-react'
-import { ClockDashedIcon, PencilIcon, TrashIcon } from '@navikt/aksel-icons'
+import { tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
+import { BodyShort, Box, Detail, Heading, HStack, ReadMore, Table, VStack } from '@navikt/ds-react'
+import { ClockDashedIcon } from '@navikt/aksel-icons'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
-import React, { useState } from 'react'
-import { VurderingAktivitetsgradForm } from './VurderingAktivitetsgradForm'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { slettAktivitetspliktVurdering } from '~shared/api/aktivitetsplikt'
+import React from 'react'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
-import { isFailure, isPending } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import { erOppgaveRedigerbar } from '~shared/types/oppgave'
-import { useDispatch } from 'react-redux'
-import { setAktivitetspliktVurdering } from '~store/reducers/Aktivitetsplikt12mnd'
+import { VisAktivitetsgrad } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VisAktivitetsgrad'
 
 export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
-  const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
-
-  const [slettStatus, slettSpesifikkAktivitet] = useApiCall(slettAktivitetspliktVurdering)
-  const [aktivitetForRedigering, setAktivitetForRedigering] = useState<IAktivitetspliktAktivitetsgrad | undefined>()
-
-  const dispatch = useDispatch()
-  const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
+  const { vurdering } = useAktivitetspliktOppgaveVurdering()
   const aktiviteter = vurdering.aktivitet
-
-  function oppdaterTilstandLagretVurdering(data: IAktivitetspliktVurderingNy) {
-    dispatch(setAktivitetspliktVurdering(data))
-    setAktivitetForRedigering(undefined)
-  }
-
-  function slettAktivitetsgradIOppgave(aktivitet: IAktivitetspliktAktivitetsgrad) {
-    slettSpesifikkAktivitet(
-      {
-        sakId: aktivitet.sakId,
-        oppgaveId: oppgave.id,
-        vurderingId: aktivitet.id,
-      },
-      (data) => {
-        dispatch(setAktivitetspliktVurdering(data))
-        setAktivitetForRedigering(undefined)
-      }
-    )
-  }
 
   return (
     <VStack gap="4">
@@ -61,12 +25,6 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
           aktivitet. Vær oppmerksom på at det finnes unntak.
         </ReadMore>
       </Box>
-
-      {isFailure(slettStatus) && (
-        <ApiErrorAlert>
-          Kunne ikke slette aktivitetsvurderingen, på grunn av feil: {slettStatus.error.detail}
-        </ApiErrorAlert>
-      )}
 
       <Table size="small">
         <Table.Header>
@@ -85,15 +43,7 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
               {aktiviteter.map((aktivitet) => (
                 <Table.ExpandableRow
                   key={aktivitet.id}
-                  open={aktivitetForRedigering?.id === aktivitet.id}
-                  content={
-                    <VurderingAktivitetsgradForm
-                      aktivitet={aktivitet}
-                      doedsdato={props.doedsdato}
-                      onAvbryt={() => setAktivitetForRedigering(undefined)}
-                      onSuccess={oppdaterTilstandLagretVurdering}
-                    />
-                  }
+                  content={<VisAktivitetsgrad aktivitet={aktivitet} doedsdato={props.doedsdato} />}
                 >
                   <Table.DataCell>{tekstAktivitetspliktVurderingType[aktivitet.aktivitetsgrad]}</Table.DataCell>
                   <Table.DataCell>{formaterDatoMedFallback(aktivitet.fom, '-')}</Table.DataCell>
@@ -101,29 +51,6 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
                   <Table.DataCell>
                     <BodyShort>{aktivitet.endret.ident}</BodyShort>
                     <Detail>Saksbehandler: {formaterDato(aktivitet.endret.tidspunkt)}</Detail>
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    {erRedigerbar && (
-                      <HStack gap="4">
-                        <Button
-                          size="xsmall"
-                          variant="secondary"
-                          onClick={() => setAktivitetForRedigering(aktivitet)}
-                          icon={<PencilIcon />}
-                        >
-                          Rediger
-                        </Button>
-                        <Button
-                          size="xsmall"
-                          variant="secondary"
-                          icon={<TrashIcon />}
-                          loading={isPending(slettStatus)}
-                          onClick={() => slettAktivitetsgradIOppgave(aktivitet)}
-                        >
-                          Slett
-                        </Button>
-                      </HStack>
-                    )}
                   </Table.DataCell>
                 </Table.ExpandableRow>
               ))}

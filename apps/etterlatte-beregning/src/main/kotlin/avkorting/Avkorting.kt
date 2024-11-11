@@ -159,7 +159,7 @@ data class Avkorting(
         // opphoerFom kan maks være ett år frem
         opphoerFom?.let {
             if (it.year.minus(nyttGrunnlag.fom.year) == 1) {
-                YearMonth.of(nyttGrunnlag.fom.year, Month.DECEMBER)
+                YearMonth.of(nyttGrunnlag.fom.year.plus(1), Month.JANUARY)
             } else if (it.year == nyttGrunnlag.fom.year) {
                 it
             } else {

@@ -99,7 +99,7 @@ export function VurderingAktivitetsgradForm(props: {
   }
 
   const svarAktivitetsgrad = watch('vurderingAvAktivitet.aktivitetsgrad')
-  const kanskjeHarUnntak =
+  const harKanskjeUnntak =
     erNyVurdering &&
     (svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 ||
       svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50)
@@ -108,8 +108,19 @@ export function VurderingAktivitetsgradForm(props: {
     <form onSubmit={handleSubmit(lagreOgOppdater)}>
       <VStack gap="6">
         <HStack gap="6">
-          <ControlledDatoVelger name="vurderingAvAktivitet.fom" label="Fra og med" control={control} />
-          <ControlledDatoVelger name="vurderingAvAktivitet.tom" label="Til og med" control={control} required={false} />
+          <ControlledDatoVelger
+            name="vurderingAvAktivitet.fom"
+            label="Fra og med"
+            control={control}
+            description="Fra dato oppgitt"
+          />
+          <ControlledDatoVelger
+            name="vurderingAvAktivitet.tom"
+            label="Til og med"
+            control={control}
+            required={false}
+            description="Hvis det er oppgitt sluttdato"
+          />
         </HStack>
 
         <ControlledRadioGruppe
@@ -134,7 +145,7 @@ export function VurderingAktivitetsgradForm(props: {
           }
         />
 
-        {kanskjeHarUnntak && (
+        {harKanskjeUnntak && (
           <ControlledRadioGruppe
             name="harUnntak"
             control={control}
@@ -149,7 +160,7 @@ export function VurderingAktivitetsgradForm(props: {
           />
         )}
 
-        {watch('harUnntak') === JaNei.JA && kanskjeHarUnntak && (
+        {watch('harUnntak') === JaNei.JA && harKanskjeUnntak && (
           <Box maxWidth="50rem">
             <Alert variant="info">
               Du kan ikke legge til unntak enda. Vi jobber med å få dette på plass. Du kan ta opp denne behandlingen
@@ -184,8 +195,19 @@ export function VurderingAktivitetsgradForm(props: {
               }
             />
           )}
+        {svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50 && watch('harUnntak') !== JaNei.JA && (
+          <Box maxWidth="50rem">
+            <Alert variant="info">
+              Basert på vurderingen du har gjort vil det bli opprettet en revurdering for mulig sanksjon.
+            </Alert>
+          </Box>
+        )}
         <Box maxWidth="60rem">
-          <Textarea {...register('vurderingAvAktivitet.beskrivelse')} label="Beskrivelse" />
+          <Textarea
+            {...register('vurderingAvAktivitet.beskrivelse')}
+            label="Beskrivelse"
+            description="Beskriv hvordan du har vurdert brukers situasjon"
+          />
         </Box>
 
         {isFailure(lagreStatus) && (

@@ -107,6 +107,12 @@ export enum AktivitetspliktSkjoennsmessigVurdering {
   NEI = 'NEI',
 }
 
+export const teksterAktivitetspliktSkjoennsmessigVurdering: Record<AktivitetspliktSkjoennsmessigVurdering, string> = {
+  JA: 'Ja',
+  MED_OPPFOELGING: 'Med oppfølging',
+  NEI: 'Nei',
+}
+
 export interface IAktivitetspliktUnntak {
   id: string
   sakId: number

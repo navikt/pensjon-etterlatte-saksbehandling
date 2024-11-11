@@ -8,8 +8,9 @@ import {
   AktivitetspliktStegmeny,
 } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAktivitet'
-import { VurderingInfoBrev } from '~components/aktivitetsplikt/brev/VurderingInfoBrev'
+import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
+import { useAktivitetspliktOppgaveVurderingState } from '~store/reducers/Aktivitetsplikt12mnd'
 
 const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurdering>(
   {} as AktivitetspliktOppgaveVurdering
@@ -17,8 +18,9 @@ const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurder
 
 export function OppgaveVurderingRoute(props: { vurderingOgOppgave: AktivitetspliktOppgaveVurdering }) {
   const { vurderingOgOppgave } = props
+
   return (
-    <AktivitetspliktOppgaveContext.Provider value={vurderingOgOppgave}>
+    <AktivitetspliktOppgaveContext.Provider value={{ ...useAktivitetspliktOppgaveVurderingState() }}>
       <StatusBar ident={vurderingOgOppgave.oppgave.fnr} />
       <AktivitetspliktStegmeny />
 
@@ -26,7 +28,7 @@ export function OppgaveVurderingRoute(props: { vurderingOgOppgave: Aktivitetspli
         <MainContent>
           <Routes>
             <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet />} />
-            <Route path={AktivitetspliktSteg.BREV} element={<VurderingInfoBrev />} />
+            <Route path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV} element={<VurderingInfoBrevOgOppsummering />} />
             <Route path="*" element={<Navigate to={AktivitetspliktSteg.VURDERING} replace />} />
           </Routes>
         </MainContent>

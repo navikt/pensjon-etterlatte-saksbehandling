@@ -1,6 +1,5 @@
 import {
   BodyShort,
-  Button,
   ConfirmationPanel,
   ErrorMessage,
   Heading,
@@ -46,7 +45,6 @@ const Virkningstidspunkt = (props: {
   const dispatch = useAppDispatch()
   const [fastsettVirkStatus, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
 
-  const [vurdert, setVurdert] = useState<boolean>(behandling.virkningstidspunkt !== null)
   const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(
     behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
   )
@@ -133,7 +131,6 @@ const Virkningstidspunkt = (props: {
     setKravdato(behandling.virkningstidspunkt?.kravdato ? new Date(behandling.virkningstidspunkt.kravdato) : null)
     setBegrunnelse(behandling.virkningstidspunkt?.begrunnelse ?? '')
     setErrorTekst('')
-    setVurdert(behandling.virkningstidspunkt !== null)
     onSuccess?.()
   }
 
@@ -150,107 +147,100 @@ const Virkningstidspunkt = (props: {
         </VStack>
 
         <Vurdering>
-          {props.redigerbar && !vurdert ? (
-            <Button variant="secondary" onClick={() => setVurdert(true)}>
-              Legg til vurdering
-            </Button>
-          ) : (
-            <VurderingsboksWrapper
-              tittel="Hva er virkningstidspunkt for behandlingen?"
-              subtittelKomponent={
-                <VStack gap="4">
-                  {erBosattUtland && (
-                    <div>
-                      <Heading size="xsmall">
-                        <HStack gap="1">
-                          Kravdato utland
-                          <HelpText placement="top">
-                            Skriv inn kravdato for søknad i utlandet, som hentes fra SED P2100.
-                          </HelpText>
-                        </HStack>
-                      </Heading>
-                      <BodyShort>
-                        {behandling.virkningstidspunkt?.kravdato
-                          ? formaterDato(behandling.virkningstidspunkt.kravdato)
-                          : 'Ikke fastsatt'}
-                      </BodyShort>
-                    </div>
-                  )}
-                  <div>
-                    <Heading size="xsmall">Virkningstidspunkt</Heading>
-                    <BodyShort spacing>
-                      {behandling.virkningstidspunkt
-                        ? formaterDato(behandling.virkningstidspunkt.dato)
-                        : 'Ikke fastsatt'}
-                    </BodyShort>
-                  </div>
-                </VStack>
-              }
-              vurdering={
-                behandling.virkningstidspunkt
-                  ? {
-                      saksbehandler: behandling.virkningstidspunkt.kilde.ident,
-                      tidspunkt: new Date(behandling.virkningstidspunkt.kilde.tidspunkt),
-                    }
-                  : undefined
-              }
-              redigerbar={props.redigerbar}
-              lagreklikk={fastsett}
-              avbrytklikk={reset}
-              kommentar={behandling.virkningstidspunkt?.begrunnelse}
-              defaultRediger={behandling.virkningstidspunkt === null}
-            >
+          <VurderingsboksWrapper
+            tittel="Hva er virkningstidspunkt for behandlingen?"
+            subtittelKomponent={
               <VStack gap="4">
-                <Heading level="3" size="small">
-                  Hva er virkningstidspunkt for behandlingen?
-                </Heading>
-
                 {erBosattUtland && (
-                  <DatoVelger
-                    label={
+                  <div>
+                    <Heading size="xsmall">
                       <HStack gap="1">
                         Kravdato utland
                         <HelpText placement="top">
                           Skriv inn kravdato for søknad i utlandet, som hentes fra SED P2100.
                         </HelpText>
                       </HStack>
-                    }
-                    onChange={(date) => setKravdato(date ?? null)}
-                    value={kravdato ?? undefined}
-                    fromDate={subYears(new Date(), 18)}
-                    toDate={addYears(new Date(), 2)}
-                  />
+                    </Heading>
+                    <BodyShort>
+                      {behandling.virkningstidspunkt?.kravdato
+                        ? formaterDato(behandling.virkningstidspunkt.kravdato)
+                        : 'Ikke fastsatt'}
+                    </BodyShort>
+                  </div>
                 )}
-                <MonthPicker {...monthpickerProps}>
-                  <MonthPicker.Input label="Virkningstidspunkt" {...inputProps} />
-                </MonthPicker>
-
-                <SoeknadsoversiktTextArea
-                  label="Begrunnelse"
-                  placeholder="Forklar begrunnelsen"
-                  value={begrunnelse}
-                  onChange={(e) => setBegrunnelse(e.target.value)}
-                />
-
-                {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
-
-                {mapFailure(
-                  fastsettVirkStatus,
-                  (error) =>
-                    behandling.behandlingType === IBehandlingsType.REVURDERING &&
-                    error.code === 'VIRK_FOER_FOERSTE_IVERKSATT_VIRK' && (
-                      <ConfirmationPanel
-                        label="Ja, jeg er sikker"
-                        checked={overstyr}
-                        onChange={(e) => setOverstyr(e.target.checked)}
-                      >
-                        Er du sikker på at du vil sette dette virkningstidspunktet?
-                      </ConfirmationPanel>
-                    )
-                )}
+                <div>
+                  <Heading size="xsmall">Virkningstidspunkt</Heading>
+                  <BodyShort spacing>
+                    {behandling.virkningstidspunkt ? formaterDato(behandling.virkningstidspunkt.dato) : 'Ikke fastsatt'}
+                  </BodyShort>
+                </div>
               </VStack>
-            </VurderingsboksWrapper>
-          )}
+            }
+            vurdering={
+              behandling.virkningstidspunkt
+                ? {
+                    saksbehandler: behandling.virkningstidspunkt.kilde.ident,
+                    tidspunkt: new Date(behandling.virkningstidspunkt.kilde.tidspunkt),
+                  }
+                : undefined
+            }
+            redigerbar={props.redigerbar}
+            lagreklikk={fastsett}
+            avbrytklikk={reset}
+            kommentar={behandling.virkningstidspunkt?.begrunnelse}
+            defaultRediger={behandling.virkningstidspunkt === null}
+            visAvbryt={!!behandling.virkningstidspunkt}
+          >
+            <VStack gap="4">
+              <Heading level="3" size="small">
+                Hva er virkningstidspunkt for behandlingen?
+              </Heading>
+
+              {erBosattUtland && (
+                <DatoVelger
+                  label={
+                    <HStack gap="1">
+                      Kravdato utland
+                      <HelpText placement="top">
+                        Skriv inn kravdato for søknad i utlandet, som hentes fra SED P2100.
+                      </HelpText>
+                    </HStack>
+                  }
+                  onChange={(date) => setKravdato(date ?? null)}
+                  value={kravdato ?? undefined}
+                  fromDate={subYears(new Date(), 18)}
+                  toDate={addYears(new Date(), 2)}
+                />
+              )}
+              <MonthPicker {...monthpickerProps}>
+                <MonthPicker.Input label="Virkningstidspunkt" {...inputProps} />
+              </MonthPicker>
+
+              <SoeknadsoversiktTextArea
+                label="Begrunnelse"
+                placeholder="Forklar begrunnelsen"
+                value={begrunnelse}
+                onChange={(e) => setBegrunnelse(e.target.value)}
+              />
+
+              {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
+
+              {mapFailure(
+                fastsettVirkStatus,
+                (error) =>
+                  behandling.behandlingType === IBehandlingsType.REVURDERING &&
+                  error.code === 'VIRK_FOER_FOERSTE_IVERKSATT_VIRK' && (
+                    <ConfirmationPanel
+                      label="Ja, jeg er sikker"
+                      checked={overstyr}
+                      onChange={(e) => setOverstyr(e.target.checked)}
+                    >
+                      Er du sikker på at du vil sette dette virkningstidspunktet?
+                    </ConfirmationPanel>
+                  )
+              )}
+            </VStack>
+          </VurderingsboksWrapper>
         </Vurdering>
       </LovtekstMedLenke>
     </>

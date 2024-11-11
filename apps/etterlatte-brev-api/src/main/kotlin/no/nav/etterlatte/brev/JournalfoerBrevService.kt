@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.JournalfoerVedtaksbrevResponseOgBrevid
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
@@ -38,14 +39,14 @@ class JournalfoerBrevService(
     suspend fun journalfoer(
         id: BrevID,
         bruker: BrukerTokenInfo,
-    ): String {
+    ): List<OpprettJournalpostResponse> {
         val brev = db.hentBrev(id)
         if (brev.brevtype == Brevtype.NOTAT) {
             throw IllegalArgumentException("Kan ikke journalføre et notat som et brev (id = $id).")
         }
         val sak = behandlingService.hentSak(brev.sakId, bruker)
 
-        return journalfoer(brev, sak, bruker).journalpostId
+        return journalfoer(brev, sak, bruker)
     }
 
     suspend fun journalfoerVedtaksbrev(
@@ -83,29 +84,37 @@ class JournalfoerBrevService(
         brev: Brev,
         sak: Sak,
         bruker: BrukerTokenInfo,
-    ): OpprettJournalpostResponse {
-        logger.info("Skal journalføre brev ${brev.id}")
+    ): List<OpprettJournalpostResponse> {
+        logger.info("Journalfører brev ${brev.id} på ${brev.mottakere.size} mottaker(e)")
+
         if (brev.status != Status.FERDIGSTILT) {
             throw FeilStatusForJournalfoering(brev.id, brev.status)
         }
 
-        // TODO EY-3627:
-        //   Mye av det som får journalpost_id i retur må potensielt skrives om for at dette skal fungere siden
-        //   dette vil returnere en liste i tiden fremover... Alternativt kun returnere id hvis [MottakerType.HOVED]?
-        val mottaker = brev.mottakere.single()
-        val response =
-            dokarkivService.journalfoer(mapTilJournalpostRequest(brev.id, brev.soekerFnr, mottaker, sak), bruker)
+        return brev.mottakere
+            .map { mottaker -> journalfoerPaaMottaker(brev.id, brev.soekerFnr, mottaker, sak, bruker) }
+            .also { db.settBrevJournalfoert(brev.id, it, bruker) }
+    }
 
-        if (response.journalpostferdigstilt) {
-            db.settBrevJournalfoert(brev.id, response)
-        } else {
-            logger.info("Kunne ikke ferdigstille journalpost. Forsøker på nytt...")
-            dokarkivService
-                .ferdigstillJournalpost(response.journalpostId, sak.enhet, bruker)
-                .also { db.settBrevJournalfoert(brev.id, response.copy(journalpostferdigstilt = it)) }
+    private suspend fun journalfoerPaaMottaker(
+        brevId: BrevID,
+        soekerFnr: String,
+        mottaker: Mottaker,
+        sak: Sak,
+        bruker: BrukerTokenInfo,
+    ): OpprettJournalpostResponse {
+        val request = mapTilJournalpostRequest(brevId, soekerFnr, mottaker, sak)
+
+        val response = dokarkivService.journalfoer(request, bruker)
+
+        if (!response.journalpostferdigstilt) {
+            logger.warn("Kunne ikke ferdigstille journalpost. Forsøker på nytt...")
+            dokarkivService.ferdigstillJournalpost(response.journalpostId, sak.enhet, bruker)
         }
 
-        logger.info("Brev med id=${brev.id} markert som journalført")
+        db.lagreJournalpostId(mottaker.id, response)
+        logger.info("Brev $brevId journalført på mottaker (id=${mottaker.id})")
+
         return response
     }
 
@@ -118,10 +127,12 @@ class JournalfoerBrevService(
         val innhold = requireNotNull(db.hentBrevInnhold(brevId))
         val pdf = requireNotNull(db.hentPdf(brevId))
 
-        /*
-         * TODO:
-         *   Her må det skilles på hoved- og kopimottaker!
-         */
+        val tittel =
+            when (mottaker.type) {
+                MottakerType.HOVED -> innhold.tittel
+                MottakerType.KOPI -> "${innhold.tittel} (KOPI)"
+            }
+
         val avsenderMottaker =
             with(mottaker) {
                 AvsenderMottaker(
@@ -137,11 +148,11 @@ class JournalfoerBrevService(
             }
 
         return JournalpostRequest(
-            tittel = innhold.tittel,
+            tittel = tittel,
             journalposttype = JournalPostType.UTGAAENDE,
             avsenderMottaker = avsenderMottaker,
             bruker = Bruker(soekerFnr),
-            eksternReferanseId = "${sak.id}.$brevId",
+            eksternReferanseId = "${sak.id}.$brevId.${mottaker.id}",
             sak = JournalpostSak(Sakstype.FAGSAK, sak.id.toString(), sak.sakType.tema, Fagsaksystem.EY.navn),
             dokumenter =
                 listOf(

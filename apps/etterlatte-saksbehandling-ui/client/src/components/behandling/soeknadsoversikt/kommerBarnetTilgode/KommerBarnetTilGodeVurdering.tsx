@@ -13,12 +13,10 @@ import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversik
 export const KommerBarnetTilGodeVurdering = ({
   kommerBarnetTilgode,
   redigerbar,
-  setVurdert,
   behandlingId,
 }: {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   redigerbar: boolean
-  setVurdert: (visVurderingKnapp: boolean) => void
   behandlingId: string
 }) => {
   const dispatch = useAppDispatch()
@@ -48,7 +46,6 @@ export const KommerBarnetTilGodeVurdering = ({
     setRadioError('')
     setBegrunnelseError('')
     setBegrunnelse(kommerBarnetTilgode?.begrunnelse || '')
-    setVurdert(kommerBarnetTilgode !== null)
     onSuccess?.()
   }
 

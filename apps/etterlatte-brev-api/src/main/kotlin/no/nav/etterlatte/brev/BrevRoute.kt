@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Spraak
@@ -28,6 +29,7 @@ import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
+import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
@@ -87,7 +89,19 @@ fun Route.brevRoute(
             put {
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val body = call.receive<OppdaterMottakerRequest>()
-                    service.oppdaterMottaker(brevId, body.mottaker)
+                    service.oppdaterMottaker(brevId, body.mottaker, brukerTokenInfo)
+
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            put("{mottakerId}/hoved") {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
+                    val mottakerId =
+                        call.parameters["mottakerId"]?.let(UUID::fromString)
+                            ?: throw UgyldigForespoerselException("MOTTAKER_ID_MANGLER", "MottakerID mangler")
+
+                    service.settHovedmottaker(brevId, mottakerId, brukerTokenInfo)
 
                     call.respond(HttpStatusCode.OK)
                 }
@@ -97,7 +111,7 @@ fun Route.brevRoute(
                 withSakId(tilgangssjekker, skrivetilgang = true) {
                     val mottakerId = UUID.fromString(call.parameters["mottakerId"])
 
-                    service.slettMottaker(brevId, mottakerId)
+                    service.slettMottaker(brevId, mottakerId, brukerTokenInfo)
 
                     call.respond(HttpStatusCode.OK)
                 }
@@ -108,7 +122,7 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 val request = call.receive<OppdaterTittelRequest>()
 
-                service.oppdaterTittel(brevId, request.tittel)
+                service.oppdaterTittel(brevId, request.tittel, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)
             }
@@ -118,7 +132,7 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) {
                 val request = call.receive<OppdaterSpraakRequest>()
 
-                service.oppdaterSpraak(brevId, request.spraak)
+                service.oppdaterSpraak(brevId, request.spraak, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)
             }
@@ -136,8 +150,8 @@ fun Route.brevRoute(
                     val brevId = brevId
                     val body = call.receive<OppdaterPayloadRequest>()
 
-                    service.lagreBrevPayload(brevId, body.payload)
-                    body.payload_vedlegg?.let { service.lagreBrevPayloadVedlegg(brevId, it) }
+                    service.lagreBrevPayload(brevId, body.payload, brukerTokenInfo)
+                    body.payload_vedlegg?.let { service.lagreBrevPayloadVedlegg(brevId, it, brukerTokenInfo) }
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -153,9 +167,12 @@ fun Route.brevRoute(
 
         post("journalfoer") {
             withSakId(tilgangssjekker, skrivetilgang = true) {
-                val journalpostId = service.journalfoer(brevId, brukerTokenInfo)
+                val journalpostIder =
+                    service
+                        .journalfoer(brevId, brukerTokenInfo)
+                        .map { it.journalpostId }
 
-                call.respond(JournalpostIdDto(journalpostId))
+                call.respond(JournalpostIdDto(journalpostIder))
             }
         }
 
@@ -167,15 +184,14 @@ fun Route.brevRoute(
                         is String -> DistribusjonsType.valueOf(queryparamDistribusjonstype)
                         null -> DistribusjonsType.ANNET
                     }
-                val journalpostIdInn = call.request.queryParameters["journalpostIdInn"]
-                val bestillingsId =
+                val bestillingsIder =
                     distribuerer.distribuer(
                         brevId,
-                        distribusjonsType = distribusjonsType,
-                        journalpostIdInn = journalpostIdInn,
+                        distribusjonsType,
+                        brukerTokenInfo,
                     )
 
-                call.respond(BestillingsIdDto(bestillingsId))
+                call.respond(BestillingsIdDto(bestillingsIder))
             }
         }
 
@@ -268,10 +284,18 @@ fun Route.brevRoute(
             }
         }
 
+        post("ferdigstill-journalfoer-og-distribuer") {
+            kunSaksbehandler { sb ->
+                val req = call.receive<FerdigstillJournalFoerOgDistribuerOpprettetBrev>()
+                val brevStatusResponse = service.ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(req, sb)
+                call.respond(brevStatusResponse)
+            }
+        }
+
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
-                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts())
+                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts(), brukerTokenInfo)
                     brev.onSuccess {
                         call.respond(brev)
                     }

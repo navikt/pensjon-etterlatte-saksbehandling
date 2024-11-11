@@ -7,7 +7,10 @@ import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevStatusResponse
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -17,10 +20,28 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 interface BrevApiKlient {
+    suspend fun opprettSpesifiktBrev(
+        sakId: SakId,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev
+
+    suspend fun slettBrev(
+        brevId: Long,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
+    suspend fun ferdigstillBrev(
+        req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevStatusResponse
+
     suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -103,6 +124,50 @@ class BrevApiKlientObo(
 
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
+
+    override suspend fun slettBrev(
+        brevId: Long,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient
+            .delete(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/$brevId?${SAKID_CALL_PARAMETER}=${sakId.sakId}"),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { },
+                failure = { errorResponse -> throw errorResponse },
+            )
+    }
+
+    override suspend fun ferdigstillBrev(
+        req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevStatusResponse =
+        post(
+            url = "$resourceUrl/api/brev/sak/${req.sakId}/ferdigstill-journalfoer-og-distribuer",
+            onSuccess = { resource ->
+                resource.response?.let { objectMapper.readValue(it.toJson()) }
+                    ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
+            },
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = req,
+        )
+
+    override suspend fun opprettSpesifiktBrev(
+        sakId: SakId,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev =
+        post(
+            url = "$resourceUrl/api/brev/sak/$sakId/spesifikk",
+            onSuccess = { resource ->
+                resource.response?.let { objectMapper.readValue(it.toJson()) }
+                    ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
+            },
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = brevParametre.toJson(),
+        )
 
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,

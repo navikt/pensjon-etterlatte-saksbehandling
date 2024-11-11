@@ -160,6 +160,7 @@ enum class OppdragKlassifikasjonskode(
     BSKTKRED("BSKTKRED"), // Kreditor disponerer - dette er mest sannsynlig verge
     KREDKRED("KREDKRED"), // Bøtetrekk, erstatningskrav, husleietrekk, eksternt kreditortrekk eller krav på offentlige avgifter
     TBTREKK("TBTREKK"), // Innbetalinger feilutbetalt stønad
+    UTBETALING("UTBETALING"), // Utbetaling Akonto
     ;
 
     override fun toString(): String = oppdragVerdi
@@ -181,6 +182,7 @@ enum class OppdragKlassifikasjonskode(
                 "KREDKRED" -> KREDKRED
                 "PENSPKBPE01" -> PENSPKBPE01
                 "TBTREKK" -> TBTREKK
+                "UTBETALING" -> UTBETALING
                 else -> throw IllegalArgumentException("$string er ikke en støttet OppdragKlassifikasjonskode!")
             }
     }

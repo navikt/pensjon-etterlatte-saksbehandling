@@ -189,7 +189,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     ): BrevDataRedigerbar =
         coroutineScope {
             val behandling = behandlingService.hentBehandling(behandlingId, brukerTokenInfo)
-            OmstillingsstoenadAvslagRedigerbartUtfall.fra(avdoede, behandling.erSluttbehandling)
+            OmstillingsstoenadAvslagRedigerbartUtfall.fra(avdoede, behandling.erSluttbehandling, behandling.tidligereFamiliepleier)
         }
 
     private suspend fun barnepensjonInnvilgelse(

@@ -17,7 +17,7 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/historikk/HistoriskeSEDer'
 import { formaterDato } from '~utils/formatering/dato'
 
-import { isPending, mapAllApiResult, mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
@@ -108,45 +108,36 @@ export default function SluttbehandlingUtland({
         gjøres en vurdering av rettigheter og trygdeavtale etter man har mottatt nødvendig dokumentasjon fra utenlandske
         trygdemyndigheter
       </BodyShort>
-      <>
-        <Heading level="2" size="medium" style={{ marginTop: '4rem' }}>
-          Informasjon fra utsendelse av kravpakke
-        </Heading>
-        {mapAllApiResult(
-          kravpakkeStatus,
-          <Spinner label="Henter kravpakke" />,
-          null,
-          () => (
-            <ApiErrorAlert>Klarte ikke å hente kravpakke for sluttbehandling</ApiErrorAlert>
-          ),
-          (kravpakkeMedAvdoed) => {
-            return (
-              <>
-                {kravpakkeMedAvdoed.kravpakke.innhold ? (
-                  <VStack gap="4">
-                    <Info label="Kravpakke gjelder" tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} />
-                    <Info
-                      tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
-                      label="Kravpakke sendt til"
-                    />
-                    <Info
-                      label="Dokumenttyper og dato sendt"
-                      tekst={visDatoerForSendteDokumenter(kravpakkeMedAvdoed.kravpakke.innhold)}
-                    />
-                    <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
-                    <Info label="Kommentar" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
-                  </VStack>
-                ) : (
-                  <Alert variant="warning">
-                    Fant ingen kravpakke for saken, kontroller at kravpakke ble opprettet. Finn sakens
-                    førstegangsbehandling og kontroller at den har huket av {`"skal sende kravpakke"`}
-                  </Alert>
-                )}
-              </>
-            )
-          }
-        )}
-      </>
+
+      <Heading level="2" size="medium" style={{ marginTop: '4rem' }}>
+        Informasjon fra utsendelse av kravpakke
+      </Heading>
+
+      {mapResult(kravpakkeStatus, {
+        pending: <Spinner label="Henter kravpakke" />,
+        error: (error) => (
+          <ApiErrorAlert>Klarte ikke å hente kravpakke for sluttbehandling: {error.detail}</ApiErrorAlert>
+        ),
+        success: ({ avdoed, kravpakke }) => (
+          <>
+            {kravpakke.innhold ? (
+              <VStack gap="4">
+                <Info label="Kravpakke gjelder" tekst={formaterNavn(avdoed)} />
+                <Info tekst={formaterKravpakkeLand(kravpakke.innhold, alleLandKodeverk)} label="Kravpakke sendt til" />
+                <Info label="Dokumenttyper og dato sendt" tekst={visDatoerForSendteDokumenter(kravpakke.innhold)} />
+                <Info label="Saks-ID RINA" tekst={kravpakke.innhold.rinanummer} />
+                <Info label="Kommentar" tekst={kravpakke.innhold.begrunnelse} />
+              </VStack>
+            ) : (
+              <Alert variant="warning">
+                Fant ingen kravpakke for saken, kontroller at kravpakke ble opprettet. Finn sakens førstegangsbehandling
+                og kontroller at den har huket av {`"skal sende kravpakke"`}
+              </Alert>
+            )}
+          </>
+        ),
+      })}
+
       {!!feilkoder?.size ? (
         <ErrorSummary
           style={{ marginTop: '10rem' }}
@@ -193,7 +184,12 @@ export default function SluttbehandlingUtland({
                 color={AWhite}
                 stroke={AWhite}
                 aria-hidden="true"
-                style={{ width: '1.8rem', height: '1.8rem', transform: 'translate(-40%, -10%)', position: 'absolute' }}
+                style={{
+                  width: '1.8rem',
+                  height: '1.8rem',
+                  transform: 'translate(-40%, -10%)',
+                  position: 'absolute',
+                }}
               />
             </div>
           ) : (
@@ -209,19 +205,18 @@ export default function SluttbehandlingUtland({
         Tidligere sluttbehandlinger
       </Heading>
       <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
+
       {visHistorikk &&
-        mapAllApiResult(
-          hentRevurderingerForSakMedAarsakStatus,
-          <Spinner label="Henter historikk" />,
-          null,
-          () => <ApiErrorAlert>Klarte ikke å hente historikken</ApiErrorAlert>,
-          (revurderingsinfoliste) => (
+        mapResult(hentRevurderingerForSakMedAarsakStatus, {
+          pending: <Spinner label="Henter historikk" />,
+          error: (error) => <ApiErrorAlert>Klarte ikke å hente historikken: {error.detail}</ApiErrorAlert>,
+          success: (revurderingsinfoliste) => (
             <HistoriskeSEDer
               revurderingsinfoliste={revurderingsinfoliste}
               landListe={alleLandKodeverk ? alleLandKodeverk : []}
             />
-          )
-        )}
+          ),
+        })}
     </Box>
   )
 }

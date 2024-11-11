@@ -1,24 +1,27 @@
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React from 'react'
-import { Aktivitetsgrad } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/Aktivitetsgrad'
-import { Unntak } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/Unntak'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { Heading } from '@navikt/ds-react'
+import { ValgForInfobrev } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/ValgForInfobrev'
 
-export function Vurderinger() {
-  const { oppgave, vurdering } = useAktivitetspliktOppgaveVurdering()
+import { AktivitetsgradIOppgave } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/AktivitetsgradIOppgave'
+import { LeggTilUnntak } from '~components/aktivitetsplikt/vurdering/unntak/LeggTilUnntak'
+import { LeggTilNyVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/LeggTilNyVurdering'
+import { UnntakIOppgave } from '~components/aktivitetsplikt/vurdering/unntak/UnntakIOppgave'
 
-  return erOppgaveRedigerbar(oppgave.status) ? (
-    <>
-      <Heading size="small">Redigering av vurderinger i en oppgave er ikke støttet enda</Heading>
-      <Aktivitetsgrad aktiviteter={vurdering.aktivitet} />
-      <Unntak unntaker={vurdering.unntak} />
-    </>
-  ) : (
+export function Vurderinger(props: { doedsdato: Date }) {
+  const { oppgave } = useAktivitetspliktOppgaveVurdering()
+  const { doedsdato } = props
+  const oppgaveErRedigerbar = erOppgaveRedigerbar(oppgave.status)
+
+  return (
     <>
       <Heading size="small">Vurderinger i oppgave</Heading>
-      <Aktivitetsgrad aktiviteter={vurdering.aktivitet} />
-      <Unntak unntaker={vurdering.unntak} />
+      <AktivitetsgradIOppgave doedsdato={doedsdato} />
+      {oppgaveErRedigerbar && <LeggTilNyVurdering doedsdato={doedsdato} />}
+      <UnntakIOppgave />
+      {oppgaveErRedigerbar && <LeggTilUnntak />}
+      <ValgForInfobrev />
     </>
   )
 }

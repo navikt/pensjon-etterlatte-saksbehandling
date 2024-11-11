@@ -6,8 +6,8 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { sendTilAttesteringGenerellBehandling } from '~shared/api/generellbehandling'
 import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
 
-import { isSuccess } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { isSuccess, mapResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const SendtilAttesteringModal = ({
   utlandsBehandling,
@@ -42,12 +42,15 @@ export const SendtilAttesteringModal = ({
           <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
             Nei, avbryt
           </Button>
-          {isSuccess(sendTilAttesteringStatus) && (
-            <Alert variant="success">Behandlingen ble sendt til attestering</Alert>
-          )}
-          {isFailureHandler({
-            apiResult: sendTilAttesteringStatus,
-            errorMessage: 'Klarte ikke å sende til attestering kravpakke utland. Prøv igjen senere.',
+          {mapResult(sendTilAttesteringStatus, {
+            error: (error) => (
+              <ApiErrorAlert>Klarte ikke å sende til attestering kravpakke utland: {error.detail}</ApiErrorAlert>
+            ),
+            success: () => (
+              <Alert variant="success">
+                Behandlingen ble sendt til attestering, du blir straks sendt til saksoversikten
+              </Alert>
+            ),
           })}
         </Modal.Footer>
       </Modal>

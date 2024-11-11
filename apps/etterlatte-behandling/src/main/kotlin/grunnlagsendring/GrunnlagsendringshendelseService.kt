@@ -57,24 +57,27 @@ class GrunnlagsendringshendelseService(
 
     fun hentGyldigeHendelserForSak(sakId: SakId) = grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId)
 
-    fun hentAlleHendelserForSak(sakId: SakId): List<Grunnlagsendringshendelse> {
-        logger.info("Henter alle relevante hendelser for sak $sakId")
-        return grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
-            sakId,
-            GrunnlagsendringStatus.relevantForSaksbehandler(),
-        )
-    }
+    fun hentAlleHendelserForSak(sakId: SakId): List<Grunnlagsendringshendelse> =
+        grunnlagsendringshendelseDao
+            .hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                GrunnlagsendringStatus.relevantForSaksbehandler(),
+            ).also {
+                logger.info("Hentet alle relevante hendelser for sak $sakId antall: ${it.size}")
+            }
 
     fun hentAlleHendelserForSakAvType(
         sakId: SakId,
         type: GrunnlagsendringsType,
     ) = inTransaction {
-        logger.info("Henter alle relevante hendelser for sak $sakId")
-        grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISakAvType(
-            sakId,
-            GrunnlagsendringStatus.relevantForSaksbehandler(),
-            type,
-        )
+        grunnlagsendringshendelseDao
+            .hentGrunnlagsendringshendelserMedStatuserISakAvType(
+                sakId,
+                GrunnlagsendringStatus.relevantForSaksbehandler(),
+                type,
+            ).also {
+                logger.info("Hentet alle relevante hendelser for sak $sakId av type $type antall hendelser ${it.size}")
+            }
     }
 
     fun arkiverHendelseMedKommentar(
@@ -396,7 +399,7 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    internal fun opprettRelevantHendelse(
+    private fun opprettRelevantHendelse(
         hendelse: Grunnlagsendringshendelse,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {

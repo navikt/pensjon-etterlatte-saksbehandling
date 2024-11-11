@@ -3,6 +3,7 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -10,6 +11,7 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
+import no.nav.etterlatte.rapidsandrivers.UtbetalingVerifikasjon
 import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.etterlatte.vedtaksvurdering.RapidUtsender
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
@@ -21,10 +23,12 @@ import tidspunkt.erEtter
 import tidspunkt.erFoerEllerPaa
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.UUID
 
 internal class OpprettVedtakforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService,
+    private val utbetalingKlient: UtbetalingKlient,
     private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -54,11 +58,59 @@ internal class OpprettVedtakforespoerselRiver(
             if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
                 vedtak.opprettVedtakOgFatt(sakId, behandlingId)
             } else {
-                vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
+                when (omregningData.utbetalingVerifikasjon) {
+                    UtbetalingVerifikasjon.INGEN -> vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
+                    UtbetalingVerifikasjon.SIMULERING -> {
+                        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
+                        verifiserUendretUtbetaling(behandlingId, skalAvbryte = false)
+                        vedtak.attesterVedtak(sakId, behandlingId)
+                    }
+                    UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING -> {
+                        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
+                        verifiserUendretUtbetaling(behandlingId, skalAvbryte = true)
+                        vedtak.attesterVedtak(sakId, behandlingId)
+                    }
+                }
             }
+
         hentBeloep(respons, dato)?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
         logger.info("Opprettet vedtak ${respons.vedtak.id} for sak: $sakId og behandling: $behandlingId")
         RapidUtsender.sendUt(respons, packet, context)
+    }
+
+    private fun verifiserUendretUtbetaling(
+        behandlingId: UUID,
+        skalAvbryte: Boolean,
+    ) {
+        val simulertBeregning = utbetalingKlient.simuler(behandlingId)
+
+        val etterbetalingSum = simulertBeregning.etterbetaling.sumOf { it.beloep }
+        val etterbetaling = etterbetalingSum.compareTo(BigDecimal.ZERO) != 0
+
+        val tilbakekrevingSum = simulertBeregning.tilbakekreving.sumOf { it.beloep }
+        val tilbakekreving = tilbakekrevingSum.compareTo(BigDecimal.ZERO) != 0
+
+        if (etterbetaling) {
+            val msg = "Omregningen fører til etterbetaling på $etterbetalingSum kr"
+            if (skalAvbryte) {
+                throw Exception("$msg, avbryter behandlingen")
+            } else {
+                logger.info(msg)
+            }
+        }
+
+        if (tilbakekreving) {
+            val msg = "Omregningen fører til tilbakekreving på $tilbakekrevingSum kr"
+            if (skalAvbryte) {
+                throw Exception("$msg, avbryter behandlingen")
+            } else {
+                logger.info(msg)
+            }
+        }
+
+        if (!etterbetaling && !tilbakekreving) {
+            logger.info("Omregningen førte ikke til tilbakekreving eller etterbetaling")
+        }
     }
 
     private fun hentBeloep(

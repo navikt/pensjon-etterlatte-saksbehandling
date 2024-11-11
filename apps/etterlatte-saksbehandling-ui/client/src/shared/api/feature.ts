@@ -20,6 +20,7 @@ async function retryInner(
   promise: () => Promise<ApiResponse<IFeature[]>>
 ): Promise<ApiResponse<IFeature[]> | ApiError> {
   if (times < 1) {
+    logger.generalError({ msg: 'Feil i henting av brytere mot Unleash gikk ikke ok etter retries.' })
     return { ok: false } as ApiError
   }
 
@@ -28,12 +29,12 @@ async function retryInner(
       if (res.ok) {
         return res
       } else {
-        logger.generalError({ msg: 'Feil i henting av brytere mot Unleash. Prøver på nytt' })
+        logger.generalWarning({ msg: 'Feil i henting av brytere mot Unleash. Prøver på nytt' })
         return retryInner(times - 1, promise)
       }
     })
     .catch((err) => {
-      logger.generalError({ msg: `Feil i henting av brytere mot Unleash. Prøver på nytt... error: ${err}` })
+      logger.generalWarning({ msg: `Feil i henting av brytere mot Unleash. Prøver på nytt... error: ${err}` })
       return retryInner(times - 1, promise)
     })
 }

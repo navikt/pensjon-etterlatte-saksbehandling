@@ -17,11 +17,14 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevStatusResponse
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
@@ -41,6 +44,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -225,11 +229,12 @@ class BeregningKlientTest :
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
 
-    override suspend fun sakHarInntektForAar(
+    override suspend fun aarligInntektsjusteringSjekk(
         sakId: SakId,
         aar: Int,
+        sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean = false
+    ): AarligInntektsjusteringAvkortingSjekkResponse = mockk()
 
     override suspend fun harTilgangTilSak(
         sakId: SakId,
@@ -336,6 +341,29 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
 class BrevApiKlientTest : BrevApiKlient {
     private var brevId = 1L
 
+    override suspend fun opprettSpesifiktBrev(
+        sakId: SakId,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun slettBrev(
+        brevId: Long,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun ferdigstillBrev(
+        req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevStatusResponse {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -365,13 +393,13 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): JournalpostIdDto = JournalpostIdDto(UUID.randomUUID().toString())
+    ): JournalpostIdDto = JournalpostIdDto(listOf(UUID.randomUUID().toString()))
 
     override suspend fun distribuerBrev(
         sakId: SakId,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BestillingsIdDto = BestillingsIdDto(UUID.randomUUID().toString())
+    ): BestillingsIdDto = BestillingsIdDto(listOf(UUID.randomUUID().toString()))
 
     override suspend fun hentBrev(
         sakId: SakId,
@@ -601,7 +629,9 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         saktype: SakType,
     ): GeografiskTilknytning = GeografiskTilknytning(kommune = "0301")
 
-    override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> = emptyMap<String, String>()
+    override suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun hentAdressebeskyttelseForPerson(
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,

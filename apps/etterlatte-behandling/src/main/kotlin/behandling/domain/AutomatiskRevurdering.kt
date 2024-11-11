@@ -59,9 +59,9 @@ data class AutomatiskRevurdering(
     override fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt) =
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(virkningstidspunkt = virkningstidspunkt) }
 
-    override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer) =
+    override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer?) =
         hvisRedigerbar {
-            endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer.dato)
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer?.dato)
         }
 
     override fun tilOpprettet() = endreTilStatus(BehandlingStatus.OPPRETTET)

@@ -9,6 +9,7 @@ import {
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
 } from '~shared/types/Aktivitetsplikt'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string
@@ -55,27 +56,37 @@ export const hentAktivitspliktVurderingForOppgave = async (args: {
 }): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
   apiClient.get(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering`)
 
-export const hentAktivitetspliktVurderingForOppgaveNy = async (args: {
-  sakId: number
-  oppgaveId: string
-}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
-  apiClient.get(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/ny`)
-
-export const opprettAktivitspliktAktivitetsgrad = async (args: {
+export const opprettAktivitetspliktAktivitetsgrad = async (args: {
   sakId: number
   oppgaveId: string
   request: IOpprettAktivitetspliktAktivitetsgrad
-}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
+}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
   apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/aktivitetsgrad`, {
     ...args.request,
   })
 
-export const opprettAktivitspliktUnntak = async (args: {
+export const slettAktivitetspliktVurdering = async (args: {
+  sakId: number
+  oppgaveId: string
+  vurderingId: string
+}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
+  apiClient.delete(
+    `/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/aktivitetsgrad/${args.vurderingId}`
+  )
+
+export const opprettAktivitetspliktUnntak = async (args: {
   sakId: number
   oppgaveId: string
   request: IOpprettAktivitetspliktUnntak
-}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
+}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
   apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/unntak`, { ...args.request })
+
+export const slettAktivitetspliktUnntak = async (args: {
+  sakId: number
+  oppgaveId: string
+  unntakId: string
+}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
+  apiClient.delete(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/unntak/${args.unntakId}`)
 
 export const hentAktivitspliktVurderingForBehandling = async (args: {
   sakId: number
@@ -104,3 +115,34 @@ export const opprettAktivitspliktUnntakForBehandling = async (args: {
 export const hentAktivitetspliktOppgaveVurdering = async (args: {
   oppgaveId: string
 }): Promise<ApiResponse<AktivitetspliktOppgaveVurdering>> => apiClient.get(`/aktivitetsplikt/oppgave/${args.oppgaveId}`)
+
+export interface IBrevAktivitetspliktRequest {
+  skalSendeBrev: boolean
+  utbetaling?: boolean
+  redusertEtterInntekt?: boolean
+}
+
+export const lagreAktivitetspliktBrevdata = async (args: {
+  oppgaveId: string
+  brevdata: IBrevAktivitetspliktRequest
+}): Promise<ApiResponse<IBrevAktivitetspliktDto>> =>
+  apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/brevdata`, { ...args.brevdata })
+
+export const opprettAktivitetspliktsbrev = async (args: { oppgaveId: string }): Promise<ApiResponse<BrevId>> =>
+  apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/opprettbrev`, {})
+
+export const ferdigstillBrevOgOppgaveAktivitetsplikt = async (args: {
+  oppgaveId: string
+}): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/ferdigstillbrev-og-oppgave`, {})
+
+interface BrevId {
+  brevId: number
+}
+
+export interface IBrevAktivitetspliktDto {
+  brevId?: number
+  skalSendeBrev: boolean
+  utbetaling?: boolean
+  redusertEtterInntekt?: boolean
+}

@@ -20,10 +20,8 @@ import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utils.toPdlSearchVariables
 import no.nav.etterlatte.utils.toPdlVariables
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 data class SoekPerson(
@@ -35,8 +33,6 @@ class PdlOboKlient(
     private val httpClient: HttpClient,
     config: Config,
 ) {
-    private val logger = LoggerFactory.getLogger(PdlOboKlient::class.java)
-
     private val apiUrl = config.getString("pdl.url")
     private val pdlScope = config.getString("pdl.scope")
 
@@ -64,12 +60,7 @@ class PdlOboKlient(
         }.let {
             when (it) {
                 is RetryResult.Success ->
-                    it.content.also { result ->
-                        result.errors?.joinToString()?.let { feil ->
-                            logger.error("Fikk data fra PDL, men også feil. Se sikkerlogg for feilmelding")
-                            sikkerLogg.error("Request ident: $ident. PDL feil $feil")
-                        }
-                    }
+                    it.content.also { result -> loggDelvisReturnerteData(result, request) }
 
                 is RetryResult.Failure -> throw it.samlaExceptions()
             }
@@ -101,12 +92,7 @@ class PdlOboKlient(
         }.let {
             when (it) {
                 is RetryResult.Success ->
-                    it.content.also { result ->
-                        result.errors?.joinToString(",")?.let { feil ->
-                            logger.error("Fikk data fra PDL, men også feil. Se sikkerlogg for feilmelding")
-                            sikkerLogg.error("Request fnr: ${fnr.value}  rolle: $rolle. \n PDL feil $feil")
-                        }
-                    }
+                    it.content.also { result -> loggDelvisReturnerteData(result, request) }
 
                 is RetryResult.Failure -> throw it.samlaExceptions()
             }
@@ -136,12 +122,7 @@ class PdlOboKlient(
         }.let {
             when (it) {
                 is RetryResult.Success ->
-                    it.content.also { result ->
-                        result.errors?.joinToString(",")?.let { feil ->
-                            logger.error("Fikk data fra PDL, men også feil. Se sikkerlogg for feilmelding")
-                            sikkerLogg.error("Request soekperson: $soekPerson \n PDL feil $feil")
-                        }
-                    }
+                    it.content.also { result -> loggDelvisReturnerteData(result, request) }
 
                 is RetryResult.Failure -> throw it.samlaExceptions()
             }

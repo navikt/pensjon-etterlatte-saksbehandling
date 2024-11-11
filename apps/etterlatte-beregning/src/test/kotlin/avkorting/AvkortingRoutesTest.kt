@@ -42,6 +42,8 @@ class AvkortingRoutesTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val avkortingService = mockk<AvkortingService>()
+    private val avkortingTidligAlderspensjonService = mockk<AvkortingTidligAlderspensjonService>()
+    private val aarligInntektsjusteringService = mockk<AarligInntektsjusteringService>()
 
     @BeforeAll
     fun beforeAll() {
@@ -179,7 +181,12 @@ class AvkortingRoutesTest {
     private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
         io.ktor.server.testing.testApplication {
             runServer(mockOAuth2Server) {
-                avkorting(avkortingService, behandlingKlient)
+                avkorting(
+                    avkortingService,
+                    behandlingKlient,
+                    avkortingTidligAlderspensjonService,
+                    aarligInntektsjusteringService,
+                )
             }
             block(this)
         }

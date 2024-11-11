@@ -50,10 +50,13 @@ import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedUtlandstilknytning
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.route.lagGrunnlagsopplysning
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -188,14 +191,15 @@ interface BehandlingService {
         utlandstilknytning: Utlandstilknytning,
     )
 
-    fun oppdaterViderefoertOpphoer(
+    suspend fun oppdaterViderefoertOpphoer(
         behandlingId: UUID,
         viderefoertOpphoer: ViderefoertOpphoer,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
-    fun fjernViderefoertOpphoer(
+    suspend fun fjernViderefoertOpphoer(
         behandlingId: UUID,
-        kilde: Grunnlagsopplysning.Kilde,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     fun oppdaterBoddEllerArbeidetUtlandet(
@@ -262,6 +266,8 @@ interface BehandlingService {
     )
 
     fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier?
+
+    fun hentAapneBehandlingerForSak(sak: Sak): List<BehandlingOgSak>
 }
 
 internal class BehandlingServiceImpl(
@@ -807,9 +813,10 @@ internal class BehandlingServiceImpl(
             }
     }
 
-    override fun oppdaterViderefoertOpphoer(
+    override suspend fun oppdaterViderefoertOpphoer(
         behandlingId: UUID,
         viderefoertOpphoer: ViderefoertOpphoer,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
             hentBehandling(behandlingId)
@@ -830,19 +837,41 @@ internal class BehandlingServiceImpl(
             .also {
                 behandlingDao.lagreViderefoertOpphoer(behandlingId, viderefoertOpphoer)
                 behandlingDao.lagreStatus(it)
+                if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+                    beregningKlient.slettAvkorting(behandling.id, brukerTokenInfo)
+                }
             }
     }
 
-    override fun fjernViderefoertOpphoer(
+    override suspend fun fjernViderefoertOpphoer(
         behandlingId: UUID,
-        kilde: Grunnlagsopplysning.Kilde,
-    ) = behandlingDao.fjernViderefoertOpphoer(behandlingId, kilde)
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val behandling =
+            hentBehandling(behandlingId)
+                ?: throw IkkeFunnetException(
+                    "BEHANDLING_IKKE_FUNNET",
+                    "Kunne ikke oppdatere videreført opphør fordi behandlingen ikke finnes",
+                )
+
+        behandling.oppdaterViderefoertOpphoer(null).also {
+            behandlingDao.fjernViderefoertOpphoer(behandlingId, brukerTokenInfo.lagGrunnlagsopplysning())
+            behandlingDao.lagreStatus(it)
+            if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+                beregningKlient.slettAvkorting(behandling.id, brukerTokenInfo)
+            }
+        }
+    }
 
     override fun hentAapenOmregning(sakId: SakId): UUID? =
         behandlingDao
             .hentAlleRevurderingerISakMedAarsak(
                 sakId,
-                listOf(Revurderingaarsak.REGULERING, Revurderingaarsak.OMREGNING),
+                listOf(
+                    Revurderingaarsak.REGULERING,
+                    Revurderingaarsak.OMREGNING,
+                    Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+                ),
             ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
             }?.id
@@ -871,6 +900,11 @@ internal class BehandlingServiceImpl(
 
     override fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
+
+    override fun hentAapneBehandlingerForSak(sak: Sak): List<BehandlingOgSak> =
+        behandlingDao.hentAapneBehandlinger(
+            Saker(listOf(sak)),
+        )
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

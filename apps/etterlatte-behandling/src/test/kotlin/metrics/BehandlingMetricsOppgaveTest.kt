@@ -4,9 +4,11 @@ import io.kotest.matchers.shouldBe
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -16,6 +18,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
@@ -45,6 +48,8 @@ internal class BehandlingMetricsOppgaveTest(
 
     @BeforeAll
     fun beforeAll() {
+        nyKontekstMedBruker(mockk<User>().also { every { it.name() } returns this::class.java.simpleName })
+
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
         sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
 

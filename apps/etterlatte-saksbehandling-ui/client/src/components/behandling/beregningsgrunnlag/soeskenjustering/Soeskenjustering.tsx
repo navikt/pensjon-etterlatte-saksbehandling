@@ -79,7 +79,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]
   }>({
     defaultValues: {
-      soeskenMedIBeregning: behandling.beregningsGrunnlag?.soeskenMedIBeregning
+      soeskenMedIBeregning: !!behandling.beregningsGrunnlag?.soeskenMedIBeregning.length
         ? mapListeFraDto(behandling.beregningsGrunnlag?.soeskenMedIBeregning)
         : [nySoeskengrunnlagPeriode(soesken, behandling.virkningstidspunkt?.dato)],
     },
@@ -91,7 +91,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   })
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const behandles = behandlingErRedigerbar(
+  const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
@@ -185,7 +185,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         )}
       </FamilieforholdWrapper>
       <Box borderWidth="1 0 0 0" borderColor="border-subtle">
-        {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
+        {visFeil && feil.length > 0 && redigerbar ? <FeilIPerioder feil={feil} /> : null}
         <form id="formsoeskenjustering">
           <UstiletListe>
             {fields.map((item, index) => (
@@ -208,7 +208,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
               />
             ))}
           </UstiletListe>
-          {behandles && (
+          {redigerbar && (
             <HStack gap="4" align="center">
               <Button
                 size="small"

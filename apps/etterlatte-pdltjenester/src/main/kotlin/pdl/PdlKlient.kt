@@ -12,14 +12,12 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.behandlingsnummer
-import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
 
@@ -48,12 +46,7 @@ class PdlKlient(
         }.let {
             when (it) {
                 is RetryResult.Success ->
-                    it.content.also { result ->
-                        result.errors?.joinToString(",")?.let { feil ->
-                            logger.error("Fikk data fra PDL, men også feil. Se sikkerlogg for feilmelding")
-                            sikkerLogg.error("Request: $hentPersonRequest \n PDL feil $feil")
-                        }
-                    }
+                    it.content.also { loggDelvisReturnerteData(it, request) }
 
                 is RetryResult.Failure -> throw it.samlaExceptions()
             }
@@ -153,21 +146,27 @@ class PdlKlient(
         }
     }
 
-    suspend fun hentPdlIdentifikator(request: HentPdlIdentRequest): PdlIdentResponse {
+    suspend fun hentPdlIdentifikator(
+        request: HentPdlIdentRequest,
+        grupper: List<PDLIdentGruppeTyper> = listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT, PDLIdentGruppeTyper.NPID),
+    ): PdlIdentResponse {
         val graphqlRequest =
             PdlIdentRequest(
-                query = getQuery("/pdl/hentIdent.graphql"),
+                query = getQuery("/pdl/hentIdenter.graphql"),
                 variables =
                     PdlIdentVariables(
                         ident = request.ident.value,
-                        grupper = listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn, PDLIdentGruppeTyper.NPID.navn),
+                        grupper = grupper.map { it.navn },
                         historikk = true,
                     ),
             )
         logger.info("Henter PdlIdentifikator for ident = ${request.ident} fra PDL")
+
         return retry<PdlIdentResponse> {
             httpClient
                 .post(apiUrl) {
+                    behandlingsnummer(SakType.entries)
+                    header(HEADER_TEMA, HEADER_TEMA_VALUE)
                     accept(Json)
                     contentType(Json)
                     setBody(graphqlRequest)
@@ -179,43 +178,6 @@ class PdlKlient(
             }
         }
     }
-
-    suspend fun hentFolkeregisterIdenterForAktoerIdBolk(
-        request: HentFolkeregisterIdenterForAktoerIdBolkRequest,
-    ): List<HentIdenterBolkResult> =
-        request.aktoerIds
-            .chunked(PDL_BULK_SIZE)
-            .map { identerChunk ->
-                val graphqlBolkRequest =
-                    PdlFoedselsnumreFraAktoerIdRequest(
-                        query = getQuery("/pdl/hentFolkeregisterIdenterBolk.graphql"),
-                        variables =
-                            IdenterBolkVariables(
-                                identer = identerChunk,
-                                grupper = setOf(IdentGruppe.FOLKEREGISTERIDENT),
-                            ),
-                    )
-
-                logger.info("Henter folkeregisterident for ${request.aktoerIds.size} aktørIds fra PDL")
-
-                val response =
-                    retry<PdlFoedselsnumreFraAktoerIdResponse> {
-                        httpClient
-                            .post(apiUrl) {
-                                behandlingsnummer(SakType.entries)
-                                header(HEADER_TEMA, HEADER_TEMA_VALUE)
-                                accept(Json)
-                                contentType(Json)
-                                setBody(graphqlBolkRequest)
-                            }.body()
-                    }.let {
-                        when (it) {
-                            is RetryResult.Success -> it.content
-                            is RetryResult.Failure -> throw it.samlaExceptions()
-                        }
-                    }
-                response.data
-            }.flatMap { it.hentIdenterBolk }
 
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): PdlGeografiskTilknytningResponse {
         val graphqlRequest =
@@ -248,7 +210,7 @@ class PdlKlient(
     suspend fun hentAktoerId(request: HentPdlIdentRequest): PdlIdentResponse {
         val graphqlRequest =
             PdlIdentRequest(
-                query = getQuery("/pdl/hentIdent.graphql"),
+                query = getQuery("/pdl/hentIdenter.graphql"),
                 variables =
                     PdlIdentVariables(
                         ident = request.ident.value,
@@ -282,6 +244,5 @@ class PdlKlient(
     companion object {
         const val HEADER_TEMA = "Tema"
         const val HEADER_TEMA_VALUE = "PEN"
-        const val PDL_BULK_SIZE = 100
     }
 }

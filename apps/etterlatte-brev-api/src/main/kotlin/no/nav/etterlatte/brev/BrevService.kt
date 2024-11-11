@@ -8,6 +8,8 @@ import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevStatusResponse
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
@@ -17,7 +19,9 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.oppgave.OppgaveService
 import no.nav.etterlatte.brev.pdf.PDFGenerator
+import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -72,14 +76,60 @@ class BrevService(
             journalfoerBrevService.journalfoer(brevId, bruker)
 
             logger.info("Distribuerer brev med id: $brevId")
-            distribuerer.distribuer(brevId)
+            distribuerer.distribuer(brevId, bruker = bruker)
 
             logger.info("Brevid: $brevId er distribuert")
             return BrevDistribusjonResponse(brevId, true)
         } catch (e: Exception) {
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=${brev.id}...", e)
+            val oppdatertBrev = db.hentBrev(brevId)
+            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
             return BrevDistribusjonResponse(brevId, false)
+        }
+    }
+
+    suspend fun ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(
+        req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
+        bruker: BrukerTokenInfo,
+    ): BrevStatusResponse {
+        val brevId = req.brevId
+        val hentBrev = db.hentBrev(brevId)
+        try {
+            val brevStatus = hentBrev.status
+            if (brevStatus.ikkeFerdigstilt()) {
+                pdfGenerator.ferdigstillOgGenererPDF(
+                    brevId,
+                    bruker,
+                    avsenderRequest = { _, _, _ ->
+                        AvsenderRequest(
+                            saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
+                            attestantIdent = req.avsenderRequest.attestantIdent,
+                            sakenhet = req.enhetsnummer,
+                        )
+                    },
+                    brevKodeMapping = { hentBrev.brevkoder!! },
+                    brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+                )
+            }
+
+            if (brevStatus.ikkeJournalfoert()) {
+                logger.info("Journalfører brev med id: $brevId")
+                journalfoerBrevService.journalfoer(brevId, bruker)
+            }
+
+            if (brevStatus.ikkeDistribuert()) {
+                logger.info("Distribuerer brev med id: $brevId")
+                distribuerer.distribuer(brevId, bruker = bruker)
+            }
+
+            logger.info("Brevid: $brevId er distribuert")
+            val oppdatertBrev = db.hentBrev(brevId)
+            return BrevStatusResponse(brevId, oppdatertBrev.status)
+        } catch (e: Exception) {
+            val oppdatertBrev = db.hentBrev(brevId)
+            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
+
+            return BrevStatusResponse(brevId, oppdatertBrev.status)
         }
     }
 
@@ -124,28 +174,33 @@ class BrevService(
     fun lagreBrevPayload(
         id: BrevID,
         payload: Slate,
+        bruker: BrukerTokenInfo,
     ): Int {
         sjekkOmBrevKanEndres(id)
         return db
-            .oppdaterPayload(id, payload)
+            .oppdaterPayload(id, payload, bruker)
             .also { logger.info("Payload for brev (id=$id) oppdatert") }
     }
 
     fun lagreBrevPayloadVedlegg(
         id: BrevID,
         payload: List<BrevInnholdVedlegg>,
+        bruker: BrukerTokenInfo,
     ): Int {
         sjekkOmBrevKanEndres(id)
         return db
-            .oppdaterPayloadVedlegg(id, payload)
+            .oppdaterPayloadVedlegg(id, payload, bruker)
             .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
     }
 
     fun opprettMottaker(brevId: BrevID): Mottaker {
         val brev = sjekkOmBrevKanEndres(brevId)
 
-        val mottakerType = if (brev.mottakere.isNotEmpty()) MottakerType.KOPI else MottakerType.HOVED
-        val nyMottaker = tomMottaker(type = mottakerType)
+        if (brev.mottakere.size > 1) {
+            throw MaksAntallMottakere()
+        }
+
+        val nyMottaker = tomMottaker(type = MottakerType.KOPI)
 
         logger.info("Oppretter ny mottaker på brev=$brevId")
 
@@ -159,52 +214,84 @@ class BrevService(
     fun slettMottaker(
         brevId: BrevID,
         mottakerId: UUID,
+        bruker: BrukerTokenInfo,
     ) {
         val brev = sjekkOmBrevKanEndres(brevId)
 
         logger.info("Sletter mottaker (id=$mottakerId) fra brev=$brevId")
 
-        if (brev.mottakere.size > 1) {
-            db.slettMottaker(brevId, mottakerId)
+        val mottaker = brev.mottakere.find { it.id == mottakerId }
+        if (mottaker?.type == MottakerType.HOVED) {
+            throw KanIkkeSletteHovedmottaker()
+        } else if (brev.mottakere.size <= 1) {
+            throw MinstEnMottakerPaakrevd()
         } else {
-            throw UgyldigForespoerselException(
-                code = "KAN_IKKE_SLETTE_MOTTAKER",
-                detail = "Kan ikke slette mottaker. Det må finnes minst 1 mottaker på brevet!",
-            )
+            db.slettMottaker(brevId, mottakerId, bruker)
+
+            logger.info("Mottaker (id=$mottakerId) slettet fra brev=$brevId")
         }
     }
 
     fun oppdaterMottaker(
         brevId: BrevID,
         mottaker: Mottaker,
+        bruker: BrukerTokenInfo,
     ): Int {
-        sjekkOmBrevKanEndres(brevId)
+        val brev = sjekkOmBrevKanEndres(brevId)
+
+        val lagretMottaker = brev.mottakere.single { it.id == mottaker.id }
+        if (lagretMottaker.type != mottaker.type) {
+            throw InternfeilException("Kan ikke sette hoved-/kopimottaker på vanlig oppdatering av mottaker")
+        }
 
         logger.info("Oppdaterer mottaker (id=${mottaker.id}) på brev=$brevId")
 
         return db
-            .oppdaterMottaker(brevId, mottaker)
+            .oppdaterMottaker(brevId, mottaker, bruker)
             .also { logger.info("Mottaker på brev (id=$brevId) oppdatert") }
+    }
+
+    fun settHovedmottaker(
+        brevId: BrevID,
+        mottakerId: UUID,
+        bruker: BrukerTokenInfo,
+    ) {
+        val brev = sjekkOmBrevKanEndres(brevId)
+
+        if (brev.mottakere.find { it.id == mottakerId }?.type == MottakerType.HOVED) {
+            return // Ikke gjør noe hvis mottakeren allerede er hovedmottaker
+        }
+
+        brev.mottakere
+            .forEach {
+                if (it.id == mottakerId) {
+                    db.oppdaterMottaker(brevId, it.copy(type = MottakerType.HOVED), bruker)
+                } else {
+                    db.oppdaterMottaker(brevId, it.copy(type = MottakerType.KOPI), bruker)
+                }
+            }
     }
 
     fun oppdaterTittel(
         id: BrevID,
         tittel: String,
+        bruker: BrukerTokenInfo,
     ): Int {
         sjekkOmBrevKanEndres(id)
         return db
-            .oppdaterTittel(id, tittel)
+            .oppdaterTittel(id, tittel, bruker)
             .also { logger.info("Tittel på brev (id=$id) oppdatert") }
     }
 
     fun oppdaterSpraak(
         id: BrevID,
         spraak: Spraak,
+        bruker: BrukerTokenInfo,
     ) {
         sjekkOmBrevKanEndres(id)
 
         db
-            .oppdaterSpraak(id, spraak)
+            .oppdaterSpraak(id, spraak, bruker)
             .also { logger.info("Språk i brev (id=$id) endret til $spraak") }
     }
 
@@ -226,14 +313,17 @@ class BrevService(
     ) {
         val brev = sjekkOmBrevKanEndres(id)
 
-        if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
+        if (brev.mottakere.size !in 1..2) {
+            logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")
+            throw UgyldigAntallMottakere()
+        } else if (brev.mottakere.any { it.erGyldig().isNotEmpty() }) {
             sikkerlogger.error("Ugyldig mottaker: ${brev.mottakere.toJson()}")
             throw UgyldigMottakerKanIkkeFerdigstilles(brev.id, brev.sakId, brev.mottakere.flatMap { it.erGyldig() })
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
-            db.settBrevFerdigstilt(id)
+            db.settBrevFerdigstilt(id, bruker)
         } else {
             val pdf = genererPdf(id, bruker)
-            db.lagrePdfOgFerdigstillBrev(id, pdf)
+            db.lagrePdfOgFerdigstillBrev(id, pdf, bruker)
         }
     }
 
@@ -302,4 +392,18 @@ class BrevKanIkkeEndres(
                 "brevId" to brev.id,
                 "status" to brev.status,
             ),
+    )
+
+class MaksAntallMottakere : UgyldigForespoerselException("MAKS_ANTALL_MOTTAKERE", "Maks 2 mottakere tillatt")
+
+class KanIkkeSletteHovedmottaker :
+    UgyldigForespoerselException(
+        code = "KAN_IKKE_SLETTE_HOVEDMOTTAKER",
+        detail = "Kan ikke slette hovedmottakeren på et brev",
+    )
+
+class MinstEnMottakerPaakrevd :
+    UgyldigForespoerselException(
+        code = "MINST_EN_MOTTAKER_PAAKREVD",
+        detail = "Kan ikke slette mottaker. Det må finnes minst 1 mottaker på brevet!",
     )

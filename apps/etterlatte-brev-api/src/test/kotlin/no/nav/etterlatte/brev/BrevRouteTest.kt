@@ -37,6 +37,7 @@ import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -182,8 +183,8 @@ internal class BrevRouteTest {
     @Test
     fun `Endepunkt for lagring av manuelt brev`() {
         val brevId = Random.nextLong()
-        coEvery { brevService.lagreBrevPayload(any(), any()) } returns 1
-        coEvery { brevService.lagreBrevPayloadVedlegg(any(), any()) } returns 1
+        coEvery { brevService.lagreBrevPayload(any(), any(), any()) } returns 1
+        coEvery { brevService.lagreBrevPayloadVedlegg(any(), any(), any()) } returns 1
         coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
@@ -201,7 +202,7 @@ internal class BrevRouteTest {
         }
 
         coVerify(exactly = 1) {
-            brevService.lagreBrevPayload(brevId, any())
+            brevService.lagreBrevPayload(brevId, any(), any())
             tilgangssjekker.harTilgangTilSak(any(), any(), any())
         }
     }
@@ -243,7 +244,8 @@ internal class BrevRouteTest {
         }
     }
 
-    val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
+    private val saksbehandler = simpleSaksbehandler("Z123456")
+    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = saksbehandler.ident()) }
 
     private fun opprettBrev(id: BrevID) =
         Brev(

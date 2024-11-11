@@ -102,6 +102,8 @@ class AutomatiskRevurderingService(
                 // TODO utfører per nå sjekkene i egne Rivers før dette gjør derfor ingenting her
             }
 
+            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {}
+
             /*
              * Skal ikke automatisk revurdere by default hvis:
              * Det ikke er en løpende sak
@@ -133,7 +135,7 @@ class AutomatiskRevurderingService(
         }
     } ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
 
-    fun opprettAutomatiskRevurdering(
+    private fun opprettAutomatiskRevurdering(
         sakId: SakId,
         forrigeBehandling: Behandling,
         revurderingAarsak: Revurderingaarsak,
@@ -162,8 +164,6 @@ class AutomatiskRevurderingService(
         )
     }
 }
-
-class KunSystembrukerException : Exception("Hendelser kan kun utføres av systembruker")
 
 class OmregningKreverLoependeVedtak :
     UgyldigForespoerselException("OMREGNING_KREVER_LØPENDE_VEDTAK", "Omregning krever at sak har løpende vedtak")

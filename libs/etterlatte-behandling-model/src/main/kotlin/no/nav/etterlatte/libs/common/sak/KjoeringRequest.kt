@@ -6,6 +6,9 @@ data class KjoeringRequest(
     val kjoering: String,
     val status: KjoeringStatus,
     val sakId: SakId,
+    val begrunnelse: String? = null,
+    val corrId: String? = null,
+    val feilendeSteg: String? = null,
 )
 
 data class LagreKjoeringRequest(
@@ -23,9 +26,12 @@ data class LagreKjoeringRequest(
 )
 
 enum class KjoeringStatus {
-    KLAR_TIL_REGULERING,
+    KLAR_TIL_REGULERING, // TODO bør denne fases ut da den er spesifikk for regulering?
+    KLAR_FOR_OMREGNING,
+    KLAR,
     STARTA,
     FEILA,
     IKKE_LOEPENDE,
     FERDIGSTILT,
+    TIL_MANUELL,
 }

@@ -40,6 +40,12 @@ enum class OmregningHendelseType : EventnameHendelseType {
     override fun lagEventnameForType(): String = "OMREGNING:${this.name}"
 }
 
+enum class UtbetalingVerifikasjon {
+    INGEN,
+    SIMULERING,
+    SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING,
+}
+
 /*
 * Verdier til omregninghendelse vil tilføres underveis i omregningsløpet og flere felter er derfor nødt ti å være mutable.
 * Derimot er det ønskelig at feltene er immutable og non null etter de blir satt.
@@ -55,6 +61,7 @@ data class OmregningData(
     private var sakType: SakType? = null,
     private var behandlingId: UUID? = null,
     private var forrigeBehandlingId: UUID? = null,
+    val utbetalingVerifikasjon: UtbetalingVerifikasjon = UtbetalingVerifikasjon.INGEN,
 ) {
     fun toPacket() =
         OmregningDataPacket(
@@ -65,6 +72,7 @@ data class OmregningData(
             sakType,
             behandlingId,
             forrigeBehandlingId,
+            utbetalingVerifikasjon,
         )
 
     fun hentFraDato(): LocalDate = fradato ?: throw OmregningshendelseHarFeilTilstand(OmregningData::fradato.name)
@@ -112,6 +120,7 @@ data class OmregningDataPacket(
     val sakType: SakType?,
     val behandlingId: UUID?,
     val forrigeBehandlingId: UUID?,
+    val utbetalingVerifikasjon: UtbetalingVerifikasjon,
 ) {
     companion object KEYS {
         val KEY = HENDELSE_DATA_KEY
@@ -121,6 +130,7 @@ data class OmregningDataPacket(
         val FRA_DATO = "$HENDELSE_DATA_KEY.${OmregningDataPacket::fradato.name}"
         val BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::behandlingId.name}"
         val FORRIGE_BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::forrigeBehandlingId.name}"
+        val REV_AARSAK = "$HENDELSE_DATA_KEY.${OmregningDataPacket::revurderingaarsak.name}"
     }
 }
 

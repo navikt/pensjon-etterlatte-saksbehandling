@@ -1,9 +1,7 @@
 import { IDetaljertBehandling, IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Informasjon, Vurdering } from '../styled'
-import { useState } from 'react'
 import { UtlandstilknytningVurdering } from './UtlandstilknytningVurdering'
-import { Button } from '@navikt/ds-react'
 
 const statusIkon = (utlandstilknytning: IUtlandstilknytning | null) => {
   if (utlandstilknytning === null) {
@@ -19,8 +17,6 @@ export const Utlandstilknytning = ({
   behandling: IDetaljertBehandling
   redigerbar: boolean
 }) => {
-  const [vurdert, setVurdert] = useState(behandling.utlandstilknytning !== null)
-
   return (
     <LovtekstMedLenke tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utlandstilknytning)}>
       <Informasjon>
@@ -30,19 +26,11 @@ export const Utlandstilknytning = ({
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
       </Informasjon>
       <Vurdering>
-        {vurdert && (
-          <UtlandstilknytningVurdering
-            utlandstilknytning={behandling.utlandstilknytning}
-            redigerbar={redigerbar}
-            setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
-            behandlingId={behandling.id}
-          />
-        )}
-        {!vurdert && redigerbar && (
-          <Button variant="secondary" onClick={() => setVurdert(true)}>
-            Legg til vurdering
-          </Button>
-        )}
+        <UtlandstilknytningVurdering
+          utlandstilknytning={behandling.utlandstilknytning}
+          redigerbar={redigerbar}
+          behandlingId={behandling.id}
+        />
       </Vurdering>
     </LovtekstMedLenke>
   )

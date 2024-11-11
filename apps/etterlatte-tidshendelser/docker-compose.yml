@@ -1,7 +1,4 @@
-version: "3"
-
 services:
-
   postgres:
     restart: always
     container_name: etterlatte-tidshendelser

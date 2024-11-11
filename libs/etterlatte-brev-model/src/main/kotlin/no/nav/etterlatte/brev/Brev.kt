@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.BrevParametereAutomatisk
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -27,6 +28,8 @@ enum class Status {
     fun ikkeJournalfoert(): Boolean = this in listOf(OPPRETTET, OPPDATERT, FERDIGSTILT)
 
     fun ikkeDistribuert(): Boolean = this != DISTRIBUERT
+
+    fun erDistribuert(): Boolean = this == DISTRIBUERT
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -50,10 +53,12 @@ data class Adresse(
                 listOf("Postnummer eller poststed er null eller blank")
             }
         } else if (adresseType == "UTENLANDSKPOSTADRESSE") {
-            if (!adresselinje1.isNullOrBlank()) {
-                listOf()
-            } else {
+            if (adresselinje1.isNullOrBlank()) {
                 listOf("Adresselinje1 er null eller blank")
+            } else if (!postnummer.isNullOrBlank() || !poststed.isNullOrBlank()) {
+                listOf("Postnummer og poststed skal ikke brukes på utenlandsk adresse")
+            } else {
+                listOf()
             }
         } else {
             listOf()
@@ -120,9 +125,21 @@ data class OpprettJournalfoerOgDistribuerRequest(
     val sakId: SakId,
 )
 
+data class FerdigstillJournalFoerOgDistribuerOpprettetBrev(
+    val brevId: BrevID,
+    val sakId: SakId,
+    val enhetsnummer: Enhetsnummer,
+    val avsenderRequest: SaksbehandlerOgAttestant,
+)
+
+data class BrevStatusResponse(
+    val brevId: BrevID,
+    val status: Status,
+)
+
 data class JournalfoerVedtaksbrevResponseOgBrevid(
     val brevId: BrevID,
-    val opprettetJournalpost: OpprettJournalpostResponse,
+    val opprettetJournalpost: List<OpprettJournalpostResponse>,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

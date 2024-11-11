@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.TilstandException
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
@@ -38,9 +39,25 @@ import java.util.UUID
 const val AKTIVITET_ID_CALL_PARAMETER = "id"
 inline val PipelineContext<*, ApplicationCall>.aktivitetId: UUID
     get() =
-        call.parameters[AKTIVITET_ID_CALL_PARAMETER].let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
+        call.parameters[AKTIVITET_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
             "MANGLER_AKTIVITET_ID",
             "Aktivitet id er ikke i path params",
+        )
+
+const val AKTIVITETSGRAD_ID_CALL_PARAMETER = "aktivitetsgradId"
+inline val PipelineContext<*, ApplicationCall>.aktivitetsgradId: UUID
+    get() =
+        call.parameters[AKTIVITETSGRAD_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
+            "MANGLER_AKTIVITETSGRAD_ID",
+            "AktivitetsgradId er ikke i path params",
+        )
+
+const val UNNTAK_ID_CALL_PARAMETER = "unntakId"
+inline val PipelineContext<*, ApplicationCall>.unntakId: UUID
+    get() =
+        call.parameters[UNNTAK_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
+            "MANGLER_UNNTAK_ID",
+            "UnntakId er ikke i path params",
         )
 
 internal fun Route.aktivitetspliktRoutes(
@@ -233,6 +250,22 @@ internal fun Route.aktivitetspliktRoutes(
             val oppgaveOgVurdering = inTransaction { aktivitetspliktOppgaveService.hentVurderingForOppgave(oppgaveId) }
             call.respond(oppgaveOgVurdering)
         }
+        post("brevdata") {
+            val brevdata = call.receive<AktivitetspliktInformasjonBrevdataRequest>()
+            val oppdaterBrevdata = inTransaction { aktivitetspliktOppgaveService.lagreBrevdata(oppgaveId, brevdata) }
+            call.respond(oppdaterBrevdata)
+        }
+        post("opprettbrev") {
+            val brevId =
+                inTransaction {
+                    aktivitetspliktOppgaveService.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId = oppgaveId, brukerTokenInfo)
+                }
+            call.respond(BrevIdDto(brevId))
+        }
+        post("ferdigstillbrev-og-oppgave") {
+            inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
+            call.respond(HttpStatusCode.NoContent)
+        }
     }
 
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
@@ -252,35 +285,73 @@ internal fun Route.aktivitetspliktRoutes(
             call.respond(vurdering)
         }
 
-        post("/aktivitetsgrad") {
-            kunSkrivetilgang {
-                logger.info("Oppretter aktivitetsgrad for sakId=$sakId og oppgaveId=$oppgaveId")
-                val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>()
-                inTransaction {
-                    aktivitetspliktService.opprettAktivitetsgradForOppgave(
-                        aktivitetsgrad = aktivitetsgrad,
-                        oppgaveId = oppgaveId,
-                        sakId = sakId,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
+        route("/aktivitetsgrad") {
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter aktivitetsgrad for sakId=$sakId og oppgaveId=$oppgaveId")
+                    val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>()
+                    val aktivitetspliktVurdering =
+                        inTransaction {
+                            aktivitetspliktService.upsertAktivitetsgradForOppgave(
+                                aktivitetsgrad = aktivitetsgrad,
+                                oppgaveId = oppgaveId,
+                                sakId = sakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(aktivitetspliktVurdering)
                 }
-                call.respond(HttpStatusCode.Created)
+            }
+
+            delete("{$AKTIVITETSGRAD_ID_CALL_PARAMETER}") {
+                kunSkrivetilgang {
+                    logger.info("Sletter aktivitetsgrad med id=$aktivitetsgradId for oppgaveId=$oppgaveId i sak=$sakId")
+                    val aktivitetsgrad =
+                        inTransaction {
+                            aktivitetspliktService.slettAktivitetsgradForOppgave(
+                                oppgaveId = oppgaveId,
+                                aktivitetsgradId = aktivitetsgradId,
+                                sakId = sakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(aktivitetsgrad)
+                }
             }
         }
 
-        post("/unntak") {
-            kunSkrivetilgang {
-                logger.info("Oppretter unntak for sakId=$sakId og oppgaveId=$oppgaveId")
-                val unntak = call.receive<LagreAktivitetspliktUnntak>()
-                inTransaction {
-                    aktivitetspliktService.opprettUnntakForOpppgave(
-                        unntak = unntak,
-                        oppgaveId = oppgaveId,
-                        sakId = sakId,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
+        route("/unntak") {
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter unntak for sakId=$sakId og oppgaveId=$oppgaveId")
+                    val unntak = call.receive<LagreAktivitetspliktUnntak>()
+                    val aktivitetspliktVurdering =
+                        inTransaction {
+                            aktivitetspliktService.upsertUnntakForOppgave(
+                                unntak = unntak,
+                                oppgaveId = oppgaveId,
+                                sakId = sakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(aktivitetspliktVurdering)
                 }
-                call.respond(HttpStatusCode.Created)
+            }
+
+            delete("{$UNNTAK_ID_CALL_PARAMETER}") {
+                kunSkrivetilgang {
+                    logger.info("Sletter unntak med id=$unntakId for sakId=$sakId og oppgaveId=$oppgaveId")
+                    val vurdering =
+                        inTransaction {
+                            aktivitetspliktService.slettUnntakForOppgave(
+                                oppgaveId = oppgaveId,
+                                sakId = sakId,
+                                unntakId = unntakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(vurdering ?: HttpStatusCode.NoContent)
+                }
             }
         }
     }
@@ -335,6 +406,10 @@ internal fun Route.aktivitetspliktRoutes(
         }
     }
 }
+
+data class BrevIdDto(
+    val brevId: BrevID? = null,
+)
 
 class VurderingIkkeFunnetException(
     sakId: SakId,

@@ -13,11 +13,11 @@ import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { useAppDispatch } from '~store/Store'
 import { Toast } from '~shared/alerts/Toast'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; behandling: IDetaljertBehandling }) => {
   const { type, behandling } = props
@@ -105,10 +105,9 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
                 <Button loading={isPending(lagrestatus)} variant="primary" size="small" style={{ maxWidth: '5em' }}>
                   Lagre
                 </Button>
-                {isSuccess(lagrestatus) && <Toast melding="Lagret" />}
-                {isFailureHandler({
-                  apiResult: lagrestatus,
-                  errorMessage: 'Kunne ikke lagre',
+                {mapResult(lagrestatus, {
+                  success: () => <Toast melding="Lagret" />,
+                  error: (error) => <ApiErrorAlert>Kunne ikke lagre: {error.detail}</ApiErrorAlert>,
                 })}
               </VStack>
             ) : (

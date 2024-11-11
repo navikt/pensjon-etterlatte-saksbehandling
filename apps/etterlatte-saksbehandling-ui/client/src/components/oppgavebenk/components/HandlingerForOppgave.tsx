@@ -14,6 +14,7 @@ import { BrevOppgaveModal } from '~components/oppgavebenk/oppgaveModal/BrevOppga
 import { TilleggsinformasjonOppgaveModal } from '~components/oppgavebenk/oppgaveModal/TilleggsinformasjonOppgaveModal'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
+import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 
 export const FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT = 'aktivitetsplikt.ny-vurdering'
 
@@ -144,7 +145,7 @@ export const HandlingerForOppgave = ({
       return (
         erInnloggetSaksbehandlerOppgave &&
         (brukNyVurderingssideAktivitetsplikt ? (
-          <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/`}>
+          <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/${AktivitetspliktSteg.VURDERING}`}>
             Gå til vurdering
           </Button>
         ) : (
@@ -154,7 +155,7 @@ export const HandlingerForOppgave = ({
     case Oppgavetype.AKTIVITETSPLIKT_12MND:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/`}>
+          <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/${AktivitetspliktSteg.VURDERING}`}>
             Gå til vurdering
           </Button>
         )

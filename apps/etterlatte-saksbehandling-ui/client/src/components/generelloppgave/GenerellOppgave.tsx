@@ -5,9 +5,10 @@ import { useForm } from 'react-hook-form'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { opprettGenerellOppgave } from '~shared/api/oppgaver'
 import { GenerellOppgaveDto, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
-import { mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { mapResult } from '~shared/api/apiUtils'
+import Spinner from '~shared/Spinner'
 
 interface GenerellOppgaveForm extends Omit<GenerellOppgaveDto, 'sakIds'> {
   sakIds: string
@@ -81,17 +82,11 @@ export default function GenerellOppgave() {
               Opprett
             </Button>
 
-            {mapAllApiResult(
-              opprettGenerellOppgaveResult,
-              <Alert variant="info">Oppretter Generelle oppgaver.</Alert>,
-              null,
-              (error) => (
-                <ApiErrorAlert>{error.detail}</ApiErrorAlert>
-              ),
-              () => (
-                <Alert variant="success">Generelle oppgaver er opprettet!</Alert>
-              )
-            )}
+            {mapResult(opprettGenerellOppgaveResult, {
+              pending: <Spinner label="Oppretter generelle oppgaver" />,
+              error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+              success: () => <Alert variant="success">Generelle oppgaver er opprettet!</Alert>,
+            })}
           </VStack>
         </form>
       )}

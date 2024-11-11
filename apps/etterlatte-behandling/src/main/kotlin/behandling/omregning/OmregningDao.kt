@@ -2,25 +2,73 @@ package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
+import no.nav.etterlatte.libs.database.toList
 
 class OmregningDao(
     private val connection: ConnectionAutoclosing,
 ) {
+    fun hentSakerTilOmregning(
+        kjoering: String,
+        antall: Int,
+        ekskluderteSaker: List<SakId>,
+    ): List<Pair<SakId, KjoeringStatus>> =
+        connection.hentConnection { connection ->
+            with(connection) {
+                val harEkskluderteSaker = ekskluderteSaker.isNotEmpty()
+
+                val statement =
+                    prepareStatement(
+                        """
+                        WITH siste_kjoeringer AS (
+                            SELECT sak_id, MAX(tidspunkt) as max_tid
+                            FROM omregningskjoering
+                            GROUP BY sak_id
+                        )
+                        SELECT o.sak_id, o.status  
+                        FROM omregningskjoering o
+                        JOIN siste_kjoeringer s
+                        ON o.sak_id = s.sak_id
+                        WHERE kjoering = ? AND status IN ('KLAR', 'FEILA') AND s.max_tid = o.tidspunkt
+                        ${if (harEkskluderteSaker) "AND o.sak_id <> ALL (?)" else ""}
+                        LIMIT ?
+                        """.trimIndent(),
+                    )
+
+                statement.setString(1, kjoering)
+                if (harEkskluderteSaker) {
+                    statement.setArray(2, createArrayOf("bigint", ekskluderteSaker.map { it.sakId }.toTypedArray()))
+                }
+                statement.setInt(if (harEkskluderteSaker) 3 else 2, antall)
+
+                statement.executeQuery().toList {
+                    Pair(
+                        SakId(getLong("sak_id")),
+                        KjoeringStatus.valueOf(getString("status")),
+                    )
+                }
+            }
+        }
+
     fun oppdaterKjoering(request: KjoeringRequest) {
         connection.hentConnection { connection ->
             with(connection) {
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO omregningskjoering (kjoering, status, sak_id)
-                        VALUES (?, ?, ?)
+                        INSERT INTO omregningskjoering (kjoering, status, sak_id, begrunnelse, corr_id, feilende_steg)
+                        VALUES (?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setString(1, request.kjoering)
                 statement.setString(2, request.status.name)
                 statement.setSakId(3, request.sakId)
+                statement.setString(4, request.begrunnelse)
+                statement.setString(5, request.corrId)
+                statement.setString(6, request.feilendeSteg)
                 statement.executeUpdate().also { require(it == 1) }
             }
         }

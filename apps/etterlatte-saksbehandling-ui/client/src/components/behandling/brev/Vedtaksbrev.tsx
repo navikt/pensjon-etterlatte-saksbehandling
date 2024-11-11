@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Heading, Box, VStack, HStack } from '@navikt/ds-react'
+import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -29,13 +29,13 @@ import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandl
 import { useBehandling } from '~components/behandling/useBehandling'
 import { addValideringsfeil, Valideringsfeilkoder } from '~store/reducers/SjekklisteReducer'
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
-import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import BrevutfallModal from '~components/behandling/brevutfall/BrevutfallModal'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -201,16 +201,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 />
                 <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
 
-                {vedtaksbrev.mottakere.map((mottaker) => (
-                  <BrevMottakerPanel
-                    key={mottaker.id}
-                    brevId={vedtaksbrev.id}
-                    behandlingId={behandlingId}
-                    sakId={sakId}
-                    mottaker={mottaker}
-                    kanRedigeres={redigerbar}
-                  />
-                ))}
+                <BrevMottakerWrapper brev={vedtaksbrev} kanRedigeres={redigerbar} />
               </>
             )}
           </VStack>

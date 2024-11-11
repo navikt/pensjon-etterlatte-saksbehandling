@@ -1,11 +1,11 @@
 package no.nav.etterlatte.utbetaling.simulering
 
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.SimulertBeregning
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeFagomraade
@@ -14,7 +14,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingMapper
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingToggles
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
@@ -38,7 +37,6 @@ class SimuleringOsService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val simuleringDao: SimuleringDao,
     private val simuleringOsKlient: SimuleringOsKlient,
-    private val featureToggleService: FeatureToggleService,
 ) {
     fun hent(behandlingId: UUID): SimulertBeregning? = simuleringDao.hent(behandlingId)?.tilSimulertBeregning()
 
@@ -70,11 +68,6 @@ class SimuleringOsService(
                 UtbetalingMapper(
                     tidligereUtbetalinger = sakensUtbetalinger,
                     vedtak = utbetalingsvedtak,
-                    skalBrukeRegelverk =
-                        featureToggleService.isEnabled(
-                            UtbetalingToggles.BRUK_REGELVERK_FOR_KLASSIFIKASJONSKODE,
-                            false,
-                        ),
                 )
             val opprettetUtbetaling = utbetalingMapper.opprettUtbetaling()
             val erFoersteUtbetalingPaaSak = utbetalingMapper.tidligereUtbetalinger.isEmpty()
@@ -140,8 +133,11 @@ class SimuleringOsService(
         Oppdrag().apply {
             fagsystemId = utbetaling.sakId.value.toString()
             oppdragGjelderId = utbetaling.stoenadsmottaker.value
-            saksbehId = brukerTokenInfo.ident()
-
+            saksbehId =
+                when (brukerTokenInfo) {
+                    is Systembruker -> OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER
+                    else -> brukerTokenInfo.ident()
+                }
             utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
             kodeEndring = if (erFoersteUtbetalingPaaSak) "NY" else "ENDR"
             kodeFagomraade = utbetaling.sakType.tilKodeFagomraade()
@@ -178,7 +174,11 @@ class SimuleringOsService(
             utbetalesTilId = utbetaling.stoenadsmottaker.value
             datoUtbetalesTilIdFom = utbetalingslinje.periode.fra.toOppdragDate()
             henvisning = utbetaling.behandlingId.shortValue.value
-            saksbehId = brukerTokenInfo.ident()
+            saksbehId =
+                when (brukerTokenInfo) {
+                    is Systembruker -> OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER
+                    else -> brukerTokenInfo.ident()
+                }
             attestant.add(
                 Attestant().apply {
                     attestantId = OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER

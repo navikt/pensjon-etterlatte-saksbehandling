@@ -16,10 +16,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
-import { Box, Heading } from '@navikt/ds-react'
+import { Box, Heading, VStack } from '@navikt/ds-react'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { BrevMottakerPanel } from '~components/person/brev/mottaker/BrevMottakerPanel'
+import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 
 export default function NyttBrev() {
   useSidetittel('Nytt brev')
@@ -60,23 +60,13 @@ export default function NyttBrev() {
         (brev) => (
           <GridContainer>
             <Column>
-              <div style={{ margin: '1rem' }}>
+              <VStack gap="4" margin="4">
                 <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
-              </div>
-              <div style={{ margin: '1rem' }}>
+
                 <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
-              </div>
-              <div style={{ margin: '1rem' }}>
-                {brev.mottakere.map((mottaker) => (
-                  <BrevMottakerPanel
-                    key={mottaker.id}
-                    brevId={brev.id}
-                    sakId={brev.sakId}
-                    mottaker={mottaker}
-                    kanRedigeres={kanRedigeres}
-                  />
-                ))}
-              </div>
+
+                <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
+              </VStack>
             </Column>
             <Column>
               {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (

@@ -24,11 +24,9 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const BoddEllerArbeidetUtlandetVurdering = ({
   redigerbar,
-  setVurdert,
   behandlingId,
 }: {
   redigerbar: boolean
-  setVurdert: (visVurderingKnapp: boolean) => void
   behandlingId: string
 }) => {
   const dispatch = useAppDispatch()
@@ -88,7 +86,6 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
     setSvar(finnSvar(boddEllerArbeidetUtlandet))
     setRadioError('')
     setBegrunnelse(boddEllerArbeidetUtlandet?.begrunnelse || '')
-    setVurdert(boddEllerArbeidetUtlandet !== null)
     onSuccess?.()
   }
 
@@ -122,6 +119,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
       avbrytklikk={reset}
       kommentar={boddEllerArbeidetUtlandet?.begrunnelse}
       defaultRediger={boddEllerArbeidetUtlandet === null}
+      visAvbryt={!!boddEllerArbeidetUtlandet?.kilde}
     >
       <>
         <Heading level="3" size="small">

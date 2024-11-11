@@ -58,14 +58,13 @@ class BrevapiKlient(
         brevId: BrevID,
         distribusjonsType: DistribusjonsType,
         sakId: SakId,
-        journalpostIdInn: String? = null,
     ): BestillingsIdDto {
         try {
             logger.info("Distribuerer brev med id $brevId")
             return retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
                 httpClient
                     .post(
-                        "$baseUrl/api/brev/$brevId/distribuer?journalpostIdInn=$journalpostIdInn&distribusjonsType=${distribusjonsType.name}&sakId=${sakId.sakId}",
+                        "$baseUrl/api/brev/$brevId/distribuer?distribusjonsType=${distribusjonsType.name}&sakId=${sakId.sakId}",
                     ) {
                         contentType(ContentType.Application.Json)
                     }.body<BestillingsIdDto>()

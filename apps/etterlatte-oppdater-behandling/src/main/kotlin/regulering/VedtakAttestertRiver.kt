@@ -3,7 +3,7 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
-import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringKjoering
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
@@ -39,6 +39,7 @@ internal class VedtakAttestertRiver(
             validate { it.requireKey(OmregningDataPacket.KEY) }
             validate { it.requireKey(OmregningDataPacket.SAK_ID) }
             validate { it.requireKey(OmregningDataPacket.KJOERING) }
+            validate { it.requireKey(OmregningDataPacket.REV_AARSAK) }
             validate { it.interestedIn(BEREGNING_BELOEP_FOER) }
             validate { it.interestedIn(BEREGNING_BELOEP_ETTER) }
             validate { it.interestedIn(BEREGNING_G_FOER) }
@@ -74,15 +75,15 @@ internal class VedtakAttestertRiver(
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
 
-        // inntektsjustering, send vedtak og varselbrev
-        if (kjoering === AarligInntektsjusteringKjoering.getKjoering()) {
+        // Årlig inntektsjustering jobb skal sende ut varsel og vedtak etter at sak er ferdig omregnet
+        if (packet.omregningData.revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
             packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
-            packet.brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL.toString()
+            packet.brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL.name
             packet.sakId = packet.omregningData.sakId
             context.publish(packet.toJson())
         } else {
             behandlingService.lagreFullfoertKjoering(request)
-            logger.info("Sak $sakId er ferdig omregnet, status er oppdatert")
+            logger.info("Sak $sakId er ferdig omregnet, status oppdatert til: ${request.status}")
         }
     }
 

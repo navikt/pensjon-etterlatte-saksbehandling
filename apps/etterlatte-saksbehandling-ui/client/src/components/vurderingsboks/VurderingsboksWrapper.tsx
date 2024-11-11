@@ -25,17 +25,33 @@ interface Props {
   avbrytklikk?: (onSuccess?: () => void) => void
   overstyrRediger?: boolean
   setOverstyrRediger?: (rediger: boolean) => void
+  visAvbryt?: boolean
 }
 
-export const VurderingsboksWrapper = (props: Props) => {
-  const [rediger, setRediger] = useState<boolean>((props.defaultRediger && props.redigerbar) ?? false)
+export const VurderingsboksWrapper = ({
+  automatiskVurdertDato,
+  avbrytklikk,
+  children,
+  defaultRediger,
+  kommentar,
+  lagreklikk,
+  overstyrRediger,
+  redigerbar,
+  setOverstyrRediger,
+  slett,
+  subtittelKomponent,
+  tittel,
+  visAvbryt = true,
+  vurdering,
+}: Props) => {
+  const [rediger, setRediger] = useState<boolean>((defaultRediger && redigerbar) ?? false)
   const [lagrer, setLagrer] = useState(false)
 
   useEffect(() => {
-    if (props.overstyrRediger !== undefined) {
-      setRediger(props.overstyrRediger)
+    if (overstyrRediger !== undefined) {
+      setRediger(overstyrRediger)
     }
-  }, [props.overstyrRediger])
+  }, [overstyrRediger])
 
   return (
     <div>
@@ -43,51 +59,49 @@ export const VurderingsboksWrapper = (props: Props) => {
         <>
           <Oppsummering>
             <Heading size="small" level="2">
-              {props.tittel}
+              {tittel}
             </Heading>
-            {props.vurdering && (
+            {vurdering && (
               <VilkaarVurdertInformasjon>
-                <Detail>Manuelt av {props.vurdering.saksbehandler}</Detail>
-                <Detail>
-                  Sist endret {props.vurdering.tidspunkt ? formaterDatoMedTidspunkt(props.vurdering.tidspunkt) : '-'}
-                </Detail>
+                <Detail>Manuelt av {vurdering.saksbehandler}</Detail>
+                <Detail>Sist endret {vurdering.tidspunkt ? formaterDatoMedTidspunkt(vurdering.tidspunkt) : '-'}</Detail>
               </VilkaarVurdertInformasjon>
             )}
-            {props.automatiskVurdertDato && (
+            {automatiskVurdertDato && (
               <VilkaarVurdertInformasjon>
                 <Detail>Automatisk</Detail>
-                <Detail>{formaterDatoMedTidspunkt(props.automatiskVurdertDato)}</Detail>
+                <Detail>{formaterDatoMedTidspunkt(automatiskVurdertDato)}</Detail>
               </VilkaarVurdertInformasjon>
             )}
-            {props.subtittelKomponent ?? <></>}
-            {props.kommentar && (
+            {subtittelKomponent ?? <></>}
+            {kommentar && (
               <Kommentar>
                 <Heading size="xsmall" level="3">
                   Begrunnelse
                 </Heading>
 
-                <VurderingsKommentar>{props.kommentar}</VurderingsKommentar>
+                <VurderingsKommentar>{kommentar}</VurderingsKommentar>
               </Kommentar>
             )}
           </Oppsummering>
 
-          {props.redigerbar && (
+          {redigerbar && (
             <>
               <RedigerWrapper
                 onClick={() => {
                   setRediger(true)
-                  if (props.setOverstyrRediger) props.setOverstyrRediger(true)
+                  if (setOverstyrRediger) setOverstyrRediger(true)
                 }}
               >
                 <PencilIcon aria-hidden="true" />
                 <span className="text"> Rediger</span>
               </RedigerWrapper>
-              {props.slett && (
+              {slett && (
                 <RedigerWrapper
                   onClick={async () => {
                     new Promise(() => {
                       setLagrer(true)
-                      props.slett?.(() => setLagrer(false))
+                      slett?.(() => setLagrer(false))
                     })
                   }}
                 >
@@ -101,16 +115,16 @@ export const VurderingsboksWrapper = (props: Props) => {
       )}
       {rediger && (
         <>
-          {props.children}
+          {children}
           <VurderingKnapper>
-            {props.lagreklikk && (
+            {lagreklikk && (
               <Button
                 loading={lagrer}
                 variant="primary"
                 size="small"
                 onClick={async () => {
                   setLagrer(true)
-                  new Promise((resolve) => resolve(props.lagreklikk!!(() => setRediger(false)))).finally(() =>
+                  new Promise((resolve) => resolve(lagreklikk!!(() => setRediger(false)))).finally(() =>
                     setLagrer(false)
                   )
                 }}
@@ -118,8 +132,8 @@ export const VurderingsboksWrapper = (props: Props) => {
                 Lagre
               </Button>
             )}
-            {props.avbrytklikk && (
-              <Button variant="secondary" size="small" onClick={() => props.avbrytklikk!!(() => setRediger(false))}>
+            {avbrytklikk && visAvbryt && (
+              <Button variant="secondary" size="small" onClick={() => avbrytklikk!!(() => setRediger(false))}>
                 Avbryt
               </Button>
             )}

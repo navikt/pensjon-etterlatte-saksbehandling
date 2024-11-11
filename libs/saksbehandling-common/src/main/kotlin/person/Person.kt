@@ -153,17 +153,25 @@ data class VergeEllerFullmektig(
     val omfang: String? = null,
 )
 
+data class PdlFolkeregisterIdentListe(
+    val identifikatorer: List<PdlIdentifikator.FolkeregisterIdent>,
+)
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed class PdlIdentifikator {
+sealed class PdlIdentifikator(
+    open val historisk: Boolean,
+) {
     @JsonTypeName("FOLKEREGISTERIDENT")
     data class FolkeregisterIdent(
         val folkeregisterident: Folkeregisteridentifikator,
-    ) : PdlIdentifikator()
+        override val historisk: Boolean = false,
+    ) : PdlIdentifikator(historisk)
 
     @JsonTypeName("NPID")
     data class Npid(
         val npid: NavPersonIdent,
-    ) : PdlIdentifikator()
+        override val historisk: Boolean = false,
+    ) : PdlIdentifikator(historisk)
 
     @JsonTypeName("AKTORID")
     data class AktoerId(
@@ -256,13 +264,6 @@ data class MottakerAdresse(
     val landkode: String,
     val land: String,
 )
-
-// TODO gir denne egentlig mening i nåværende form? Aktiv tar utgangspunkt i det vi får fra PPS, men det kan
-//  i teorien være en adresse som ikke lenger er gyldig da den kan ha satt gyldigTilDato
-fun List<Adresse>.aktiv(): Adresse? = firstOrNull { it.aktiv }
-
-fun List<Adresse>.nyeste(inkluderInaktiv: Boolean = false): Adresse? =
-    sortedByDescending { it.gyldigFraOgMed }.firstOrNull { if (inkluderInaktiv) true else it.gyldigTilOgMed == null }
 
 enum class AdressebeskyttelseGradering {
     STRENGT_FORTROLIG_UTLAND,

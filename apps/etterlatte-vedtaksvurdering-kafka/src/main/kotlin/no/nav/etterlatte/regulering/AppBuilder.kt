@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.no.nav.etterlatte.klienter.BrevKlient
 import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlientImpl
+import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_BREV_API_URL
 import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_UTBETALING_URL
 import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_VEDTAK_URL
 
@@ -27,7 +28,7 @@ class AppBuilder(
 ) {
     private val vedtakUrl = requireNotNull(props[ETTERLATTE_VEDTAK_URL]) { "Mangler vedtak url " }
     private val utbetalingUrl = requireNotNull(props[ETTERLATTE_UTBETALING_URL]) { "Mangler utbetaling url " }
-    private val brevUrl = requireNotNull(props[VedtakKafkaKey.ETTERLATTE_BREV_URL]) { "Mangler brev-api url " }
+    private val brevUrl = requireNotNull(props[ETTERLATTE_BREV_API_URL]) { "Mangler brev-api url " }
     private val env = Miljoevariabler.systemEnv()
 
     fun lagVedtakKlient(): VedtakServiceImpl = VedtakServiceImpl(vedtakHttpKlient, vedtakUrl)
@@ -83,7 +84,7 @@ private fun featureToggleProperties(config: Config) =
 enum class VedtakKafkaKey : EnvEnum {
     ETTERLATTE_VEDTAK_URL,
     ETTERLATTE_UTBETALING_URL,
-    ETTERLATTE_BREV_URL,
+    ETTERLATTE_BREV_API_URL,
     ;
 
     override fun key() = name

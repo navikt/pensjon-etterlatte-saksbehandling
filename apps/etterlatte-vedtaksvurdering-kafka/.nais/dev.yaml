@@ -63,5 +63,6 @@ spec:
       rules:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-utbetaling
+        - application: etterlatte-brev-api
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

@@ -49,6 +49,7 @@ internal class OpprettVedtakforespoerselRiver(
             validate { it.requireKey(OmregningDataPacket.SAK_ID) }
             validate { it.requireKey(OmregningDataPacket.BEHANDLING_ID) }
             validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
+            validate { it.requireKey(OmregningDataPacket.REV_AARSAK) }
         }
     }
 
@@ -64,9 +65,9 @@ internal class OpprettVedtakforespoerselRiver(
         val behandlingId = omregningData.hentBehandlingId()
         val dato = omregningData.hentFraDato()
 
-        val skalAttestere = featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)
+        val kunFatteVedtak = featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)
         val respons =
-            if (!skalAttestere) {
+            if (kunFatteVedtak) {
                 vedtak.opprettVedtakOgFatt(sakId, behandlingId)
             } else {
                 when (omregningData.utbetalingVerifikasjon) {
@@ -91,7 +92,7 @@ internal class OpprettVedtakforespoerselRiver(
                 else -> false
             }
         if (skalSendeBrev) {
-            opprettBrev(sakId, skalAttestere, omregningData.revurderingaarsak)
+            opprettBrev(sakId, kunFatteVedtak, omregningData.revurderingaarsak)
         }
 
         hentBeloep(respons, dato)?.let { packet[ReguleringEvents.VEDTAK_BELOEP] = it }
@@ -136,7 +137,7 @@ internal class OpprettVedtakforespoerselRiver(
 
     private fun opprettBrev(
         sakId: SakId,
-        skalAttestere: Boolean,
+        kunFatteVedtak: Boolean,
         revurderingaarsak: Revurderingaarsak,
     ) {
         val brevRequest =
@@ -151,7 +152,7 @@ internal class OpprettVedtakforespoerselRiver(
 
                 else -> throw InternfeilException("Støtter ikke brev under automatisk omregning for $revurderingaarsak")
             }
-        if (!skalAttestere) {
+        if (kunFatteVedtak) {
             brevKlient.opprettBrev(sakId, brevRequest)
         } else {
             brevKlient.opprettJournalFoerOgDistribuer(sakId, brevRequest)

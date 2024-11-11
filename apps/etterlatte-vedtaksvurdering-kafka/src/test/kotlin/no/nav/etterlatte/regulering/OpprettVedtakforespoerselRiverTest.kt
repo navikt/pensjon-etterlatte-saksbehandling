@@ -10,6 +10,7 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.no.nav.etterlatte.klienter.BrevKlient
 import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -53,12 +54,15 @@ internal class OpprettVedtakforespoerselRiverTest {
         val melding = genererOpprettVedtakforespoersel(behandlingId)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val utbetalingKlientMock = mockk<UtbetalingKlient>(relaxed = true)
+        val brevKlientMock = mockk<BrevKlient>(relaxed = true)
+
         val inspector =
             TestRapid().apply {
                 OpprettVedtakforespoerselRiver(
                     this,
                     vedtakServiceMock,
                     utbetalingKlientMock,
+                    brevKlientMock,
                     DummyFeatureToggleService(),
                 )
             }
@@ -74,6 +78,7 @@ internal class OpprettVedtakforespoerselRiverTest {
         val melding = genererOpprettVedtakforespoersel(behandlingId)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val utbetalingKlientMock = mockk<UtbetalingKlient>(relaxed = true)
+        val brevKlientMock = mockk<BrevKlient>(relaxed = true)
         val featureToggleService = DummyFeatureToggleService()
         featureToggleService.settBryter(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, true)
 
@@ -83,6 +88,7 @@ internal class OpprettVedtakforespoerselRiverTest {
                     this,
                     vedtakServiceMock,
                     utbetalingKlientMock,
+                    brevKlientMock,
                     featureToggleService,
                 )
             }
@@ -98,6 +104,7 @@ internal class OpprettVedtakforespoerselRiverTest {
         val melding = genererOpprettVedtakforespoersel(behandlingId)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val utbetalingKlientMock = mockk<UtbetalingKlient>(relaxed = true)
+        val brevKlientMock = mockk<BrevKlient>(relaxed = true)
         val featureToggleService = DummyFeatureToggleService()
         featureToggleService.settBryter(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)
 
@@ -107,6 +114,7 @@ internal class OpprettVedtakforespoerselRiverTest {
                     this,
                     vedtakServiceMock,
                     utbetalingKlientMock,
+                    brevKlientMock,
                     featureToggleService,
                 )
             }
@@ -142,12 +150,15 @@ internal class OpprettVedtakforespoerselRiverTest {
                             )
                     }
             }
+        val brevKlientMock = mockk<BrevKlient>(relaxed = true)
+
         val inspector =
             TestRapid().apply {
                 OpprettVedtakforespoerselRiver(
                     this,
                     vedtakServiceMock,
                     utbetalingKlientMock,
+                    brevKlientMock,
                     DummyFeatureToggleService(),
                 )
             }
@@ -173,16 +184,27 @@ internal class OpprettVedtakforespoerselRiverTest {
             mockk<UtbetalingKlient> {
                 every { simuler(any()) } returns
                     mockk {
-                        every { etterbetaling } returns listOf(mockk(relaxed = true) { every { beloep } returns BigDecimal.valueOf(100) })
+                        every { etterbetaling } returns
+                            listOf(
+                                mockk(relaxed = true) {
+                                    every { beloep } returns
+                                        BigDecimal.valueOf(
+                                            100,
+                                        )
+                                },
+                            )
                         every { tilbakekreving } returns listOf(mockk(relaxed = true))
                     }
             }
+        val brevKlientMock = mockk<BrevKlient>(relaxed = true)
+
         val inspector =
             TestRapid().apply {
                 OpprettVedtakforespoerselRiver(
                     this,
                     vedtakServiceMock,
                     utbetalingKlientMock,
+                    brevKlientMock,
                     DummyFeatureToggleService(),
                 )
             }
@@ -216,12 +238,15 @@ internal class OpprettVedtakforespoerselRiverTest {
                             listOf(mockk(relaxed = true) { every { beloep } returns BigDecimal.valueOf(100) })
                     }
             }
+        val brevKlientMock = mockk<BrevKlient>(relaxed = true)
+
         val inspector =
             TestRapid().apply {
                 OpprettVedtakforespoerselRiver(
                     this,
                     vedtakServiceMock,
                     utbetalingKlientMock,
+                    brevKlientMock,
                     DummyFeatureToggleService(),
                 )
             }
@@ -234,5 +259,34 @@ internal class OpprettVedtakforespoerselRiverTest {
         verify { vedtakServiceMock.opprettVedtakOgFatt(sakId, behandlingId) }
         verify { utbetalingKlientMock.simuler(behandlingId) }
         verify(exactly = 0) { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
+    }
+
+    @Test
+    fun `Aarlig inntektsjustering skal opprette og distribuere brev`() {
+        val behandlingId = UUID.randomUUID()
+        val melding =
+            genererOpprettVedtakforespoersel(
+                behandlingId,
+                revurderingaarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+            )
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        val utbetalingKlientMock = mockk<UtbetalingKlient>(relaxed = true)
+        val brevKlientMock = mockk<BrevKlient>(relaxed = true)
+
+        val inspector =
+            TestRapid().apply {
+                OpprettVedtakforespoerselRiver(
+                    this,
+                    vedtakServiceMock,
+                    utbetalingKlientMock,
+                    brevKlientMock,
+                    DummyFeatureToggleService(),
+                )
+            }
+
+        inspector.sendTestMessage(melding.toJson())
+
+        verify { vedtakServiceMock.opprettVedtakFattOgAttester(sakId, behandlingId) }
+        verify { brevKlientMock.opprettJournalFoerOgDistribuer(sakId, any()) }
     }
 }

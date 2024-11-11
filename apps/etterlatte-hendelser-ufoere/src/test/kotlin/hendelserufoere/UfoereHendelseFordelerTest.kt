@@ -1,21 +1,19 @@
 package no.nav.etterlatte.hendelserufoere
 
-import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import no.nav.etterlatte.kafka.JsonMessage
-import no.nav.etterlatte.kafka.KafkaProdusent
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.BehandlingKlient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UfoereHendelseFordelerTest {
-    private val kafkaProduser: KafkaProdusent<String, JsonMessage> = mockk()
+    private val behandlingKlient = mockk<BehandlingKlient>()
     private lateinit var ufoereHendelseFordeler: UfoereHendelseFordeler
 
     @BeforeEach
     fun setup() {
-        coEvery { kafkaProduser.publiser(any(), any()) } returns mockk(relaxed = true)
-
-        ufoereHendelseFordeler = UfoereHendelseFordeler(kafkaProduser)
+        ufoereHendelseFordeler = UfoereHendelseFordeler(behandlingKlient)
     }
 
     @Test
@@ -31,7 +29,11 @@ internal class UfoereHendelseFordelerTest {
                 hendelsestype = "ufoere"
             }
 
-        ufoereHendelseFordeler.haandterHendelse(ufoereHendelse)
+        runBlocking {
+            ufoereHendelseFordeler.haandterHendelse(ufoereHendelse)
+        }
+
+        coVerify(exactly = 1) { behandlingKlient.postTilBehandling(any()) }
     }
 
     @Test
@@ -47,6 +49,8 @@ internal class UfoereHendelseFordelerTest {
                 hendelsestype = "ufoere"
             }
 
-        ufoereHendelseFordeler.haandterHendelse(ufoereHendelse)
+        runBlocking {
+            ufoereHendelseFordeler.haandterHendelse(ufoereHendelse)
+        }
     }
 }

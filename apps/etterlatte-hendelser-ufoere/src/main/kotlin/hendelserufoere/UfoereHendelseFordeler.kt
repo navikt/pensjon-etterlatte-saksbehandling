@@ -1,26 +1,30 @@
 package no.nav.etterlatte.hendelserufoere
 
-import no.nav.etterlatte.kafka.JsonMessage
-import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.BehandlingKlient
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class UfoereHendelseFordeler(
-    private val kafkaProduser: KafkaProdusent<String, JsonMessage>,
+    private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(UfoereHendelseFordeler::class.java)
-    private val sikkerLogg: Logger = sikkerlogger()
 
-    fun haandterHendelse(hendelse: UfoereHendelse) {
+    suspend fun haandterHendelse(hendelse: UfoereHendelse) {
         try {
             val ageInYears = hendelse.alderVedVirkningstidspunkt / 12
             if (ageInYears in 18..21) {
                 logger.info("Bruker er mellom 18 og 21 på på virkningstidspunktet. Sender ufoerehendelse til behandling?")
-                // TODO: Gjør noe med denne hendelsen
+                behandlingKlient.postTilBehandling(
+                    ufoereHendelse =
+                        UfoeretrygdHendelse(
+                            hendelseId = 123L,
+                            ident = hendelse.personidentifikator,
+                        ),
+                )
             } else {
-                sikkerLogg.info(
-                    "Ufoerehendelse med personidentifikator=${hendelse.personidentifikator} " +
+                logger.info(
+                    "Ufoerehendelse med personidentifikator=${hendelse.personidentifikator.maskerFnr()} " +
                         "og alderVedVirkningstidspunkt=${hendelse.alderVedVirkningstidspunkt} " +
                         "er ikke innenfor aldersgruppen 18-21. Hendelsen blir ikke sendt videre.",
                 )

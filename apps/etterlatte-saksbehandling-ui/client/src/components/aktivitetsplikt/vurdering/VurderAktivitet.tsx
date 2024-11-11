@@ -1,7 +1,7 @@
-import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
-import React, { useEffect } from 'react'
+import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
 import { Vurderinger } from '~components/aktivitetsplikt/vurdering/Vurderinger'
-import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
@@ -11,10 +11,6 @@ import { velgDoedsdato } from '~components/person/aktivitet/Aktivitet'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
-import { erOppgaveRedigerbar } from '~shared/types/oppgave'
-import { useDispatch } from 'react-redux'
-import { setBrevid } from '~store/reducers/Aktivitetsplikt12mnd'
 
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
@@ -46,45 +42,33 @@ export function VurderAktivitet() {
           })}
         </VStack>
       </Box>
-      <NesteEllerOpprettBrev />
+      <NesteKnapp />
     </>
   )
 }
 
-function NesteEllerOpprettBrev() {
-  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+function NesteKnapp() {
+  const { vurdering } = useAktivitetspliktOppgaveVurdering()
+  const aktiviteter = vurdering.aktivitet
   const navigate = useNavigate()
-
-  const [opprettBrevStatus, opprettBrevCall] = useApiCall(opprettAktivitetspliktsbrev)
-  const dispatch = useDispatch()
-  const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
-  const skalOppretteBrev = erRedigerbar && aktivtetspliktbrevdata?.skalSendeBrev && !aktivtetspliktbrevdata.brevId
-
-  function opprettBrev() {
-    opprettBrevCall(
-      {
-        oppgaveId: oppgave.id,
-      },
-      (brevId) => {
-        dispatch(setBrevid(brevId.brevId))
-        navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)
-      }
-    )
+  const [manglerAktiviteter, setManglerAktiviteter] = useState(false)
+  const gaaTilNeste = () => {
+    if (aktiviteter?.length) {
+      navigate(`../${AktivitetspliktSteg.BREVVALG}`)
+      setManglerAktiviteter(false)
+    } else {
+      setManglerAktiviteter(true)
+    }
   }
+  useEffect(() => {
+    setManglerAktiviteter(false)
+  }, [vurdering.aktivitet])
 
   return (
     <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
       <HStack gap="4" justify="center">
-        {mapFailure(opprettBrevStatus, (error) => (
-          <ApiErrorAlert>Kunne ikke opprette brev: {error.detail}</ApiErrorAlert>
-        ))}
-        {skalOppretteBrev ? (
-          <Button onClick={opprettBrev} loading={isPending(opprettBrevStatus)}>
-            Opprett og gå til brev
-          </Button>
-        ) : (
-          <Button onClick={() => navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)}>Neste</Button>
-        )}
+        <Button onClick={gaaTilNeste}>Neste</Button>
+        {manglerAktiviteter && <Alert variant="error">Du må registrere en aktivitet for å gå videre</Alert>}
       </HStack>
     </Box>
   )

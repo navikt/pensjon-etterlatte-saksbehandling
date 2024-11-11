@@ -177,6 +177,12 @@ class AktivitetspliktOppgaveService(
     ): OppgaveIntern {
         val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        try {
+            oppgaveService.sjekkOmKanFerdigstilleOppgave(oppgave, brukerTokenInfo)
+        } catch (e: Exception) {
+            throw FeilIOppgave("Kan ikke ferdigstille oppgave for oppgaveid $oppgaveId", e)
+        }
+
         val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
         val brevId = brevData.brevId ?: throw ManglerBrevdata("Brevid er ikke registrert på oppgaveid $oppgaveId")
         val req =
@@ -195,6 +201,15 @@ class AktivitetspliktOppgaveService(
         }
     }
 }
+
+class FeilIOppgave(
+    msg: String,
+    override val cause: Throwable? = null,
+) : UgyldigForespoerselException(
+        code = "OPPGAVE_AVSLUTTET",
+        detail = msg,
+        cause = cause,
+    )
 
 class OppgaveErAvsluttet(
     msg: String,

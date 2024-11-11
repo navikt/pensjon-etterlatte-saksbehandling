@@ -356,6 +356,14 @@ class OppgaveService(
         return hentOppgave(id)
     }
 
+    fun sjekkOmKanFerdigstilleOppgave(
+        oppgave: OppgaveIntern,
+        saksbehandler: BrukerTokenInfo,
+    ) {
+        sikreAtOppgaveIkkeErAvsluttet(oppgave = oppgave)
+        sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgave, saksbehandler)
+    }
+
     private fun ferdigstillOppgave(
         oppgave: OppgaveIntern,
         saksbehandler: BrukerTokenInfo,

@@ -2,7 +2,6 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 import React from 'react'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { Heading } from '@navikt/ds-react'
-import { ValgForInfobrev } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/ValgForInfobrev'
 
 import { AktivitetsgradIOppgave } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/AktivitetsgradIOppgave'
 import { LeggTilUnntak } from '~components/aktivitetsplikt/vurdering/unntak/LeggTilUnntak'
@@ -21,7 +20,6 @@ export function Vurderinger(props: { doedsdato: Date }) {
       {oppgaveErRedigerbar && <LeggTilNyVurdering doedsdato={doedsdato} />}
       <UnntakIOppgave />
       {oppgaveErRedigerbar && <LeggTilUnntak />}
-      <ValgForInfobrev />
     </>
   )
 }

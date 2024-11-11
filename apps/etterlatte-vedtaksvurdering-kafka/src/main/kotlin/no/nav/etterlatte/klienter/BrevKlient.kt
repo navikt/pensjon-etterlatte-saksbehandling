@@ -52,7 +52,7 @@ class BrevKlient(
                 logger.info("Oppretter brev uten distribusjon for sak med sakId=$sakid")
                 retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
                     httpClient
-                        .post("$url/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer-for-omregning") {
+                        .post("$url/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
                             contentType(ContentType.Application.Json)
                             setBody(opprett.toJson())
                         }.body<BrevDistribusjonResponse>()

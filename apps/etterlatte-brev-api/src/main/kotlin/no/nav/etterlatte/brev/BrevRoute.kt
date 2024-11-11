@@ -294,17 +294,6 @@ fun Route.brevRoute(
             }
         }
 
-        post("opprett-journalfoer-og-distribuer-for-omregning") {
-            kunSystembruker { systembruker ->
-                withSakId(tilgangssjekker, skrivetilgang = true) {
-                    val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
-
-                    val brevErDistribuert = service.opprettJournalfoerOgDistribuerOmregning(systembruker, req)
-                    call.respond(brevErDistribuert)
-                }
-            }
-        }
-
         post("ferdigstill-journalfoer-og-distribuer") {
             kunSaksbehandler { sb ->
                 val req = call.receive<FerdigstillJournalFoerOgDistribuerOpprettetBrev>()

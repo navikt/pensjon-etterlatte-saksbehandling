@@ -148,6 +148,7 @@ internal class OpprettVedtakforespoerselRiver(
                         brevParametereAutomatisk = BrevParametereAutomatisk.OmstillingsstoenadInntektsjusteringRedigerbar(),
                         avsenderRequest = SaksbehandlerOgAttestant(Fagsaksystem.EY.navn, Fagsaksystem.EY.navn),
                         sakId = sakId,
+                        oppgaveVedFeil = false,
                     )
 
                 else -> throw InternfeilException("Støtter ikke brev under automatisk omregning for $revurderingaarsak")

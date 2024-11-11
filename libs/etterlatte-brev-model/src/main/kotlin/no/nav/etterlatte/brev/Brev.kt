@@ -123,6 +123,7 @@ data class OpprettJournalfoerOgDistribuerRequest(
     val brevParametereAutomatisk: BrevParametereAutomatisk,
     val avsenderRequest: SaksbehandlerOgAttestant,
     val sakId: SakId,
+    val oppgaveVedFeil: Boolean = true,
 )
 
 data class FerdigstillJournalFoerOgDistribuerOpprettetBrev(

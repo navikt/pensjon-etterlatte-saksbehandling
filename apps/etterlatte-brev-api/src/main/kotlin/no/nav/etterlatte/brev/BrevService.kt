@@ -86,11 +86,16 @@ class BrevService(
                 "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
                 e,
             )
-            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
+            if (req.oppgaveVedFeil) {
+                oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
+            }
             return BrevDistribusjonResponse(brevId, false)
         }
     }
 
+    /*
+     * Brukes ved automatisk omregning hvis behandlingen skal stoppe etter fattet vedtak
+     */
     suspend fun opprettOgFerdigstillOmregning(
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
@@ -120,23 +125,6 @@ class BrevService(
         )
 
         return BrevDistribusjonResponse(brevId, false)
-    }
-
-    suspend fun opprettJournalfoerOgDistribuerOmregning(
-        bruker: BrukerTokenInfo,
-        req: OpprettJournalfoerOgDistribuerRequest,
-    ): BrevDistribusjonResponse {
-        val response = opprettOgFerdigstillOmregning(bruker, req)
-        val brevId = response.brevId
-
-        logger.info("Journalfører brev med id: $brevId")
-        journalfoerBrevService.journalfoer(brevId, bruker)
-
-        logger.info("Distribuerer brev med id: $brevId")
-        distribuerer.distribuer(brevId, bruker = bruker)
-
-        logger.info("Brevid: $brevId er distribuert")
-        return BrevDistribusjonResponse(brevId, true)
     }
 
     suspend fun ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(

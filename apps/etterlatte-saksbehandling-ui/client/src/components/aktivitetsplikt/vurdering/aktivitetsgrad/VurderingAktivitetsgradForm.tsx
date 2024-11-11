@@ -3,6 +3,7 @@ import {
   AktivitetspliktSkjoennsmessigVurdering,
   AktivitetspliktVurderingType,
   IAktivitetspliktAktivitetsgrad,
+  IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNy,
   IOpprettAktivitetspliktAktivitetsgrad,
   tekstAktivitetspliktVurderingType,
@@ -12,17 +13,20 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettAktivitetspliktAktivitetsgrad } from '~shared/api/aktivitetsplikt'
 import { useForm } from 'react-hook-form'
-import { Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, ErrorMessage, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { addMonths, startOfMonth } from 'date-fns'
+import { JaNei } from '~shared/types/ISvar'
 
 interface NyVurdering {
   typeVurdering: AktivitetspliktOppgaveVurderingType
   vurderingAvAktivitet: IOpprettAktivitetspliktAktivitetsgrad
+  harUnntak?: JaNei
+  unntak?: Partial<IAktivitetspliktUnntak>
 }
 
 function maanederForVurdering(typeVurdering: AktivitetspliktOppgaveVurderingType): number {
@@ -41,6 +45,7 @@ export function VurderingAktivitetsgradForm(props: {
 }) {
   const { aktivitet, onSuccess, onAvbryt, doedsdato } = props
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
+  const [feilmelding, setFeilmelding] = useState('')
   const typeVurdering =
     oppgave.type === 'AKTIVITETSPLIKT'
       ? AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
@@ -59,12 +64,20 @@ export function VurderingAktivitetsgradForm(props: {
     },
   })
 
+  const erNyVurdering = aktivitet === undefined
+
   useEffect(() => {
     reset()
   }, [aktivitet])
 
   function lagreOgOppdater(formdata: Partial<NyVurdering>) {
+    setFeilmelding('')
     if (!formdata.vurderingAvAktivitet?.aktivitetsgrad || !formdata.vurderingAvAktivitet.fom) {
+      setFeilmelding('Du må fylle ut vurderingen av aktivitetsgraden.')
+      return
+    }
+    if (formdata.harUnntak === JaNei.JA) {
+      setFeilmelding('Du kan ikke lagre ned unntak i vurderingen enda.')
       return
     }
 
@@ -84,6 +97,12 @@ export function VurderingAktivitetsgradForm(props: {
       onSuccess
     )
   }
+
+  const svarAktivitetsgrad = watch('vurderingAvAktivitet.aktivitetsgrad')
+  const kanskjeHarUnntak =
+    erNyVurdering &&
+    (svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 ||
+      svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50)
 
   return (
     <form onSubmit={handleSubmit(lagreOgOppdater)}>
@@ -115,8 +134,32 @@ export function VurderingAktivitetsgradForm(props: {
           }
         />
 
+        {kanskjeHarUnntak && (
+          <ControlledRadioGruppe
+            name="harUnntak"
+            control={control}
+            legend="Er det unntak for bruker?"
+            radios={
+              <>
+                <Radio value={JaNei.JA}>Ja</Radio>
+                <Radio value={JaNei.NEI}>Nei</Radio>
+              </>
+            }
+            errorVedTomInput="Du må svare om bruker har unntak"
+          />
+        )}
+
+        {watch('harUnntak') === JaNei.JA && kanskjeHarUnntak && (
+          <Box maxWidth="50rem">
+            <Alert variant="info">
+              Du kan ikke legge til unntak enda. Vi jobber med å få dette på plass. Du kan ta opp denne behandlingen
+              igjen neste uke.
+            </Alert>
+          </Box>
+        )}
+
         {watch('typeVurdering') === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER &&
-          watch('vurderingAvAktivitet.aktivitetsgrad') === AktivitetspliktVurderingType.AKTIVITET_OVER_50 && (
+          svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 && (
             <ControlledRadioGruppe
               control={control}
               name="vurderingAvAktivitet.skjoennsmessigVurdering"
@@ -148,6 +191,8 @@ export function VurderingAktivitetsgradForm(props: {
         {isFailure(lagreStatus) && (
           <ApiErrorAlert>Kunne ikke lagre vurdering: {lagreStatus.error.detail} </ApiErrorAlert>
         )}
+        {feilmelding.length > 0 && <ErrorMessage>{feilmelding}</ErrorMessage>}
+
         <HStack gap="4">
           <Button type="submit" loading={isPending(lagreStatus)}>
             Lagre

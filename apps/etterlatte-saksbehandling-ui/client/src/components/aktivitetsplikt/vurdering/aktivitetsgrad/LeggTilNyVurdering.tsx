@@ -26,13 +26,15 @@ export function LeggTilNyVurdering(props: { doedsdato?: Date }) {
   }
 
   return (
-    <VStack gap="4">
-      <Heading size="small">Ny vurdering av aktivitetsplikt</Heading>
-      <VurderingAktivitetsgradForm
-        doedsdato={props.doedsdato}
-        onSuccess={oppdaterStateVedLagring}
-        onAvbryt={() => setLeggerTilVurdering(false)}
-      />
-    </VStack>
+    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <VStack gap="6">
+        <Heading size="medium">Vurdering av brukers aktivitet ved 12 måneder</Heading>
+        <VurderingAktivitetsgradForm
+          doedsdato={props.doedsdato}
+          onSuccess={oppdaterStateVedLagring}
+          onAvbryt={() => setLeggerTilVurdering(false)}
+        />
+      </VStack>
+    </Box>
   )
 }

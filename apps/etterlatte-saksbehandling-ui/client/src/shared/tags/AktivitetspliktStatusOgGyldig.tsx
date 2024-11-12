@@ -17,9 +17,9 @@ export const AktivitetspliktStatusTagOgGyldig = ({
     <>
       <Label>Status på gjenlevende sin aktivitet</Label>
       {harVurdering(aktivitetspliktVurdering) ? (
-        <div>
+        <BodyShort>
           <AktivitetspliktStatusTag status={finnStatusPaaAktivitetsplikt(aktivitetspliktVurdering)} />
-        </div>
+        </BodyShort>
       ) : (
         <BodyShort>Ingen vurdering</BodyShort>
       )}

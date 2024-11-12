@@ -34,7 +34,7 @@ type Props = {
   behandlingstype: IBehandlingsType
   redigerTotalvurdering: boolean
   setRedigerTotalvurdering: Dispatch<SetStateAction<boolean>>
-  revurderingsaarsak: Revurderingaarsak
+  revurderingsaarsak: Revurderingaarsak | null
 }
 
 export const Resultat = (props: Props) => {

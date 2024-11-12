@@ -62,9 +62,11 @@ export const Resultat = (props: Props) => {
     })
 
   const lagreVilkaarsvurderingResultat = () => {
-    !(svar && [ISvar.JA, ISvar.NEI].includes(svar))
-      ? setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
-      : setRadioError(undefined)
+    if (!(svar && [ISvar.JA, ISvar.NEI].includes(svar))) {
+      setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
+    } else {
+      setRadioError(undefined)
+    }
 
     if (radioError === undefined && svar !== undefined) {
       oppdaterTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) => {

@@ -306,7 +306,7 @@ internal fun Route.aktivitetspliktRoutes(
             delete("{$AKTIVITETSGRAD_ID_CALL_PARAMETER}") {
                 kunSkrivetilgang {
                     logger.info("Sletter aktivitetsgrad med id=$aktivitetsgradId for oppgaveId=$oppgaveId i sak=$sakId")
-                    val aktivitetsgrad =
+                    val vurdering =
                         inTransaction {
                             aktivitetspliktService.slettAktivitetsgradForOppgave(
                                 oppgaveId = oppgaveId,
@@ -315,7 +315,7 @@ internal fun Route.aktivitetspliktRoutes(
                                 brukerTokenInfo = brukerTokenInfo,
                             )
                         }
-                    call.respond(aktivitetsgrad)
+                    call.respond(vurdering)
                 }
             }
         }
@@ -350,7 +350,7 @@ internal fun Route.aktivitetspliktRoutes(
                                 brukerTokenInfo = brukerTokenInfo,
                             )
                         }
-                    call.respond(vurdering ?: HttpStatusCode.NoContent)
+                    call.respond(vurdering)
                 }
             }
         }

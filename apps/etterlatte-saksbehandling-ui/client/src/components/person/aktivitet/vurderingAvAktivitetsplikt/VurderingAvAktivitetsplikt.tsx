@@ -1,5 +1,5 @@
 import React from 'react'
-import { IAktivitetspliktVurderingNy } from '~shared/types/Aktivitetsplikt'
+import { IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Heading, VStack } from '@navikt/ds-react'
 import { Aktivitetsgrad } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/Aktivitetsgrad'
 import { Unntak } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/Unntak'
@@ -7,7 +7,7 @@ import { Unntak } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/
 export const VurderingAvAktivitetsplikt = ({
   aktivitetspliktVurdering,
 }: {
-  aktivitetspliktVurdering: IAktivitetspliktVurderingNy
+  aktivitetspliktVurdering: IAktivitetspliktVurderingNyDto
 }) => {
   return (
     <VStack gap="8">

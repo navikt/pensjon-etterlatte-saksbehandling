@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { Vurderinger } from '~components/aktivitetsplikt/vurdering/Vurderinger'
 import { mapResult } from '~shared/api/apiUtils'
@@ -11,6 +11,7 @@ import { velgDoedsdato } from '~components/person/aktivitet/Aktivitet'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
+import { Oversikt } from '~components/behandling/aktivitetsplikt/Oversikt'
 
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
@@ -22,11 +23,7 @@ export function VurderAktivitet() {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4" maxWidth="120rem">
-        <Heading level="1" size="large">
-          Oppfølging av aktivitet
-        </Heading>
-      </Box>
+      <Oversikt />
       <Box paddingInline="16" paddingBlock="16" maxWidth="120rem">
         <VStack gap="4">
           {mapResult(familieOpplysningerResult, {

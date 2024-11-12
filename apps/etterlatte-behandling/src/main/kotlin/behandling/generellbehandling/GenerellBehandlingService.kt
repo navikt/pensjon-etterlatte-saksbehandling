@@ -146,13 +146,7 @@ class GenerellBehandlingService(
         generellBehandling: GenerellBehandling,
         saksbehandler: Saksbehandler,
     ) {
-        with(hentBehandlingMedId(generellBehandling.id) ?: throw GenerellIkkeFunnetException()) {
-            if (!kanEndres()) {
-                throw FeilStatusGenerellBehandling(
-                    "Behandlingen (id: $id) kan ikke ha status $status hvis du skal sende den til attestering",
-                )
-            }
-        }
+        sjekkStatusErTillattForAttestering(generellBehandling)
 
         when (generellBehandling.innhold) {
             is Innhold.KravpakkeUtland -> validerUtland(generellBehandling.innhold as Innhold.KravpakkeUtland)
@@ -401,6 +395,18 @@ class GenerellBehandlingService(
             return KravPakkeMedAvdoed(kravpakke, avdoed.opplysning)
         } else {
             throw RuntimeException("Kravpakken for sak $sakId har ikke blitt attestert, status: ${kravpakke.status}")
+        }
+    }
+
+    private fun sjekkStatusErTillattForAttestering(generellBehandling: GenerellBehandling) {
+        val behandling = hentBehandlingMedId(generellBehandling.id) ?: throw GenerellIkkeFunnetException()
+        if (!behandling.kanEndres()) {
+            throw FeilStatusGenerellBehandling(
+                """
+                Behandlingen (id: ${behandling.id}) kan ikke ha status ${behandling.status} 
+                hvis du skal sende den til attestering
+                """.trimIndent(),
+            )
         }
     }
 }

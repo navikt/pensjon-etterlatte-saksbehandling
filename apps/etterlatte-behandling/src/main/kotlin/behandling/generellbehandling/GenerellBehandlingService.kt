@@ -149,7 +149,7 @@ class GenerellBehandlingService(
         with(hentBehandlingMedId(generellBehandling.id) ?: throw GenerellIkkeFunnetException()) {
             if (!kanEndres()) {
                 throw FeilStatusGenerellBehandling(
-                    "Behandlingen må ha status opprettet eller returnert, hadde $status id: $id",
+                    "Behandlingen (id: $id) kan ikke ha status $status hvis du skal sende den til attestering",
                 )
             }
         }

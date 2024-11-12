@@ -9,7 +9,7 @@ import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
-import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
+import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
@@ -576,7 +576,7 @@ internal class AvkortingTest {
             @Test
             fun `Skal opprette nytt årsoppgjør med angitt foventet inntekt`() {
                 val forventetInntekt =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         aarsinntekt = 200000,
                         fom = YearMonth.of(2024, Month.MARCH),
                     )
@@ -606,6 +606,125 @@ internal class AvkortingTest {
                     }
                 }
             }
+
+            @Test
+            fun `Skal opprette nytt årsoppgjør med angitt foventet inntekt og droppe fom da den er i neste år`() {
+                val fomAar = 2024
+                val forventetInntekt =
+                    avkortinggrunnlagLagreDto(
+                        aarsinntekt = 200000,
+                        fom = YearMonth.of(fomAar, Month.MARCH),
+                    )
+
+                val opprettaAvkorting =
+                    Avkorting().oppdaterMedInntektsgrunnlag(
+                        forventetInntekt,
+                        bruker,
+                        opphoerFom = YearMonth.of(fomAar.plus(1), Month.MARCH),
+                    )
+
+                opprettaAvkorting.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
+                    aarsoppgjoer(
+                        aar = 2024,
+                        fom = YearMonth.of(2024, 3),
+                    ),
+                    Aarsoppgjoer::id,
+                    Aarsoppgjoer::inntektsavkorting,
+                )
+                with(opprettaAvkorting.aarsoppgjoer.single().inntektsavkorting) {
+                    size shouldBe 1
+                    with(get(0).grunnlag) {
+                        inntektTom shouldBe forventetInntekt.inntektTom
+                        fratrekkInnAar shouldBe forventetInntekt.fratrekkInnAar
+                        inntektUtlandTom shouldBe forventetInntekt.inntektUtlandTom
+                        fratrekkInnAarUtland shouldBe forventetInntekt.fratrekkInnAarUtland
+                        spesifikasjon shouldBe forventetInntekt.spesifikasjon
+                    }
+                }
+            }
+
+            @Test
+            fun `Skal feile hvis opphøer er satt tilbake i tid `() {
+                val fomAar = 2024
+                val fom = YearMonth.of(fomAar, Month.MARCH)
+                val forventetInntekt =
+                    avkortinggrunnlagLagreDto(
+                        aarsinntekt = 200000,
+                        fom = fom,
+                    )
+
+                assertThrows<OpphoerErTilbakeITid> {
+                    Avkorting().oppdaterMedInntektsgrunnlag(
+                        forventetInntekt,
+                        bruker,
+                        opphoerFom = YearMonth.of(fomAar.minus(1), Month.MARCH),
+                    )
+                }
+            }
+        }
+
+        @Test
+        fun `Skal opprette nytt årsoppgjør inntekt og droppe fom da den er i neste år og ta den med i neste års `() {
+            val fomAar = 2024
+            val fomYearMonth = YearMonth.of(2024, Month.MARCH)
+            val forventetInntekt =
+                avkortinggrunnlagLagreDto(
+                    aarsinntekt = 200000,
+                    fom = fomYearMonth,
+                )
+
+            val tomAar = fomAar.plus(1)
+            val tomYearMonth = YearMonth.of(tomAar, Month.MARCH)
+            val opprettaAvkortingForstegangsbehandling =
+                Avkorting().oppdaterMedInntektsgrunnlag(
+                    forventetInntekt,
+                    bruker,
+                    opphoerFom = tomYearMonth,
+                )
+
+            opprettaAvkortingForstegangsbehandling.aarsoppgjoer.single().shouldBeEqualToIgnoringFields(
+                aarsoppgjoer(
+                    aar = fomAar,
+                    fom = fomYearMonth,
+                ),
+                Aarsoppgjoer::id,
+                Aarsoppgjoer::inntektsavkorting,
+            )
+            with(opprettaAvkortingForstegangsbehandling.aarsoppgjoer.single().inntektsavkorting) {
+                size shouldBe 1
+                with(get(0).grunnlag) {
+                    inntektTom shouldBe forventetInntekt.inntektTom
+                    fratrekkInnAar shouldBe forventetInntekt.fratrekkInnAar
+                    inntektUtlandTom shouldBe forventetInntekt.inntektUtlandTom
+                    fratrekkInnAarUtland shouldBe forventetInntekt.fratrekkInnAarUtland
+                    spesifikasjon shouldBe forventetInntekt.spesifikasjon
+                }
+            }
+
+            val forventetInntektRevurdering =
+                avkortinggrunnlagLagreDto(
+                    aarsinntekt = 200000,
+                    fom = YearMonth.of(tomAar, Month.JANUARY),
+                )
+            val revurdert =
+                Avkorting(opprettaAvkortingForstegangsbehandling.aarsoppgjoer).oppdaterMedInntektsgrunnlag(
+                    forventetInntektRevurdering,
+                    bruker,
+                    opphoerFom = tomYearMonth,
+                )
+            revurdert.aarsoppgjoer.size shouldBe 2
+            val foerstegangsbehandlingen = revurdert.aarsoppgjoer.first()
+            foerstegangsbehandlingen.aar shouldBe fomAar
+            foerstegangsbehandlingen.inntektsavkorting
+                .first()
+                .grunnlag.periode shouldBe
+                Periode(fomYearMonth, YearMonth.of(fomAar, Month.DECEMBER))
+            val revurderingen = revurdert.aarsoppgjoer[1]
+            revurderingen.aar shouldBe tomAar
+            revurderingen.inntektsavkorting
+                .first()
+                .grunnlag.periode shouldBe
+                Periode(YearMonth.of(tomAar, Month.JANUARY), YearMonth.of(tomAar, Month.FEBRUARY))
         }
 
         @Nested
@@ -631,7 +750,7 @@ internal class AvkortingTest {
             @Test
             fun `Eksisterer det inntekt med samme id skal eksisterende inntekt oppdateres uten aa legge til nytt`() {
                 val endretInntekt =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         id = andreInntekt.id,
                         aarsinntekt = 200000,
                         fom = YearMonth.of(2024, Month.MARCH),
@@ -664,7 +783,7 @@ internal class AvkortingTest {
             @Test
             fun `Eksisterer ikke inntekt skal det legges til og til og med paa periode til siste inntekt skal settes`() {
                 val nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         fom = YearMonth.of(2024, Month.AUGUST),
                     )
 
@@ -701,7 +820,7 @@ internal class AvkortingTest {
             @Test
             fun `Ny inntekt for et aarsoppgjoer som ikke finnes enda skal opprette det nye aaret`() {
                 val nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         aarsinntekt = 150000,
                         fom = YearMonth.of(2025, Month.JANUARY),
                     )
@@ -884,7 +1003,7 @@ internal class AvkortingTest {
         @Test
         fun `utledning av innvilga måneder`() {
             val grunnlag =
-                avkortinggrunnlagLagre(
+                avkortinggrunnlagLagreDto(
                     fom = YearMonth.of(2024, 3),
                 )
             val opprettaAvkorting =
@@ -908,7 +1027,7 @@ internal class AvkortingTest {
         @Test
         fun `utledning av innvilga måneder med opphør`() {
             val grunnlag =
-                avkortinggrunnlagLagre(
+                avkortinggrunnlagLagreDto(
                     fom = YearMonth.of(2024, 3),
                 )
             val opprettaAvkorting =
@@ -933,7 +1052,7 @@ internal class AvkortingTest {
         @Test
         fun `utledning av innvilga måneder med aldersoverang`() {
             val grunnlag =
-                avkortinggrunnlagLagre(
+                avkortinggrunnlagLagreDto(
                     fom = YearMonth.of(2024, 3),
                 )
             val opprettaAvkorting =
@@ -959,7 +1078,7 @@ internal class AvkortingTest {
         @Test
         fun `utledning av overstyrt innvilga måneder`() {
             val grunnlag =
-                avkortinggrunnlagLagre(
+                avkortinggrunnlagLagreDto(
                     fom = YearMonth.of(2024, 3),
                     overstyrtInnvilgaMaaneder =
                         AvkortingOverstyrtInnvilgaMaanederDto(

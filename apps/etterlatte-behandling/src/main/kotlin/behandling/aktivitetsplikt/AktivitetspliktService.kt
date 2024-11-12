@@ -354,7 +354,7 @@ class AktivitetspliktService(
         unntakId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AktivitetspliktVurdering? {
+    ): AktivitetspliktVurdering {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
@@ -743,9 +743,3 @@ interface AktivitetspliktVurderingOpprettetDato {
 }
 
 fun Grunnlagsopplysning.Kilde.endretDatoOrNull(): Tidspunkt? = if (this is Grunnlagsopplysning.Saksbehandler) this.tidspunkt else null
-
-class SakidTilhoererIkkeOppgaveException :
-    UgyldigForespoerselException(
-        "OPPGAVE_TILHOERER_IKKE_SAK",
-        "OppgaveId peker på en oppgave som har en annen sak enn angitt SakId",
-    )

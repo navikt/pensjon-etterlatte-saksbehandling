@@ -75,7 +75,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
         success: (behandlingId) => (
           <>
             {behandlingId ? (
-              <Box paddingBlock="2 2">
+              <Box paddingBlock="2">
                 <Alert variant="info">
                   <HStack gap="6" justify="space-between">
                     <Heading size="small" level="2">

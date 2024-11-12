@@ -60,7 +60,6 @@ class PersonWebService(
             } else {
                 PersonMapper.mapPersonNavnFoedsel(
                     ppsKlient = ppsKlient,
-                    ident = ident,
                     hentPerson = it.data.hentPerson,
                 )
             }

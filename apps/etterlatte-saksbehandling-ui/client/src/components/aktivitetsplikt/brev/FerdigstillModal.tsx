@@ -39,7 +39,7 @@ function FerdigstillModal(props: { type: 'BREV' | 'OPPGAVE' }) {
 
   return (
     <>
-      <Button variant="primary" onClick={() => setOpen(open)}>
+      <Button variant="primary" onClick={() => setOpen(true)}>
         Ferdigstill
       </Button>
       <Modal open={open} onClose={() => setOpen(false)} aria-label="Ferdigstill oppgave">
@@ -77,18 +77,18 @@ function FerdigstillModal(props: { type: 'BREV' | 'OPPGAVE' }) {
         </Modal.Body>
         <Modal.Footer>
           <Button
-            variant="secondary"
-            onClick={() => setOpen(false)}
-            disabled={isPending(ferdigstillBrevOgOppgaveStatus) || isPending(ferdigstillOppgaveStatus)}
-          >
-            {isSuccess(ferdigstillBrevOgOppgaveStatus) || isSuccess(ferdigstillOppgaveStatus) ? 'Lukk' : 'Avbryt'}
-          </Button>
-          <Button
             variant="primary"
             onClick={ferdigstill}
             loading={isPending(ferdigstillBrevOgOppgaveStatus) || isPending(ferdigstillOppgaveStatus)}
           >
             Ferdigstill oppgave {type === 'BREV' && ' og brev'}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => setOpen(false)}
+            disabled={isPending(ferdigstillBrevOgOppgaveStatus) || isPending(ferdigstillOppgaveStatus)}
+          >
+            {isSuccess(ferdigstillBrevOgOppgaveStatus) || isSuccess(ferdigstillOppgaveStatus) ? 'Lukk' : 'Avbryt'}
           </Button>
         </Modal.Footer>
       </Modal>

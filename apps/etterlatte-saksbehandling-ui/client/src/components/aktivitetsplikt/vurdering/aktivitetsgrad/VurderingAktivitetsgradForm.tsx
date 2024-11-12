@@ -4,7 +4,7 @@ import {
   AktivitetspliktVurderingType,
   IAktivitetspliktAktivitetsgrad,
   IAktivitetspliktUnntak,
-  IAktivitetspliktVurderingNy,
+  IAktivitetspliktVurderingNyDto,
   IOpprettAktivitetspliktAktivitetsgrad,
   tekstAktivitetspliktVurderingType,
   teksterAktivitetspliktSkjoennsmessigVurdering,
@@ -41,7 +41,7 @@ export function VurderingAktivitetsgradForm(props: {
   aktivitet?: IAktivitetspliktAktivitetsgrad
   doedsdato?: Date
   onAvbryt?: () => void
-  onSuccess: (data: IAktivitetspliktVurderingNy) => void
+  onSuccess: (data: IAktivitetspliktVurderingNyDto) => void
 }) {
   const { aktivitet, onSuccess, onAvbryt, doedsdato } = props
   const { oppgave } = useAktivitetspliktOppgaveVurdering()

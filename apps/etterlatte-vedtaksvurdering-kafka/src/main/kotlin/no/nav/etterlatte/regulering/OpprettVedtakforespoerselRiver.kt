@@ -1,18 +1,14 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.brev.BrevParametereAutomatisk
-import no.nav.etterlatte.brev.Brevkoder
-import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
-import no.nav.etterlatte.brev.model.BrevOpprettResponse
-import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
-import no.nav.etterlatte.brev.model.OpprettBrevRequest
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.GenererOgFerdigstillVedtaksbrev
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.no.nav.etterlatte.klienter.BrevKlient
 import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
@@ -68,7 +64,6 @@ internal class OpprettVedtakforespoerselRiver(
         val dato = omregningData.hentFraDato()
         val revurderingaarsak = omregningData.revurderingaarsak
 
-        val kunFatteVedtak = featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)
         val skalSendeBrev =
             when (omregningData.revurderingaarsak) {
                 Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> true
@@ -76,29 +71,28 @@ internal class OpprettVedtakforespoerselRiver(
             }
 
         val respons =
-            if (kunFatteVedtak) {
-                opprettBrev(skalSendeBrev, sakId, behandlingId, omregningData.revurderingaarsak)
+            if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
+                opprettBrev(behandlingId, sakId, revurderingaarsak)
                 vedtak.opprettVedtakOgFatt(sakId, behandlingId)
             } else {
                 when (omregningData.utbetalingVerifikasjon) {
-                    UtbetalingVerifikasjon.INGEN -> vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
-                    UtbetalingVerifikasjon.SIMULERING -> {
-                        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
-                        val brevResp = opprettBrev(skalSendeBrev, sakId, behandlingId, revurderingaarsak)
-
-                        verifiserUendretUtbetaling(behandlingId, skalAvbryte = false)
-                        ferdigstillBrev(skalSendeBrev, sakId, revurderingaarsak, brevResp)
-                        vedtak.attesterVedtak(sakId, behandlingId)
+                    UtbetalingVerifikasjon.INGEN -> {
+                        if (skalSendeBrev) {
+                            vedtakOgBrev(sakId, behandlingId, revurderingaarsak)
+                        } else {
+                            vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
+                        }
                     }
 
-                    UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING -> {
-                        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
-                        val brevResp = opprettBrev(skalSendeBrev, sakId, behandlingId, revurderingaarsak)
+                    UtbetalingVerifikasjon.SIMULERING -> vedtakOgBrev(sakId, behandlingId, revurderingaarsak, false)
 
-                        verifiserUendretUtbetaling(behandlingId, skalAvbryte = true)
-                        ferdigstillBrev(skalSendeBrev, sakId, revurderingaarsak, brevResp)
-                        vedtak.attesterVedtak(sakId, behandlingId)
-                    }
+                    UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING ->
+                        vedtakOgBrev(
+                            sakId,
+                            behandlingId,
+                            revurderingaarsak,
+                            true,
+                        )
                 }
             }
 
@@ -142,56 +136,50 @@ internal class OpprettVedtakforespoerselRiver(
         }
     }
 
-    private fun opprettBrev(
-        skalSendeBrev: Boolean,
+    private fun vedtakOgBrev(
         sakId: SakId,
         behandlingId: UUID,
         revurderingaarsak: Revurderingaarsak,
-    ): BrevOpprettResponse? {
-        if (!skalSendeBrev) {
-            return null
+        skalAvbryteUtbetaling: Boolean? = null,
+    ): VedtakOgRapid {
+        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
+        val brev = opprettBrev(behandlingId, sakId, revurderingaarsak)
+
+        if (skalAvbryteUtbetaling != null) {
+            verifiserUendretUtbetaling(behandlingId, skalAvbryte = skalAvbryteUtbetaling)
         }
 
-        val brevRequest =
-            when (revurderingaarsak) {
-                Revurderingaarsak.AARLIG_INNTEKTSJUSTERING ->
-                    OpprettBrevRequest(
-                        brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL,
-                        brevParametereAutomatisk = BrevParametereAutomatisk.OmstillingsstoenadInntektsjusteringRedigerbar(),
-                        sakId = sakId,
-                        behandlingId = behandlingId,
-                    )
+        if (brev != null) {
+            ferdigstillBrev(behandlingId, brev.id, revurderingaarsak)
+        }
 
-                else -> throw InternfeilException("Støtter ikke brev under automatisk omregning for $revurderingaarsak")
-            }
-        return brevKlient.opprettBrev(sakId, brevRequest)
+        return vedtak.attesterVedtak(sakId, behandlingId)
     }
 
-    private fun ferdigstillBrev(
-        skalSendeBrev: Boolean,
+    private fun opprettBrev(
+        behandlingId: UUID,
         sakId: SakId,
         revurderingaarsak: Revurderingaarsak,
-        brevResponse: BrevOpprettResponse?,
-    ) {
-        if (!skalSendeBrev) {
-            return
+    ): Brev? =
+        when (revurderingaarsak) {
+            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> brevKlient.opprettBrev(behandlingId, sakId)
+            else -> null
         }
-        val (brevId, enhetsnummer) =
-            brevResponse
-                ?: throw InternfeilException("Mangler brevrespons fra opprettelse av brev for $sakId")
-        val brevRequest =
-            when (revurderingaarsak) {
-                Revurderingaarsak.AARLIG_INNTEKTSJUSTERING ->
-                    FerdigstillJournalFoerOgDistribuerOpprettetBrev(
-                        brevId = brevId,
-                        sakId = sakId,
-                        enhetsnummer = enhetsnummer,
-                        avsenderRequest = SaksbehandlerOgAttestant(Fagsaksystem.EY.navn, Fagsaksystem.EY.navn),
-                    )
 
-                else -> throw InternfeilException("Støtter ikke brev under automatisk omregning for $revurderingaarsak")
-            }
-        brevKlient.ferdigstillJournalfoerDistribuerBrev(sakId, brevRequest)
+    private fun ferdigstillBrev(
+        behandlingId: UUID,
+        brevId: BrevID,
+        revurderingaarsak: Revurderingaarsak,
+    ) {
+        when (revurderingaarsak) {
+            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING ->
+                brevKlient.genererPdfOgFerdigstillVedtaksbrev(
+                    behandlingId,
+                    GenererOgFerdigstillVedtaksbrev(behandlingId, brevId),
+                )
+
+            else -> throw InternfeilException("Støtter ikke brev under automatisk omregning for $revurderingaarsak")
+        }
     }
 
     private fun hentBeloep(

@@ -7,13 +7,11 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
-import no.nav.etterlatte.brev.model.BrevOpprettResponse
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
-import no.nav.etterlatte.brev.model.OpprettBrevRequest
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
@@ -45,6 +43,9 @@ class BrevService(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
 
+    /*
+     * Brev uten behandling (dødshendelse, etc)
+     */
     suspend fun opprettJournalfoerOgDistribuerRiver(
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
@@ -91,21 +92,6 @@ class BrevService(
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
             return BrevDistribusjonResponse(brevId, false)
         }
-    }
-
-    suspend fun opprettBrev(
-        bruker: BrukerTokenInfo,
-        req: OpprettBrevRequest,
-    ): BrevOpprettResponse {
-        val (brev, enhetsnummer) =
-            brevoppretter.opprettBrevSomHarInnhold(
-                sakId = req.sakId,
-                behandlingId = req.behandlingId,
-                bruker = bruker,
-                brevKode = req.brevKode,
-                brevData = req.brevParametereAutomatisk.brevDataMapping(),
-            )
-        return BrevOpprettResponse(brev.id, enhetsnummer)
     }
 
     suspend fun ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(

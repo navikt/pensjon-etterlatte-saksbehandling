@@ -125,11 +125,9 @@ data class OpprettJournalfoerOgDistribuerRequest(
     val sakId: SakId,
 )
 
-data class OpprettBrevRequest(
-    val brevKode: Brevkoder,
-    val brevParametereAutomatisk: BrevParametereAutomatisk,
-    val sakId: SakId,
+data class GenererOgFerdigstillVedtaksbrev(
     val behandlingId: UUID,
+    val brevId: BrevID,
 )
 
 data class FerdigstillJournalFoerOgDistribuerOpprettetBrev(
@@ -164,9 +162,4 @@ data class OpprettJournalpostResponse(
 data class BrevDistribusjonResponse(
     val brevId: BrevID,
     val erDistribuert: Boolean,
-)
-
-data class BrevOpprettResponse(
-    val brevId: BrevID,
-    val enhetsnummer: Enhetsnummer,
 )

@@ -21,7 +21,6 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.OpprettBrevRequest
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.pdf.PDFService
@@ -280,16 +279,6 @@ fun Route.brevRoute(
                     val req = call.receive<OpprettJournalfoerOgDistribuerRequest>()
 
                     val brevErDistribuert = service.opprettJournalfoerOgDistribuerRiver(systembruker, req)
-                    call.respond(brevErDistribuert)
-                }
-            }
-        }
-
-        post("opprett-brev") {
-            kunSystembruker { systembruker ->
-                withSakId(tilgangssjekker, skrivetilgang = true) {
-                    val req = call.receive<OpprettBrevRequest>()
-                    val brevErDistribuert = service.opprettBrev(systembruker, req)
                     call.respond(brevErDistribuert)
                 }
             }

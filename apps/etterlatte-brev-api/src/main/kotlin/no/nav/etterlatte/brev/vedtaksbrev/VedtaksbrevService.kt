@@ -90,7 +90,13 @@ class VedtaksbrevService(
                 pdfGenerator.genererPdf(
                     id = id,
                     bruker = bruker,
-                    avsenderRequest = { brukerToken, vedtak, enhet -> opprettAvsenderRequest(brukerToken, vedtak, enhet) },
+                    avsenderRequest = { brukerToken, vedtak, enhet ->
+                        opprettAvsenderRequest(
+                            brukerToken,
+                            vedtak,
+                            enhet,
+                        )
+                    },
                     brevKodeMapping = { brevKodeMappingVedtak.brevKode(it) },
                     brevDataMapping = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
                 )
@@ -111,6 +117,15 @@ class VedtaksbrevService(
         )
 
         return pdf
+    }
+
+    suspend fun genererPdfOgFerdigstill(
+        behandlingId: UUID,
+        brevId: BrevID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        genererPdf(brevId, brukerTokenInfo)
+        ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
     }
 
     suspend fun ferdigstillVedtaksbrev(

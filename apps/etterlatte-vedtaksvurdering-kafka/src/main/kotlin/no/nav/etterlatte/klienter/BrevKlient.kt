@@ -8,8 +8,10 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
-import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
+import no.nav.etterlatte.brev.model.BrevOpprettResponse
+import no.nav.etterlatte.brev.model.BrevStatusResponse
+import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
+import no.nav.etterlatte.brev.model.OpprettBrevRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -25,17 +27,17 @@ class BrevKlient(
 
     internal fun opprettBrev(
         sakid: SakId,
-        opprett: OpprettJournalfoerOgDistribuerRequest,
-    ): BrevDistribusjonResponse =
+        opprett: OpprettBrevRequest,
+    ): BrevOpprettResponse =
         runBlocking {
             try {
                 logger.info("Oppretter brev uten distribusjon for sak med sakId=$sakid")
                 retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
                     httpClient
-                        .post("$url/api/brev/sak/${sakid.sakId}/opprett-for-omregning") {
+                        .post("$url/api/brev/sak/${sakid.sakId}/opprett-brev") {
                             contentType(ContentType.Application.Json)
                             setBody(opprett.toJson())
-                        }.body<BrevDistribusjonResponse>()
+                        }.body<BrevOpprettResponse>()
                 }
             } catch (e: ResponseException) {
                 logger.error("Opprettelse av brev feilet for sak med sakId=$sakid feilet", e)
@@ -43,19 +45,19 @@ class BrevKlient(
             }
         }
 
-    internal fun opprettJournalFoerOgDistribuer(
+    internal fun ferdigstillJournalfoerDistribuerBrev(
         sakid: SakId,
-        opprett: OpprettJournalfoerOgDistribuerRequest,
-    ): BrevDistribusjonResponse =
+        request: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
+    ): BrevStatusResponse =
         runBlocking {
             try {
                 logger.info("Oppretter brev uten distribusjon for sak med sakId=$sakid")
                 retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
                     httpClient
-                        .post("$url/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
+                        .post("$url/api/brev/sak/${sakid.sakId}/ferdigstill-journalfoer-og-distribuer") {
                             contentType(ContentType.Application.Json)
-                            setBody(opprett.toJson())
-                        }.body<BrevDistribusjonResponse>()
+                            setBody(request.toJson())
+                        }.body<BrevStatusResponse>()
                 }
             } catch (e: ResponseException) {
                 logger.error("Opprettelse av brev feilet for sak med sakId=$sakid feilet", e)

@@ -287,6 +287,6 @@ internal class OpprettVedtakforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
 
         verify { vedtakServiceMock.opprettVedtakFattOgAttester(sakId, behandlingId) }
-        verify { brevKlientMock.opprettJournalFoerOgDistribuer(sakId, any()) }
+        verify { brevKlientMock.ferdigstillJournalfoerDistribuerBrev(sakId, any()) }
     }
 }

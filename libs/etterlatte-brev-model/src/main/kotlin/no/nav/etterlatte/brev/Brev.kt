@@ -123,7 +123,13 @@ data class OpprettJournalfoerOgDistribuerRequest(
     val brevParametereAutomatisk: BrevParametereAutomatisk,
     val avsenderRequest: SaksbehandlerOgAttestant,
     val sakId: SakId,
-    val oppgaveVedFeil: Boolean = true,
+)
+
+data class OpprettBrevRequest(
+    val brevKode: Brevkoder,
+    val brevParametereAutomatisk: BrevParametereAutomatisk,
+    val sakId: SakId,
+    val behandlingId: UUID,
 )
 
 data class FerdigstillJournalFoerOgDistribuerOpprettetBrev(
@@ -158,4 +164,9 @@ data class OpprettJournalpostResponse(
 data class BrevDistribusjonResponse(
     val brevId: BrevID,
     val erDistribuert: Boolean,
+)
+
+data class BrevOpprettResponse(
+    val brevId: BrevID,
+    val enhetsnummer: Enhetsnummer,
 )

@@ -7,11 +7,13 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.BrevOpprettResponse
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
+import no.nav.etterlatte.brev.model.OpprettBrevRequest
 import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
@@ -86,45 +88,24 @@ class BrevService(
                 "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
                 e,
             )
-            if (req.oppgaveVedFeil) {
-                oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
-            }
+            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
             return BrevDistribusjonResponse(brevId, false)
         }
     }
 
-    /*
-     * Brukes ved automatisk omregning hvis behandlingen skal stoppe etter fattet vedtak
-     */
-    suspend fun opprettOgFerdigstillOmregning(
+    suspend fun opprettBrev(
         bruker: BrukerTokenInfo,
-        req: OpprettJournalfoerOgDistribuerRequest,
-    ): BrevDistribusjonResponse {
+        req: OpprettBrevRequest,
+    ): BrevOpprettResponse {
         val (brev, enhetsnummer) =
             brevoppretter.opprettBrevSomHarInnhold(
                 sakId = req.sakId,
-                behandlingId = null,
+                behandlingId = req.behandlingId,
                 bruker = bruker,
                 brevKode = req.brevKode,
                 brevData = req.brevParametereAutomatisk.brevDataMapping(),
             )
-        val brevId = brev.id
-
-        pdfGenerator.ferdigstillOgGenererPDF(
-            brevId,
-            bruker,
-            avsenderRequest = { _, _, _ ->
-                AvsenderRequest(
-                    saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
-                    attestantIdent = req.avsenderRequest.attestantIdent,
-                    sakenhet = enhetsnummer,
-                )
-            },
-            brevKodeMapping = { req.brevKode },
-            brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
-        )
-
-        return BrevDistribusjonResponse(brevId, false)
+        return BrevOpprettResponse(brev.id, enhetsnummer)
     }
 
     suspend fun ferdigstillBrevJournalfoerOgDistribuerforOpprettetBrev(

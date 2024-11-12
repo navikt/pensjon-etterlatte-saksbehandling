@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -663,7 +663,11 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.ytelseEtterAvkorting.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
-                                    regelverk = hentRegelverkFraBeregningForPeriode(beregningOgAvkorting.beregning, it.fom),
+                                    regelverk =
+                                        hentRegelverkFraBeregningForPeriode(
+                                            beregningOgAvkorting.beregning.beregningsperioder,
+                                            it.fom,
+                                        ),
                                 )
                             }
                         }
@@ -703,15 +707,13 @@ class VedtakBehandlingService(
     }
 
     private fun hentRegelverkFraBeregningForPeriode(
-        beregning: BeregningDTO,
+        beregningsperioder: List<Beregningsperiode>,
         fom: YearMonth,
     ): Regelverk? =
-        beregning.beregningsperioder
+        beregningsperioder
             .sortedBy { it.datoFOM }
-            .first {
-                (fom.isAfter(it.datoFOM) || fom == it.datoFOM) &&
-                    (it.datoTOM == null || (fom.isBefore(it.datoTOM) || fom == it.datoFOM))
-            }.regelverk
+            .first { fom >= it.datoFOM && (it.datoTOM == null || fom <= it.datoTOM) }
+            .regelverk
 
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,

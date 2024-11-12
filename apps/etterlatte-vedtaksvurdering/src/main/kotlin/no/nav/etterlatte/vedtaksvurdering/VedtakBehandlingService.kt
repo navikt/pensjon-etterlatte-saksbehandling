@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -709,11 +710,15 @@ class VedtakBehandlingService(
     private fun hentRegelverkFraBeregningForPeriode(
         beregningsperioder: List<Beregningsperiode>,
         fom: YearMonth,
-    ): Regelverk? =
-        beregningsperioder
-            .sortedBy { it.datoFOM }
-            .first { fom >= it.datoFOM && (it.datoTOM == null || fom <= it.datoTOM) }
-            .regelverk
+    ): Regelverk? {
+        val samsvarendeBeregningsperiode =
+            beregningsperioder
+                .sortedBy { it.datoFOM }
+                .firstOrNull { fom >= it.datoFOM && (it.datoTOM == null || fom <= it.datoTOM) }
+                ?: throw InternfeilException("Fant ingen beregningsperioder som samsvarte med avkortingsperiode $fom")
+
+        return samsvarendeBeregningsperiode.regelverk
+    }
 
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,

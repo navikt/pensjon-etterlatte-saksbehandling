@@ -77,8 +77,8 @@ class VedtakBehandlingService(
 
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
-        val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering)
 
         return if (vedtak != null) {
             logger.info("Oppdaterer vedtak for behandling med behandlingId=$behandlingId")
@@ -103,8 +103,9 @@ class VedtakBehandlingService(
         val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
-        val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering)
+
         oppdaterVedtak(
             behandling = behandling,
             eksisterendeVedtak = vedtak,
@@ -603,6 +604,7 @@ class VedtakBehandlingService(
 
     private fun vedtakType(
         behandlingType: BehandlingType,
+        revurderingaarsak: Revurderingaarsak?,
         vilkaarsvurdering: VilkaarsvurderingDto?,
     ): VedtakType =
         when (behandlingType) {
@@ -616,7 +618,13 @@ class VedtakBehandlingService(
             BehandlingType.REVURDERING -> {
                 when (vilkaarsvurderingUtfallNonNull(vilkaarsvurdering?.resultat?.utfall)) {
                     VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.ENDRING
-                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.OPPHOER
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
+                        if (revurderingaarsak == Revurderingaarsak.NY_SOEKNAD) {
+                            VedtakType.AVSLAG
+                        } else {
+                            VedtakType.OPPHOER
+                        }
+                    }
                 }
             }
         }

@@ -178,20 +178,21 @@ object PersonMapper {
 
     fun mapPersonNavnFoedsel(
         ppsKlient: ParallelleSannheterKlient,
-        ident: String,
         hentPerson: PdlHentPersonNavnFoedselsdato,
     ): PersonNavnFoedselsaar =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
 
             val fnr =
-                if (Folkeregisteridentifikator.isValid(ident)) {
-                    ident
-                } else {
-                    ppsKlient
-                        .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
-                        .identifikasjonsnummer
-                }
+                ppsKlient
+                    .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
+                    .identifikasjonsnummer
+
+            val historiskeFoedselsnummer =
+                hentPerson.folkeregisteridentifikator
+                    .filter { it.metadata.historisk }
+                    .map { Folkeregisteridentifikator.of(it.identifikasjonsnummer) }
+
             val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
 
@@ -200,6 +201,7 @@ object PersonMapper {
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = Folkeregisteridentifikator.of(fnr),
+                historiskeFoedselsnummer = historiskeFoedselsnummer,
                 foedselsdato = foedselsdato.foedselsdato,
                 foedselsaar = foedselsdato.foedselsaar,
                 doedsdato = doedsfall?.doedsdato,

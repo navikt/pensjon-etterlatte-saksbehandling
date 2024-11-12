@@ -11,7 +11,7 @@ import { velgDoedsdato } from '~components/person/aktivitet/Aktivitet'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { Oversikt } from '~components/behandling/aktivitetsplikt/Oversikt'
+import { AktivitetspliktVurdering12MndOversikt } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering12MndOversikt'
 
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
@@ -23,7 +23,7 @@ export function VurderAktivitet() {
 
   return (
     <>
-      <Oversikt />
+      <AktivitetspliktVurdering12MndOversikt />
       <Box paddingInline="16" paddingBlock="16" maxWidth="120rem">
         <VStack gap="4">
           {mapResult(familieOpplysningerResult, {

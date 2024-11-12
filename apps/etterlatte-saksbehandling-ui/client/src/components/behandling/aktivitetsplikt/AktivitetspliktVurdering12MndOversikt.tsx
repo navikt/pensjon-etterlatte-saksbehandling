@@ -3,7 +3,7 @@ import React from 'react'
 import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktStatusOgGyldig'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 
-export const Oversikt = () => {
+export const AktivitetspliktVurdering12MndOversikt = () => {
   const { vurdering } = useAktivitetspliktOppgaveVurdering()
   return (
     <>

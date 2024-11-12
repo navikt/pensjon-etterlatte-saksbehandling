@@ -35,9 +35,17 @@ export const GyldigFramsattVurdering = ({
   const [, setGyldighetsproeving, resetToInitial] = useApiCall(lagreGyldighetsproeving)
 
   const lagre = (onSuccess?: () => void) => {
-    !svar ? setRadioError('Du må velge et svar') : setRadioError('')
+    if (!svar) {
+      setRadioError('Du må velge et svar')
+    } else {
+      setRadioError('')
+    }
     const harBegrunnelse = begrunnelse.trim().length > 0
-    harBegrunnelse ? setBegrunnelseError('') : setBegrunnelseError('Begrunnelsen må fylles ut')
+    if (harBegrunnelse) {
+      setBegrunnelseError('')
+    } else {
+      setBegrunnelseError('Begrunnelsen må fylles ut')
+    }
 
     if (svar !== undefined && harBegrunnelse) {
       return setGyldighetsproeving(
@@ -128,7 +136,7 @@ export const GyldigFramsattVurdering = ({
           onChange={(e) => {
             const oppdatertBegrunnelse = e.target.value
             setBegrunnelse(oppdatertBegrunnelse)
-            oppdatertBegrunnelse.trim().length > 0 && setBegrunnelseError('')
+            if (oppdatertBegrunnelse.trim().length > 0) setBegrunnelseError('')
           }}
           error={begrunnelseError ? begrunnelseError : false}
         />

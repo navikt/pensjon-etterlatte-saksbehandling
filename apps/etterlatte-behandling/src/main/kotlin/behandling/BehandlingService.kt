@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -874,7 +873,7 @@ internal class BehandlingServiceImpl(
                     Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                 ),
             ).singleOrNull {
-                it.status != BehandlingStatus.AVBRUTT && it.status != IVERKSATT
+                it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
             }?.id
 
     override fun oppdaterTidligereFamiliepleier(

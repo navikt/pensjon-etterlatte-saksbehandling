@@ -929,12 +929,23 @@ class TrygdetidServiceImpl(
             return null
         }
 
-        return trygdetidRepository
-            .hentBehandlingerMedTrygdetiderForAvdoede(avdoede)
-            .filter { it.behandlingId != behandlingId }
+        return behandlingMedTrygdetiderForAvdoede(avdoede)
+            .filter { it != behandlingId }
+            .firstOrNull { behandlingStatusOkForKopieringAvTrygdetid(it, brukerTokenInfo) }
+    }
+
+    private fun behandlingMedTrygdetiderForAvdoede(avdoedeList: List<Folkeregisteridentifikator>): List<UUID> {
+        val avdoede = avdoedeList.map { it.value }
+        val trygdetiderByBehandlingId: Collection<List<TrygdetidPartial>> =
+            trygdetidRepository
+                .hentTrygdetiderForAvdoede(avdoede)
+                .groupBy(TrygdetidPartial::behandlingId)
+                .values
+
+        return trygdetiderByBehandlingId
             .filter { it.trygdetiderGjelderEksaktSammeAvdoede(avdoede) }
-            .firstOrNull { behandlingStatusOkForKopieringAvTrygdetid(it.behandlingId, brukerTokenInfo) }
-            ?.behandlingId
+            .sortedByDescending { trygdetider -> trygdetider.maxOfOrNull { it.opprettet } }
+            .map { it.first().behandlingId }
     }
 
     private fun behandlingStatusOkForKopieringAvTrygdetid(

@@ -5,7 +5,6 @@ import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -217,11 +216,12 @@ private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =
             },
     )
 
-data class BehandlingMedTrygdetider(
+fun List<TrygdetidPartial>.trygdetiderGjelderEksaktSammeAvdoede(avdoede: List<String>): Boolean =
+    this.map { it.ident }.sorted() ==
+        avdoede.sorted()
+
+data class TrygdetidPartial(
     val behandlingId: UUID,
-    val trygdetider: List<Trygdetid>,
-) {
-    fun trygdetiderGjelderEksaktSammeAvdoede(avdoede: List<Folkeregisteridentifikator>): Boolean =
-        trygdetider.map(Trygdetid::ident).sorted() ==
-            avdoede.map(Folkeregisteridentifikator::value).sorted()
-}
+    val ident: String,
+    val opprettet: Tidspunkt,
+)

@@ -8,9 +8,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -168,38 +166,24 @@ class TrygdetidRepository(
             }
         }
 
-    fun hentBehandlingerMedTrygdetiderForAvdoede(avdoedeList: List<Folkeregisteridentifikator>): List<BehandlingMedTrygdetider> {
-        val avdoede = avdoedeList.map { it.value }
-
-        val trygdetiderByBehandlingId =
-            using(sessionOf(dataSource)) { session ->
-                session.run(
-                    queryOf(
-                        """SELECT DISTINCT behandling_id, ident, opprettet 
-                        FROM trygdetid 
-                        WHERE ident = ANY(:identer)
-                        """.trimMargin(),
-                        mapOf("identer" to session.createArrayOf("text", avdoede)),
-                    ).map { row ->
-                        TrygdetidInfo(
-                            row.uuid("behandling_id"),
-                            row.string("ident"),
-                            row.tidspunkt("opprettet"),
-                        )
-                    }.asList,
-                )
-            }.groupBy(TrygdetidInfo::behandlingId)
-
-        val behandlingerSomHarAlleAvdoede =
-            trygdetiderByBehandlingId.values
-                .filter { trygdetider ->
-                    trygdetider.map { it.ident }.containsAll(avdoede)
-                }
-        return behandlingerSomHarAlleAvdoede
-            .sortedByDescending { trygdetider -> trygdetider.maxOfOrNull { it.opprettet } }
-            .map { it.first().behandlingId }
-            .map { behandlingId -> BehandlingMedTrygdetider(behandlingId, hentTrygdetiderForBehandling(behandlingId)) }
-    }
+    fun hentTrygdetiderForAvdoede(avdoede: List<String>) =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    """SELECT DISTINCT behandling_id, ident, opprettet 
+                            FROM trygdetid 
+                            WHERE ident = ANY(:identer)
+                    """.trimMargin(),
+                    mapOf("identer" to session.createArrayOf("text", avdoede)),
+                ).map { row ->
+                    TrygdetidPartial(
+                        row.uuid("behandling_id"),
+                        row.string("ident"),
+                        row.tidspunkt("opprettet"),
+                    )
+                }.asList,
+            )
+        }
 
     private fun opprettTrygdetid(
         trygdetid: Trygdetid,
@@ -240,12 +224,6 @@ class TrygdetidRepository(
                 ),
         ).let { query -> tx.update(query) }
     }
-
-    data class TrygdetidInfo(
-        val behandlingId: UUID,
-        val ident: String,
-        val opprettet: Tidspunkt,
-    )
 
     private fun oppdaterOpplysningsgrunnlag(
         trygdetidId: UUID?,

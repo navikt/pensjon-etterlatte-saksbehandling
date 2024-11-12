@@ -2,7 +2,6 @@ import react from "eslint-plugin-react";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import jsxA11Y from "eslint-plugin-jsx-a11y";
 import globals from "globals";
-import vitest from "eslint-plugin-vitest"
 import tsParser from "@typescript-eslint/parser";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,7 +24,6 @@ export default [{
         react,
         "@typescript-eslint": typescriptEslint,
         "jsx-a11y": jsxA11Y,
-        "vitest": vitest,
     },
 
     languageOptions: {

@@ -19,18 +19,15 @@ internal class UfoereHendelseFordelerTest {
 
     @Test
     fun `skal håndtere ufoerehendelse der bruker er mellom og 18 og 21 på virkningstidspunkt`() {
-        val attenAarIMaaneder = 12 * 18
-
         coEvery { behandlingKlient.postTilBehandling(any()) } returns Unit
 
-        val ufoereHendelse: UfoereHendelse =
-            UfoereHendelse().apply {
-                personidentifikator = "12312312312"
-                ytelse = "ufoere"
-                virkningstidspunkt = "2021-01-01"
-                alderVedVirkningstidspunkt = attenAarIMaaneder
-                hendelsestype = "ufoere"
-            }
+        val ufoereHendelse =
+            UfoereHendelse(
+                personIdent = "12312312312",
+                virkningsdato = "2018-01-01",
+                fodselsdato = "2000-01-01",
+                vedtaksType = "ufoere",
+            )
 
         runBlocking {
             ufoereHendelseFordeler.haandterHendelse(ufoereHendelse)
@@ -41,18 +38,15 @@ internal class UfoereHendelseFordelerTest {
 
     @Test
     fun `skal håndtere ufoerehendelse der bruker fyller 21 på virkningstidspunkt`() {
-        val tjueenAarIMaaneder = 12 * 21
-
         coEvery { behandlingKlient.postTilBehandling(any()) } returns Unit
 
-        val ufoereHendelse: UfoereHendelse =
-            UfoereHendelse().apply {
-                personidentifikator = "12312312312"
-                ytelse = "ufoere"
-                virkningstidspunkt = "2021-01-01"
-                alderVedVirkningstidspunkt = tjueenAarIMaaneder
-                hendelsestype = "ufoere"
-            }
+        val ufoereHendelse =
+            UfoereHendelse(
+                personIdent = "12312312312",
+                virkningsdato = "2021-01-01",
+                fodselsdato = "2000-01-01",
+                vedtaksType = "ufoere",
+            )
 
         runBlocking {
             ufoereHendelseFordeler.haandterHendelse(ufoereHendelse)
@@ -63,16 +57,13 @@ internal class UfoereHendelseFordelerTest {
 
     @Test
     fun `skal ignorere ufoerehendelse der bruker ikke er mellom og 18 og 21 på virkningstidspunkt`() {
-        val tolvAarIMaaneder = 12 * 12
-
-        val ufoereHendelse: UfoereHendelse =
-            UfoereHendelse().apply {
-                personidentifikator = "12312312312"
-                ytelse = "ufoere"
-                virkningstidspunkt = "2021-01-01"
-                alderVedVirkningstidspunkt = tolvAarIMaaneder
-                hendelsestype = "ufoere"
-            }
+        val ufoereHendelse =
+            UfoereHendelse(
+                personIdent = "12312312312",
+                virkningsdato = "2021-01-01",
+                fodselsdato = "1980-01-01",
+                vedtaksType = "ufoere",
+            )
 
         runBlocking {
             ufoereHendelseFordeler.haandterHendelse(ufoereHendelse)

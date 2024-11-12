@@ -5,7 +5,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.hendelserufoere.UfoeretrygdHendelse
+import no.nav.etterlatte.hendelserufoere.UfoereHendelse
 import org.slf4j.LoggerFactory
 
 class BehandlingKlient(
@@ -14,7 +14,7 @@ class BehandlingKlient(
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    suspend fun postTilBehandling(ufoereHendelse: UfoeretrygdHendelse) {
+    suspend fun postTilBehandling(ufoereHendelse: UfoereHendelse) {
         logger.info("Lagrer hendelse om uføretrygd i behandling")
 
         behandlingHttpClient.post(

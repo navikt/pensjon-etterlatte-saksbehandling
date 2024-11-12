@@ -91,9 +91,13 @@ export interface IAktivitetspliktVurdering {
   unntak?: IAktivitetspliktUnntak
 }
 
-export interface IAktivitetspliktVurderingNy {
-  aktivitet?: IAktivitetspliktAktivitetsgrad[]
-  unntak?: IAktivitetspliktUnntak[]
+export interface IAktivitetspliktVurderingNyDto {
+  aktivitet: IAktivitetspliktAktivitetsgrad[]
+  unntak: IAktivitetspliktUnntak[]
+}
+
+export function harVurdering(vurdering: IAktivitetspliktVurderingNyDto): boolean {
+  return vurdering && !!(vurdering.aktivitet.length && vurdering.unntak.length)
 }
 
 export interface IAktivitetspliktAktivitetsgrad {
@@ -115,6 +119,12 @@ export enum AktivitetspliktSkjoennsmessigVurdering {
   JA = 'JA',
   MED_OPPFOELGING = 'MED_OPPFOELGING',
   NEI = 'NEI',
+}
+
+export const teksterAktivitetspliktSkjoennsmessigVurdering: Record<AktivitetspliktSkjoennsmessigVurdering, string> = {
+  JA: 'Ja',
+  MED_OPPFOELGING: 'Med oppfølging',
+  NEI: 'Nei',
 }
 
 export interface IAktivitetspliktUnntak {
@@ -177,8 +187,9 @@ export interface AktivitetspliktOppgaveVurdering {
   vurderingType: AktivitetspliktOppgaveType
   oppgave: OppgaveDTO
   sak: ISak
-  vurdering: IAktivitetspliktVurderingNy
+  vurdering: IAktivitetspliktVurderingNyDto
   aktivtetspliktbrevdata?: IBrevAktivitetspliktDto
+  sistEndret?: string
 }
 
 export enum AktivitetspliktOppgaveType {

@@ -17,7 +17,7 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
   const [result, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
 
   useEffect(() => {
-    ident && hentPerson(ident)
+    if (ident) hentPerson(ident)
   }, [ident])
 
   const gender = (fnr: string): GenderList => {

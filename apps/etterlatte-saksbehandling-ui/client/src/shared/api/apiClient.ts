@@ -136,7 +136,7 @@ async function errorFrom(response: Response): Promise<JsonError> {
 
   try {
     return JSON.parse(responseContent)
-  } catch (err) {
+  } catch {
     logger.generalWarning({
       msg:
         `${responseContent} $Url: ${response.url}` ||

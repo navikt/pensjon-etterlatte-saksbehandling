@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.sjekkliste
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.util.UUID
@@ -80,7 +81,7 @@ class SjekklisteDao(
             stmt.setObject(6, sjekklisteId)
             stmt.executeUpdate().also {
                 if (it != 1) {
-                    throw IllegalStateException("Feil under oppdatering av sjekkliste $sjekklisteId")
+                    throw InternfeilException("Feil under oppdatering av sjekkliste $sjekklisteId")
                 }
             }
         }
@@ -156,7 +157,7 @@ class SjekklisteDao(
                 stmt
                     .executeQuery()
                     .toList { sjekklisteItem() }
-                    .also { if (it.isEmpty()) throw IllegalStateException("Fant ingen sjekklisterad id=$sjekklisteItemId") }
+                    .also { if (it.isEmpty()) throw InternfeilException("Fant ingen sjekklisterad id=$sjekklisteItemId") }
                     .first()
             }
         }
@@ -190,7 +191,7 @@ class SjekklisteDao(
             stmt.setObject(3, itemId)
             stmt.executeUpdate().also {
                 if (it != 1) {
-                    throw IllegalStateException("Feil under oppdatering av sjekklisterad $itemId")
+                    throw InternfeilException("Feil under oppdatering av sjekklisterad $itemId")
                 }
             }
         }

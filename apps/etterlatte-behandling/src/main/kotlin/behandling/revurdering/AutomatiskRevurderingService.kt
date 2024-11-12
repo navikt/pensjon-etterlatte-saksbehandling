@@ -165,8 +165,6 @@ class AutomatiskRevurderingService(
     }
 }
 
-class KunSystembrukerException : Exception("Hendelser kan kun utføres av systembruker")
-
 class OmregningKreverLoependeVedtak :
     UgyldigForespoerselException("OMREGNING_KREVER_LØPENDE_VEDTAK", "Omregning krever at sak har løpende vedtak")
 

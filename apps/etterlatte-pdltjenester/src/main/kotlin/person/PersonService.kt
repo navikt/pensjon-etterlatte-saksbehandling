@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
-import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarRequest
@@ -16,6 +15,7 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
+import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -194,6 +194,33 @@ class PersonService(
         }
     }
 
+    suspend fun hentPdlFolkeregisterIdenter(request: HentPdlIdentRequest): PdlFolkeregisterIdentListe {
+        logger.info("Henter alle folkeregisteridenter for ident=${request.ident} fra PDL, inkl. historiske")
+
+        val response = pdlKlient.hentPdlIdentifikator(request, listOf(PDLIdentGruppeTyper.FOLKEREGISTERIDENT))
+
+        return if (response.data?.hentIdenter == null) {
+            val pdlFeil = response.errors?.asFormatertFeil()
+
+            if (response.errors?.personIkkeFunnet() == true) {
+                throw FantIkkePersonException("Fant ikke personen ${request.ident}")
+            } else {
+                throw PdlForesporselFeilet(
+                    "Kunne ikke hente pdlidentifkator for ${request.ident} fra PDL: $pdlFeil",
+                )
+            }
+        } else {
+            response.data.hentIdenter.identer
+                .filterNot { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
+                .map {
+                    PdlIdentifikator.FolkeregisterIdent(
+                        Folkeregisteridentifikator.of(it.ident),
+                        it.historisk,
+                    )
+                }.let(::PdlFolkeregisterIdentListe)
+        }
+    }
+
     suspend fun hentPersongalleri(hentPersongalleriRequest: HentPersongalleriRequest): Persongalleri {
         val persongalleri =
             when (hentPersongalleriRequest.saktype) {
@@ -315,13 +342,6 @@ class PersonService(
             gjenlevende = listOf(mottakerAvYtelsen.value) + levende.map { it.foedselsnummer.value },
             personerUtenIdent = personerUtenIdent.ifEmpty { null },
         )
-    }
-
-    suspend fun hentFolkeregisterIdenterForAktoerIdBolk(request: HentFolkeregisterIdenterForAktoerIdBolkRequest): Map<String, String?> {
-        logger.info("Henter folkeregisteridenter for aktørIds=${request.aktoerIds}")
-
-        val response = pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(request)
-        return response.associate { it.ident to it.identer?.firstOrNull()?.ident }
     }
 
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): GeografiskTilknytning {

@@ -60,6 +60,8 @@ export const formaterOppgavetype = (type: string) => {
       return 'Journalføring'
     case 'VURD_HENV':
       return 'Vurder henvendelse'
+    case 'VUR_KONS_YTE':
+      return 'Vurder konsekvens for ytelsen'
     default:
       return type
   }

@@ -156,3 +156,9 @@ data class AarligInntektsjusteringAvkortingSjekkResponse(
     val harInntektForAar: Boolean,
     val harSanksjon: Boolean,
 )
+
+data class AarligInntektsjusteringAvkortingRequest(
+    val aar: Int,
+    val forrigeBehandling: UUID,
+    val nyBehandling: UUID,
+)

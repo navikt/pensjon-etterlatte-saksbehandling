@@ -1,4 +1,4 @@
-import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
 import { BodyShort, Box, Heading, Label, VStack } from '@navikt/ds-react'
@@ -55,20 +55,16 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
                 )}
                 <Label>Gjenlevende sin tidslinje</Label>
 
-                {isSuccess(sakResult) &&
+                {mapSuccess(sakResult, (data) =>
                   mapResult(familieOpplysningerResult, {
                     pending: <Spinner label="Henter opplysninger om avdød" />,
                     error: (error) => (
                       <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger om avdød'}</ApiErrorAlert>
                     ),
-                    success: ({ avdoede }) => (
-                      <>
-                        {avdoede && (
-                          <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={sakResult.data.sak.id} />
-                        )}
-                      </>
-                    ),
-                  })}
+                    success: ({ avdoede }) =>
+                      avdoede && <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={data.sak.id} />,
+                  })
+                )}
               </VStack>
               <hr style={{ width: '100%' }} />
 

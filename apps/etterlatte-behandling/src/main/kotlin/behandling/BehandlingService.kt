@@ -868,7 +868,11 @@ internal class BehandlingServiceImpl(
         behandlingDao
             .hentAlleRevurderingerISakMedAarsak(
                 sakId,
-                listOf(Revurderingaarsak.REGULERING, Revurderingaarsak.OMREGNING),
+                listOf(
+                    Revurderingaarsak.REGULERING,
+                    Revurderingaarsak.OMREGNING,
+                    Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+                ),
             ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != IVERKSATT
             }?.id

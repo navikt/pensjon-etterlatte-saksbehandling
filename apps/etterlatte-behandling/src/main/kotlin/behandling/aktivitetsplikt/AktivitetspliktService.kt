@@ -331,10 +331,7 @@ class AktivitetspliktService(
             )
         }
 
-        return hentVurderingForOppgave(oppgaveId) ?: throw InternfeilException(
-            "Vi har ingen vurderinger men vi " +
-                "oppdaterte nettopp en vurdering i en oppgave. Gjelder oppgave med id=$oppgaveId i sak $sakId",
-        )
+        return hentVurderingForOppgave(oppgaveId)
     }
 
     fun slettAktivitetsgradForOppgave(
@@ -342,7 +339,7 @@ class AktivitetspliktService(
         aktivitetsgradId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AktivitetspliktVurdering? {
+    ): AktivitetspliktVurdering {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
@@ -404,13 +401,9 @@ class AktivitetspliktService(
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
     }
 
-    fun hentVurderingForOppgave(oppgaveId: UUID): AktivitetspliktVurdering? {
+    fun hentVurderingForOppgave(oppgaveId: UUID): AktivitetspliktVurdering {
         val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId)
         val unntak = aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId)
-
-        if (aktivitetsgrad.isEmpty() && unntak.isEmpty()) {
-            return null
-        }
 
         return AktivitetspliktVurdering(aktivitetsgrad, unntak)
     }
@@ -741,7 +734,9 @@ data class AktivitetspliktVurderingGammel(
 data class AktivitetspliktVurdering(
     val aktivitet: List<AktivitetspliktAktivitetsgrad>,
     val unntak: List<AktivitetspliktUnntak>,
-)
+) {
+    fun erTom() = aktivitet.isEmpty() && unntak.isEmpty()
+}
 
 interface AktivitetspliktVurderingOpprettetDato {
     val opprettet: Grunnlagsopplysning.Kilde

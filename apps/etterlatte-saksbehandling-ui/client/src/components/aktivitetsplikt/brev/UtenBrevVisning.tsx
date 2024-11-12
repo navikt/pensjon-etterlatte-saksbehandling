@@ -5,16 +5,19 @@ import { Alert, BodyShort, VStack } from '@navikt/ds-react'
 import { mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
-import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/AktivitetspliktBrev'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useDispatch } from 'react-redux'
+import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
+import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 
 export function UtenBrevVisning() {
-  const { oppgave, oppdater, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
+  const dispatch = useDispatch()
 
   const ferdigstillOppgaveWrapper = () => {
-    apiFerdigstillOppgave(oppgave.id, () => {
-      oppdater()
+    apiFerdigstillOppgave(oppgave.id, (oppgave) => {
+      dispatch(setAktivitetspliktOppgave(oppgave))
     })
   }
   const oppgaveErFerdigstilt = oppgave.status === Oppgavestatus.FERDIGSTILT
@@ -36,7 +39,7 @@ export function UtenBrevVisning() {
         </>
       )}
       <InfobrevKnapperad
-        ferdigstill={!oppgaveKanFerdigstilles ? ferdigstillOppgaveWrapper : undefined}
+        ferdigstill={oppgaveKanFerdigstilles ? ferdigstillOppgaveWrapper : undefined}
         status={ferdigstillOppgaveStatus}
         tekst="Ferdigstill oppgave"
       >

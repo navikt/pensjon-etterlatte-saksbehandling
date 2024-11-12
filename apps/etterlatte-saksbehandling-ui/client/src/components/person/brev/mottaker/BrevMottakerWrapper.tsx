@@ -6,11 +6,8 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettMottaker } from '~shared/api/brev'
 import { isPending } from '~shared/api/apiUtils'
 import { PlusIcon } from '@navikt/aksel-icons'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) => {
-  const kanLeggeTilMottaker = useFeatureEnabledMedDefault('kan-legge-til-mottaker', false)
-
   const [mottakere, setMottakere] = useState(brev.mottakere)
 
   const [opprettMottakerResult, apiOpprettMottaker] = useApiCall(opprettMottaker)
@@ -42,7 +39,7 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
         />
       ))}
 
-      {kanLeggeTilMottaker && mottakere.length < 2 && (
+      {kanRedigeres && mottakere.length < 2 && (
         <HStack justify="center">
           <Button
             variant="secondary"

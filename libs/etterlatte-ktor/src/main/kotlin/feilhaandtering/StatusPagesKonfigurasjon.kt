@@ -125,6 +125,17 @@ class StatusPagesKonfigurasjon(
 
         status(*statusCodes5xx) { call, code ->
             routeLogger.debug("Fikk kode {}", code)
+            if (code == HttpStatusCode.ServiceUnavailable) {
+                routeLogger.warn("Et endepunkt returnerte Service Unavailable. Det er sannsynligvis fra R&R")
+                return@status call.respond(
+                    ForespoerselException(
+                        status = code.value,
+                        code = code.description,
+                        detail = "Tjenesten er ikke tilgjengelig",
+                    ),
+                )
+            }
+
             val feil =
                 InternfeilLoggerException(
                     status = code.value,

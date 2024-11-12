@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -55,6 +56,7 @@ class AarligInntektsjusteringJobbServiceTest {
     private val vedtakKlient: VedtakKlient = mockk()
     private val beregningKlient: BeregningKlient = mockk()
     private val pdlTjenesterKlient: PdlTjenesterKlient = mockk()
+    private val oppgaveService: OppgaveService = mockk()
     private val rapid: KafkaProdusent<String, String> = mockk()
 
     val service =
@@ -67,6 +69,7 @@ class AarligInntektsjusteringJobbServiceTest {
             vedtakKlient,
             beregningKlient,
             pdlTjenesterKlient,
+            oppgaveService,
             rapid,
         )
 

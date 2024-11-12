@@ -28,6 +28,8 @@ import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingS
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -39,6 +41,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
@@ -57,6 +60,7 @@ class AarligInntektsjusteringJobbService(
     private val vedtakKlient: VedtakKlient,
     private val beregningKlient: BeregningKlient,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
+    private val oppgaveService: OppgaveService,
     private val rapid: KafkaProdusent<String, String>,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -90,7 +94,7 @@ class AarligInntektsjusteringJobbService(
             val forrigeBehandling = hentForrigeBehandling(sakId)
 
             if (vedtak.underSamordning) {
-                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, TIL_SAMORDNING)
+                nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, TIL_SAMORDNING)
                 return@inTransaction
             }
 
@@ -114,7 +118,7 @@ class AarligInntektsjusteringJobbService(
 
             val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak)
             if (aapneBehandlinger.isNotEmpty()) {
-                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, AAPEN_BEHANDLING)
+                nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)
                 return@inTransaction
             }
 
@@ -179,6 +183,31 @@ class AarligInntektsjusteringJobbService(
                 HardkodaSystembruker.omregning,
             )
         }
+
+    /*
+      Inntektsjustering: vi opprette oppgave i det tilfelle behandling ikke kan opprettes automatisk f.eks har åpen behandling,
+      samordning etc. Ny behandling opprettes via oppgaven.
+     */
+    private fun nyOppgaveOgOppdaterKjoering(
+        sakId: SakId,
+        forrigeBehandlingId: UUID,
+        kjoering: String,
+        aarsakTilManuell: AarligInntektsjusteringAarsakManuell,
+    ) {
+        oppgaveService.opprettOppgave(
+            referanse = forrigeBehandlingId.toString(),
+            sakId = sakId,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.AARLIG_INNTEKTSJUSTERING,
+            merknad = "Kan ikke behandles automatisk",
+        )
+        oppdaterKjoering(
+            kjoering,
+            KjoeringStatus.TIL_MANUELL,
+            sakId,
+            aarsakTilManuell.name,
+        )
+    }
 
     private fun nyBehandlingOgOppdaterKjoering(
         sakId: SakId,

@@ -489,6 +489,7 @@ internal class ApplicationContext(
             grunnlagService = grunnlagsService,
             beregningKlient = beregningsKlient,
             pdlTjenesterKlient = pdlTjenesterKlient,
+            oppgaveService = oppgaveService,
             rapid = rapid,
         )
 

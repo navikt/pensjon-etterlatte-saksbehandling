@@ -6,7 +6,7 @@ import {
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
-import { Alert, BodyShort, Box, Button, Heading, HStack, Link, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, HStack, Link, ReadMore, VStack } from '@navikt/ds-react'
 import { ExternalLinkIcon, PlusCircleIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -37,9 +37,9 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
   }
 
   const [kopierTrygdetidStatus, kopierTrygdetidReq] = useApiCall(kopierTrygdetidFraAnnenBehandling)
-  const [visDetaljer, setVisDetaljer] = useState(false)
-  const [skjult, setSkjult] = useState(false)
-  const [trygdetidKopiert, setTrygdetidKopiert] = useState(false)
+  const [visDetaljer, setVisDetaljer] = useState<boolean | undefined>(undefined)
+
+  const skalViseDetaljer: () => boolean = () => visDetaljer ?? !harRedigertTrygdetidGrunnlag()
 
   const kopierTrygdetid = (kildeBehandlingId: string) => {
     trackClick('kopier-trygdetidsgrunnlag-fra-behandling-med-samme-avdoede')
@@ -49,7 +49,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
         kildeBehandlingId: kildeBehandlingId,
       },
       (trygdetider) => {
-        setTrygdetidKopiert(true)
+        setVisDetaljer(false)
         setTrygdetider(trygdetider)
       }
     )
@@ -59,35 +59,22 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
     hentKandidatForKopieringAvTrygdetidReq(behandlingId)
   }, [])
 
-  useEffect(() => {
-    setVisDetaljer(!harRedigertTrygdetidGrunnlag())
-    setSkjult(trygdetidKopiert)
-    setTrygdetidKopiert(false)
-  }, [trygdetider])
-
-  if (skjult) {
-    return <></>
-  }
-
   return (
     <>
       {mapResult(hentKandidatForKopieringAvTrygdetidStatus, {
+        error: (error) => (
+          <ApiErrorAlert>En feil har oppstått ved henting av trygdetid for samme avdøde. {error.detail}</ApiErrorAlert>
+        ),
         success: (behandlingId) => (
           <>
-            {behandlingId ? (
+            {behandlingId && (
               <Box paddingBlock="2">
                 <Alert variant="info">
-                  <HStack gap="6" justify="space-between">
-                    <Heading size="small" level="2">
-                      Det finnes en annen behandling tilknyttet samme avdøde
-                    </Heading>
-                    {!visDetaljer && (
-                      <Link href="#" onClick={() => setVisDetaljer(true)}>
-                        Les mer
-                      </Link>
-                    )}
-                  </HStack>
-                  {visDetaljer && (
+                  <ReadMore
+                    header="Det finnes en annen behandling tilknyttet avdøde"
+                    open={skalViseDetaljer()}
+                    onClick={() => setVisDetaljer(!visDetaljer)}
+                  >
                     <VStack gap="3">
                       <BodyShort>
                         Det finnes en annen behandling tilknyttet avdøde {avdoedesNavn()}, der trygdetiden allerede er
@@ -98,33 +85,30 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
                         Gå til behandlingen
                         <ExternalLinkIcon>Gå til behandlingen</ExternalLinkIcon>
                       </Link>
-                      <HStack gap="4" justify="space-between">
-                        <Button
-                          variant="primary"
-                          icon={<PlusCircleIcon fontSize="1.5rem" />}
-                          onClick={() => kopierTrygdetid(behandlingId)}
-                        >
-                          Ja, kopier og legg til trygdetid
-                        </Button>
+                      <HStack gap="1">
                         <Button
                           variant="secondary"
-                          icon={<XMarkOctagonIcon fontSize="1.5rem" />}
+                          size="small"
+                          icon={<XMarkOctagonIcon />}
                           onClick={() => setVisDetaljer(false)}
                         >
                           Nei, jeg ønsker å fylle ut manuelt
                         </Button>
+                        <Button
+                          variant="primary"
+                          size="small"
+                          icon={<PlusCircleIcon />}
+                          onClick={() => kopierTrygdetid(behandlingId)}
+                        >
+                          Ja, kopier og legg til trygdetid
+                        </Button>
                       </HStack>
                     </VStack>
-                  )}
+                  </ReadMore>
                 </Alert>
               </Box>
-            ) : (
-              <></>
             )}
           </>
-        ),
-        error: (error) => (
-          <ApiErrorAlert>En feil har oppstått ved henting av trygdetid for samme avdøde. {error.detail}</ApiErrorAlert>
         ),
       })}
       {isFailureHandler({

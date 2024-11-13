@@ -15,8 +15,15 @@ fun main() {
         val appBuilder = AppBuilder(rapidEnv)
         val vedtakKlient = appBuilder.lagVedtakKlient()
         val utbetalingKlient = appBuilder.lagUtbetalingKlient()
+        val brevKlient = appBuilder.lagBrevKlient()
         LoependeYtelserforespoerselRiver(rapidsConnection, vedtakKlient)
-        OpprettVedtakforespoerselRiver(rapidsConnection, vedtakKlient, utbetalingKlient, appBuilder.lagFeatureToggleService())
+        OpprettVedtakforespoerselRiver(
+            rapidsConnection,
+            vedtakKlient,
+            utbetalingKlient,
+            brevKlient,
+            appBuilder.lagFeatureToggleService(),
+        )
         LagreIverksattVedtakRiver(rapidsConnection, vedtakKlient)
         AttestertVedtakRiver(rapidsConnection, vedtakKlient)
         SamordningMottattRiver(rapidsConnection, vedtakKlient)

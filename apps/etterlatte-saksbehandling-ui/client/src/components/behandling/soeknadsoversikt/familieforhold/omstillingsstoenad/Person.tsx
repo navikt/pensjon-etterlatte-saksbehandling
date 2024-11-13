@@ -42,7 +42,7 @@ export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props
 
         <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
 
-        {person.utland && <Utlandsopphold utland={person.utland} />}
+        {person.utland && <Utlandsopphold utland={person.utland} landListeResult={landListeResult} />}
 
         <StatsborgerskapVisning
           statsborgerskap={person.statsborgerskap}

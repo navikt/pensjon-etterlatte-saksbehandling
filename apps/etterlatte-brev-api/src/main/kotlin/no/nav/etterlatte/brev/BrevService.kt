@@ -43,6 +43,9 @@ class BrevService(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
 
+    /*
+     * Brev uten behandling (dødshendelse, etc)
+     */
     suspend fun opprettJournalfoerOgDistribuerRiver(
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
@@ -82,7 +85,10 @@ class BrevService(
             return BrevDistribusjonResponse(brevId, true)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
+            logger.error(
+                "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
+                e,
+            )
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
             return BrevDistribusjonResponse(brevId, false)
         }
@@ -127,7 +133,10 @@ class BrevService(
             return BrevStatusResponse(brevId, oppdatertBrev.status)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
+            logger.error(
+                "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
+                e,
+            )
 
             return BrevStatusResponse(brevId, oppdatertBrev.status)
         }

@@ -159,3 +159,4 @@ spec:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling
         - application: etterlatte-brev-kafka
+        - application: etterlatte-vedtaksvurdering-kafka

@@ -27,6 +27,7 @@ data class PdlAdressebeskyttelseRequest(
 data class PdlVariables(
     val ident: String,
     val bostedsadresse: Boolean = false,
+    val folkeregisteridentHistorikk: Boolean = false,
     val bostedsadresseHistorikk: Boolean = false,
     val deltBostedsadresse: Boolean = false,
     val oppholdsadresse: Boolean = false,

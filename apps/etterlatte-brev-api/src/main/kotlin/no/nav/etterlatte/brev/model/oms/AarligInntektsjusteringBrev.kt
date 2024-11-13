@@ -20,12 +20,24 @@ data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
     val opphoerDato: LocalDate?,
 ) : BrevDataRedigerbar {
     companion object {
-        fun fra() =
-            OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
-                // TODO
-                inntektsbeloep = Kroner(12345),
-                opphoerDato = null,
+        fun fra(
+            avkortingsinfo: Avkortingsinfo,
+            opphoerDato: LocalDate?,
+        ): OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall {
+            val sisteBeregningsperiode =
+                avkortingsinfo.beregningsperioder
+                    .filter {
+                        it.datoFOM.year ==
+                            avkortingsinfo.beregningsperioder
+                                .first()
+                                .datoFOM.year
+                    }.maxBy { it.datoFOM }
+
+            return OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
+                inntektsbeloep = sisteBeregningsperiode.inntekt,
+                opphoerDato = opphoerDato,
             )
+        }
     }
 }
 

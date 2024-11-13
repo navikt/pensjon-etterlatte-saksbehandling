@@ -173,7 +173,13 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
                     VedtakType.ENDRING -> {
                         if (revurderingaarsak != null && revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
-                            aarligInntektsjusteringRedigerbart()
+                            aarligInntektsjusteringRedigerbart(
+                                brukerTokenInfo,
+                                behandlingId,
+                                virkningstidspunkt!!,
+                                sakType,
+                                vedtakType,
+                            )
                         } else {
                             omstillingsstoenadEndring(
                                 brukerTokenInfo,
@@ -355,10 +361,30 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         )
     }
 
-    private suspend fun aarligInntektsjusteringRedigerbart() =
-        coroutineScope {
-            OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall.fra()
-        }
+    private suspend fun aarligInntektsjusteringRedigerbart(
+        bruker: BrukerTokenInfo,
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        sakType: SakType,
+        vedtakType: VedtakType,
+    ) = coroutineScope {
+        val avkortingsinfo =
+            async {
+                beregningService.finnAvkortingsinfo(
+                    behandlingId,
+                    sakType,
+                    virkningstidspunkt,
+                    vedtakType,
+                    bruker,
+                )
+            }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+
+        OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall.fra(
+            avkortingsinfo = avkortingsinfo.await(),
+            opphoerDato = behandling.opphoerFraOgMed?.atDay(1),
+        )
+    }
 
     private suspend fun omstillingsstoenadOpphoer(
         bruker: BrukerTokenInfo,

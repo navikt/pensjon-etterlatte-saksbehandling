@@ -65,7 +65,8 @@ class TrygdetidRepository(
                         poengaar_overstyrt,
                         yrkesskade,
                         beregnet_samlet_trygdetid_norge,
-                        opprettet
+                        opprettet,
+                        kopiert_grunnlag_fra_behandling
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                     """.trimIndent(),
@@ -115,6 +116,13 @@ class TrygdetidRepository(
                     gjeldendeTrygdetid.id,
                     gjeldendeTrygdetid.behandlingId,
                     oppdatertTrygdetid.yrkesskade,
+                    tx,
+                )
+
+                oppdaterKopiertGrunnlagFraBehandling(
+                    gjeldendeTrygdetid.id,
+                    gjeldendeTrygdetid.behandlingId,
+                    oppdatertTrygdetid.kopiertGrunnlagFraBehandling,
                     tx,
                 )
 
@@ -361,6 +369,29 @@ class TrygdetidRepository(
                     "id" to id,
                     "behandlingId" to behandlingId,
                     "overstyrtNorskPoengaar" to overstyrtNorskPoengaar,
+                ),
+        ).let { query ->
+            tx.update(query)
+        }
+    }
+
+    private fun oppdaterKopiertGrunnlagFraBehandling(
+        id: UUID,
+        behandlingId: UUID,
+        kildeBehandlingId: UUID?,
+        tx: TransactionalSession,
+    ) {
+        queryOf(
+            statement =
+                """
+                UPDATE trygdetid 
+                  SET kopiert_grunnlag_fra_behandling = :kildeBehandlingId WHERE id = :id AND  behandling_id = :behandlingId
+                """.trimIndent(),
+            paramMap =
+                mapOf(
+                    "id" to id,
+                    "behandlingId" to behandlingId,
+                    "kildeBehandlingId" to kildeBehandlingId,
                 ),
         ).let { query ->
             tx.update(query)
@@ -622,6 +653,7 @@ class TrygdetidRepository(
         overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
         ident = string("ident"),
         yrkesskade = boolean("yrkesskade"),
+        kopiertGrunnlagFraBehandling = uuidOrNull("kopiert_grunnlag_fra_behandling"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

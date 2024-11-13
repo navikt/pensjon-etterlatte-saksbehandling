@@ -900,15 +900,17 @@ class TrygdetidServiceImpl(
             "Trygdetidene gjelder forskjellige avdøde"
         }
 
+        // TODO Hva om trygdetid har f.x. overstyrt poengår fra før?
         trygdetiderMaal
-            .forEach { maal ->
+            .forEach { trygdetidMaal ->
                 trygdetidRepository.oppdaterTrygdetid(
-                    maal.copy(
+                    trygdetidMaal.copy(
                         trygdetidGrunnlag =
                             trygdetiderKilde
-                                .single { kilde -> maal.ident == kilde.ident }
+                                .single { trygdetidKilde -> trygdetidKilde.ident == trygdetidMaal.ident }
                                 .trygdetidGrunnlag
                                 .map { it.copy(id = UUID.randomUUID()) },
+                        kopiertGrunnlagFraBehandling = kildeBehandlingId,
                     ),
                 )
             }

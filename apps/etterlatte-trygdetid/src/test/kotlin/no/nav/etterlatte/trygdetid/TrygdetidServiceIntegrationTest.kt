@@ -256,6 +256,7 @@ internal class TrygdetidServiceIntegrationTest(
         val trygdetidList = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
         trygdetidList.size shouldBe 1
 
+        trygdetidList.first().kopiertGrunnlagFraBehandling shouldBe kildeBehandlingId
         with(trygdetidList.first().trygdetidGrunnlag.sortedBy { it.periode.fra }) {
             this[0].periode.fra shouldBe LocalDate.of(2020, 5, 1)
             this[0].periode.til shouldBe LocalDate.of(2020, 7, 1)

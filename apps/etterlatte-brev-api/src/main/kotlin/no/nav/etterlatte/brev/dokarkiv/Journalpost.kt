@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.dokarkiv
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import org.slf4j.LoggerFactory
 
 interface OpprettJournalpost {
@@ -41,7 +42,7 @@ data class JournalpostRequest(
     override val tittel: String,
 ) : OpprettJournalpost {
     init {
-        check(journalposttype != JournalPostType.NOTAT) {
+        checkInternFeil(journalposttype != JournalPostType.NOTAT) {
             "${this::class.simpleName} skal ikke brukes til opprettelse av Notat. " +
                 "Bruk ${OpprettNotatJournalpostRequest::class.simpleName} i stedet."
         }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.aktivitetsplikt
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevParametre
@@ -133,6 +134,27 @@ class AktivitetspliktOppgaveService(
             UtlandstilknytningType.BOSATT_UTLAND -> NasjonalEllerUtland.UTLAND
         }
 
+    private fun sjekkOmHarNyVurdering(
+        oppgave: OppgaveIntern,
+        aktiviteterIOppgave: List<AktivitetspliktAktivitetsgrad>,
+    ) {
+        val harNyVurdering =
+            when (oppgave.type) {
+                OppgaveType.AKTIVITETSPLIKT_12MND -> aktiviteterIOppgave.any { it.vurdertFra12Mnd }
+                OppgaveType.AKTIVITETSPLIKT -> aktiviteterIOppgave.isNotEmpty()
+                else -> throw UgyldigForespoerselException(
+                    "FEIL_OPPGAVETYPE",
+                    "Kan ikke opprette brev for aktivitetsplikt med oppgavetype ${oppgave.type}",
+                )
+            }
+        if (!harNyVurdering) {
+            throw UgyldigForespoerselException(
+                "MANGLER_NY_VURDERING",
+                "Ny vurdering av aktivitetsplikt i denne oppgaven mangler. Den må legges til før brev kan opprettes",
+            )
+        }
+    }
+
     fun opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(
         oppgaveId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -145,22 +167,7 @@ class AktivitetspliktOppgaveService(
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
             val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId)
-
-            val harNyVurdering =
-                when (oppgave.type) {
-                    OppgaveType.AKTIVITETSPLIKT_12MND -> vurderingForOppgave.aktivitet.any { it.vurdertFra12Mnd }
-                    OppgaveType.AKTIVITETSPLIKT -> vurderingForOppgave.aktivitet.isNotEmpty()
-                    else -> throw UgyldigForespoerselException(
-                        "FEIL_OPPGAVETYPE",
-                        "Kan ikke opprette brev for aktivitetsplikt med oppgavetype ${oppgave.type}",
-                    )
-                }
-            if (!harNyVurdering) {
-                throw UgyldigForespoerselException(
-                    "MANGLER_NY_VURDERING",
-                    "Ny vurdering av aktivitetsplikt i denne oppgaven mangler. Den må legges til før brev kan opprettes",
-                )
-            }
+            sjekkOmHarNyVurdering(oppgave, vurderingForOppgave.aktivitet)
 
             val sisteAktivtetsgrad =
                 vurderingForOppgave.aktivitet.maxByOrNull { it.fom }

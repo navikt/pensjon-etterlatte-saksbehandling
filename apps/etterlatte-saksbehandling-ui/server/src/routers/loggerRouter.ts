@@ -98,7 +98,7 @@ const stringifyUserDevice = (device?: UserDeviceInfo): string | undefined => {
       const os = `${device.os.name} ${device.os.version} (${device.os.versionName})`
 
       return `${browser} - ${os}`
-    } catch (e) {
+    } catch {
       logger.error(`Kunne ikke formatere userDeviceInfo til lesbar string: \n${sanitize(JSON.stringify(device))}`)
       return undefined
     }

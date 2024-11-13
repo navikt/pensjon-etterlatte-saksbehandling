@@ -1,13 +1,12 @@
 package no.nav.etterlatte.kodeverk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.network.sockets.SocketTimeoutException
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.Headers
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -16,9 +15,10 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 interface KodeverkKlient {
-    suspend fun hentLandkoder(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse
-
-    suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse
+    suspend fun hent(
+        kodeverkNavn: KodeverkNavn,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): KodeverkResponse
 }
 
 class KodeverkKlientImpl(
@@ -32,7 +32,10 @@ class KodeverkKlientImpl(
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpKlient)
 
-    override suspend fun hentLandkoder(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse =
+    override suspend fun hent(
+        kodeverkNavn: KodeverkNavn,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): KodeverkResponse =
         try {
             logger.info("Henter alle landkoder fra Kodeverk")
             downstreamResourceClient
@@ -40,12 +43,12 @@ class KodeverkKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$url/Landkoder/koder/betydninger?ekskluderUgyldige=false&spraak=nb",
+                            url = "$url/$kodeverkNavn/koder/betydninger?ekskluderUgyldige=false&spraak=nb",
                             additionalHeaders = mapOf(Headers.NAV_CONSUMER_ID to applicationName),
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { resource -> deserialize(resource.response.toString()) },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: SocketTimeoutException) {
@@ -53,42 +56,23 @@ class KodeverkKlientImpl(
 
             throw TimeoutForespoerselException(
                 code = "KODEVERK_TIMEOUT",
-                detail = "Henting av landkoder fra kodeverk tok for lang tid... Prøv igjen om litt.",
+                detail = "Henting av ${kodeverkNavn.verdi} fra kodeverk tok for lang tid... Prøv igjen om litt.",
             )
         } catch (e: Exception) {
             logger.error("Henting av landkoder feilet", e)
             throw e
         }
+}
 
-    override suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse =
-        try {
-            logger.info("Henter arkivtemaer fra Kodeverk")
-            downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$url/Arkivtemaer/koder/betydninger?ekskluderUgyldige=true&spraak=nb",
-                            additionalHeaders = mapOf(Headers.NAV_CONSUMER_ID to applicationName),
-                        ),
-                    brukerTokenInfo = brukerTokenInfo,
-                ).mapBoth(
-                    success = { resource ->
-                        resource.response.let { objectMapper.readValue<KodeverkResponse>(it.toString()) }
-                    },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: SocketTimeoutException) {
-            logger.warn("Timeout mot kodeverk ved henting av arkivtemaer")
+enum class KodeverkNavn(
+    val verdi: String,
+) {
+    ARKIVTEMAER("Arkivtemaer"),
+    LANDKODER("Landkoder"),
+    LANDKODERISO2("LandkoderISO2"),
+    ;
 
-            throw TimeoutForespoerselException(
-                code = "KODEVERK_TIMEOUT",
-                detail = "Henting av arkivtemaer fra kodeverk tok for lang tid... Prøv igjen om litt.",
-            )
-        } catch (e: Exception) {
-            logger.error("Henting av arkivtemaer feilet", e)
-            throw e
-        }
+    override fun toString(): String = verdi
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

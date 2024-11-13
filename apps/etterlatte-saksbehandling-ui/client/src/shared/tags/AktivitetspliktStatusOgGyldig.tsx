@@ -32,7 +32,7 @@ export const AktivitetspliktStatusTag = ({ status }: { status: StatusPaaAktivite
     case AktivitetspliktStatus.OPPFYLT:
       return <Tag variant="success">Aktivitetsplikt oppfylt fra {formaterDatoMedFallback(status.dato, '-')}</Tag>
     case AktivitetspliktStatus.IKKE_OPPFYLT:
-      return <Tag variant="error">Aktivitetsplikt oppfylt fra {formaterDatoMedFallback(status.dato, '-')}</Tag>
+      return <Tag variant="error">Aktivitetsplikt ikke oppfylt fra {formaterDatoMedFallback(status.dato, '-')}</Tag>
     case AktivitetspliktStatus.UNNTAK:
       return <Tag variant="alt2">Unntak fra aktivitetskrav til {formaterDatoMedFallback(status.dato, '-')}</Tag>
     case AktivitetspliktStatus.VARIG_UNNTAK:

@@ -107,7 +107,13 @@ class AktivitetspliktOppgaveService(
             val hentBrevId = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
             if (!data.skalSendeBrev && hentBrevId?.brevId != null) {
                 aktivitetspliktBrevDao.fjernBrevId(oppgaveId, kilde)
-                runBlocking { brevApiKlient.slettBrev(brevId = hentBrevId.brevId, sakId = sak.id, brukerTokenInfo = saksbehandler) }
+                runBlocking {
+                    brevApiKlient.slettBrev(
+                        brevId = hentBrevId.brevId,
+                        sakId = sak.id,
+                        brukerTokenInfo = saksbehandler,
+                    )
+                }
             }
             return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)!!
         }
@@ -138,11 +144,29 @@ class AktivitetspliktOppgaveService(
         }
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
-            val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId) ?: throw GenerellIkkeFunnetException()
+            val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId)
+
+            val harNyVurdering =
+                when (oppgave.type) {
+                    OppgaveType.AKTIVITETSPLIKT_12MND -> vurderingForOppgave.aktivitet.any { it.vurdertFra12Mnd }
+                    OppgaveType.AKTIVITETSPLIKT -> vurderingForOppgave.aktivitet.isNotEmpty()
+                    else -> throw UgyldigForespoerselException(
+                        "FEIL_OPPGAVETYPE",
+                        "Kan ikke opprette brev for aktivitetsplikt med oppgavetype ${oppgave.type}",
+                    )
+                }
+            if (!harNyVurdering) {
+                throw UgyldigForespoerselException(
+                    "MANGLER_NY_VURDERING",
+                    "Ny vurdering av aktivitetsplikt i denne oppgaven mangler. Den må legges til før brev kan opprettes",
+                )
+            }
+
             val sisteAktivtetsgrad =
                 vurderingForOppgave.aktivitet.maxByOrNull { it.fom }
                     ?: throw ManglerAktivitetsgrad("Mangler aktivitetsgrad for oppgave: $oppgaveId")
-            val nasjonalEllerUtland = behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+            val nasjonalEllerUtland =
+                behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
             val brevParametreAktivitetsplikt10mnd =
                 BrevParametre.AktivitetspliktInformasjon10Mnd(
                     aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),

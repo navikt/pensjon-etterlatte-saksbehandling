@@ -167,11 +167,13 @@ class AktivitetspliktOppgaveService(
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
             val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId)
-            sjekkOmHarNyVurdering(oppgave, vurderingForOppgave.aktivitet)
 
             val sisteAktivtetsgrad =
                 vurderingForOppgave.aktivitet.maxByOrNull { it.fom }
                     ?: throw ManglerAktivitetsgrad("Mangler aktivitetsgrad for oppgave: $oppgaveId")
+
+            sjekkOmHarNyVurdering(oppgave, vurderingForOppgave.aktivitet)
+
             val nasjonalEllerUtland =
                 behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
             val brevParametreAktivitetsplikt10mnd =

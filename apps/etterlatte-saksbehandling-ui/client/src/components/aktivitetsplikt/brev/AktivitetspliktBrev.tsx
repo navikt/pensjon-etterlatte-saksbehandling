@@ -14,7 +14,7 @@ import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBr
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
-import { FerdigstillAktivitetspliktBrevModal } from '~components/aktivitetsplikt/brev/FerdigstillModal'
+import { FerdigstillAktivitetspliktBrevModal } from '~components/aktivitetsplikt/brev/FerdigstillBrevModal'
 
 export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
   const { oppgave, sistEndret } = useAktivitetspliktOppgaveVurdering()

@@ -4,7 +4,7 @@ import React from 'react'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
-import { FerdigstillAktivitetspliktOppgaveModal } from '~components/aktivitetsplikt/brev/FerdigstillModal'
+import { FerdigstillAktivitetspliktOppgaveModal } from '~components/aktivitetsplikt/brev/FerdigstillAktivitetspliktOppgaveModal'
 
 export function UtenBrevVisning() {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()

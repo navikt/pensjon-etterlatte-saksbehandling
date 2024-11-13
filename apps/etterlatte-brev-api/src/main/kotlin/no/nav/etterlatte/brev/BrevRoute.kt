@@ -295,7 +295,8 @@ fun Route.brevRoute(
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
-                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts(), brukerTokenInfo)
+                    val brev =
+                        pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts(), brukerTokenInfo)
                     brev.onSuccess {
                         call.respond(brev)
                     }

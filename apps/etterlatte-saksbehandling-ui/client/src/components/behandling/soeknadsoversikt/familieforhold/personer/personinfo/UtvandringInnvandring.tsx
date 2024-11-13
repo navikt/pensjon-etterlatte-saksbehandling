@@ -3,6 +3,9 @@ import { Utland } from '~shared/types/Person'
 import { Box, Label } from '@navikt/ds-react'
 import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
+import { visLandInfoFraKodeverkEllerDefault } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
+import { Result } from '~shared/api/apiUtils'
+import { ILand } from '~utils/kodeverk'
 
 export const ListeItemMedSpacingIMellom = styled.li`
   :not(:first-child) {
@@ -10,8 +13,7 @@ export const ListeItemMedSpacingIMellom = styled.li`
   }
 `
 
-export function Utlandsopphold(props: { utland: Utland }) {
-  const { utland } = props
+export function Utlandsopphold({ utland, landListeResult }: { utland: Utland; landListeResult: Result<ILand[]> }) {
   const utflyttinger = utland.utflyttingFraNorge ?? []
   const innflyttinger = utland.innflyttingTilNorge ?? []
 
@@ -23,12 +25,15 @@ export function Utlandsopphold(props: { utland: Utland }) {
           <UstiletListe>
             {utflyttinger.map((utflytting, index) => {
               return (
-                <ListeItemMedSpacingIMellom key={index}>
+                <li key={index}>
                   <UstiletListe>
-                    <li>Tilflyttingsland: {utflytting.tilflyttingsland ?? 'ukjent'}</li>
+                    <li>
+                      Tilflyttingsland:{' '}
+                      {visLandInfoFraKodeverkEllerDefault(landListeResult, utflytting.tilflyttingsland)}
+                    </li>
                     <li>Dato: {formaterKanskjeStringDatoMedFallback('ukjent', utflytting.dato)}</li>
                   </UstiletListe>
-                </ListeItemMedSpacingIMellom>
+                </li>
               )
             })}
           </UstiletListe>
@@ -44,7 +49,10 @@ export function Utlandsopphold(props: { utland: Utland }) {
               return (
                 <li key={index}>
                   <UstiletListe>
-                    <li>Fraflyttingsland: {innflytting.fraflyttingsland ?? 'ukjent'}</li>
+                    <li>
+                      Fraflyttingsland:{' '}
+                      {visLandInfoFraKodeverkEllerDefault(landListeResult, innflytting.fraflyttingsland)}
+                    </li>
                     <li>Dato: {formaterKanskjeStringDatoMedFallback('ukjent', innflytting.dato)}</li>
                   </UstiletListe>
                 </li>

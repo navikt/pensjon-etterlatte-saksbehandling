@@ -114,10 +114,15 @@ class SamordningsKlientImpl(
             val response =
                 httpClient.post("$resourceUrl/api/refusjonskrav") {
                     contentType(ContentType.Application.Json)
-                    header("pid", samordningmelding.pid)
-                    parameter("tpNr", samordningmelding.tpNr)
-                    parameter("samId", samordningmelding.samId)
-                    parameter("refusjonskrav", samordningmelding.refusjonskrav)
+                    setBody(
+                        OpprettRefusjonskravRequest(
+                            pid = samordningmelding.pid,
+                            tpNr = samordningmelding.tpNr,
+                            samId = samordningmelding.samId,
+                            refusjonskrav = samordningmelding.refusjonskrav,
+                            periodisertBelopListe = emptyList(),
+                        ),
+                    )
                     expectSuccess = false
                 }
 
@@ -176,6 +181,21 @@ internal data class SamordneVedtakRequest(
 
 private class SamordneVedtakRespons(
     val ventPaaSvar: Boolean,
+)
+
+private data class OpprettRefusjonskravRequest(
+    val pid: String,
+    val tpNr: String,
+    val samId: Long,
+    val refusjonskrav: Boolean,
+    val periodisertBelopListe: List<Refusjonstrekk>,
+)
+
+private data class Refusjonstrekk(
+    val belop: Double?,
+    val kravstillersRef: String?,
+    val datoFom: LocalDate?,
+    val datoTom: LocalDate?,
 )
 
 class SamordneVedtakBehandlingUgyldigForespoerselException(

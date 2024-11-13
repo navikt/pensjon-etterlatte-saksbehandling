@@ -9,7 +9,7 @@ import {
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
@@ -159,13 +159,13 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   return (
     <Box paddingInline="16" maxWidth="69rem">
-      {kopierTrygdetidsgrunnlagEnabled && (
+      {kopierTrygdetidsgrunnlagEnabled && behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
         <TrygdetidIAnnenBehandlingMedSammeAvdoede
           behandlingId={behandling.id}
           setTrygdetider={setTrygdetider}
           trygdetider={trygdetider}
           mapNavn={mapNavn}
-        ></TrygdetidIAnnenBehandlingMedSammeAvdoede>
+        />
       )}
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}

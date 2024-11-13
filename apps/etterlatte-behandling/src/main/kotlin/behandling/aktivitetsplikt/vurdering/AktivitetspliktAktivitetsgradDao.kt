@@ -33,7 +33,7 @@ class AktivitetspliktAktivitetsgradDao(
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
     ) = connectionAutoclosing.hentConnection {
-        checkInternFeil(oppgaveId == null && behandlingId == null) {
+        checkInternFeil(oppgaveId != null || behandlingId != null) {
             "Kan ikke opprette aktivitetsgrad som ikke er koblet på en behandling eller oppgave. $sakId"
         }
 

@@ -6,7 +6,7 @@ REST-appliksasjon og Kafka-produsent som holder styr på saker, behandlinger og 
 
 ### Sak
 
-En sak er et overheng som representerer alt NAV vet eller gjør i forbindelse med en spesifikk ytelse til en spesifikk
+En sak er et overheng som representerer alt Nav vet eller gjør i forbindelse med en spesifikk ytelse til en spesifikk
 person. Én person har et unikt saksnummer for en spesifikk ytelse.
 
 ### Behandling
@@ -25,7 +25,7 @@ En Behandling starter når det er identifisert et behandlingsbehov. En behandlin
 ### Behandlingsbehov
 
 Et behandlingsbehov representerer at det har skjedd noe som gjør at det må gjøres en behandling i en sak. Det kan for
-eksempel være at NAV har mottatt en søknad.
+eksempel være at Nav har mottatt en søknad.
 
 ### Oppgave
 
@@ -94,6 +94,6 @@ kommando oppretter ny symlink til colima sin docker.sock.
 
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
-### For NAV-ansatte
+### For Nav-ansatte
 
 Interne henvendelser kan sendes via Slack i kanalen #po-pensjon-team-etterlatte.

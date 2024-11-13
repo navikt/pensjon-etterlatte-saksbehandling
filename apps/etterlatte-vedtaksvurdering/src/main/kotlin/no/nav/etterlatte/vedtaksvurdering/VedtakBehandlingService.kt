@@ -422,7 +422,7 @@ class VedtakBehandlingService(
             }
         } catch (e: Exception) {
             repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
-            throw e
+            throw InternfeilException("Klarte ikke å oppdatere samordningsmelding", e)
         }
     }
 
@@ -744,7 +744,7 @@ class VedtakBehandlingService(
                             VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider)
                         }
 
-                        null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
+                        null -> throw InternfeilException("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
                     }
                 }
             }

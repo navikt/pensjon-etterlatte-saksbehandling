@@ -18,11 +18,11 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal fun Route.revurderingRoutes(
@@ -31,7 +31,7 @@ internal fun Route.revurderingRoutes(
     omgjoeringKlageRevurderingService: OmgjoeringKlageRevurderingService,
     automatiskRevurderingService: AutomatiskRevurderingService,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("RevurderingRoute")
 
     route("/api/revurdering") {
         route("{$BEHANDLINGID_CALL_PARAMETER}") {

@@ -18,10 +18,10 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import org.slf4j.LoggerFactory
 
 fun Route.avkorting(
     avkortingService: AvkortingService,
@@ -29,7 +29,7 @@ fun Route.avkorting(
     tidligAlderspensjonService: AvkortingTidligAlderspensjonService,
     aarligInntektsjusteringService: AarligInntektsjusteringService,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("AvkortingRoute")
 
     route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {

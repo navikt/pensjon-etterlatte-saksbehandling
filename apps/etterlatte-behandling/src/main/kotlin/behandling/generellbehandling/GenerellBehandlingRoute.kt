@@ -16,18 +16,18 @@ import no.nav.etterlatte.libs.ktor.route.GENERELLBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.generellBehandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.sak.SakIkkeFunnetException
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
+import org.slf4j.LoggerFactory
 
 internal fun Route.generellbehandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     sakService: SakService,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("GenerelBehandlingRoute")
 
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->

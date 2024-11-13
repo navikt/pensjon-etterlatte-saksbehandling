@@ -19,6 +19,7 @@ import { forhaandsvisBlankettKa } from '~shared/api/klage'
 import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
+import { BodyShortMedNewlines } from '~shared/BodyShortMedNewlines'
 
 export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
   const klage = useKlage()
@@ -130,7 +131,7 @@ export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: bool
       <BodyShort>
         <strong>Begrunnelse:</strong>
       </BodyShort>
-      <BodyShort spacing>{omgjoering.begrunnelse}</BodyShort>
+      <BodyShortMedNewlines spacing>{omgjoering.begrunnelse}</BodyShortMedNewlines>
 
       {kanRedigere && (
         <Alert variant="info">Når klagen ferdigstilles vil det opprettes en oppgave for omgjøring av vedtaket.</Alert>

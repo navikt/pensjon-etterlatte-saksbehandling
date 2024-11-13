@@ -6,6 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -24,11 +25,13 @@ fun Route.aldersovergang(aldersovergangService: AldersovergangService) {
 
             logger.info("Behandler aldersovergang [behandlingId=$behandlingId, løpende behandlingId=$loependeBehandlingId]")
             val vilkaarsvurdering =
-                aldersovergangService.behandleOpphoerAldersovergang(
-                    behandlingId = behandlingId,
-                    loependeBehandlingId = loependeBehandlingId,
-                    brukerTokenInfo = call.brukerTokenInfo,
-                )
+                inTransaction {
+                    aldersovergangService.behandleOpphoerAldersovergang(
+                        behandlingId = behandlingId,
+                        loependeBehandlingId = loependeBehandlingId,
+                        brukerTokenInfo = call.brukerTokenInfo,
+                    )
+                }
 
             call.respond(HttpStatusCode.OK, mapOf("vilkaarsvurderingid" to vilkaarsvurdering.id))
         }

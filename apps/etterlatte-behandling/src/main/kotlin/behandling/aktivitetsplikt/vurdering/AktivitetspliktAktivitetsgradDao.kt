@@ -8,7 +8,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
@@ -20,13 +20,6 @@ import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
 import java.util.UUID
-
-class MaaHaKoblingTilBehandlingElleroppgave(
-    sakId: SakId,
-) : UgyldigForespoerselException(
-        code = "FEIL_UPSERT_AKTIVITETSPLKIT",
-        detail = "Kan ikke opprette aktivitetsgrad som ikke er koblet på en behandling eller oppgave. $sakId",
-    )
 
 class AktivitetspliktAktivitetsgradDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
@@ -40,8 +33,8 @@ class AktivitetspliktAktivitetsgradDao(
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
     ) = connectionAutoclosing.hentConnection {
-        if (oppgaveId == null && behandlingId == null) {
-            throw MaaHaKoblingTilBehandlingElleroppgave(sakId)
+        checkInternFeil(oppgaveId == null && behandlingId == null) {
+            "Kan ikke opprette aktivitetsgrad som ikke er koblet på en behandling eller oppgave. $sakId"
         }
 
         with(it) {

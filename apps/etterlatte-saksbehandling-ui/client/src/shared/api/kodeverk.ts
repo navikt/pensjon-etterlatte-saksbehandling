@@ -5,10 +5,10 @@ export interface Beskrivelse {
   tekst: string
 }
 
-export interface Land {
+export interface KodeverkLand {
   isoLandkode: string
   beskrivelse: Beskrivelse
 }
 
 export const hentKodeverkArkivtemaer = (): Promise<ApiResponse<Beskrivelse[]>> => apiClient.get('/kodeverk/arkivtemaer')
-export const hentKodeverkLandISO2 = (): Promise<ApiResponse<Land[]>> => apiClient.get('/kodeverk/land-iso2')
+export const hentKodeverkLandISO2 = (): Promise<ApiResponse<KodeverkLand[]>> => apiClient.get('/kodeverk/land-iso2')

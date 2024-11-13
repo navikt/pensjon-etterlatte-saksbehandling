@@ -24,6 +24,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentKodeverkLandISO2 } from '~shared/api/kodeverk'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { capitalize } from '~utils/formatering/formatering'
 
 enum JuridiskEnhet {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -251,21 +252,24 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
                       name="adresse.landkode"
                       control={control}
                       render={({ field: { onChange, value } }) => {
-                        const options = landkoder.map((kode) => kode.beskrivelse.term)
-                        const selected = landkoder.find((lk) => lk.isoLandkode === value)?.beskrivelse?.term
+                        const options = landkoder.map((kode) => ({
+                          label: capitalize(kode.beskrivelse.term),
+                          value: kode.isoLandkode,
+                        }))
+                        const finnTerm = (kode: string) =>
+                          landkoder.find((lk) => lk.isoLandkode === kode)?.beskrivelse?.term
 
-                        const finnKode = (term: string) =>
-                          landkoder.find((lk) => lk.beskrivelse.term === term)?.isoLandkode
+                        const selected = value ? finnTerm(value) : undefined
 
                         return (
                           <UNSAFE_Combobox
                             label="Land"
                             options={options}
-                            selectedOptions={[selected || '']}
+                            selectedOptions={[selected ? capitalize(selected) : '']}
                             onToggleSelected={(option, isSelected) => {
                               if (isSelected) {
-                                setValue('adresse.land', option)
-                                onChange(finnKode(option))
+                                setValue('adresse.land', capitalize(finnTerm(option)))
+                                onChange(option)
                               }
                             }}
                             shouldAutocomplete

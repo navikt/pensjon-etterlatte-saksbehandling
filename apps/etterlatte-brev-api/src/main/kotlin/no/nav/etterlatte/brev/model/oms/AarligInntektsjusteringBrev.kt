@@ -11,6 +11,8 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.fromDto
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -57,6 +59,8 @@ class OmstillingsstoenadInntektsjusteringVedtak(
             innholdMedVedlegg: InnholdMedVedlegg,
             avkortingsinfo: Avkortingsinfo,
             trygdetid: TrygdetidDto,
+            behandling: DetaljertBehandling,
+            navnAvdoed: String,
         ): OmstillingsstoenadInntektsjusteringVedtak {
             // TODO duplikater som bør vurderes å trekkes ut felles
             val beregningsperioder =
@@ -87,12 +91,14 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                         it.datoFOM.year == beregningsperioder.first().datoFOM.year
                     }.maxBy { it.datoFOM }
 
+            val virk = behandling.virkningstidspunkt!!.dato.atDay(1)
+
             return OmstillingsstoenadInntektsjusteringVedtak(
                 innhold = innholdMedVedlegg.innhold(),
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
-                        virkningsdato = LocalDate.of(2025, 1, 1),
+                        virkningsdato = virk,
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
                         sisteBeregningsperiodeNesteAar = null,
@@ -100,18 +106,18 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = "TODO", // TODO
+                                navnAvdoed = navnAvdoed,
                             ),
-                        oppphoersdato = null,
+                        oppphoersdato = behandling.opphoerFraOgMed?.atDay(1),
                         opphoerNesteAar = false, // inntekt neste år ikke implementert for revurdering
                     ),
-                omsRettUtenTidsbegrensning = false,
-                tidligereFamiliepleier = false,
-                inntektsaar = 2025,
-                harUtbetaling = true,
-                endringIUtbetaling = true,
-                virkningstidspunkt = LocalDate.of(2025, 1, 1),
-                bosattUtland = false,
+                omsRettUtenTidsbegrensning = false, // TODO
+                tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
+                inntektsaar = virk.year,
+                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                endringIUtbetaling = true, // TODO
+                virkningstidspunkt = virk,
+                bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
             )
         }
     }

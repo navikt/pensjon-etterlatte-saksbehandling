@@ -30,7 +30,9 @@ export const SlettBrev = ({ brev }: { brev: IBrev }) => {
 
   return (
     <>
-      <Button variant="danger" icon={<TrashIcon />} onClick={() => setIsOpen(true)} title="Slett brev" />
+      <Button variant="danger" icon={<TrashIcon />} onClick={() => setIsOpen(true)} title="Slett brev" size="small">
+        Slett
+      </Button>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Slett brev">
         <Modal.Body>

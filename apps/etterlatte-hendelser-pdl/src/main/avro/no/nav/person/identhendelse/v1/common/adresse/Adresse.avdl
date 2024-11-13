@@ -40,14 +40,14 @@ protocol AdresseV1 {
 
   record UtenlandskAdresse {
     union { null, string } adressenavnNummer = null;
-    union { null, string } bygningEtasjeLeilighet = null;    // NAV-spesifikk. Dekker de neste 3 feltene.
+    union { null, string } bygningEtasjeLeilighet = null;    // Nav-spesifikk. Dekker de neste 3 feltene.
     union { null, string } bygning = null;
     union { null, string } etasjenummer = null;
     union { null, string } boenhet = null;
     union { null, string } postboksNummerNavn = null;
     union { null, string } postkode = null;
     union { null, string } bySted = null;
-    union { null, string } regionDistriktOmraade = null;     // NAV-spesifikk. Dekker de neste 2 feltene.
+    union { null, string } regionDistriktOmraade = null;     // Nav-spesifikk. Dekker de neste 2 feltene.
     union { null, string } distriktsnavn = null;
     union { null, string } region = null;
     string landkode;

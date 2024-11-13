@@ -45,7 +45,7 @@ class PdlOboKlient(
         val request =
             PdlGraphqlRequest(
                 query = getQuery("/pdl/hentPersonNavnFoedsel.graphql"),
-                variables = PdlVariables(ident),
+                variables = PdlVariables(ident, folkeregisteridentHistorikk = true),
             )
 
         return retry<PdlPersonNavnFoedselResponse>(times = 3) {

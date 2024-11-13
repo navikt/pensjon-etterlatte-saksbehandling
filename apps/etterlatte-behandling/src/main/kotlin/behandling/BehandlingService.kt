@@ -44,6 +44,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -258,7 +259,7 @@ interface BehandlingService {
         opphoerFraOgMed: YearMonth,
     )
 
-    fun hentAapenOmregning(sakId: SakId): UUID?
+    fun hentAapenOmregning(sakId: SakId): Revurdering?
 
     fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,
@@ -617,10 +618,10 @@ internal class BehandlingServiceImpl(
     ) {
         inTransaction {
             val behandling = behandlingDao.hentBehandling(behandlingId)
-            require(behandling != null) {
+            checkInternFeil(behandling != null) {
                 "Behandling finnes ikke $behandlingId"
             }
-            when (behandling.type) {
+            when (behandling!!.type) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
                 BehandlingType.REVURDERING -> {
                     behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
@@ -863,7 +864,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentAapenOmregning(sakId: SakId): UUID? =
+    override fun hentAapenOmregning(sakId: SakId): Revurdering? =
         behandlingDao
             .hentAlleRevurderingerISakMedAarsak(
                 sakId,
@@ -874,7 +875,7 @@ internal class BehandlingServiceImpl(
                 ),
             ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
-            }?.id
+            }
 
     override fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,

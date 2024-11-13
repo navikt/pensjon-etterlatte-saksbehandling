@@ -30,6 +30,10 @@ fun ApplicationTestBuilder.runServerWithModule(
     }
 }
 
+/*
+Obs krever at du intercepter og legger på egen context hvis du ikke bruker Application.module i behandling som kaller settOppApplikasjonen()
+Se TestHelper.kt i behandling
+ */
 fun ApplicationTestBuilder.runServer(
     server: MockOAuth2Server,
     routePrefix: String = "",

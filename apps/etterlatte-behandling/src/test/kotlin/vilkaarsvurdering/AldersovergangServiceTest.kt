@@ -1,26 +1,26 @@
-/*
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
+import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.Test
-import vilkaarsvurdering.VilkaarTypeOgUtfall
-import vilkaarsvurdering.Vilkaarsvurdering
-import vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
-import vilkaarsvurdering.VurdertVilkaar
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
@@ -107,17 +107,15 @@ class AldersovergangServiceTest {
             vilkaarsvurderingService.oppdaterTotalVurdering(behandlingId, brukerTokenInfo, vilkaarsvurderingResultat)
         } returns VilkaarsvurderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, 1L)
 
-        runBlocking {
-            val res =
-                aldersAldersovergangService.behandleOpphoerAldersovergang(
-                    behandlingId = behandlingId,
-                    loependeBehandlingId = loependeBehandlingId,
-                    brukerTokenInfo = brukerTokenInfo,
-                    tidspunkt = { tidspunkt },
-                )
+        val res =
+            aldersAldersovergangService.behandleOpphoerAldersovergang(
+                behandlingId = behandlingId,
+                loependeBehandlingId = loependeBehandlingId,
+                brukerTokenInfo = brukerTokenInfo,
+                tidspunkt = { tidspunkt },
+            )
 
-            res shouldBe vilkaarsvurdering
-        }
+        res shouldBe vilkaarsvurdering
 
         coVerify { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId) }
         coVerify {
@@ -144,4 +142,3 @@ class AldersovergangServiceTest {
         }
     }
 }
-*/

@@ -7,9 +7,11 @@ import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BehandlingInfoService(
@@ -17,6 +19,8 @@ class BehandlingInfoService(
     private val behandlingService: BehandlingService,
     private val behandlingsstatusService: BehandlingStatusService,
 ) {
+    private val logger = LoggerFactory.getLogger(BehandlingInfoService::class.java)
+
     fun lagreBrevutfallOgEtterbetaling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -28,7 +32,10 @@ class BehandlingInfoService(
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
-        sjekkBehandlingKanEndres(behandling, opphoer)
+        logger.info("Behandling $behandlingId årsak ${behandling.revurderingsaarsak()}")
+        if (behandling.revurderingsaarsak()?.name != Revurderingaarsak.AARLIG_INNTEKTSJUSTERING.name) {
+            sjekkBehandlingKanEndres(behandling, opphoer)
+        }
 
         val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
         val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
@@ -168,7 +175,12 @@ class BehandlingInfoService(
         } else {
             when (behandling.sak.sakType) {
                 SakType.BARNEPENSJON -> behandlingsstatusService.settBeregnet(behandling.id, brukerTokenInfo, false)
-                SakType.OMSTILLINGSSTOENAD -> behandlingsstatusService.settAvkortet(behandling.id, brukerTokenInfo, false)
+                SakType.OMSTILLINGSSTOENAD ->
+                    behandlingsstatusService.settAvkortet(
+                        behandling.id,
+                        brukerTokenInfo,
+                        false,
+                    )
             }
         }
     }

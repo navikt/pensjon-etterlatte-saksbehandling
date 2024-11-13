@@ -1,5 +1,7 @@
 package no.nav.etterlatte.brev
 
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+
 /*
 Breva våre er teknisk sett to brev som er satt sammen - den redigerbare delen, og delen som ligg fast.
 Saksbehandler kan redigere den redigerbare delen, og ved PDF-generering sender vi den delen over til brevbakeren,
@@ -212,7 +214,7 @@ enum class Brevkoder(
     ;
 
     init {
-        require(redigering != ferdigstilling) {
+        checkInternFeil(redigering != ferdigstilling) {
             "Bruk forskjellige maler for redigering og ferdigstilling. $redigering og $ferdigstilling er like"
         }
     }

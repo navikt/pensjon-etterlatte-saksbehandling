@@ -23,6 +23,7 @@ import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkUgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -43,6 +44,9 @@ class BrevService(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
 
+    /*
+     * Brev uten behandling (dødshendelse, etc)
+     */
     suspend fun opprettJournalfoerOgDistribuerRiver(
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
@@ -82,7 +86,10 @@ class BrevService(
             return BrevDistribusjonResponse(brevId, true)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
+            logger.error(
+                "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
+                e,
+            )
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
             return BrevDistribusjonResponse(brevId, false)
         }
@@ -127,7 +134,10 @@ class BrevService(
             return BrevStatusResponse(brevId, oppdatertBrev.status)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
+            logger.error(
+                "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
+                e,
+            )
 
             return BrevStatusResponse(brevId, oppdatertBrev.status)
         }
@@ -339,7 +349,9 @@ class BrevService(
         logger.info("Sjekker om brev med id=$id kan slettes")
 
         val brev = sjekkOmBrevKanEndres(id)
-        check(brev.behandlingId == null) { "Brev med id=$id er et vedtaksbrev og kan ikke slettes" }
+        checkUgyldigForespoerselException(value = brev.behandlingId == null, code = "BREV_KAN_IKKE_SLETTES") {
+            "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
+        }
 
         val result = db.settBrevSlettet(id, bruker)
         logger.info("Brev med id=$id slettet=$result")

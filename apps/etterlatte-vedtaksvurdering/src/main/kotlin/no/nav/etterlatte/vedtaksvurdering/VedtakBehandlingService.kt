@@ -8,7 +8,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -421,7 +422,7 @@ class VedtakBehandlingService(
             }
         } catch (e: Exception) {
             repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
-            throw e
+            throw InternfeilException("Klarte ikke å oppdatere samordningsmelding", e)
         }
     }
 
@@ -663,7 +664,11 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.ytelseEtterAvkorting.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
-                                    regelverk = hentRegelverkFraBeregningForPeriode(beregningOgAvkorting.beregning, it.fom),
+                                    regelverk =
+                                        hentRegelverkFraBeregningForPeriode(
+                                            beregningOgAvkorting.beregning.beregningsperioder,
+                                            it.fom,
+                                        ),
                                 )
                             }
                         }
@@ -703,15 +708,17 @@ class VedtakBehandlingService(
     }
 
     private fun hentRegelverkFraBeregningForPeriode(
-        beregning: BeregningDTO,
+        beregningsperioder: List<Beregningsperiode>,
         fom: YearMonth,
-    ): Regelverk? =
-        beregning.beregningsperioder
-            .sortedBy { it.datoFOM }
-            .first {
-                (fom.isAfter(it.datoFOM) || fom == it.datoFOM) &&
-                    (it.datoTOM == null || (fom.isBefore(it.datoTOM) || fom == it.datoFOM))
-            }.regelverk
+    ): Regelverk? {
+        val samsvarendeBeregningsperiode =
+            beregningsperioder
+                .sortedBy { it.datoFOM }
+                .firstOrNull { fom >= it.datoFOM && (it.datoTOM == null || fom <= it.datoTOM) }
+                ?: throw InternfeilException("Fant ingen beregningsperioder som samsvarte med avkortingsperiode $fom")
+
+        return samsvarendeBeregningsperiode.regelverk
+    }
 
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,
@@ -737,7 +744,7 @@ class VedtakBehandlingService(
                             VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider)
                         }
 
-                        null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
+                        null -> throw InternfeilException("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
                     }
                 }
             }

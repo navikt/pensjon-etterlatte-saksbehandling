@@ -10,7 +10,8 @@ import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
 import { VurderingAvAktivitetsplikt } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/VurderingAvAktivitetsplikt'
-import { AktivitetspliktStatusTag } from '~shared/tags/AktivitetspliktStatusTag'
+import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktStatusOgGyldig'
+import { harVurdering } from '~shared/types/Aktivitetsplikt'
 
 export const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
@@ -45,14 +46,7 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
               <VStack gap="4">
                 <Heading size="medium">Aktivitetsplikt</Heading>
 
-                <Label>Status på gjenlevende sin aktivitet</Label>
-                {aktivitetspliktVurdering ? (
-                  <div>
-                    <AktivitetspliktStatusTag aktivitetspliktVurdering={aktivitetspliktVurdering} />
-                  </div>
-                ) : (
-                  <BodyShort>Ingen vurdering</BodyShort>
-                )}
+                <AktivitetspliktStatusTagOgGyldig aktivitetspliktVurdering={aktivitetspliktVurdering} />
                 <Label>Gjenlevende sin tidslinje</Label>
 
                 {mapSuccess(sakResult, (data) =>
@@ -68,7 +62,7 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
               </VStack>
               <hr style={{ width: '100%' }} />
 
-              {aktivitetspliktVurdering ? (
+              {harVurdering(aktivitetspliktVurdering) ? (
                 <VurderingAvAktivitetsplikt aktivitetspliktVurdering={aktivitetspliktVurdering} />
               ) : (
                 <BodyShort>Ingen vurdering</BodyShort>

@@ -10,6 +10,7 @@ data class PersonNavnFoedselsaar(
     val mellomnavn: String? = null,
     val etternavn: String,
     val foedselsnummer: Folkeregisteridentifikator,
+    val historiskeFoedselsnummer: List<Folkeregisteridentifikator>,
     val foedselsaar: Int,
     val foedselsdato: LocalDate? = null,
     val doedsdato: LocalDate? = null,

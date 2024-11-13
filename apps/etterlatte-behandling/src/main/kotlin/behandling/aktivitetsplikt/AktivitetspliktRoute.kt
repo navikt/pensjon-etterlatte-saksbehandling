@@ -18,7 +18,7 @@ import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
-import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -229,12 +229,24 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
         }
-
+        route("oppgave-oppfoelging") {
+            post {
+                kunSystembruker {
+                    logger.info("Sjekker om sak $sakId ikke har varig unntak og skal ha oppgave om infobrev")
+                    val request = call.receive<OpprettOppgaveForAktivitetspliktDto>()
+                    val opprettet =
+                        inTransaction {
+                            aktivitetspliktService.opprettOppgaveHvisIkkeVarigUnntak(request)
+                        }
+                    call.respond(opprettet)
+                }
+            }
+        }
         route("varigUnntak") {
             post {
                 kunSystembruker {
                     logger.info("Sjekker om sak $sakId trenger informasjon om aktivetsplikt - varig unntak etter 6 måneder")
-                    val request = call.receive<OpprettOppgaveForAktivitetspliktVarigUnntakDto>()
+                    val request = call.receive<OpprettOppgaveForAktivitetspliktDto>()
                     val opprettet =
                         inTransaction {
                             aktivitetspliktService.opprettOppgaveHvisVarigUnntak(request)

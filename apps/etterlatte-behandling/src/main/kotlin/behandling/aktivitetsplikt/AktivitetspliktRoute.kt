@@ -30,10 +30,10 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 const val AKTIVITET_ID_CALL_PARAMETER = "id"
@@ -64,7 +64,7 @@ internal fun Route.aktivitetspliktRoutes(
     aktivitetspliktService: AktivitetspliktService,
     aktivitetspliktOppgaveService: AktivitetspliktOppgaveService,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("AktivitetspliktRoute")
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt") {
         get {

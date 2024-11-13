@@ -10,15 +10,20 @@ import {
   Select,
   TextField,
   ToggleGroup,
+  UNSAFE_Combobox,
   VStack,
 } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { AdresseType, Mottaker } from '~shared/types/Brev'
-import { isPending, Result } from '~shared/api/apiUtils'
+import { isInitial, isPending, mapResult, Result } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Controller, useForm } from 'react-hook-form'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentKodeverkLandISO2 } from '~shared/api/kodeverk'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 enum JuridiskEnhet {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -39,6 +44,8 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
     initialMottaker.orgnummer ? JuridiskEnhet.BEDRIFT : JuridiskEnhet.PRIVATPERSON
   )
 
+  const [landResult, apiHentLand] = useApiCall(hentKodeverkLandISO2)
+
   const {
     control,
     formState: { errors, isDirty },
@@ -55,6 +62,12 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
     if (juridiskEnhet == JuridiskEnhet.BEDRIFT) setValue('foedselsnummer', undefined)
     else if (juridiskEnhet == JuridiskEnhet.PRIVATPERSON) setValue('orgnummer', undefined)
   }, [juridiskEnhet])
+
+  useEffect(() => {
+    if (isOpen && isInitial(landResult)) {
+      apiHentLand(undefined)
+    }
+  })
 
   const lagreEndringer = (mottaker: Mottaker) => {
     if (!isDirty) {
@@ -73,6 +86,7 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
   }
 
   const erNorskAdresse = watch('adresse.adresseType') === AdresseType.NORSKPOSTADRESSE
+  const erUtenlanskAdresse = watch('adresse.adresseType') === AdresseType.UTENLANDSKPOSTADRESSE
 
   return (
     <>
@@ -148,8 +162,20 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
                     message: 'Adressetype må være satt',
                   },
                 }}
-                render={({ field, formState: { errors } }) => (
-                  <Select {...field} label="Adressetype" error={errors?.adresse?.adresseType?.message}>
+                render={({ field: { onChange, ...rest }, formState: { errors } }) => (
+                  <Select
+                    {...rest}
+                    label="Adressetype"
+                    error={errors?.adresse?.adresseType?.message}
+                    onChange={(e) => {
+                      const type = e.target.value as AdresseType
+                      if (type === AdresseType.NORSKPOSTADRESSE) {
+                        setValue('adresse.landkode', 'NO')
+                        setValue('adresse.land', 'NORGE')
+                      }
+                      onChange(type)
+                    }}
+                  >
                     <option></option>
                     <option value={AdresseType.NORSKPOSTADRESSE}>Norsk postadresse</option>
                     <option value={AdresseType.UTENLANDSKPOSTADRESSE}>Utenlandsk postadresse</option>
@@ -157,28 +183,30 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
                 )}
               />
 
-              {!erNorskAdresse && (
+              {erUtenlanskAdresse && (
                 <Alert variant="warning" size="small">
                   OBS: På utenlandske adresser må du kun bruke adresselinjer, land og landkode
                 </Alert>
               )}
 
-              <VStack>
-                <Label>Adresselinjer</Label>
-                <TextField
-                  {...register('adresse.adresselinje1', {
-                    required: {
-                      value: true,
-                      message: 'Det må være minst én adresselinje',
-                    },
-                  })}
-                  label=""
-                  placeholder="Adresselinje 1"
-                  error={errors?.adresse?.adresselinje1?.message}
-                />
-                <TextField {...register('adresse.adresselinje2')} label="" placeholder="Adresselinje 2" />
-                <TextField {...register('adresse.adresselinje3')} label="" placeholder="Adresselinje 3" />
-              </VStack>
+              {(erNorskAdresse || erUtenlanskAdresse) && (
+                <VStack>
+                  <Label>Adresselinjer</Label>
+                  <TextField
+                    {...register('adresse.adresselinje1', {
+                      required: {
+                        value: true,
+                        message: 'Det må være minst én adresselinje',
+                      },
+                    })}
+                    label=""
+                    placeholder="Adresselinje 1"
+                    error={errors?.adresse?.adresselinje1?.message}
+                  />
+                  <TextField {...register('adresse.adresselinje2')} label="" placeholder="Adresselinje 2" />
+                  <TextField {...register('adresse.adresselinje3')} label="" placeholder="Adresselinje 3" />
+                </VStack>
+              )}
 
               {erNorskAdresse && (
                 <HGrid columns={2} gap="4 4">
@@ -214,32 +242,39 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
                 </HGrid>
               )}
 
-              <HGrid columns={2} gap="4 4">
-                <TextField
-                  {...register('adresse.landkode', {
-                    required: {
-                      value: true,
-                      message: 'Landkode må være satt (2 tegn)',
-                    },
-                    pattern: {
-                      value: /^[A-Z]{2}$/,
-                      message: 'Ugyldig tegn i landkoden. Landkode skal kun bestå av 2 store bokstaver (eks. NO)',
-                    },
-                  })}
-                  label="Landkode"
-                  error={errors?.adresse?.landkode?.message}
-                />
-                <TextField
-                  {...register('adresse.land', {
-                    required: {
-                      value: true,
-                      message: 'Land må være satt',
-                    },
-                  })}
-                  label="Land"
-                  error={errors?.adresse?.land?.message}
-                />
-              </HGrid>
+              {erUtenlanskAdresse &&
+                mapResult(landResult, {
+                  pending: <Spinner label="Henter land og landkoder" />,
+                  error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                  success: (landkoder) => (
+                    <Controller
+                      name="adresse.landkode"
+                      control={control}
+                      render={({ field: { onChange, value } }) => {
+                        const options = landkoder.map((kode) => kode.beskrivelse.term)
+                        const selected = landkoder.find((lk) => lk.isoLandkode === value)?.beskrivelse?.term
+
+                        const finnKode = (term: string) =>
+                          landkoder.find((lk) => lk.beskrivelse.term === term)?.isoLandkode
+
+                        return (
+                          <UNSAFE_Combobox
+                            label="Land"
+                            options={options}
+                            selectedOptions={[selected || '']}
+                            onToggleSelected={(option, isSelected) => {
+                              if (isSelected) {
+                                setValue('adresse.land', option)
+                                onChange(finnKode(option))
+                              }
+                            }}
+                            shouldAutocomplete
+                          />
+                        )
+                      }}
+                    />
+                  ),
+                })}
 
               <ControlledRadioGruppe
                 name="tvingSentralPrint"

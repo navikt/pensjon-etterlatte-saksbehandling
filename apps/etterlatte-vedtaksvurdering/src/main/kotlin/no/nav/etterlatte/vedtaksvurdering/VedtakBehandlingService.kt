@@ -584,12 +584,11 @@ class VedtakBehandlingService(
         virkningstidspunkt: YearMonth,
         behandling: DetaljertBehandling,
     ) = when (vedtakType) {
-        VedtakType.OPPHOER -> {
-            virkningstidspunkt
-        }
+        VedtakType.OPPHOER -> virkningstidspunkt
+        VedtakType.AVSLAG -> behandling.opphoerFraOgMed
         else -> {
             if (virkningstidspunkt == behandling.opphoerFraOgMed) {
-                // TODO Det burde være en løsning for å kunne fjerne et opphler uten en revurdering med samme virk som opphøret?
+                // TODO Det burde være en løsning for å kunne fjerne et opphør uten en revurdering med samme virk som opphøret?
                 null
             } else if (behandling.opphoerFraOgMed != null && virkningstidspunkt > behandling.opphoerFraOgMed) {
                 throw UgyldigForespoerselException(

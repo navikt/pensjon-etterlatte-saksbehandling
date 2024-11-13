@@ -1,5 +1,6 @@
 import { apiClient, ApiResponse } from './apiClient'
 import { Brevtype, IBrev, Mottaker, Spraak } from '~shared/types/Brev'
+import { DokDistKanalResponse } from '~shared/types/dokdist'
 
 export const hentBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/${props.brevId}?sakId=${props.sakId}`)
@@ -145,3 +146,10 @@ export const markerBrevSomUtgaar = async (props: {
   kommentar: string
 }): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/${props.brevId}/utgaar?sakId=${props.sakId}`, { kommentar: props.kommentar })
+
+export const bestemDistribusjonskanal = async (args: {
+  brevId: number
+  sakId: number
+  mottakerId: string
+}): Promise<ApiResponse<DokDistKanalResponse>> =>
+  apiClient.get(`/brev/${args.brevId}/kanal?sakId=${args.sakId}&mottakerId=${args.mottakerId}`)

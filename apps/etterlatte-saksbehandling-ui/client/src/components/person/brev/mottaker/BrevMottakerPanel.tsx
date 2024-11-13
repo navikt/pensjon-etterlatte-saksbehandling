@@ -8,10 +8,10 @@ import { RedigerMottakerModal } from '~components/person/brev/mottaker/RedigerMo
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { DigitalKontaktinformasjon, hentKontaktinformasjonKRR } from '~shared/api/krr'
-import { oppdaterMottaker, settHovedmottaker } from '~shared/api/brev'
+import { bestemDistribusjonskanal, oppdaterMottaker, settHovedmottaker } from '~shared/api/brev'
 import { SlettMottakerModal } from '~components/person/brev/mottaker/SlettMottakerModal'
 import { PersonCheckmarkIcon } from '@navikt/aksel-icons'
+import { Distribusjonskanal, DokDistKanalResponse } from '~shared/types/dokdist'
 
 interface MottakerProps {
   brevId: number
@@ -32,6 +32,25 @@ const formaterMottakerType = (type: MottakerType) => {
   }
 }
 
+const formaterDistribusjonskanal = (kanal: Distribusjonskanal) => {
+  switch (kanal) {
+    case Distribusjonskanal.LOKAL_PRINT:
+      return 'Lokal print'
+    case Distribusjonskanal.PRINT:
+      return 'Print'
+    case Distribusjonskanal.DITT_NAV:
+      return 'Ditt Nav'
+    case Distribusjonskanal.SDP:
+      return 'SDP'
+    case Distribusjonskanal.INGEN_DISTRIBUSJON:
+      return 'Ingen distribusjon'
+    case Distribusjonskanal.TRYGDERETTEN:
+      return 'Trygderetten'
+    case Distribusjonskanal.DPVT:
+      return 'DPVT'
+  }
+}
+
 export function BrevMottakerPanel({
   brevId,
   behandlingId,
@@ -46,7 +65,7 @@ export function BrevMottakerPanel({
   const [oppdaterMottakerResult, apiOppdaterMottaker] = useApiCall(oppdaterMottaker)
   const [settHovedmottakerResult, apiSettHovedmottaker] = useApiCall(settHovedmottaker)
   const [soeker, getSoekerFraGrunnlag] = useApiCall(getGrunnlagsAvOpplysningstype)
-  const [kontaktinfoResult, hentKontaktinfo] = useApiCall(hentKontaktinformasjonKRR)
+  const [dokdistkanalResult, hentDokdistKanal] = useApiCall(bestemDistribusjonskanal)
 
   useEffect(() => {
     if (!behandlingId) {
@@ -61,10 +80,10 @@ export function BrevMottakerPanel({
   }, [])
 
   useEffect(() => {
-    if (mottaker.foedselsnummer?.value && !mottaker.bestillingId) {
-      hentKontaktinfo(mottaker.foedselsnummer.value)
+    if (mottaker.foedselsnummer?.value && !mottaker.tvingSentralPrint) {
+      hentDokdistKanal({ brevId, sakId, mottakerId: mottaker.id })
     }
-  }, [mottaker.foedselsnummer?.value])
+  }, [mottaker.foedselsnummer?.value, mottaker.tvingSentralPrint])
 
   const oppdater = (brevId: number, sakId: number, mottaker: Mottaker, onSuccess: Function) => {
     apiOppdaterMottaker({ brevId, sakId, mottaker }, () => {
@@ -130,26 +149,6 @@ export function BrevMottakerPanel({
 
       {flereMottakere ? <MottakerInnholdKompakt mottaker={mottaker} /> : <MottakerInnhold mottaker={mottaker} />}
 
-      {mapResult(kontaktinfoResult, {
-        pending: <Loader />,
-        success: (res?: DigitalKontaktinformasjon) => (
-          <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="4 0" marginBlock="4 0">
-            <Heading size="xsmall" spacing>
-              Kontakt- og reservasjonsregisteret
-            </Heading>
-
-            {res ? (
-              <VStack gap="2">
-                <Info label="Kan varsles" tekst={res.kanVarsles ? 'Ja' : 'Nei'} />
-                <Info label="Reservert mot digital kommunikasjon" tekst={res.reservert ? 'Ja' : 'Nei'} />
-              </VStack>
-            ) : (
-              'Ikke registrert i KRR'
-            )}
-          </Box>
-        ),
-      })}
-
       {!!mottaker.bestillingId && (
         <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="4 0" marginBlock="4 0">
           <Info label="JournalpostID" tekst={mottaker.journalpostId} wide />
@@ -158,8 +157,21 @@ export function BrevMottakerPanel({
       )}
 
       <Box borderWidth="1 0 0 0" borderColor="border-subtle" paddingBlock="4 0" marginBlock="4 0">
-        <Heading size="xsmall">Distribusjonsmetode</Heading>
-        <BodyShort>{mottaker.tvingSentralPrint ? 'Tving sentral print' : 'Automatisk'}</BodyShort>
+        <Heading size="xsmall" spacing>
+          Distribusjonsmetode
+        </Heading>
+
+        {mottaker.tvingSentralPrint
+          ? 'Tvinger sentral print'
+          : mapResult(dokdistkanalResult, {
+              pending: <Loader />,
+              success: (res: DokDistKanalResponse) => (
+                <VStack gap="4">
+                  <Info label="Kanal" tekst={formaterDistribusjonskanal(res.distribusjonskanal)} />
+                  <Info label="Begrunnelse" tekst={res.regelBegrunnelse} />
+                </VStack>
+              ),
+            })}
       </Box>
 
       {mapFailure(settHovedmottakerResult, (error) => (

@@ -93,7 +93,7 @@ spec:
     - name: DOKDISTKANAL_URL
       value: https://dokdistkanal.dev-fss-pub.nais.io/rest
     - name: DOKDISTKANAL_CLIENT_ID
-      value: dev-fss.teamdokumenthandtering.dokdistkanal-q1
+      value: dev-fss.teamdokumenthandtering.dokdistkanal
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: REGOPPSLAG_SCOPE

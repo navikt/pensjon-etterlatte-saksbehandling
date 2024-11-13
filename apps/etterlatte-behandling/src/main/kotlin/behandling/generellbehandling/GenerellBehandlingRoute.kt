@@ -27,7 +27,7 @@ internal fun Route.generellbehandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     sakService: SakService,
 ) {
-    val logger = LoggerFactory.getLogger("GenerelBehandlingRoute")
+    val logger = LoggerFactory.getLogger("GenerellbehandlingRoute")
 
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->

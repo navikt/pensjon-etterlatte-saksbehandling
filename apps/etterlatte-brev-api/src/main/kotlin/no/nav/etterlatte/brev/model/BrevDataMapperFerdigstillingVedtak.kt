@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.Brevkoder.BP_INNVILGELSE_FORELDRELOES
 import no.nav.etterlatte.brev.Brevkoder.BP_OPPHOER
 import no.nav.etterlatte.brev.Brevkoder.BP_REVURDERING
 import no.nav.etterlatte.brev.Brevkoder.OMS_AVSLAG
+import no.nav.etterlatte.brev.Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL
 import no.nav.etterlatte.brev.Brevkoder.OMS_INNVILGELSE
 import no.nav.etterlatte.brev.Brevkoder.OMS_OPPHOER
 import no.nav.etterlatte.brev.Brevkoder.OMS_REVURDERING
@@ -29,6 +30,7 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoer
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurdering
 import no.nav.etterlatte.brev.model.klage.AvvistKlageFerdigData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInntektsjusteringVedtak
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelse
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
@@ -152,8 +154,6 @@ class BrevDataMapperFerdigstillingVedtak(
                         utlandstilknytningType,
                     )
 
-                // TODO: legg til OMS_INNTEKTSJUSTERING_VARSEL
-
                 OMS_REVURDERING ->
                     omstillingsstoenadRevurdering(
                         bruker,
@@ -173,6 +173,19 @@ class BrevDataMapperFerdigstillingVedtak(
                     omstillingsstoenadAvslag(
                         innholdMedVedlegg.innhold(),
                         utlandstilknytningType,
+                    )
+
+                OMS_INNTEKTSJUSTERING_VARSEL ->
+                    omstillingsstoenadInntektsjusteringVedtak(
+                        bruker,
+                        innholdMedVedlegg,
+                        revurderingsaarsak,
+                        avdoede,
+                        behandlingId!!,
+                        sakId,
+                        sakType,
+                        vedtakType!!,
+                        virkningstidspunkt!!,
                     )
 
                 OMS_OPPHOER ->
@@ -535,6 +548,37 @@ class BrevDataMapperFerdigstillingVedtak(
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
             virkningsdato,
             utlandstilknytningType,
+        )
+    }
+
+    private suspend fun omstillingsstoenadInntektsjusteringVedtak(
+        bruker: BrukerTokenInfo,
+        innholdMedVedlegg: InnholdMedVedlegg,
+        revurderingaarsak: Revurderingaarsak?,
+        avdoede: List<Avdoed>,
+        behandlingId: UUID,
+        sakId: SakId,
+        sakType: SakType,
+        vedtakType: VedtakType,
+        virkningstidspunkt: YearMonth,
+    ) = coroutineScope {
+        val avkortingsinfo =
+            async {
+                beregningService.finnAvkortingsinfo(
+                    behandlingId,
+                    sakType,
+                    virkningstidspunkt,
+                    vedtakType,
+                    bruker,
+                )
+            }
+
+        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
+
+        OmstillingsstoenadInntektsjusteringVedtak.fra(
+            innholdMedVedlegg = innholdMedVedlegg,
+            avkortingsinfo = avkortingsinfo.await(),
+            trygdetid = requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
         )
     }
 }

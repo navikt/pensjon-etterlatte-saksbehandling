@@ -15,11 +15,18 @@ data class BrevkodeRequest(
     val revurderingaarsak: Revurderingaarsak?,
 )
 
+class VedtakTypeFeilForBrevkode(
+    val vedtakType: VedtakType?,
+) : UgyldigForespoerselException(
+        code = "FEIL_VEDTAKTYPE",
+        detail = "Feil vedtakstype $ $vedtakType",
+    )
+
 class BrevKodeMapperVedtak {
     fun brevKode(request: BrevkodeRequest): Brevkoder {
         if (request.erMigrering && !request.erForeldreloes) {
-            check(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(request.vedtakType)) {
-                "Vedtaktype må være ${VedtakType.INNVILGELSE.name} eller ${VedtakType.ENDRING.name} var ${request.vedtakType}"
+            if (listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(request.vedtakType)) {
+                throw VedtakTypeFeilForBrevkode(request.vedtakType)
             }
             return Brevkoder.OMREGNING
         }

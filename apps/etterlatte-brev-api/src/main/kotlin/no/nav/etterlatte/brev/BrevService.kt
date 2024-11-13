@@ -23,6 +23,7 @@ import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkUgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -348,7 +349,9 @@ class BrevService(
         logger.info("Sjekker om brev med id=$id kan slettes")
 
         val brev = sjekkOmBrevKanEndres(id)
-        check(brev.behandlingId == null) { "Brev med id=$id er et vedtaksbrev og kan ikke slettes" }
+        checkUgyldigForespoerselException(value = brev.behandlingId == null, code = "BREV_KAN_IKKE_SLETTES") {
+            "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
+        }
 
         val result = db.settBrevSlettet(id, bruker)
         logger.info("Brev med id=$id slettet=$result")

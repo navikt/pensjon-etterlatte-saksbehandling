@@ -11,6 +11,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
@@ -101,7 +102,7 @@ private fun opprettSoeknadJson(
     behandlingssteg: Behandlingssteg,
 ): String {
     if (soeknadType == SoeknadType.BARNEPENSJON) {
-        check(barnFnr.isNotEmpty()) {
+        checkInternFeil(barnFnr.isNotEmpty()) {
             "Kan ikke opprette barnepensjon uten fnr på barn!"
         }
     }

@@ -2,9 +2,8 @@ import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
-import { ferdigstillBrevOgOppgaveAktivitetsplikt } from '~shared/api/aktivitetsplikt'
 import { BrevProsessType, BrevStatus, IBrev } from '~shared/types/Brev'
-import { isFailure, mapResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Column, GridContainer } from '~shared/styled'
@@ -13,24 +12,15 @@ import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
-import { isPending } from '@reduxjs/toolkit'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
-import { useDispatch } from 'react-redux'
-import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
+import { FerdigstillAktivitetspliktBrevModal } from '~components/aktivitetsplikt/brev/FerdigstillBrevModal'
 
 export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
   const { oppgave, sistEndret } = useAktivitetspliktOppgaveVurdering()
   const [kanRedigeres, setKanRedigeres] = useState(false)
 
   const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
-  const [status, ferdigstillOppgaveOgBrev] = useApiCall(ferdigstillBrevOgOppgaveAktivitetsplikt)
-  const dispatch = useDispatch()
-  const ferdigstill = () => {
-    ferdigstillOppgaveOgBrev({ oppgaveId: oppgave.id }, (oppgave) => {
-      dispatch(setAktivitetspliktOppgave(oppgave))
-    })
-  }
 
   const hentBrevOgSetStatus = () => {
     apiHentBrev({ brevId: brevId, sakId: oppgave.sakId }, (brev) => {
@@ -81,20 +71,22 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
           </Column>
           <Column>
             {brevErFerdigstilt ? (
-              <Box maxHeight="955px" width="100%" height="100%" marginBlock="0 16">
-                <ForhaandsvisningBrev brev={brev} />
-              </Box>
-            ) : (
-              <HStack wrap={false}>
-                <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} tilbakestillingsaction={() => undefined} />
-              </HStack>
-            )}
-            <InfobrevKnapperad ferdigstill={!brevErFerdigstilt ? ferdigstill : undefined} status={status}>
               <>
-                {isFailure(status) && <ApiErrorAlert>Kunne ikke ferdigstille {status.error.detail}</ApiErrorAlert>}
-                {isPending(status) && <Spinner label="Ferdigstiller brev og oppgave" />}
+                <Box maxHeight="955px" width="100%" height="100%" marginBlock="0 16">
+                  <ForhaandsvisningBrev brev={brev} />
+                </Box>
+                <InfobrevKnapperad />
               </>
-            </InfobrevKnapperad>
+            ) : (
+              <>
+                <HStack wrap={false}>
+                  <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} tilbakestillingsaction={() => undefined} />
+                </HStack>
+                <InfobrevKnapperad>
+                  <FerdigstillAktivitetspliktBrevModal />
+                </InfobrevKnapperad>
+              </>
+            )}
           </Column>
         </GridContainer>
       )

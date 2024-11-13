@@ -1,54 +1,39 @@
 import { Oppgavestatus } from '~shared/types/oppgave'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { ferdigstillOppgave } from '~shared/api/oppgaver'
 import { Alert, BodyShort, VStack } from '@navikt/ds-react'
-import { mapFailure } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
-import { useDispatch } from 'react-redux'
-import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
+
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
+import { FerdigstillAktivitetspliktOppgaveModal } from '~components/aktivitetsplikt/brev/FerdigstillAktivitetspliktOppgaveModal'
 
 export function UtenBrevVisning() {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
-  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
-  const dispatch = useDispatch()
-
-  const ferdigstillOppgaveWrapper = () => {
-    apiFerdigstillOppgave(oppgave.id, (oppgave) => {
-      dispatch(setAktivitetspliktOppgave(oppgave))
-    })
-  }
   const oppgaveErFerdigstilt = oppgave.status === Oppgavestatus.FERDIGSTILT
   const oppgaveKanFerdigstilles = !oppgaveErFerdigstilt && !!aktivtetspliktbrevdata && !aktivtetspliktbrevdata.brevId
 
   return (
     <VStack gap="4" justify="center">
       {oppgaveErFerdigstilt ? (
-        <Alert variant="success">Oppgaven er ferdigstilt</Alert>
+        <>
+          <Alert variant="success">Oppgaven er ferdigstilt</Alert>
+          <InfobrevKnapperad />
+        </>
       ) : oppgaveKanFerdigstilles ? (
         <>
           <BodyShort>Brev skal ikke sendes for denne oppgaven, du kan nå ferdigstille oppgaven.</BodyShort>
+
+          <InfobrevKnapperad>
+            <FerdigstillAktivitetspliktOppgaveModal />
+          </InfobrevKnapperad>
         </>
       ) : (
         <>
           <Alert variant="error">
             Brev er ikke opprettet for oppgaven. Du må gå tilbake til forrige steg for å opprette brevet
           </Alert>
+          <InfobrevKnapperad />
         </>
       )}
-      <InfobrevKnapperad
-        ferdigstill={oppgaveKanFerdigstilles ? ferdigstillOppgaveWrapper : undefined}
-        status={ferdigstillOppgaveStatus}
-        tekst="Ferdigstill oppgave"
-      >
-        <>
-          {mapFailure(ferdigstillOppgaveStatus, (error) => (
-            <ApiErrorAlert>Kunne ikke ferdigstille oppgave.{error.detail}</ApiErrorAlert>
-          ))}
-        </>
-      </InfobrevKnapperad>
     </VStack>
   )
 }

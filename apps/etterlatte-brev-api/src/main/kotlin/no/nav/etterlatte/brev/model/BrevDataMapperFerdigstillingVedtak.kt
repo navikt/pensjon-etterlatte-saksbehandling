@@ -11,7 +11,7 @@ import no.nav.etterlatte.brev.Brevkoder.BP_INNVILGELSE_FORELDRELOES
 import no.nav.etterlatte.brev.Brevkoder.BP_OPPHOER
 import no.nav.etterlatte.brev.Brevkoder.BP_REVURDERING
 import no.nav.etterlatte.brev.Brevkoder.OMS_AVSLAG
-import no.nav.etterlatte.brev.Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL
+import no.nav.etterlatte.brev.Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK
 import no.nav.etterlatte.brev.Brevkoder.OMS_INNVILGELSE
 import no.nav.etterlatte.brev.Brevkoder.OMS_OPPHOER
 import no.nav.etterlatte.brev.Brevkoder.OMS_REVURDERING
@@ -175,7 +175,7 @@ class BrevDataMapperFerdigstillingVedtak(
                         utlandstilknytningType,
                     )
 
-                OMS_INNTEKTSJUSTERING_VARSEL ->
+                OMS_INNTEKTSJUSTERING_VEDTAK ->
                     omstillingsstoenadInntektsjusteringVedtak(
                         bruker,
                         innholdMedVedlegg,

@@ -95,7 +95,11 @@ class PDFGenerator(
         val brevkodePar =
             brevKodeMapping(
                 BrevkodeRequest(
-                    loependeIPesys(generellBrevData.systemkilde, generellBrevData.behandlingId, generellBrevData.revurderingsaarsak),
+                    loependeIPesys(
+                        generellBrevData.systemkilde,
+                        generellBrevData.behandlingId,
+                        generellBrevData.revurderingsaarsak,
+                    ),
                     erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
                     generellBrevData.sak.sakType,
                     generellBrevData.forenkletVedtak?.type,
@@ -118,7 +122,11 @@ class PDFGenerator(
                                 ),
                             behandlingId = generellBrevData.behandlingId,
                             sakType = generellBrevData.sak.sakType,
-                            erForeldreloes = erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
+                            erForeldreloes =
+                                erForeldreloes(
+                                    generellBrevData.personerISak.soeker,
+                                    generellBrevData.personerISak.avdoede,
+                                ),
                             utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
                             avdoede = generellBrevData.personerISak.avdoede,
                             systemkilde = generellBrevData.systemkilde,
@@ -132,7 +140,11 @@ class PDFGenerator(
                             klage = generellBrevData.forenkletVedtak?.klage,
                             harVerge = generellBrevData.personerISak.verge != null,
                             bruker = bruker,
-                            innholdMedVedlegg = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                            innholdMedVedlegg =
+                                InnholdMedVedlegg(
+                                    { hentLagretInnhold(brev) },
+                                    { hentLagretInnholdVedlegg(brev) },
+                                ),
                             kode = brevkodePar,
                             tittel = brev.tittel,
                         ),
@@ -148,7 +160,7 @@ class PDFGenerator(
 
         // TODO: ikke ideelt, bør finne en bedre måte å kombinere flere brev til en utsending
         // I forbindelse med årlig inntektsjustering jobb skal det sendes ut varsel og vedtak i samme brev.
-        if (brev.brevkoder == Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL) {
+        if (brev.brevkoder == Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK) {
             val varselbrev = opprettInntektsjusteringVarselbrevPdf(sak, brev, generellBrevData, avsender)
             return PDFHelper.kombinerPdfListeTilEnPdf(listOf(varselbrev, vedtaksbrev))
         }

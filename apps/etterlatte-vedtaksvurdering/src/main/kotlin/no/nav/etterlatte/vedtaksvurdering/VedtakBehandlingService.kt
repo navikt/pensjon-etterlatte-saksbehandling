@@ -77,8 +77,8 @@ class VedtakBehandlingService(
 
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
-        val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering)
 
         return if (vedtak != null) {
             logger.info("Oppdaterer vedtak for behandling med behandlingId=$behandlingId")
@@ -103,8 +103,9 @@ class VedtakBehandlingService(
         val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
-        val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering)
+
         oppdaterVedtak(
             behandling = behandling,
             eksisterendeVedtak = vedtak,
@@ -422,7 +423,7 @@ class VedtakBehandlingService(
             }
         } catch (e: Exception) {
             repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
-            throw e
+            throw InternfeilException("Klarte ikke å oppdatere samordningsmelding", e)
         }
     }
 
@@ -583,12 +584,11 @@ class VedtakBehandlingService(
         virkningstidspunkt: YearMonth,
         behandling: DetaljertBehandling,
     ) = when (vedtakType) {
-        VedtakType.OPPHOER -> {
-            virkningstidspunkt
-        }
+        VedtakType.OPPHOER -> virkningstidspunkt
+        VedtakType.AVSLAG -> behandling.opphoerFraOgMed
         else -> {
             if (virkningstidspunkt == behandling.opphoerFraOgMed) {
-                // TODO Det burde være en løsning for å kunne fjerne et opphler uten en revurdering med samme virk som opphøret?
+                // TODO Det burde være en løsning for å kunne fjerne et opphør uten en revurdering med samme virk som opphøret?
                 null
             } else if (behandling.opphoerFraOgMed != null && virkningstidspunkt > behandling.opphoerFraOgMed) {
                 throw UgyldigForespoerselException(
@@ -603,6 +603,7 @@ class VedtakBehandlingService(
 
     private fun vedtakType(
         behandlingType: BehandlingType,
+        revurderingaarsak: Revurderingaarsak?,
         vilkaarsvurdering: VilkaarsvurderingDto?,
     ): VedtakType =
         when (behandlingType) {
@@ -616,7 +617,13 @@ class VedtakBehandlingService(
             BehandlingType.REVURDERING -> {
                 when (vilkaarsvurderingUtfallNonNull(vilkaarsvurdering?.resultat?.utfall)) {
                     VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.ENDRING
-                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.OPPHOER
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
+                        if (revurderingaarsak == Revurderingaarsak.NY_SOEKNAD) {
+                            VedtakType.AVSLAG
+                        } else {
+                            VedtakType.OPPHOER
+                        }
+                    }
                 }
             }
         }
@@ -744,7 +751,7 @@ class VedtakBehandlingService(
                             VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider)
                         }
 
-                        null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
+                        null -> throw InternfeilException("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
                     }
                 }
             }

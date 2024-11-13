@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming.vedtak
 
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsperiode
@@ -7,6 +8,20 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingsperiodeTy
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import java.math.BigDecimal
 import java.time.YearMonth
+
+class FeilBeloep(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "FEIL_BELOEP",
+        detail = msg,
+    )
+
+class FeilTomPeriodeVedtak(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "FEIL_TOM_PERIODE_VEDTAK",
+        detail = msg,
+    )
 
 class Vedtaksverifiserer {
     fun verifiser(
@@ -30,17 +45,22 @@ class Vedtaksverifiserer {
         fraVedtak: Utbetalingsperiode,
         korresponderendeUtbetalingslinje: Utbetalingslinje,
     ) {
-        check(sammenlignBeloep(fraVedtak, korresponderendeUtbetalingslinje)) {
-            "Beløp fra vedtak $vedtakId var ${fraVedtak.beloep}, men i utbetalingslinje ${korresponderendeUtbetalingslinje.beloep}"
+        if (!sammenlignBeloep(fraVedtak, korresponderendeUtbetalingslinje)) {
+            throw FeilBeloep(
+                "Beløp fra vedtak $vedtakId var ${fraVedtak.beloep}, men i utbetalingslinje ${korresponderendeUtbetalingslinje.beloep}",
+            )
         }
-        check(fraVedtak.periode.tom == korresponderendeUtbetalingslinje.periode.til?.let { YearMonth.from(it) }) {
-            "Tom-periode fra vedtak $vedtakId var ${fraVedtak.periode.tom}, men i utbetalingslinje ${
-                korresponderendeUtbetalingslinje.periode.til?.let {
-                    YearMonth.from(
-                        it,
-                    )
-                }
-            }"
+
+        if (fraVedtak.periode.tom != korresponderendeUtbetalingslinje.periode.til?.let { YearMonth.from(it) }) {
+            throw FeilTomPeriodeVedtak(
+                "Tom-periode fra vedtak $vedtakId var ${fraVedtak.periode.tom}, men i utbetalingslinje ${
+                    korresponderendeUtbetalingslinje.periode.til?.let {
+                        YearMonth.from(
+                            it,
+                        )
+                    }
+                }",
+            )
         }
     }
 

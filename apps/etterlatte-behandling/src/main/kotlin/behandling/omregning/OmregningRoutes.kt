@@ -11,11 +11,11 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import org.slf4j.LoggerFactory
 
 fun Route.omregningRoutes(omregningService: OmregningService) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("OmregningRoute")
 
     route("/omregning") {
         put("kjoering") {

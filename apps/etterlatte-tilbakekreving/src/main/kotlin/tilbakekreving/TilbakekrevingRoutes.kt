@@ -11,10 +11,10 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
-import no.nav.etterlatte.libs.ktor.route.routeLogger
+import org.slf4j.LoggerFactory
 
 fun Route.tilbakekrevingRoutes(tilbakekrevingService: TilbakekrevingService) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("TilbakekrevingRoute")
 
     route("/api/tilbakekreving/{sakId}") {
         post("/vedtak") {

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering.service
 
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
@@ -22,59 +21,58 @@ class AldersovergangService(
         loependeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         tidspunkt: () -> LocalDateTime = { LocalDateTime.now() },
-    ): Vilkaarsvurdering =
-        inTransaction {
-            val vilkaarsvurdering =
-                vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
-                    ?: vilkaarsvurderingService
-                        .kopierVilkaarsvurdering(
-                            behandlingId = behandlingId,
-                            kopierFraBehandling = loependeBehandlingId,
-                            brukerTokenInfo = brukerTokenInfo,
-                            kopierResultat = false,
-                        ).vilkaarsvurdering
+    ): Vilkaarsvurdering {
+        val vilkaarsvurdering =
+            vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
+                ?: vilkaarsvurderingService
+                    .kopierVilkaarsvurdering(
+                        behandlingId = behandlingId,
+                        kopierFraBehandling = loependeBehandlingId,
+                        brukerTokenInfo = brukerTokenInfo,
+                        kopierResultat = false,
+                    ).vilkaarsvurdering
 
-            val aldersvilkaar =
-                vilkaarsvurdering.vilkaar.single {
-                    it.hovedvilkaar.type in
-                        listOf(
-                            VilkaarType.BP_ALDER_BARN_2024,
-                            VilkaarType.OMS_OVERLAPPENDE_YTELSER,
-                        )
-                }
+        val aldersvilkaar =
+            vilkaarsvurdering.vilkaar.single {
+                it.hovedvilkaar.type in
+                    listOf(
+                        VilkaarType.BP_ALDER_BARN_2024,
+                        VilkaarType.OMS_OVERLAPPENDE_YTELSER,
+                    )
+            }
 
-            // Aldersvilkår => ikke oppfylt
-            vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
-                behandlingId = behandlingId,
-                brukerTokenInfo = brukerTokenInfo,
-                vurdertVilkaar =
-                    VurdertVilkaar(
-                        vilkaarId = aldersvilkaar.id,
-                        hovedvilkaar =
-                            VilkaarTypeOgUtfall(
-                                type = aldersvilkaar.hovedvilkaar.type,
-                                resultat = Utfall.IKKE_OPPFYLT,
-                            ),
-                        vurdering =
-                            VilkaarVurderingData(
-                                kommentar = "Aldersgrensen er passert",
-                                tidspunkt = tidspunkt(),
-                                saksbehandler = Fagsaksystem.EY.navn,
-                            ),
-                    ),
-            )
+        // Aldersvilkår => ikke oppfylt
+        vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
+            behandlingId = behandlingId,
+            brukerTokenInfo = brukerTokenInfo,
+            vurdertVilkaar =
+                VurdertVilkaar(
+                    vilkaarId = aldersvilkaar.id,
+                    hovedvilkaar =
+                        VilkaarTypeOgUtfall(
+                            type = aldersvilkaar.hovedvilkaar.type,
+                            resultat = Utfall.IKKE_OPPFYLT,
+                        ),
+                    vurdering =
+                        VilkaarVurderingData(
+                            kommentar = "Aldersgrensen er passert",
+                            tidspunkt = tidspunkt(),
+                            saksbehandler = Fagsaksystem.EY.navn,
+                        ),
+                ),
+        )
 
-            // Resultat på hele vurderingen => ikke oppfylt
-            vilkaarsvurderingService
-                .oppdaterTotalVurdering(
-                    behandlingId,
-                    brukerTokenInfo,
-                    VilkaarsvurderingResultat(
-                        utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
-                        kommentar = "Automatisk aldersovergang",
-                        tidspunkt = tidspunkt(),
-                        saksbehandler = Fagsaksystem.EY.navn,
-                    ),
-                ).vilkaarsvurdering
-        }
+        // Resultat på hele vurderingen => ikke oppfylt
+        return vilkaarsvurderingService
+            .oppdaterTotalVurdering(
+                behandlingId,
+                brukerTokenInfo,
+                VilkaarsvurderingResultat(
+                    utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+                    kommentar = "Automatisk aldersovergang",
+                    tidspunkt = tidspunkt(),
+                    saksbehandler = Fagsaksystem.EY.navn,
+                ),
+            ).vilkaarsvurdering
+    }
 }

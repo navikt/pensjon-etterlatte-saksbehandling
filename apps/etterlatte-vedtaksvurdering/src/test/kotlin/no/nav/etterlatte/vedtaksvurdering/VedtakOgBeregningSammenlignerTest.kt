@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -33,14 +34,14 @@ class VedtakOgBeregningSammenlignerTest {
 
     @Test
     fun `sammenligner behandling feiler naar sum for beregning og utbetaling ikke stemmer`() {
-        assertThrows<IllegalStateException> {
+        assertThrows<InternfeilException> {
             VedtakOgBeregningSammenligner.sammenlign(BeregningOgAvkorting(lagBeregning(100), null), lagVedtak())
         }
     }
 
     @Test
     fun `sammenligner behandling feiler naar periode for beregning og utbetaling ikke stemmer`() {
-        assertThrows<IllegalStateException> {
+        assertThrows<InternfeilException> {
             VedtakOgBeregningSammenligner.sammenlign(
                 BeregningOgAvkorting(
                     lagBeregning(
@@ -59,7 +60,7 @@ class VedtakOgBeregningSammenlignerTest {
 
     @Test
     fun `sammenligner behandling feiler naar beloep fra avkorting og utbetaling ikke stemmer`() {
-        assertThrows<IllegalStateException> {
+        assertThrows<InternfeilException> {
             VedtakOgBeregningSammenligner.sammenlign(
                 BeregningOgAvkorting(lagBeregning(), lagAvkorting(1200)),
                 lagVedtak(),

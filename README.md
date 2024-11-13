@@ -112,7 +112,7 @@ Det legges ut varsler om feilmeldinger i appene på Slack i kanalen `#team-etter
 
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
-## For NAV-ansatte
+## For Nav-ansatte
 
 Interne henvendelser kan sendes via Slack i kanalen #po-pensjon-team-etterlatte.
 

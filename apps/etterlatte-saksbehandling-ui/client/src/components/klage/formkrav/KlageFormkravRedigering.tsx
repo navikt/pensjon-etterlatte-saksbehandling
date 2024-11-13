@@ -156,7 +156,7 @@ export function KlageFormkravRedigering() {
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
             at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
             tolkes som id'en til det vedtaket. */}
-          <VStack gap="4" width="30rem">
+          <VStack gap="4">
             <Controller
               rules={{
                 required: true,
@@ -166,26 +166,28 @@ export function KlageFormkravRedigering() {
                 const { value, ...rest } = field
                 return (
                   <>
-                    <Select
-                      label="Hvilket vedtak klages det på?"
-                      value={value ?? ''}
-                      {...rest}
-                      readOnly={!redigerModus}
-                    >
-                      <option value="">Velg vedtak</option>
-                      {kjenteVedtak.map((vedtak) => (
-                        <option key={vedtak.id} value={vedtak.id}>
-                          Vedtak {vedtak.id} om {formaterVedtakType(vedtak.vedtakType!!)} -{' '}
-                          {formaterKanskjeStringDato(vedtak.datoAttestert)}
-                        </option>
-                      ))}
-                      <option value="-1">Det klages ikke på et konkret vedtak</option>
-                    </Select>
-                    {fieldState.error && (
-                      <ErrorMessage>
-                        Du må velge vedtaket det klages på, eller svare at det ikke klages på et konkret vedtak
-                      </ErrorMessage>
-                    )}
+                    <Box maxWidth="30rem">
+                      <Select
+                        label="Hvilket vedtak klages det på?"
+                        value={value ?? ''}
+                        {...rest}
+                        readOnly={!redigerModus}
+                      >
+                        <option value="">Velg vedtak</option>
+                        {kjenteVedtak.map((vedtak) => (
+                          <option key={vedtak.id} value={vedtak.id}>
+                            Vedtak {vedtak.id} om {formaterVedtakType(vedtak.vedtakType!!)} -{' '}
+                            {formaterKanskjeStringDato(vedtak.datoAttestert)}
+                          </option>
+                        ))}
+                        <option value="-1">Det klages ikke på et konkret vedtak</option>
+                      </Select>
+                      {fieldState.error && (
+                        <ErrorMessage>
+                          Du må velge vedtaket det klages på, eller svare at det ikke klages på et konkret vedtak
+                        </ErrorMessage>
+                      )}
+                    </Box>
                   </>
                 )
               }}
@@ -258,34 +260,35 @@ export function KlageFormkravRedigering() {
                 </>
               }
             />
-
-            <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" readOnly={!redigerModus} />
+            <Box maxWidth="42.5rem">
+              <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" readOnly={!redigerModus} />
+            </Box>
+            {redigerModus ? (
+              <HStack gap="4" justify="center">
+                <Button type="submit" loading={isPending(lagreFormkravStatus)}>
+                  Lagre vurdering av formkrav
+                </Button>
+              </HStack>
+            ) : (
+              <VStack gap="2">
+                <div>
+                  <Button onClick={() => setRedigerModus(true)} variant="secondary">
+                    Endre vurdering
+                  </Button>
+                </div>
+                {kanVurdereUtfall(klage) ? (
+                  <HStack justify="center">
+                    <Button as="a" href={nesteSteg(klage, 'formkrav')}>
+                      Neste side
+                    </Button>
+                  </HStack>
+                ) : (
+                  <BeOmInfoFraKlager klage={klage} />
+                )}
+              </VStack>
+            )}
           </VStack>
 
-          {redigerModus ? (
-            <HStack gap="4" justify="center">
-              <Button type="submit" loading={isPending(lagreFormkravStatus)}>
-                Lagre vurdering av formkrav
-              </Button>
-            </HStack>
-          ) : (
-            <VStack gap="2">
-              <div>
-                <Button onClick={() => setRedigerModus(true)} variant="secondary">
-                  Endre vurdering
-                </Button>
-              </div>
-              {kanVurdereUtfall(klage) ? (
-                <HStack justify="center">
-                  <Button as="a" href={nesteSteg(klage, 'formkrav')}>
-                    Neste side
-                  </Button>
-                </HStack>
-              ) : (
-                <BeOmInfoFraKlager klage={klage} />
-              )}
-            </VStack>
-          )}
           {isFailureHandler({
             apiResult: lagreFormkravStatus,
             errorMessage:

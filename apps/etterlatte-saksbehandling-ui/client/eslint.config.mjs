@@ -36,7 +36,7 @@ export default [{
         },
 
         parser: tsParser,
-        ecmaVersion: 12,
+        ecmaVersion: 15,
         sourceType: "module",
 
         parserOptions: {
@@ -48,7 +48,7 @@ export default [{
 
     settings: {
         react: {
-            version: "17.0.2",
+            version: "18.3.1",
         },
     },
 

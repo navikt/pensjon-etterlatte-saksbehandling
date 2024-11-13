@@ -29,7 +29,7 @@ export default [...compat.extends("plugin:@typescript-eslint/recommended", "pret
         },
 
         parser: tsParser,
-        ecmaVersion: "12",
+        ecmaVersion: 15,
         sourceType: "module",
     },
 

@@ -31,17 +31,17 @@ export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T
     return mappers.pending !== undefined ? mappers.pending : fallback
   }
   if (isFailure(result)) {
-    if (mappers.error === undefined) {
+    if (mappers.error) {
       return fallback
     }
     if (typeof mappers.error === 'function') {
-      return (mappers.error as Function)(result.error)
+      return mappers.error(result.error)
     } else {
       return mappers.error
     }
   }
   if (isSuccess(result)) {
-    return mappers.success !== undefined ? mappers.success(result.data) : fallback
+    return mappers.success ? mappers.success(result.data) : fallback
   }
   throw new Error(`Ukjent status på result: ${JSON.stringify(result)}`)
 }

@@ -258,7 +258,7 @@ interface BehandlingService {
         opphoerFraOgMed: YearMonth,
     )
 
-    fun hentAapenOmregning(sakId: SakId): UUID?
+    fun hentAapenOmregning(sakId: SakId): Revurdering?
 
     fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,
@@ -863,7 +863,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentAapenOmregning(sakId: SakId): UUID? =
+    override fun hentAapenOmregning(sakId: SakId): Revurdering? =
         behandlingDao
             .hentAlleRevurderingerISakMedAarsak(
                 sakId,
@@ -874,7 +874,7 @@ internal class BehandlingServiceImpl(
                 ),
             ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
-            }?.id
+            }
 
     override fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,

@@ -125,6 +125,11 @@ data class OpprettJournalfoerOgDistribuerRequest(
     val sakId: SakId,
 )
 
+data class GenererOgFerdigstillVedtaksbrev(
+    val behandlingId: UUID,
+    val brevId: BrevID,
+)
+
 data class FerdigstillJournalFoerOgDistribuerOpprettetBrev(
     val brevId: BrevID,
     val sakId: SakId,

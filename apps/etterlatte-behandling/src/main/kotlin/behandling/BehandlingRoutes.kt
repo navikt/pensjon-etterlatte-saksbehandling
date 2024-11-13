@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
+import no.nav.etterlatte.libs.common.behandling.AvbrytBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
@@ -149,7 +150,16 @@ internal fun Route.behandlingRoutes(
 
         post("/avbryt") {
             kunSkrivetilgang {
-                inTransaction { behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo) }
+                val body = call.receive<AvbrytBehandlingRequest>()
+
+                inTransaction {
+                    behandlingService.avbrytBehandling(
+                        behandlingId,
+                        brukerTokenInfo,
+                        body.aarsakTilAvbrytelse,
+                        body.kommentar,
+                    )
+                }
                 call.respond(HttpStatusCode.OK)
             }
         }

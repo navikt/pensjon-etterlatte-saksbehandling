@@ -45,28 +45,34 @@ export function VurderAktivitet() {
 }
 
 function NesteKnapp() {
-  const { vurdering } = useAktivitetspliktOppgaveVurdering()
+  const { vurdering, vurderingType } = useAktivitetspliktOppgaveVurdering()
   const aktiviteter = vurdering.aktivitet
   const navigate = useNavigate()
-  const [manglerAktiviteter, setManglerAktiviteter] = useState(false)
+  const [feilmeldingAktiviteter, setFeilmeldingAktiviteter] = useState('')
   const gaaTilNeste = () => {
+    setFeilmeldingAktiviteter('')
     if (aktiviteter?.length) {
-      navigate(`../${AktivitetspliktSteg.BREVVALG}`)
-      setManglerAktiviteter(false)
+      if (vurderingType === 'TOLV_MAANEDER' && aktiviteter.every((aktivitet) => !aktivitet.vurdertFra12Mnd)) {
+        setFeilmeldingAktiviteter('Du må gjøre en ny vurdering fra 12 måneder for å gå videre')
+      } else {
+        navigate(`../${AktivitetspliktSteg.BREVVALG}`)
+      }
     } else {
-      setManglerAktiviteter(true)
+      setFeilmeldingAktiviteter('Du må registrere en aktivitet for å gå videre')
     }
   }
   useEffect(() => {
-    setManglerAktiviteter(false)
+    setFeilmeldingAktiviteter('')
   }, [vurdering.aktivitet])
 
   return (
     <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle" marginBlock="4">
-      <HStack gap="4" justify="center">
-        <Button onClick={gaaTilNeste}>Neste</Button>
-        {manglerAktiviteter && <Alert variant="error">Du må registrere en aktivitet for å gå videre</Alert>}
-      </HStack>
+      <VStack gap="6">
+        {feilmeldingAktiviteter.length > 0 && <Alert variant="error">{feilmeldingAktiviteter}</Alert>}
+        <HStack gap="4" justify="center">
+          <Button onClick={gaaTilNeste}>Neste</Button>
+        </HStack>
+      </VStack>
     </Box>
   )
 }

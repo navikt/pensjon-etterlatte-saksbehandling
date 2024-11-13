@@ -9,9 +9,11 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -23,6 +25,8 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import java.time.Year
+import java.time.YearMonth
 import java.util.UUID
 
 internal fun Route.revurderingRoutes(
@@ -30,6 +34,7 @@ internal fun Route.revurderingRoutes(
     manuellRevurderingService: ManuellRevurderingService,
     omgjoeringKlageRevurderingService: OmgjoeringKlageRevurderingService,
     automatiskRevurderingService: AutomatiskRevurderingService,
+    aarligInntektsjusteringJobbService: AarligInntektsjusteringJobbService,
 ) {
     val logger = routeLogger
 
@@ -74,6 +79,30 @@ internal fun Route.revurderingRoutes(
                             }
 
                         call.respond(revurdering.id)
+                    }
+                }
+            }
+
+            post("manuell-inntektsjustering") {
+                kunSaksbehandlerMedSkrivetilgang {
+                    logger.info("Oppretter ny revurdering for årlig inntektsjustering på sak $sakId")
+                    medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
+                        if (opprettRevurderingRequest.aarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
+                            val revurderingId =
+                                inTransaction {
+                                    aarligInntektsjusteringJobbService.nyBehandling(
+                                        sakId,
+                                        aarligInntektsjusteringJobbService.hentForrigeBehandling(sakId),
+                                        YearMonth.of(Year.now().value, 1).plusYears(1),
+                                    )
+                                }
+                            call.respond(revurderingId)
+                        } else {
+                            throw IkkeTillattException(
+                                "FEIL_REVURDERINGSAARSAK",
+                                "Revurderingsaarsak: ${opprettRevurderingRequest.aarsak} er ikke tillatt",
+                            )
+                        }
                     }
                 }
             }
@@ -147,6 +176,7 @@ data class OpprettRevurderingRequest(
     val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,
+    val referanse: String? = null,
 )
 
 data class RevurderingInfoDto(

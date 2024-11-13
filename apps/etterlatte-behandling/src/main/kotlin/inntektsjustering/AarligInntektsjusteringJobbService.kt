@@ -199,7 +199,7 @@ class AarligInntektsjusteringJobbService(
             sakId = sakId,
             kilde = OppgaveKilde.BEHANDLING,
             type = OppgaveType.AARLIG_INNTEKTSJUSTERING,
-            merknad = "Kan ikke behandles automatisk",
+            merknad = "Kan ikke behandles automatisk, revurdering må opprettes manuelt",
         )
         oppdaterKjoering(
             kjoering,
@@ -216,36 +216,47 @@ class AarligInntektsjusteringJobbService(
         kjoering: String,
         aarsakTilManuell: AarligInntektsjusteringAarsakManuell,
     ) {
-        val persongalleri =
-            runBlocking {
-                grunnlagService.hentPersongalleri(forrigeBehandling.id)
-            }
-        revurderingService
-            .opprettRevurdering(
-                sakId = sakId,
-                persongalleri = persongalleri,
-                forrigeBehandling = forrigeBehandling.id,
-                mottattDato = null,
-                prosessType = Prosesstype.MANUELL,
-                kilde = Vedtaksloesning.GJENNY,
-                revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
-                virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
-                utlandstilknytning = forrigeBehandling.utlandstilknytning,
-                boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-                begrunnelse = BEGRUNNELSE_AUTOMATISK_JOBB,
-                saksbehandlerIdent = Fagsaksystem.EY.navn,
-                frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
-                opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
-            ).oppdater()
-            .also {
-                revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)
-            }
+        nyBehandling(sakId, forrigeBehandling, loependeFom)
         oppdaterKjoering(
             kjoering,
             KjoeringStatus.TIL_MANUELL,
             sakId,
             aarsakTilManuell.name,
         )
+    }
+
+    fun nyBehandling(
+        sakId: SakId,
+        forrigeBehandling: Behandling,
+        loependeFom: YearMonth,
+    ): UUID {
+        val persongalleri =
+            runBlocking {
+                grunnlagService.hentPersongalleri(forrigeBehandling.id)
+            }
+        val revurdering =
+            revurderingService
+                .opprettRevurdering(
+                    sakId = sakId,
+                    persongalleri = persongalleri,
+                    forrigeBehandling = forrigeBehandling.id,
+                    mottattDato = null,
+                    prosessType = Prosesstype.MANUELL,
+                    kilde = Vedtaksloesning.GJENNY,
+                    revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+                    virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
+                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
+                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
+                    begrunnelse = BEGRUNNELSE_AUTOMATISK_JOBB,
+                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
+                    opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
+                ).oppdater()
+                .also {
+                    revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)
+                }
+
+        return revurdering.id
     }
 
     private fun publiserKlarForOmregning(
@@ -296,7 +307,7 @@ class AarligInntektsjusteringJobbService(
         )
     }
 
-    private fun hentForrigeBehandling(sakId: SakId) =
+    fun hentForrigeBehandling(sakId: SakId) =
         behandlingService.hentSisteIverksatte(sakId)
             ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 

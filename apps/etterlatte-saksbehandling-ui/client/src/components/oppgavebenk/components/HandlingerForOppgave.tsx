@@ -15,6 +15,9 @@ import { TilleggsinformasjonOppgaveModal } from '~components/oppgavebenk/oppgave
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
+import { opprettManuellInntektsjustering } from '~shared/api/revurdering'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { useNavigate } from 'react-router-dom'
 
 export const FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT = 'aktivitetsplikt.ny-vurdering'
 
@@ -25,6 +28,7 @@ export const HandlingerForOppgave = ({
   oppgave: OppgaveDTO
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }) => {
+  const navigate = useNavigate()
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
@@ -33,6 +37,15 @@ export const HandlingerForOppgave = ({
     FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT,
     false
   )
+
+  const opprettInntektsjusteringRevurdering = () => {
+    opprettManuellInntektsjustering({
+      sakId: oppgave.sakId,
+      aarsak: Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+    }).then((revurderingId) => {
+      navigate(`/behandling/${revurderingId}/`)
+    })
+  }
 
   if (kilde === OppgaveKilde.GENERELL_BEHANDLING) {
     switch (type) {
@@ -175,6 +188,12 @@ export const HandlingerForOppgave = ({
         erInnloggetSaksbehandlerOppgave && (
           <AktivitetspliktInfo6MndVarigUnntakModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
+      )
+    case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
+      return (
+        <Button size="small" onClick={opprettInntektsjusteringRevurdering}>
+          Opprett revurdering
+        </Button>
       )
     default:
       return null

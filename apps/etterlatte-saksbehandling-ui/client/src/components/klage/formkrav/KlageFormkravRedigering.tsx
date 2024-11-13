@@ -261,7 +261,12 @@ export function KlageFormkravRedigering() {
               }
             />
             <Box maxWidth="42.5rem">
-              <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" readOnly={!redigerModus} />
+              <Textarea
+                {...register('begrunnelse')}
+                label="Totalvurdering (valgfritt)"
+                readOnly={!redigerModus}
+                resize
+              />
             </Box>
             {redigerModus ? (
               <HStack gap="4" justify="center">

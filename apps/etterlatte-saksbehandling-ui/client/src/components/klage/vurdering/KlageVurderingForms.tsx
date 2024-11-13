@@ -86,7 +86,7 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
           const { value, ...rest } = field
           return (
             <Box maxWidth="42.5rem">
-              <Textarea label="Begrunnelse" value={value ?? ''} {...rest} />
+              <Textarea label="Begrunnelse" value={value ?? ''} {...rest} resize />
 
               {fieldState.error && <ErrorMessage>Du må gi en begrunnelse for omgjøringen.</ErrorMessage>}
             </Box>

@@ -49,7 +49,7 @@ function etterbetalingPeriodeValgToString(etterbetalingPeriodeValg?: Etterbetali
 }
 
 export const BrevutfallVisning = (props: {
-  behandlingErOpphoer: Boolean
+  behandlingErOpphoer: boolean
   redigerbar: boolean
   brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
   sakType: SakType

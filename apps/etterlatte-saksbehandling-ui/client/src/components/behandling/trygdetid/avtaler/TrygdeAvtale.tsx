@@ -35,7 +35,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
   const [avtalerListe, setAvtalerListe] = useState<TrygdetidAvtale[]>()
   const [avtaleKriterierListe, setAvtaleKriterierListe] = useState<TrygdetidAvtaleKriteria[]>()
   const [trygdeavtale, setTrygdeavtale] = useState<Trygdeavtale | undefined>(undefined)
-  const [redigering, setRedigering] = useState<Boolean>(true)
+  const [redigering, setRedigering] = useState<boolean>(true)
 
   useEffect(() => {
     fetchTrygdetidAvtaler(null, (avtaler: TrygdetidAvtale[]) => {

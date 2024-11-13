@@ -206,6 +206,3 @@ const Sidebar = styled.div`
   width: 40%;
   border-right: 1px solid #c6c2bf;
 `
-styled(Alert).attrs({ variant: 'warning' })`
-  margin-bottom: 1em;
-`

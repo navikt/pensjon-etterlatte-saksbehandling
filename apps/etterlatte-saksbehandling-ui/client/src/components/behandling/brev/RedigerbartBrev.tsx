@@ -77,7 +77,7 @@ export default function RedigerbartBrev({
           lagret: true,
           beskrivelse: `Lagret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())}`,
         })
-        tilbakestillingsaction && tilbakestillingsaction()
+        if (tilbakestillingsaction) tilbakestillingsaction()
         if (lukkAdvarselBehandlingEndret) lukkAdvarselBehandlingEndret()
       }
     )

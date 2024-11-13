@@ -892,31 +892,34 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         kildeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<TrygdetidDto> {
-        val trygdetiderKilde = trygdetidRepository.hentTrygdetiderForBehandling(kildeBehandlingId)
-        val trygdetiderMaal = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+    ): List<TrygdetidDto> =
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            val trygdetiderKilde = trygdetidRepository.hentTrygdetiderForBehandling(kildeBehandlingId)
+            val trygdetiderMaal = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
 
-        require(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
-            "Trygdetidene gjelder forskjellige avdøde"
-        }
-
-        // TODO Hva om trygdetid har f.x. overstyrt poengår fra før?
-        trygdetiderMaal
-            .forEach { trygdetidMaal ->
-                trygdetidRepository.oppdaterTrygdetid(
-                    trygdetidMaal.copy(
-                        trygdetidGrunnlag =
-                            trygdetiderKilde
-                                .single { trygdetidKilde -> trygdetidKilde.ident == trygdetidMaal.ident }
-                                .trygdetidGrunnlag
-                                .map { it.copy(id = UUID.randomUUID()) },
-                        kopiertGrunnlagFraBehandling = kildeBehandlingId,
-                    ),
-                )
+            require(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
+                "Trygdetidene gjelder forskjellige avdøde"
             }
-        return hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-            .map { it.toDto() }
-    }
+
+            // TODO Hva om trygdetid har f.x. overstyrt poengår fra før?
+            trygdetiderMaal
+                .forEach { trygdetidMaal ->
+                    oppdaterBeregnetTrygdetid(
+                        behandlingId,
+                        trygdetidMaal.copy(
+                            trygdetidGrunnlag =
+                                trygdetiderKilde
+                                    .single { trygdetidKilde -> trygdetidKilde.ident == trygdetidMaal.ident }
+                                    .trygdetidGrunnlag
+                                    .map { it.copy(id = UUID.randomUUID()) },
+                            kopiertGrunnlagFraBehandling = kildeBehandlingId,
+                        ),
+                        brukerTokenInfo,
+                    )
+                }
+            hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                .map { it.toDto() }
+        }
 
     override suspend fun finnBehandlingMedTrygdetidForSammeAvdoede(
         behandlingId: UUID,

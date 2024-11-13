@@ -31,11 +31,11 @@ export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T
     return mappers.pending !== undefined ? mappers.pending : fallback
   }
   if (isFailure(result)) {
-    if (mappers.error) {
+    if (!mappers.error) {
       return fallback
     }
     if (typeof mappers.error === 'function') {
-      return mappers.error(result.error)
+      return (mappers.error as (_: ApiError) => R)(result.error)
     } else {
       return mappers.error
     }

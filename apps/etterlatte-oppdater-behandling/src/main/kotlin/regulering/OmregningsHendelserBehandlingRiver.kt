@@ -4,6 +4,8 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
@@ -67,9 +69,13 @@ internal class OmregningsHendelserBehandlingRiver(
                         BrevutfallDto(
                             behandlingId = behandlingId,
                             aldersgruppe = Aldersgruppe.OVER_18, // eller null siden oms?
-                            feilutbetaling = null,
-                            frivilligSkattetrekk = false,
+                            feilutbetaling =
+                                Feilutbetaling(
+                                    valg = FeilutbetalingValg.NEI,
+                                    kommentar = null,
+                                ),
                             kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                            frivilligSkattetrekk = false,
                         ),
                 ),
             )

@@ -1,5 +1,6 @@
 
 import no.nav.etterlatte.beregning.grunnlag.Prosent
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -17,11 +18,11 @@ class ProsentTest {
 
     @Test
     fun `stoetter ikke negativ prosent`() {
-        assertThrows<IllegalArgumentException> { Prosent(-1) }
+        assertThrows<InternfeilException> { Prosent(-1) }
     }
 
     @Test
     fun `stoetter ikke prosent over 100`() {
-        assertThrows<IllegalArgumentException> { Prosent(101) }
+        assertThrows<InternfeilException> { Prosent(101) }
     }
 }

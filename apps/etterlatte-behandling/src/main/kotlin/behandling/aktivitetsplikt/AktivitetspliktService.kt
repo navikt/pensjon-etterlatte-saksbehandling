@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -290,7 +291,7 @@ class AktivitetspliktService(
         if (aktivitetsgrad.id != null) {
             aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgrad, kilde, behandlingId)
         } else {
-            require(
+            checkInternFeil(
                 aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId).isEmpty(),
             ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
             val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
@@ -385,7 +386,7 @@ class AktivitetspliktService(
         if (unntak.id != null) {
             aktivitetspliktUnntakDao.oppdaterUnntak(unntak, kilde, behandlingId)
         } else {
-            require(
+            checkInternFeil(
                 aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId).isEmpty(),
             ) { "Unntak finnes allerede for behandling $behandlingId" }
 

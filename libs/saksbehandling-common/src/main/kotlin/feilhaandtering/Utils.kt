@@ -11,6 +11,7 @@ fun <T : Any> checkNotNullOrThrowException(
     }
 }
 
+// Todo endre til if(value)
 fun checkInternFeil(
     value: Boolean,
     message: () -> String,
@@ -20,6 +21,7 @@ fun checkInternFeil(
     }
 }
 
+// Todo endre til if(value)
 fun checkUgyldigForespoerselException(
     value: Boolean,
     code: String,
@@ -29,3 +31,5 @@ fun checkUgyldigForespoerselException(
         throw UgyldigForespoerselException(code = code, detail = message())
     }
 }
+
+// TODO: må også bytte ut checknotnull og requirenotnull

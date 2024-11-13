@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -457,7 +458,7 @@ class AktivitetspliktServiceTest {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT
                 }
 
-            assertThrows<IllegalArgumentException> {
+            assertThrows<InternfeilException> {
                 service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
             }
         }

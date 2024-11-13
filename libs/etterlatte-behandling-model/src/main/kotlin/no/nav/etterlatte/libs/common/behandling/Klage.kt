@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
@@ -208,7 +209,7 @@ data class Klage(
                 is KlageUtfallMedData.AvvistMedOmgjoering -> null
             }
         hjemmel?.let {
-            require(it.kanBrukesForSaktype(this.sak.sakType)) {
+            checkInternFeil(it.kanBrukesForSaktype(this.sak.sakType)) {
                 "Hjemmelen $it er ikke gyldig for saktypen ${this.sak.sakType}"
             }
         }

@@ -5,17 +5,10 @@ data class AvbrytBehandlingRequest(
     val kommentar: String? = null,
 )
 
-sealed class AarsakTilAvbrytelse {
-    enum class Foerstegangsbehandling {
-        SOEKNADEN_ER_IKKE_AKTUELL,
-        FEILREGISTRERT,
-        ANNET,
-    }
-
-    enum class Revurdering {
-        IKKE_LENGER_AKTUELL,
-        FEILREGISTRERT,
-        AVBRUTT_PAA_GRUNN_AV_FEIL,
-        ANNET,
-    }
+enum class AarsakTilAvbrytelse {
+    IKKE_LENGER_AKTUELL,
+    SOEKNADEN_ER_IKKE_AKTUELL,
+    FEILREGISTRERT,
+    AVBRUTT_PAA_GRUNN_AV_FEIL,
+    ANNET,
 }

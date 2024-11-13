@@ -26,6 +26,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -233,7 +234,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
 
-        every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
 
         every { behandlingHendelser.sendMeldingForHendelseStatisitkk(any(), any()) } returns Unit
 
@@ -257,7 +258,7 @@ internal class BehandlingServiceImplTest {
             behandlingService.avbrytBehandling(attestertBehandling.id, saksbehandler)
         }
         assertDoesNotThrow {
-            behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, saksbehandler)
+            behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, saksbehandler, AarsakTilAvbrytelse.ANNET, "")
         }
     }
 
@@ -269,7 +270,7 @@ internal class BehandlingServiceImplTest {
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
-        every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
         every { behandlingHendelser.sendMeldingForHendelseStatisitkk(any(), any()) } returns Unit
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
@@ -279,7 +280,7 @@ internal class BehandlingServiceImplTest {
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler())
 
         verify {
-            hendelseDaoMock.behandlingAvbrutt(any(), any())
+            hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any())
         }
     }
 
@@ -339,7 +340,7 @@ internal class BehandlingServiceImplTest {
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
-        every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
         every {
             behandlingHendelser.sendMeldingForHendelseStatisitkk(
                 any(),
@@ -351,7 +352,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler())
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
 
         verify {
             behandlingHendelser.sendMeldingForHendelseStatisitkk(
@@ -369,7 +370,7 @@ internal class BehandlingServiceImplTest {
 
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
-        every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
         every {
             behandlingHendelser.sendMeldingForHendelseStatisitkk(
                 any(),

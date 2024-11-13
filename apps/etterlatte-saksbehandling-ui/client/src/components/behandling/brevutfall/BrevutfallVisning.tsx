@@ -31,7 +31,7 @@ export function feilutbetalingToString(feilutbetaling?: FeilutbetalingValg | nul
     case FeilutbetalingValg.JA_INGEN_VARSEL_MOTREGNES:
       return 'Ja, men motregnes mot annen ytelse fra NAV, så avventer varsel om feilutbetaling til ev. tilbakekrevingssak'
     case FeilutbetalingValg.JA_INGEN_TK:
-      return 'Ja, men under 4 rettsgebyr, så ingen tilbakekreving'
+      return 'Ja, men ikke grunnlag for tilbakekreving pga under 4 rettsgebyr, eller annen grunn (se notat)'
     default:
       return 'Ikke satt'
   }

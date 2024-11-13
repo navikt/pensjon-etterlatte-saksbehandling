@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.VedtakTilJournalfoering
+import no.nav.etterlatte.brev.model.GenererOgFerdigstillVedtaksbrev
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
@@ -93,6 +94,28 @@ fun Route.vedtaksbrevRoute(
             }
         }
 
+        post("vedtak/generer-pdf-og-ferdigstill") {
+            kunSystembruker { systembruker ->
+                val behandlingId = behandlingId
+                val request = call.receive<GenererOgFerdigstillVedtaksbrev>()
+                logger.info("Generere og ferdigstille vedtaksbrev for behandling (behandlingId=$behandlingId)")
+
+                measureTimedValue {
+                    service.genererPdfOgFerdigstill(request.behandlingId, request.brevId, systembruker)
+                }.also { (_, varighet) ->
+                    logger.info(
+                        "Generere og ferdigstilling av vedtaksbrev tok ${
+                            varighet.toString(
+                                DurationUnit.SECONDS,
+                                2,
+                            )
+                        }",
+                    )
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+        }
+
         post("vedtak/ferdigstill") {
             withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                 logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
@@ -118,10 +141,12 @@ fun Route.vedtaksbrevRoute(
                     service.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, body.brevtype)
                 }.let { (brevPayload, varighet) ->
                     logger.info(
-                        "Oppretting av nytt innhold til brev (id=$brevId) tok ${varighet.toString(
-                            DurationUnit.SECONDS,
-                            2,
-                        )}",
+                        "Oppretting av nytt innhold til brev (id=$brevId) tok ${
+                            varighet.toString(
+                                DurationUnit.SECONDS,
+                                2,
+                            )
+                        }",
                     )
                     call.respond(brevPayload)
                 }

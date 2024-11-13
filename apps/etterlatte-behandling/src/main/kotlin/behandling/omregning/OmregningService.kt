@@ -26,7 +26,9 @@ class OmregningService(
     ) {
         if (request.status == KjoeringStatus.FEILA) {
             behandlingService.hentAapenOmregning(request.sakId)?.let {
-                behandlingService.avbrytBehandling(it, bruker)
+                if (it.status.kanAvbrytes()) {
+                    behandlingService.avbrytBehandling(it.id, bruker)
+                }
             }
         }
         omregningDao.oppdaterKjoering(request)

@@ -76,7 +76,7 @@ export const Person = ({
         <div>
           <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
         </div>
-        {person.utland && <Utlandsopphold utland={person.utland} />}
+        {person.utland && <Utlandsopphold utland={person.utland} landListeResult={landListeResult} />}
         <StatsborgerskapVisning
           statsborgerskap={person.statsborgerskap}
           pdlStatsborgerskap={person.pdlStatsborgerskap}

@@ -1,6 +1,6 @@
 import {
   IAktivitetspliktAktivitetsgrad,
-  IAktivitetspliktVurderingNy,
+  IAktivitetspliktVurderingNyDto,
   teksterAktivitetspliktSkjoennsmessigVurdering,
 } from '~shared/types/Aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
@@ -26,7 +26,7 @@ export function VisAktivitetsgrad(props: { doedsdato?: Date; aktivitet: IAktivit
   const dispatch = useDispatch()
   const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
 
-  function oppdaterTilstandLagretVurdering(data: IAktivitetspliktVurderingNy) {
+  function oppdaterTilstandLagretVurdering(data: IAktivitetspliktVurderingNyDto) {
     setRedigerer(false)
     dispatch(setAktivitetspliktVurdering(data))
   }

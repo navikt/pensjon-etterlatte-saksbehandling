@@ -1,5 +1,7 @@
 package no.nav.etterlatte.brev
 
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+
 /*
 Breva våre er teknisk sett to brev som er satt sammen - den redigerbare delen, og delen som ligg fast.
 Saksbehandler kan redigere den redigerbare delen, og ved PDF-generering sender vi den delen over til brevbakeren,
@@ -115,12 +117,13 @@ enum class Brevkoder(
         "Vedtak om endring av omstillingsstønad",
         Brevtype.VEDTAK,
     ),
-    OMS_INNTEKTSJUSTERING_VARSEL(
-        EtterlatteBrevKode.INGEN_REDIGERBAR_DEL,
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VARSEL,
-        "Varselbrev - oppdatere endringer i inntekt",
-        Brevtype.VARSEL,
+    OMS_INNTEKTSJUSTERING_VEDTAK(
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VEDTAK_UTFALL,
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VEDTAK,
+        "Varsel og midlertidig vedtak for å oppdatere endringer i inntekt",
+        Brevtype.VEDTAK,
     ),
+
     OMS_VARSEL(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL_UTFALL,
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL,
@@ -212,7 +215,7 @@ enum class Brevkoder(
     ;
 
     init {
-        require(redigering != ferdigstilling) {
+        checkInternFeil(redigering != ferdigstilling) {
             "Bruk forskjellige maler for redigering og ferdigstilling. $redigering og $ferdigstilling er like"
         }
     }

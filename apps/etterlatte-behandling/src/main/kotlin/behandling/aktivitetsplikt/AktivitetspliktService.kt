@@ -21,8 +21,8 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
-import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
-import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -41,6 +42,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
@@ -290,7 +292,7 @@ class AktivitetspliktService(
         if (aktivitetsgrad.id != null) {
             aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgrad, kilde, behandlingId)
         } else {
-            require(
+            checkInternFeil(
                 aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId).isEmpty(),
             ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
             val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
@@ -354,7 +356,7 @@ class AktivitetspliktService(
         unntakId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AktivitetspliktVurdering? {
+    ): AktivitetspliktVurdering {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
@@ -385,7 +387,7 @@ class AktivitetspliktService(
         if (unntak.id != null) {
             aktivitetspliktUnntakDao.oppdaterUnntak(unntak, kilde, behandlingId)
         } else {
-            require(
+            checkInternFeil(
                 aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId).isEmpty(),
             ) { "Unntak finnes allerede for behandling $behandlingId" }
 
@@ -471,13 +473,11 @@ class AktivitetspliktService(
         }
     }
 
-    fun opprettOppgaveHvisVarigUnntak(
-        request: OpprettOppgaveForAktivitetspliktVarigUnntakDto,
-    ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse =
+    fun opprettOppgaveHvisVarigUnntak(request: OpprettOppgaveForAktivitetspliktDto): OpprettOppgaveForAktivitetspliktResponse =
         if (harVarigUnntak(request.sakId)) {
             opprettOppgaveForVarigUnntak(request)
         } else {
-            OpprettOppgaveForAktivitetspliktVarigUnntakResponse()
+            OpprettOppgaveForAktivitetspliktResponse()
         }
 
     private fun opprettOppgaveForRevurdering(
@@ -502,9 +502,7 @@ class AktivitetspliktService(
             }
     }
 
-    private fun opprettOppgaveForVarigUnntak(
-        request: OpprettOppgaveForAktivitetspliktVarigUnntakDto,
-    ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse {
+    private fun opprettOppgaveForVarigUnntak(request: OpprettOppgaveForAktivitetspliktDto): OpprettOppgaveForAktivitetspliktResponse {
         logger.info("Oppretter oppgave for infobrev for varig unntak av aktivitetsplikt for sak ${request.sakId}")
         return oppgaveService
             .opprettOppgave(
@@ -515,7 +513,7 @@ class AktivitetspliktService(
                 merknad = request.jobbType.beskrivelse,
                 frist = request.frist,
             ).let { oppgave ->
-                OpprettOppgaveForAktivitetspliktVarigUnntakResponse(
+                OpprettOppgaveForAktivitetspliktResponse(
                     opprettetOppgave = true,
                     oppgaveId = oppgave.id,
                 )
@@ -620,6 +618,37 @@ class AktivitetspliktService(
                 "Kan ikke endre på unntak / vurderinger i en oppgave som er avsluttet",
             )
         }
+    }
+
+    fun opprettOppgaveHvisIkkeVarigUnntak(dto: OpprettOppgaveForAktivitetspliktDto): OpprettOppgaveForAktivitetspliktResponse {
+        if (harVarigUnntak(dto.sakId)) {
+            return OpprettOppgaveForAktivitetspliktResponse(
+                opprettetOppgave = false,
+            )
+        }
+        logger.info("Sak ${dto.sakId} har ikke varig unntak, oppretter oppgave for aktivitetsplikt infobrev")
+        val oppgaveType =
+            when (dto.jobbType) {
+                JobbType.OMS_DOED_4MND -> OppgaveType.AKTIVITETSPLIKT
+                JobbType.OMS_DOED_10MND -> OppgaveType.AKTIVITETSPLIKT_12MND
+                else -> throw UgyldigForespoerselException(
+                    "FEIL_JOBBTYPE",
+                    "Kan ikke opprette en aktivitetspliktoppgave for jobbtype=${dto.jobbType} i sak ${dto.sakId}",
+                )
+            }
+        val opprettetOppgave =
+            oppgaveService.opprettOppgave(
+                referanse = dto.referanse ?: "",
+                sakId = dto.sakId,
+                kilde = OppgaveKilde.HENDELSE,
+                type = oppgaveType,
+                merknad = dto.jobbType.beskrivelse,
+                frist = dto.frist,
+            )
+        return OpprettOppgaveForAktivitetspliktResponse(
+            opprettetOppgave = true,
+            oppgaveId = opprettetOppgave.id,
+        )
     }
 }
 
@@ -743,9 +772,3 @@ interface AktivitetspliktVurderingOpprettetDato {
 }
 
 fun Grunnlagsopplysning.Kilde.endretDatoOrNull(): Tidspunkt? = if (this is Grunnlagsopplysning.Saksbehandler) this.tidspunkt else null
-
-class SakidTilhoererIkkeOppgaveException :
-    UgyldigForespoerselException(
-        "OPPGAVE_TILHOERER_IKKE_SAK",
-        "OppgaveId peker på en oppgave som har en annen sak enn angitt SakId",
-    )

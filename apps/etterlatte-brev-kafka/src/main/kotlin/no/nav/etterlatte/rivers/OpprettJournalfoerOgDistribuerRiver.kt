@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.BrevParametereAutomatisk
 import no.nav.etterlatte.brev.BrevParametereAutomatisk.BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar
 import no.nav.etterlatte.brev.BrevParametereAutomatisk.BarnepensjonInformasjonDoedsfallRedigerbar
 import no.nav.etterlatte.brev.BrevParametereAutomatisk.OmstillingsstoenadInformasjonDoedsfallRedigerbar
-import no.nav.etterlatte.brev.BrevParametereAutomatisk.OmstillingsstoenadInntektsjusteringRedigerbar
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
@@ -90,13 +89,23 @@ class OpprettJournalfoerOgDistribuerRiver(
                     val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                     val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
                     val brevdata = opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
-                    BarnepensjonInformasjonDoedsfallRedigerbar(brevdata.borIutland, brevdata.avdoedNavn, brevdata.erOver18aar)
+                    BarnepensjonInformasjonDoedsfallRedigerbar(
+                        brevdata.borIutland,
+                        brevdata.avdoedNavn,
+                        brevdata.erOver18aar,
+                    )
                 }
+
                 Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
                     val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                    val brevdata = opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
-                    BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar(brevdata.avdoedNavn, brevdata.borIutland)
+                    val brevdata =
+                        opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
+                    BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar(
+                        brevdata.avdoedNavn,
+                        brevdata.borIutland,
+                    )
                 }
+
                 Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
                     val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                     val brevdata =
@@ -106,11 +115,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         )
                     OmstillingsstoenadInformasjonDoedsfallRedigerbar(brevdata.borIutland, brevdata.avdoedNavn)
                 }
-                // TODO: @Andreas Balevik
-                Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL -> {
-                    // TODO: hvilke data skal vi ha her?
-                    OmstillingsstoenadInntektsjusteringRedigerbar()
-                }
+
                 else -> throw Exception("Støtter ikke brevtype $brevKode i sak $sakId")
             }
 

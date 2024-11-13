@@ -9,11 +9,11 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import org.slf4j.LoggerFactory
 
 internal fun Route.statistikkRoutes(behandlingService: BehandlingService) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("StatistikkRoute")
 
     route("/behandlinger/statistikk/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {

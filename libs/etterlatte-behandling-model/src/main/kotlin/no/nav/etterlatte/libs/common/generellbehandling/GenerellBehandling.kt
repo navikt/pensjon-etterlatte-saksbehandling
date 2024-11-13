@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.generellbehandling
 
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
@@ -46,12 +47,12 @@ data class GenerellBehandling(
         if (innhold !== null) {
             when (type) {
                 GenerellBehandlingType.ANNEN ->
-                    require(innhold is Innhold.Annen) {
+                    checkInternFeil(innhold is Innhold.Annen) {
                         "Type $type matcher " +
                             "ikke innhold navn: ${innhold.javaClass.simpleName}"
                     }
                 GenerellBehandlingType.KRAVPAKKE_UTLAND ->
-                    require(innhold is Innhold.KravpakkeUtland) {
+                    checkInternFeil(innhold is Innhold.KravpakkeUtland) {
                         "Type $type matcher ikke innhold navn: ${innhold.javaClass.simpleName}"
                     }
             }

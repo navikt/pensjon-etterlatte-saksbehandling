@@ -1,4 +1,4 @@
-import { IAktivitetspliktUnntak, IAktivitetspliktVurderingNy } from '~shared/types/Aktivitetsplikt'
+import { IAktivitetspliktUnntak, IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -34,7 +34,7 @@ export function VisUnntak(props: { unntak: IAktivitetspliktUnntak }) {
     )
   }
 
-  function oppdaterStateEtterRedigertUnntak(data: IAktivitetspliktVurderingNy) {
+  function oppdaterStateEtterRedigertUnntak(data: IAktivitetspliktVurderingNyDto) {
     dispatch(setAktivitetspliktVurdering(data))
     setRedigerer(false)
     resetSlettStatus()

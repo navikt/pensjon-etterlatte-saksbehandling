@@ -81,9 +81,13 @@ export interface IAktivitetspliktVurdering {
   unntak?: IAktivitetspliktUnntak
 }
 
-export interface IAktivitetspliktVurderingNy {
-  aktivitet?: IAktivitetspliktAktivitetsgrad[]
-  unntak?: IAktivitetspliktUnntak[]
+export interface IAktivitetspliktVurderingNyDto {
+  aktivitet: IAktivitetspliktAktivitetsgrad[]
+  unntak: IAktivitetspliktUnntak[]
+}
+
+export function harVurdering(vurdering: IAktivitetspliktVurderingNyDto): boolean {
+  return vurdering && !!(vurdering.aktivitet.length || vurdering.unntak.length)
 }
 
 export interface IAktivitetspliktAktivitetsgrad {
@@ -173,7 +177,7 @@ export interface AktivitetspliktOppgaveVurdering {
   vurderingType: AktivitetspliktOppgaveType
   oppgave: OppgaveDTO
   sak: ISak
-  vurdering: IAktivitetspliktVurderingNy
+  vurdering: IAktivitetspliktVurderingNyDto
   aktivtetspliktbrevdata?: IBrevAktivitetspliktDto
   sistEndret?: string
 }

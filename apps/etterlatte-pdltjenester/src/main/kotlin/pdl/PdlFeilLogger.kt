@@ -24,7 +24,7 @@ fun loggDelvisReturnerteData(
                     " Se sikkerlogg for feilmelding",
                 stackTrace,
             )
-            sikkerLogg.error("Request: $req \n PDL feil $feil", stackTrace)
+            sikkerLogg.error("PDL feil $feil \n\n Request: $req", stackTrace)
         }
     }
 }

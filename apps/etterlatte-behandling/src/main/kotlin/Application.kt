@@ -94,7 +94,6 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerJob,
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
-        context.oppgaveFristGaarUtJobb,
         context.omregningKlassifikasjonskodeJob,
     )
 

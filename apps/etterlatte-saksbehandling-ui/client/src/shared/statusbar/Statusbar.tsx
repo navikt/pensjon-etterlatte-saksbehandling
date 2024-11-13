@@ -51,6 +51,11 @@ export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
 
             <BodyShort>|</BodyShort>
             <KopierbarVerdi value={person.foedselsnummer} />
+            {ident !== person.foedselsnummer && person.historiskeFoedselsnummer.includes(ident!!) && (
+              <Alert variant="warning" size="small">
+                Bruker har historisk ident {ident}
+              </Alert>
+            )}
 
             <VergemaalTag vergemaal={person.vergemaal} />
           </HStack>

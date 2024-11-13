@@ -62,6 +62,7 @@ export interface IPdlPersonNavnFoedsel {
   mellomnavn?: string
   etternavn: string
   foedselsnummer: string
+  historiskeFoedselsnummer: string[]
   foedselsaar: number
   foedselsdato: Date | undefined
   doedsdato: Date | undefined

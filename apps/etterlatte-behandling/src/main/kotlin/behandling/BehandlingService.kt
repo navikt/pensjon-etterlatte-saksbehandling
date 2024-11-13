@@ -352,7 +352,7 @@ internal class BehandlingServiceImpl(
             throw BehandlingKanIkkeAvbrytesException(behandling.status)
         }
 
-        behandlingDao.avbrytBehandling(behandlingId).also {
+        behandlingDao.avbrytBehandling(behandlingId, aarsak, kommentar).also {
             val hendelserKnyttetTilBehandling =
                 grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
             oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)

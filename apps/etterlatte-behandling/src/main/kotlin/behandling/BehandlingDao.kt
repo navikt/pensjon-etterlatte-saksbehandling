@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -311,6 +312,23 @@ class BehandlingDao(
         }
     }
 
+    fun lagreAvbruttAarsak(
+        behandlingId: UUID,
+        aarsakTilAvbrytelse: AarsakTilAvbrytelse,
+        kommentar: String,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt = prepareStatement("UPDATE behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
+
+            stmt.setString(1, aarsakTilAvbrytelse.name)
+            stmt.setString(2, kommentar)
+            stmt.setObject(3, behandlingId)
+            checkInternFeil(stmt.executeUpdate() == 1) {
+                "Kunne ikke lagreStatus behandling for $behandlingId"
+            }
+        }
+    }
+
     fun lagreBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
@@ -476,12 +494,21 @@ class BehandlingDao(
 
     private fun ResultSet.behandlingAvRettType() = tilBehandling(getString("behandlingstype"))
 
-    fun avbrytBehandling(behandlingId: UUID) =
+    fun avbrytBehandling(
+        behandlingId: UUID,
+        aarsakTilAvbrytelse: AarsakTilAvbrytelse?,
+        kommentar: String?,
+    ) {
         this.lagreStatus(
             behandlingId = behandlingId,
             status = BehandlingStatus.AVBRUTT,
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
         )
+
+        if (aarsakTilAvbrytelse != null) {
+            this.lagreAvbruttAarsak(behandlingId, aarsakTilAvbrytelse, kommentar ?: "")
+        }
+    }
 
     fun lagreNyttVirkningstidspunkt(
         behandlingId: UUID,

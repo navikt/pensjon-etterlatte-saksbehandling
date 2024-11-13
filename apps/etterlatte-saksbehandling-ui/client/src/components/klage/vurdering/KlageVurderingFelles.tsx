@@ -125,7 +125,7 @@ export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: bool
       <Heading size="small" level="3">
         Omgjøring
       </Heading>
-      <BodyShort spacing>
+      <BodyShort spacing as="div">
         Vedtaket omgjøres på grunn av <strong>{TEKSTER_AARSAK_OMGJOERING[omgjoering.grunnForOmgjoering]}.</strong>
       </BodyShort>
       <BodyShort>

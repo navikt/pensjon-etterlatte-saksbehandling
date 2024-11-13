@@ -8,6 +8,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -342,7 +343,11 @@ class UtbetalingDao(
                         "vedtakId" to oppdragMedKvittering.vedtakId().param(),
                     ),
             ).let { tx.run(it.asUpdate) }
-                .also { require(it == 1) { "Kunne ikke oppdatere kvittering i utbetaling" } }
+                .also {
+                    checkInternFeil(it == 1) {
+                        "Kunne ikke oppdatere kvittering i utbetaling"
+                    }
+                }
 
             opprettUtbetalingshendelse(
                 Utbetalingshendelse(

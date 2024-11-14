@@ -19,7 +19,6 @@ import { IAvkorting } from '~shared/types/IAvkorting'
 
 export const setBehandling = createAction<IDetaljertBehandling>('behandling/set')
 export const resetBehandling = createAction('behandling/reset')
-export const oppdaterBehandling = createAction<IDetaljertBehandling>('behandling/oppdater')
 export const oppdaterGyldighetsproeving = createAction<IGyldighetResultat>('behandling/gyldighetsproeving')
 export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
 export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering | undefined>(
@@ -71,17 +70,14 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(setBehandling, (state, action) => {
     state.behandling = action.payload
   })
-  builder.addCase(oppdaterBehandling, (state, action) => {
-    state.behandling = { ...state.behandling, ...action.payload }
+  builder.addCase(resetBehandling, (state) => {
+    state.behandling = null
   })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
     state.behandling!!.vilkaarsvurdering = action.payload
   })
   builder.addCase(updateBrevutfallOgEtterbetaling, (state, action) => {
     state.behandling!!.brevutfallOgEtterbetaling = action.payload
-  })
-  builder.addCase(resetBehandling, (state) => {
-    state.behandling = null
   })
   builder.addCase(oppdaterGyldighetsproeving, (state, action) => {
     state.behandling!!.gyldighetsprøving = action.payload

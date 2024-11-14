@@ -20,7 +20,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
 import { IHendelse } from '~shared/types/IHendelse'
-import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
+import { resetBehandling, setBehandling } from '~store/reducers/BehandlingReducer'
 import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
@@ -85,7 +85,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       fetchBehandling(
         behandlingId,
         (behandling) => {
-          dispatch(oppdaterBehandling(behandling))
+          dispatch(setBehandling(behandling))
           setVisAdvarselBehandlingEndret(behandlingRedigertEtterOpprettetBrev(vedtaksbrev, behandling.hendelser))
           setVisAdvarselIngenAvdoede(redigerbar && personopplysninger?.avdoede.length === 0)
         },

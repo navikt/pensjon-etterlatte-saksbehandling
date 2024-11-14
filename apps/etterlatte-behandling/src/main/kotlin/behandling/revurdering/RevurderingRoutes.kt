@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -23,6 +24,8 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
+import java.time.Year
+import java.time.YearMonth
 import java.util.UUID
 
 internal fun Route.revurderingRoutes(
@@ -30,6 +33,7 @@ internal fun Route.revurderingRoutes(
     manuellRevurderingService: ManuellRevurderingService,
     omgjoeringKlageRevurderingService: OmgjoeringKlageRevurderingService,
     automatiskRevurderingService: AutomatiskRevurderingService,
+    aarligInntektsjusteringJobbService: AarligInntektsjusteringJobbService,
 ) {
     val logger = LoggerFactory.getLogger("RevurderingRoute")
 
@@ -75,6 +79,21 @@ internal fun Route.revurderingRoutes(
 
                         call.respond(revurdering.id)
                     }
+                }
+            }
+
+            post("manuell-inntektsjustering") {
+                kunSaksbehandlerMedSkrivetilgang {
+                    logger.info("Oppretter ny revurdering for årlig inntektsjustering på sak $sakId")
+                    val revurdering =
+                        inTransaction {
+                            aarligInntektsjusteringJobbService.nyManuellRevurdering(
+                                sakId,
+                                aarligInntektsjusteringJobbService.hentForrigeBehandling(sakId),
+                                YearMonth.of(Year.now().value, 1).plusYears(1),
+                            )
+                        }
+                    call.respond(revurdering.id)
                 }
             }
 
@@ -147,6 +166,7 @@ data class OpprettRevurderingRequest(
     val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,
+    val referanse: String? = null,
 )
 
 data class RevurderingInfoDto(

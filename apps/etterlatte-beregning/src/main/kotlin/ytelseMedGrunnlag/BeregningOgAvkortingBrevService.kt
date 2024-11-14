@@ -67,7 +67,7 @@ class BeregningOgAvkortingBrevService(
 
         return BeregningOgAvkortingDto(
             perioder = avkortinger,
-            endringIUtebalingVedVirk =
+            endringIUtbetalingVedVirk =
                 when (behandling.behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING -> false
                     else -> {

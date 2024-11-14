@@ -18,7 +18,7 @@ data class Utbetalingsinfo(
 data class Avkortingsinfo(
     val virkningsdato: LocalDate,
     val beregningsperioder: List<AvkortetBeregningsperiode>,
-    val endringIUtebalingVedVirk: Boolean,
+    val endringIUtbetalingVedVirk: Boolean,
 )
 
 data class AvkortetBeregningsperiode(

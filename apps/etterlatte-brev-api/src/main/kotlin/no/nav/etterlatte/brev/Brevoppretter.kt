@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.VERGENAVN_FOR_MOTTAKER
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -143,11 +144,11 @@ class Brevoppretter(
             when (verge) {
                 is Vergemaal -> {
                     logger.warn("Er verge, kan ikke ferdigstille uten å legge til adresse manuelt.")
-                    tomMottaker().copy(foedselsnummer = MottakerFoedselsnummer(verge.foedselsnummer.value))
+                    tomVergeMottaker().copy(foedselsnummer = MottakerFoedselsnummer(verge.foedselsnummer.value))
                 }
                 is UkjentVergemaal -> {
                     logger.warn("Er verge, kan ikke ferdigstille uten å legge til adresse manuelt.")
-                    tomMottaker()
+                    tomVergeMottaker()
                 }
 
                 else ->
@@ -159,10 +160,10 @@ class Brevoppretter(
             }
         }
 
-    private fun tomMottaker() =
+    private fun tomVergeMottaker(): Mottaker =
         Mottaker(
             UUID.randomUUID(),
-            navn = "Ukjent",
+            navn = VERGENAVN_FOR_MOTTAKER,
             foedselsnummer = null,
             orgnummer = null,
             adresse = Adresse(adresseType = "", landkode = "", land = ""),

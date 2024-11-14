@@ -1,7 +1,7 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect, useState } from 'react'
-import { Box, HStack, Table, Tag } from '@navikt/ds-react'
-import { CheckmarkIcon } from '@navikt/aksel-icons'
+import { Box, Button, HStack, Table, Tag } from '@navikt/ds-react'
+import { CheckmarkIcon, ExternalLinkIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { SakMedBehandlinger } from '~components/person/typer'
@@ -77,7 +77,20 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
                     <Table.DataCell>
                       <HStack gap="4" justify="end">
                         {!!notat.journalpostId ? (
-                          <NotatVisningModal notat={notat} />
+                          <>
+                            <Button
+                              as="a"
+                              href={`/api/notat/${notat.id}/pdf`}
+                              target="_blank"
+                              variant="secondary"
+                              icon={<ExternalLinkIcon />}
+                              size="small"
+                            >
+                              Åpne
+                            </Button>
+
+                            <NotatVisningModal notat={notat} />
+                          </>
                         ) : (
                           <>
                             <SlettNotatModal

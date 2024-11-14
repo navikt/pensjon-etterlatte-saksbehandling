@@ -145,6 +145,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             behandlingId={behandlingId}
             redigerbar={redigerbar}
             behandlingstype={behandling.behandlingType}
+            revurderingsaarsak={behandling.revurderingsaarsak}
           />
         </>
       )}

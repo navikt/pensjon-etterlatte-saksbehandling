@@ -266,9 +266,15 @@ function foerstegangsbehandlingRoutes(
 
 function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteType> {
   const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const nySoeknad = behandling.revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
+
+  const routesOpphoer = [behandlingroutes.revurderingsoversikt, behandlingroutes.vilkaarsvurdering]
+  if (opphoer && !nySoeknad) {
+    routesOpphoer.push(behandlingroutes.beregning)
+  }
 
   const defaultRoutes: Array<BehandlingRouteType> = opphoer
-    ? [behandlingroutes.revurderingsoversikt, behandlingroutes.vilkaarsvurdering, behandlingroutes.beregning]
+    ? routesOpphoer
     : [
         behandlingroutes.revurderingsoversikt,
         behandlingroutes.vilkaarsvurdering,

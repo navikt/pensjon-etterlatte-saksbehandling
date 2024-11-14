@@ -40,7 +40,6 @@ import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.OmregningKlassifikasjonskodeJob
-import no.nav.etterlatte.behandling.jobs.OppgaveFristGaarUtJobb
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
@@ -105,7 +104,6 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
-import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaKey.KAFKA_RAPID_TOPIC
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -119,8 +117,6 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.isProd
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
@@ -135,7 +131,6 @@ import no.nav.etterlatte.metrics.GjenopprettingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
-import no.nav.etterlatte.oppgave.OppgaveFristGaarUtJobService
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
@@ -159,7 +154,6 @@ import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
-import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 private fun pdlHttpClient(config: Config) =
@@ -560,7 +554,6 @@ internal class ApplicationContext(
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
-    val oppgaveFristGaarUtJobService = OppgaveFristGaarUtJobService(oppgaveService)
     val saksbehandlerService: SaksbehandlerService =
         SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
     val gosysOppgaveService =
@@ -652,17 +645,6 @@ internal class ApplicationContext(
             initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
-        )
-    }
-
-    val oppgaveFristGaarUtJobb: OppgaveFristGaarUtJobb by lazy {
-        OppgaveFristGaarUtJobb(
-            erLeader = { leaderElectionKlient.isLeader() },
-            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
-            periode = Duration.ofDays(1),
-            oppgaveFristGaarUtJobService = oppgaveFristGaarUtJobService,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
         )
     }
 

@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -24,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
@@ -261,7 +263,9 @@ class BehandlingDao(
                     stmt.setString(18, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
                     stmt.setJsonb(19, tidligereFamiliepleier)
                 }
-                require(stmt.executeUpdate() == 1)
+                checkInternFeil(stmt.executeUpdate() == 1) {
+                    "Kunne ikke opprette behandling for ${behandling.id}"
+                }
             }
         }
 
@@ -281,7 +285,9 @@ class BehandlingDao(
             stmt.setObject(1, objectMapper.writeValueAsString(gyldighetsproeving))
             stmt.setTidspunkt(2, Tidspunkt.now().toLocalDatetimeUTC().toTidspunkt())
             stmt.setObject(3, behandlingId)
-            require(stmt.executeUpdate() == 1)
+            checkInternFeil(stmt.executeUpdate() == 1) {
+                "Kunne ikke lagreGyldighetsproeving behandling for $behandlingId"
+            }
         }
     }
 
@@ -300,7 +306,26 @@ class BehandlingDao(
             stmt.setString(1, status.name)
             stmt.setTidspunkt(2, sistEndret.toTidspunkt())
             stmt.setObject(3, behandlingId)
-            require(stmt.executeUpdate() == 1)
+            checkInternFeil(stmt.executeUpdate() == 1) {
+                "Kunne ikke lagreStatus behandling for $behandlingId"
+            }
+        }
+    }
+
+    fun lagreAvbruttAarsak(
+        behandlingId: UUID,
+        aarsakTilAvbrytelse: AarsakTilAvbrytelse,
+        kommentar: String,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt = prepareStatement("UPDATE behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
+
+            stmt.setString(1, aarsakTilAvbrytelse.name)
+            stmt.setString(2, kommentar)
+            stmt.setObject(3, behandlingId)
+            checkInternFeil(stmt.executeUpdate() == 1) {
+                "Kunne ikke lagreStatus behandling for $behandlingId"
+            }
         }
     }
 
@@ -313,7 +338,9 @@ class BehandlingDao(
 
             stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
             stmt.setObject(2, behandlingId)
-            require(stmt.executeUpdate() == 1)
+            checkInternFeil(stmt.executeUpdate() == 1) {
+                "Kunne ikke lagreBoddEllerArbeidetUtlandet behandling for $behandlingId"
+            }
         }
     }
 
@@ -325,7 +352,9 @@ class BehandlingDao(
             val statement = prepareStatement("UPDATE behandling set utlandstilknytning = ? where id = ?")
             statement.setJsonb(1, utlandstilknytning)
             statement.setObject(2, behandlingId)
-            require(statement.executeUpdate() == 1)
+            checkInternFeil(statement.executeUpdate() == 1) {
+                "Kunne ikke lagreUtlandstilknytning behandling for $behandlingId"
+            }
         }
     }
 
@@ -337,7 +366,9 @@ class BehandlingDao(
             val statement = prepareStatement("UPDATE behandling set tidligere_familiepleier = ? where id = ?")
             statement.setJsonb(1, tidligereFamiliepleier)
             statement.setObject(2, behandlingId)
-            require(statement.executeUpdate() == 1)
+            checkInternFeil(statement.executeUpdate() == 1) {
+                "Kunne ikke lagreTidligereFamiliepleier behandling for $behandlingId"
+            }
         }
     }
 
@@ -446,7 +477,9 @@ class BehandlingDao(
             val statement = prepareStatement("UPDATE behandling set sende_brev = ? where id = ?")
             statement.setBoolean(1, skalSendeBrev)
             statement.setObject(2, behandlingId)
-            require(statement.executeUpdate() == 1)
+            checkInternFeil(statement.executeUpdate() == 1) {
+                "Kunne ikke send brev behandling for $behandlingId"
+            }
         }
     }
 
@@ -461,12 +494,21 @@ class BehandlingDao(
 
     private fun ResultSet.behandlingAvRettType() = tilBehandling(getString("behandlingstype"))
 
-    fun avbrytBehandling(behandlingId: UUID) =
+    fun avbrytBehandling(
+        behandlingId: UUID,
+        aarsakTilAvbrytelse: AarsakTilAvbrytelse?,
+        kommentar: String?,
+    ) {
         this.lagreStatus(
             behandlingId = behandlingId,
             status = BehandlingStatus.AVBRUTT,
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
         )
+
+        if (aarsakTilAvbrytelse != null) {
+            this.lagreAvbruttAarsak(behandlingId, aarsakTilAvbrytelse, kommentar ?: "")
+        }
+    }
 
     fun lagreNyttVirkningstidspunkt(
         behandlingId: UUID,
@@ -503,4 +545,5 @@ private fun ResultSet.toTidligereFamiliepleier(): TidligereFamiliepleier? =
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
+// TODO: fjerne denne bruke, blir veldig dårlig feilmelding
 fun PreparedStatement.updateSuccessful() = require(this.executeUpdate() == 1)

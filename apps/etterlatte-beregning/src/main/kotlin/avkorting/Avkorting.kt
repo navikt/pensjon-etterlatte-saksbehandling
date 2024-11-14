@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.Sanksjon
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -151,6 +152,23 @@ data class Avkorting(
         return oppdatertMedNyInntekt.beregnAvkortingRevurdering(beregning, sanksjoner)
     }
 
+    private fun finnTom(
+        opphoerFom: YearMonth? = null,
+        nyttGrunnlag: AvkortingGrunnlagLagreDto,
+    ): YearMonth? =
+        // opphoerFom kan maks være ett år frem
+        opphoerFom?.let {
+            if (it.year.minus(nyttGrunnlag.fom.year) == 1) {
+                YearMonth.of(nyttGrunnlag.fom.year, Month.DECEMBER)
+            } else if (it.year == nyttGrunnlag.fom.year) {
+                it.minusMonths(1)
+            } else {
+                throw OpphoerErTilbakeITid(
+                    "Opphøer er tilbake i tid, opphør: $opphoerFom nyttgrunnlag er fra: ${nyttGrunnlag.fom} id: ${nyttGrunnlag.id}",
+                )
+            }
+        }
+
     fun oppdaterMedInntektsgrunnlag(
         nyttGrunnlag: AvkortingGrunnlagLagreDto,
         bruker: BrukerTokenInfo,
@@ -158,24 +176,25 @@ data class Avkorting(
         aldersovergang: YearMonth? = null,
     ): Avkorting {
         val aarsoppgjoer = hentEllerOpprettAarsoppgjoer(nyttGrunnlag.fom)
+        val tom = finnTom(opphoerFom, nyttGrunnlag)
         val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
-                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom, opphoerFom) } +
+                .map { it.lukkSisteInntektsperiode(nyttGrunnlag.fom, tom) } +
                 listOf(
                     Inntektsavkorting(
                         grunnlag =
                             AvkortingGrunnlag(
                                 id = nyttGrunnlag.id,
-                                periode = Periode(fom = nyttGrunnlag.fom, tom = opphoerFom?.minusMonths(1)),
+                                periode = Periode(fom = nyttGrunnlag.fom, tom = tom),
                                 inntektTom = nyttGrunnlag.inntektTom,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
                                 inntektUtlandTom = nyttGrunnlag.inntektUtlandTom,
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
                                 innvilgaMaaneder =
                                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.antall
-                                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, opphoerFom, aldersovergang),
+                                        ?: finnAntallInnvilgaMaanederForAar(aarsoppgjoer.fom, tom, aldersovergang),
                                 overstyrtInnvilgaMaanederAarsak =
                                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
@@ -434,6 +453,10 @@ data class Avkorting(
     }
 }
 
+class OpphoerErTilbakeITid(
+    msg: String,
+) : InternfeilException(msg)
+
 /**
  * Kan være forventet årsinntekt oppgitt av bruker eller faktisk årsinntekt etter skatteoppgjør.
  */
@@ -539,8 +562,8 @@ data class Inntektsavkorting(
 
     fun lukkSisteInntektsperiode(
         virkningstidspunkt: YearMonth,
-        opphoerFom: YearMonth?,
-    ) = if (grunnlag.periode.tom == null || grunnlag.periode.tom == opphoerFom?.minusMonths(1)) {
+        tom: YearMonth?,
+    ) = if (grunnlag.periode.tom == null || grunnlag.periode.tom == tom) {
         copy(
             grunnlag =
                 grunnlag.copy(
@@ -673,10 +696,10 @@ private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning
 
 fun finnAntallInnvilgaMaanederForAar(
     aarsoppgjoerFom: YearMonth,
-    opphoerFom: YearMonth?,
+    tom: YearMonth?,
     aldersovergang: YearMonth?,
 ): Int {
-    val tomMaaned = opphoerFom ?: aldersovergang
-    val tom = tomMaaned?.monthValue?.let { it - 1 } ?: 12
-    return tom - (aarsoppgjoerFom.monthValue - 1)
+    val tomMaaned = tom ?: aldersovergang?.minusMonths(1)
+    val tomEllerDesember = tomMaaned?.monthValue ?: 12
+    return tomEllerDesember - (aarsoppgjoerFom.monthValue - 1)
 }

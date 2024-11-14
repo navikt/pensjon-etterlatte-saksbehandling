@@ -1,4 +1,4 @@
-import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { ReactNode, useEffect } from 'react'
 import { BodyShort, Box, Heading, Label, VStack } from '@navikt/ds-react'
@@ -10,7 +10,8 @@ import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
 import { VurderingAvAktivitetsplikt } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/VurderingAvAktivitetsplikt'
-import { AktivitetspliktStatusTag } from '~shared/tags/AktivitetspliktStatusTag'
+import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktStatusOgGyldig'
+import { harVurdering } from '~shared/types/Aktivitetsplikt'
 
 export const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
   if (avdoede.length === 0) return new Date()
@@ -45,34 +46,23 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
               <VStack gap="4">
                 <Heading size="medium">Aktivitetsplikt</Heading>
 
-                <Label>Status på gjenlevende sin aktivitet</Label>
-                {aktivitetspliktVurdering ? (
-                  <div>
-                    <AktivitetspliktStatusTag aktivitetspliktVurdering={aktivitetspliktVurdering} />
-                  </div>
-                ) : (
-                  <BodyShort>Ingen vurdering</BodyShort>
-                )}
+                <AktivitetspliktStatusTagOgGyldig aktivitetspliktVurdering={aktivitetspliktVurdering} />
                 <Label>Gjenlevende sin tidslinje</Label>
 
-                {isSuccess(sakResult) &&
+                {mapSuccess(sakResult, (data) =>
                   mapResult(familieOpplysningerResult, {
                     pending: <Spinner label="Henter opplysninger om avdød" />,
                     error: (error) => (
                       <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger om avdød'}</ApiErrorAlert>
                     ),
-                    success: ({ avdoede }) => (
-                      <>
-                        {avdoede && (
-                          <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={sakResult.data.sak.id} />
-                        )}
-                      </>
-                    ),
-                  })}
+                    success: ({ avdoede }) =>
+                      avdoede && <AktivitetspliktTidslinje doedsdato={velgDoedsdato(avdoede)} sakId={data.sak.id} />,
+                  })
+                )}
               </VStack>
               <hr style={{ width: '100%' }} />
 
-              {aktivitetspliktVurdering ? (
+              {harVurdering(aktivitetspliktVurdering) ? (
                 <VurderingAvAktivitetsplikt aktivitetspliktVurdering={aktivitetspliktVurdering} />
               ) : (
                 <BodyShort>Ingen vurdering</BodyShort>

@@ -8,7 +8,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -76,8 +77,8 @@ class VedtakBehandlingService(
 
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
-        val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering)
 
         return if (vedtak != null) {
             logger.info("Oppdaterer vedtak for behandling med behandlingId=$behandlingId")
@@ -102,8 +103,9 @@ class VedtakBehandlingService(
         val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
-        val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val vedtakType = vedtakType(behandling.behandlingType, behandling.revurderingsaarsak, vilkaarsvurdering)
+
         oppdaterVedtak(
             behandling = behandling,
             eksisterendeVedtak = vedtak,
@@ -421,7 +423,7 @@ class VedtakBehandlingService(
             }
         } catch (e: Exception) {
             repository.slettManuellBehandlingSamordningsmelding(samordningmelding.samId)
-            throw e
+            throw InternfeilException("Klarte ikke å oppdatere samordningsmelding", e)
         }
     }
 
@@ -582,12 +584,11 @@ class VedtakBehandlingService(
         virkningstidspunkt: YearMonth,
         behandling: DetaljertBehandling,
     ) = when (vedtakType) {
-        VedtakType.OPPHOER -> {
-            virkningstidspunkt
-        }
+        VedtakType.OPPHOER -> virkningstidspunkt
+        VedtakType.AVSLAG -> behandling.opphoerFraOgMed
         else -> {
             if (virkningstidspunkt == behandling.opphoerFraOgMed) {
-                // TODO Det burde være en løsning for å kunne fjerne et opphler uten en revurdering med samme virk som opphøret?
+                // TODO Det burde være en løsning for å kunne fjerne et opphør uten en revurdering med samme virk som opphøret?
                 null
             } else if (behandling.opphoerFraOgMed != null && virkningstidspunkt > behandling.opphoerFraOgMed) {
                 throw UgyldigForespoerselException(
@@ -602,6 +603,7 @@ class VedtakBehandlingService(
 
     private fun vedtakType(
         behandlingType: BehandlingType,
+        revurderingaarsak: Revurderingaarsak?,
         vilkaarsvurdering: VilkaarsvurderingDto?,
     ): VedtakType =
         when (behandlingType) {
@@ -615,7 +617,13 @@ class VedtakBehandlingService(
             BehandlingType.REVURDERING -> {
                 when (vilkaarsvurderingUtfallNonNull(vilkaarsvurdering?.resultat?.utfall)) {
                     VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.ENDRING
-                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.OPPHOER
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
+                        if (revurderingaarsak == Revurderingaarsak.NY_SOEKNAD) {
+                            VedtakType.AVSLAG
+                        } else {
+                            VedtakType.OPPHOER
+                        }
+                    }
                 }
             }
         }
@@ -663,7 +671,11 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.ytelseEtterAvkorting.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
-                                    regelverk = hentRegelverkFraBeregningForPeriode(beregningOgAvkorting.beregning, it.fom),
+                                    regelverk =
+                                        hentRegelverkFraBeregningForPeriode(
+                                            beregningOgAvkorting.beregning.beregningsperioder,
+                                            it.fom,
+                                        ),
                                 )
                             }
                         }
@@ -703,15 +715,17 @@ class VedtakBehandlingService(
     }
 
     private fun hentRegelverkFraBeregningForPeriode(
-        beregning: BeregningDTO,
+        beregningsperioder: List<Beregningsperiode>,
         fom: YearMonth,
-    ): Regelverk? =
-        beregning.beregningsperioder
-            .sortedBy { it.datoFOM }
-            .first {
-                (fom.isAfter(it.datoFOM) || fom == it.datoFOM) &&
-                    (it.datoTOM == null || (fom.isBefore(it.datoTOM) || fom == it.datoFOM))
-            }.regelverk
+    ): Regelverk? {
+        val samsvarendeBeregningsperiode =
+            beregningsperioder
+                .sortedBy { it.datoFOM }
+                .firstOrNull { fom >= it.datoFOM && (it.datoTOM == null || fom <= it.datoTOM) }
+                ?: throw InternfeilException("Fant ingen beregningsperioder som samsvarte med avkortingsperiode $fom")
+
+        return samsvarendeBeregningsperiode.regelverk
+    }
 
     private suspend fun hentDataForVedtak(
         behandlingId: UUID,
@@ -737,7 +751,7 @@ class VedtakBehandlingService(
                             VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider)
                         }
 
-                        null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
+                        null -> throw InternfeilException("Mangler resultat av vilkårsvurdering for behandling $behandlingId")
                     }
                 }
             }

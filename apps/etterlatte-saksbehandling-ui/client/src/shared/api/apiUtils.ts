@@ -15,8 +15,6 @@ export const isPendingOrInitial = (result: Result<unknown>): result is Initial |
   isPending(result) || isInitial(result)
 export const isSuccessOrInitial = (result: Result<unknown>): result is Initial | Success<unknown> =>
   isSuccess(result) || isInitial(result)
-export const isFailureWithCode = (result: Result<unknown>, code: number): result is Error<ApiError> =>
-  result.status === 'error' && result.error.status === code
 
 export type Mappers<T, R> = {
   success?: (_: T) => R
@@ -33,17 +31,17 @@ export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T
     return mappers.pending !== undefined ? mappers.pending : fallback
   }
   if (isFailure(result)) {
-    if (mappers.error === undefined) {
+    if (!mappers.error) {
       return fallback
     }
     if (typeof mappers.error === 'function') {
-      return (mappers.error as Function)(result.error)
+      return (mappers.error as (_: ApiError) => R)(result.error)
     } else {
       return mappers.error
     }
   }
   if (isSuccess(result)) {
-    return mappers.success !== undefined ? mappers.success(result.data) : fallback
+    return mappers.success ? mappers.success(result.data) : fallback
   }
   throw new Error(`Ukjent status på result: ${JSON.stringify(result)}`)
 }
@@ -59,21 +57,6 @@ export const mapApiResult = <T>(
   return mapResult(result, {
     pending: mapInitialOrPending,
     initial: mapInitialOrPending,
-    error: (error) => (error.status === 502 ? null : mapError(error)),
-    success: mapSuccess,
-  })
-}
-
-export const mapAllApiResult = <T>(
-  result: Result<T>,
-  mapPending: ReactElement,
-  mapInitial: ReactElement | null,
-  mapError: (_: ApiError) => ReactElement,
-  mapSuccess: (_: T) => ReactElement | null
-): ReactElement | null => {
-  return mapResult(result, {
-    pending: mapPending,
-    initial: mapInitial,
     error: (error) => (error.status === 502 ? null : mapError(error)),
     success: mapSuccess,
   })

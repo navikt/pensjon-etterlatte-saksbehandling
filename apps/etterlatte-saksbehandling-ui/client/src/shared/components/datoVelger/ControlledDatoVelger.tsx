@@ -52,7 +52,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
 
   const { datepickerProps, inputProps, setSelected, selectedDay } = useDatepicker({
     onDateChange: (date: Date) => {
-      date && field.onChange(formatDateToLocaleDateOrEmptyString(date))
+      if (date) field.onChange(formatDateToLocaleDateOrEmptyString(date))
     },
     locale: 'nb',
     inputFormat: 'dd.MM.yyyy',

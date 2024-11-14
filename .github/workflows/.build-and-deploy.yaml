@@ -27,7 +27,7 @@ jobs:
           distribution: temurin
           java-version: 21
       - name: Inject slug/short variables
-        uses: rlespinasse/github-slug-action@v4
+        uses: rlespinasse/github-slug-action@v5
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:

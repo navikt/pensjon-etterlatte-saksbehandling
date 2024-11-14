@@ -2,7 +2,10 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.distribusjon.BestemDistribusjonskanalRequest
+import no.nav.etterlatte.brev.distribusjon.BestemDistribusjonskanalResponse
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
+import no.nav.etterlatte.brev.distribusjon.DokDistKanalKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDistribusjonResponse
 import no.nav.etterlatte.brev.model.BrevID
@@ -23,7 +26,9 @@ import no.nav.etterlatte.brev.vedtaksbrev.UgyldigAntallMottakere
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkUgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -38,11 +43,15 @@ class BrevService(
     private val journalfoerBrevService: JournalfoerBrevService,
     private val pdfGenerator: PDFGenerator,
     private val distribuerer: Brevdistribuerer,
+    private val dokDistKanalKlient: DokDistKanalKlient,
     private val oppgaveService: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
 
+    /*
+     * Brev uten behandling (dødshendelse, etc)
+     */
     suspend fun opprettJournalfoerOgDistribuerRiver(
         bruker: BrukerTokenInfo,
         req: OpprettJournalfoerOgDistribuerRequest,
@@ -82,7 +91,10 @@ class BrevService(
             return BrevDistribusjonResponse(brevId, true)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
+            logger.error(
+                "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
+                e,
+            )
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
             return BrevDistribusjonResponse(brevId, false)
         }
@@ -127,7 +139,10 @@ class BrevService(
             return BrevStatusResponse(brevId, oppdatertBrev.status)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
-            logger.error("Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}", e)
+            logger.error(
+                "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
+                e,
+            )
 
             return BrevStatusResponse(brevId, oppdatertBrev.status)
         }
@@ -339,7 +354,9 @@ class BrevService(
         logger.info("Sjekker om brev med id=$id kan slettes")
 
         val brev = sjekkOmBrevKanEndres(id)
-        check(brev.behandlingId == null) { "Brev med id=$id er et vedtaksbrev og kan ikke slettes" }
+        checkUgyldigForespoerselException(value = brev.behandlingId == null, code = "BREV_KAN_IKKE_SLETTES") {
+            "Brev med id=$id er et vedtaksbrev og kan ikke slettes"
+        }
 
         val result = db.settBrevSlettet(id, bruker)
         logger.info("Brev med id=$id slettet=$result")
@@ -369,6 +386,29 @@ class BrevService(
         }
 
         db.settBrevUtgaatt(id, kommentar, bruker)
+    }
+
+    suspend fun bestemDistribusjonskanal(
+        id: BrevID,
+        mottakerId: UUID,
+        sak: Sak,
+        bruker: BrukerTokenInfo,
+    ): BestemDistribusjonskanalResponse {
+        val brev = db.hentBrev(id)
+
+        val mottaker = brev.mottakere.single { it.id == mottakerId }
+        val mottakerIdent = (mottaker.foedselsnummer?.value ?: mottaker.orgnummer)
+
+        val request =
+            BestemDistribusjonskanalRequest(
+                brukerId = brev.soekerFnr,
+                dokumenttypeId = null,
+                erArkivert = false,
+                mottakerId = mottakerIdent!!,
+                tema = sak.sakType.tema,
+            )
+
+        return dokDistKanalKlient.bestemDistribusjonskanal(request, bruker)
     }
 
     private fun sjekkOmBrevKanEndres(brevID: BrevID): Brev {

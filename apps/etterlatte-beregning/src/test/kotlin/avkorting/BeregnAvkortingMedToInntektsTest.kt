@@ -6,7 +6,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
-import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
+import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.beregning
 import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
@@ -77,7 +77,7 @@ class BeregnAvkortingMedToInntektsTest {
         Avkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         aarsinntekt = 300000,
                         fratrekkInnAar = 150000,
                         fom = YearMonth.of(2024, Month.JULY),
@@ -101,7 +101,7 @@ class BeregnAvkortingMedToInntektsTest {
         eksisterende
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         aarsinntekt = 325000,
                         fratrekkInnAar = 0,
                         fom = YearMonth.of(2025, Month.JANUARY),
@@ -125,7 +125,7 @@ class BeregnAvkortingMedToInntektsTest {
         eksisterende
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         aarsinntekt = 350000,
                         fratrekkInnAar = 150000,
                         fom = YearMonth.of(eksisterende.aarsoppgjoer.last().aar, Month.OCTOBER),
@@ -149,7 +149,7 @@ class BeregnAvkortingMedToInntektsTest {
         eksisterende
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         id =
                             eksisterende.aarsoppgjoer
                                 .last()

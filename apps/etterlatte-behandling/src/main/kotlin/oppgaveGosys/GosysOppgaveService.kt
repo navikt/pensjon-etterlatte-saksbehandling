@@ -12,6 +12,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkUgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
@@ -246,14 +247,14 @@ class GosysOppgaveServiceImpl(
             throw StoetterKunFlyttingAvJournalfoeringsoppgave()
         }
 
-        check(!gosysOppgave.journalpostId.isNullOrBlank()) {
+        checkUgyldigForespoerselException(value = !gosysOppgave.journalpostId.isNullOrBlank(), code = "KAN_IKKE_FLYTTE_GOSYS_OPPGAVE") {
             "Kan ikke flytte oppgave når journalpostId mangler (oppgaveId=${gosysOppgave.id})"
         }
 
         val nyOppgave =
             inTransaction {
                 oppgaveService.opprettOppgave(
-                    referanse = gosysOppgave.journalpostId,
+                    referanse = gosysOppgave.journalpostId!!,
                     sakId = sakId,
                     kilde = OppgaveKilde.SAKSBEHANDLER,
                     type = OppgaveType.JOURNALFOERING,

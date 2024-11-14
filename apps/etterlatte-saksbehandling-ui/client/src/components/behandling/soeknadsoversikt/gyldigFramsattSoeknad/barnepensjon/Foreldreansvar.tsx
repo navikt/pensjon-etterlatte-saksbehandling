@@ -8,7 +8,7 @@ interface Props {
   persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
   gjenlevendeGrunnlag: Personopplysning | undefined
   soekerGrunnlag: Personopplysning | undefined
-  harKildePesys: Boolean
+  harKildePesys: boolean
 }
 
 export const Foreldreansvar = ({

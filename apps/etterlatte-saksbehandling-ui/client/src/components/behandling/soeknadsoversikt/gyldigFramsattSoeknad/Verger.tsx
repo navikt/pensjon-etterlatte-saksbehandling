@@ -6,10 +6,10 @@ import { IPdlPerson } from '~shared/types/Person'
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { useEffect } from 'react'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
-import { isSuccess } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { mapResult } from '~shared/api/apiUtils'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 import { VStack } from '@navikt/ds-react'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface Props {
   behandlingId: string
@@ -28,7 +28,7 @@ export const Verger = ({ sakId, behandlingId }: Props) => {
 
   function successContents(soekerOpplysning: Grunnlagsopplysning<IPdlPerson, KildePdl>) {
     const vergeList = soekerOpplysning.opplysning.vergemaalEllerFremtidsfullmakt || []
-    if (vergeList?.length == 0) {
+    if (!vergeList?.length) {
       return (
         <Info label="Vergemål" tekst="Ingen verge registrert" undertekst={formaterKildePdl(soekerOpplysning.kilde)} />
       )
@@ -68,10 +68,9 @@ export const Verger = ({ sakId, behandlingId }: Props) => {
 
   return (
     <VStack gap="4">
-      {isSuccess(soeker) && successContents(soeker.data)}
-      {isFailureHandler({
-        apiResult: soeker,
-        errorMessage: 'Kunne ikke hente info om verger',
+      {mapResult(soeker, {
+        error: (error) => <ApiErrorAlert>Kunne ikke hente info om verge(r): {error.detail}</ApiErrorAlert>,
+        success: (data) => successContents(data),
       })}
     </VStack>
   )

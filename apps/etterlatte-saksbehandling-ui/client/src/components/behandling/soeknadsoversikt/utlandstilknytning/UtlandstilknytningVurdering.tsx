@@ -33,7 +33,11 @@ export const UtlandstilknytningVurdering = ({
   const [setUtlandstilknytningStatus, setUtlandstilknytning, resetToInitial] = useApiCall(lagreUtlandstilknytning)
 
   const lagre = (onSuccess?: () => void) => {
-    !svar ? setRadioError('Du må velge et svar') : setRadioError('')
+    if (!svar) {
+      setRadioError('Du må velge et svar')
+    } else {
+      setRadioError('')
+    }
 
     if (svar !== undefined)
       return setUtlandstilknytning({ behandlingId, begrunnelse, svar }, (utlandstilknyningstype) => {

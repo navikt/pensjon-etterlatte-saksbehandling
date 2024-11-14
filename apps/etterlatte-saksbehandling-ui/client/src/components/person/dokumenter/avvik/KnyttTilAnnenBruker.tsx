@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Button, HStack, TextField } from '@navikt/ds-react'
+import { Alert, Button, HStack, TextField, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { BrukerIdType, Journalpost, Sakstype } from '~shared/types/Journalpost'
 import { ISak } from '~shared/types/sak'
@@ -110,9 +110,10 @@ export const KnyttTilAnnenBruker = ({
     ),
     pending: <Spinner label="Henter sak..." />,
     success: (annenSak) => (
-      <>
-        {isSuccess(sakStatus) && <SakOverfoeringDetailjer fra={sakStatus.data.sak} til={annenSak} />}
-        <br />
+      <VStack gap="4">
+        {mapSuccess(sakStatus, (data) => (
+          <SakOverfoeringDetailjer fra={data.sak} til={annenSak} />
+        ))}
 
         <HStack gap="4" justify="end">
           <Button variant="secondary" onClick={lukkModal} disabled={isLoading}>
@@ -122,7 +123,7 @@ export const KnyttTilAnnenBruker = ({
             Flytt journalpost til sak {annenSak.id}
           </Button>
         </HStack>
-      </>
+      </VStack>
     ),
     error: (error) =>
       error.status === 404 ? (

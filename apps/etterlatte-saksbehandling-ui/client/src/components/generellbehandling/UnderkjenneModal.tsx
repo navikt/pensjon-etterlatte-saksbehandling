@@ -6,8 +6,8 @@ import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehan
 import { useNavigate } from 'react-router-dom'
 import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
 
-import { isSuccess } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { isSuccess, mapResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const UnderkjenneModal = ({
   utlandsBehandling,
@@ -54,12 +54,12 @@ export const UnderkjenneModal = ({
       >
         Bekreft og send i retur
       </Button>
-      {isSuccess(underkjennStatus) && (
-        <Alert variant="success">Behandlingen ble underkjent, du blir straks sendt til saksoversikten</Alert>
-      )}
-      {isFailureHandler({
-        apiResult: underkjennStatus,
-        errorMessage: 'Behandlingen ble ikke underkjent',
+
+      {mapResult(underkjennStatus, {
+        error: (error) => <ApiErrorAlert>Feil oppsto ved underkjenning: {error.detail}</ApiErrorAlert>,
+        success: () => (
+          <Alert variant="success">Behandlingen ble underkjent, du blir straks sendt til saksoversikten</Alert>
+        ),
       })}
     </>
   )

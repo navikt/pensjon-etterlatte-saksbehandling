@@ -32,8 +32,8 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const vedtaksresultat = useVedtaksResultat()
   const visOverstyrKnapp = useFeatureEnabledMedDefault('overstyr-beregning-knapp', false)
 
-  const [visOverstyrtBeregningGrunnlag, setVisOverstyrtBeregningGrunnlag] = useState<Boolean>(false)
-  const [erBehandlingFerdigstilt] = useState<Boolean>(!statusErRedigerbar(behandling.status))
+  const [visOverstyrtBeregningGrunnlag, setVisOverstyrtBeregningGrunnlag] = useState<boolean>(false)
+  const [erBehandlingFerdigstilt] = useState<boolean>(!statusErRedigerbar(behandling.status))
 
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterDato(behandling.virkningstidspunkt.dato)

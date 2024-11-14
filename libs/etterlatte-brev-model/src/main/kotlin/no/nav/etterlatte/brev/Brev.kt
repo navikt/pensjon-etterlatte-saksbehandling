@@ -50,11 +50,11 @@ data class Adresse(
             if (!(postnummer.isNullOrBlank() || poststed.isNullOrBlank())) {
                 listOf()
             } else {
-                listOf("Postnummer eller poststed er null eller blank")
+                listOf("Postnummer eller poststed er ikke angitt")
             }
         } else if (adresseType == "UTENLANDSKPOSTADRESSE") {
             if (adresselinje1.isNullOrBlank()) {
-                listOf("Adresselinje1 er null eller blank")
+                listOf("Adresselinje1 er ikke angitt")
             } else if (!postnummer.isNullOrBlank() || !poststed.isNullOrBlank()) {
                 listOf("Postnummer og poststed skal ikke brukes på utenlandsk adresse")
             } else {
@@ -81,7 +81,7 @@ data class Mottaker(
         if (navn.isBlank()) {
             listOf("Navn er blank")
         } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
-            listOf("Fødselsnummer og orgnummer er null eller blank")
+            listOf("Fødselsnummer og orgnummer er ikke angitt")
         } else {
             adresse.erGyldig()
         }
@@ -123,6 +123,11 @@ data class OpprettJournalfoerOgDistribuerRequest(
     val brevParametereAutomatisk: BrevParametereAutomatisk,
     val avsenderRequest: SaksbehandlerOgAttestant,
     val sakId: SakId,
+)
+
+data class GenererOgFerdigstillVedtaksbrev(
+    val behandlingId: UUID,
+    val brevId: BrevID,
 )
 
 data class FerdigstillJournalFoerOgDistribuerOpprettetBrev(

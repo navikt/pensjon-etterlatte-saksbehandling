@@ -37,7 +37,6 @@ import no.nav.etterlatte.inntektsjustering.aarligInntektsjusteringRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.kodeverk.kodeverk
-import no.nav.etterlatte.krr.krrRoute
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -94,7 +93,6 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerJob,
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
-        context.oppgaveFristGaarUtJobb,
         context.omregningKlassifikasjonskodeJob,
     )
 
@@ -220,7 +218,6 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
 
     tilgangRoutes(applicationContext.tilgangService)
     kodeverk(applicationContext.kodeverkService)
-    krrRoute(applicationContext.tilgangService, applicationContext.krrKlient)
     vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
     aldersovergang(applicationContext.aldersovergangService)
 }

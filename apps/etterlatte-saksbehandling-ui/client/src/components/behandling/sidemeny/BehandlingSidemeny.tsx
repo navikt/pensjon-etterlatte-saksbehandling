@@ -202,7 +202,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
           </Tabs.Panel>
         )}
       </Tabs>
-      <AnnullerBehandling />
+      <AnnullerBehandling behandlingType={behandling.behandlingType} />
     </Sidebar>
   )
 }

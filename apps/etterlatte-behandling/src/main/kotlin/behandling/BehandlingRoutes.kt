@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
+import no.nav.etterlatte.libs.common.behandling.AvbrytBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
@@ -44,13 +45,13 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.lagGrunnlagsopplysning
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -66,7 +67,7 @@ internal fun Route.behandlingRoutes(
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     behandlingFactory: BehandlingFactory,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("BehandlingRoute")
 
     post("/api/behandling") {
         val request = call.receive<NyBehandlingRequest>()
@@ -149,7 +150,16 @@ internal fun Route.behandlingRoutes(
 
         post("/avbryt") {
             kunSkrivetilgang {
-                inTransaction { behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo) }
+                val body = call.receive<AvbrytBehandlingRequest>()
+
+                inTransaction {
+                    behandlingService.avbrytBehandling(
+                        behandlingId,
+                        brukerTokenInfo,
+                        body.aarsakTilAvbrytelse,
+                        body.kommentar,
+                    )
+                }
                 call.respond(HttpStatusCode.OK)
             }
         }

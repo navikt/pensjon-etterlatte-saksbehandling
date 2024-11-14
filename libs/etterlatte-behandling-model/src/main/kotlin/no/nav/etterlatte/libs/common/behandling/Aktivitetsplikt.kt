@@ -24,7 +24,7 @@ data class OpprettRevurderingForAktivitetspliktDto(
     val jobbType: JobbType,
 )
 
-data class OpprettOppgaveForAktivitetspliktVarigUnntakDto(
+data class OpprettOppgaveForAktivitetspliktDto(
     val sakId: SakId,
     val referanse: String? = null,
     val frist: Tidspunkt,
@@ -39,7 +39,7 @@ data class OpprettRevurderingForAktivitetspliktResponse(
     val forrigeBehandlingId: UUID,
 )
 
-data class OpprettOppgaveForAktivitetspliktVarigUnntakResponse(
+data class OpprettOppgaveForAktivitetspliktResponse(
     val opprettetOppgave: Boolean = false,
     val oppgaveId: UUID? = null,
 )

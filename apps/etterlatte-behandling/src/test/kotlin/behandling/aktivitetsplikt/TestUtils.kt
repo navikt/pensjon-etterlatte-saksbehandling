@@ -57,7 +57,7 @@ fun aktivitetsgrad(
             ident = "Z123456",
             tidspunkt = Tidspunkt.now(),
         ),
-    endret: Grunnlagsopplysning.Saksbehandler? =
+    endret: Grunnlagsopplysning.Saksbehandler =
         Grunnlagsopplysning.Saksbehandler(
             ident = "Z123456",
             tidspunkt = Tidspunkt.now(),

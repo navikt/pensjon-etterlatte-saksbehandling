@@ -26,7 +26,7 @@ export const hentOppgavelistenFilterFraLocalStorage = (): Filter => {
     const filter = localStorage[OPPGAVELISTEN_FILTER_KEY]
     if (!!filter) return JSON.parse(filter)
     else return initialFilter()
-  } catch (error) {
+  } catch {
     logger.generalError({ msg: 'Feil i hentingen av filter for oppgavelisten fra localstorage' })
 
     return initialFilter()
@@ -38,7 +38,7 @@ export const hentMinOppgavelisteFilterFraLocalStorage = (): Filter => {
     const filter = localStorage[MIN_OPPGAVELISTE_FILTER_KEY]
     if (!!filter) return JSON.parse(filter)
     else return initialMinOppgavelisteFiltre()
-  } catch (error) {
+  } catch {
     logger.generalError({ msg: 'Feil i hentingen av filter for min oppgaveliste fra localstorage' })
 
     return initialMinOppgavelisteFiltre()
@@ -50,7 +50,7 @@ export const hentGosysOppgaverFilterFraLocalStorage = (): GosysFilter => {
     const filter = localStorage[GOSYS_OPPGAVER_FILTER_KEY]
     if (!!filter) return JSON.parse(filter)
     else return {}
-  } catch (error) {
+  } catch {
     logger.generalError({ msg: 'Feil i hentingen av gosys filter fra localstorage' })
 
     return {}

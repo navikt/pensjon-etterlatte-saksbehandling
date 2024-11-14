@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
@@ -69,7 +70,11 @@ class OmregningDao(
                 statement.setString(4, request.begrunnelse)
                 statement.setString(5, request.corrId)
                 statement.setString(6, request.feilendeSteg)
-                statement.executeUpdate().also { require(it == 1) }
+                statement.executeUpdate().also {
+                    checkInternFeil(it > 0) {
+                        "Kunne ikke oppdaterKjoering for id sakid ${request.sakId}"
+                    }
+                }
             }
         }
     }
@@ -97,7 +102,11 @@ class OmregningDao(
                 statement.setBigDecimal(9, request.avkortingFoer)
                 statement.setBigDecimal(10, request.avkortingEtter)
                 statement.setBigDecimal(11, request.vedtakBeloep)
-                statement.executeUpdate().also { require(it == 1) }
+                statement.executeUpdate().also {
+                    checkInternFeil(it > 0) {
+                        "Kunne ikke lagreKjoering for id sakid ${request.sakId}"
+                    }
+                }
             }
         }
     }

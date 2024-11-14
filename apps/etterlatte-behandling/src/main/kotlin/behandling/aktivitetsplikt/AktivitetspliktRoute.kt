@@ -18,7 +18,7 @@ import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
-import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -30,10 +30,10 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.oppgaveId
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 const val AKTIVITET_ID_CALL_PARAMETER = "id"
@@ -64,7 +64,7 @@ internal fun Route.aktivitetspliktRoutes(
     aktivitetspliktService: AktivitetspliktService,
     aktivitetspliktOppgaveService: AktivitetspliktOppgaveService,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("AktivitetspliktRoute")
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt") {
         get {
@@ -229,12 +229,24 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
         }
-
+        route("oppgave-oppfoelging") {
+            post {
+                kunSystembruker {
+                    logger.info("Sjekker om sak $sakId ikke har varig unntak og skal ha oppgave om infobrev")
+                    val request = call.receive<OpprettOppgaveForAktivitetspliktDto>()
+                    val opprettet =
+                        inTransaction {
+                            aktivitetspliktService.opprettOppgaveHvisIkkeVarigUnntak(request)
+                        }
+                    call.respond(opprettet)
+                }
+            }
+        }
         route("varigUnntak") {
             post {
                 kunSystembruker {
                     logger.info("Sjekker om sak $sakId trenger informasjon om aktivetsplikt - varig unntak etter 6 måneder")
-                    val request = call.receive<OpprettOppgaveForAktivitetspliktVarigUnntakDto>()
+                    val request = call.receive<OpprettOppgaveForAktivitetspliktDto>()
                     val opprettet =
                         inTransaction {
                             aktivitetspliktService.opprettOppgaveHvisVarigUnntak(request)
@@ -263,8 +275,8 @@ internal fun Route.aktivitetspliktRoutes(
             call.respond(BrevIdDto(brevId))
         }
         post("ferdigstillbrev-og-oppgave") {
-            inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
-            call.respond(HttpStatusCode.NoContent)
+            val oppgave = inTransaction { aktivitetspliktOppgaveService.ferdigstillBrevOgOppgave(oppgaveId, brukerTokenInfo) }
+            call.respond(oppgave)
         }
     }
 
@@ -306,7 +318,7 @@ internal fun Route.aktivitetspliktRoutes(
             delete("{$AKTIVITETSGRAD_ID_CALL_PARAMETER}") {
                 kunSkrivetilgang {
                     logger.info("Sletter aktivitetsgrad med id=$aktivitetsgradId for oppgaveId=$oppgaveId i sak=$sakId")
-                    val aktivitetsgrad =
+                    val vurdering =
                         inTransaction {
                             aktivitetspliktService.slettAktivitetsgradForOppgave(
                                 oppgaveId = oppgaveId,
@@ -315,7 +327,7 @@ internal fun Route.aktivitetspliktRoutes(
                                 brukerTokenInfo = brukerTokenInfo,
                             )
                         }
-                    call.respond(aktivitetsgrad ?: HttpStatusCode.NoContent)
+                    call.respond(vurdering)
                 }
             }
         }
@@ -350,7 +362,7 @@ internal fun Route.aktivitetspliktRoutes(
                                 brukerTokenInfo = brukerTokenInfo,
                             )
                         }
-                    call.respond(vurdering ?: HttpStatusCode.NoContent)
+                    call.respond(vurdering)
                 }
             }
         }

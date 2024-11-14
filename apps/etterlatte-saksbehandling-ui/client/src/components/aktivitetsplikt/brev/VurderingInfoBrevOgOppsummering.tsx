@@ -1,9 +1,12 @@
-import { Box, Heading } from '@navikt/ds-react'
+import { Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import React from 'react'
 import { Aktivitetspliktbrev } from '~components/aktivitetsplikt/brev/AktivitetspliktBrev'
 import { UtenBrevVisning } from '~components/aktivitetsplikt/brev/UtenBrevVisning'
+import { useNavigate } from 'react-router-dom'
+import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
+import { handlinger } from '~components/behandling/handlinger/typer'
 
 export function VurderingInfoBrevOgOppsummering() {
   useSidetittel('Aktivitetsplikt brev og oppsummering')
@@ -20,4 +23,23 @@ export function VurderingInfoBrevOgOppsummering() {
   }
 
   return <Aktivitetspliktbrev brevId={aktivtetspliktbrevdata.brevId} />
+}
+
+export function InfobrevKnapperad(props: { children?: React.ReactElement }) {
+  const navigate = useNavigate()
+  return (
+    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <HStack gap="4" justify="center">
+        <Button
+          variant="secondary"
+          onClick={() => {
+            navigate(`../${AktivitetspliktSteg.BREVVALG}`)
+          }}
+        >
+          {handlinger.TILBAKE.navn}
+        </Button>
+        {props.children}
+      </HStack>
+    </Box>
+  )
 }

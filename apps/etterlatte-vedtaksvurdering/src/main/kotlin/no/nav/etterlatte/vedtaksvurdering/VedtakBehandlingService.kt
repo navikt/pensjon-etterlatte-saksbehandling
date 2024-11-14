@@ -476,6 +476,7 @@ class VedtakBehandlingService(
                 "03a17bf9-28f6-4630-99c8-b3828162e26f", // sak 18504
                 "ef84c8c4-c37d-4273-9531-9783a85790ab", // sak 18967
                 "6f9e8895-f725-4323-b1f2-da094bad1118", // sak 19069
+                "989d4930-5752-4b07-84e9-d747f912708c", // sak 18106
             )
         return behandlingerSomErStuck.find { it == behandlingId.toString() } != null
     }

@@ -32,11 +32,19 @@ internal fun withRetryOgFeilhaandtering(
             }
         }
     } catch (e: Exception) {
-        feilhaandteringLogger.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
-        sikkerLogg.error(
-            "Håndtering av melding ${packet.id} feila på steg $feilendeSteg. med body ${packet.toJson()}",
-            e,
-        )
+        val feilmelding = "Håndtering av melding ${packet.id} feila på steg $feilendeSteg."
+        val feilmelding2 = "$feilmelding med body ${packet.toJson()}"
+        when (kontekst) {
+            Kontekst.OMREGNING, Kontekst.AARLIG_INNTEKTSJUSTERING -> {
+                feilhaandteringLogger.warn(feilmelding, e)
+                sikkerLogg.warn(feilmelding2, e)
+            }
+
+            else -> {
+                feilhaandteringLogger.error(feilmelding, e)
+                sikkerLogg.error(feilmelding2, e)
+            }
+        }
 
         publiserFeilamelding(packet, feilendeSteg, kontekst, e, context)
         feilhaandteringLogger.warn("Fikk feil, sendte ut på feilkø, returnerer nå failure-result")

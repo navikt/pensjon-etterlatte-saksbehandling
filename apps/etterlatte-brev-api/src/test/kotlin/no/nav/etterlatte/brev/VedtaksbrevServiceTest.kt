@@ -319,6 +319,7 @@ internal class VedtaksbrevServiceTest {
                 mockk<BrevutfallDto> {
                     every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL
                     every { aldersgruppe } returns Aldersgruppe.UNDER_18
+                    every { frivilligSkattetrekk } returns true
                 }
 
             runBlocking {

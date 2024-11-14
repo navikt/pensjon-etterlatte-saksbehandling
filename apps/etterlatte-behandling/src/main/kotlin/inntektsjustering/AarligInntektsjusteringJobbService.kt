@@ -216,7 +216,7 @@ class AarligInntektsjusteringJobbService(
         kjoering: String,
         aarsakTilManuell: AarligInntektsjusteringAarsakManuell,
     ) {
-        nyBehandling(sakId, forrigeBehandling, loependeFom)
+        nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
         oppdaterKjoering(
             kjoering,
             KjoeringStatus.TIL_MANUELL,
@@ -225,7 +225,7 @@ class AarligInntektsjusteringJobbService(
         )
     }
 
-    fun nyBehandling(
+    fun nyManuellRevurdering(
         sakId: SakId,
         forrigeBehandling: Behandling,
         loependeFom: YearMonth,
@@ -234,6 +234,7 @@ class AarligInntektsjusteringJobbService(
             runBlocking {
                 grunnlagService.hentPersongalleri(forrigeBehandling.id)
             }
+
         val revurdering =
             revurderingService
                 .opprettRevurdering(

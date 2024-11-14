@@ -307,6 +307,8 @@ class AarligInntektsjusteringJobbServiceTest {
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
+
         runBlocking {
             service.startAarligInntektsjustering(request)
         }
@@ -338,6 +340,8 @@ class AarligInntektsjusteringJobbServiceTest {
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns listOf(mockk())
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
 
         runBlocking {
             service.startAarligInntektsjustering(request)

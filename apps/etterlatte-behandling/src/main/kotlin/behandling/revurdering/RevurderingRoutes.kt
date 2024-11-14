@@ -24,9 +24,9 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import org.slf4j.LoggerFactory
 import java.time.Year
 import java.time.YearMonth
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal fun Route.revurderingRoutes(
@@ -90,7 +90,7 @@ internal fun Route.revurderingRoutes(
                         if (opprettRevurderingRequest.aarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
                             val revurderingId =
                                 inTransaction {
-                                    aarligInntektsjusteringJobbService.nyBehandling(
+                                    aarligInntektsjusteringJobbService.nyManuellRevurdering(
                                         sakId,
                                         aarligInntektsjusteringJobbService.hentForrigeBehandling(sakId),
                                         YearMonth.of(Year.now().value, 1).plusYears(1),

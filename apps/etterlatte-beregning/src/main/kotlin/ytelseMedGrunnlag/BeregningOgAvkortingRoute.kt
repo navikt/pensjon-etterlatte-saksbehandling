@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
 fun Route.ytelseMedGrunnlag(
-    ytelseMedGrunnlagService: YtelseMedGrunnlagService,
+    beregningOgAvkortingBrevService: BeregningOgAvkortingBrevService,
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/beregning/ytelse-med-grunnlag/{$BEHANDLINGID_CALL_PARAMETER}") {
@@ -22,7 +22,7 @@ fun Route.ytelseMedGrunnlag(
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter utregnet ytelse med grunnlag for behandlingId=$it")
                 val ytelse =
-                    ytelseMedGrunnlagService.hentYtelseMedGrunnlag(it, brukerTokenInfo)
+                    beregningOgAvkortingBrevService.hentBeregningOgAvkorting(it, brukerTokenInfo)
                         ?: throw GenerellIkkeFunnetException()
                 call.respond(ytelse)
             }

@@ -71,7 +71,7 @@ class ClientCredentialAuthProvider(
         request: HttpRequestBuilder,
         authHeader: HttpAuthHeader?,
     ) {
-        accessTokenService.getAccessToken(clientPropertiesConfig).accessToken.also {
+        accessTokenService.getAccessToken(clientPropertiesConfig).access_token.also {
             request.headers[HttpHeaders.Authorization] = "Bearer $it"
         }
     }

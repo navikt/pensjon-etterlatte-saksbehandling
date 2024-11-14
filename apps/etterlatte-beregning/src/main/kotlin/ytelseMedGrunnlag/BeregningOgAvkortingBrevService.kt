@@ -2,6 +2,7 @@ package no.nav.etterlatte.ytelseMedGrunnlag
 
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
@@ -17,6 +18,7 @@ import java.util.UUID
 class BeregningOgAvkortingBrevService(
     private val beregningRepository: BeregningRepository,
     private val avkortingRepository: AvkortingRepository,
+    private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val behandlingKlient: BehandlingKlient,
 ) {
     suspend fun hentBeregningOgAvkorting(
@@ -27,6 +29,7 @@ class BeregningOgAvkortingBrevService(
         val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
         val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
+        val behandlingsGrunnlag = beregningsGrunnlagService.hentBeregningsGrunnlag(behandlingId, brukerTokenInfo)
 
         val avkortinger =
             avkorting.avkortetYtelse.map { avkortetYtelse ->
@@ -54,6 +57,7 @@ class BeregningOgAvkortingBrevService(
                     grunnbelop = beregningIPeriode.grunnbelop,
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                     beregningsMetode = beregningIPeriode.beregningsMetode,
+                    beregningsMetodeFraGrunnlag = behandlingsGrunnlag?.beregningsMetode?.beregningsMetode,
                     sanksjon = avkortetYtelse.sanksjon,
                     institusjonsopphold = beregningIPeriode.institusjonsopphold,
                     erOverstyrtInnvilgaMaaneder = grunnlag.overstyrtInnvilgaMaaneder != null,

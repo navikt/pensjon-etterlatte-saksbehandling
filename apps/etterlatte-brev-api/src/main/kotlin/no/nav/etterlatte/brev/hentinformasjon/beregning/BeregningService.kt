@@ -138,7 +138,6 @@ class BeregningService(
         if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
 
         val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
-        val beregningsGrunnlag = hentBeregningsGrunnlag(behandlingId, brukerTokenInfo)
 
         val beregningsperioder =
             ytelseMedGrunnlag.perioder.map {
@@ -163,9 +162,7 @@ class BeregningService(
                     utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
                     trygdetid = it.trygdetid,
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
-                    beregningsMetodeFraGrunnlag =
-                        beregningsGrunnlag?.beregningsMetode?.beregningsMetode
-                            ?: requireNotNull(it.beregningsMetode),
+                    beregningsMetodeFraGrunnlag = requireNotNull(it.beregningsMetodeFraGrunnlag),
                     // ved manuelt overstyrt beregning har vi ikke grunnlag
                     sanksjon = it.sanksjon,
                     institusjon = it.institusjonsopphold,

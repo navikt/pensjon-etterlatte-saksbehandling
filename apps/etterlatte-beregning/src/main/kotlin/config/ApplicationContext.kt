@@ -129,6 +129,7 @@ class ApplicationContext {
         BeregningOgAvkortingBrevService(
             beregningRepository = beregningRepository,
             avkortingRepository = avkortingRepository,
+            beregningsGrunnlagService = beregningsGrunnlagService,
             behandlingKlient = behandlingKlient,
         )
     val grunnbeloepService = GrunnbeloepService(repository = GrunnbeloepRepository)

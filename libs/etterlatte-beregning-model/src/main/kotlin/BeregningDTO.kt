@@ -132,6 +132,7 @@ data class BeregningOgAvkortingPeriodeDto(
     val grunnbelop: Int,
     val grunnbelopMnd: Int,
     val beregningsMetode: BeregningsMetode?,
+    val beregningsMetodeFraGrunnlag: BeregningsMetode?,
     val sanksjon: SanksjonertYtelse?,
     val institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag?,
     val erOverstyrtInnvilgaMaaneder: Boolean,

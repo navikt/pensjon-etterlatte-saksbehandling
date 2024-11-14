@@ -8,6 +8,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
@@ -16,6 +18,9 @@ import no.nav.etterlatte.beregning.regler.beregning
 import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.ytelseMedGrunnlag.BeregningOgAvkortingBrevService
@@ -26,11 +31,13 @@ import java.util.UUID
 internal class BeregningOgAvkortingBrevServiceTest {
     private val avkortingRepository = mockk<AvkortingRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
+    private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val service =
         BeregningOgAvkortingBrevService(
             beregningRepository,
             avkortingRepository,
+            beregningsGrunnlagService,
             behandlingKlient,
         )
 
@@ -118,6 +125,15 @@ internal class BeregningOgAvkortingBrevServiceTest {
                         ),
                     ),
             )
+        coEvery { beregningsGrunnlagService.hentBeregningsGrunnlag(behandlingsId, bruker) } returns
+            BeregningsGrunnlag(
+                behandlingId = behandlingsId,
+                kilde = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+                beregningsMetode =
+                    BeregningsMetodeBeregningsgrunnlag(
+                        BeregningsMetode.BEST,
+                    ),
+            )
 
         val ytelse =
             runBlocking {
@@ -133,6 +149,7 @@ internal class BeregningOgAvkortingBrevServiceTest {
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 120000
             grunnbelopMnd shouldBe 10000
+            beregningsMetodeFraGrunnlag shouldBe BeregningsMetode.BEST
         }
         with(ytelse.perioder[1]) {
             periode shouldBe Periode(fom = YearMonth.of(2024, 4), tom = YearMonth.of(2024, 5))
@@ -143,6 +160,7 @@ internal class BeregningOgAvkortingBrevServiceTest {
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 120000
             grunnbelopMnd shouldBe 10000
+            beregningsMetodeFraGrunnlag shouldBe BeregningsMetode.BEST
         }
         with(ytelse.perioder[2]) {
             periode shouldBe Periode(fom = YearMonth.of(2024, 6), tom = null)
@@ -153,6 +171,7 @@ internal class BeregningOgAvkortingBrevServiceTest {
             fratrekkInnAar shouldBe 25000
             grunnbelop shouldBe 132000
             grunnbelopMnd shouldBe 11000
+            beregningsMetodeFraGrunnlag shouldBe BeregningsMetode.BEST
         }
     }
 }

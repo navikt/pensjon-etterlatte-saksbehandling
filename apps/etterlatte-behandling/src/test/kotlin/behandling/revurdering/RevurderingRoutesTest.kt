@@ -70,7 +70,7 @@ internal class RevurderingRoutesTest {
                 client.post("api/revurdering/1/manuell-inntektsjustering") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
-                    setBody(OpprettRevurderingRequest(oppgaveId = UUID.randomUUID()))
+                    setBody(OpprettManuellInntektsjustering(oppgaveID = UUID.randomUUID()))
                 }
 
             assertEquals(HttpStatusCode.OK, response.status)

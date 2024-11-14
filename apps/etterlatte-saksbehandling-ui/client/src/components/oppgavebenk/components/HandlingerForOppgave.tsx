@@ -19,6 +19,8 @@ import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi } from '~shared/api/revurdering'
 import Spinner from '~shared/Spinner'
+import { mapResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT = 'aktivitetsplikt.ny-vurdering'
 
@@ -49,7 +51,7 @@ export const HandlingerForOppgave = ({
         sakId: oppgave.sakId,
         oppgaveId: oppgave.id,
       },
-      (revurderingId: string) => navigate(`/behandling/${revurderingId}/`)
+      (revurdering: string) => navigate(`/behandling/${revurdering}/`)
     )
   }
 
@@ -196,17 +198,18 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
-      if (opprettManuellRevurderingStatus.status === 'pending') {
-        return <Spinner label="Oppretter ..." margin="0" />
-      } else if (opprettManuellRevurderingStatus.status === 'error') {
-        return 'Feil ved opprettelse av revurdering.'
-      } else {
-        return (
+      return mapResult(opprettManuellRevurderingStatus, {
+        initial: (
           <Button size="small" onClick={opprettInntektsjusteringRevurdering}>
             Opprett revurdering
           </Button>
-        )
-      }
+        ),
+        pending: <Spinner label="Oppretter ..." margin="0" />,
+        error: (error) => (
+          <ApiErrorAlert>Feil ved opprettelse av revurdering: {error?.detail ?? 'Ukjent feil'}</ApiErrorAlert>
+        ),
+      })
+
     default:
       return null
   }

@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
-import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
@@ -67,7 +66,7 @@ internal fun Route.revurderingRoutes(
                             inTransaction {
                                 manuellRevurderingService.opprettManuellRevurderingWrapper(
                                     sakId = sakId,
-                                    aarsak = opprettRevurderingRequest.aarsak!!,
+                                    aarsak = opprettRevurderingRequest.aarsak,
                                     paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
                                     paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
                                     begrunnelse = opprettRevurderingRequest.begrunnelse,
@@ -84,12 +83,12 @@ internal fun Route.revurderingRoutes(
             post("manuell-inntektsjustering") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering for årlig inntektsjustering på sak $sakId")
-                    medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
+                    medBody<OpprettManuellInntektsjustering> {
                         val revurdering =
                             inTransaction {
-                                aarligInntektsjusteringJobbService.opprettRevurderingAarligInntektsjustering(
+                                aarligInntektsjusteringJobbService.opprettManuellInntektsjustering(
                                     sakId,
-                                    opprettRevurderingRequest.oppgaveId!!,
+                                    it.oppgaveID,
                                     saksbehandler,
                                 )
                             }
@@ -162,12 +161,16 @@ data class OpprettOmgjoeringKlageRequest(
 )
 
 data class OpprettRevurderingRequest(
-    val aarsak: Revurderingaarsak? = null,
+    val aarsak: Revurderingaarsak,
     val paaGrunnAvHendelseId: String? = null,
     val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,
     val oppgaveId: UUID? = null,
+)
+
+data class OpprettManuellInntektsjustering(
+    val oppgaveID: UUID,
 )
 
 data class RevurderingInfoDto(

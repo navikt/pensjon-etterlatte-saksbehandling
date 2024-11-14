@@ -227,7 +227,7 @@ class RevurderingService(
                                 it,
                                 checkNotNull(forrigeBehandling) {
                                     "Har en automatisk behandling som ikke sender med behandlingId for sist iverksatt. " +
-                                        "Da kan vi ikke legge inn riktig grunnlag. regulering id=${it.id}"
+                                        "Da kan vi ikke legge inn riktig grunnlag. Automatisk behandling id=${it.id}"
                                 },
                                 HardkodaSystembruker.opprettGrunnlag,
                             )

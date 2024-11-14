@@ -33,16 +33,16 @@ internal fun withRetryOgFeilhaandtering(
         }
     } catch (e: Exception) {
         val feilmelding = "Håndtering av melding ${packet.id} feila på steg $feilendeSteg."
-        val feilmelding2 = "$feilmelding med body ${packet.toJson()}"
+        val feilmeldingSikkerlogg = "$feilmelding med body ${packet.toJson()}"
         when (kontekst) {
             Kontekst.OMREGNING, Kontekst.AARLIG_INNTEKTSJUSTERING -> {
                 feilhaandteringLogger.warn(feilmelding, e)
-                sikkerLogg.warn(feilmelding2, e)
+                sikkerLogg.warn(feilmeldingSikkerlogg, e)
             }
 
             else -> {
                 feilhaandteringLogger.error(feilmelding, e)
-                sikkerLogg.error(feilmelding2, e)
+                sikkerLogg.error(feilmeldingSikkerlogg, e)
             }
         }
 

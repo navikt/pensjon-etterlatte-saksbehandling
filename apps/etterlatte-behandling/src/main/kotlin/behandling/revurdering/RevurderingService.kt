@@ -205,27 +205,33 @@ class RevurderingService(
             RevurderingOgOppfoelging(
                 it,
                 leggInnGrunnlag = {
-                    when (revurderingAarsak) {
-                        Revurderingaarsak.REGULERING ->
-                            runBlocking {
-                                grunnlagService.laasTilGrunnlagIBehandling(
-                                    it,
-                                    checkNotNull(forrigeBehandling) {
-                                        "Har en regulering som ikke sender med behandlingId for sist iverksatt. " +
-                                            "Da kan vi ikke legge inn riktig grunnlag. regulering id=${it.id}"
-                                    },
-                                    HardkodaSystembruker.opprettGrunnlag,
-                                )
-                            }
+                    val kanHenteNyttGrunnlag =
+                        when (revurderingAarsak) {
+                            Revurderingaarsak.REGULERING,
+                            Revurderingaarsak.OMREGNING,
+                            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+                            -> false
 
-                        else ->
-                            runBlocking {
-                                grunnlagService.leggInnNyttGrunnlag(
-                                    it,
-                                    persongalleri,
-                                    HardkodaSystembruker.opprettGrunnlag,
-                                )
-                            }
+                            Revurderingaarsak.INNTEKTSENDRING -> it.prosesstype != Prosesstype.AUTOMATISK
+                            else -> true
+                        }
+                    runBlocking {
+                        if (kanHenteNyttGrunnlag) {
+                            grunnlagService.leggInnNyttGrunnlag(
+                                it,
+                                persongalleri,
+                                HardkodaSystembruker.opprettGrunnlag,
+                            )
+                        } else {
+                            grunnlagService.laasTilGrunnlagIBehandling(
+                                it,
+                                checkNotNull(forrigeBehandling) {
+                                    "Har en automatisk behandling som ikke sender med behandlingId for sist iverksatt. " +
+                                        "Da kan vi ikke legge inn riktig grunnlag. Automatisk behandling id=${it.id}"
+                                },
+                                HardkodaSystembruker.opprettGrunnlag,
+                            )
+                        }
                     }
                 },
                 sendMeldingForHendelse = {

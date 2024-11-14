@@ -573,14 +573,15 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
 
-        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
-
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+        val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
+        val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
 
         OmstillingsstoenadInntektsjusteringVedtak.fra(
             innholdMedVedlegg = innholdMedVedlegg,
             avkortingsinfo = avkortingsinfo.await(),
             trygdetid = requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
+            vilkaarsVurdering = vilkaarsvurdering.await(),
             behandling = behandling,
             navnAvdoed = avdoede.single().navn,
         )

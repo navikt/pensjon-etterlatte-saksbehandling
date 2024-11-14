@@ -14,6 +14,9 @@ import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -59,6 +62,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
             innholdMedVedlegg: InnholdMedVedlegg,
             avkortingsinfo: Avkortingsinfo,
             trygdetid: TrygdetidDto,
+            vilkaarsVurdering: VilkaarsvurderingDto,
             behandling: DetaljertBehandling,
             navnAvdoed: String,
         ): OmstillingsstoenadInntektsjusteringVedtak {
@@ -93,6 +97,15 @@ class OmstillingsstoenadInntektsjusteringVedtak(
 
             val virk = behandling.virkningstidspunkt!!.dato.atDay(1)
 
+            val omsRettUtenTidsbegrensning =
+                vilkaarsVurdering.vilkaar
+                    .single {
+                        it.hovedvilkaar.type in
+                            listOf(
+                                VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                            )
+                    }.hovedvilkaar.resultat == Utfall.OPPFYLT
+
             return OmstillingsstoenadInntektsjusteringVedtak(
                 innhold = innholdMedVedlegg.innhold(),
                 beregning =
@@ -111,7 +124,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                         oppphoersdato = behandling.opphoerFraOgMed?.atDay(1),
                         opphoerNesteAar = false, // inntekt neste år ikke implementert for revurdering
                     ),
-                omsRettUtenTidsbegrensning = false, // TODO
+                omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning,
                 tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
                 inntektsaar = virk.year,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },

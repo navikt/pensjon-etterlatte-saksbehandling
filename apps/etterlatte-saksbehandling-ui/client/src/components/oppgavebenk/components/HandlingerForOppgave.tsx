@@ -205,9 +205,7 @@ export const HandlingerForOppgave = ({
           </Button>
         ),
         pending: <Spinner label="Oppretter ..." margin="0" />,
-        error: (error) => (
-          <ApiErrorAlert>Feil ved opprettelse av revurdering: {error?.detail ?? 'Ukjent feil'}</ApiErrorAlert>
-        ),
+        error: (error) => <ApiErrorAlert>{error?.detail ?? 'Ukjent feil'}</ApiErrorAlert>,
       })
 
     default:

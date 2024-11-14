@@ -148,7 +148,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             brukerTokenInfo,
                             behandlingId,
                             virkningstidspunkt,
-                            sakType,
+                            utlandstilknytningType,
                         )
 
                     VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, behandlingId)
@@ -277,7 +277,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         behandlingId: UUID,
         virkningstidspunkt: YearMonth?,
-        sakType: SakType,
+        utlandstilknytningType: UtlandstilknytningType?,
     ) = coroutineScope {
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
@@ -294,6 +294,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             etterbetaling.await(),
             utbetalingsinfo.await(),
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
+            utlandstilknytningType,
         )
     }
 

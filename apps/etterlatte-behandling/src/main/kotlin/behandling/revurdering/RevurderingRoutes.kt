@@ -88,7 +88,7 @@ internal fun Route.revurderingRoutes(
                     logger.info("Oppretter ny revurdering for årlig inntektsjustering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
                         if (opprettRevurderingRequest.aarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
-                            val revurderingId =
+                            val revurdering =
                                 inTransaction {
                                     aarligInntektsjusteringJobbService.nyManuellRevurdering(
                                         sakId,
@@ -96,7 +96,7 @@ internal fun Route.revurderingRoutes(
                                         YearMonth.of(Year.now().value, 1).plusYears(1),
                                     )
                                 }
-                            call.respond(revurderingId)
+                            call.respond(revurdering.id)
                         } else {
                             throw IkkeTillattException(
                                 "FEIL_REVURDERINGSAARSAK",

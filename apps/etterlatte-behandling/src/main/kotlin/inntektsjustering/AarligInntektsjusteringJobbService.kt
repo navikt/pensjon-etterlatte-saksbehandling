@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
@@ -229,7 +230,7 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
         forrigeBehandling: Behandling,
         loependeFom: YearMonth,
-    ): UUID {
+    ): Revurdering {
         val persongalleri =
             runBlocking {
                 grunnlagService.hentPersongalleri(forrigeBehandling.id)
@@ -257,7 +258,7 @@ class AarligInntektsjusteringJobbService(
                     revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)
                 }
 
-        return revurdering.id
+        return revurdering
     }
 
     private fun publiserKlarForOmregning(

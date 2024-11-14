@@ -88,7 +88,7 @@ internal fun Route.revurderingRoutes(
                             inTransaction {
                                 aarligInntektsjusteringJobbService.opprettManuellInntektsjustering(
                                     sakId,
-                                    it.oppgaveID,
+                                    it.oppgaveId,
                                     saksbehandler,
                                 )
                             }
@@ -166,11 +166,10 @@ data class OpprettRevurderingRequest(
     val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,
-    val oppgaveId: UUID? = null,
 )
 
 data class OpprettManuellInntektsjustering(
-    val oppgaveID: UUID,
+    val oppgaveId: UUID,
 )
 
 data class RevurderingInfoDto(

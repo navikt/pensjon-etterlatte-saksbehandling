@@ -87,6 +87,7 @@ class AarligInntektsjusteringJobbService(
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
         val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak)
         if (aapneBehandlinger.isNotEmpty()) {
+            logger.info("Sak har åpne behandlinger, kan ikke opprette revurdering")
             throw UgyldigForespoerselException(
                 "KAN_IKKE_OPPRETTE_REVURDERING_PGA_AAPNE_BEHANDLINGER",
                 "Kan ikke opprette revurdering på grunn av sak har åpne behandlinger",

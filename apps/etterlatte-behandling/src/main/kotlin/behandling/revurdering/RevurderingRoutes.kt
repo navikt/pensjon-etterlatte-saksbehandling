@@ -19,13 +19,12 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
-import java.time.Year
-import java.time.YearMonth
 import java.util.UUID
 
 internal fun Route.revurderingRoutes(
@@ -83,17 +82,19 @@ internal fun Route.revurderingRoutes(
             }
 
             post("manuell-inntektsjustering") {
-                kunSaksbehandlerMedSkrivetilgang {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering for årlig inntektsjustering på sak $sakId")
-                    val revurdering =
-                        inTransaction {
-                            aarligInntektsjusteringJobbService.nyManuellRevurdering(
-                                sakId,
-                                aarligInntektsjusteringJobbService.hentForrigeBehandling(sakId),
-                                YearMonth.of(Year.now().value, 1).plusYears(1),
-                            )
-                        }
-                    call.respond(revurdering.id)
+                    medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
+                        val revurdering =
+                            inTransaction {
+                                aarligInntektsjusteringJobbService.opprettRevurderingAarligInntektsjustering(
+                                    sakId,
+                                    opprettRevurderingRequest.oppgaveId!!,
+                                    saksbehandler,
+                                )
+                            }
+                        call.respond(revurdering.id)
+                    }
                 }
             }
 
@@ -166,7 +167,7 @@ data class OpprettRevurderingRequest(
     val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,
-    val referanse: String? = null,
+    val oppgaveId: UUID? = null,
 )
 
 data class RevurderingInfoDto(

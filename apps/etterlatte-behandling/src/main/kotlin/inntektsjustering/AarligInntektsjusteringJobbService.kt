@@ -40,8 +40,10 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
@@ -49,6 +51,7 @@ import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
+import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
@@ -74,6 +77,20 @@ class AarligInntektsjusteringJobbService(
         request.saker.forEach { sakId ->
             startEnkeltSak(request.kjoering, request.loependeFom, sakId)
         }
+    }
+
+    fun opprettRevurderingAarligInntektsjustering(
+        sakId: SakId,
+        oppgaveId: UUID,
+        saksbehandler: Saksbehandler,
+    ): Revurdering {
+        // TODO: bør defineres i en utils slik at den kan gjenbrukes på tvers av all logikk knytt til inntektsjustering
+        val loependeFom = YearMonth.of(Year.now().value, 1).plusYears(1)
+
+        val forrigeBehandling = hentForrigeBehandling(sakId)
+        val revurdering = nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
+        oppgaveService.ferdigstillOppgave(oppgaveId, saksbehandler)
+        return revurdering
     }
 
     private fun startEnkeltSak(
@@ -226,7 +243,7 @@ class AarligInntektsjusteringJobbService(
         )
     }
 
-    fun nyManuellRevurdering(
+    private fun nyManuellRevurdering(
         sakId: SakId,
         forrigeBehandling: Behandling,
         loependeFom: YearMonth,

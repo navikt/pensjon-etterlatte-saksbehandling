@@ -15,8 +15,10 @@ import { TilleggsinformasjonOppgaveModal } from '~components/oppgavebenk/oppgave
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { opprettManuellInntektsjustering } from '~shared/api/revurdering'
 import { useNavigate } from 'react-router-dom'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi } from '~shared/api/revurdering'
+import Spinner from '~shared/Spinner'
 
 export const FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT = 'aktivitetsplikt.ny-vurdering'
 
@@ -30,6 +32,10 @@ export const HandlingerForOppgave = ({
   const navigate = useNavigate()
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
 
+  const [opprettManuellRevurderingStatus, opprettManuellInntektsjustering] = useApiCall(
+    opprettManuellInntektsjusteringApi
+  )
+
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
   const brukNyVurderingssideAktivitetsplikt = useFeatureEnabledMedDefault(
@@ -38,11 +44,13 @@ export const HandlingerForOppgave = ({
   )
 
   const opprettInntektsjusteringRevurdering = () => {
-    opprettManuellInntektsjustering({
-      sakId: oppgave.sakId,
-    }).then((revurderingId) => {
-      navigate(`/behandling/${revurderingId}/`)
-    })
+    opprettManuellInntektsjustering(
+      {
+        sakId: oppgave.sakId,
+        oppgaveId: oppgave.id,
+      },
+      (revurderingId: string) => navigate(`/behandling/${revurderingId}/`)
+    )
   }
 
   if (kilde === OppgaveKilde.GENERELL_BEHANDLING) {
@@ -188,7 +196,9 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
-      return (
+      return opprettManuellRevurderingStatus.status == 'pending' ? (
+        <Spinner label="Oppretter ..." margin="0" />
+      ) : (
         <Button size="small" onClick={opprettInntektsjusteringRevurdering}>
           Opprett revurdering
         </Button>

@@ -129,12 +129,13 @@ data class OmstillingsstoenadInntektsjusteringVarsel(
     val virkningstidspunkt: LocalDate,
 ) : BrevData {
     companion object {
-        fun fra() =
-            OmstillingsstoenadInntektsjusteringVarsel(
-                // TODO
-                inntektsaar = 2025,
-                bosattUtland = false,
-                virkningstidspunkt = LocalDate.of(2025, 1, 1),
+        fun fra(behandling: DetaljertBehandling): OmstillingsstoenadInntektsjusteringVarsel {
+            val virk = behandling.virkningstidspunkt!!.dato
+            return OmstillingsstoenadInntektsjusteringVarsel(
+                inntektsaar = virk.year,
+                bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                virkningstidspunkt = virk.atDay(1),
             )
+        }
     }
 }

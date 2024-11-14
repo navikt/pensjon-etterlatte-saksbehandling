@@ -16,7 +16,6 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { opprettManuellInntektsjustering } from '~shared/api/revurdering'
-import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { useNavigate } from 'react-router-dom'
 
 export const FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT = 'aktivitetsplikt.ny-vurdering'
@@ -41,7 +40,6 @@ export const HandlingerForOppgave = ({
   const opprettInntektsjusteringRevurdering = () => {
     opprettManuellInntektsjustering({
       sakId: oppgave.sakId,
-      aarsak: Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
     }).then((revurderingId) => {
       navigate(`/behandling/${revurderingId}/`)
     })

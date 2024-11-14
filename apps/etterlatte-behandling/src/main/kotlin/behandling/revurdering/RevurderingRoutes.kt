@@ -13,7 +13,6 @@ import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -86,24 +85,15 @@ internal fun Route.revurderingRoutes(
             post("manuell-inntektsjustering") {
                 kunSaksbehandlerMedSkrivetilgang {
                     logger.info("Oppretter ny revurdering for årlig inntektsjustering på sak $sakId")
-                    medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
-                        if (opprettRevurderingRequest.aarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
-                            val revurdering =
-                                inTransaction {
-                                    aarligInntektsjusteringJobbService.nyManuellRevurdering(
-                                        sakId,
-                                        aarligInntektsjusteringJobbService.hentForrigeBehandling(sakId),
-                                        YearMonth.of(Year.now().value, 1).plusYears(1),
-                                    )
-                                }
-                            call.respond(revurdering.id)
-                        } else {
-                            throw IkkeTillattException(
-                                "FEIL_REVURDERINGSAARSAK",
-                                "Revurderingsaarsak: ${opprettRevurderingRequest.aarsak} er ikke tillatt",
+                    val revurdering =
+                        inTransaction {
+                            aarligInntektsjusteringJobbService.nyManuellRevurdering(
+                                sakId,
+                                aarligInntektsjusteringJobbService.hentForrigeBehandling(sakId),
+                                YearMonth.of(Year.now().value, 1).plusYears(1),
                             )
                         }
-                    }
+                    call.respond(revurdering.id)
                 }
             }
 

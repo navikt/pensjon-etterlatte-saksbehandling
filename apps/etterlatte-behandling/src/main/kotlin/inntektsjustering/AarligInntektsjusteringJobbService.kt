@@ -200,7 +200,7 @@ class AarligInntektsjusteringJobbService(
             sakId = sakId,
             kilde = OppgaveKilde.BEHANDLING,
             type = OppgaveType.AARLIG_INNTEKTSJUSTERING,
-            merknad = "Kan ikke behandles automatisk, revurdering må opprettes manuelt",
+            merknad = "Kan ikke behandles automatisk. Årsak: ${aarsakTilManuell.name}",
         )
         oppdaterKjoering(
             kjoering,

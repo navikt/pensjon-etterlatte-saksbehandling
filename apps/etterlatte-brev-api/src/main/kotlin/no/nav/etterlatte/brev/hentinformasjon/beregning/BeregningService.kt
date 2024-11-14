@@ -161,8 +161,12 @@ class BeregningService(
                     restanse = Kroner(it.restanse),
                     utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
                     trygdetid = it.trygdetid,
-                    beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
-                    beregningsMetodeFraGrunnlag = requireNotNull(it.beregningsMetodeFraGrunnlag),
+                    beregningsMetodeAnvendt =
+                        it.beregningsMetode
+                            ?: throw InternfeilException("OMS Brevdata krever anvendt beregningsmetode"),
+                    beregningsMetodeFraGrunnlag =
+                        it.beregningsMetodeFraGrunnlag
+                            ?: throw InternfeilException("OMS Brevdata krever valgt beregningsmetode fra beregningsgrunnlag"),
                     // ved manuelt overstyrt beregning har vi ikke grunnlag
                     sanksjon = it.sanksjon,
                     institusjon = it.institusjonsopphold,

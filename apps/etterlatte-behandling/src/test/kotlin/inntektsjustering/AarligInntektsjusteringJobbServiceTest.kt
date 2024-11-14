@@ -1,6 +1,7 @@
 package no.nav.etterlatte.inntektsjustering
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -178,6 +179,38 @@ class AarligInntektsjusteringJobbServiceTest {
                     ),
             ),
         )
+
+    @Test
+    fun `skal opprette revurdering og slette oppgave`() {
+        val oppgaveId = UUID.randomUUID()
+        val sakId = SakId(123L)
+        coEvery { oppgaveService.ferdigstillOppgave(oppgaveId, any()) } returns mockk()
+        val revurdering = service.opprettRevurderingAarligInntektsjustering(sakId, oppgaveId, mockk())
+        verify {
+            revurderingService.opprettRevurdering(
+                sakId = sakId,
+                persongalleri = any(),
+                forrigeBehandling = any(),
+                mottattDato = any(),
+                prosessType = any(),
+                kilde = any(),
+                revurderingAarsak = any(),
+                virkningstidspunkt = any(),
+                utlandstilknytning = any(),
+                boddEllerArbeidetUtlandet = any(),
+                begrunnelse = any(),
+                fritekstAarsak = any(),
+                saksbehandlerIdent = any(),
+                relatertBehandlingId = any(),
+                frist = any(),
+                paaGrunnAvOppgave = any(),
+                opphoerFraOgMed = any(),
+                tidligereFamiliepleier = any(),
+            )
+        }
+
+        revurdering shouldNotBe null
+    }
 
     @Test
     fun `starter jobb for gyldig sak`() {

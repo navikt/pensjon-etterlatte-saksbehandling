@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RevurderingRoutesTest {
@@ -55,6 +56,25 @@ internal class RevurderingRoutesTest {
     fun after() {
         applicationContext.close()
         server.shutdown()
+    }
+
+    @Test
+    fun `kan opprette manuell revurdering inntektsjustering`() {
+        testApplication {
+            val client =
+                runServerWithModule(server) {
+                    module(applicationContext)
+                }
+
+            val response =
+                client.post("api/revurdering/1/manuell-inntektsjustering") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(OpprettRevurderingRequest(oppgaveId = UUID.randomUUID()))
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
     }
 
     @Test

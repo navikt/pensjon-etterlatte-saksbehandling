@@ -67,7 +67,7 @@ internal fun Route.revurderingRoutes(
                             inTransaction {
                                 manuellRevurderingService.opprettManuellRevurderingWrapper(
                                     sakId = sakId,
-                                    aarsak = opprettRevurderingRequest.aarsak,
+                                    aarsak = opprettRevurderingRequest.aarsak!!,
                                     paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
                                     paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
                                     begrunnelse = opprettRevurderingRequest.begrunnelse,
@@ -162,7 +162,7 @@ data class OpprettOmgjoeringKlageRequest(
 )
 
 data class OpprettRevurderingRequest(
-    val aarsak: Revurderingaarsak,
+    val aarsak: Revurderingaarsak? = null,
     val paaGrunnAvHendelseId: String? = null,
     val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,

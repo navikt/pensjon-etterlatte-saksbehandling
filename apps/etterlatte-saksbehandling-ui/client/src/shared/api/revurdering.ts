@@ -43,15 +43,12 @@ export const opprettRevurdering = async ({
   })
 }
 
-export const opprettManuellInntektsjustering = async ({
-  sakId,
-  oppgaveId,
-}: {
+export const opprettManuellInntektsjustering = async (args: {
   sakId: number
   oppgaveId: string
 }): Promise<ApiResponse<string>> => {
-  return apiClient.post(`/revurdering/${sakId}/manuell-inntektsjustering`, {
-    oppgaveId: oppgaveId,
+  return apiClient.post(`/revurdering/${args.sakId}/manuell-inntektsjustering`, {
+    oppgaveId: args.oppgaveId,
   })
 }
 

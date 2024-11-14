@@ -196,13 +196,17 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
-      return opprettManuellRevurderingStatus.status == 'pending' ? (
-        <Spinner label="Oppretter ..." margin="0" />
-      ) : (
-        <Button size="small" onClick={opprettInntektsjusteringRevurdering}>
-          Opprett revurdering
-        </Button>
-      )
+      if (opprettManuellRevurderingStatus.status === 'pending') {
+        return <Spinner label="Oppretter ..." margin="0" />
+      } else if (opprettManuellRevurderingStatus.status === 'error') {
+        return 'Feil ved opprettelse av revurdering.'
+      } else {
+        return (
+          <Button size="small" onClick={opprettInntektsjusteringRevurdering}>
+            Opprett revurdering
+          </Button>
+        )
+      }
     default:
       return null
   }

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class Brevoppretter(
@@ -25,6 +26,8 @@ class Brevoppretter(
     private val db: BrevRepository,
     private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun opprettBrevSomHarInnhold(
         sakId: SakId,
         behandlingId: UUID?,
@@ -138,8 +141,14 @@ class Brevoppretter(
     ): Mottaker =
         with(personerISak) {
             when (verge) {
-                is Vergemaal -> tomMottaker().copy(foedselsnummer = MottakerFoedselsnummer(verge.foedselsnummer.value))
-                is UkjentVergemaal -> tomMottaker()
+                is Vergemaal -> {
+                    logger.warn("Er verge, kan ikke ferdigstille uten å legge til adresse manuelt.")
+                    tomMottaker().copy(foedselsnummer = MottakerFoedselsnummer(verge.foedselsnummer.value))
+                }
+                is UkjentVergemaal -> {
+                    logger.warn("Er verge, kan ikke ferdigstille uten å legge til adresse manuelt.")
+                    tomMottaker()
+                }
 
                 else ->
                     adresseService.hentMottakerAdresse(

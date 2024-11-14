@@ -65,7 +65,6 @@ class TrygdetidRepository(
                         poengaar_overstyrt,
                         yrkesskade,
                         beregnet_samlet_trygdetid_norge,
-                        opprettet,
                         kopiert_grunnlag_fra_behandling
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId

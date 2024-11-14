@@ -31,7 +31,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
 
   const harRedigertTrygdetidGrunnlag = () => {
     const redigert = trygdetider.find((trygdetid) =>
-      trygdetid?.trygdetidGrunnlag.find((grunnlag) => grunnlag.kilde.ident != 'Gjenny')
+      trygdetid?.trygdetidGrunnlag.find((grunnlag) => grunnlag.kilde.ident !== 'Gjenny')
     )
     return !!redigert
   }
@@ -39,7 +39,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
   const [kopierTrygdetidStatus, kopierTrygdetidReq] = useApiCall(kopierTrygdetidFraAnnenBehandling)
   const [visDetaljer, setVisDetaljer] = useState<boolean | undefined>(undefined)
 
-  const skalViseDetaljer: () => boolean = () => visDetaljer ?? !harRedigertTrygdetidGrunnlag()
+  const skalViseDetaljer = visDetaljer ?? !harRedigertTrygdetidGrunnlag()
 
   const kopierTrygdetid = (kildeBehandlingId: string) => {
     trackClick('kopier-trygdetidsgrunnlag-fra-behandling-med-samme-avdoede')
@@ -75,13 +75,13 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
                       Det finnes en annen sak tilknyttet avdøde
                     </Heading>
                     <Spacer />
-                    {!skalViseDetaljer() && (
+                    {!skalViseDetaljer && (
                       <Button variant="tertiary" size="small" onClick={() => setVisDetaljer(true)}>
                         Les mer
                       </Button>
                     )}
                   </HStack>
-                  {skalViseDetaljer() && (
+                  {skalViseDetaljer && (
                     <VStack gap="3">
                       <BodyShort>
                         Det finnes en annen sak tilknyttet avdøde {avdoedesNavn()}, der trygdetiden allerede er fylt

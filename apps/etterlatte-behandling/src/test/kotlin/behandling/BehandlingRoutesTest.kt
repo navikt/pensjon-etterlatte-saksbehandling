@@ -49,6 +49,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -196,7 +197,7 @@ internal class BehandlingRoutesTest {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 
-        mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
+        mockBehandlingService(bodyVirkningstidspunkt)
 
         coEvery {
             behandlingService.erGyldigVirkningstidspunkt(any(), any(), any(), any())
@@ -208,7 +209,7 @@ internal class BehandlingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
                     contentType(ContentType.Application.Json)
                     setBody(
-                        """
+                        """ 
                         {
                         "dato":"$bodyVirkningstidspunkt",
                         "begrunnelse":"$bodyBegrunnelse"
@@ -259,7 +260,7 @@ internal class BehandlingRoutesTest {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 
-        mockBehandlingService(bodyVirkningstidspunkt, bodyBegrunnelse)
+        mockBehandlingService(bodyVirkningstidspunkt)
 
         coEvery {
             behandlingService.erGyldigVirkningstidspunkt(any(), any(), any(), any())
@@ -341,6 +342,7 @@ internal class BehandlingRoutesTest {
     ) {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { saksbehandlerMedRoller } returns mockk<SaksbehandlerMedRoller>()
                 every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
                 every { name() } returns this::class.java.simpleName
             }
@@ -360,10 +362,7 @@ internal class BehandlingRoutesTest {
         }
     }
 
-    private fun mockBehandlingService(
-        bodyVirkningstidspunkt: Tidspunkt,
-        bodyBegrunnelse: String,
-    ) {
+    private fun mockBehandlingService(bodyVirkningstidspunkt: Tidspunkt) {
         val parsetVirkningstidspunkt =
             YearMonth.from(
                 bodyVirkningstidspunkt.toNorskTid().let {
@@ -374,14 +373,14 @@ internal class BehandlingRoutesTest {
             Virkningstidspunkt(
                 parsetVirkningstidspunkt,
                 Grunnlagsopplysning.Saksbehandler.create(NAV_IDENT),
-                bodyBegrunnelse,
+                "begrunnelse",
             )
         coEvery {
             behandlingService.oppdaterVirkningstidspunkt(
                 behandlingId,
                 parsetVirkningstidspunkt,
                 any(),
-                bodyBegrunnelse,
+                "begrunnelse",
                 any(),
             )
         } returns virkningstidspunkt

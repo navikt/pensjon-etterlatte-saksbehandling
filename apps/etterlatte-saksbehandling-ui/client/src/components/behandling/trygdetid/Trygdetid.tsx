@@ -9,7 +9,7 @@ import {
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
@@ -27,6 +27,8 @@ import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 interface Props {
   redigerbar: boolean
@@ -52,6 +54,7 @@ const manglerTrygdetid = (
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
 
+  const kopierTrygdetidsgrunnlagEnabled = useFeatureEnabledMedDefault('kopier-trygdetidsgrunnlag', false)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
@@ -66,7 +69,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   const personopplysninger = usePersonopplysninger()
 
-  const mapNavn = (fnr: string): string => {
+  const mapNavn = (fnr: string, visFnr: boolean = true): string => {
     const opplysning = personopplysninger?.avdoede?.find(
       (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
     )?.opplysning
@@ -75,7 +78,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       return fnr
     }
 
-    return `${formaterNavn(opplysning)} (${fnr})`
+    return `${formaterNavn(opplysning)} ${visFnr ? ` (${fnr})` : ''}`
   }
 
   const tidligereFamiliepleier =
@@ -156,6 +159,14 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   return (
     <Box paddingInline="16" maxWidth="69rem">
+      {kopierTrygdetidsgrunnlagEnabled && behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+        <TrygdetidIAnnenBehandlingMedSammeAvdoede
+          behandlingId={behandling.id}
+          setTrygdetider={setTrygdetider}
+          trygdetider={trygdetider}
+          mapNavn={mapNavn}
+        />
+      )}
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
 
@@ -238,11 +249,11 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         })}
         {isFailureHandler({
           apiResult: hentAlleLandRequest,
-          errorMessage: 'Hent feil har oppstått ved henting av landliste',
+          errorMessage: 'En feil har oppstått ved henting av landliste',
         })}
         {isFailureHandler({
           apiResult: overstyrTrygdetidStatus,
-          errorMessage: 'Hent feil har oppstått ved opprettelse av overstyrt trygdetid',
+          errorMessage: 'En feil har oppstått ved opprettelse av overstyrt trygdetid',
         })}
 
         {behandlingsIdMangler && <ApiErrorAlert>Finner ikke behandling - ID mangler</ApiErrorAlert>}

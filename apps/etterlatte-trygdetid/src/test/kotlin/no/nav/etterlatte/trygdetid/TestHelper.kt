@@ -15,6 +15,8 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -69,6 +71,7 @@ fun trygdetid(
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     opplysninger: List<Opplysningsgrunnlag> = standardOpplysningsgrunnlag(),
     yrkesskade: Boolean = false,
+    opplysningerDifferanse: OpplysningerDifferanse = OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt()),
 ) = Trygdetid(
     id = randomUUID(),
     sakId = sakId,
@@ -78,6 +81,7 @@ fun trygdetid(
     beregnetTrygdetid = beregnetTrygdetid,
     ident = ident,
     yrkesskade = yrkesskade,
+    opplysningerDifferanse = opplysningerDifferanse,
 )
 
 fun standardOpplysningsgrunnlag(): List<Opplysningsgrunnlag> {

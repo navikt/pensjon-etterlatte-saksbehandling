@@ -158,6 +158,18 @@ export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
     yrkesskade: false,
   })
 
+export const kopierTrygdetidFraAnnenBehandling = async (args: {
+  behandlingId: string
+  kildeBehandlingId: string
+}): Promise<ApiResponse<ITrygdetid[]>> =>
+  apiClient.post<ITrygdetid[]>(`/trygdetid_v2/${args.behandlingId}/kopier-grunnlag/${args.kildeBehandlingId}`, {})
+
+export const hentKandidatForKopieringAvTrygdetid = async (
+  behandlingId: string
+): Promise<ApiResponse<string | null>> => {
+  return apiClient.get(`/trygdetid_v2/${behandlingId}/behandling-med-trygdetid-for-avdoede`)
+}
+
 export interface ITrygdetid {
   id: string
   ident: string

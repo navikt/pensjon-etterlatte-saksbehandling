@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -40,7 +41,6 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -79,16 +79,23 @@ class AarligInntektsjusteringJobbService(
         }
     }
 
-    fun opprettRevurderingAarligInntektsjustering(
+    fun opprettManuellInntektsjustering(
         sakId: SakId,
         oppgaveId: UUID,
         saksbehandler: Saksbehandler,
     ): Revurdering {
+        val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
+        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak)
+        if (aapneBehandlinger.isNotEmpty()) {
+            throw UgyldigForespoerselException(
+                "KAN_IKKE_OPPRETTE_REVURDERING_PGA_AAPNE_BEHANDLINGER",
+                "Kan ikke opprette revurdering på grunn av sak har åpne behandlinger",
+            )
+        }
+
         // TODO: bør defineres i en utils slik at den kan gjenbrukes på tvers av all logikk knytt til inntektsjustering
         val loependeFom = YearMonth.of(Year.now().value, 1).plusYears(1)
-
-        val forrigeBehandling = hentForrigeBehandling(sakId)
-        val revurdering = nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
+        val revurdering = nyManuellRevurdering(sakId, hentForrigeBehandling(sakId), loependeFom)
         oppgaveService.ferdigstillOppgave(oppgaveId, saksbehandler)
         return revurdering
     }

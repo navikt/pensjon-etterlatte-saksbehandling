@@ -16,7 +16,7 @@ if [ -n "${changedKotlinFiles-unset}" ]; then
     echo "🛠 Running ktlint"
 
     #store the result of the commit in a variable and split into array items with newline
-    cd ../../
+    cd ../../../
     committedFiles=$(git diff --name-only --cached --diff-filter=d)
     files=$(echo $committedFiles | tr ";" "\\n")
 

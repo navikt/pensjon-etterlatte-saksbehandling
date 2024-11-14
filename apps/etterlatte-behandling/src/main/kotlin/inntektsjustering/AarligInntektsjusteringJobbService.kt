@@ -84,8 +84,10 @@ class AarligInntektsjusteringJobbService(
         oppgaveId: UUID,
         saksbehandler: Saksbehandler,
     ): Revurdering {
-        val forrigeBehandling = hentForrigeBehandling(sakId)
+        // TODO: bør defineres i en utils slik at den kan gjenbrukes på tvers av all logikk knytt til inntektsjustering
         val loependeFom = YearMonth.of(Year.now().value, 1).plusYears(1)
+
+        val forrigeBehandling = hentForrigeBehandling(sakId)
         val revurdering = nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
         oppgaveService.ferdigstillOppgave(oppgaveId, saksbehandler)
         return revurdering

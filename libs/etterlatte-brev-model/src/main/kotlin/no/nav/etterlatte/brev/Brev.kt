@@ -85,9 +85,17 @@ data class Mottaker(
         } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
             listOf("Fødselsnummer og orgnummer er ikke angitt")
         } else {
-            adresse.erGyldig()
+            val erGyldig = adresse.erGyldig()
+            if (erVerge()) {
+                erGyldig.plus("Saksbehandler må manuelt håndtere verge").reversed()
+            }
+            erGyldig
         }
+
+    fun erVerge() = this.navn == VERGENAVN_FOR_MOTTAKER
 }
+
+const val VERGENAVN_FOR_MOTTAKER = "Ukjent(Vergemål, kan ikke sende automatisk)"
 
 enum class MottakerType { HOVED, KOPI }
 

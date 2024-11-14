@@ -14,8 +14,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
-import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
-import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakResponse
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
@@ -91,7 +91,14 @@ interface BehandlingService {
         frist: Tidspunkt,
         referanse: String? = null,
         jobbType: JobbType,
-    ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse
+    ): OpprettOppgaveForAktivitetspliktResponse
+
+    fun opprettOppgaveOppfoelgingAktivitetsplikt(
+        sakId: SakId,
+        frist: Tidspunkt,
+        referanse: String? = null,
+        jobbType: JobbType,
+    ): OpprettOppgaveForAktivitetspliktResponse
 
     fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
 
@@ -122,6 +129,9 @@ interface BehandlingService {
         sakId: SakId,
         status: KjoeringStatus,
         kjoering: String,
+        begrunnelse: String? = null,
+        corrId: String? = null,
+        feilendeSteg: String? = null,
     )
 
     fun lagreFullfoertKjoering(request: LagreKjoeringRequest)
@@ -339,20 +349,41 @@ class BehandlingServiceImpl(
         frist: Tidspunkt,
         referanse: String?,
         jobbType: JobbType,
-    ): OpprettOppgaveForAktivitetspliktVarigUnntakResponse =
+    ): OpprettOppgaveForAktivitetspliktResponse =
         runBlocking {
             behandlingKlient
                 .post("$url/api/sak/${sakId.sakId}/aktivitetsplikt/varigUnntak") {
                     contentType(ContentType.Application.Json)
                     setBody(
-                        OpprettOppgaveForAktivitetspliktVarigUnntakDto(
+                        OpprettOppgaveForAktivitetspliktDto(
                             sakId = sakId,
                             referanse = referanse,
                             frist = frist,
                             jobbType = jobbType,
                         ),
                     )
-                }.body<OpprettOppgaveForAktivitetspliktVarigUnntakResponse>()
+                }.body<OpprettOppgaveForAktivitetspliktResponse>()
+        }
+
+    override fun opprettOppgaveOppfoelgingAktivitetsplikt(
+        sakId: SakId,
+        frist: Tidspunkt,
+        referanse: String?,
+        jobbType: JobbType,
+    ): OpprettOppgaveForAktivitetspliktResponse =
+        runBlocking {
+            behandlingKlient
+                .post("$url/api/sak/${sakId.sakId}/aktivitetsplikt/oppgave-oppfoelging") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        OpprettOppgaveForAktivitetspliktDto(
+                            sakId = sakId,
+                            referanse = referanse,
+                            frist = frist,
+                            jobbType = jobbType,
+                        ),
+                    )
+                }.body<OpprettOppgaveForAktivitetspliktResponse>()
         }
 
     override fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto) {
@@ -368,6 +399,9 @@ class BehandlingServiceImpl(
         sakId: SakId,
         status: KjoeringStatus,
         kjoering: String,
+        begrunnelse: String?,
+        corrId: String?,
+        feilendeSteg: String?,
     ) {
         runBlocking {
             behandlingKlient.put("$url/omregning/kjoering") {
@@ -377,6 +411,9 @@ class BehandlingServiceImpl(
                         kjoering = kjoering,
                         status = status,
                         sakId = sakId,
+                        begrunnelse = begrunnelse,
+                        corrId = corrId,
+                        feilendeSteg = feilendeSteg,
                     ),
                 )
             }

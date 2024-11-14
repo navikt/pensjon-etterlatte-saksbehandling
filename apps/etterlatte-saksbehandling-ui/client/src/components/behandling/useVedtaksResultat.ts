@@ -1,6 +1,7 @@
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 // Dette er en midlertidig workaround i frontend fram til vi får noe mer rimelig rundt hva er vedtaksresultat i backend
 // Laget som en felles greie slik at
@@ -12,12 +13,18 @@ export function useVedtaksResultat(): VedtakResultat | null {
   const behandling = useBehandling()
   const behandlingType = behandling?.behandlingType
   const vilkaarsresultat = behandling?.vilkaarsvurdering?.resultat?.utfall
+  const foerstegangsbehandling = behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   switch (vilkaarsresultat) {
     case VilkaarsvurderingResultat.OPPFYLT:
-      return behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? 'innvilget' : 'endring'
+      return foerstegangsbehandling ? 'innvilget' : 'endring'
     case VilkaarsvurderingResultat.IKKE_OPPFYLT:
-      return behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? 'avslag' : 'opphoer'
+      const revurderingNySoeknad =
+        behandlingType === IBehandlingsType.REVURDERING &&
+        behandling?.revurderingsaarsak == Revurderingaarsak.NY_SOEKNAD
+
+      if (foerstegangsbehandling || revurderingNySoeknad) return 'avslag'
+      else return 'opphoer'
     default:
       return null
   }

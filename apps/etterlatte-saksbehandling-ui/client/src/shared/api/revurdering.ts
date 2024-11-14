@@ -43,6 +43,10 @@ export const opprettRevurdering = async ({
   })
 }
 
+export const opprettManuellInntektsjustering = async ({ sakId }: { sakId: number }): Promise<ApiResponse<string>> => {
+  return apiClient.post(`/revurdering/${sakId}/manuell-inntektsjustering`, {})
+}
+
 export const hentStoettedeRevurderinger = async ({
   sakType,
 }: {

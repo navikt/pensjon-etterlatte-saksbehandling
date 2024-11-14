@@ -8,17 +8,17 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.utbetaling.klienter.BehandlingKlient
 import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
+import org.slf4j.LoggerFactory
 
 internal fun Route.utbetalingRoutes(
     service: SimuleringOsService,
     behandlingKlient: BehandlingKlient,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("UtbetalingRoute")
 
     route("/api/utbetaling") {
         route("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {

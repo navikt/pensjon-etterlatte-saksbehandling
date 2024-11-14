@@ -49,12 +49,13 @@ export const opprettOppgave = async (args: {
   request: NyOppgaveDto
 }): Promise<ApiResponse<OppgaveDTO>> => apiClient.post(`/oppgaver/sak/${args.sakId}/opprett`, { ...args.request })
 
-export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<any>> => ferdigstillOppgaveMedMerknad({ id })
+export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> =>
+  ferdigstillOppgaveMedMerknad({ id })
 
 export const ferdigstillOppgaveMedMerknad = async (args: {
   id: string
   merknad?: string | null
-}): Promise<ApiResponse<any>> => apiClient.put(`/oppgaver/${args.id}/ferdigstill`, { merknad: args.merknad })
+}): Promise<ApiResponse<OppgaveDTO>> => apiClient.put(`/oppgaver/${args.id}/ferdigstill`, { merknad: args.merknad })
 
 export interface OppdatertOppgaveversjonResponseDto {
   versjon: number | null
@@ -99,7 +100,7 @@ export const redigerFristApi = async (args: {
 
 export interface EndrePaaVentRequest {
   aarsak?: string
-  merknad: String
+  merknad: string
   paaVent: boolean
 }
 

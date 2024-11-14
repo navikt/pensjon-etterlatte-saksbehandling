@@ -54,8 +54,8 @@ export const TilleggsinformasjonOppgaveModal = ({
   const avslutt = ({ kommentar }: { kommentar: string }) => {
     const merknad = `${oppgave.merknad}. Kommentar: ${kommentar}`
 
-    avsluttOppgave({ id: oppgave.id, merknad }, () => {
-      oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+    avsluttOppgave({ id: oppgave.id, merknad }, (oppgave) => {
+      oppdaterStatus(oppgave.id, oppgave.status)
       setIsOpen(false)
     })
   }

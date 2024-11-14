@@ -7,7 +7,7 @@ import {
   slettTotalVurdering,
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
-import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea, Box, HStack, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
 import { svarTilTotalResultat, totalResultatTilSvar } from './utils'
 import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
@@ -22,6 +22,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { formaterSakstype } from '~utils/formatering/formatering'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -33,6 +34,7 @@ type Props = {
   behandlingstype: IBehandlingsType
   redigerTotalvurdering: boolean
   setRedigerTotalvurdering: Dispatch<SetStateAction<boolean>>
+  revurderingsaarsak: Revurderingaarsak | null
 }
 
 export const Resultat = (props: Props) => {
@@ -45,6 +47,7 @@ export const Resultat = (props: Props) => {
     redigerbar,
     behandlingstype,
     setRedigerTotalvurdering,
+    revurderingsaarsak,
   } = props
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
@@ -62,9 +65,11 @@ export const Resultat = (props: Props) => {
     })
 
   const lagreVilkaarsvurderingResultat = () => {
-    !(svar && [ISvar.JA, ISvar.NEI].includes(svar))
-      ? setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
-      : setRadioError(undefined)
+    if (!(svar && [ISvar.JA, ISvar.NEI].includes(svar))) {
+      setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
+    } else {
+      setRadioError(undefined)
+    }
 
     if (radioError === undefined && svar !== undefined) {
       oppdaterTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) => {
@@ -75,7 +80,7 @@ export const Resultat = (props: Props) => {
   }
 
   const resultatTekst = () => {
-    if (erRevurdering) {
+    if (erRevurdering && !nySoeknad) {
       return vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
         ? 'Fortsatt oppfylt'
         : 'Opphør av ytelse'
@@ -95,6 +100,7 @@ export const Resultat = (props: Props) => {
   const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'
   const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
   const erRevurdering = behandlingstype === IBehandlingsType.REVURDERING
+  const nySoeknad = revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
 
   return (
     <>
@@ -186,7 +192,9 @@ export const Resultat = (props: Props) => {
                 error={radioError ? radioError : false}
               >
                 <Radio value={ISvar.JA}>{erRevurdering ? 'Fortsatt oppfylt' : 'Ja, vilkår er oppfylt'}</Radio>
-                <Radio value={ISvar.NEI}>{erRevurdering ? 'Opphør av ytelse' : 'Nei, vilkår er ikke oppfylt'}</Radio>
+                <Radio value={ISvar.NEI}>
+                  {erRevurdering && !nySoeknad ? 'Opphør av ytelse' : 'Nei, vilkår er ikke oppfylt'}
+                </Radio>
               </RadioGroup>
               <Textarea
                 label="Begrunnelse"

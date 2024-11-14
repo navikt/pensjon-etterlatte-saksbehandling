@@ -18,7 +18,9 @@ export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNota
 
   return (
     <>
-      <Button variant="danger" size="small" icon={<TrashIcon />} onClick={() => setIsOpen(true)} />
+      <Button variant="danger" size="small" icon={<TrashIcon />} onClick={() => setIsOpen(true)}>
+        Slett
+      </Button>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Body>

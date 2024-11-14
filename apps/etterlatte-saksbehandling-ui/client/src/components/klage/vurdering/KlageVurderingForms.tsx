@@ -6,7 +6,7 @@ import {
   Utfall,
 } from '~shared/types/Klage'
 import React from 'react'
-import { ErrorMessage, Heading, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Box, ErrorMessage, Heading, Select, Textarea, VStack } from '@navikt/ds-react'
 import { FieldOrNull } from '~shared/types/util'
 import { Control, Controller } from 'react-hook-form'
 
@@ -45,7 +45,7 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
   const { control } = props
 
   return (
-    <VStack gap="4" width="30rem">
+    <VStack gap="4">
       <Heading level="2" size="medium">
         Omgjøring
       </Heading>
@@ -60,7 +60,7 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
         render={({ field, fieldState }) => {
           const { value, ...rest } = field
           return (
-            <>
+            <Box maxWidth="30rem">
               <Select label="Hvorfor skal saken omgjøres?" value={value ?? ''} {...rest}>
                 <option value="">Velg grunn</option>
                 {AARSAKER_OMGJOERING.map((aarsak) => (
@@ -70,7 +70,7 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
                 ))}
               </Select>
               {fieldState.error && <ErrorMessage>Du må velge en årsak for omgjøringen.</ErrorMessage>}
-            </>
+            </Box>
           )
         }}
       />
@@ -85,11 +85,11 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
         render={({ field, fieldState }) => {
           const { value, ...rest } = field
           return (
-            <>
-              <Textarea label="Begrunnelse" value={value ?? ''} {...rest} />
+            <Box maxWidth="42.5rem">
+              <Textarea label="Begrunnelse" value={value ?? ''} {...rest} resize />
 
               {fieldState.error && <ErrorMessage>Du må gi en begrunnelse for omgjøringen.</ErrorMessage>}
-            </>
+            </Box>
           )
         }}
       />

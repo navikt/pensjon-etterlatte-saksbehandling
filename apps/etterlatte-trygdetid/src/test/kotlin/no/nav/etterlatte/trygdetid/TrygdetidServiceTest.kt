@@ -54,6 +54,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -1782,6 +1783,140 @@ internal class TrygdetidServiceTest {
             behandling.sak
             behandling.behandlingType
         }
+    }
+
+    @Nested
+    inner class BehandlingMedSammeAvdoed {
+        private val grunnlagMock = mockk<Grunnlag>()
+        private val avdoede1Mock = mockk<Grunnlagsdata<JsonNode>>()
+        private val avdoede2Mock = mockk<Grunnlagsdata<JsonNode>>()
+
+        private lateinit var mocks: List<Grunnlagsdata<JsonNode>>
+
+        private fun setupGrunnlagMock(
+            avdoed1: Folkeregisteridentifikator,
+            avdoed2: Folkeregisteridentifikator,
+        ) {
+            mocks = listOf(avdoede1Mock, avdoede2Mock)
+            coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlagMock
+            every { grunnlagMock.hentAvdoede() } returns mocks
+            every { avdoede1Mock[Opplysningstype.FOEDSELSNUMMER] } answers { konstantOpplysning(avdoed1) }
+            every { avdoede2Mock[Opplysningstype.FOEDSELSNUMMER] } answers { konstantOpplysning(avdoed2) }
+        }
+
+        private fun verifyHentetAvdoede(behandlingId: UUID) {
+            coVerify(exactly = 1) {
+                grunnlagKlient.hentGrunnlag(behandlingId, any())
+                grunnlagMock.hentAvdoede()
+            }
+            verify { avdoede1Mock[Opplysningstype.FOEDSELSNUMMER] }
+            verify { avdoede2Mock[Opplysningstype.FOEDSELSNUMMER] }
+        }
+
+        @Test
+        fun `finnBehandlingMedTrygdetidForSammeAvdoede skal finne behandling med ok status`() {
+            val annenBehandling = behandling(randomUUID(), randomSakId(), BehandlingStatus.BEREGNET)
+            val avdoed1 = Folkeregisteridentifikator.of("10418305857")
+            val avdoed2 = Folkeregisteridentifikator.of("01448203510")
+
+            setupGrunnlagMock(avdoed1, avdoed2)
+
+            every { repository.hentTrygdetiderForAvdoede(any()) } returns
+                listOf(
+                    trygdetidPartial(annenBehandling.id, avdoed1),
+                    trygdetidPartial(annenBehandling.id, avdoed2),
+                )
+            coEvery { behandlingKlient.hentBehandling(annenBehandling.id, any()) } returns annenBehandling
+
+            val behandlingId = randomUUID()
+            val behandlingMedSammeAvdoede =
+                runBlocking {
+                    service.finnBehandlingMedTrygdetidForSammeAvdoede(behandlingId, saksbehandler)
+                }
+
+            behandlingMedSammeAvdoede shouldBe annenBehandling.id
+
+            verifyHentetAvdoede(behandlingId)
+            verify(exactly = 1) {
+                repository.hentTrygdetiderForAvdoede(listOf(avdoed1.value, avdoed2.value))
+            }
+            coVerify(exactly = 1) {
+                behandlingKlient.hentBehandling(annenBehandling.id, saksbehandler)
+            }
+        }
+
+        @Test
+        fun `finnBehandlingMedTrygdetidForSammeAvdoede skal bare ta med behandlinger som har alle avdøde`() {
+            val annenBehandling1 = behandling(randomUUID(), randomSakId(), BehandlingStatus.BEREGNET)
+            val annenBehandling2 = behandling(randomUUID(), randomSakId(), BehandlingStatus.BEREGNET)
+            val behandling = behandling(randomUUID(), randomSakId(), BehandlingStatus.ATTESTERT)
+            val avdoed1 = Folkeregisteridentifikator.of("10418305857")
+            val avdoed2 = Folkeregisteridentifikator.of("01448203510")
+
+            setupGrunnlagMock(avdoed1, avdoed2)
+
+            every { repository.hentTrygdetiderForAvdoede(any()) } returns
+                listOf(
+                    trygdetidPartial(annenBehandling1.id, avdoed1),
+                    trygdetidPartial(annenBehandling1.id, avdoed2),
+                    trygdetidPartial(annenBehandling2.id, avdoed1),
+                    trygdetidPartial(behandling.id, avdoed1),
+                    trygdetidPartial(behandling.id, avdoed2),
+                )
+            coEvery { behandlingKlient.hentBehandling(annenBehandling1.id, any()) } returns annenBehandling1
+
+            val behandlingMedSammeAvdoede =
+                runBlocking {
+                    service.finnBehandlingMedTrygdetidForSammeAvdoede(behandling.id, saksbehandler)
+                }
+            behandlingMedSammeAvdoede shouldBe annenBehandling1.id
+
+            verifyHentetAvdoede(behandling.id)
+            verify(exactly = 1) {
+                repository.hentTrygdetiderForAvdoede(listOf(avdoed1.value, avdoed2.value))
+            }
+            coVerify(exactly = 1) {
+                behandlingKlient.hentBehandling(annenBehandling1.id, saksbehandler)
+            }
+        }
+
+        @Test
+        fun `finnBehandlingMedTrygdetidForSammeAvdoede skal ikke ta med den samme behandlingen`() {
+            val annenBehandling = behandling(randomUUID(), randomSakId(), BehandlingStatus.AVBRUTT)
+            val behandling = behandling(randomUUID(), randomSakId(), BehandlingStatus.ATTESTERT)
+            val avdoed1 = Folkeregisteridentifikator.of("10418305857")
+            val avdoed2 = Folkeregisteridentifikator.of("01448203510")
+
+            setupGrunnlagMock(avdoed1, avdoed2)
+
+            every { repository.hentTrygdetiderForAvdoede(any()) } returns
+                listOf(
+                    trygdetidPartial(annenBehandling.id, avdoed1),
+                    trygdetidPartial(annenBehandling.id, avdoed2),
+                    trygdetidPartial(behandling.id, avdoed1),
+                    trygdetidPartial(behandling.id, avdoed2),
+                )
+            coEvery { behandlingKlient.hentBehandling(annenBehandling.id, any()) } returns annenBehandling
+
+            val behandlingMedSammeAvdoede =
+                runBlocking {
+                    service.finnBehandlingMedTrygdetidForSammeAvdoede(behandling.id, saksbehandler)
+                }
+            behandlingMedSammeAvdoede shouldBe null
+
+            verifyHentetAvdoede(behandling.id)
+            verify(exactly = 1) {
+                repository.hentTrygdetiderForAvdoede(listOf(avdoed1.value, avdoed2.value))
+            }
+            coVerify(exactly = 1) {
+                behandlingKlient.hentBehandling(annenBehandling.id, saksbehandler)
+            }
+        }
+
+        private fun trygdetidPartial(
+            behandlingId: UUID,
+            avdoed1: Folkeregisteridentifikator,
+        ) = TrygdetidPartial(behandlingId, avdoed1.value, Tidspunkt.now())
     }
 
     private fun beregnetTrygdetid() =

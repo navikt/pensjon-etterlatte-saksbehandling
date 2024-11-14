@@ -27,6 +27,7 @@ data class PdlAdressebeskyttelseRequest(
 data class PdlVariables(
     val ident: String,
     val bostedsadresse: Boolean = false,
+    val folkeregisteridentHistorikk: Boolean = false,
     val bostedsadresseHistorikk: Boolean = false,
     val deltBostedsadresse: Boolean = false,
     val oppholdsadresse: Boolean = false,
@@ -506,42 +507,6 @@ data class PdlGeografiskTilknytningResponse(
     override val data: PdlGeografiskTilknytningData? = null,
     override val errors: List<PdlResponseError>? = null,
 ) : PdlDataErrorResponse<PdlGeografiskTilknytningData>
-
-data class PdlFoedselsnumreFraAktoerIdRequest(
-    val query: String,
-    val variables: IdenterBolkVariables,
-)
-
-data class IdenterBolkVariables(
-    val identer: List<String>,
-    val grupper: Set<IdentGruppe>,
-)
-
-data class PdlFoedselsnumreFraAktoerIdResponse(
-    val data: PdlFoedselsnumreFraAktoerIdData,
-)
-
-data class PdlFoedselsnumreFraAktoerIdData(
-    val hentIdenterBolk: Set<HentIdenterBolkResult>,
-)
-
-data class HentIdenterBolkResult(
-    val ident: String,
-    val identer: Set<IdentInformasjon>?,
-    val code: String,
-)
-
-data class IdentInformasjon(
-    val ident: String,
-    val gruppe: IdentGruppe,
-    val historisk: Boolean,
-)
-
-enum class IdentGruppe {
-    AKTORID,
-    FOLKEREGISTERIDENT,
-    NPID,
-}
 
 data class PdlHentForelderansvarHistorikkVariables(
     val ident: String,

@@ -99,6 +99,10 @@ spec:
       value: https://dokdistfordeling.prod-fss-pub.nais.io/rest/v1
     - name: DOKDIST_CLIENT_ID
       value: prod-fss.teamdokumenthandtering.saf
+    - name: DOKDISTKANAL_URL
+      value: https://dokdistkanal.prod-fss-pub.nais.io/rest
+    - name: DOKDISTKANAL_CLIENT_ID
+      value: prod-fss.teamdokumenthandtering.dokdistkanal
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
     - name: REGOPPSLAG_SCOPE
@@ -151,6 +155,7 @@ spec:
         - host: regoppslag.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: dokdistfordeling.prod-fss-pub.nais.io
+        - host: dokdistkanal.prod-fss-pub.nais.io
         - host: data.brreg.no
         - host: pensjon-brevbaker.intern.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io
@@ -159,3 +164,4 @@ spec:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling
         - application: etterlatte-brev-kafka
+        - application: etterlatte-vedtaksvurdering-kafka

@@ -12,14 +12,14 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import org.slf4j.LoggerFactory
 
 internal fun Route.egenAnsattRoute(
     egenAnsattService: EgenAnsattService,
     requestLogger: BehandlingRequestLogger,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("EgenAnsattRoute")
 
     route("/egenansatt") {
         post {

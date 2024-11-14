@@ -1,7 +1,13 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
@@ -52,6 +58,28 @@ internal class OmregningsHendelserBehandlingRiver(
                     revurderingAarsak = omregningData.revurderingaarsak,
                 ),
             )
+
+        if (omregningData.revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
+            behandlinger.leggInnBrevutfall(
+                BrevutfallOgEtterbetalingDto(
+                    behandlingId = behandlingId,
+                    opphoer = false, // TODO opphørfom?a
+                    etterbetaling = null,
+                    brevutfall =
+                        BrevutfallDto(
+                            behandlingId = behandlingId,
+                            aldersgruppe = Aldersgruppe.OVER_18, // eller null siden oms?
+                            feilutbetaling =
+                                Feilutbetaling(
+                                    valg = FeilutbetalingValg.NEI,
+                                    kommentar = null,
+                                ),
+                            kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                            frivilligSkattetrekk = false,
+                        ),
+                ),
+            )
+        }
 
         omregningData.endreSakType(sakType)
         omregningData.endreBehandlingId(behandlingId)

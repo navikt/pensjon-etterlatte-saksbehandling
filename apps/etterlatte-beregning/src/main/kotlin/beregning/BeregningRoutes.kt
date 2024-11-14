@@ -14,16 +14,16 @@ import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import org.slf4j.LoggerFactory
 
 fun Route.beregning(
     beregningService: BeregningService,
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/beregning") {
-        val logger = routeLogger
+        val logger = LoggerFactory.getLogger("BeregningRoute")
 
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) {

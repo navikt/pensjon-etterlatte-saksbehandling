@@ -6,6 +6,7 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 
 export enum AktivitetspliktSteg {
   VURDERING = 'vurdering',
+  BREVVALG = 'brevvalg',
   OPPSUMMERING_OG_BREV = 'oppsummering',
 }
 
@@ -19,6 +20,7 @@ export function AktivitetspliktStegmeny() {
     <StegMenyBox>
       <HStack gap="6" align="center">
         <AktivitetNavLenke path={AktivitetspliktSteg.VURDERING} description="Oppfølging av aktivitet" enabled={true} />
+        <AktivitetNavLenke path={AktivitetspliktSteg.BREVVALG} description="Brevvalg" enabled={true} />
         <AktivitetNavLenke
           path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV}
           description="Brev og oppsummering"

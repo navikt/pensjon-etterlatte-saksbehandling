@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
@@ -219,19 +220,19 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
 private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregning {
     val base =
         beregningsperioder.first().apply {
-            check(beregningsperioder.all { it.beregningId == beregningId }) {
+            checkInternFeil(beregningsperioder.all { it.beregningId == beregningId }) {
                 "Beregningen inneholder forskjellige beregningsIder $beregningId for beregning $beregningId"
             }
-            check(beregningsperioder.all { it.behandlingId == behandlingId }) {
+            checkInternFeil(beregningsperioder.all { it.behandlingId == behandlingId }) {
                 "Beregningen inneholder forskjellige behandlingIder $behandlingId for beregning $beregningId"
             }
-            check(beregningsperioder.all { it.type == type }) {
+            checkInternFeil(beregningsperioder.all { it.type == type }) {
                 "Beregningen inneholder forskjellige typer $type for beregning $beregningId"
             }
-            check(beregningsperioder.all { it.beregnetDato == beregnetDato }) {
+            checkInternFeil(beregningsperioder.all { it.beregnetDato == beregnetDato }) {
                 "Beregningen inneholder forskjellige beregnetDatoer $beregnetDato for beregning $beregningId"
             }
-            check(beregningsperioder.all { it.grunnlagMetadata == grunnlagMetadata }) {
+            checkInternFeil(beregningsperioder.all { it.grunnlagMetadata == grunnlagMetadata }) {
                 "Beregningen inneholder forskjellige grunnlagMetadata $grunnlagMetadata for beregning $beregningId"
             }
         }

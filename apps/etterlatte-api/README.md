@@ -98,9 +98,9 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 }
 ```
 
-## Internt i NAV
+## Internt i Nav
 
-Endepunktene som er nevnt over finnes også til bruk for NAV-interne systemer, men da på `/api/pensjon/vedtak` osv.
+Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, men da på `/api/pensjon/vedtak` osv.
 
 ### Løpende omstillingsstønad
 Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før angitt dato, eller starter måneden etterpå så vil svaret være _nei_. **NB!** Merk at denne tjenesten _ikke gjør noe tolkning av faktisk utbetaling_ for å gi svaret, kun om ytelsen er innvilget. Så for eksempel om ytelsen er fullstendig avkortet, så vil svaret likevel være ja. 
@@ -142,6 +142,6 @@ Appen bygges og deployes automatisk ved commits til `apps/etterlatte-api/**`.
 
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
-### For NAV-ansatte
+### For Nav-ansatte
 
 Interne henvendelser kan sendes via Slack i kanalen #po-pensjon-team-etterlatte.

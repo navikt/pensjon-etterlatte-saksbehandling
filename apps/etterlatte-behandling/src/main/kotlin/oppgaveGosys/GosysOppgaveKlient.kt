@@ -13,6 +13,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
@@ -151,8 +152,7 @@ class GosysOppgaveKlientImpl(
         } catch (e: SocketTimeoutException) {
             throw GosysTimeout()
         } catch (e: Exception) {
-            logger.error("Feil ved henting av oppgaver fra Gosys", e)
-            throw e
+            throw GosysInternalFeil(cause = e)
         }
     }
 
@@ -180,8 +180,7 @@ class GosysOppgaveKlientImpl(
         } catch (e: SocketTimeoutException) {
             throw GosysTimeout()
         } catch (e: Exception) {
-            logger.error("Feil ved henting av oppgaver fra Gosys", e)
-            throw e
+            throw GosysInternalFeil(cause = e)
         }
     }
 
@@ -309,6 +308,13 @@ data class EndreStatusRequest(
     val status: String,
     val beskrivelse: String? = null,
 )
+
+class GosysInternalFeil(
+    override val cause: Throwable,
+) : InternfeilException(
+        detail = "Feil ved henting av oppgaver fra Gosys. Melding ${cause.message}",
+        cause = cause,
+    )
 
 class GosysTimeout :
     TimeoutForespoerselException(

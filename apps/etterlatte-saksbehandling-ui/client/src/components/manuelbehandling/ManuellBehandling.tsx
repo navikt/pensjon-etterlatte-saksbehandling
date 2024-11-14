@@ -10,9 +10,8 @@ import {
 } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
-import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useParams } from 'react-router-dom'
 import { hentOppgave } from '~shared/api/oppgaver'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
@@ -25,6 +24,7 @@ import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModa
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { OverstyrtBeregningKategori } from '~shared/types/OverstyrtBeregning'
+import Spinner from '~shared/Spinner'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
@@ -40,7 +40,6 @@ export default function ManuellBehandling() {
   useSidetittel('Manuell behandling')
 
   const [opprettBehandlingStatus, opprettNyBehandling] = useApiCall(opprettBehandling)
-  const [nyBehandlingId, setNyId] = useState('')
   const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
 
   const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
@@ -52,8 +51,8 @@ export default function ManuellBehandling() {
     if (oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
         setOppgaveStatus(oppgave.status)
-        oppgave.fnr && methods.setValue('persongalleri.soeker', oppgave.fnr)
-        oppgave.referanse && methods.setValue('pesysId', Number(oppgave.referanse))
+        if (oppgave.fnr) methods.setValue('persongalleri.soeker', oppgave.fnr)
+        if (oppgave.referanse) methods.setValue('pesysId', Number(oppgave.referanse))
         if (oppgave.type === Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG) {
           methods.setValue('kilde', 'GJENOPPRETTA')
         }
@@ -94,7 +93,6 @@ export default function ManuellBehandling() {
         if (data.overstyrTrygdetid) {
           opprettOverstyrtTrygdetidReq({ behandlingId: nyBehandlingRespons })
         }
-        setNyId(nyBehandlingRespons)
       }
     )
   }
@@ -200,25 +198,20 @@ export default function ManuellBehandling() {
           </Knapp>
         )}
 
-        {isSuccess(opprettBehandlingStatus) && (
-          <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>
-        )}
-        {isFailureHandler({
-          apiResult: opprettBehandlingStatus,
-          errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
+        {mapResult(opprettBehandlingStatus, {
+          error: (error) => (
+            <ApiErrorAlert>Det oppsto en feil ved oppretting av behandlingen: {error.detail}</ApiErrorAlert>
+          ),
+          success: (nyBehandlingId) => (
+            <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>
+          ),
         })}
 
-        {mapAllApiResult(
-          overstyrTrygdetidStatus,
-          <Alert variant="info">Oppretter overstyrt trygdetid.</Alert>,
-          null,
-          () => (
-            <ApiErrorAlert>Klarte ikke å overstyre trygdetid.</ApiErrorAlert>
-          ),
-          () => (
-            <Alert variant="success">Overstyrt trygdetid opprettet!</Alert>
-          )
-        )}
+        {mapResult(overstyrTrygdetidStatus, {
+          pending: <Spinner label="Oppretter overstyrt trygdetid" />,
+          error: () => <ApiErrorAlert>Klarte ikke å overstyre trygdetid.</ApiErrorAlert>,
+          success: () => <Alert variant="success">Overstyrt trygdetid opprettet!</Alert>,
+        })}
       </FormProvider>
     </FormWrapper>
   )

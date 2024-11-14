@@ -33,16 +33,14 @@ import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
-import { Grunnlagsopplysning } from '~shared/types/grunnlag'
-import { formaterNavn, IPdlPerson } from '~shared/types/Person'
-import { KildePdl } from '~shared/types/kilde'
+import { formaterNavn } from '~shared/types/Person'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { hentSak } from '~shared/api/sak'
 import { SendtilAttesteringModal } from '~components/generellbehandling/SendtilAttesteringModal'
 import { NavigateFunction } from 'react-router/dist/lib/hooks'
 import { GenerellbehandlingSidemeny } from '~components/generellbehandling/GenerellbehandlingSidemeny'
 
-import { isPending, isPendingOrInitial, isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isPending, isPendingOrInitial, isSuccess, mapApiResult, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
@@ -85,7 +83,6 @@ const KravpakkeUtlandBehandling = (props: {
   const [oppdaterGenerellBehandlingStatus, oppdaterGenerellBehandlingApi] = useApiCall(oppdaterGenerellBehandling)
   const [avbrytbehandlingStatus, avbrytBehandlingApi] = useApiCall(avbrytGenerellBehandling)
   const [avdoedeStatus, avdoedeFetch] = useApiCall(getGrunnlagsAvOpplysningstype)
-  const [avdoed, setAvdoed] = useState<Grunnlagsopplysning<IPdlPerson, KildePdl> | null>(null)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
@@ -120,14 +117,11 @@ const KravpakkeUtlandBehandling = (props: {
 
   useEffect(() => {
     if (utlandsBehandling.tilknyttetBehandling) {
-      avdoedeFetch(
-        {
-          sakId: utlandsBehandling.sakId,
-          behandlingId: utlandsBehandling.tilknyttetBehandling,
-          opplysningstype: 'AVDOED_PDL_V1',
-        },
-        (avdoed) => setAvdoed(avdoed)
-      )
+      avdoedeFetch({
+        sakId: utlandsBehandling.sakId,
+        behandlingId: utlandsBehandling.tilknyttetBehandling,
+        opplysningstype: 'AVDOED_PDL_V1',
+      })
     }
 
     fetchAlleLand(null, (landliste) => {
@@ -184,21 +178,21 @@ const KravpakkeUtlandBehandling = (props: {
             <div>
               {utlandsBehandling.tilknyttetBehandling ? (
                 <div>
-                  {isSuccess(avdoedeStatus) && avdoed && (
-                    <>
-                      <h3>Informasjon om avdøde</h3>
-                      <VStack gap="4">
-                        <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
-                        <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
-                      </VStack>
-                    </>
-                  )}
-                  {isFailureHandler({
-                    apiResult: avdoedeStatus,
-                    errorMessage: 'Klarte ikke å hente informasjon om avdøed',
+                  {mapResult(avdoedeStatus, {
+                    pending: <Spinner label="Henter opplysninger om avdøde" />,
+                    error: (error) => (
+                      <ApiErrorAlert>Klarte ikke å hente informasjon om avdød: {error.detail}</ApiErrorAlert>
+                    ),
+                    success: (avdoed) => (
+                      <>
+                        <h3>Informasjon om avdøde</h3>
+                        <VStack gap="4">
+                          <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
+                          <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
+                        </VStack>
+                      </>
+                    ),
                   })}
-
-                  <Spinner visible={isPendingOrInitial(avdoedeStatus)} label="Henter opplysninger om avdøde" />
                 </div>
               ) : (
                 <Alert variant="warning">
@@ -262,7 +256,7 @@ const KravpakkeUtlandBehandling = (props: {
                         Valgte land
                       </Heading>
                     ) : null}
-                    {isSuccess(hentAlleLandRequest) && valgteLandIsoKode && (
+                    {valgteLandIsoKode && (
                       <Chips>
                         {valgteLandIsoKode.map((landIsoKode) => {
                           const kodeverkLandMatch = alleLandKodeverk?.find(

@@ -14,7 +14,7 @@ import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSi
 import Spinner from '~shared/Spinner'
 import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/PersonopplysningerReducer'
-import { mapAllApiResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -56,12 +56,10 @@ export const Behandling = () => {
     }
   }, [behandlingFraRedux])
 
-  return mapAllApiResult(
-    fetchBehandlingStatus,
-    <Spinner label="Henter behandling ..." />,
-    null,
-    () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
-    () => {
+  return mapResult(fetchBehandlingStatus, {
+    pending: <Spinner label="Henter behandling ..." />,
+    error: (error) => <ApiErrorAlert>Kunne ikke hente behandling: {error.detail}</ApiErrorAlert>,
+    success: () => {
       if (behandlingFraRedux) {
         const behandling = behandlingFraRedux as IBehandlingReducer
         return (
@@ -85,6 +83,6 @@ export const Behandling = () => {
         )
       }
       return null
-    }
-  )
+    },
+  })
 }

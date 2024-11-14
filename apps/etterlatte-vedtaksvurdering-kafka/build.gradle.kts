@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-utbetaling-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
+    implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))

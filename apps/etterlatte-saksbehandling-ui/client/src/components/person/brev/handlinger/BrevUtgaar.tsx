@@ -42,7 +42,15 @@ export const BrevUtgaar = ({ brev }: { brev: IBrev }) => {
 
   return (
     <>
-      <Button variant="danger" icon={<ArrowUndoIcon />} onClick={() => setIsOpen(true)} title="Marker som utgår" />
+      <Button
+        variant="danger"
+        icon={<ArrowUndoIcon />}
+        onClick={() => setIsOpen(true)}
+        title="Marker som utgår"
+        size="small"
+      >
+        Utgår
+      </Button>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Slett brev" header={{ heading: 'Brev utgår' }}>
         <Modal.Body>

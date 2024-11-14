@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+
 import { epochToUTC } from '../utils/date'
 import { expect } from 'chai'
 import { hasBeenIssued, hasExpired } from '../middleware/auth'

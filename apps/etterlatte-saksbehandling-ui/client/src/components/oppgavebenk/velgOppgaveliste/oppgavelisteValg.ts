@@ -17,7 +17,7 @@ export const hentValgFraLocalStorage = (): string => {
     const valg = localStorage[OPPGAVELISTE_VALG_KEY]
     if (!!valg) return valg
     else return initialValg
-  } catch (error) {
+  } catch {
     logger.generalError({ msg: 'Feil i hentingen av oppgavelista valg fra localstorage' })
 
     return initialValg

@@ -8,21 +8,21 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import org.slf4j.LoggerFactory
 
 fun Route.ytelseMedGrunnlag(
-    ytelseMedGrunnlagService: YtelseMedGrunnlagService,
+    beregningOgAvkortingBrevService: BeregningOgAvkortingBrevService,
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/beregning/ytelse-med-grunnlag/{$BEHANDLINGID_CALL_PARAMETER}") {
-        val logger = routeLogger
+        val logger = LoggerFactory.getLogger("YtelseMedGrunnlagRoute")
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter utregnet ytelse med grunnlag for behandlingId=$it")
                 val ytelse =
-                    ytelseMedGrunnlagService.hentYtelseMedGrunnlag(it, brukerTokenInfo)
+                    beregningOgAvkortingBrevService.hentBeregningOgAvkorting(it, brukerTokenInfo)
                         ?: throw GenerellIkkeFunnetException()
                 call.respond(ytelse)
             }

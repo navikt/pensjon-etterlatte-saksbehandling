@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -78,11 +79,30 @@ class AktivitetspliktBrevDao(
                 prepareStatement(
                     """
                     UPDATE aktivitetsplikt_brevdata SET brev_id = ?
-                        WHERE oppgave_id = ? 
+                    WHERE oppgave_id = ? 
                     
                     """.trimIndent(),
                 )
             stmt.setLong(1, brevId)
+            stmt.setObject(2, oppgaveId)
+            stmt.executeUpdate()
+        }
+    }
+
+    fun fjernBrevId(
+        oppgaveId: UUID,
+        kilde: Grunnlagsopplysning.Saksbehandler,
+    ) = connectionAutoclosing.hentConnection { connection ->
+        with(connection) {
+            val stmt =
+                prepareStatement(
+                    """
+                    UPDATE aktivitetsplikt_brevdata SET brev_id = NULL, kilde = ?
+                    WHERE oppgave_id = ? 
+                    
+                    """.trimIndent(),
+                )
+            stmt.setJsonb(1, kilde)
             stmt.setObject(2, oppgaveId)
             stmt.executeUpdate()
         }

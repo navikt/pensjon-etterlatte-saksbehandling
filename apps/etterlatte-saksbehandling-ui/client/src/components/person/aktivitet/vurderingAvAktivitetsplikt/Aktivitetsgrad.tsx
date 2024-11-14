@@ -16,8 +16,8 @@ export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktA
         <ReadMore header="Dette menes med aktivitetsgrad">
           I oversikten over aktivitetsgrad kan du se hvilken aktivitetsgrad brukeren har hatt. For å motta
           omstillingsstønad stilles det ingen krav til aktivitet de første seks månedene etter dødsfall. Etter seks
-          måneder forventes det at du er i minst 50 % aktivitet, og etter ett år og fremover forventes det 100 %
-          aktivitet. Vær oppmerksom på at det finnes unntak.
+          måneder forventes det at du er i minst 50 % aktivitet, og etter ett år og fremover kan man skjønnsmessig kreve
+          opp til 100 % aktivitet. Vær oppmerksom på at det finnes unntak.
         </ReadMore>
       </Box>
 

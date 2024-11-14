@@ -16,6 +16,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -1630,49 +1631,130 @@ internal class VedtakBehandlingServiceTest(
         coVerify { behandlingKlientMock wasNot called }
     }
 
+    @Test
+    fun `skal opprette nytt vedtak og sette riktig regelverk for perioder`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2024, Month.APRIL)
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.OMSTILLINGSSTOENAD,
+                sakId1,
+                ENHET_1,
+            )
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                saktype = SakType.OMSTILLINGSSTOENAD,
+            )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
+            BeregningOgAvkorting(
+                beregning =
+                    mockBeregning(
+                        virkningstidspunkt,
+                        behandlingId,
+                        beregningsperioder =
+                            listOf(
+                                mockBeregningsperiode(fom = YearMonth.of(2024, Month.APRIL), tom = YearMonth.of(2024, Month.APRIL)),
+                                mockBeregningsperiode(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2025, Month.JANUARY)),
+                            ),
+                    ),
+                avkorting =
+                    mockAvkorting(
+                        avkortetYtelse =
+                            listOf(
+                                mockAvkortetYtelse(fom = YearMonth.of(2024, Month.APRIL), tom = YearMonth.of(2024, Month.APRIL)),
+                                mockAvkortetYtelse(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2024, Month.DECEMBER)),
+                                mockAvkortetYtelse(fom = YearMonth.of(2025, Month.JANUARY), tom = null),
+                            ),
+                    ),
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        val vedtak =
+            runBlocking {
+                service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
+            }
+
+        vedtak shouldNotBe null
+        vedtak.status shouldBe VedtakStatus.OPPRETTET
+    }
+
+    private fun mockBeregningsperiode(
+        fom: YearMonth,
+        tom: YearMonth?,
+    ): Beregningsperiode =
+        Beregningsperiode(
+            datoFOM = fom,
+            datoTOM = tom,
+            utbetaltBeloep = 100,
+            soeskenFlokk = null,
+            grunnbelop = 10000,
+            grunnbelopMnd = 1000,
+            trygdetid = 40,
+            regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
+        )
+
+    private fun mockAvkortetYtelse(
+        fom: YearMonth,
+        tom: YearMonth?,
+    ) = AvkortetYtelseDto(
+        fom = fom,
+        tom = tom,
+        ytelseFoerAvkorting = 100,
+        ytelseEtterAvkorting = 50,
+        avkortingsbeloep = 50,
+        restanse = 0,
+        sanksjon = null,
+    )
+
     private fun underkjennVedtakBegrunnelse() = UnderkjennVedtakDto("Vedtaket er ugyldig", "Annet")
 
     private fun mockBeregning(
         virkningstidspunkt: YearMonth,
         behandlingId: UUID,
         beregningstype: Beregningstype = Beregningstype.BP,
+        beregningsperioder: List<Beregningsperiode> =
+            listOf(
+                Beregningsperiode(
+                    datoFOM = virkningstidspunkt,
+                    datoTOM = null,
+                    utbetaltBeloep = 100,
+                    soeskenFlokk = null,
+                    grunnbelop = 10000,
+                    grunnbelopMnd = 1000,
+                    trygdetid = 40,
+                ),
+            ),
     ): BeregningDTO =
         mockk(relaxed = true) {
             every { beregningId } returns randomUUID()
             every { this@mockk.behandlingId } returns behandlingId
             every { type } returns beregningstype
             every { beregnetDato } returns Tidspunkt.now()
-            every { beregningsperioder } returns
-                listOf(
-                    Beregningsperiode(
-                        datoFOM = virkningstidspunkt,
-                        datoTOM = null,
-                        utbetaltBeloep = 100,
-                        soeskenFlokk = null,
-                        grunnbelop = 10000,
-                        grunnbelopMnd = 1000,
-                        trygdetid = 40,
-                    ),
-                )
+            every { this@mockk.beregningsperioder } returns beregningsperioder
         }
 
     private fun mockAvkorting(
         virkningstidspunkt: YearMonth = YearMonth.now(),
         ytelseEtterAvkorting: Int = 50,
+        avkortetYtelse: List<AvkortetYtelseDto> =
+            listOf(
+                AvkortetYtelseDto(
+                    fom = virkningstidspunkt,
+                    tom = null,
+                    ytelseFoerAvkorting = 100,
+                    ytelseEtterAvkorting = ytelseEtterAvkorting,
+                    avkortingsbeloep = 50,
+                    restanse = 0,
+                    sanksjon = null,
+                ),
+            ),
     ): AvkortingDto =
         mockk(relaxed = true) {
-            every { avkortetYtelse } returns
-                listOf(
-                    AvkortetYtelseDto(
-                        fom = virkningstidspunkt,
-                        tom = null,
-                        ytelseFoerAvkorting = 100,
-                        ytelseEtterAvkorting = ytelseEtterAvkorting,
-                        avkortingsbeloep = 50,
-                        restanse = 0,
-                        sanksjon = null,
-                    ),
-                )
+            every { this@mockk.avkortetYtelse } returns avkortetYtelse
         }
 
     private fun mockVilkaarsvurdering(utfall: VilkaarsvurderingUtfall = VilkaarsvurderingUtfall.OPPFYLT): VilkaarsvurderingDto =

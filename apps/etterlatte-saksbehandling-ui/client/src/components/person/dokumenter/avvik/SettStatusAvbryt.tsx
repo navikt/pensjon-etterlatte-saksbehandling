@@ -2,7 +2,7 @@ import { Alert, Button, HStack, Loader, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { settStatusAvbryt } from '~shared/api/dokument'
-import { Journalpost, Journalposttype } from '~shared/types/Journalpost'
+import { Journalpost, Journalposttype, Journalstatus } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const SettStatusAvbryt = ({ journalpost }: { journalpost: Journalpost }) => {
@@ -15,6 +15,10 @@ export const SettStatusAvbryt = ({ journalpost }: { journalpost: Journalpost }) 
 
   if (journalpost.journalposttype === Journalposttype.I) {
     return <Alert variant="warning">Du kan ikke avbryte en inngående journalpost!</Alert>
+  }
+
+  if (journalpost.journalstatus === Journalstatus.FERDIGSTILT) {
+    return <Alert variant="warning">Du kan ikke avbryte en ferdigstilt journalpost</Alert>
   }
 
   if (isSuccess(settStatusAvbrytResult)) {

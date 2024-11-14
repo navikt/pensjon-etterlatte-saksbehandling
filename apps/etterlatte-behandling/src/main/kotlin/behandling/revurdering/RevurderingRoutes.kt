@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -18,11 +19,12 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
-import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal fun Route.revurderingRoutes(
@@ -30,8 +32,9 @@ internal fun Route.revurderingRoutes(
     manuellRevurderingService: ManuellRevurderingService,
     omgjoeringKlageRevurderingService: OmgjoeringKlageRevurderingService,
     automatiskRevurderingService: AutomatiskRevurderingService,
+    aarligInntektsjusteringJobbService: AarligInntektsjusteringJobbService,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("RevurderingRoute")
 
     route("/api/revurdering") {
         route("{$BEHANDLINGID_CALL_PARAMETER}") {
@@ -73,6 +76,23 @@ internal fun Route.revurderingRoutes(
                                 )
                             }
 
+                        call.respond(revurdering.id)
+                    }
+                }
+            }
+
+            post("manuell-inntektsjustering") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    logger.info("Oppretter ny revurdering for årlig inntektsjustering på sak $sakId")
+                    medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
+                        val revurdering =
+                            inTransaction {
+                                aarligInntektsjusteringJobbService.opprettRevurderingAarligInntektsjustering(
+                                    sakId,
+                                    opprettRevurderingRequest.oppgaveId!!,
+                                    saksbehandler,
+                                )
+                            }
                         call.respond(revurdering.id)
                     }
                 }
@@ -147,6 +167,7 @@ data class OpprettRevurderingRequest(
     val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,
+    val oppgaveId: UUID? = null,
 )
 
 data class RevurderingInfoDto(

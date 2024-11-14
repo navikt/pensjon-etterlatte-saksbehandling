@@ -45,7 +45,7 @@ class PdlOboKlient(
         val request =
             PdlGraphqlRequest(
                 query = getQuery("/pdl/hentPersonNavnFoedsel.graphql"),
-                variables = PdlVariables(ident),
+                variables = PdlVariables(ident, folkeregisteridentHistorikk = true),
             )
 
         return retry<PdlPersonNavnFoedselResponse>(times = 3) {
@@ -60,7 +60,7 @@ class PdlOboKlient(
         }.let {
             when (it) {
                 is RetryResult.Success ->
-                    it.content.also { loggDelvisReturnerteData(it, request) }
+                    it.content.also { result -> loggDelvisReturnerteData(result, request) }
 
                 is RetryResult.Failure -> throw it.samlaExceptions()
             }

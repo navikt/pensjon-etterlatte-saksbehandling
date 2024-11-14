@@ -1,10 +1,6 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.brev.BrevRequestHendelseType
-import no.nav.etterlatte.brev.Brevkoder
-import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringKjoering
-import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
@@ -19,9 +15,7 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGN
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP
-import no.nav.etterlatte.rapidsandrivers.brevKode
 import no.nav.etterlatte.rapidsandrivers.omregningData
-import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -36,9 +30,11 @@ internal class VedtakAttestertRiver(
 
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
+            // TODO lytt på noe annet? eksplisitt klar for ferdigstil elns?
             validate { it.requireKey(OmregningDataPacket.KEY) }
             validate { it.requireKey(OmregningDataPacket.SAK_ID) }
             validate { it.requireKey(OmregningDataPacket.KJOERING) }
+            validate { it.requireKey(OmregningDataPacket.REV_AARSAK) }
             validate { it.interestedIn(BEREGNING_BELOEP_FOER) }
             validate { it.interestedIn(BEREGNING_BELOEP_ETTER) }
             validate { it.interestedIn(BEREGNING_G_FOER) }
@@ -74,16 +70,10 @@ internal class VedtakAttestertRiver(
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
 
-        // Årlig inntektsjustering jobb skal sende ut varsel og vedtak etter at sak er ferdig omregnet
-        if (kjoering === AarligInntektsjusteringKjoering.getKjoering()) {
-            packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
-            packet.brevKode = Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL.name
-            packet.sakId = packet.omregningData.sakId
-            context.publish(packet.toJson())
-        } else {
-            behandlingService.lagreFullfoertKjoering(request)
-            logger.info("Sak $sakId er ferdig omregnet, status oppdatert til: ${request.status}")
-        }
+        // TODO Burde ikke ferdigstille kun basert på attestert men også om brev er ordentlig distribuert osv. Bør gjøre en sanity check er først?
+
+        behandlingService.lagreFullfoertKjoering(request)
+        logger.info("Sak $sakId er ferdig omregnet, status oppdatert til: ${request.status}")
     }
 
     private fun bigDecimal(

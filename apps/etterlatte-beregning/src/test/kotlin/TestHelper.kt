@@ -149,7 +149,7 @@ fun avkortinggrunnlag(
     overstyrtInnvilgaMaanederBegrunnelse = overstyrtInnvilgaMaanederBegrunnelse,
 )
 
-fun avkortinggrunnlagLagre(
+fun avkortinggrunnlagLagreDto(
     id: UUID = UUID.randomUUID(),
     aarsinntekt: Int = 100000,
     fratrekkInnAar: Int = 10000,

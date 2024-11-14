@@ -59,16 +59,28 @@ export const Vurdering = ({
 
   const valider = (vilkaarForm: VilkaarForm): vilkaarForm is VilkaarFormValidert => {
     const resultatIkkeValgt = vilkaarForm.resultat == undefined
-    resultatIkkeValgt ? setRadioError('Du må velge et svar') : setRadioError(undefined)
+    if (resultatIkkeValgt) {
+      setRadioError('Du må velge et svar')
+    } else {
+      setRadioError(undefined)
+    }
 
     const unntakIkkeValgt =
       vilkaarForm.resultat == VurderingsResultat.IKKE_OPPFYLT &&
       !vilkaarForm.vilkaarsUnntakType &&
       vilkaar.unntaksvilkaar.length > 0
-    unntakIkkeValgt ? setUnntakRadioError('Du må velge et unntak') : setUnntakRadioError(undefined)
+    if (unntakIkkeValgt) {
+      setUnntakRadioError('Du må velge et unntak')
+    } else {
+      setUnntakRadioError(undefined)
+    }
 
     const manglerKommentar = MIN_KOMMENTAR_LENGDE > (vilkaarForm.kommentar?.length ?? 0)
-    manglerKommentar ? setKommentarError('Du må oppgi en begrunnelse') : setKommentarError(undefined)
+    if (manglerKommentar) {
+      setKommentarError('Du må oppgi en begrunnelse')
+    } else {
+      setKommentarError(undefined)
+    }
 
     return !resultatIkkeValgt && !unntakIkkeValgt && !manglerKommentar
   }

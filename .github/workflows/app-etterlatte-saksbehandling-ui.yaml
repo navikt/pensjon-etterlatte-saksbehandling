@@ -71,7 +71,7 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: apps/${{ env.APP_NAME }}/client/yarn.lock
       - name: Inject slug/short variables
-        uses: rlespinasse/github-slug-action@v4
+        uses: rlespinasse/github-slug-action@v5
       - name: License check top level
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn install --frozen-lockfile && yarn lisenssjekk

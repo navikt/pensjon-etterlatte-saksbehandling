@@ -8,7 +8,7 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.Restanse
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
-import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
+import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.beregning
 import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
@@ -1913,7 +1913,7 @@ class BeregnAvkortingTest {
         Avkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         aarsinntekt = 300000,
                         fratrekkInnAar = 50000,
                         fom = YearMonth.of(2024, Month.MARCH),
@@ -1942,7 +1942,7 @@ class BeregnAvkortingTest {
         Avkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         aarsinntekt = 300000,
                         fratrekkInnAar = 50000,
                         fom = YearMonth.of(2024, Month.MARCH),
@@ -2010,7 +2010,7 @@ class BeregnAvkortingTest {
             .kopierAvkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         id = UUID.randomUUID(),
                         aarsinntekt = 400000,
                         fratrekkInnAar = 50000,
@@ -2097,7 +2097,7 @@ class BeregnAvkortingTest {
             .kopierAvkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         id = UUID.randomUUID(),
                         aarsinntekt = 300000,
                         fratrekkInnAar = 50000,
@@ -2130,7 +2130,7 @@ class BeregnAvkortingTest {
             .kopierAvkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         id = UUID.randomUUID(),
                         aarsinntekt = 450000,
                         fratrekkInnAar = 50000,
@@ -2178,7 +2178,7 @@ class BeregnAvkortingTest {
             .let {
                 it.beregnAvkortingMedNyttGrunnlag(
                     nyttGrunnlag =
-                        avkortinggrunnlagLagre(
+                        avkortinggrunnlagLagreDto(
                             id =
                                 it.aarsoppgjoer
                                     .single()
@@ -2230,7 +2230,7 @@ class BeregnAvkortingTest {
             .kopierAvkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         id = UUID.randomUUID(),
                         aarsinntekt = 500000,
                         fratrekkInnAar = 0,
@@ -2272,7 +2272,7 @@ class BeregnAvkortingTest {
             .kopierAvkorting()
             .beregnAvkortingMedNyttGrunnlag(
                 nyttGrunnlag =
-                    avkortinggrunnlagLagre(
+                    avkortinggrunnlagLagreDto(
                         id = UUID.randomUUID(),
                         aarsinntekt = 262500,
                         fratrekkInnAar = 0,

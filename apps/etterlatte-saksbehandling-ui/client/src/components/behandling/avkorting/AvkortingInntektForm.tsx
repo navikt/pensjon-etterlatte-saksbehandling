@@ -121,7 +121,7 @@ export const AvkortingInntektForm = ({
       (respons) => {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
-        nyttAvkortingGrunnlag.fraVirk && reset(nyttAvkortingGrunnlag.fraVirk)
+        if (nyttAvkortingGrunnlag.fraVirk) reset(nyttAvkortingGrunnlag.fraVirk)
         dispatch(oppdaterAvkorting(respons))
         setVisForm(false)
       }

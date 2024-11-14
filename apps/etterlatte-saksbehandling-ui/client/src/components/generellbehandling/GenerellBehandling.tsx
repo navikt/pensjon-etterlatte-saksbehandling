@@ -5,13 +5,11 @@ import { hentGenerellBehandling } from '~shared/api/generellbehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
 import KravpakkeUtlandBehandling from '~components/generellbehandling/KravpakkeUtlandBehandling'
-import { KravpakkeUtland } from '~shared/types/Generellbehandling'
+import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { Alert } from '@navikt/ds-react'
-import { Generellbehandling } from '~shared/types/Generellbehandling'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { hentSak } from '~shared/api/sak'
-import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { mapApiResult, mapResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 const GenerellBehandling = () => {
@@ -24,14 +22,10 @@ const GenerellBehandling = () => {
   const [hentSakStatus, hentSakApi] = useApiCall(hentSak)
 
   useEffect(() => {
-    fetchGenerellbehandling(generellbehandlingId)
+    fetchGenerellbehandling(generellbehandlingId, (generellBehandling) => {
+      hentSakApi(generellBehandling.sakId)
+    })
   }, [generellbehandlingId])
-
-  useEffect(() => {
-    if (isSuccess(fetchGenerellbehandlingStatus)) {
-      hentSakApi(fetchGenerellbehandlingStatus.data.sakId)
-    }
-  }, [fetchGenerellbehandlingStatus])
 
   return mapApiResult(
     fetchGenerellbehandlingStatus,
@@ -42,11 +36,11 @@ const GenerellBehandling = () => {
         case 'KRAVPAKKE_UTLAND':
           return (
             <>
-              {isFailureHandler({
-                apiResult: hentSakStatus,
-                errorMessage: 'Vi klarte ikke å hente sak og derfor vil navn baren være borte',
+              {mapResult(hentSakStatus, {
+                error: (error) => <ApiErrorAlert>Feil ved henting av saksinformasjon: {error.detail}</ApiErrorAlert>,
+                success: (sak) => <StatusBar ident={sak.ident} />,
               })}
-              {isSuccess(hentSakStatus) && <StatusBar ident={hentSakStatus.data.ident} />}
+
               <KravpakkeUtlandBehandling
                 utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}
               />

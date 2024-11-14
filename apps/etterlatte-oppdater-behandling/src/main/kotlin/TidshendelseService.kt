@@ -43,19 +43,7 @@ class TidshendelseService(
             }
         } else {
             return when (hendelse.jobbtype) {
-                JobbType.OMS_DOED_4MND ->
-                    opprettOppgave(hendelse).let { oppgaveId ->
-                        TidshendelseResult.OpprettetOppgave(
-                            oppgaveId,
-                        )
-                    }
-                JobbType.OMS_DOED_10MND ->
-                    opprettOppgave(hendelse).let { oppgaveId ->
-                        TidshendelseResult.OpprettetOppgave(
-                            oppgaveId,
-                        )
-                    }
-
+                JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> opprettAktivitetspliktOppgave(hendelse)
                 JobbType.OMS_DOED_6MND -> opprettRevurderingForAktivitetsplikt(hendelse)
                 JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
                 else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
@@ -105,6 +93,33 @@ class TidshendelseService(
             )
         logger.info("Opprettet oppgave $oppgaveId [sak=${hendelse.sakId}]")
         return oppgaveId
+    }
+
+    private fun opprettAktivitetspliktOppgave(hendelse: TidshendelsePacket): TidshendelseResult {
+        if (hendelse.jobbtype !in listOf(JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND)) {
+            throw InternfeilException(
+                "Ingen håndtering for jobbtype: ${hendelse.jobbtype} som " +
+                    "aktivitetspliktoppgave for sak: ${hendelse.sakId}",
+            )
+        }
+        val response =
+            behandlingService.opprettOppgaveOppfoelgingAktivitetsplikt(
+                sakId = hendelse.sakId,
+                frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
+                jobbType = hendelse.jobbtype,
+                referanse = null,
+            )
+
+        return when {
+            response.opprettetOppgave -> {
+                logger.info(
+                    "Opprettet oppgave for infobrev aktivitetsplikt for jobbtype ${hendelse.jobbtype}" +
+                        "i sak ${hendelse.sakId}",
+                )
+                TidshendelseResult.OpprettetOppgave(response.oppgaveId!!)
+            }
+            else -> TidshendelseResult.Skipped
+        }
     }
 
     private fun opprettRevurderingForAktivitetsplikt(hendelse: TidshendelsePacket): TidshendelseResult {

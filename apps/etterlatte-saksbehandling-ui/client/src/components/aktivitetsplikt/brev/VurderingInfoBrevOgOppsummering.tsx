@@ -1,70 +1,45 @@
-import { Alert, Box, Heading } from '@navikt/ds-react'
+import { Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
-import React, { useEffect, useState } from 'react'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { mapFailure } from '~shared/api/apiUtils'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import { isPending } from '@reduxjs/toolkit'
-import { opprettAktivitetspliktsbrev } from '~shared/api/aktivitetsplikt'
+import React from 'react'
 import { Aktivitetspliktbrev } from '~components/aktivitetsplikt/brev/AktivitetspliktBrev'
 import { UtenBrevVisning } from '~components/aktivitetsplikt/brev/UtenBrevVisning'
+import { useNavigate } from 'react-router-dom'
+import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
+import { handlinger } from '~components/behandling/handlinger/typer'
 
-export function VurderingInfoBrevOgOppsummering({ fetchOppgave }: { fetchOppgave: () => void }) {
+export function VurderingInfoBrevOgOppsummering() {
   useSidetittel('Aktivitetsplikt brev og oppsummering')
 
-  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
-  const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettAktivitetspliktsbrev)
-  const brevdataFinnes = !!aktivtetspliktbrevdata
+  const { aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
 
-  const [brevId, setBrevid] = useState<number | undefined>(aktivtetspliktbrevdata?.brevId)
-  const [brevErKlart, setBrevErKlart] = useState<boolean>(false)
+  if (!aktivtetspliktbrevdata?.brevId) {
+    return (
+      <Box paddingInline="16" paddingBlock="16">
+        <Heading size="large">Vurdering av {aktivtetspliktbrevdata?.skalSendeBrev ? 'brev' : 'oppgave'}</Heading>
+        <UtenBrevVisning />
+      </Box>
+    )
+  }
 
-  useEffect(() => {
-    if (brevdataFinnes) {
-      if (aktivtetspliktbrevdata?.skalSendeBrev) {
-        if (aktivtetspliktbrevdata.brevId) {
-          setBrevid(aktivtetspliktbrevdata.brevId)
-          setBrevErKlart(true)
-        } else {
-          opprettBrevApiCall({ oppgaveId: oppgave.id }, (brevIdDto) => {
-            setBrevid(brevIdDto.brevId)
-            setBrevErKlart(true)
-          })
-        }
-      } else {
-        setBrevErKlart(false)
-      }
-    }
-  }, [])
+  return <Aktivitetspliktbrev brevId={aktivtetspliktbrevdata.brevId} />
+}
 
+export function InfobrevKnapperad(props: { children?: React.ReactElement }) {
+  const navigate = useNavigate()
   return (
-    <Box paddingInline="16" paddingBlock="16">
-      <Heading size="large">Vurdering av {aktivtetspliktbrevdata?.skalSendeBrev ? 'brev' : 'oppgave'}</Heading>
-      {brevdataFinnes ? (
-        <>
-          {aktivtetspliktbrevdata?.skalSendeBrev ? (
-            <>
-              {isPending(opprettBrevStatus) && <Spinner label="Oppretter brev" />}
-              {mapFailure(opprettBrevStatus, (err) => (
-                <ApiErrorAlert>Kunne ikke opprette brev {err.detail}</ApiErrorAlert>
-              ))}
-              {brevErKlart && brevId && (
-                <Aktivitetspliktbrev brevId={brevId} sakId={oppgave.sakId} oppgaveid={oppgave.id} />
-              )}
-            </>
-          ) : (
-            <UtenBrevVisning oppgave={oppgave} fetchOppgave={fetchOppgave} />
-          )}
-        </>
-      ) : (
-        <>
-          <Alert variant="error">
-            Brevdata finnes ikke for denne oppgaven, gå tilbake til vurderingssiden for å endre dette
-          </Alert>
-        </>
-      )}
+    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+      <HStack gap="4" justify="center">
+        <Button
+          variant="secondary"
+          onClick={() => {
+            navigate(`../${AktivitetspliktSteg.BREVVALG}`)
+          }}
+        >
+          {handlinger.TILBAKE.navn}
+        </Button>
+        {props.children}
+      </HStack>
     </Box>
   )
 }

@@ -8,6 +8,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktAktivitetsgradDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.VurdertAktivitetsgrad
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
@@ -32,8 +33,8 @@ class AktivitetspliktAktivitetsgradDao(
         oppgaveId: UUID? = null,
         behandlingId: UUID? = null,
     ) = connectionAutoclosing.hentConnection {
-        check(oppgaveId != null || behandlingId != null) {
-            "Kan ikke opprette aktivitetsgrad som ikke er koblet på en behandling eller oppgave"
+        checkInternFeil(oppgaveId != null || behandlingId != null) {
+            "Kan ikke opprette aktivitetsgrad som ikke er koblet på en behandling eller oppgave. $sakId"
         }
 
         with(it) {
@@ -282,7 +283,7 @@ data class AktivitetspliktAktivitetsgrad(
     val fom: LocalDate,
     val tom: LocalDate?,
     override val opprettet: Grunnlagsopplysning.Kilde,
-    val endret: Grunnlagsopplysning.Kilde?,
+    val endret: Grunnlagsopplysning.Saksbehandler,
     val beskrivelse: String,
     val vurdertFra12Mnd: Boolean = false,
 ) : AktivitetspliktVurderingOpprettetDato {

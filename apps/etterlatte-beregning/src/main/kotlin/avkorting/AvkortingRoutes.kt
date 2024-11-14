@@ -10,6 +10,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
@@ -17,17 +18,18 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
+import org.slf4j.LoggerFactory
 
 fun Route.avkorting(
     avkortingService: AvkortingService,
     behandlingKlient: BehandlingKlient,
     tidligAlderspensjonService: AvkortingTidligAlderspensjonService,
+    aarligInntektsjusteringService: AarligInntektsjusteringService,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("AvkortingRoute")
 
     route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
@@ -87,12 +89,24 @@ fun Route.avkorting(
         }
     }
 
-    route("/api/beregning/avkorting/aarlig-inntektsjustering-sjekk") {
-        post {
-            val harInntektForAarDto = call.receive<AarligInntektsjusteringAvkortingSjekkRequest>()
-            logger.info("Henter har inntekt for ${harInntektForAarDto.aar} for sakId=${harInntektForAarDto.sakId}")
-            val respons = avkortingService.hentSjekkAarligInntektsjustering(harInntektForAarDto)
+    route("/api/beregning/avkorting") {
+        post("aarlig-inntektsjustering-sjekk") {
+            val request = call.receive<AarligInntektsjusteringAvkortingSjekkRequest>()
+            logger.info("Henter har inntekt for ${request.aar} for sakId=${request.sakId}")
+            val respons = aarligInntektsjusteringService.hentSjekkAarligInntektsjustering(request)
             call.respond(respons)
+        }
+        post("aarlig-inntektsjustering") {
+            val request = call.receive<AarligInntektsjusteringAvkortingRequest>()
+            logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")
+            val respons =
+                aarligInntektsjusteringService.kopierAarligInntektsjustering(
+                    aar = request.aar,
+                    behandlingId = request.nyBehandling,
+                    forrigeBehandlingId = request.forrigeBehandling,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            call.respond(respons.toDto())
         }
     }
 }

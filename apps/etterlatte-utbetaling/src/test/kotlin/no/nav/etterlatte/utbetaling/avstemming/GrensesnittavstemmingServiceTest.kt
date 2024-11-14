@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.avstemming
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.AvstemmingsdataSender
@@ -93,7 +94,7 @@ internal class GrensesnittavstemmingServiceTest {
                 saktype = Saktype.BARNEPENSJON,
             )
 
-        assertThrows<IllegalArgumentException> {
+        assertThrows<InternfeilException> {
             grensesnittavstemmingService.hentNestePeriode(Saktype.BARNEPENSJON)
         }
     }

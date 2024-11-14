@@ -96,7 +96,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
   }
 
   const finnPeriodisertBeregningsmetodeForAvdoed = (
-    ident: String
+    ident: string
   ): PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | undefined => {
     if (behandling?.beregningsGrunnlag && !!behandling?.beregningsGrunnlag.beregningsMetodeFlereAvdoede?.length) {
       return mapListeFraDto(behandling.beregningsGrunnlag.beregningsMetodeFlereAvdoede)?.find(
@@ -116,7 +116,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
         dispatch(oppdaterBeregningsGrunnlag(result))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
         setRedigerModus(false)
-        !!onSuccess && onSuccess(result)
+        if (!!onSuccess) onSuccess(result)
       }
     )
   }

@@ -7,6 +7,8 @@ data class KjoeringRequest(
     val status: KjoeringStatus,
     val sakId: SakId,
     val begrunnelse: String? = null,
+    val corrId: String? = null,
+    val feilendeSteg: String? = null,
 )
 
 data class LagreKjoeringRequest(

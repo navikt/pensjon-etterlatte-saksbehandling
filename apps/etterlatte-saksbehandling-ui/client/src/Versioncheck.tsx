@@ -30,14 +30,14 @@ const Versioncheck = () => {
     }, timeout5minutesinms)
 
     return () => {
-      timeoutReload && window.clearTimeout(timeoutReload)
-      intervalVersionCheck && window.clearTimeout(intervalVersionCheck)
+      if (timeoutReload) window.clearTimeout(timeoutReload)
+      if (intervalVersionCheck) window.clearTimeout(intervalVersionCheck)
     }
   }, [])
 
   const onAvbryt = () => {
     setIsOutdated(false)
-    timeoutReloadPage && window.clearTimeout(timeoutReloadPage)
+    if (timeoutReloadPage) window.clearTimeout(timeoutReloadPage)
   }
 
   return (

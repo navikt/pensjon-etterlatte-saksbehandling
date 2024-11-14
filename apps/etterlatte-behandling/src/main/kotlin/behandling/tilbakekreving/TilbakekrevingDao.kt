@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -197,7 +198,11 @@ class TilbakekrevingDao(
             statement.setJsonb(6, vurdering)
         }
         statement.setBoolean(7, tilbakekrevingBehandling.sendeBrev)
-        statement.executeUpdate().also { require(it == 1) }
+        statement.executeUpdate().also {
+            checkInternFeil(it == 1) {
+                "Kunne ikke lagre tilbaekreving behandling for sakid ${tilbakekrevingBehandling.sak.id}"
+            }
+        }
     }
 
     private fun deleteTilbakekrevingsperioder(
@@ -212,7 +217,11 @@ class TilbakekrevingDao(
                 """.trimIndent(),
             )
         statement.setObject(1, tilbakekrevingId)
-        statement.executeUpdate().also { require(it > 0) }
+        statement.executeUpdate().also {
+            checkInternFeil(it > 0) {
+                "Kunne ikke deleteTilbakekrevingsperioder behandling for id $tilbakekrevingId"
+            }
+        }
     }
 
     private fun insertTilbakekrevingsperioder(

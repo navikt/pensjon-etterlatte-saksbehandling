@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -29,6 +30,12 @@ interface BrevApiKlient {
         brevParametre: BrevParametre,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
+
+    suspend fun slettBrev(
+        brevId: Long,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 
     suspend fun ferdigstillBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
@@ -117,6 +124,21 @@ class BrevApiKlientObo(
 
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
+
+    override suspend fun slettBrev(
+        brevId: Long,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient
+            .delete(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/$brevId?${SAKID_CALL_PARAMETER}=${sakId.sakId}"),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { },
+                failure = { errorResponse -> throw errorResponse },
+            )
+    }
 
     override suspend fun ferdigstillBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,

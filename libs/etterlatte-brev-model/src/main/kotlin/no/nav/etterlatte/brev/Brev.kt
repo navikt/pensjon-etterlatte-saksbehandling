@@ -45,16 +45,18 @@ data class Adresse(
 ) {
     fun erGyldig(): List<String> =
         if (adresseType.isBlank() || landkode.isBlank() || land.isBlank()) {
-            listOf("Adressetype ($adresseType), landkode ($landkode) eller land ($land) er blank")
+            listOf(
+                "Adressetype ($adresseType), landkode ($landkode) eller land ($land) er blank. Sjekk om det er verge i saken. Da vet vi ikke hvor brevet skal.",
+            )
         } else if (adresseType == "NORSKPOSTADRESSE") {
             if (!(postnummer.isNullOrBlank() || poststed.isNullOrBlank())) {
                 listOf()
             } else {
-                listOf("Postnummer eller poststed er null eller blank")
+                listOf("Postnummer eller poststed er ikke angitt")
             }
         } else if (adresseType == "UTENLANDSKPOSTADRESSE") {
             if (adresselinje1.isNullOrBlank()) {
-                listOf("Adresselinje1 er null eller blank")
+                listOf("Adresselinje1 er ikke angitt")
             } else if (!postnummer.isNullOrBlank() || !poststed.isNullOrBlank()) {
                 listOf("Postnummer og poststed skal ikke brukes på utenlandsk adresse")
             } else {
@@ -81,11 +83,19 @@ data class Mottaker(
         if (navn.isBlank()) {
             listOf("Navn er blank")
         } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
-            listOf("Fødselsnummer og orgnummer er null eller blank")
+            listOf("Fødselsnummer og orgnummer er ikke angitt")
         } else {
-            adresse.erGyldig()
+            val erGyldig = adresse.erGyldig()
+            if (erVerge()) {
+                erGyldig.plus("Saksbehandler må manuelt håndtere verge").reversed()
+            }
+            erGyldig
         }
+
+    fun erVerge() = this.navn == VERGENAVN_FOR_MOTTAKER
 }
+
+const val VERGENAVN_FOR_MOTTAKER = "Ukjent(Vergemål, kan ikke sende automatisk)"
 
 enum class MottakerType { HOVED, KOPI }
 
@@ -123,6 +133,11 @@ data class OpprettJournalfoerOgDistribuerRequest(
     val brevParametereAutomatisk: BrevParametereAutomatisk,
     val avsenderRequest: SaksbehandlerOgAttestant,
     val sakId: SakId,
+)
+
+data class GenererOgFerdigstillVedtaksbrev(
+    val behandlingId: UUID,
+    val brevId: BrevID,
 )
 
 data class FerdigstillJournalFoerOgDistribuerOpprettetBrev(

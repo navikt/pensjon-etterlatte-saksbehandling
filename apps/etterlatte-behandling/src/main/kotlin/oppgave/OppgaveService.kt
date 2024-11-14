@@ -280,7 +280,7 @@ class OppgaveService(
             hentOppgaverForReferanse(referanse)
                 .filter { it.type == type }
                 .singleOrNull { it.erAttestering() }
-                ?: throw IllegalStateException("Fant ikke oppgave med referanse: $referanse")
+                ?: throw InternfeilException("Fant ikke oppgave med referanse: $referanse")
 
         val oppdatertMerknad = merknad ?: oppgave.merknad ?: ""
         val oppgaveId = oppgave.id
@@ -347,12 +347,21 @@ class OppgaveService(
         id: UUID,
         saksbehandler: BrukerTokenInfo,
         merknad: String? = null,
-    ) {
+    ): OppgaveIntern {
         val oppgave =
             checkNotNull(oppgaveDao.hentOppgave(id)) {
                 "Oppgave med id=$id finnes ikke – avbryter ferdigstilling av oppgaven"
             }
         ferdigstillOppgave(oppgave, saksbehandler, merknad)
+        return hentOppgave(id)
+    }
+
+    fun sjekkOmKanFerdigstilleOppgave(
+        oppgave: OppgaveIntern,
+        saksbehandler: BrukerTokenInfo,
+    ) {
+        sikreAtOppgaveIkkeErAvsluttet(oppgave = oppgave)
+        sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgave, saksbehandler)
     }
 
     private fun ferdigstillOppgave(
@@ -665,6 +674,7 @@ class OppgaveService(
                         OppgaveType.KRAVPAKKE_UTLAND,
                         OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
+                        OppgaveType.AARLIG_INNTEKTSJUSTERING,
                         OppgaveType.MANUELL_UTSENDING_BREV,
                         -> {
                             logger.info(

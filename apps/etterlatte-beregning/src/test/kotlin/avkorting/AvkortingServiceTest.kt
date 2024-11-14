@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
+import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagreDto
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -469,7 +469,7 @@ internal class AvkortingServiceTest {
                     service.beregnAvkortingMedNyttGrunnlag(
                         behandlingId,
                         bruker,
-                        avkortinggrunnlagLagre(fom = YearMonth.of(2024, 1)),
+                        avkortinggrunnlagLagreDto(fom = YearMonth.of(2024, 1)),
                     )
                 }
             }

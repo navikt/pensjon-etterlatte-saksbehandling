@@ -24,34 +24,37 @@ const mapAdresse = (mottaker: Mottaker) => {
   return `${adresselinje}, ${postlinje}`
 }
 
-const vedtaksbrevKanEndres = (status: BrevStatus) => [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(status)
-
-const annetBrevKanEndres = (status: BrevStatus) =>
-  [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT, BrevStatus.FERDIGSTILT, BrevStatus.JOURNALFOERT].includes(status)
+const kanEndres = (status: BrevStatus) => status !== BrevStatus.DISTRIBUERT
 
 const handlingKnapp = (brev: IBrev) => {
-  if (brev.behandlingId && vedtaksbrevKanEndres(brev.status)) {
+  if (kanEndres(brev.status)) {
+    const href = brev.behandlingId
+      ? `/behandling/${brev.behandlingId}/brev`
+      : `/person/sak/${brev.sakId}/brev/${brev.id}`
+
     return (
-      <Button
-        as="a"
-        href={`/behandling/${brev.behandlingId}/brev`}
-        variant="secondary"
-        title="Gå til behandling"
-        icon={<ExternalLinkIcon />}
-      />
-    )
-  } else if (!brev.behandlingId && annetBrevKanEndres(brev.status)) {
-    return (
-      <Button
-        as="a"
-        href={`/person/sak/${brev.sakId}/brev/${brev.id}`}
-        variant="secondary"
-        title="Rediger"
-        icon={<DocPencilIcon />}
-      />
+      <Button as="a" href={href} variant="secondary" title="Rediger" icon={<DocPencilIcon />} size="small">
+        Rediger
+      </Button>
     )
   }
-  return <BrevModal brev={brev} />
+
+  return (
+    <>
+      <Button
+        as="a"
+        href={`/api/brev/${brev.id}/pdf?sakId=${brev.sakId}`}
+        target="_blank"
+        variant="secondary"
+        icon={<ExternalLinkIcon />}
+        size="small"
+      >
+        Åpne
+      </Button>
+
+      <BrevModal brev={brev} />
+    </>
+  )
 }
 
 export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBehandlinger> }) {

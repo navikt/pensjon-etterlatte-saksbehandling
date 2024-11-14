@@ -19,8 +19,10 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslagRedigerbartUtfal
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoerRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingRedigerbartUtfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.ForelderVerge
@@ -69,6 +71,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     avdoede,
                     forenkletVedtak?.klage,
                     utlandstilknytningType,
+                    revurderingsaarsak,
                 )
             }
         }
@@ -123,6 +126,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         avdoede: List<Avdoed>,
         klage: Klage?,
         utlandstilknytningType: UtlandstilknytningType?,
+        revurderingaarsak: Revurderingaarsak? = null,
     ): BrevDataRedigerbar =
         when (sakType) {
             SakType.BARNEPENSJON -> {
@@ -138,6 +142,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             loependeIPesys,
                             avdoede,
                         )
+
                     VedtakType.ENDRING ->
                         barnepensjonEndring(
                             brukerTokenInfo,
@@ -145,6 +150,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             virkningstidspunkt,
                             sakType,
                         )
+
                     VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, behandlingId)
                     VedtakType.AVSLAG -> barnepensjonAvslag(avdoede, brukerTokenInfo, behandlingId)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
@@ -164,14 +170,27 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             sakType,
                             vedtakType,
                         )
-                    VedtakType.ENDRING ->
-                        omstillingsstoenadEndring(
-                            brukerTokenInfo,
-                            behandlingId,
-                            virkningstidspunkt!!,
-                            sakType,
-                            vedtakType,
-                        )
+
+                    VedtakType.ENDRING -> {
+                        if (revurderingaarsak != null && revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
+                            aarligInntektsjusteringRedigerbart(
+                                brukerTokenInfo,
+                                behandlingId,
+                                virkningstidspunkt!!,
+                                sakType,
+                                vedtakType,
+                            )
+                        } else {
+                            omstillingsstoenadEndring(
+                                brukerTokenInfo,
+                                behandlingId,
+                                virkningstidspunkt!!,
+                                sakType,
+                                vedtakType,
+                            )
+                        }
+                    }
+
                     VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, behandlingId)
                     VedtakType.AVSLAG -> omstillingsstoenadAvslag(brukerTokenInfo, behandlingId, avdoede)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(klage, utlandstilknytningType)
@@ -189,7 +208,11 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     ): BrevDataRedigerbar =
         coroutineScope {
             val behandling = behandlingService.hentBehandling(behandlingId, brukerTokenInfo)
-            OmstillingsstoenadAvslagRedigerbartUtfall.fra(avdoede, behandling.erSluttbehandling, behandling.tidligereFamiliepleier)
+            OmstillingsstoenadAvslagRedigerbartUtfall.fra(
+                avdoede,
+                behandling.erSluttbehandling,
+                behandling.tidligereFamiliepleier,
+            )
         }
 
     private suspend fun barnepensjonInnvilgelse(
@@ -335,6 +358,31 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
+        )
+    }
+
+    private suspend fun aarligInntektsjusteringRedigerbart(
+        bruker: BrukerTokenInfo,
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        sakType: SakType,
+        vedtakType: VedtakType,
+    ) = coroutineScope {
+        val avkortingsinfo =
+            async {
+                beregningService.finnAvkortingsinfo(
+                    behandlingId,
+                    sakType,
+                    virkningstidspunkt,
+                    vedtakType,
+                    bruker,
+                )
+            }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+
+        OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall.fra(
+            avkortingsinfo = avkortingsinfo.await(),
+            opphoerDato = behandling.opphoerFraOgMed?.atDay(1),
         )
     }
 

@@ -12,6 +12,11 @@ fun Route.kodeverk(kodeverkService: KodeverkService) {
         get("/land") {
             call.respond(kodeverkService.hentAlleLand(brukerTokenInfo))
         }
+
+        get("/land-iso2") {
+            call.respond(kodeverkService.hentAlleLandISO2(brukerTokenInfo))
+        }
+
         get("/arkivtemaer") {
             call.respond(kodeverkService.hentArkivTemaer(brukerTokenInfo))
         }

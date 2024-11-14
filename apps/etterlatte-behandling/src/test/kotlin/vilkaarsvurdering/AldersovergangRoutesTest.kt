@@ -12,10 +12,16 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.mockSaksbehandler
+import no.nav.etterlatte.mockedSakTilgangDao
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -35,6 +41,7 @@ internal class AldersovergangRoutesTest {
     @BeforeAll
     fun before() {
         mockOAuth2Server.startRandomPort()
+        Kontekst.set(Context(saksbehandler, DatabaseContext(mockk()), mockedSakTilgangDao(), null))
     }
 
     @AfterAll
@@ -43,11 +50,13 @@ internal class AldersovergangRoutesTest {
     }
 
     private val token: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
+    private val saksbehandler = mockSaksbehandler("User")
 
     @Test
     fun `skal delegere til aldersovergangservice`() {
         testApplication {
             runServer(mockOAuth2Server) {
+                attachMockContext(saksbehandler)
                 aldersovergang(aldersovergangService)
             }
 

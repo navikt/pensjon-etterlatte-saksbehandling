@@ -22,6 +22,7 @@ import { JaNei } from '~shared/types/ISvar'
 
 import { ILand } from '~utils/kodeverk'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
+import { AvbrytBehandlingRequest } from '~shared/types/AnnullerBehandling'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -40,8 +41,13 @@ export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljert
 export const opprettBehandling = async (nyBehandlingRequest: NyBehandlingRequest): Promise<ApiResponse<string>> =>
   apiClient.post(`/behandling`, { ...nyBehandlingRequest })
 
-export const avbrytBehandling = async (id: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/behandling/${id}/avbryt`, {})
+export const avbrytBehandling = async (args: {
+  id: string
+  avbrytBehandlingRequest: AvbrytBehandlingRequest
+}): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/behandling/${args.id}/avbryt`, {
+    ...args.avbrytBehandlingRequest,
+  })
 }
 
 export const fastsettVirkningstidspunkt = async (args: {

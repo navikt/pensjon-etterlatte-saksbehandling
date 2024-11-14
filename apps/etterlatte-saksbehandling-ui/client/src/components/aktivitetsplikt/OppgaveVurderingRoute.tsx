@@ -10,29 +10,27 @@ import {
 import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAktivitet'
 import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
+import { useAktivitetspliktOppgaveVurderingState } from '~store/reducers/Aktivitetsplikt12mnd'
+import { ValgForInfobrev } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/ValgForInfobrev'
 
 const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurdering>(
   {} as AktivitetspliktOppgaveVurdering
 )
 
-export function OppgaveVurderingRoute(props: {
-  vurderingOgOppgave: AktivitetspliktOppgaveVurdering
-  fetchOppgave: () => void
-}) {
-  const { vurderingOgOppgave, fetchOppgave } = props
+export function OppgaveVurderingRoute(props: { vurderingOgOppgave: AktivitetspliktOppgaveVurdering }) {
+  const { vurderingOgOppgave } = props
+
   return (
-    <AktivitetspliktOppgaveContext.Provider value={vurderingOgOppgave}>
+    <AktivitetspliktOppgaveContext.Provider value={{ ...useAktivitetspliktOppgaveVurderingState() }}>
       <StatusBar ident={vurderingOgOppgave.oppgave.fnr} />
       <AktivitetspliktStegmeny />
 
       <GridContainer>
         <MainContent>
           <Routes>
-            <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet fetchOppgave={fetchOppgave} />} />
-            <Route
-              path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV}
-              element={<VurderingInfoBrevOgOppsummering fetchOppgave={fetchOppgave} />}
-            />
+            <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet />} />
+            <Route path={AktivitetspliktSteg.BREVVALG} element={<ValgForInfobrev />} />
+            <Route path={AktivitetspliktSteg.OPPSUMMERING_OG_BREV} element={<VurderingInfoBrevOgOppsummering />} />
             <Route path="*" element={<Navigate to={AktivitetspliktSteg.VURDERING} replace />} />
           </Routes>
         </MainContent>

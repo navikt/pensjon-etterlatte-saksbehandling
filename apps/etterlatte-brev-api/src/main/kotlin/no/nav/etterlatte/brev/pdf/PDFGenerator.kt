@@ -22,7 +22,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAarligInntektsjusteringJobb
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -95,7 +94,11 @@ class PDFGenerator(
         val brevkodePar =
             brevKodeMapping(
                 BrevkodeRequest(
-                    loependeIPesys(generellBrevData.systemkilde, generellBrevData.behandlingId, generellBrevData.revurderingsaarsak),
+                    loependeIPesys(
+                        generellBrevData.systemkilde,
+                        generellBrevData.behandlingId,
+                        generellBrevData.revurderingsaarsak,
+                    ),
                     erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
                     generellBrevData.sak.sakType,
                     generellBrevData.forenkletVedtak?.type,
@@ -104,39 +107,48 @@ class PDFGenerator(
             )
 
         val sak = generellBrevData.sak
+        val brevData =
+            brevDataMapping(
+                BrevDataFerdigstillingRequest(
+                    loependeIPesys =
+                        loependeIPesys(
+                            generellBrevData.systemkilde,
+                            generellBrevData.behandlingId,
+                            generellBrevData.revurderingsaarsak,
+                        ),
+                    behandlingId = generellBrevData.behandlingId,
+                    sakType = generellBrevData.sak.sakType,
+                    erForeldreloes =
+                        erForeldreloes(
+                            generellBrevData.personerISak.soeker,
+                            generellBrevData.personerISak.avdoede,
+                        ),
+                    utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
+                    avdoede = generellBrevData.personerISak.avdoede,
+                    systemkilde = generellBrevData.systemkilde,
+                    soekerUnder18 = generellBrevData.personerISak.soeker.under18,
+                    soekerNavn = generellBrevData.personerISak.soeker.formaterNavn(),
+                    sakId = generellBrevData.sak.id,
+                    virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt,
+                    vedtakType = generellBrevData.forenkletVedtak?.type,
+                    revurderingsaarsak = generellBrevData.revurderingsaarsak,
+                    tilbakekreving = generellBrevData.forenkletVedtak?.tilbakekreving,
+                    klage = generellBrevData.forenkletVedtak?.klage,
+                    harVerge = generellBrevData.personerISak.verge != null,
+                    bruker = bruker,
+                    innholdMedVedlegg =
+                        InnholdMedVedlegg(
+                            { hentLagretInnhold(brev) },
+                            { hentLagretInnholdVedlegg(brev) },
+                        ),
+                    kode = brevkodePar,
+                    tittel = brev.tittel,
+                ),
+            )
         val brevRequest =
             BrevbakerRequest.fra(
                 brevKode = brevkodePar.ferdigstilling,
-                brevData =
-                    brevDataMapping(
-                        BrevDataFerdigstillingRequest(
-                            loependeIPesys =
-                                loependeIPesys(
-                                    generellBrevData.systemkilde,
-                                    generellBrevData.behandlingId,
-                                    generellBrevData.revurderingsaarsak,
-                                ),
-                            behandlingId = generellBrevData.behandlingId,
-                            sakType = generellBrevData.sak.sakType,
-                            erForeldreloes = erForeldreloes(generellBrevData.personerISak.soeker, generellBrevData.personerISak.avdoede),
-                            utlandstilknytningType = generellBrevData.utlandstilknytning?.type,
-                            avdoede = generellBrevData.personerISak.avdoede,
-                            systemkilde = generellBrevData.systemkilde,
-                            soekerUnder18 = generellBrevData.personerISak.soeker.under18,
-                            soekerNavn = generellBrevData.personerISak.soeker.formaterNavn(),
-                            sakId = generellBrevData.sak.id,
-                            virkningstidspunkt = generellBrevData.forenkletVedtak?.virkningstidspunkt,
-                            vedtakType = generellBrevData.forenkletVedtak?.type,
-                            revurderingsaarsak = generellBrevData.revurderingsaarsak,
-                            tilbakekreving = generellBrevData.forenkletVedtak?.tilbakekreving,
-                            klage = generellBrevData.forenkletVedtak?.klage,
-                            harVerge = generellBrevData.personerISak.verge != null,
-                            bruker = bruker,
-                            innholdMedVedlegg = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
-                            kode = brevkodePar,
-                            tittel = brev.tittel,
-                        ),
-                    ),
+                brevData = brevData,
                 avsender = avsender,
                 soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sakId = sak.id,
@@ -144,16 +156,16 @@ class PDFGenerator(
                 sakType = sak.sakType,
             )
 
-        val brevPdf = brevbakerService.genererPdf(brev.id, brevRequest)
+        val vedtaksbrev = brevbakerService.genererPdf(brev.id, brevRequest)
 
         // TODO: ikke ideelt, bør finne en bedre måte å kombinere flere brev til en utsending
         // I forbindelse med årlig inntektsjustering jobb skal det sendes ut varsel og vedtak i samme brev.
-        if (brev.brevkoder == Brevkoder.OMS_INNTEKTSJUSTERING_VARSEL) {
-            val vedtaksbrevPdf = opprettInntektsjusteringVedtaksbrevPdf(sak, brev, generellBrevData, avsender)
-            return PDFHelper.kombinerPdfListeTilEnPdf(listOf(brevPdf, vedtaksbrevPdf))
+        if (brev.brevkoder == Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK) {
+            val varselbrev = opprettInntektsjusteringVarselbrevPdf(sak, brev, generellBrevData, avsender, brevData)
+            return PDFHelper.kombinerPdfListeTilEnPdf(listOf(varselbrev, vedtaksbrev))
         }
 
-        return brevPdf
+        return vedtaksbrev
     }
 
     private fun hentLagretInnhold(brev: Brev) =
@@ -174,17 +186,18 @@ class PDFGenerator(
         return brev
     }
 
-    private suspend fun opprettInntektsjusteringVedtaksbrevPdf(
+    private suspend fun opprettInntektsjusteringVarselbrevPdf(
         sak: Sak,
         brev: Brev,
         generellBrevData: GenerellBrevData,
         avsender: Avsender,
+        brevData: BrevDataFerdigstilling,
     ): Pdf =
         brevbakerService.genererPdf(
             brev.id,
             BrevbakerRequest.fra(
-                EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VEDTAK,
-                OmstillingsstoenadAarligInntektsjusteringJobb(), // TODO: legge til evnt. brevdata
+                EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VARSEL,
+                brevData,
                 avsender,
                 generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sak.id,

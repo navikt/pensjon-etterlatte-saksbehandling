@@ -4,6 +4,7 @@ import no.nav.etterlatte.beregning.regler.overstyr.RegulerManuellBeregningGrunnl
 import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloepUtenGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.regulerOverstyrtKroneavrundet
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -88,17 +89,17 @@ private fun utledGrunnbeloep(reguleringsmaaned: YearMonth) =
         ).let { resultat ->
             when (resultat) {
                 is RegelkjoeringResultat.Suksess -> {
-                    check(resultat.periodiserteResultater.size == 2) {
+                    checkInternFeil(resultat.periodiserteResultater.size == 2) {
                         "Fikk uventet antall perioder for utleding av grunnlag: ${resultat.periodiserteResultater.size}"
                     }
                     resultat.periodiserteResultater.let {
                         val gammelG: Grunnbeloep = it[0].resultat.verdi
                         val forrigeGrunnbeloepDato = reguleringsmaaned.minusYears(1)
-                        check(gammelG.dato == forrigeGrunnbeloepDato) {
+                        checkInternFeil(gammelG.dato == forrigeGrunnbeloepDato) {
                             "Dato til utledet forrige grunnbeløp er ikke forventet dato $forrigeGrunnbeloepDato"
                         }
                         val nyG: Grunnbeloep = it[1].resultat.verdi
-                        check(nyG.dato == reguleringsmaaned) {
+                        checkInternFeil(nyG.dato == reguleringsmaaned) {
                             "Dato til utledet nytt grunnbeløp er ikke forventet dato $reguleringsmaaned"
                         }
                         Pair(gammelG, nyG)

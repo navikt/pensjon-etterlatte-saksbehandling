@@ -41,8 +41,8 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
       apiFerdigstillVedtaksbrev(
         behandling.id,
         () => settVedtakTilAttestert(),
-        () => {
-          setError(`Feil oppsto ved ferdigstilling av vedtaksbrevet... Prøv igjen.`)
+        (error) => {
+          setError(`Feil oppsto ved ferdigstilling av vedtaksbrevet: ${error.detail}.`)
           setModalisOpen(false)
         }
       )

@@ -65,6 +65,7 @@ import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -251,7 +252,7 @@ internal class VedtaksbrevServiceTest {
                 }
             if (sakType == SakType.OMSTILLINGSSTOENAD) {
                 coEvery { beregningService.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns
-                    Avkortingsinfo(LocalDate.now(), listOf())
+                    Avkortingsinfo(LocalDate.now(), listOf(), false)
             }
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
@@ -365,7 +366,7 @@ internal class VedtaksbrevServiceTest {
                     ),
                 )
 
-            assertThrows<IllegalArgumentException> {
+            assertThrows<InternfeilException> {
                 runBlocking {
                     vedtaksbrevService.opprettVedtaksbrev(
                         SAK_ID,

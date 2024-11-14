@@ -36,9 +36,9 @@ export const AktivitetspliktInfo6MndVarigUnntakModal = ({
   const ferdigstill = () => {
     if (!erFerdigstilt) {
       const merknad = begrunnelse ? begrunnelse : oppgave.merknad
-      apiFerdigstillOppgave({ id: oppgave.id, merknad }, () => {
+      apiFerdigstillOppgave({ id: oppgave.id, merknad }, (oppgave) => {
         setVisModal(false)
-        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+        oppdaterStatus(oppgave.id, oppgave.status)
       })
     }
   }

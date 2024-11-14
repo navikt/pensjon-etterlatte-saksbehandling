@@ -176,6 +176,7 @@ export function VurderingAktivitetsgradForm(props: {
               name="vurderingAvAktivitet.skjoennsmessigVurdering"
               legend="Vil bruker være selvforsørget etter stønaden utløper?"
               errorVedTomInput="Du må vurdere om bruker vil være selvforsørget ved 50-99 % grad aktivitet"
+              description="Vurderingen her blir ikke grunnlag for innhold i infobrev, men styrer hvilke oppgaver Gjenny lager for oppfølging av aktiviteten til bruker."
               radios={
                 <>
                   <Radio value={AktivitetspliktSkjoennsmessigVurdering.JA}>

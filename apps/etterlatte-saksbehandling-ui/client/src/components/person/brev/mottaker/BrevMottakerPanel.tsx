@@ -8,7 +8,7 @@ import { RedigerMottakerModal } from '~components/person/brev/mottaker/RedigerMo
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { bestemDistribusjonskanal, oppdaterMottaker, settHovedmottaker } from '~shared/api/brev'
+import { hentDistKanal, oppdaterMottaker, settHovedmottaker } from '~shared/api/brev'
 import { SlettMottakerModal } from '~components/person/brev/mottaker/SlettMottakerModal'
 import { PersonCheckmarkIcon } from '@navikt/aksel-icons'
 import { Distribusjonskanal, DokDistKanalResponse } from '~shared/types/dokdist'
@@ -65,7 +65,7 @@ export function BrevMottakerPanel({
   const [oppdaterMottakerResult, apiOppdaterMottaker] = useApiCall(oppdaterMottaker)
   const [settHovedmottakerResult, apiSettHovedmottaker] = useApiCall(settHovedmottaker)
   const [soeker, getSoekerFraGrunnlag] = useApiCall(getGrunnlagsAvOpplysningstype)
-  const [dokdistkanalResult, hentDokdistKanal] = useApiCall(bestemDistribusjonskanal)
+  const [distKanalResult, apiHentDistKanal] = useApiCall(hentDistKanal)
 
   useEffect(() => {
     if (!behandlingId) {
@@ -81,7 +81,7 @@ export function BrevMottakerPanel({
 
   useEffect(() => {
     if (mottaker.foedselsnummer?.value && !mottaker.tvingSentralPrint) {
-      hentDokdistKanal({ brevId, sakId, mottakerId: mottaker.id })
+      apiHentDistKanal({ brevId, sakId, mottakerId: mottaker.id })
     }
   }, [mottaker.foedselsnummer?.value, mottaker.tvingSentralPrint])
 
@@ -163,7 +163,7 @@ export function BrevMottakerPanel({
 
         {mottaker.tvingSentralPrint
           ? 'Tvinger sentral print'
-          : mapResult(dokdistkanalResult, {
+          : mapResult(distKanalResult, {
               pending: <Loader />,
               success: (res: DokDistKanalResponse) => (
                 <VStack gap="4">

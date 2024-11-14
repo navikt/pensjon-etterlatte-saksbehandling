@@ -147,7 +147,7 @@ export const markerBrevSomUtgaar = async (props: {
 }): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/${props.brevId}/utgaar?sakId=${props.sakId}`, { kommentar: props.kommentar })
 
-export const bestemDistribusjonskanal = async (args: {
+export const hentDistKanal = async (args: {
   brevId: number
   sakId: number
   mottakerId: string

@@ -72,7 +72,7 @@ class AdresseService(
         saksbehandlerNavn: String?,
         attestantNavn: String?,
     ): Avsender {
-        val kontor = enhet.navn ?: "NAV"
+        val kontor = enhet.navn ?: "Nav"
         val telefon = enhet.kontaktinfo?.telefonnummer ?: ""
 
         return Avsender(

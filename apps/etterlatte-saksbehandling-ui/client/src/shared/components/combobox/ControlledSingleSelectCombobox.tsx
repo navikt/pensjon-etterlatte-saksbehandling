@@ -35,7 +35,11 @@ export const ControlledSingleSelectCombobox = <T extends FieldValues>({
           options={options}
           selectedOptions={[value]}
           onToggleSelected={(option, isSelected) => {
-            isSelected ? onChange(option) : onChange('')
+            if (isSelected) {
+              onChange(option)
+            } else {
+              onChange('')
+            }
           }}
           error={error?.message}
           shouldAutocomplete

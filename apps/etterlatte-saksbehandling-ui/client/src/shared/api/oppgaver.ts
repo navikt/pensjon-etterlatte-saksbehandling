@@ -100,7 +100,7 @@ export const redigerFristApi = async (args: {
 
 export interface EndrePaaVentRequest {
   aarsak?: string
-  merknad: String
+  merknad: string
   paaVent: boolean
 }
 

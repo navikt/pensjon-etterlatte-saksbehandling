@@ -32,8 +32,7 @@ class BehandlingInfoService(
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
-        logger.info("Behandling $behandlingId årsak ${behandling.revurderingsaarsak()}")
-        if (behandling.revurderingsaarsak()?.name != Revurderingaarsak.AARLIG_INNTEKTSJUSTERING.name) {
+        if (behandling.revurderingsaarsak() != Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
             sjekkBehandlingKanEndres(behandling, opphoer)
         }
 

@@ -9,14 +9,14 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 fun Route.aldersovergang(aldersovergangService: AldersovergangService) {
     route("/api/vilkaarsvurdering/aldersovergang") {
-        val logger = routeLogger
+        val logger = LoggerFactory.getLogger("AldersovergangRoute")
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
             val loependeBehandlingId =

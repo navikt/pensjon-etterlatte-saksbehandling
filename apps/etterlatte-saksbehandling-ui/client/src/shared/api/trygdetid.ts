@@ -16,12 +16,12 @@ export interface TrygdetidsperiodeListe {
 }
 
 export interface TrygdetidPeriodePesys {
-  isoCountryCode: String // ISO 3166-1 alpha-3 code feks: "NOR" "SWE"
-  fra: String //TODO: eller date? kommer i steg 2 da vi dette skal brukes i frontend
-  til: String
-  poengInnAar?: Boolean
-  poengUtAar?: Boolean
-  prorata?: Boolean
+  isoCountryCode: string // ISO 3166-1 alpha-3 code feks: "NOR" "SWE"
+  fra: string //TODO: eller date? kommer i steg 2 da vi dette skal brukes i frontend
+  til: string
+  poengInnAar?: boolean
+  poengUtAar?: boolean
+  prorata?: boolean
   kilde: {
     tidspunkt: string
     type: string
@@ -235,8 +235,8 @@ export interface IFremtidigTrygdetid {
   periode?: string
   antallMaaneder?: number
   opptjeningstidIMaaneder?: number
-  mindreEnnFireFemtedelerAvOpptjeningstiden?: Boolean
-  nordiskKonvensjon?: Boolean
+  mindreEnnFireFemtedelerAvOpptjeningstiden?: boolean
+  nordiskKonvensjon?: boolean
 }
 
 export interface IProrataBroek {
@@ -285,6 +285,6 @@ export enum ITrygdetidGrunnlagType {
 }
 
 export interface IOpplysningerDifferanse {
-  differanse: Boolean
+  differanse: boolean
   oppdaterteGrunnlagsopplysninger: IGrunnlagOpplysninger
 }

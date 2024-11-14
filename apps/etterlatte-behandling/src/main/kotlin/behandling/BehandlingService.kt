@@ -23,6 +23,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -166,6 +167,8 @@ interface BehandlingService {
     fun avbrytBehandling(
         behandlingId: UUID,
         saksbehandler: BrukerTokenInfo,
+        aarsak: AarsakTilAvbrytelse? = null,
+        kommentar: String? = null,
     )
 
     fun registrerBehandlingHendelse(
@@ -339,6 +342,8 @@ internal class BehandlingServiceImpl(
     override fun avbrytBehandling(
         behandlingId: UUID,
         saksbehandler: BrukerTokenInfo,
+        aarsak: AarsakTilAvbrytelse?,
+        kommentar: String?,
     ) {
         val behandling =
             hentBehandlingForId(behandlingId)
@@ -347,7 +352,7 @@ internal class BehandlingServiceImpl(
             throw BehandlingKanIkkeAvbrytesException(behandling.status)
         }
 
-        behandlingDao.avbrytBehandling(behandlingId).also {
+        behandlingDao.avbrytBehandling(behandlingId, aarsak, kommentar).also {
             val hendelserKnyttetTilBehandling =
                 grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
             oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
@@ -381,7 +386,7 @@ internal class BehandlingServiceImpl(
                 )
             }
 
-            hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident())
+            hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident(), kommentar, aarsak.toString())
             grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
         }
 
@@ -530,7 +535,9 @@ internal class BehandlingServiceImpl(
         overstyr: Boolean,
     ): Boolean {
         val virkningstidspunkt = request.dato
-        if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
+        if (behandling.revurderingsaarsak() != Revurderingaarsak.NY_SOEKNAD &&
+            virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)
+        ) {
             throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
         }
 

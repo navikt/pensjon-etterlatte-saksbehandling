@@ -173,9 +173,14 @@ export enum GrunnlagsendringStatus {
   HISTORISK = 'HISTORISK',
 }
 
-const SAKSROLLER = ['SOEKER', 'INNSENDER', 'SOESKEN', 'AVDOED', 'GJENLEVENDE', 'UKJENT'] as const
-
-export type Saksrolle = (typeof SAKSROLLER)[number]
+export enum Saksrolle {
+  SOEKER = 'SOEKER',
+  INNSENDER = 'INNSENDER',
+  SOESKEN = 'SOESKEN',
+  AVDOED = 'AVDOED',
+  GJENLEVENDE = 'GJENLEVENDE',
+  UKJENT = 'UKJENT',
+}
 
 export interface GrunnlagsendringsListe {
   hendelser: Grunnlagsendringshendelse[]

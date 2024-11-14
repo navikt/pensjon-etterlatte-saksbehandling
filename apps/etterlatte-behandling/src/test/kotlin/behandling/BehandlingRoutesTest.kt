@@ -31,7 +31,9 @@ import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.token.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.AnnenForelder
+import no.nav.etterlatte.libs.common.behandling.AvbrytBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -244,10 +246,12 @@ internal class BehandlingRoutesTest {
             val response =
                 client.post("/api/behandling/$behandlingId/avbryt") {
                     header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(AvbrytBehandlingRequest(AarsakTilAvbrytelse.ANNET, "begrunnelse"))
                 }
 
             assertEquals(200, response.status.value)
-            verify(exactly = 1) { behandlingService.avbrytBehandling(behandlingId, any()) }
+            verify(exactly = 1) { behandlingService.avbrytBehandling(behandlingId, any(), any(), any()) }
         }
     }
 

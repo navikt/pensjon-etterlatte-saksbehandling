@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId2
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -58,8 +59,16 @@ class TidshendelseServiceTest {
     }
 
     @Test
-    fun `haandterHendelseMedLoependeYtelse med type oms_doed_4mnd skal opprette oppgave`() {
+    fun `haandterHendelseMedLoependeYtelse med type oms_doed_4mnd skal opprette oppgave aktivitetsplikt`() {
         val behandlingId = UUID.randomUUID()
+        every {
+            behandlingService.opprettOppgaveOppfoelgingAktivitetsplikt(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns OpprettOppgaveForAktivitetspliktResponse(opprettetOppgave = true, oppgaveId = opprettetOppgaveId)
         val opprettetOppgave =
             tidshendelseService.haandterHendelse(
                 TidshendelsePacket(
@@ -74,16 +83,16 @@ class TidshendelseServiceTest {
 
         opprettetOppgave.opprettetOppgaveId shouldBe opprettetOppgaveId
         verify {
-            behandlingService.opprettOppgave(
+            behandlingService.opprettOppgaveOppfoelgingAktivitetsplikt(
                 sakId = sakId2,
-                oppgaveType = OppgaveType.AKTIVITETSPLIKT,
-                referanse = behandlingId.toString(),
-                merknad = any(),
+                jobbType = JobbType.OMS_DOED_4MND,
+                referanse = null,
                 frist = withArg { it shouldNotBe null },
             )
         }
         verify(exactly = 0) {
             behandlingService.opprettAutomatiskRevurdering(any())
+            behandlingService.opprettOppgave(any(), any(), any(), any(), any())
         }
     }
 
@@ -107,7 +116,8 @@ class TidshendelseServiceTest {
         val sakId = randomSakId()
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
 
-        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, type = JobbType.OMS_DOED_3AAR)
+        val melding =
+            lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, type = JobbType.OMS_DOED_3AAR)
         melding["oms_rett_uten_tidsbegrensning"] = true
 
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding))

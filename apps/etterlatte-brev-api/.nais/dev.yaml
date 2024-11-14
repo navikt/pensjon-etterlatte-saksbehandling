@@ -90,6 +90,10 @@ spec:
       value: https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1
     - name: DOKDIST_CLIENT_ID
       value: dev-fss.teamdokumenthandtering.saf
+    - name: DOKDISTKANAL_URL
+      value: https://dokdistkanal.dev-fss-pub.nais.io/rest
+    - name: DOKDISTKANAL_CLIENT_ID
+      value: dev-fss.teamdokumenthandtering.dokdistkanal
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: REGOPPSLAG_SCOPE
@@ -142,6 +146,7 @@ spec:
         - host: regoppslag.dev-fss-pub.nais.io
         - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: dokdistfordeling.dev-fss-pub.nais.io
+        - host: dokdistkanal.dev-fss-pub.nais.io
         - host: data.brreg.no
         - host: pensjon-brevbaker.intern.dev.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io

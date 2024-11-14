@@ -115,11 +115,11 @@ data class AvkortetYtelseDto(
     val sanksjon: SanksjonertYtelse?,
 )
 
-data class YtelseMedGrunnlagDto(
-    val perioder: List<YtelseMedGrunnlagPeriodisertDto>,
+data class BeregningOgAvkortingDto(
+    val perioder: List<BeregningOgAvkortingPeriodeDto>,
 )
 
-data class YtelseMedGrunnlagPeriodisertDto(
+data class BeregningOgAvkortingPeriodeDto(
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
     val restanse: Int,

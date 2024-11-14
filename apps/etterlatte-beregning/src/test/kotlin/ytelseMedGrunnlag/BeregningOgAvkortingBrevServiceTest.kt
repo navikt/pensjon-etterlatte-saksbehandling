@@ -18,17 +18,17 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
-import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
+import no.nav.etterlatte.ytelseMedGrunnlag.BeregningOgAvkortingBrevService
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 import java.util.UUID
 
-internal class YtelseMedGrunnlagServiceTest {
+internal class BeregningOgAvkortingBrevServiceTest {
     private val avkortingRepository = mockk<AvkortingRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val service =
-        YtelseMedGrunnlagService(
+        BeregningOgAvkortingBrevService(
             beregningRepository,
             avkortingRepository,
             behandlingKlient,
@@ -39,7 +39,7 @@ internal class YtelseMedGrunnlagServiceTest {
         every { avkortingRepository.hentAvkorting(any()) } returns null
         every { beregningRepository.hent(any()) } returns null
         runBlocking {
-            service.hentYtelseMedGrunnlag(UUID.randomUUID(), bruker) shouldBe null
+            service.hentBeregningOgAvkorting(UUID.randomUUID(), bruker) shouldBe null
         }
     }
 
@@ -121,7 +121,7 @@ internal class YtelseMedGrunnlagServiceTest {
 
         val ytelse =
             runBlocking {
-                service.hentYtelseMedGrunnlag(behandlingsId, bruker)
+                service.hentBeregningOgAvkorting(behandlingsId, bruker)
             }
 
         with(ytelse!!.perioder[0]) {

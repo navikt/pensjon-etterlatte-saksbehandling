@@ -4,26 +4,30 @@ import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
-import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
-import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagPeriodisertDto
+import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
+import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
-class YtelseMedGrunnlagService(
+/**
+ * Hensikten med denne tjenesten er å la brev hente data om beregning og avkorting i et samlet sted
+ */
+class BeregningOgAvkortingBrevService(
     private val beregningRepository: BeregningRepository,
     private val avkortingRepository: AvkortingRepository,
     private val behandlingKlient: BehandlingKlient,
 ) {
-    suspend fun hentYtelseMedGrunnlag(
+    suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): YtelseMedGrunnlagDto? {
+    ): BeregningOgAvkortingDto? {
         val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
         val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
         val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
+
         val avkortinger =
             avkorting.avkortetYtelse.map { avkortetYtelse ->
                 val beregningIPeriode =
@@ -37,7 +41,7 @@ class YtelseMedGrunnlagService(
                 val oppgittInntekt = grunnlag.inntektTom + grunnlag.inntektUtlandTom
                 val fratrekkInnAar = grunnlag.fratrekkInnAar + grunnlag.fratrekkInnAarUtland
 
-                YtelseMedGrunnlagPeriodisertDto(
+                BeregningOgAvkortingPeriodeDto(
                     periode = Periode(avkortetYtelse.fom, avkortetYtelse.tom),
                     ytelseEtterAvkorting = avkortetYtelse.ytelseEtterAvkorting,
                     restanse = avkortetYtelse.restanse,
@@ -56,7 +60,7 @@ class YtelseMedGrunnlagService(
                 )
             }
 
-        return YtelseMedGrunnlagDto(
+        return BeregningOgAvkortingDto(
             perioder = avkortinger,
         )
     }

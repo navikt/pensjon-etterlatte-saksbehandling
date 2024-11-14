@@ -39,7 +39,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
 
   const { monthpickerProps, inputProps, setSelected, selectedMonth } = useMonthpicker({
     onMonthChange: (date: Date) => {
-      date && field.onChange(formatDateToLocaleDateOrEmptyString(date))
+      if (date) field.onChange(formatDateToLocaleDateOrEmptyString(date))
     },
     defaultSelected: field.value ? new Date(field.value) : null,
     fromDate: fromDate ?? undefined,

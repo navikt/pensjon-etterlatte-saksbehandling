@@ -37,7 +37,7 @@ class Server(
                     avkortingTidligAlderspensjonService,
                     aarligInntektsjusteringService,
                 )
-                ytelseMedGrunnlag(ytelseMedGrunnlagService, behandlingKlient)
+                ytelseMedGrunnlag(beregningOgAvkortingBrevService, behandlingKlient)
                 grunnbeloep(grunnbeloepService)
                 sanksjon(sanksjonService, behandlingKlient)
             }

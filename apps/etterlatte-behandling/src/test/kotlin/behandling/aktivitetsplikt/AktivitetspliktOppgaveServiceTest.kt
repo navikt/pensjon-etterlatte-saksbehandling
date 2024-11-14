@@ -18,6 +18,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -179,6 +180,7 @@ class AktivitetspliktOppgaveServiceTest {
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
                 every { sakId } returns sakIdForOppgave
+                every { type } returns OppgaveType.AKTIVITETSPLIKT_12MND
             }
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
 
@@ -264,6 +266,7 @@ class AktivitetspliktOppgaveServiceTest {
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
                 every { sakId } returns sakIdForOppgave
+                every { type } returns OppgaveType.AKTIVITETSPLIKT_12MND
             }
 
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
@@ -279,6 +282,7 @@ class AktivitetspliktOppgaveServiceTest {
                 opprettet = kilde,
                 endret = kilde,
                 beskrivelse = "Beskrivelse",
+                vurdertFra12Mnd = true,
             )
         every { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) } returns
             mockk {
@@ -303,6 +307,60 @@ class AktivitetspliktOppgaveServiceTest {
             }
         service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         verify(exactly = 1) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
+        verify(exactly = 1) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
+    }
+
+    @Test
+    fun `skal ikke opprette brev hvis det ikke er vurdert fra 12 mnd i 12mnd-oppgave`() {
+        val simpleSaksbehandler = simpleSaksbehandler()
+        val oppgaveId = UUID.randomUUID()
+        val sakIdForOppgave = SakId(1L)
+        every { oppgaveService.hentOppgave(oppgaveId) } returns
+            mockk {
+                every { sakId } returns sakIdForOppgave
+                every { type } returns OppgaveType.AKTIVITETSPLIKT_12MND
+            }
+
+        val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val aksgrad =
+            AktivitetspliktAktivitetsgrad(
+                id = UUID.randomUUID(),
+                sakId = sakIdForOppgave,
+                behandlingId = UUID.randomUUID(),
+                oppgaveId = oppgaveId,
+                aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
+                fom = LocalDate.now(),
+                tom = null,
+                opprettet = kilde,
+                endret = kilde,
+                beskrivelse = "Beskrivelse",
+                vurdertFra12Mnd = false,
+            )
+        every { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) } returns
+            mockk {
+                every { aktivitet } returns listOf(aksgrad)
+            }
+        every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, any()) } returns 1
+
+        val skalSendeBrev =
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                null,
+                true,
+                utbetaling = true,
+                redusertEtterInntekt = true,
+                kilde = kilde,
+            )
+        every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalSendeBrev
+        coEvery { brevApiKlient.opprettSpesifiktBrev(any(), any(), any()) } returns
+            mockk {
+                every { id } returns 1L
+            }
+        assertThrows<UgyldigForespoerselException> {
+            service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
+        }
+        verify(exactly = 0) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
         verify(exactly = 1) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
     }
 

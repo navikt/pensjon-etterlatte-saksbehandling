@@ -5,8 +5,12 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.database.single
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.util.UUID
+
+private val logger: Logger = LoggerFactory.getLogger("Vedtaksbehandling")
 
 class VedtaksbehandlingDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
@@ -47,12 +51,24 @@ private data class Vedtaksbehandling(
     val type: BehandlingType,
     val status: String,
 ) {
-    fun erRedigerbar(): Boolean =
-        when (type) {
-            BehandlingType.BEHANDLING -> BehandlingStatus.valueOf(status).kanEndres()
-            BehandlingType.TILBAKEKREVING -> TilbakekrevingStatus.valueOf(status).kanEndres()
-            BehandlingType.KLAGE -> KlageStatus.kanEndres(KlageStatus.valueOf(status))
-        }
+    fun erRedigerbar(): Boolean {
+        val redigerbar =
+            when (type) {
+                BehandlingType.BEHANDLING -> BehandlingStatus.valueOf(status).kanEndres()
+                BehandlingType.TILBAKEKREVING -> TilbakekrevingStatus.valueOf(status).kanEndres()
+                BehandlingType.KLAGE -> {
+                    val klageStatus = KlageStatus.valueOf(status)
+                    // I konteksten av vedtak så er klager også mulig å endre når formkravene ikke er oppfylt,
+                    // siden det er da man oppretter vedtak om avvist klage
+                    KlageStatus.kanEndres(klageStatus) || klageStatus == KlageStatus.FORMKRAV_IKKE_OPPFYLT
+                }
+            }
+        logger.info(
+            "Fikk henvendelse om vedtak til behandling $id av type $type var redigerbar. " +
+                "Svarte $redigerbar fordi statusen var $status",
+        )
+        return redigerbar
+    }
 }
 
 private enum class BehandlingType {

@@ -29,7 +29,7 @@ interface Props {
   behandling: IBehandlingReducer
   oppdaterBeregningsgrunnlag: (beregningsmetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => void
   lagreBeregningsGrunnlagResult: Result<BeregningsGrunnlagDto>
-  kunEnJuridiskForelder?: Boolean
+  kunEnJuridiskForelder?: boolean
 }
 
 export const BeregningsMetodeBrukt = ({

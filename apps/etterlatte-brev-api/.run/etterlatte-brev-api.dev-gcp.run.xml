@@ -8,7 +8,7 @@
       <env name="DOKARKIV_URL" value="https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost" />
       <env name="DOKDIST_CLIENT_ID" value="dev-fss.teamdokumenthandtering.saf" />
       <env name="DOKDIST_URL" value="https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1" />
-      <env name="DOKDISTKANAL_CLIENT_ID" value="dev-fss.teamdokumenthandtering.dokdistkanal-q1" />
+      <env name="DOKDISTKANAL_CLIENT_ID" value="dev-fss.teamdokumenthandtering.dokdistkanal" />
       <env name="DOKDISTKANAL_URL" value="https://dokdistkanal.dev-fss-pub.nais.io/rest" />
       <env name="CLAMAV_ENDPOINT_URL" value="http://clamav.nais-system.svc.cluster.local" />
       <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />

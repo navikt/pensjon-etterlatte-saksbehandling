@@ -137,10 +137,10 @@ class BeregningService(
     ): Avkortingsinfo? {
         if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
 
-        val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
+        val beregningOgAvkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
 
         val beregningsperioder =
-            ytelseMedGrunnlag.perioder.map {
+            beregningOgAvkorting.perioder.map {
                 AvkortetBeregningsperiode(
                     datoFOM = it.periode.fom.atDay(1),
                     datoTOM = it.periode.tom?.atEndOfMonth(),
@@ -173,6 +173,7 @@ class BeregningService(
         return Avkortingsinfo(
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder = beregningsperioder,
+            beregningOgAvkorting.endringIUtebalingVedVirk,
         )
     }
 }

@@ -117,6 +117,8 @@ data class AvkortetYtelseDto(
 
 data class BeregningOgAvkortingDto(
     val perioder: List<BeregningOgAvkortingPeriodeDto>,
+    // Hvis nytt beløp fra siste åpne periode er ulik den siste åpne perioden til forrige behandling
+    val endringIUtebalingVedVirk: Boolean,
 )
 
 data class BeregningOgAvkortingPeriodeDto(

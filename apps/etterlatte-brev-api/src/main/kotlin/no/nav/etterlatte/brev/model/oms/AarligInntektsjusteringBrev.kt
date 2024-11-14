@@ -115,7 +115,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                 tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
                 inntektsaar = virk.year,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                endringIUtbetaling = true, // TODO
+                endringIUtbetaling = avkortingsinfo.endringIUtebalingVedVirk,
                 virkningstidspunkt = virk,
                 bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
             )

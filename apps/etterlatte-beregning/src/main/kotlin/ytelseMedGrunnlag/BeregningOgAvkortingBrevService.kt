@@ -4,6 +4,7 @@ import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingPeriodeDto
@@ -26,8 +27,8 @@ class BeregningOgAvkortingBrevService(
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningOgAvkortingDto? {
         val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
-        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
-        val avkorting = avkortingUtenLoependeYtelse.toDto(virkningstidspunkt.dato)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val avkorting = avkortingUtenLoependeYtelse.toDto(behandling.virkningstidspunkt().dato)
         val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
         val behandlingsGrunnlag = beregningsGrunnlagService.hentBeregningsGrunnlag(behandlingId, brukerTokenInfo)
 
@@ -66,6 +67,24 @@ class BeregningOgAvkortingBrevService(
 
         return BeregningOgAvkortingDto(
             perioder = avkortinger,
+            endringIUtebalingVedVirk =
+                when (behandling.behandlingType) {
+                    BehandlingType.FØRSTEGANGSBEHANDLING -> false
+                    else -> {
+                        val forrigeBehandlingId =
+                            behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
+                        val forrigeAvkorting = avkortingRepository.hentAvkorting(forrigeBehandlingId)
+                        val sisteBeloep =
+                            forrigeAvkorting
+                                ?.toDto()
+                                ?.avkortetYtelse
+                                ?.last()
+                                ?.ytelseEtterAvkorting
+                        sisteBeloep?.let {
+                            it != avkorting.avkortetYtelse.last().ytelseEtterAvkorting
+                        } ?: false
+                    }
+                },
         )
     }
 }

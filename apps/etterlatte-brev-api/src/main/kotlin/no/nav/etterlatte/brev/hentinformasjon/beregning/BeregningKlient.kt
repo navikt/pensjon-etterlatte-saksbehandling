@@ -77,7 +77,7 @@ class BeregningKlient(
         }
     }
 
-    internal suspend fun hentYtelseMedGrunnlag(
+    internal suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningOgAvkortingDto {

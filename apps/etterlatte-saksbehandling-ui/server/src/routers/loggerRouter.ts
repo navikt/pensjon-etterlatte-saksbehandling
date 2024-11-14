@@ -3,7 +3,7 @@ import { frontendLogger, logger } from '../monitoring/logger'
 import sourceMap, { NullableMappedPosition } from 'source-map'
 import * as fs from 'fs'
 import { parseJwt } from '../utils/parsejwt'
-import { sanitize, sanitizeUrl } from '../utils/sanitize'
+import { sanitizeUrl } from '../utils/sanitize'
 /* eslint @typescript-eslint/no-explicit-any: 0 */ // --> OFF
 
 export const loggerRouter = express.Router()
@@ -85,23 +85,7 @@ const mapCommonFields = (user?: string, jsonContent?: JsonContent, errorData?: E
     request_uri: sanitizeUrl(jsonContent?.url),
     outbound_uri: errorData?.apiErrorInfo?.url,
     method: errorData?.apiErrorInfo?.method,
-    user_device: stringifyUserDevice(jsonContent?.userDeviceInfo),
     user_agent: jsonContent?.userAgent,
-  }
-}
-
-const stringifyUserDevice = (device?: UserDeviceInfo): string | undefined => {
-  if (!device) return undefined
-  else {
-    try {
-      const browser = `${device.browser.name} ${device.browser.version}`
-      const os = `${device.os.name} ${device.os.version} (${device.os.versionName})`
-
-      return `${browser} - ${os}`
-    } catch {
-      logger.error(`Kunne ikke formatere userDeviceInfo til lesbar string: \n${sanitize(JSON.stringify(device))}`)
-      return undefined
-    }
   }
 }
 
@@ -140,17 +124,4 @@ interface JsonError {
 interface JsonContent {
   url: string
   userAgent: string
-  userDeviceInfo?: UserDeviceInfo
-}
-
-interface UserDeviceInfo {
-  browser: {
-    name: string
-    version: string
-  }
-  os: {
-    name: string
-    version: string
-    versionName: string
-  }
 }

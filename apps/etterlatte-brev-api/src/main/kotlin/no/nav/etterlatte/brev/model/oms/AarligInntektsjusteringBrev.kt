@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
-import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
@@ -131,23 +130,6 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                 endringIUtbetaling = avkortingsinfo.endringIUtebalingVedVirk,
                 virkningstidspunkt = virk,
                 bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
-            )
-        }
-    }
-}
-
-data class OmstillingsstoenadInntektsjusteringVarsel(
-    val inntektsaar: Int,
-    val bosattUtland: Boolean,
-    val virkningstidspunkt: LocalDate,
-) : BrevData {
-    companion object {
-        fun fra(behandling: DetaljertBehandling): OmstillingsstoenadInntektsjusteringVarsel {
-            val virk = behandling.virkningstidspunkt!!.dato
-            return OmstillingsstoenadInntektsjusteringVarsel(
-                inntektsaar = virk.year,
-                bosattUtland = behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
-                virkningstidspunkt = virk.atDay(1),
             )
         }
     }

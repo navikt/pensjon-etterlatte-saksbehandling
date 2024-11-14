@@ -27,6 +27,8 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
+import no.nav.etterlatte.libs.common.behandling.AvbrytBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -594,6 +596,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             client
                 .post("/api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
                     addAuthToken(systemBruker)
+                    contentType(ContentType.Application.Json)
+                    setBody(AvbrytBehandlingRequest(AarsakTilAvbrytelse.ANNET, "begrunnelse"))
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }

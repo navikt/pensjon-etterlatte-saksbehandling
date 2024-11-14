@@ -85,7 +85,7 @@ export function BrevMottakerPanel({
     }
   }, [mottaker.foedselsnummer?.value, mottaker.tvingSentralPrint])
 
-  const oppdater = (brevId: number, sakId: number, mottaker: Mottaker, onSuccess: Function) => {
+  const oppdater = (brevId: number, sakId: number, mottaker: Mottaker, onSuccess: () => void) => {
     apiOppdaterMottaker({ brevId, sakId, mottaker }, () => {
       setMottaker(mottaker)
       onSuccess()

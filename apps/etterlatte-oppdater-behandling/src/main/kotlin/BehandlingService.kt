@@ -34,7 +34,9 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
+import no.nav.etterlatte.libs.common.sak.DisttribuertEllerIverksatt
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
+import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
@@ -132,6 +134,12 @@ interface BehandlingService {
         begrunnelse: String? = null,
         corrId: String? = null,
         feilendeSteg: String? = null,
+    )
+
+    fun lagreKjoeringBrevDistribuertEllerIverksatt(
+        sakId: SakId,
+        kjoering: String,
+        distEllerIverksatt: DisttribuertEllerIverksatt,
     )
 
     fun lagreFullfoertKjoering(request: LagreKjoeringRequest)
@@ -418,6 +426,26 @@ class BehandlingServiceImpl(
                 )
             }
             logger.debug("$kjoering: kjoeringStatus for sak {} er oppdatert til: {}", sakId, status)
+        }
+    }
+
+    override fun lagreKjoeringBrevDistribuertEllerIverksatt(
+        sakId: SakId,
+        kjoering: String,
+        distEllerIverksatt: DisttribuertEllerIverksatt,
+    ) {
+        runBlocking {
+            behandlingKlient.put("$url/omregning/dist-eller-iverksatt") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    KjoeringDistEllerIverksattRequest(
+                        kjoering = kjoering,
+                        sakId = sakId,
+                        distEllerIverksatt = distEllerIverksatt,
+                    ),
+                )
+            }
+            logger.debug("$kjoering: har fullført distribuering av brev for sak $sakId")
         }
     }
 

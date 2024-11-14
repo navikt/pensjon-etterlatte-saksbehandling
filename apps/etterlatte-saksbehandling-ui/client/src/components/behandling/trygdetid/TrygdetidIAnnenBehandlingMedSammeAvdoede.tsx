@@ -6,7 +6,17 @@ import {
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
-import { Alert, BodyShort, Box, Button, HStack, Link, ReadMore, VStack } from '@navikt/ds-react'
+import {
+  Alert,
+  BodyShort,
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Link,
+  Spacer,
+  VStack
+} from '@navikt/ds-react'
 import { ExternalLinkIcon, PlusCircleIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -68,28 +78,35 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
         success: (behandlingId) => (
           <>
             {behandlingId && (
-              <Box paddingBlock="2">
+              <Box maxWidth="50rem">
                 <Alert variant="info">
-                  <ReadMore
-                    header="Det finnes en annen behandling tilknyttet avdøde"
-                    open={skalViseDetaljer()}
-                    onClick={() => setVisDetaljer(!visDetaljer)}
-                  >
+                  <HStack gap="6" justify="end" minWidth="45rem">
+                    <Heading size="small" level="2" spacing>
+                      Det finnes en annen sak tilknyttet avdøde
+                    </Heading>
+                    <Spacer/>
+                    {!skalViseDetaljer() && (
+                      <Button variant="tertiary" size="small" onClick={() => setVisDetaljer(true)}>
+                        Les mer
+                      </Button>
+                    )}
+                  </HStack>
+                  {skalViseDetaljer() && (
                     <VStack gap="3">
                       <BodyShort>
-                        Det finnes en annen behandling tilknyttet avdøde {avdoedesNavn()}, der trygdetiden allerede er
+                        Det finnes en annen sak tilknyttet avdøde {avdoedesNavn()}, der trygdetiden allerede er
                         fylt inn. Ønsker du å benytte den samme trygdetiden i denne behandlingen? Dette overskriver det
                         du eventuelt har registrert allerede.
                       </BodyShort>
                       <Link href={`/behandling/${behandlingId}/trygdetid`} as="a" target="_blank">
-                        Gå til behandlingen
-                        <ExternalLinkIcon>Gå til behandlingen</ExternalLinkIcon>
+                        Forhåndsvis trygdetiden
+                        <ExternalLinkIcon/>
                       </Link>
                       <HStack gap="1">
                         <Button
                           variant="secondary"
                           size="small"
-                          icon={<XMarkOctagonIcon />}
+                          icon={<XMarkOctagonIcon/>}
                           onClick={() => setVisDetaljer(false)}
                         >
                           Nei, jeg ønsker å fylle ut manuelt
@@ -97,14 +114,14 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
                         <Button
                           variant="primary"
                           size="small"
-                          icon={<PlusCircleIcon />}
+                          icon={<PlusCircleIcon/>}
                           onClick={() => kopierTrygdetid(behandlingId)}
                         >
                           Ja, kopier og legg til trygdetid
                         </Button>
                       </HStack>
                     </VStack>
-                  </ReadMore>
+                  )}
                 </Alert>
               </Box>
             )}

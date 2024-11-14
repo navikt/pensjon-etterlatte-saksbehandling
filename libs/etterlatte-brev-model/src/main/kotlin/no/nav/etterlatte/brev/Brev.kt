@@ -45,7 +45,9 @@ data class Adresse(
 ) {
     fun erGyldig(): List<String> =
         if (adresseType.isBlank() || landkode.isBlank() || land.isBlank()) {
-            listOf("Adressetype ($adresseType), landkode ($landkode) eller land ($land) er blank")
+            listOf(
+                "Adressetype ($adresseType), landkode ($landkode) eller land ($land) er blank. Sjekk om det er verge i saken. Da vet vi ikke hvor brevet skal.",
+            )
         } else if (adresseType == "NORSKPOSTADRESSE") {
             if (!(postnummer.isNullOrBlank() || poststed.isNullOrBlank())) {
                 listOf()

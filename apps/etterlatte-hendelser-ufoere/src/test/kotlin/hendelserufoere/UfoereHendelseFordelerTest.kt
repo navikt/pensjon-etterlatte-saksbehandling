@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingKlient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class UfoereHendelseFordelerTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
@@ -24,9 +25,9 @@ internal class UfoereHendelseFordelerTest {
         val ufoereHendelse =
             UfoereHendelse(
                 personIdent = "12312312312",
-                virkningsdato = "2018-01-01",
-                fodselsdato = "2000-01-01",
-                vedtaksType = "ufoere",
+                virkningsdato = LocalDate.parse("2018-01-01"),
+                fodselsdato = LocalDate.parse("2000-01-01"),
+                vedtaksType = VedtaksType.INNV,
             )
 
         runBlocking {
@@ -43,9 +44,9 @@ internal class UfoereHendelseFordelerTest {
         val ufoereHendelse =
             UfoereHendelse(
                 personIdent = "12312312312",
-                virkningsdato = "2021-01-01",
-                fodselsdato = "2000-01-01",
-                vedtaksType = "ufoere",
+                virkningsdato = LocalDate.parse("2021-01-01"),
+                fodselsdato = LocalDate.parse("2000-01-01"),
+                vedtaksType = VedtaksType.INNV,
             )
 
         runBlocking {
@@ -60,9 +61,9 @@ internal class UfoereHendelseFordelerTest {
         val ufoereHendelse =
             UfoereHendelse(
                 personIdent = "12312312312",
-                virkningsdato = "2021-01-01",
-                fodselsdato = "1980-01-01",
-                vedtaksType = "ufoere",
+                virkningsdato = LocalDate.parse("2021-01-01"),
+                fodselsdato = LocalDate.parse("1980-01-01"),
+                vedtaksType = VedtaksType.INNV,
             )
 
         runBlocking {

@@ -4,7 +4,6 @@ import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 class UfoereHendelseFordeler(
@@ -17,10 +16,7 @@ class UfoereHendelseFordeler(
             val attenAarIMaaneder = 12 * 18
             val tjueenAarIMaaneder = 12 * 21
 
-            val datoVedFoedsel = LocalDate.parse(hendelse.fodselsdato)
-            val datoVedVirkningstidspunkt = LocalDate.parse(hendelse.virkningsdato)
-
-            val alderVedVirkningstidspunkt = ChronoUnit.MONTHS.between(datoVedFoedsel, datoVedVirkningstidspunkt)
+            val alderVedVirkningstidspunkt = ChronoUnit.MONTHS.between(hendelse.fodselsdato, hendelse.virkningsdato)
 
             if (alderVedVirkningstidspunkt in attenAarIMaaneder..tjueenAarIMaaneder) {
                 logger.info("Bruker er mellom 18 og 21 på på virkningstidspunktet. Sender ufoerehendelse til behandling")
@@ -35,7 +31,7 @@ class UfoereHendelseFordeler(
                 )
             }
         } catch (e: Exception) {
-            loggFeilVedHaandteringAvHendelse(hendelse.vedtaksType, e)
+            loggFeilVedHaandteringAvHendelse(hendelse.vedtaksType.name, e)
             throw e
         }
     }

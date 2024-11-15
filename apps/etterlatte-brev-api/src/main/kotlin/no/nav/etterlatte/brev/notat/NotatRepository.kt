@@ -168,7 +168,7 @@ class NotatRepository(
                     ),
                 ).asUpdate,
             ).also { oppdatert ->
-                require(oppdatert == 1)
+                checkNotNull(oppdatert == 1) { "Kunne ikke lagre tittel! for id $id" }
             }
 
         tx.lagreHendelse(id, tittel.toJson(), bruker)

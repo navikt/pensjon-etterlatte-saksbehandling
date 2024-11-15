@@ -3,7 +3,7 @@ import {
   AktivitetspliktVurderingType,
   IAktivitetspliktAktivitetsgrad,
   IAktivitetspliktUnntak,
-  IAktivitetspliktVurderingNy,
+  IAktivitetspliktVurderingNyDto,
 } from '~shared/types/Aktivitetsplikt'
 
 export enum AktivitetspliktStatus {
@@ -14,7 +14,7 @@ export enum AktivitetspliktStatus {
   IKKE_VURDERT,
 }
 
-interface StatusPaaAktivitetsplikt {
+export interface StatusPaaAktivitetsplikt {
   aktivitetspliktStatus: AktivitetspliktStatus
   dato?: Date | string
 }
@@ -32,10 +32,10 @@ const sisteGjeldendeAktivitet = (aktivitet: IAktivitetspliktAktivitetsgrad[]): I
 }
 
 export const finnStatusPaaAktivitetsplikt = (
-  aktivitetspliktVurdering: IAktivitetspliktVurderingNy
+  aktivitetspliktVurdering: IAktivitetspliktVurderingNyDto
 ): StatusPaaAktivitetsplikt => {
   // Hvis innbygger har unntak, så viker dette for aktivitetsplikt
-  if (!!aktivitetspliktVurdering.unntak?.length) {
+  if (!!aktivitetspliktVurdering.unntak.length) {
     const gjeldendeUnntak = sisteGjeldendeUnntak([...aktivitetspliktVurdering.unntak])
 
     if (gjeldendeUnntak.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT) {
@@ -48,7 +48,7 @@ export const finnStatusPaaAktivitetsplikt = (
         dato: gjeldendeUnntak?.tom,
       }
     }
-  } else if (!!aktivitetspliktVurdering.aktivitet?.length) {
+  } else if (!!aktivitetspliktVurdering.aktivitet.length) {
     const gjeldendeAktivitet = sisteGjeldendeAktivitet([...aktivitetspliktVurdering.aktivitet])
 
     if (gjeldendeAktivitet?.aktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50) {

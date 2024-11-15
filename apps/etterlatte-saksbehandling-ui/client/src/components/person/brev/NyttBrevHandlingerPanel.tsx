@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
 
-import { isPending, mapAllApiResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 
 interface Props {
   brev: IBrev
@@ -81,41 +81,23 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
         width="medium"
         aria-label="Ferdigstilling av brev"
       >
-        {mapAllApiResult(
-          ferdigstillStatus,
-          <Spinner label="Forsøker å ferdigstille brevet ..." />,
-          null,
-          (error) => (
-            <Alert variant="error">{error.detail}</Alert>
-          ),
-          () => (
-            <Alert variant="info">Ferdigstilt ok!</Alert>
-          )
-        )}
+        {mapResult(ferdigstillStatus, {
+          pending: <Spinner label="Forsøker å ferdigstille brevet ..." />,
+          error: (error) => <Alert variant="error">{error.detail}</Alert>,
+          success: () => <Alert variant="info">Ferdigstilt ok!</Alert>,
+        })}
 
-        {mapAllApiResult(
-          journalfoerStatus,
-          <Spinner label="Journalfører brevet i dokarkiv ..." />,
-          null,
-          (error) => (
-            <Alert variant="error">{error.detail}</Alert>
-          ),
-          () => (
-            <Alert variant="info">Journalført ok!</Alert>
-          )
-        )}
+        {mapResult(journalfoerStatus, {
+          pending: <Spinner label="Journalfører brevet i dokarkiv ..." />,
+          error: (error) => <Alert variant="error">{error.detail}</Alert>,
+          success: () => <Alert variant="info">Journalført ok!</Alert>,
+        })}
 
-        {mapAllApiResult(
-          distribuerStatus,
-          <Spinner label="Sender brev til distribusjon ..." />,
-          null,
-          (error) => (
-            <Alert variant="error">{error.detail}</Alert>
-          ),
-          () => (
-            <Alert variant="success">Brev sendt til distribusjon. Laster inn brev på nytt...</Alert>
-          )
-        )}
+        {mapResult(distribuerStatus, {
+          pending: <Spinner label="Sender brev til distribusjon ..." />,
+          error: (error) => <Alert variant="error">{error.detail}</Alert>,
+          success: () => <Alert variant="success">Brev sendt til distribusjon. Laster inn brev på nytt...</Alert>,
+        })}
       </Modal>
 
       <Modal open={isOpen && !statusModalOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">

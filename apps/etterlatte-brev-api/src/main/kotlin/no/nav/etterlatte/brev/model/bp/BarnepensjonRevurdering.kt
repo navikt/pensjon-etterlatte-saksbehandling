@@ -108,18 +108,28 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
     val harUtbetaling: Boolean,
     val feilutbetaling: FeilutbetalingType,
     val brukerUnder18Aar: Boolean,
+    val bosattUtland: Boolean,
+    val frivilligSkattetrekk: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             etterbetaling: EtterbetalingDTO?,
             utbetalingsinfo: Utbetalingsinfo,
             brevutfall: BrevutfallDto,
-        ): BarnepensjonRevurderingRedigerbartUtfall =
-            BarnepensjonRevurderingRedigerbartUtfall(
+            utlandstilknytning: UtlandstilknytningType?,
+        ): BarnepensjonRevurderingRedigerbartUtfall {
+            val frivilligSkattetrekk =
+                brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
+                    ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
+
+            return BarnepensjonRevurderingRedigerbartUtfall(
                 erEtterbetaling = etterbetaling != null,
                 harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
                 brukerUnder18Aar = requireNotNull(brevutfall.aldersgruppe) == Aldersgruppe.UNDER_18,
+                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                frivilligSkattetrekk = frivilligSkattetrekk,
             )
+        }
     }
 }

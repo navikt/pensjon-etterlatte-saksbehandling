@@ -15,6 +15,12 @@ import { TilleggsinformasjonOppgaveModal } from '~components/oppgavebenk/oppgave
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
+import { useNavigate } from 'react-router-dom'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi } from '~shared/api/revurdering'
+import Spinner from '~shared/Spinner'
+import { mapResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT = 'aktivitetsplikt.ny-vurdering'
 
@@ -25,7 +31,12 @@ export const HandlingerForOppgave = ({
   oppgave: OppgaveDTO
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }) => {
+  const navigate = useNavigate()
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
+
+  const [opprettManuellRevurderingStatus, opprettManuellInntektsjustering] = useApiCall(
+    opprettManuellInntektsjusteringApi
+  )
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
@@ -33,6 +44,16 @@ export const HandlingerForOppgave = ({
     FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT,
     false
   )
+
+  const opprettInntektsjusteringRevurdering = () => {
+    opprettManuellInntektsjustering(
+      {
+        sakId: oppgave.sakId,
+        oppgaveId: oppgave.id,
+      },
+      (revurdering: string) => navigate(`/behandling/${revurdering}/`)
+    )
+  }
 
   if (kilde === OppgaveKilde.GENERELL_BEHANDLING) {
     switch (type) {
@@ -176,6 +197,17 @@ export const HandlingerForOppgave = ({
           <AktivitetspliktInfo6MndVarigUnntakModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
+    case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
+      return mapResult(opprettManuellRevurderingStatus, {
+        initial: (
+          <Button size="small" onClick={opprettInntektsjusteringRevurdering}>
+            Opprett revurdering
+          </Button>
+        ),
+        pending: <Spinner label="Oppretter ..." margin="0" />,
+        error: (error) => <ApiErrorAlert>{error?.detail ?? 'Ukjent feil'}</ApiErrorAlert>,
+      })
+
     default:
       return null
   }

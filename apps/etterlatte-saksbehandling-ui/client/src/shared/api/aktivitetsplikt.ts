@@ -4,11 +4,13 @@ import {
   AktivitetspliktOppgaveVurdering,
   IAktivitet,
   IAktivitetspliktVurdering,
-  IAktivitetspliktVurderingNy,
+  IAktivitetspliktVurderingNyDto,
   IOpprettAktivitet,
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
 } from '~shared/types/Aktivitetsplikt'
+import { KildeSaksbehandler } from '~shared/types/kilde'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string
@@ -47,7 +49,8 @@ export const slettAktivitetForSak = async (args: {
 
 export const hentAktivitspliktVurderingForSak = async (args: {
   sakId: number
-}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> => apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/vurdering`)
+}): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
+  apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/vurdering`)
 
 export const hentAktivitspliktVurderingForOppgave = async (args: {
   sakId: number
@@ -55,17 +58,11 @@ export const hentAktivitspliktVurderingForOppgave = async (args: {
 }): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
   apiClient.get(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering`)
 
-export const hentAktivitetspliktVurderingForOppgaveNy = async (args: {
-  sakId: number
-  oppgaveId: string
-}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
-  apiClient.get(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/ny`)
-
 export const opprettAktivitetspliktAktivitetsgrad = async (args: {
   sakId: number
   oppgaveId: string
   request: IOpprettAktivitetspliktAktivitetsgrad
-}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
+}): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
   apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/aktivitetsgrad`, {
     ...args.request,
   })
@@ -74,7 +71,7 @@ export const slettAktivitetspliktVurdering = async (args: {
   sakId: number
   oppgaveId: string
   vurderingId: string
-}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
+}): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
   apiClient.delete(
     `/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/aktivitetsgrad/${args.vurderingId}`
   )
@@ -83,14 +80,14 @@ export const opprettAktivitetspliktUnntak = async (args: {
   sakId: number
   oppgaveId: string
   request: IOpprettAktivitetspliktUnntak
-}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
+}): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
   apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/unntak`, { ...args.request })
 
 export const slettAktivitetspliktUnntak = async (args: {
   sakId: number
   oppgaveId: string
   unntakId: string
-}): Promise<ApiResponse<IAktivitetspliktVurderingNy>> =>
+}): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
   apiClient.delete(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/unntak/${args.unntakId}`)
 
 export const hentAktivitspliktVurderingForBehandling = async (args: {
@@ -130,7 +127,7 @@ export interface IBrevAktivitetspliktRequest {
 export const lagreAktivitetspliktBrevdata = async (args: {
   oppgaveId: string
   brevdata: IBrevAktivitetspliktRequest
-}): Promise<ApiResponse<void>> =>
+}): Promise<ApiResponse<IBrevAktivitetspliktDto>> =>
   apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/brevdata`, { ...args.brevdata })
 
 export const opprettAktivitetspliktsbrev = async (args: { oppgaveId: string }): Promise<ApiResponse<BrevId>> =>
@@ -138,7 +135,7 @@ export const opprettAktivitetspliktsbrev = async (args: { oppgaveId: string }): 
 
 export const ferdigstillBrevOgOppgaveAktivitetsplikt = async (args: {
   oppgaveId: string
-}): Promise<ApiResponse<void>> =>
+}): Promise<ApiResponse<OppgaveDTO>> =>
   apiClient.post(`/aktivitetsplikt/oppgave/${args.oppgaveId}/ferdigstillbrev-og-oppgave`, {})
 
 interface BrevId {
@@ -150,4 +147,5 @@ export interface IBrevAktivitetspliktDto {
   skalSendeBrev: boolean
   utbetaling?: boolean
   redusertEtterInntekt?: boolean
+  kilde: KildeSaksbehandler
 }

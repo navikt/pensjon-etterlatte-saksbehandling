@@ -1,6 +1,6 @@
 import { Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { FilePdfIcon } from '@navikt/aksel-icons'
+import { EyeIcon } from '@navikt/aksel-icons'
 import { Notat } from '~shared/api/notat'
 import ForhaandsvisningNotat from '~components/person/notat/ForhaandsvisningNotat'
 import { DokumentVisningModal } from '~shared/brev/pdf-visning'
@@ -14,7 +14,9 @@ export const NotatVisningModal = ({ notat }: { notat: Notat }) => {
 
   return (
     <>
-      <Button variant="secondary" onClick={open} size="small" icon={<FilePdfIcon />} />
+      <Button variant="primary" onClick={open} size="small" icon={<EyeIcon />}>
+        Vis
+      </Button>
 
       <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
         <Modal.Body>

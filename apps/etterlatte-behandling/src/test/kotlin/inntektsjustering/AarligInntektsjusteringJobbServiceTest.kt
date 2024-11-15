@@ -1,6 +1,7 @@
 package no.nav.etterlatte.inntektsjustering
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -29,16 +31,19 @@ import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
@@ -55,6 +60,7 @@ class AarligInntektsjusteringJobbServiceTest {
     private val vedtakKlient: VedtakKlient = mockk()
     private val beregningKlient: BeregningKlient = mockk()
     private val pdlTjenesterKlient: PdlTjenesterKlient = mockk()
+    private val oppgaveService: OppgaveService = mockk()
     private val rapid: KafkaProdusent<String, String> = mockk()
 
     val service =
@@ -67,6 +73,7 @@ class AarligInntektsjusteringJobbServiceTest {
             vedtakKlient,
             beregningKlient,
             pdlTjenesterKlient,
+            oppgaveService,
             rapid,
         )
 
@@ -175,6 +182,52 @@ class AarligInntektsjusteringJobbServiceTest {
                     ),
             ),
         )
+
+    @Test
+    fun `skal ikke opprette manuell inntektsjustering hvis aapne behandlinger`() {
+        val oppgaveId = UUID.randomUUID()
+        val sakId = SakId(123L)
+        val behandlinger = listOf(mockk<BehandlingOgSak>())
+        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns behandlinger
+
+        val exception =
+            assertThrows<UgyldigForespoerselException> {
+                service.opprettManuellInntektsjustering(sakId, oppgaveId, mockk())
+            }
+        exception.code shouldBe "KAN_IKKE_OPPRETTE_REVURDERING_PGA_AAPNE_BEHANDLINGER"
+    }
+
+    @Test
+    fun `skal opprette manuell inntektsjustering og slette oppgave`() {
+        val oppgaveId = UUID.randomUUID()
+        val sakId = SakId(123L)
+        coEvery { oppgaveService.ferdigstillOppgave(oppgaveId, any()) } returns mockk()
+        val revurdering = service.opprettManuellInntektsjustering(sakId, oppgaveId, mockk())
+        verify {
+            revurderingService.opprettRevurdering(
+                sakId = sakId,
+                persongalleri = any(),
+                forrigeBehandling = any(),
+                mottattDato = any(),
+                prosessType = any(),
+                kilde = any(),
+                revurderingAarsak = any(),
+                virkningstidspunkt = any(),
+                utlandstilknytning = any(),
+                boddEllerArbeidetUtlandet = any(),
+                begrunnelse = any(),
+                fritekstAarsak = any(),
+                saksbehandlerIdent = any(),
+                relatertBehandlingId = any(),
+                frist = any(),
+                paaGrunnAvOppgave = any(),
+                opphoerFraOgMed = any(),
+                tidligereFamiliepleier = any(),
+            )
+        }
+
+        revurdering shouldNotBe null
+    }
 
     @Test
     fun `starter jobb for gyldig sak`() {
@@ -304,6 +357,8 @@ class AarligInntektsjusteringJobbServiceTest {
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
 
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
+
         runBlocking {
             service.startAarligInntektsjustering(request)
         }
@@ -335,6 +390,8 @@ class AarligInntektsjusteringJobbServiceTest {
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns listOf(mockk())
 
         every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
 
         runBlocking {
             service.startAarligInntektsjustering(request)

@@ -68,6 +68,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK: 'Aktivitetsplikt informasjon - varig unntak',
   GENERELL_OPPGAVE: 'Generell oppgave',
   MANUELL_UTSENDING_BREV: 'Manuell brevutsending',
+  AARLIG_INNTEKTSJUSTERING: 'Årlig inntektsjustering',
 } as const
 
 export const FRISTFILTER = {

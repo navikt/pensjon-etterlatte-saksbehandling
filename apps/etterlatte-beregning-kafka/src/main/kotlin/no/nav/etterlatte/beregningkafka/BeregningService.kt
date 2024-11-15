@@ -13,6 +13,7 @@ import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import java.util.UUID
 
 class BeregningService(
@@ -86,6 +87,6 @@ class BeregningService(
     suspend fun hentGrunnbeloep(): Grunnbeloep =
         beregningApp
             .get("$url/api/beregning/grunnbeloep")
-            .also { require(it.status.isSuccess()) }
+            .also { checkInternFeil(it.status.isSuccess()) { "Kunne ikke hente grunnbeloep" } }
             .body<Grunnbeloep>()
 }

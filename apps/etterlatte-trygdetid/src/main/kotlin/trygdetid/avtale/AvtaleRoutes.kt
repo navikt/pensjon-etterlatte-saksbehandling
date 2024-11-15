@@ -13,11 +13,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 fun Route.avtale(
@@ -25,7 +25,7 @@ fun Route.avtale(
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/trygdetid/avtaler") {
-        val logger = routeLogger
+        val logger = LoggerFactory.getLogger("AvtaleRoute")
 
         get {
             logger.info("Henter alle avtaler")

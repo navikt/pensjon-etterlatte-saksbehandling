@@ -60,7 +60,6 @@ class PersonWebService(
             } else {
                 PersonMapper.mapPersonNavnFoedsel(
                     ppsKlient = ppsKlient,
-                    ident = ident,
                     hentPerson = it.data.hentPerson,
                 )
             }
@@ -88,8 +87,7 @@ class PersonWebService(
                                             ppsKlient = ppsKlient,
                                             ident =
                                                 it.person.folkeregisteridentifikator
-                                                    .filter { !it.metadata.historisk }
-                                                    .first()
+                                                    .first { !it.metadata.historisk }
                                                     .identifikasjonsnummer,
                                             soekPerson = it.person,
                                         )
@@ -234,7 +232,7 @@ class PersonWebService(
         any { error ->
             error.extensions?.code == "unauthorized" &&
                 error.extensions
-                    ?.details
+                    .details
                     ?.policy
                     ?.let { policy ->
                         policy.contains("adressebeskyttelse_fortrolig_adresse") ||

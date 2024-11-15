@@ -72,9 +72,9 @@ export const AktivitetspliktInfoModal = ({
 
   const ferdigstill = (data: AktivitetspliktVurderingValues) => {
     if (!erFerdigstilt && vurdering) {
-      apiFerdigstillOppgave(oppgave.id, () => {
+      apiFerdigstillOppgave(oppgave.id, (oppgave) => {
         setVisModal(false)
-        oppdaterStatus(oppgave.id, Oppgavestatus.FERDIGSTILT)
+        oppdaterStatus(oppgave.id, oppgave.status)
       })
     } else if (data.aktivitetsplikt === JaNei.NEI || data.unntak === JaNei.JA) {
       opprettUnntak(

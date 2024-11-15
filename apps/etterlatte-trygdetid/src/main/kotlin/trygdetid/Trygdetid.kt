@@ -31,6 +31,7 @@ data class Trygdetid(
     val overstyrtNorskPoengaar: Int? = null,
     val opplysningerDifferanse: OpplysningerDifferanse? = null,
     val yrkesskade: Boolean,
+    val kopiertGrunnlagFraBehandling: UUID? = null,
 ) {
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
         val normalisertNyttTrygdetidGrunnlag = listOf(nyttTrygdetidGrunnlag).normaliser().first()
@@ -215,3 +216,13 @@ private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =
                 else -> throw Exception("Mangler gyldig kilde for opplysning $id")
             },
     )
+
+fun List<TrygdetidPartial>.trygdetiderGjelderEksaktSammeAvdoede(avdoede: List<String>): Boolean =
+    this.map { it.ident }.sorted() ==
+        avdoede.sorted()
+
+data class TrygdetidPartial(
+    val behandlingId: UUID,
+    val ident: String,
+    val opprettet: Tidspunkt,
+)

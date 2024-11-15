@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+
 import { describe, expect, it } from 'vitest'
 import { fnrErGyldig, fnrHarGyldigFormat } from './fnr'
 

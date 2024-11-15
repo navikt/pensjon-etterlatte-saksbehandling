@@ -25,12 +25,12 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 fun Route.vedtaksvurderingRoute(
@@ -40,7 +40,7 @@ fun Route.vedtaksvurderingRoute(
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/vedtak") {
-        val logger = routeLogger
+        val logger = LoggerFactory.getLogger("VedtaksvurderingRoute")
 
         get("/sak/{$SAKID_CALL_PARAMETER}/iverksatte") {
             withSakId(behandlingKlient) { sakId ->
@@ -305,8 +305,7 @@ fun Route.tilbakekrevingvedtakRoute(
     service: VedtakTilbakekrevingService,
     behandlingKlient: BehandlingKlient,
 ) {
-    val logger = routeLogger
-
+    val logger = LoggerFactory.getLogger("TilbakekrevingsvedtakRoute")
     route("/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/lagre-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
@@ -342,7 +341,7 @@ fun Route.klagevedtakRoute(
     service: VedtakKlageService,
     behandlingKlient: BehandlingKlient,
 ) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("KlagevedtakRoute")
 
     route("/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/upsert") {

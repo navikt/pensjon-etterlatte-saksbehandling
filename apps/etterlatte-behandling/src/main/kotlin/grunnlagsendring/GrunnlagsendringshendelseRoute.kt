@@ -23,11 +23,11 @@ import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
+import org.slf4j.LoggerFactory
 
 internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseService: GrunnlagsendringshendelseService) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("GrunnlagsendringhendelseRoute")
 
     route("/grunnlagsendringshendelse") {
         post("/doedshendelse") {

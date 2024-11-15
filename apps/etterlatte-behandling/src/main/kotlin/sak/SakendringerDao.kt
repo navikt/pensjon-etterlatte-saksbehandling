@@ -48,7 +48,7 @@ class SakendringerDao(
             block(connection)
         }.also { lagreEndringerPaaSak(null, it, kallendeMetode) }
 
-    internal fun lagreEndringerPaaSak(
+    private fun lagreEndringerPaaSak(
         sakFoer: Sak?,
         sakEtter: Sak,
         kallendeMetode: String,

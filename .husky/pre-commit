@@ -1,12 +1,15 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-cd ./apps/etterlatte-saksbehandling-ui && yarn lint-staged
+cd ./apps/etterlatte-saksbehandling-ui
+yarn lint-staged --cwd ./client
+yarn lint-staged --cwd ./server
+
 changedKotlinFiles=$(git diff --name-only --cached | grep '\.kt[s"]\?$' || true)
 
 if [ -n "${changedKotlinFiles-unset}" ]; then
     kotlinversion=$(ktlint -v)
-    expectedVersion="ktlint version 1.4.0"
+    expectedVersion="ktlint version 1.4.1"
     if [ "$kotlinversion" != "$expectedVersion" ]; then
       echo "\033[1;31mERROR:\033[0m\tRunning version $kotlinversion needs to be $expectedVersion"
       exit 1

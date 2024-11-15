@@ -8,19 +8,19 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
+import org.slf4j.LoggerFactory
 
 fun Route.automatiskBehandlingRoutes(
     service: AutomatiskBehandlingService,
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/vedtak") {
-        val logger = routeLogger
+        val logger = LoggerFactory.getLogger("AutomatiskBehandlingRoute")
 
         post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGID_CALL_PARAMETER}/automatisk") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->

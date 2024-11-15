@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { Vurderinger } from '~components/aktivitetsplikt/vurdering/Vurderinger'
 import { mapResult } from '~shared/api/apiUtils'
@@ -11,6 +11,7 @@ import { velgDoedsdato } from '~components/person/aktivitet/Aktivitet'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
+import { AktivitetspliktVurdering12MndOversikt } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering12MndOversikt'
 
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
@@ -22,11 +23,7 @@ export function VurderAktivitet() {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4" maxWidth="120rem">
-        <Heading level="1" size="large">
-          Oppfølging av aktivitet
-        </Heading>
-      </Box>
+      <AktivitetspliktVurdering12MndOversikt />
       <Box paddingInline="16" paddingBlock="16" maxWidth="120rem">
         <VStack gap="4">
           {mapResult(familieOpplysningerResult, {
@@ -48,28 +45,34 @@ export function VurderAktivitet() {
 }
 
 function NesteKnapp() {
-  const { vurdering } = useAktivitetspliktOppgaveVurdering()
+  const { vurdering, vurderingType } = useAktivitetspliktOppgaveVurdering()
   const aktiviteter = vurdering.aktivitet
   const navigate = useNavigate()
-  const [manglerAktiviteter, setManglerAktiviteter] = useState(false)
+  const [feilmeldingAktiviteter, setFeilmeldingAktiviteter] = useState('')
   const gaaTilNeste = () => {
+    setFeilmeldingAktiviteter('')
     if (aktiviteter?.length) {
-      navigate(`../${AktivitetspliktSteg.BREVVALG}`)
-      setManglerAktiviteter(false)
+      if (vurderingType === 'TOLV_MAANEDER' && aktiviteter.every((aktivitet) => !aktivitet.vurdertFra12Mnd)) {
+        setFeilmeldingAktiviteter('Du må gjøre en ny vurdering fra 12 måneder for å gå videre')
+      } else {
+        navigate(`../${AktivitetspliktSteg.BREVVALG}`)
+      }
     } else {
-      setManglerAktiviteter(true)
+      setFeilmeldingAktiviteter('Du må registrere en aktivitet for å gå videre')
     }
   }
   useEffect(() => {
-    setManglerAktiviteter(false)
+    setFeilmeldingAktiviteter('')
   }, [vurdering.aktivitet])
 
   return (
-    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-      <HStack gap="4" justify="center">
-        <Button onClick={gaaTilNeste}>Neste</Button>
-        {manglerAktiviteter && <Alert variant="error">Du må registrere en aktivitet for å gå videre</Alert>}
-      </HStack>
+    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle" marginBlock="4">
+      <VStack gap="6">
+        {feilmeldingAktiviteter.length > 0 && <Alert variant="error">{feilmeldingAktiviteter}</Alert>}
+        <HStack gap="4" justify="center">
+          <Button onClick={gaaTilNeste}>Neste</Button>
+        </HStack>
+      </VStack>
     </Box>
   )
 }

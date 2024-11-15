@@ -22,6 +22,7 @@ import no.nav.etterlatte.tidshendelser.TidshendelserKey.JOBB_POLLER_OPENING_HOUR
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_INITIAL_DELAY
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_INTERVAL
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_OPENING_HOURS
+import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
@@ -72,13 +73,21 @@ class AppContext(
     private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, grunnlagKlient, behandlingKlient)
     private val reguleringDao = ReguleringDao(dataSource)
     private val reguleringService = ReguleringService(publisher, reguleringDao)
+    private val inntektsjusteringService = AarligInntektsjusteringService(publisher, reguleringDao)
 
     val jobbPollerTask =
         JobbPollerTask(
             initialDelaySeconds = env.requireEnvValue(JOBB_POLLER_INITIAL_DELAY).toLong(),
             periode = env.requireEnvValue(JOBB_POLLER_INTERVAL).let { Duration.parse(it) } ?: Duration.ofMinutes(5),
             openingHours = env.requireEnvValue(JOBB_POLLER_OPENING_HOURS).let { OpeningHours.of(it) },
-            jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService, reguleringService),
+            jobbPoller =
+                JobbPoller(
+                    hendelseDao,
+                    aldersovergangerService,
+                    omstillingsstoenadService,
+                    reguleringService,
+                    inntektsjusteringService,
+                ),
         )
 
     val opprettJobberTask =

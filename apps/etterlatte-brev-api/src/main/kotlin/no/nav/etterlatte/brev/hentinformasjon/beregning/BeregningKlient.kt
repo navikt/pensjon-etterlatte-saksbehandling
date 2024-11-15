@@ -6,8 +6,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningOgAvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
-import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -77,10 +77,10 @@ class BeregningKlient(
         }
     }
 
-    internal suspend fun hentYtelseMedGrunnlag(
+    internal suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): YtelseMedGrunnlagDto {
+    ): BeregningOgAvkortingDto {
         try {
             logger.info("Henter utregnet ytelse med grunnlag for behandlingId=$behandlingId")
 
@@ -93,7 +93,10 @@ class BeregningKlient(
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (re: ResponseException) {
-            logger.error("Henting av utregnet ytelse med grunnlag for behandling med behandlingId=$behandlingId feilet", re)
+            logger.error(
+                "Henting av utregnet ytelse med grunnlag for behandling med behandlingId=$behandlingId feilet",
+                re,
+            )
 
             throw ForespoerselException(
                 status = re.response.status.value,

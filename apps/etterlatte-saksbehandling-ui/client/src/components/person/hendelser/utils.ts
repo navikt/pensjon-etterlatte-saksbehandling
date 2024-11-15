@@ -142,7 +142,7 @@ export const revurderingKanOpprettes = (
   behandlinger: IBehandlingsammendrag[],
   enhetId: string,
   enheter: string[]
-): Boolean => {
+): boolean => {
   return (
     behandlinger.filter((behandling) => behandlingErIverksatt(behandling.status)).length > 0 &&
     enhetErSkrivbar(enhetId, enheter)
@@ -153,7 +153,7 @@ export const omgjoeringAvslagKanOpprettes = (
   behandlinger: IBehandlingsammendrag[],
   enhet: string,
   enheter: Array<string>
-): Boolean => {
+): boolean => {
   return (
     behandlinger.length > 0 &&
     behandlinger.every(

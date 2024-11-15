@@ -6,7 +6,6 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
@@ -14,18 +13,14 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asContextElement
-import kotlinx.coroutines.withContext
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.attachMockContextWithDbAndSakdao
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
-import no.nav.etterlatte.lagContext
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
@@ -276,20 +271,7 @@ class TilgangsstyringTest {
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {
-                    intercept(ApplicationCallPipeline.Call) {
-                        val context =
-                            lagContext(user.also { every { it.name() } returns this::class.java.simpleName }, sakTilgangDao = sakTilgangDao)
-
-                        withContext(
-                            Dispatchers.Default +
-                                Kontekst.asContextElement(
-                                    value = context,
-                                ),
-                        ) {
-                            proceed()
-                        }
-                        Kontekst.remove()
-                    }
+                    attachMockContextWithDbAndSakdao(user, sakTilgangDao)
 
                     route("/api") {
                         route("/sak") {

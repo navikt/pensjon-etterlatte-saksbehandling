@@ -64,7 +64,8 @@ class TrygdetidRepository(
                         beregnet_trygdetid_overstyrt,
                         poengaar_overstyrt,
                         yrkesskade,
-                        beregnet_samlet_trygdetid_norge
+                        beregnet_samlet_trygdetid_norge,
+                        kopiert_grunnlag_fra_behandling
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                     """.trimIndent(),
@@ -117,6 +118,13 @@ class TrygdetidRepository(
                     tx,
                 )
 
+                oppdaterKopiertGrunnlagFraBehandling(
+                    gjeldendeTrygdetid.id,
+                    gjeldendeTrygdetid.behandlingId,
+                    oppdatertTrygdetid.kopiertGrunnlagFraBehandling,
+                    tx,
+                )
+
                 // opprett grunnlag
                 oppdatertTrygdetid.trygdetidGrunnlag
                     .filter { gjeldendeTrygdetid.trygdetidGrunnlag.find { tg -> tg.id == it.id } == null }
@@ -163,6 +171,25 @@ class TrygdetidRepository(
             ).let { query ->
                 tx.update(query)
             }
+        }
+
+    fun hentTrygdetiderForAvdoede(avdoede: List<String>) =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    """SELECT DISTINCT behandling_id, ident, opprettet 
+                            FROM trygdetid 
+                            WHERE ident = ANY(:identer)
+                    """.trimMargin(),
+                    mapOf("identer" to session.createArrayOf("text", avdoede)),
+                ).map { row ->
+                    TrygdetidPartial(
+                        row.uuid("behandling_id"),
+                        row.string("ident"),
+                        row.tidspunkt("opprettet"),
+                    )
+                }.asList,
+            )
         }
 
     private fun opprettTrygdetid(
@@ -341,6 +368,29 @@ class TrygdetidRepository(
                     "id" to id,
                     "behandlingId" to behandlingId,
                     "overstyrtNorskPoengaar" to overstyrtNorskPoengaar,
+                ),
+        ).let { query ->
+            tx.update(query)
+        }
+    }
+
+    private fun oppdaterKopiertGrunnlagFraBehandling(
+        id: UUID,
+        behandlingId: UUID,
+        kildeBehandlingId: UUID?,
+        tx: TransactionalSession,
+    ) {
+        queryOf(
+            statement =
+                """
+                UPDATE trygdetid 
+                  SET kopiert_grunnlag_fra_behandling = :kildeBehandlingId WHERE id = :id AND  behandling_id = :behandlingId
+                """.trimIndent(),
+            paramMap =
+                mapOf(
+                    "id" to id,
+                    "behandlingId" to behandlingId,
+                    "kildeBehandlingId" to kildeBehandlingId,
                 ),
         ).let { query ->
             tx.update(query)
@@ -602,6 +652,7 @@ class TrygdetidRepository(
         overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
         ident = string("ident"),
         yrkesskade = boolean("yrkesskade"),
+        kopiertGrunnlagFraBehandling = uuidOrNull("kopiert_grunnlag_fra_behandling"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

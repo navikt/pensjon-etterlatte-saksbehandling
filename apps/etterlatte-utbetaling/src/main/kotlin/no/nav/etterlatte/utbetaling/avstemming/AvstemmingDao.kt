@@ -5,6 +5,7 @@ import kotliquery.param
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -39,7 +40,7 @@ class AvstemmingDao(
                 session.run(
                     it.asUpdate,
                 )
-            }.also { require(it == 1) { "Kunne ikke opprette avstemming" } }
+            }.also { checkInternFeil(it == 1) { "Kunne ikke opprette avstemming" } }
         }
 
     fun hentDatoOpprettetForSisteKonsistensavstemming(saktype: Saktype): Tidspunkt? =
@@ -87,7 +88,9 @@ class AvstemmingDao(
                         "avstemmingtype" to Avstemmingtype.GRENSESNITTAVSTEMMING.name.param(),
                         "saktype" to grensesnittavstemming.saktype.name.param(),
                     ),
-            ).let { session.run(it.asUpdate) }.also { require(it == 1) { "Kunne ikke opprette avstemming" } }
+            ).let { session.run(it.asUpdate) }.also {
+                checkInternFeil(it == 1) { "Kunne ikke opprette avstemming" }
+            }
         }
 
     fun hentSisteGrensesnittavstemming(saktype: Saktype): Grensesnittavstemming? =

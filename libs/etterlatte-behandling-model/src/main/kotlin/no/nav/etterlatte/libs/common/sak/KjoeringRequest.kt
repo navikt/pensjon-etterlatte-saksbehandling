@@ -34,4 +34,5 @@ enum class KjoeringStatus {
     IKKE_LOEPENDE,
     FERDIGSTILT,
     TIL_MANUELL,
+    TIL_MANUELL_UTEN_OPPGAVE,
 }

@@ -36,6 +36,7 @@ import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
 import no.nav.etterlatte.kodeverk.KodeverkKlient
+import no.nav.etterlatte.kodeverk.KodeverkNavn
 import no.nav.etterlatte.kodeverk.KodeverkResponse
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -591,7 +592,10 @@ class AxsysKlientTest : AxsysKlient {
 }
 
 class KodeverkKlientTest : KodeverkKlient {
-    override suspend fun hentLandkoder(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse {
+    override suspend fun hent(
+        kodeverkNavn: KodeverkNavn,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): KodeverkResponse {
         val betydning =
             Betydning(
                 gyldigTil = "1900-01-01",
@@ -607,8 +611,6 @@ class KodeverkKlientTest : KodeverkKlient {
             ),
         )
     }
-
-    override suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): KodeverkResponse = KodeverkResponse(emptyMap())
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.ResultSet
@@ -29,7 +30,7 @@ class BosattUtlandDao(
                 statement.setObject(2, bosattUtland.rinanummer)
                 statement.setJsonb(3, bosattUtland.mottatteSeder)
                 statement.setJsonb(4, bosattUtland.sendteSeder)
-                require(statement.executeUpdate() == 1)
+                checkInternFeil(statement.executeUpdate() == 1) { "Kunne ikke lagre utland for behandlingId: ${bosattUtland.behandlingId}" }
             }
         }
 

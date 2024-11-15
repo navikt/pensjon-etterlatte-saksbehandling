@@ -35,6 +35,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
+import no.nav.etterlatte.brev.distribusjon.DokDistKanalKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.dokument.SafKlient
@@ -129,6 +130,7 @@ internal class ApplicationContext {
     val dokarkivService = DokarkivServiceImpl(dokarkivKlient)
 
     val distribusjonKlient = DistribusjonKlient(config)
+    val dokdistKanalKlient = DokDistKanalKlient(config)
 
     val distribusjonService = DistribusjonServiceImpl(distribusjonKlient)
 
@@ -192,6 +194,7 @@ internal class ApplicationContext {
             journalfoerBrevService,
             pdfGenerator,
             brevdistribuerer,
+            dokdistKanalKlient,
             oppgaveService,
         )
 

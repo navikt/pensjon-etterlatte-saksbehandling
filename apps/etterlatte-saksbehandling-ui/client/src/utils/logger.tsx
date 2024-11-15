@@ -1,10 +1,7 @@
-import Bowser from 'bowser'
 import { apiClient } from '~shared/api/apiClient'
 import { store } from '~store/Store'
 import { loggError, loggInfo } from '~store/reducers/BehandlingReducer'
 import { ErrorInfo } from 'react'
-
-const browser: any = Bowser.getParser(window.navigator.userAgent)
 
 const GYLDIG_FNR = (input: string | undefined) => /^\d{11}$/.test(input ?? '')
 
@@ -26,7 +23,6 @@ function sanitizeUrlPossibleFnr(url?: string): string {
 const defaultContext = {
   url: sanitizeUrlPossibleFnr(window.location.href),
   userAgent: window.navigator.userAgent,
-  userDeviceInfo: browser.parsedResult,
 }
 
 const loggFunc = (data: any) => apiClient.post('/logg', data, true, true)
@@ -73,14 +69,6 @@ export const logger = {
       .then(() => store.dispatch(loggError(data)))
       .catch((err) => {
         console.error('Unable to log error message: ', data, ' err: ', err)
-      })
-  },
-  generalInfo: (info: object) => {
-    const data = { type: 'info', data: info, jsonContent: { ...defaultContext } }
-    loggFunc(data)
-      .then(() => store.dispatch(loggInfo(data)))
-      .catch((err) => {
-        console.error('Unable to log info message: ', data, ' err: ', err)
       })
   },
   generalError: (info: ErrorData) => {

@@ -10,10 +10,10 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
-import no.nav.etterlatte.libs.ktor.route.routeLogger
+import org.slf4j.LoggerFactory
 
 internal fun Route.doedshendelseRoute(doedshendelseService: DoedshendelseService) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("DoedshendelseRoute")
     route("/doedshendelse") {
         post("/brevdistribuert") {
             kunSystembruker {

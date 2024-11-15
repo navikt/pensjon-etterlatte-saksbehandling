@@ -29,7 +29,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.sanksjon.SanksjonRepository
 import no.nav.etterlatte.sanksjon.SanksjonService
-import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
+import no.nav.etterlatte.ytelseMedGrunnlag.BeregningOgAvkortingBrevService
 
 private fun featureToggleProperties(config: Config) =
     FeatureToggleProperties(
@@ -125,10 +125,11 @@ class ApplicationContext {
             avkortingRepository = avkortingRepository,
             sanksjonService = sanksjonService,
         )
-    val ytelseMedGrunnlagService =
-        YtelseMedGrunnlagService(
+    val beregningOgAvkortingBrevService =
+        BeregningOgAvkortingBrevService(
             beregningRepository = beregningRepository,
             avkortingRepository = avkortingRepository,
+            beregningsGrunnlagService = beregningsGrunnlagService,
             behandlingKlient = behandlingKlient,
         )
     val grunnbeloepService = GrunnbeloepService(repository = GrunnbeloepRepository)

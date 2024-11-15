@@ -31,7 +31,7 @@ enum class JobbType(
         SakType.OMSTILLINGSSTOENAD,
     ),
     OMS_DOED_10MND(
-        "Omstillingsstønad vurdering av aktivitetsplikt 10 mnd etter dødsdato",
+        "Infobrev om aktivitetsplikt 10 mnd etter dødsdato",
         JobbKategori.OMS_DOEDSDATO,
         SakType.OMSTILLINGSSTOENAD,
     ),
@@ -56,4 +56,5 @@ enum class JobbKategori {
     ALDERSOVERGANG,
     OMS_DOEDSDATO,
     REGULERING,
+    AARLIG_INNTEKTSJUSTERING,
 }

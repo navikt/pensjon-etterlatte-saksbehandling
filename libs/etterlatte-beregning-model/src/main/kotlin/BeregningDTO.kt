@@ -115,11 +115,13 @@ data class AvkortetYtelseDto(
     val sanksjon: SanksjonertYtelse?,
 )
 
-data class YtelseMedGrunnlagDto(
-    val perioder: List<YtelseMedGrunnlagPeriodisertDto>,
+data class BeregningOgAvkortingDto(
+    val perioder: List<BeregningOgAvkortingPeriodeDto>,
+    // Hvis nytt beløp fra siste åpne periode er ulik den siste åpne perioden til forrige behandling
+    val endringIUtbetalingVedVirk: Boolean,
 )
 
-data class YtelseMedGrunnlagPeriodisertDto(
+data class BeregningOgAvkortingPeriodeDto(
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
     val restanse: Int,
@@ -132,6 +134,7 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val grunnbelop: Int,
     val grunnbelopMnd: Int,
     val beregningsMetode: BeregningsMetode?,
+    val beregningsMetodeFraGrunnlag: BeregningsMetode?,
     val sanksjon: SanksjonertYtelse?,
     val institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag?,
     val erOverstyrtInnvilgaMaaneder: Boolean,

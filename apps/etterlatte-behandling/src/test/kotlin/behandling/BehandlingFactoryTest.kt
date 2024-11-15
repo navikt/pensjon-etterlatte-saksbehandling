@@ -994,6 +994,7 @@ class BehandlingFactoryTest {
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
+        every { behandlingDaoMock.hentTidligereFamiliepleier(any()) } returns null
 
         val revurderingsBehandling =
             behandlingFactory

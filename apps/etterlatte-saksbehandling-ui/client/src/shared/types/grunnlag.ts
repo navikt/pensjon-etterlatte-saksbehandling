@@ -44,6 +44,7 @@ export interface PersongalleriSamsvar {
 }
 
 export type MismatchPersongalleri =
+  | 'ENDRET_SOEKER_FNR'
   | 'MANGLER_GJENLEVENDE'
   | 'MANGLER_AVDOED'
   | 'MANGLER_SOESKEN'

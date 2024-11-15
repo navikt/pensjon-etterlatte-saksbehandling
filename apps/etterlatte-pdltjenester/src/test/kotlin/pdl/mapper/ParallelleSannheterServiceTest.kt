@@ -15,6 +15,7 @@ import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlSivilstand
 import no.nav.etterlatte.pdl.PdlSivilstandstype
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
+import no.nav.etterlatte.pdlFolkeregisteridentifikator
 import no.nav.etterlatte.pdlHentPerson
 import no.nav.etterlatte.pdlMetadata
 import org.junit.jupiter.api.Assertions
@@ -48,13 +49,15 @@ internal class ParallelleSannheterServiceTest {
         val pdlHentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl)
 
         ppsKlient.setupMockToPickFirst(pdlHentPerson)
+        coEvery { ppsKlient.avklarFolkeregisteridentifikator(pdlHentPerson.folkeregisteridentifikator!!) } returns
+            pdlFolkeregisteridentifikator(SOEKER_FOEDSELSNUMMER.value)
         coEvery { ppsKlient.avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
         coEvery { ppsKlient.avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
         coEvery { ppsKlient.avklarStatsborgerskap(statsborgerskapPdl) } throws Exception("Whoops")
 
         val person =
             parallelleSannheterService.mapPerson(
-                fnr = SOEKER_FOEDSELSNUMMER,
+                oppslagFnr = SOEKER_FOEDSELSNUMMER,
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson,
                 saktyper = listOf(SakType.BARNEPENSJON),
@@ -89,7 +92,11 @@ internal class ParallelleSannheterServiceTest {
                     metadata = pdlMetadata(),
                 ),
             )
-        val pdlHentPerson = pdlHentPerson(sivilstand = pdlSivilstand)
+        val pdlHentPerson =
+            pdlHentPerson(
+                folkeregisteridentifikator = listOf(pdlFolkeregisteridentifikator(GJENLEVENDE_FOEDSELSNUMMER.value)),
+                sivilstand = pdlSivilstand,
+            )
 
         ppsKlient.setupMockToPickFirst(pdlHentPerson)
         coEvery { ppsKlient.avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
@@ -103,7 +110,7 @@ internal class ParallelleSannheterServiceTest {
 
         val person =
             parallelleSannheterService.mapPerson(
-                fnr = GJENLEVENDE_FOEDSELSNUMMER,
+                oppslagFnr = GJENLEVENDE_FOEDSELSNUMMER,
                 personRolle = PersonRolle.GJENLEVENDE,
                 hentPerson = pdlHentPerson,
                 saktyper = listOf(SakType.OMSTILLINGSSTOENAD),
@@ -137,7 +144,7 @@ internal class ParallelleSannheterServiceTest {
 
         val person =
             parallelleSannheterService.mapPerson(
-                fnr = SOEKER_FOEDSELSNUMMER,
+                oppslagFnr = SOEKER_FOEDSELSNUMMER,
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson,
                 saktyper = listOf(SakType.BARNEPENSJON),
@@ -157,7 +164,7 @@ internal class ParallelleSannheterServiceTest {
 
         val person =
             parallelleSannheterService.mapPerson(
-                fnr = SOEKER_FOEDSELSNUMMER,
+                oppslagFnr = SOEKER_FOEDSELSNUMMER,
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson,
                 saktyper = listOf(SakType.BARNEPENSJON),
@@ -168,6 +175,8 @@ internal class ParallelleSannheterServiceTest {
 }
 
 private fun ParallelleSannheterKlient.setupMockToPickFirst(pdlHentPerson: PdlHentPerson) {
+    coEvery { avklarFolkeregisteridentifikator(pdlHentPerson.folkeregisteridentifikator!!) } returns
+        pdlHentPerson.folkeregisteridentifikator!!.first()
     coEvery { avklarNavn(pdlHentPerson.navn) } returns pdlHentPerson.navn.first()
     coEvery { avklarFoedselsdato(pdlHentPerson.foedselsdato) } returns pdlHentPerson.foedselsdato.first()
     coEvery { avklarFoedested(pdlHentPerson.foedested) } returns pdlHentPerson.foedested.firstOrNull()

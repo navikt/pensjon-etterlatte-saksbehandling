@@ -82,7 +82,7 @@ class PersonService(
             } else {
                 // TODO: bruke mapOpplysningsperson også PersonDTO toPerson?
                 parallelleSannheterService.mapPerson(
-                    fnr = request.foedselsnummer,
+                    oppslagFnr = request.foedselsnummer,
                     personRolle = request.rolle,
                     hentPerson = it.data.hentPerson,
                     saktyper = request.saktyper,
@@ -273,7 +273,7 @@ class PersonService(
                 )?.plus(gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() })
 
         return Persongalleri(
-            soeker = mottakerAvYtelsen.value,
+            soeker = mottaker.foedselsnummer.value,
             innsender = innsender?.value,
             soesken = soesken.map { it.foedselsnummer.value },
             avdoed = avdoede.map { it.foedselsnummer.value },
@@ -330,11 +330,11 @@ class PersonService(
             )
 
         return Persongalleri(
-            soeker = mottakerAvYtelsen.value,
+            soeker = mottaker.foedselsnummer.value,
             innsender = innsender?.value,
             soesken = listOf(),
             avdoed = avdoede.map { it.foedselsnummer.value },
-            gjenlevende = listOf(mottakerAvYtelsen.value) + levende.map { it.foedselsnummer.value },
+            gjenlevende = listOf(mottaker.foedselsnummer.value) + levende.map { it.foedselsnummer.value },
             personerUtenIdent = personerUtenIdent.ifEmpty { null },
         )
     }

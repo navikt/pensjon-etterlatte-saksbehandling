@@ -31,6 +31,7 @@ import no.nav.etterlatte.personweb.familieOpplysninger.Bostedsadresse
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import no.nav.etterlatte.personweb.familieOpplysninger.Familierelasjon
 import no.nav.etterlatte.personweb.familieOpplysninger.Sivilstand
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -42,12 +43,25 @@ class ParallelleSannheterService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun mapPerson(
-        fnr: Folkeregisteridentifikator,
+        oppslagFnr: Folkeregisteridentifikator,
         personRolle: PersonRolle,
         hentPerson: PdlHentPerson,
         saktyper: List<SakType>,
     ): Person =
         runBlocking {
+            val fnr =
+                if (hentPerson.folkeregisteridentifikator == null) {
+                    logger.error(
+                        "Fikk person som mangler folkeregisteridentifikator i PDL. Se sikkerlogg for fnr som oppslaget ble utført med.",
+                    )
+                    sikkerLogg.error("Person med fnr=${oppslagFnr.value} mangler folkeregisteridentifikator i PDL")
+                    oppslagFnr
+                } else {
+                    ppsKlient
+                        .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
+                        .let { Folkeregisteridentifikator.of(it.identifikasjonsnummer) }
+                }
+
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
             val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
             val (statsborgerskap, pdlStatsborgerskap) =

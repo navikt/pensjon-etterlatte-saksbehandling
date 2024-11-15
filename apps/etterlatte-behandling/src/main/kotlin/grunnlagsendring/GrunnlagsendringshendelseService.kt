@@ -260,9 +260,10 @@ class GrunnlagsendringshendelseService(
         fnr: String,
         type: GrunnlagsendringsType,
         samsvar: SamsvarMellomKildeOgGrunnlag,
-    ): List<Grunnlagsendringshendelse> =
-        inTransaction {
-            runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
+    ): List<Grunnlagsendringshendelse> {
+        val personMedSakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
+        return inTransaction {
+            personMedSakerOgRoller
                 .asSequence()
                 .distinct()
                 .filter(::harRolleSoeker)
@@ -272,7 +273,9 @@ class GrunnlagsendringshendelseService(
                     val sakId = sakIdOgRolle.sakId
                     val hendelseId = UUID.randomUUID()
 
-                    logger.info("Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av type=$type på sak=$sakId")
+                    logger.info(
+                        "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av type=$type på sak=$sakId",
+                    )
 
                     grunnlagsendringshendelseDao
                         .opprettGrunnlagsendringshendelse(
@@ -298,12 +301,15 @@ class GrunnlagsendringshendelseService(
                                     merknad = hendelse.beskrivelse(),
                                 )
 
-                            logger.info("Oppgave med id=${oppgave.id} opprettet for grunnlagsendringshendelse med id=$hendelseId")
+                            logger.info(
+                                "Oppgave med id=${oppgave.id} opprettet for grunnlagsendringshendelse med id=$hendelseId",
+                            )
 
                             hendelse
                         }
                 }.toList()
         }
+    }
 
     private fun harSakIGjenny(rolleOgSak: SakidOgRolle) = sakService.finnSak(rolleOgSak.sakId) != null
 

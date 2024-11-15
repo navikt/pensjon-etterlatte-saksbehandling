@@ -50,6 +50,11 @@ enum class JobbType(
         JobbKategori.REGULERING,
         sakType = null,
     ),
+    AARLIG_INNTEKTSJUSTERING(
+        "Årlig inntektsjustering - varselbrev og utkast til vedtak",
+        JobbKategori.AARLIG_INNTEKTSJUSTERING,
+        sakType = SakType.OMSTILLINGSSTOENAD,
+    ),
 }
 
 enum class JobbKategori {

@@ -172,19 +172,6 @@ class AarligInntektsjusteringJobbServiceTest {
             personPdl.copy(etternavn = OpplysningDTO("endret etternavn", "")),
             personPdl.copy(foedselsdato = OpplysningDTO(LocalDate.of(1990, 2, 25), "")),
             personPdl.copy(doedsdato = OpplysningDTO(LocalDate.of(1990, 2, 25), "")),
-            personPdl.copy(
-                vergemaalEllerFremtidsfullmakt =
-                    listOf(
-                        OpplysningDTO(
-                            VergemaalEllerFremtidsfullmakt(
-                                embete = null,
-                                type = null,
-                                vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
-                            ),
-                            "",
-                        ),
-                    ),
-            ),
         )
 
     @Test

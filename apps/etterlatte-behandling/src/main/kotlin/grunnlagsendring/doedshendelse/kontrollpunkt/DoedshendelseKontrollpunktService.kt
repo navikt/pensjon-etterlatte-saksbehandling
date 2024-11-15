@@ -103,8 +103,8 @@ class DoedshendelseKontrollpunktService(
     ): Triple<Sak?, PersonDTO, PersonDTO> {
         val sakType = hendelse.sakTypeForEpsEllerBarn()
         val sak = sakService.finnSak(hendelse.beroertFnr, sakType)
-        val avdoed = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
-        val gjenlevende = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.beroertFnr, beroert, hendelse.sakTypeForEpsEllerBarn())
+        val avdoed = pdlTjenesterKlient.hentPdlModellForSaktype(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
+        val gjenlevende = pdlTjenesterKlient.hentPdlModellForSaktype(hendelse.beroertFnr, beroert, hendelse.sakTypeForEpsEllerBarn())
 
         return Triple(sak, avdoed, gjenlevende)
     }

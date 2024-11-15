@@ -362,7 +362,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
         } returns grunnlagsendringshendelse
 
-        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+        every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         val opprettedeHendelser =
             grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(fnr, GrunnlagsendringsType.DOEDSFALL)
         assertEquals(6, opprettedeHendelser.size)
@@ -389,7 +389,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             sakService.finnSak(sakId)
         } returns sak
-        every { pdlService.hentPdlModellFlereSaktyper(soekerFnr, any(), sak.sakType) } returns
+        every { pdlService.hentPdlModellForSaktype(soekerFnr, any(), sak.sakType) } returns
             mockPerson()
         coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
         every {
@@ -446,7 +446,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             sakService.finnSak(sakId)
         } returns sak
-        every { pdlService.hentPdlModellFlereSaktyper(soekerFnr, any(), sak.sakType) } returns
+        every { pdlService.hentPdlModellForSaktype(soekerFnr, any(), sak.sakType) } returns
             mockPerson()
         coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
         every {
@@ -509,7 +509,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             sakService.finnSak(sakId)
         } returns Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.defaultEnhet.enhetNr)
 
-        every { pdlService.hentPdlModellFlereSaktyper(soekerFnr, any(), SakType.OMSTILLINGSSTOENAD) } returns
+        every { pdlService.hentPdlModellForSaktype(soekerFnr, any(), SakType.OMSTILLINGSSTOENAD) } returns
             mockPerson()
         coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
         every {
@@ -552,7 +552,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 postnr = "2040",
                 adresseLinje1 = "Furukollveien 189",
             )
-        every { pdlService.hentPdlModellFlereSaktyper(gjenlevendeFnr, any(), SakType.BARNEPENSJON) } returns
+        every { pdlService.hentPdlModellForSaktype(gjenlevendeFnr, any(), SakType.BARNEPENSJON) } returns
             mockPerson()
                 .copy(bostedsadresse = listOf(OpplysningDTO(bostedAdresse, "adresse")))
         coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
@@ -681,7 +681,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         coVerify(exactly = 1) { grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr) }
 
-        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+        every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
 
         sakIder.forEach {
             verify(exactly = 1) {
@@ -729,7 +729,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coVerify(exactly = 1) { grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr) }
         verify(exactly = 2) { sakService.finnSak(any()) }
 
-        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+        every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
 
         verify(exactly = 0) {
             sakService.oppdaterAdressebeskyttelse(
@@ -824,7 +824,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
-        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+        every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
 
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()

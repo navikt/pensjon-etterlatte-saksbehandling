@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 interface PdlTjenesterKlient : Pingable {
-    fun hentPdlModellFlereSaktyper(
+    fun hentPdlModellForSaktype(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,
@@ -112,7 +112,7 @@ class PdlTjenesterKlientImpl(
         return response
     }
 
-    override fun hentPdlModellFlereSaktyper(
+    override fun hentPdlModellForSaktype(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,

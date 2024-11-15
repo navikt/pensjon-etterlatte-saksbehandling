@@ -123,7 +123,7 @@ internal class DoedshendelseServiceTest {
         } returns avdoed.copy(avdoedesBarn = listOf(fellesbarn, fellesbarn), bostedsadresse = bostedsadresse)
 
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 annenForelder.value,
                 PersonRolle.TILKNYTTET_BARN,
                 SakType.OMSTILLINGSSTOENAD,
@@ -220,7 +220,7 @@ internal class DoedshendelseServiceTest {
             )
 
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 annenForelder.value,
                 PersonRolle.TILKNYTTET_BARN,
                 SakType.OMSTILLINGSSTOENAD,
@@ -328,7 +328,7 @@ internal class DoedshendelseServiceTest {
             )
 
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 annenForelder.value,
                 PersonRolle.TILKNYTTET_BARN,
                 SakType.OMSTILLINGSSTOENAD,

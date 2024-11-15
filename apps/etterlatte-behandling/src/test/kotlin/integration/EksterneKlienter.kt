@@ -614,7 +614,7 @@ class KodeverkKlientTest : KodeverkKlient {
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {
-    override fun hentPdlModellFlereSaktyper(
+    override fun hentPdlModellForSaktype(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,

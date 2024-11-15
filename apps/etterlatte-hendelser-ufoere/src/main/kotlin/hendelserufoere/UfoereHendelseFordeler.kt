@@ -36,6 +36,7 @@ class UfoereHendelseFordeler(
             }
         } catch (e: Exception) {
             loggFeilVedHaandteringAvHendelse(hendelse.vedtaksType, e)
+            throw e
         }
     }
 

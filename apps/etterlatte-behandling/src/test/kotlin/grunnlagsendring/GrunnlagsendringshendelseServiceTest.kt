@@ -1,5 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -61,7 +63,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -150,7 +154,13 @@ internal class GrunnlagsendringshendelseServiceTest {
                 listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
             )
         } returns
-            listOf(grlhendelse.copy(id = randomUUID(), samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse, gjelderPerson = sak.ident))
+            listOf(
+                grlhendelse.copy(
+                    id = randomUUID(),
+                    samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse,
+                    gjelderPerson = sak.ident,
+                ),
+            )
         val erDuplikatHvisGjelderPersonErSakident =
             grunnlagsendringshendelseService.erDuplikatHendelse(
                 sakId,
@@ -209,7 +219,10 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
 
         every {
-            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            )
         } returns emptyList()
 
         val erIkkeDuplikat =
@@ -222,7 +235,10 @@ internal class GrunnlagsendringshendelseServiceTest {
         assertFalse(erIkkeDuplikat)
 
         every {
-            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            )
         } returns listOf(grlhendelse.copy(id = randomUUID(), samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse))
 
         val erDuplikat =
@@ -356,7 +372,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     @EnumSource(
         GrunnlagsendringsType::class,
         mode = EnumSource.Mode.EXCLUDE,
-        names = ["INSTITUSJONSOPPHOLD", "SIVILSTAND"],
+        names = ["INSTITUSJONSOPPHOLD", "SIVILSTAND", "UFOERETRYGD"],
     )
     fun `Gyldige hendelser for saktype BP`(grltype: GrunnlagsendringsType) {
         val soekerFnr = KONTANT_FOT.value
@@ -377,7 +393,10 @@ internal class GrunnlagsendringshendelseServiceTest {
             mockPerson()
         coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
         every {
-            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            )
         } returns emptyList()
         every { behandlingService.hentBehandlingerForSak(sak.id) } returns emptyList()
         val grunnlagsendringshendelse =
@@ -410,7 +429,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     @EnumSource(
         GrunnlagsendringsType::class,
         mode = EnumSource.Mode.EXCLUDE,
-        names = ["INSTITUSJONSOPPHOLD"],
+        names = ["INSTITUSJONSOPPHOLD", "UFOERETRYGD"],
     )
     fun `Gyldige hendelser for saktype OMS`(grltype: GrunnlagsendringsType) {
         val soekerFnr = KONTANT_FOT.value
@@ -431,7 +450,10 @@ internal class GrunnlagsendringshendelseServiceTest {
             mockPerson()
         coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
         every {
-            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            )
         } returns emptyList()
         every { behandlingService.hentBehandlingerForSak(sak.id) } returns emptyList()
         val grunnlagsendringshendelse =
@@ -491,7 +513,10 @@ internal class GrunnlagsendringshendelseServiceTest {
             mockPerson()
         coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
         every {
-            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            )
         } returns emptyList()
         val grlhendelse =
             grunnlagsendringshendelseMedSamsvar(
@@ -569,7 +594,10 @@ internal class GrunnlagsendringshendelseServiceTest {
         } returns grlhendelse
 
         every {
-            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            )
         } returns listOf(grlhendelse)
         grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(gjenlevendeFnr, GrunnlagsendringsType.BOSTED)
 
@@ -805,5 +833,96 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         assertEquals(hendelseSomLagres.captured.type, GrunnlagsendringsType.GRUNNBELOEP)
         assertEquals(hendelseSomLagres.captured.sakId, sakId)
+    }
+
+    @Test
+    fun `Skal opprette hendelse for ufoeretrygd hvis sak finnes og er loepende`() {
+        val sakId = sakId1
+        val fnr = KONTANT_FOT.value
+
+        val hendelse =
+            UfoereHendelse(
+                personIdent = fnr,
+                fodselsdato = LocalDate.of(2024, Month.APRIL, 1),
+                virkningsdato = LocalDate.of(2024, Month.APRIL, 1),
+                vedtaksType = VedtaksType.INNV,
+            )
+
+        every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
+            .returns(
+                PersonMedSakerOgRoller(
+                    KONTANT_FOT.value,
+                    listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)),
+                ),
+            )
+
+        every { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any()) } returns mockk(relaxed = true)
+        every { oppgaveService.opprettOppgave(any(), sakId, OppgaveKilde.HENDELSE, OppgaveType.VURDER_KONSEKVENS, any(), any()) } returns
+            mockk(relaxed = true)
+        every { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(sakId, GrunnlagsendringsType.UFOERETRYGD) } returns true
+
+        val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
+
+        grunnlagsendringsshendelser.shouldNotBeEmpty()
+    }
+
+    @Test
+    fun `Skal ikke opprette hendelse for ufoeretrygd hvis sak finnes men ikke er loepende`() {
+        val sakId = sakId1
+        val fnr = KONTANT_FOT.value
+
+        val hendelse =
+            UfoereHendelse(
+                personIdent = fnr,
+                fodselsdato = LocalDate.of(2024, Month.APRIL, 1),
+                virkningsdato = LocalDate.of(2024, Month.APRIL, 1),
+                vedtaksType = VedtaksType.INNV,
+            )
+
+        every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
+            .returns(
+                PersonMedSakerOgRoller(
+                    KONTANT_FOT.value,
+                    listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)),
+                ),
+            )
+
+        every { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(sakId, GrunnlagsendringsType.UFOERETRYGD) } returns false
+
+        val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
+
+        grunnlagsendringsshendelser.shouldBeEmpty()
+    }
+
+    @Test
+    fun `Skal ikke opprette hendelse for ufoeretrygd hvis sak ikke finnes`() {
+        val sakId = sakId1
+        val fnr = KONTANT_FOT.value
+
+        val hendelse =
+            UfoereHendelse(
+                personIdent = fnr,
+                fodselsdato = LocalDate.of(2024, Month.APRIL, 1),
+                virkningsdato = LocalDate.of(2024, Month.APRIL, 1),
+                vedtaksType = VedtaksType.INNV,
+            )
+
+        every { sakService.finnSak(sakId) } returns null
+
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
+            .returns(
+                PersonMedSakerOgRoller(
+                    KONTANT_FOT.value,
+                    listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)),
+                ),
+            )
+
+        val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
+
+        grunnlagsendringsshendelser.shouldBeEmpty()
     }
 }

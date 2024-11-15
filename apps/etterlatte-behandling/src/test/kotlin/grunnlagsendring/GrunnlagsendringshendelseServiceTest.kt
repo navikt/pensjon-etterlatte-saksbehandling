@@ -63,7 +63,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -838,7 +840,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = sakId1
         val fnr = KONTANT_FOT.value
 
-        val hendelse = UfoereHendelse(fnr, "2024-01-01", "2024-01-01", "INNVILGELSE")
+        val hendelse =
+            UfoereHendelse(
+                personIdent = fnr,
+                fodselsdato = LocalDate.of(2024, Month.APRIL, 1),
+                virkningsdato = LocalDate.of(2024, Month.APRIL, 1),
+                vedtaksType = VedtaksType.INNV,
+            )
 
         every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
@@ -865,7 +873,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = sakId1
         val fnr = KONTANT_FOT.value
 
-        val hendelse = UfoereHendelse(fnr, "2024-01-01", "2024-01-01", "INNVILGELSE")
+        val hendelse =
+            UfoereHendelse(
+                personIdent = fnr,
+                fodselsdato = LocalDate.of(2024, Month.APRIL, 1),
+                virkningsdato = LocalDate.of(2024, Month.APRIL, 1),
+                vedtaksType = VedtaksType.INNV,
+            )
 
         every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
@@ -889,7 +903,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = sakId1
         val fnr = KONTANT_FOT.value
 
-        val hendelse = UfoereHendelse(fnr, "2024-01-01", "2024-01-01", "INNVILGELSE")
+        val hendelse =
+            UfoereHendelse(
+                personIdent = fnr,
+                fodselsdato = LocalDate.of(2024, Month.APRIL, 1),
+                virkningsdato = LocalDate.of(2024, Month.APRIL, 1),
+                vedtaksType = VedtaksType.INNV,
+            )
 
         every { sakService.finnSak(sakId) } returns null
 

@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseService: GrunnlagsendringshendelseService) {
     val logger = LoggerFactory.getLogger("GrunnlagsendringhendelseRoute")
@@ -146,10 +147,15 @@ data class GrunnlagsendringsListe(
     val hendelser: List<Grunnlagsendringshendelse>,
 )
 
-// TODO bør denne flyttes til lib?
 data class UfoereHendelse(
     val personIdent: String,
-    val fodselsdato: String,
-    val virkningsdato: String,
-    val vedtaksType: String,
+    val fodselsdato: LocalDate,
+    val virkningsdato: LocalDate,
+    val vedtaksType: VedtaksType,
 )
+
+enum class VedtaksType {
+    INNV,
+    ENDR,
+    OPPH,
+}

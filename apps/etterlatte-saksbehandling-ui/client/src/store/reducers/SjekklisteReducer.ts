@@ -22,7 +22,8 @@ export const sjekklisteReducer = createReducer(initialState, (builder) => {
   builder.addCase(updateSjekklisteItem, (state, action) => {
     const oppdatertItem = action.payload
     if(state.sjekkliste) {
-      const updatedList = state.sjekkliste!.sjekklisteItems.map((it) => (it.id === oppdatertItem.id ? oppdatertItem : it))
+      const updatedList = state.sjekkliste.sjekklisteItems
+        .map((it) => (it.id === oppdatertItem.id ? oppdatertItem : it))
       state.sjekkliste.sjekklisteItems =  updatedList
     }
   })

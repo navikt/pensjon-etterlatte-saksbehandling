@@ -52,6 +52,7 @@ export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
 export const resetViderefoertOpphoer = createAction('behandling/viderefoert-opphoer/reset')
+export const oppdaterDetaljertBehandling = createAction<IDetaljertBehandling>('behandling/oppdater')
 
 export interface IBehandlingReducer extends IDetaljertBehandling {
   beregningsGrunnlag?: BeregningsGrunnlagDto
@@ -69,6 +70,9 @@ const initialState: { behandling: IBehandlingReducer | null } = {
 export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(setBehandling, (state, action) => {
     state.behandling = action.payload
+  })
+  builder.addCase(oppdaterDetaljertBehandling, (state, action) => {
+    state.behandling = { ...state.behandling, ...action.payload }
   })
   builder.addCase(resetBehandling, (state) => {
     state.behandling = null

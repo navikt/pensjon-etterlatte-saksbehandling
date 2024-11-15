@@ -14,7 +14,10 @@ Bygget med Kotlin, Rapids & Rivers og [Ktor](https://ktor.io/).
 
 ### Kjøre lokalt
 
-Appen er ikke satt opp for kunne kjøres lokalt p.t.
+- Kjør opp kafka med `docker-compose up`
+- Hent ned secret med `get-secret`
+- Start appen som normalt (spesifiser eventuelt om den skal gå mot lokal behandling)
+- For å sende en payload til kafka-topicen kjør ` jq -c . test.json | docker exec -i etterlatte-hendelser-ufoere-kafka-1 kafka-console-producer.sh --bootstrap-server localhost:9092 --topic etterlatte`. Merk at jq må være installert.
 
 ## Bygg og deploy
 

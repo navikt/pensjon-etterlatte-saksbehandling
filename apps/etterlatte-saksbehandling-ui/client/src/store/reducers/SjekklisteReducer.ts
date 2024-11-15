@@ -21,10 +21,11 @@ export const sjekklisteReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(updateSjekklisteItem, (state, action) => {
     const oppdatertItem = action.payload
-    if(state.sjekkliste) {
-      const updatedList = state.sjekkliste.sjekklisteItems
-        .map((it) => (it.id === oppdatertItem.id ? oppdatertItem : it))
-      state.sjekkliste.sjekklisteItems =  updatedList
+    if (state.sjekkliste) {
+      const updatedList = state.sjekkliste.sjekklisteItems.map((it) =>
+        it.id === oppdatertItem.id ? oppdatertItem : it
+      )
+      state.sjekkliste.sjekklisteItems = updatedList
     }
   })
   builder.addCase(addValideringsfeil, (state, action) => {

@@ -184,11 +184,6 @@ class AarligInntektsjusteringJobbService(
                 return@inTransaction
             }
 
-            if (opplysningerGjenny.opplysning.vergemaalEllerFremtidsfullmakt?.isNotEmpty() == true) {
-                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, VERGEMAAL)
-                return@inTransaction
-            }
-
             oppdaterKjoering(kjoering, KjoeringStatus.KLAR_FOR_OMREGNING, sakId)
             publiserKlarForOmregning(sakId, loependeFom, kjoering)
         } catch (e: Exception) {

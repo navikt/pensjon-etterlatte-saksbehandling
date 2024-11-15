@@ -37,10 +37,6 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
     innloggetSaksbehandler.skriveEnheter
   )
 
-  if (!behandles) {
-    return null
-  }
-
   const {
     control,
     handleSubmit,
@@ -49,6 +45,10 @@ export default function AnnullerBehandling({ behandlingType }: { behandlingType:
   } = useForm<AvbrytBehandlingRequest>({
     defaultValues: { aarsakTilAvbrytelse: AarsakTilAvsluttingFoerstegangsbehandling.ANNET, kommentar: '' },
   })
+
+  if (!behandles) {
+    return null
+  }
 
   const avbryt = (data: AvbrytBehandlingRequest) => {
     avbrytBehandlingen({ id: behandling!!.id, avbrytBehandlingRequest: data }, () => {

@@ -164,9 +164,9 @@ class GrunnlagsendringshendelseService(
                 ),
         )
 
-    fun opprettUfoeretrygdhendelse(hendelse: UfoeretrygdHendelse): List<Grunnlagsendringshendelse> =
+    fun opprettUfoerehendelse(hendelse: UfoereHendelse): List<Grunnlagsendringshendelse> =
         opprettHendelseAvTypeForPersonMedSamsvar(
-            fnr = hendelse.ident,
+            fnr = hendelse.personIdent,
             type = GrunnlagsendringsType.UFOERETRYGD,
             samsvar =
                 SamsvarMellomKildeOgGrunnlag.Ufoeretrygd(

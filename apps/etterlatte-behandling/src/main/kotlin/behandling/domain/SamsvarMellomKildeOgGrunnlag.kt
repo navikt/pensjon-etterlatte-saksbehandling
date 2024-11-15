@@ -2,7 +2,7 @@ package no.nav.etterlatte.behandling.domain
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import no.nav.etterlatte.grunnlagsendring.UfoeretrygdHendelse
+import no.nav.etterlatte.grunnlagsendring.UfoereHendelse
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -85,7 +85,7 @@ sealed class SamsvarMellomKildeOgGrunnlag {
     @JsonTypeName("UFOERETRYGD")
     data class Ufoeretrygd(
         override val samsvar: Boolean,
-        val hendelse: UfoeretrygdHendelse,
+        val hendelse: UfoereHendelse,
     ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("ADRESSE")

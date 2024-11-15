@@ -838,7 +838,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = sakId1
         val fnr = KONTANT_FOT.value
 
-        val hendelse = UfoeretrygdHendelse(ident = fnr, hendelseId = 1L)
+        val hendelse = UfoereHendelse(fnr, "2024-01-01", "2024-01-01", "INNVILGELSE")
 
         every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
@@ -855,7 +855,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             mockk(relaxed = true)
         every { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(sakId, GrunnlagsendringsType.UFOERETRYGD) } returns true
 
-        val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoeretrygdhendelse(hendelse)
+        val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
 
         grunnlagsendringsshendelser.shouldNotBeEmpty()
     }
@@ -865,7 +865,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = sakId1
         val fnr = KONTANT_FOT.value
 
-        val hendelse = UfoeretrygdHendelse(ident = fnr, hendelseId = 1L)
+        val hendelse = UfoereHendelse(fnr, "2024-01-01", "2024-01-01", "INNVILGELSE")
 
         every { sakService.finnSak(sakId) } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
@@ -879,7 +879,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         every { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(sakId, GrunnlagsendringsType.UFOERETRYGD) } returns false
 
-        val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoeretrygdhendelse(hendelse)
+        val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
 
         grunnlagsendringsshendelser.shouldBeEmpty()
     }
@@ -889,7 +889,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = sakId1
         val fnr = KONTANT_FOT.value
 
-        val hendelse = UfoeretrygdHendelse(ident = fnr, hendelseId = 1L)
+        val hendelse = UfoereHendelse(fnr, "2024-01-01", "2024-01-01", "INNVILGELSE")
 
         every { sakService.finnSak(sakId) } returns null
 
@@ -901,7 +901,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 ),
             )
 
-        val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoeretrygdhendelse(hendelse)
+        val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
 
         grunnlagsendringsshendelser.shouldBeEmpty()
     }

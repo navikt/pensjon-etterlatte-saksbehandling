@@ -115,9 +115,9 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
 
         post("/ufoeretrygd") {
             kunSystembruker {
-                val hendelse = call.receive<UfoeretrygdHendelse>()
-                logger.info("Mottar en uføretrygd-hendelse")
-                grunnlagsendringshendelseService.opprettUfoeretrygdhendelse(hendelse)
+                val hendelse = call.receive<UfoereHendelse>()
+                logger.info("Mottar en hendelse fra uføre")
+                grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -146,7 +146,10 @@ data class GrunnlagsendringsListe(
     val hendelser: List<Grunnlagsendringshendelse>,
 )
 
-data class UfoeretrygdHendelse(
-    val hendelseId: Long,
-    val ident: String,
+// TODO bør denne flyttes til lib?
+data class UfoereHendelse(
+    val personIdent: String,
+    val fodselsdato: String,
+    val virkningsdato: String,
+    val vedtaksType: String,
 )

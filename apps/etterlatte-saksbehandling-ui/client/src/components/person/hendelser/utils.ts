@@ -47,6 +47,8 @@ export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType
       return 'Gjenny'
     case 'INSTITUSJONSOPPHOLD':
       return 'Inst2'
+    case 'UFOERETRYGD':
+      return 'Pesys'
     case 'DOEDSDATO':
     case 'UTLAND':
     case 'BARN':

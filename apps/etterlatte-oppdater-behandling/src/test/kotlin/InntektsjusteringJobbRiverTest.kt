@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -19,7 +20,6 @@ import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
-import no.nav.etterlatte.rapidsandrivers.RapidEvents.LOEPENDE_FOM
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -28,7 +28,7 @@ import java.time.YearMonth
 
 class InntektsjusteringJobbRiverTest {
     private val kjoering = "inntektsjustering-jobb-2024"
-    private val loependeFom = YearMonth.of(2024, 1)
+    private val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
 
     @Test
     fun `teste start inntektsjustering jobb aktivert`() {
@@ -112,7 +112,6 @@ class InntektsjusteringJobbRiverTest {
                     ANTALL to 12000,
                     SPESIFIKKE_SAKER to listOf<SakId>(),
                     EKSKLUDERTE_SAKER to listOf<SakId>(),
-                    LOEPENDE_FOM to loependeFom.atDay(1),
                 ),
             ).toJson()
 

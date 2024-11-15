@@ -10,6 +10,8 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING
@@ -51,7 +53,6 @@ import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
-import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
@@ -66,6 +67,7 @@ class AarligInntektsjusteringJobbService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val oppgaveService: OppgaveService,
     private val rapid: KafkaProdusent<String, String>,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -94,8 +96,7 @@ class AarligInntektsjusteringJobbService(
             )
         }
 
-        // TODO: bør defineres i en utils slik at den kan gjenbrukes på tvers av all logikk knytt til inntektsjustering
-        val loependeFom = YearMonth.of(Year.now().value, 1).plusYears(1)
+        val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
         val revurdering = nyManuellRevurdering(sakId, hentForrigeBehandling(sakId), loependeFom)
         oppgaveService.ferdigstillOppgave(oppgaveId, saksbehandler)
         return revurdering
@@ -220,6 +221,15 @@ class AarligInntektsjusteringJobbService(
         kjoering: String,
         aarsakTilManuell: AarligInntektsjusteringAarsakManuell,
     ) {
+        if (!manuellBehandlingSkruddPaa()) {
+            oppdaterKjoering(
+                kjoering,
+                KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE,
+                sakId,
+                aarsakTilManuell.name,
+            )
+            return
+        }
         oppgaveService.opprettOppgave(
             referanse = forrigeBehandlingId.toString(),
             sakId = sakId,
@@ -242,6 +252,15 @@ class AarligInntektsjusteringJobbService(
         kjoering: String,
         aarsakTilManuell: AarligInntektsjusteringAarsakManuell,
     ) {
+        if (!manuellBehandlingSkruddPaa()) {
+            oppdaterKjoering(
+                kjoering,
+                KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE,
+                sakId,
+                aarsakTilManuell.name,
+            )
+            return
+        }
         nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
         oppdaterKjoering(
             kjoering,
@@ -359,6 +378,9 @@ class AarligInntektsjusteringJobbService(
                     HardkodaSystembruker.omregning,
                 ).innsender ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
         }
+
+    private fun manuellBehandlingSkruddPaa(): Boolean =
+        featureToggleService.isEnabled(ManuellBehandlingToggle.MANUELL_BEHANDLING, defaultValue = false)
 }
 
 enum class AarligInntektsjusteringAarsakManuell {
@@ -368,4 +390,13 @@ enum class AarligInntektsjusteringAarsakManuell {
     TIL_SAMORDNING,
     AAPEN_BEHANDLING,
     HAR_SANKSJON,
+}
+
+enum class ManuellBehandlingToggle(
+    val value: String,
+) : FeatureToggle {
+    MANUELL_BEHANDLING("aarlig-inntektsjustering-la-manuell-behandling"),
+    ;
+
+    override fun key(): String = this.value
 }

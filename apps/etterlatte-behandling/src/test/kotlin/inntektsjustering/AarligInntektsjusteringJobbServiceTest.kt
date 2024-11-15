@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -62,6 +63,7 @@ class AarligInntektsjusteringJobbServiceTest {
     private val pdlTjenesterKlient: PdlTjenesterKlient = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val rapid: KafkaProdusent<String, String> = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     val service =
         AarligInntektsjusteringJobbService(
@@ -75,6 +77,7 @@ class AarligInntektsjusteringJobbServiceTest {
             pdlTjenesterKlient,
             oppgaveService,
             rapid,
+            featureToggleService,
         )
 
     @BeforeAll
@@ -85,6 +88,7 @@ class AarligInntektsjusteringJobbServiceTest {
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
+        every { featureToggleService.isEnabled(any(), any()) } returns true
 
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
         coEvery {

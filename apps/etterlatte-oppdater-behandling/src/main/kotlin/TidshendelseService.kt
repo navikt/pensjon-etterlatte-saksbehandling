@@ -56,7 +56,13 @@ class TidshendelseService(
             logger.info("Har migrert yrkesskadefordel: utvidet aldersgrense [sak=${hendelse.sakId}]")
             return true
         }
-        if (hendelse.jobbtype in arrayOf(JobbType.OMS_DOED_3AAR, JobbType.OMS_DOED_5AAR) && hendelse.harRettUtenTidsbegrensning) {
+        if (hendelse.jobbtype in
+            arrayOf(
+                JobbType.OMS_DOED_3AAR,
+                JobbType.OMS_DOED_5AAR,
+            ) &&
+            hendelse.harRettUtenTidsbegrensning
+        ) {
             logger.info("Har omstillingsstønad med rett uten tidsbegrensning, opphører ikke [sak=${hendelse.sakId}]")
             return true
         }
@@ -118,6 +124,7 @@ class TidshendelseService(
                 )
                 TidshendelseResult.OpprettetOppgave(response.oppgaveId!!)
             }
+
             else -> TidshendelseResult.Skipped
         }
     }
@@ -189,6 +196,7 @@ class TidshendelseService(
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> false
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
+            JobbType.AARLIG_INNTEKTSJUSTERING,
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: ${hendelse.jobbtype}")
         }
 
@@ -205,6 +213,7 @@ class TidshendelseService(
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
+            JobbType.AARLIG_INNTEKTSJUSTERING,
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: $type")
         }
 }

@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 cd ./apps/etterlatte-saksbehandling-ui
 yarn lint-staged --cwd ./client
 yarn lint-staged --cwd ./server

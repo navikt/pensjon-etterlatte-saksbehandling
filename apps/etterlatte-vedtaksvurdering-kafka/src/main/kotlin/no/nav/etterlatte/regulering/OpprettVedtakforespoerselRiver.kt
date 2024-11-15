@@ -72,8 +72,9 @@ internal class OpprettVedtakforespoerselRiver(
 
         val respons =
             if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
+                val vedtak = vedtak.opprettVedtakOgFatt(sakId, behandlingId)
                 opprettBrev(behandlingId, sakId, revurderingaarsak)
-                vedtak.opprettVedtakOgFatt(sakId, behandlingId)
+                vedtak
             } else {
                 when (omregningData.utbetalingVerifikasjon) {
                     UtbetalingVerifikasjon.INGEN -> {

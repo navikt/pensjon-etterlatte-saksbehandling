@@ -56,4 +56,5 @@ enum class JobbKategori {
     ALDERSOVERGANG,
     OMS_DOEDSDATO,
     REGULERING,
+    AARLIG_INNTEKTSJUSTERING,
 }

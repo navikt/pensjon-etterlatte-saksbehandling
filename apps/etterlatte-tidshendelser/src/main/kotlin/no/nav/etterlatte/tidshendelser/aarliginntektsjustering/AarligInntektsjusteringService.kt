@@ -42,7 +42,7 @@ fun createRecord(konfigurasjon: Reguleringskonfigurasjon) =
         .newMessage(
             mapOf(
                 InntektsjusteringHendelseType.START_INNTEKTSJUSTERING_JOBB.lagParMedEventNameKey(),
-                ReguleringEvents.DATO to AarligInntektsjusteringRequest.utledLoependeFom(),
+                ReguleringEvents.DATO to AarligInntektsjusteringRequest.utledLoependeFom().atDay(1),
                 RapidEvents.KJOERING to AarligInntektsjusteringRequest.utledKjoering(),
                 RapidEvents.ANTALL to konfigurasjon.antall,
                 RapidEvents.SPESIFIKKE_SAKER to konfigurasjon.spesifikkeSaker.tilSeparertString(),

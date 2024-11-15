@@ -19,8 +19,8 @@ import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
-import no.nav.etterlatte.rapidsandrivers.RapidEvents.LOEPENDE_FOM
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.DATO
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -112,7 +112,7 @@ class InntektsjusteringJobbRiverTest {
                     ANTALL to 12000,
                     SPESIFIKKE_SAKER to listOf<SakId>(),
                     EKSKLUDERTE_SAKER to listOf<SakId>(),
-                    LOEPENDE_FOM to loependeFom.atDay(1),
+                    DATO to loependeFom.atDay(1),
                 ),
             ).toJson()
 

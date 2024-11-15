@@ -113,15 +113,16 @@ class AarligInntektsjusteringJobbService(
                 runBlocking {
                     vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
                 }
-            if (!vedtak.erLoepende) {
-                oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, "Sak er ikke løpende")
-                return@inTransaction
-            }
 
             val forrigeBehandling = hentForrigeBehandling(sakId)
 
             if (vedtak.underSamordning) {
                 nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, TIL_SAMORDNING)
+                return@inTransaction
+            }
+
+            if (!vedtak.erLoepende) {
+                oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, "Sak er ikke løpende")
                 return@inTransaction
             }
 

@@ -25,4 +25,5 @@ enum class KlageinstansUtfall(
     AVVIST("Avvist KA"),
     INNSTILLING_STADFESTELSE("Innstilling om stadfestelse til trygderetten fra KA"),
     INNSTILLING_AVVIST("Innstilling om avist til trygderetten fra KA"),
+    MEDHOLD_ETTER_FVL_35("Medhold Etter Fvl 35"),
 }

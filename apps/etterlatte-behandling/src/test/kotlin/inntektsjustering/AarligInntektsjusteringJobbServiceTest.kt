@@ -153,7 +153,6 @@ class AarligInntektsjusteringJobbServiceTest {
                 any(),
                 any(),
                 any(),
-                any(),
             )
         } returns
             mockk {
@@ -213,7 +212,6 @@ class AarligInntektsjusteringJobbServiceTest {
                 frist = any(),
                 paaGrunnAvOppgave = any(),
                 opphoerFraOgMed = any(),
-                tidligereFamiliepleier = any(),
             )
         }
 

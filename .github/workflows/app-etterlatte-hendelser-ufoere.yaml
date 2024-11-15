@@ -1,0 +1,48 @@
+name: etterlatte-hendelser-ufoere
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+    inputs:
+      deploy-prod:
+        description: 'Deploy til produksjon'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - true
+          - false
+  push:
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-hendelser-ufoere/**
+      - libs/saksbehandling-common/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
+      - gradle/libs.versions.toml
+      - "!**/test/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-hendelser-ufoere/**
+      - "!apps/etterlatte-hendelser-ufoere/.nais/*"
+      - libs/saksbehandling-common/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
+      - gradle/libs.versions.toml
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.test.yaml
+    secrets: inherit
+
+  build-and-deploy:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/.build-and-deploy.yaml
+    secrets: inherit

@@ -1010,6 +1010,7 @@ class BehandlingFactoryTest {
         verify {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            behandlingDaoMock.hentTidligereFamiliepleier(any())
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
         verify(exactly = 2) {

@@ -5,7 +5,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
-import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
@@ -13,7 +12,6 @@ import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.antall
-import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
 import no.nav.etterlatte.rapidsandrivers.kjoering
 import no.nav.etterlatte.rapidsandrivers.saker
@@ -22,7 +20,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 
 internal class InntektsjusteringJobbRiver(
     rapidsConnection: RapidsConnection,
@@ -35,7 +32,6 @@ internal class InntektsjusteringJobbRiver(
         initialiserRiver(rapidsConnection, InntektsjusteringHendelseType.START_INNTEKTSJUSTERING_JOBB) {
             validate { it.requireKey(KJOERING) }
             validate { it.requireKey(ANTALL) }
-            validate { it.requireKey(DATO_KEY) }
             validate { it.interestedIn(SPESIFIKKE_SAKER) }
             validate { it.interestedIn(EKSKLUDERTE_SAKER) }
         }
@@ -55,7 +51,7 @@ internal class InntektsjusteringJobbRiver(
 
         val antall = packet.antall
         val sakType = SakType.OMSTILLINGSSTOENAD
-        val loependeFom = YearMonth.from(packet.dato)
+        val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
 
         kjoerIBatch(
             logger = logger,
@@ -76,7 +72,6 @@ internal class InntektsjusteringJobbRiver(
                 val request =
                     AarligInntektsjusteringRequest(
                         kjoering = kjoering,
-                        loependeFom = loependeFom,
                         saker = sakerSomSkalInformeres.saker.map { it.id },
                     )
                 behandlingService.startAarligInntektsjustering(request)

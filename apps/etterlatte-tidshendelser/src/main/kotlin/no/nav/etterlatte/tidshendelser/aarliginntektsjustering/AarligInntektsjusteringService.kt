@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRe
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.RapidEvents
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.tilSeparertString
 import no.nav.etterlatte.tidshendelser.HendelserJobb
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
@@ -42,7 +41,6 @@ fun createRecord(konfigurasjon: Reguleringskonfigurasjon) =
         .newMessage(
             mapOf(
                 InntektsjusteringHendelseType.START_INNTEKTSJUSTERING_JOBB.lagParMedEventNameKey(),
-                ReguleringEvents.DATO to AarligInntektsjusteringRequest.utledLoependeFom().atDay(1),
                 RapidEvents.KJOERING to AarligInntektsjusteringRequest.utledKjoering(),
                 RapidEvents.ANTALL to konfigurasjon.antall,
                 RapidEvents.SPESIFIKKE_SAKER to konfigurasjon.spesifikkeSaker.tilSeparertString(),

@@ -55,7 +55,7 @@ internal class DoedshendelseKontrollpunktBarnService(
                 DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
             } else {
                 pdlTjenesterKlient
-                    .hentPdlModellFlereSaktyper(
+                    .hentPdlModellForSaktype(
                         foedselsnummer = annenForelderFnr,
                         rolle = PersonRolle.GJENLEVENDE,
                         saktype = SakType.BARNEPENSJON,

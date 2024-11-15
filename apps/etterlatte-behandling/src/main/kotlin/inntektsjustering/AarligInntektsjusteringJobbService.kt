@@ -163,17 +163,22 @@ class AarligInntektsjusteringJobbService(
 
             val opplysningerGjenny = hentOpplysningerGjenny(sak, forrigeBehandling.id)
 
+            val opplysningerPdl = hentPdlPersonopplysning(sak)
+
+            if (!opplysningerPdl.vergemaalEllerFremtidsfullmakt.isNullOrEmpty()) {
+                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, VERGEMAAL)
+                return@inTransaction
+            }
             val opplysningerErUendretIPdl =
-                hentPdlPersonopplysning(sak).let { opplysningerPdl ->
-                    with(opplysningerGjenny.opplysning) {
-                        fornavn == opplysningerPdl.fornavn.verdi &&
-                            mellomnavn == opplysningerPdl.mellomnavn?.verdi &&
-                            etternavn == opplysningerPdl.etternavn.verdi &&
-                            foedselsdato == opplysningerPdl.foedselsdato?.verdi &&
-                            doedsdato == opplysningerPdl.doedsdato?.verdi &&
-                            vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt?.map { it.verdi }
-                    }
+                with(opplysningerGjenny.opplysning) {
+                    fornavn == opplysningerPdl.fornavn.verdi &&
+                        mellomnavn == opplysningerPdl.mellomnavn?.verdi &&
+                        etternavn == opplysningerPdl.etternavn.verdi &&
+                        foedselsdato == opplysningerPdl.foedselsdato?.verdi &&
+                        doedsdato == opplysningerPdl.doedsdato?.verdi &&
+                        vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt?.map { it.verdi }
                 }
+
             if (!opplysningerErUendretIPdl) {
                 nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, UTDATERTE_PERSONO_INFO)
                 return@inTransaction
@@ -358,7 +363,7 @@ class AarligInntektsjusteringJobbService(
             ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 
     private fun hentPdlPersonopplysning(sak: Sak) =
-        pdlTjenesterKlient.hentPdlModellFlereSaktyper(sak.ident, PersonRolle.INNSENDER, SakType.OMSTILLINGSSTOENAD)
+        pdlTjenesterKlient.hentPdlModellForSaktype(sak.ident, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
 
     private fun hentPdlPersonident(sak: Sak) =
         runBlocking {

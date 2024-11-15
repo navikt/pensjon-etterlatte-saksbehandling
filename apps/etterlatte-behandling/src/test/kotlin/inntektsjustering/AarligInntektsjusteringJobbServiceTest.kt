@@ -112,7 +112,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 Folkeregisteridentifikator.of(fnrGyldigSak),
             )
         coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 any(),
                 any(),
                 SakType.OMSTILLINGSSTOENAD,
@@ -506,7 +506,7 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 any(),
                 any(),
                 SakType.OMSTILLINGSSTOENAD,
@@ -561,7 +561,7 @@ class AarligInntektsjusteringJobbServiceTest {
             }
 
         coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 any(),
                 any(),
                 SakType.OMSTILLINGSSTOENAD,

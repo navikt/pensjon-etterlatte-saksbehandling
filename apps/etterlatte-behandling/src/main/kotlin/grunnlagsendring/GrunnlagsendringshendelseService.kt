@@ -366,7 +366,7 @@ class GrunnlagsendringshendelseService(
     ) {
         val personRolle = grunnlagsendringshendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
         val pdlData =
-            pdltjenesterKlient.hentPdlModellFlereSaktyper(
+            pdltjenesterKlient.hentPdlModellForSaktype(
                 grunnlagsendringshendelse.gjelderPerson,
                 personRolle,
                 sak.sakType,

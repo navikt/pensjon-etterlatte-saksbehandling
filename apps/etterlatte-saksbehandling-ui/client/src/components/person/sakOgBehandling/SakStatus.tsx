@@ -60,7 +60,6 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
       </Tag>
     )
   }
-
   useEffect(() => {
     vedtakISakFetch(sakId)
   }, [])

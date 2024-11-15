@@ -17,7 +17,7 @@ export function TilbakekrevingVurdering({
           Vurdering
         </Heading>
       </Box>
-      <TilbakekrevingVurderingSkjema behandling={behandling} redigerbar={redigerbar} />
+      {behandling && <TilbakekrevingVurderingSkjema behandling={behandling} redigerbar={redigerbar} />}
     </>
   )
 }

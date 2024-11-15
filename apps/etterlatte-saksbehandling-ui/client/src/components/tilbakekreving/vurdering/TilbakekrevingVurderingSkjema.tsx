@@ -56,9 +56,6 @@ export function TilbakekrevingVurderingSkjema({
   behandling: TilbakekrevingBehandling
   redigerbar: boolean
 }) {
-  if (!behandling) {
-    return
-  }
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)

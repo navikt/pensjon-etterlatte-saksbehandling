@@ -8,7 +8,7 @@ import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeri
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import styled from 'styled-components'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Spraak } from '~shared/types/Brev'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
@@ -86,6 +86,7 @@ export default function OpprettNyBehandling() {
     watch,
   } = methods
 
+  const valgtSakType = watch('sakType')
   const onSubmit = (data: NyBehandlingSkjema) => {
     dispatch(
       settNyBehandlingRequest({
@@ -104,12 +105,6 @@ export default function OpprettNyBehandling() {
     neste()
   }
 
-  const valgtSakType = watch('sakType')
-
-  useEffect(() => {
-    setValue('persongalleri.avdoed', mapAvdoed(valgtSakType, nyBehandlingRequest?.persongalleri?.avdoed))
-  }, [valgtSakType])
-
   return (
     <FormWrapper $column>
       <FormProvider {...methods}>
@@ -124,6 +119,12 @@ export default function OpprettNyBehandling() {
             })}
             label="Hvilken type er saken?"
             error={errors.sakType?.message}
+            onChange={(event) => {
+              setValue(
+                'persongalleri.avdoed',
+                mapAvdoed(event.target.value as SakType, nyBehandlingRequest?.persongalleri?.avdoed)
+              )
+            }}
           >
             <option value="" disabled>
               Velg ...

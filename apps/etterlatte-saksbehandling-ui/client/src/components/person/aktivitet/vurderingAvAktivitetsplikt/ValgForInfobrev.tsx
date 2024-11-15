@@ -169,6 +169,7 @@ export const ValgForInfobrev = () => {
   )
 }
 
+//TODO: valider på skjemaet her før man trykker neste så ikke bare backend skjer
 function NesteEllerOpprettBrevValg() {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const navigate = useNavigate()

@@ -54,6 +54,7 @@ export enum GrunnlagsendringsType {
   GRUNNBELOEP = 'GRUNNBELOEP',
   INSTITUSJONSOPPHOLD = 'INSTITUSJONSOPPHOLD',
   ADRESSE = 'ADRESSE',
+  UFOERETRYGD = 'UFOERETRYGD',
 }
 
 export interface Folkeregisteridentifikatorsamsvar {
@@ -143,6 +144,16 @@ export interface InstitusjonsoppholdSamsvar {
   oppholdBeriket: InstitusjonsoppholdHendelseBeriket
 }
 
+export interface UfoeretrygdSamsvar {
+  type: 'UFOERETRYGD'
+  samsvar: boolean
+  hendelse: UfoereHendelse
+}
+
+export interface UfoereHendelse {
+  personIdent: string
+}
+
 interface InstitusjonsoppholdHendelseBeriket {
   startdato: string
   faktiskSluttdato: string
@@ -163,6 +174,7 @@ export type SamsvarMellomKildeOgGrunnlag =
   | InstitusjonsoppholdSamsvar
   | AdresseSamsvar
   | Folkeregisteridentifikatorsamsvar
+  | UfoeretrygdSamsvar
 
 export enum GrunnlagsendringStatus {
   VENTER_PAA_JOBB = 'VENTER_PAA_JOBB',

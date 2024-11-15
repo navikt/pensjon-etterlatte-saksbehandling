@@ -28,12 +28,12 @@ class AarligInntektsjusteringService(
     }
 
     private fun startAarligInntektsjustering(konfigurasjon: Reguleringskonfigurasjon) {
-        logger.info("StartReguleringJob startet")
+        logger.info("StartInntektsJob startet")
         rapidsPublisher(
             UUID.randomUUID(),
             createRecord(konfigurasjon),
         )
-        logger.info("StartReguleringJob ferdig")
+        logger.info("StartInntektsJob ferdig")
     }
 }
 

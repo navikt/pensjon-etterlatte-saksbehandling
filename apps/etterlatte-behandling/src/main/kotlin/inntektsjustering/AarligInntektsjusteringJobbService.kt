@@ -222,15 +222,22 @@ class AarligInntektsjusteringJobbService(
         kjoering: String,
         aarsakTilManuell: AarligInntektsjusteringAarsakManuell,
     ) {
-        if (manuellBehandlingSkruddPaa()) {
-            oppgaveService.opprettOppgave(
-                referanse = forrigeBehandlingId.toString(),
-                sakId = sakId,
-                kilde = OppgaveKilde.BEHANDLING,
-                type = OppgaveType.AARLIG_INNTEKTSJUSTERING,
-                merknad = "Kan ikke behandles automatisk. Årsak: ${aarsakTilManuell.name}",
+        if (!manuellBehandlingSkruddPaa()) {
+            oppdaterKjoering(
+                kjoering,
+                KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE,
+                sakId,
+                aarsakTilManuell.name,
             )
+            return
         }
+        oppgaveService.opprettOppgave(
+            referanse = forrigeBehandlingId.toString(),
+            sakId = sakId,
+            kilde = OppgaveKilde.BEHANDLING,
+            type = OppgaveType.AARLIG_INNTEKTSJUSTERING,
+            merknad = "Kan ikke behandles automatisk. Årsak: ${aarsakTilManuell.name}",
+        )
         oppdaterKjoering(
             kjoering,
             KjoeringStatus.TIL_MANUELL,
@@ -246,9 +253,16 @@ class AarligInntektsjusteringJobbService(
         kjoering: String,
         aarsakTilManuell: AarligInntektsjusteringAarsakManuell,
     ) {
-        if (manuellBehandlingSkruddPaa()) {
-            nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
+        if (!manuellBehandlingSkruddPaa()) {
+            oppdaterKjoering(
+                kjoering,
+                KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE,
+                sakId,
+                aarsakTilManuell.name,
+            )
+            return
         }
+        nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
         oppdaterKjoering(
             kjoering,
             KjoeringStatus.TIL_MANUELL,

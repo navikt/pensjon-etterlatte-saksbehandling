@@ -43,6 +43,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { RevurderingKravpakke } from '~components/behandling/revurderingsoversikt/RevurderingKravpakke'
 import { ViderefoereOpphoer } from '~components/behandling/soeknadsoversikt/viderefoere-opphoer/ViderefoereOpphoer'
+import { TidligereFamiliepleier } from '~components/behandling/soeknadsoversikt/tidligereFamiliepleier/TidligereFamiliepleier'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -169,6 +170,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           {{ info: <GrunnlagForVirkningstidspunkt /> }}
         </Virkningstidspunkt>
 
+        {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
+          <TidligereFamiliepleier behandling={behandling} redigerbar={redigerbar} />
+        )}
         <ViderefoereOpphoer behandling={behandling} redigerbar={redigerbar} />
       </Box>
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">

@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -162,7 +161,6 @@ class RevurderingService(
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
         opphoerFraOgMed: YearMonth? = null,
-        tidligereFamiliepleier: TidligereFamiliepleier? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -180,9 +178,14 @@ class RevurderingService(
             relatertBehandlingId = relatertBehandlingId,
             sendeBrev = revurderingAarsak.skalSendeBrev,
             opphoerFraOgMed = opphoerFraOgMed,
-            tidligereFamiliepleier = tidligereFamiliepleier,
+            tidligereFamiliepleier = null,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
+
+            val tidligereFamiliepleier = forrigeBehandling?.let { behandlingDao.hentTidligereFamiliepleier(it) }
+            if (tidligereFamiliepleier != null) {
+                behandlingDao.lagreTidligereFamiliepleier(opprettBehandling.id, tidligereFamiliepleier)
+            }
 
             if (!fritekstAarsak.isNullOrEmpty()) {
                 lagreRevurderingsaarsakFritekst(fritekstAarsak, opprettBehandling.id, saksbehandlerIdent)

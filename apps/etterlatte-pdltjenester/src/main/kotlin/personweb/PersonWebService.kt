@@ -11,11 +11,10 @@ import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.SoekPerson
-import no.nav.etterlatte.pdl.mapper.PersonMapper
+import no.nav.etterlatte.pdl.mapper.ParallelleSannheterService
 import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.dto.PersonSoekSvar
 import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
@@ -33,7 +32,7 @@ class PdlForesporselFeilet(
 
 class PersonWebService(
     private val pdlOboKlient: PdlOboKlient,
-    private val ppsKlient: ParallelleSannheterKlient,
+    private val personMappingService: ParallelleSannheterService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -58,8 +57,7 @@ class PersonWebService(
                     )
                 }
             } else {
-                PersonMapper.mapPersonNavnFoedsel(
-                    ppsKlient = ppsKlient,
+                personMappingService.mapPersonNavnFoedsel(
                     hentPerson = it.data.hentPerson,
                 )
             }
@@ -83,8 +81,7 @@ class PersonWebService(
                             val mappedePersoner =
                                 personSoekSvar.data.sokPerson.hits.map {
                                     async {
-                                        PersonMapper.mapPersonSoek(
-                                            ppsKlient = ppsKlient,
+                                        personMappingService.mapPersonSoek(
                                             ident =
                                                 it.person.folkeregisteridentifikator
                                                     .first { !it.metadata.historisk }
@@ -213,9 +210,7 @@ class PersonWebService(
                     )
                 }
             } else {
-                PersonMapper.mapFamiliemedlem(
-                    ppsKlient = ppsKlient,
-                    pdlOboKlient = pdlOboKlient,
+                personMappingService.mapFamiliemedlem(
                     ident = fnr,
                     hentPerson = it.data.hentPerson,
                     sakType = sakType,

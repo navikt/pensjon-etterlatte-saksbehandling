@@ -2,6 +2,8 @@ package no.nav.etterlatte.pdl.mapper
 
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
+import no.nav.etterlatte.libs.common.behandling.RelativPersonrolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -15,6 +17,7 @@ import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterException
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
@@ -31,12 +34,14 @@ import no.nav.etterlatte.personweb.familieOpplysninger.Sivilstand
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-object PersonMapper {
+class ParallelleSannheterService(
+    private val ppsKlient: ParallelleSannheterKlient,
+    private val pdlKlient: PdlKlient,
+    private val pdlOboKlient: PdlOboKlient,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun mapPerson(
-        ppsKlient: ParallelleSannheterKlient,
-        pdlKlient: PdlKlient,
         fnr: Folkeregisteridentifikator,
         personRolle: PersonRolle,
         hentPerson: PdlHentPerson,
@@ -46,19 +51,15 @@ object PersonMapper {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
             val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
             val (statsborgerskap, pdlStatsborgerskap) =
-                kanskjeAvklarStatsborgerskap(
-                    ppsKlient,
-                    hentPerson.statsborgerskap,
-                )
-            val sivilstand = hentPerson.sivilstand?.let { pdlSivilstand -> avklarSivilstatus(ppsKlient, fnr, pdlSivilstand) }
+                kanskjeAvklarStatsborgerskap(hentPerson.statsborgerskap)
+            val sivilstand =
+                hentPerson.sivilstand?.let { pdlSivilstand -> avklarSivilstatus(fnr, pdlSivilstand) }
             val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
             val foedested = ppsKlient.avklarFoedested(hentPerson.foedested)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val barnekull =
                 if (personRolle == PersonRolle.AVDOED) {
-                    BarnekullMapper.mapBarnekull(
-                        pdlKlient,
-                        ppsKlient,
+                    mapBarnekull(
                         hentPerson,
                         saktyper,
                     )
@@ -99,18 +100,11 @@ object PersonMapper {
                     ),
                 avdoedesBarn = barnekull?.barn,
                 avdoedesBarnUtenIdent = barnekull?.barnUtenIdent,
-                vergemaalEllerFremtidsfullmakt =
-                    hentPerson.vergemaalEllerFremtidsfullmakt?.let {
-                        VergeMapper.mapVerge(
-                            it,
-                        )
-                    },
+                vergemaalEllerFremtidsfullmakt = VergeMapper.mapVerge(hentPerson),
             )
         }
 
     fun mapFamiliemedlem(
-        ppsKlient: ParallelleSannheterKlient,
-        pdlOboKlient: PdlOboKlient,
         hentPerson: PdlHentPerson,
         ident: Folkeregisteridentifikator,
         sakType: SakType,
@@ -121,7 +115,6 @@ object PersonMapper {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
             val (statsborgerskap, pdlStatsborgerskap) =
                 kanskjeAvklarStatsborgerskap(
-                    ppsKlient,
                     hentPerson.statsborgerskap,
                 )
             val sivilstand = hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) }
@@ -129,12 +122,10 @@ object PersonMapper {
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
             val barnekull =
-                BarnekullMapper.mapBarnekullPersonopplysning(
-                    ppsKlient,
-                    pdlOboKlient,
-                    brukerTokenInfo = brukerTokenInfo,
+                mapBarnekullPersonopplysning(
                     forelder = hentPerson,
                     sakType = sakType,
+                    brukerTokenInfo = brukerTokenInfo,
                 )
 
             Familiemedlem(
@@ -155,12 +146,7 @@ object PersonMapper {
                     },
                 utland = UtlandMapper.mapUtland(hentPerson),
                 barn = barnekull?.barn,
-                vergemaalEllerFremtidsfullmakt =
-                    hentPerson.vergemaalEllerFremtidsfullmakt?.let {
-                        VergeMapper.mapVerge(
-                            it,
-                        )
-                    },
+                vergemaalEllerFremtidsfullmakt = VergeMapper.mapVerge(hentPerson),
                 familierelasjon =
                     FamilieRelasjonMapper
                         .mapFamilieRelasjon(
@@ -176,10 +162,7 @@ object PersonMapper {
             )
         }
 
-    fun mapPersonNavnFoedsel(
-        ppsKlient: ParallelleSannheterKlient,
-        hentPerson: PdlHentPersonNavnFoedselsdato,
-    ): PersonNavnFoedselsaar =
+    fun mapPersonNavnFoedsel(hentPerson: PdlHentPersonNavnFoedselsdato): PersonNavnFoedselsaar =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
 
@@ -211,7 +194,6 @@ object PersonMapper {
         }
 
     suspend fun mapPersonSoek(
-        ppsKlient: ParallelleSannheterKlient,
         ident: String,
         soekPerson: SoekPersonTreff,
     ): PersonSoekSvar {
@@ -235,31 +217,26 @@ object PersonMapper {
     }
 
     fun mapOpplysningsperson(
-        ppsKlient: ParallelleSannheterKlient,
-        pdlKlient: PdlKlient,
-        request: HentPersonRequest,
         hentPerson: PdlHentPerson,
+        request: HentPersonRequest,
     ): PersonDTO =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
             val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
             val (statsborgerskap, statsborgerskapPdl) =
                 kanskjeAvklarStatsborgerskap(
-                    ppsKlient,
                     hentPerson.statsborgerskap,
                 )
             val sivilstand =
                 hentPerson.sivilstand?.let { pdlSivilstand ->
-                    avklarSivilstatus(ppsKlient, request.foedselsnummer, pdlSivilstand)
+                    avklarSivilstatus(request.foedselsnummer, pdlSivilstand)
                 }
             val foedselsdato = ppsKlient.avklarFoedselsdato(hentPerson.foedselsdato)
             val foedested = ppsKlient.avklarFoedested(hentPerson.foedested)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val barnekull =
                 if (request.rolle == PersonRolle.AVDOED) {
-                    BarnekullMapper.mapBarnekull(
-                        pdlKlient,
-                        ppsKlient,
+                    mapBarnekull(
                         hentPerson,
                         request.saktyper,
                     )
@@ -272,7 +249,13 @@ object PersonMapper {
                 mellomnavn = navn.mellomnavn?.let { OpplysningDTO(navn.mellomnavn, navn.metadata.opplysningsId) },
                 etternavn = OpplysningDTO(navn.etternavn, navn.metadata.opplysningsId),
                 foedselsnummer = OpplysningDTO(request.foedselsnummer, null),
-                foedselsdato = foedselsdato.foedselsdato?.let { OpplysningDTO(it, foedselsdato.metadata.opplysningsId) },
+                foedselsdato =
+                    foedselsdato.foedselsdato?.let {
+                        OpplysningDTO(
+                            it,
+                            foedselsdato.metadata.opplysningsId,
+                        )
+                    },
                 foedselsaar = OpplysningDTO(foedselsdato.foedselsaar, foedselsdato.metadata.opplysningsId),
                 doedsdato = doedsfall?.doedsdato?.let { OpplysningDTO(it, doedsfall.metadata.opplysningsId) },
                 foedeland = foedested?.foedeland?.let { OpplysningDTO(it, foedested.metadata.opplysningsId) },
@@ -317,14 +300,93 @@ object PersonMapper {
                     ),
                 avdoedesBarn = barnekull?.barn,
                 vergemaalEllerFremtidsfullmakt =
-                    hentPerson.vergemaalEllerFremtidsfullmakt
-                        ?.let { VergeMapper.mapVerge(it) }
+                    VergeMapper
+                        .mapVerge(hentPerson)
                         ?.map { OpplysningDTO(it, null) },
             )
         }
 
+    private suspend fun mapBarnekull(
+        forelder: PdlHentPerson,
+        saktyper: List<SakType>,
+    ): Barnekull? {
+        val barnFnr =
+            forelder.forelderBarnRelasjon
+                ?.filter {
+                    it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN &&
+                        it.relatertPersonsIdent != null
+                }?.map { it.relatertPersonsIdent }
+                ?.distinct()
+                ?.map { Folkeregisteridentifikator.of(it) }
+
+        val personerUtenIdent =
+            forelder.forelderBarnRelasjon
+                ?.filter {
+                    it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN &&
+                        it.relatertPersonUtenFolkeregisteridentifikator != null
+                }?.map {
+                    PersonUtenIdent(
+                        RelativPersonrolle.BARN,
+                        it.relatertPersonUtenFolkeregisteridentifikator!!.tilRelatertPerson(),
+                    )
+                }
+
+        val personer =
+            barnFnr?.let { fnr ->
+                pdlKlient.hentPersonBolk(fnr, saktyper).data?.hentPersonBolk?.map {
+                    mapPerson(
+                        Folkeregisteridentifikator.of(it.ident),
+                        PersonRolle.TILKNYTTET_BARN,
+                        it.person!!,
+                        saktyper,
+                    )
+                }
+            }
+
+        return personer?.let { Barnekull(it, personerUtenIdent) }
+    }
+
+    private suspend fun mapBarnekullPersonopplysning(
+        forelder: PdlHentPerson,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BarnekullPersonopplysning? {
+        val barnFnr =
+            forelder.forelderBarnRelasjon
+                ?.filter {
+                    it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN &&
+                        it.relatertPersonsIdent != null
+                }?.map { it.relatertPersonsIdent }
+                ?.distinct()
+                ?.map { Folkeregisteridentifikator.of(it) }
+
+        val personer =
+            barnFnr?.let { fnr ->
+                fnr.map { ident ->
+                    pdlOboKlient
+                        .hentPerson(
+                            ident,
+                            PersonRolle.TILKNYTTET_BARN,
+                            bruker = brukerTokenInfo,
+                            sakType = sakType,
+                        ).data
+                        ?.hentPerson
+                        ?.let {
+                            mapFamiliemedlem(
+                                it,
+                                ident,
+                                sakType,
+                                brukerTokenInfo = brukerTokenInfo,
+                                PersonRolle.TILKNYTTET_BARN,
+                            )
+                        }
+                }
+            }
+
+        return personer?.let { BarnekullPersonopplysning(it) }
+    }
+
     private suspend fun kanskjeAvklarStatsborgerskap(
-        ppsKlient: ParallelleSannheterKlient,
         statsborgerskap: List<PdlStatsborgerskap>?,
     ): Pair<PdlStatsborgerskap?, List<Statsborgerskap>?> {
         if (statsborgerskap == null) {
@@ -339,7 +401,6 @@ object PersonMapper {
     }
 
     private suspend fun avklarSivilstatus(
-        ppsKlient: ParallelleSannheterKlient,
         folkeregisteridentifikator: Folkeregisteridentifikator,
         pdlSivilstand: List<PdlSivilstand>,
     ): OpplysningDTO<Sivilstatus>? =
@@ -362,11 +423,20 @@ object PersonMapper {
                 throw e
             }
         }
+
+    private fun PdlStatsborgerskap.tilStatsborgerskap(): Statsborgerskap =
+        Statsborgerskap(
+            land = this.land,
+            gyldigFraOgMed = this.gyldigFraOgMed,
+            gyldigTilOgMed = this.gyldigTilOgMed,
+        )
 }
 
-fun PdlStatsborgerskap.tilStatsborgerskap(): Statsborgerskap =
-    Statsborgerskap(
-        land = this.land,
-        gyldigFraOgMed = this.gyldigFraOgMed,
-        gyldigTilOgMed = this.gyldigTilOgMed,
-    )
+data class Barnekull(
+    val barn: List<Person>,
+    val barnUtenIdent: List<PersonUtenIdent>? = null,
+)
+
+data class BarnekullPersonopplysning(
+    val barn: List<Familiemedlem?>,
+)

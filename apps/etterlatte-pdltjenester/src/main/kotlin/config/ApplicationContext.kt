@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
+import no.nav.etterlatte.pdl.mapper.ParallelleSannheterService
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.personweb.PersonWebService
 
@@ -20,8 +21,8 @@ class ApplicationContext(
     val config: Config = ConfigFactory.load()
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
 
-    val pdlOboKlient = PdlOboKlient(httpClient(), config)
-    val pdlKlient =
+    private val pdlOboKlient = PdlOboKlient(httpClient(), config)
+    private val pdlKlient =
         PdlKlient(
             httpClient =
                 httpClientClientCredentials(
@@ -33,22 +34,25 @@ class ApplicationContext(
             apiUrl = config.getString("pdl.url"),
         )
 
-    val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
+    private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
-    val parallelleSannheterKlient =
+    private val parallelleSannheterKlient =
         ParallelleSannheterKlient(
             httpClient = httpClient(),
             apiUrl = config.getString("pps.url"),
             featureToggleService = featureToggleService,
         )
 
-    val personService: PersonService =
-        PersonService(
-            pdlKlient = pdlKlient,
+    private val parallelleSannheterService =
+        ParallelleSannheterService(
             ppsKlient = parallelleSannheterKlient,
+            pdlKlient = pdlKlient,
+            pdlOboKlient = pdlOboKlient,
         )
 
-    val personWebService = PersonWebService(pdlOboKlient, parallelleSannheterKlient)
+    val personService = PersonService(pdlKlient, parallelleSannheterService)
+
+    val personWebService = PersonWebService(pdlOboKlient, parallelleSannheterService)
 }
 
 private fun featureToggleProperties(config: Config) =

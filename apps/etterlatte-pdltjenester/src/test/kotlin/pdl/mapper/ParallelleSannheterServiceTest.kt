@@ -10,21 +10,24 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.pdl.ParallelleSannheterException
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.pdl.PdlFoedested
-import no.nav.etterlatte.pdl.PdlFoedselsdato
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
-import no.nav.etterlatte.pdl.PdlMetadata
-import no.nav.etterlatte.pdl.PdlNavn
 import no.nav.etterlatte.pdl.PdlSivilstand
 import no.nav.etterlatte.pdl.PdlSivilstandstype
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
+import no.nav.etterlatte.pdlHentPerson
+import no.nav.etterlatte.pdlMetadata
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 
-class PersonMapperTest {
+internal class ParallelleSannheterServiceTest {
+    private val pdlKlient = mockk<PdlKlient>()
+    private val ppsKlient = mockk<ParallelleSannheterKlient>()
+
+    private val parallelleSannheterService = ParallelleSannheterService(ppsKlient, pdlKlient, mockk())
+
     @Test
     fun `ved feil fra pps avklar statsborgerskap tar vi med pdl-dataene`() {
         val fomNorge = LocalDate.of(2020, 1, 1)
@@ -34,32 +37,26 @@ class PersonMapperTest {
                 land = "Norge",
                 gyldigFraOgMed = fomNorge,
                 gyldigTilOgMed = tomNorge,
-                metadata = pdlmetadata(),
+                metadata = pdlMetadata(),
             )
 
         val fomSverige = LocalDate.of(2000, 1, 1)
         val tomSverige = null
-        val statSverige = PdlStatsborgerskap("Sverige", fomSverige, tomSverige, pdlmetadata())
+        val statSverige = PdlStatsborgerskap("Sverige", fomSverige, tomSverige, pdlMetadata())
 
         val statsborgerskapPdl: List<PdlStatsborgerskap> = listOf(statNorge, statSverige)
         val pdlHentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl)
 
-        val ppsKlient =
-            mockk<ParallelleSannheterKlient> {
-                setupMockToPickFirst(pdlHentPerson)
-                coEvery { avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
-                coEvery { avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
-                coEvery { avklarStatsborgerskap(statsborgerskapPdl) } throws Exception("Whoops")
-            }
-        val pdlKlient = mockk<PdlKlient>()
+        ppsKlient.setupMockToPickFirst(pdlHentPerson)
+        coEvery { ppsKlient.avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
+        coEvery { ppsKlient.avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
+        coEvery { ppsKlient.avklarStatsborgerskap(statsborgerskapPdl) } throws Exception("Whoops")
 
         val person =
-            PersonMapper.mapPerson(
-                ppsKlient = ppsKlient,
-                pdlKlient = pdlKlient,
+            parallelleSannheterService.mapPerson(
                 fnr = SOEKER_FOEDSELSNUMMER,
                 personRolle = PersonRolle.BARN,
-                hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
+                hentPerson = pdlHentPerson,
                 saktyper = listOf(SakType.BARNEPENSJON),
             )
         Assertions.assertNull(person.statsborgerskap)
@@ -82,48 +79,30 @@ class PersonMapperTest {
                     gyldigFraOgMed = LocalDate.of(2023, Month.NOVEMBER, 7),
                     relatertVedSivilstand = null,
                     bekreftelsesdato = null,
-                    metadata =
-                        PdlMetadata(
-                            endringer = listOf(),
-                            historisk = false,
-                            master = "",
-                            opplysningsId = "",
-                        ),
+                    metadata = pdlMetadata(),
                 ),
                 PdlSivilstand(
                     type = PdlSivilstandstype.UGIFT,
                     gyldigFraOgMed = null,
                     relatertVedSivilstand = null,
                     bekreftelsesdato = null,
-                    metadata =
-                        PdlMetadata(
-                            endringer = listOf(),
-                            historisk = false,
-                            master = "",
-                            opplysningsId = "",
-                        ),
+                    metadata = pdlMetadata(),
                 ),
             )
         val pdlHentPerson = pdlHentPerson(sivilstand = pdlSivilstand)
 
-        val pdlKlient = mockk<PdlKlient>()
-        val ppsKlient =
-            mockk<ParallelleSannheterKlient> {
-                setupMockToPickFirst(pdlHentPerson)
-                coEvery { avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
-                coEvery { avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
-                coEvery {
-                    avklarSivilstand(
-                        pdlSivilstand,
-                        GJENLEVENDE_FOEDSELSNUMMER,
-                    )
-                } throws ParallelleSannheterException("Kunne ikke avklare sivlstand", HttpStatusCode.NotImplemented)
-            }
+        ppsKlient.setupMockToPickFirst(pdlHentPerson)
+        coEvery { ppsKlient.avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
+        coEvery { ppsKlient.avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
+        coEvery {
+            ppsKlient.avklarSivilstand(
+                pdlSivilstand,
+                GJENLEVENDE_FOEDSELSNUMMER,
+            )
+        } throws ParallelleSannheterException("Kunne ikke avklare sivlstand", HttpStatusCode.NotImplemented)
 
         val person =
-            PersonMapper.mapPerson(
-                ppsKlient = ppsKlient,
-                pdlKlient = pdlKlient,
+            parallelleSannheterService.mapPerson(
                 fnr = GJENLEVENDE_FOEDSELSNUMMER,
                 personRolle = PersonRolle.GJENLEVENDE,
                 hentPerson = pdlHentPerson,
@@ -145,28 +124,22 @@ class PersonMapperTest {
                     land = "Norge",
                     gyldigFraOgMed = fomNorge,
                     gyldigTilOgMed = tomNorge,
-                    metadata = pdlmetadata(),
+                    metadata = pdlMetadata(),
                 ),
-                PdlStatsborgerskap("Sverige", fomSverige, tomSverige, pdlmetadata()),
+                PdlStatsborgerskap("Sverige", fomSverige, tomSverige, pdlMetadata()),
             )
         val pdlHentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl)
 
-        val ppsKlient =
-            mockk<ParallelleSannheterKlient> {
-                setupMockToPickFirst(pdlHentPerson)
-                coEvery { avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
-                coEvery { avklarStatsborgerskap(statsborgerskapPdl) } returns statsborgerskapPdl.first()
-                coEvery { avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
-            }
-        val pdlKlient = mockk<PdlKlient>()
+        ppsKlient.setupMockToPickFirst(pdlHentPerson)
+        coEvery { ppsKlient.avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
+        coEvery { ppsKlient.avklarStatsborgerskap(statsborgerskapPdl) } returns statsborgerskapPdl.first()
+        coEvery { ppsKlient.avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
 
         val person =
-            PersonMapper.mapPerson(
-                ppsKlient = ppsKlient,
-                pdlKlient = pdlKlient,
+            parallelleSannheterService.mapPerson(
                 fnr = SOEKER_FOEDSELSNUMMER,
                 personRolle = PersonRolle.BARN,
-                hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
+                hentPerson = pdlHentPerson,
                 saktyper = listOf(SakType.BARNEPENSJON),
             )
         Assertions.assertEquals("Norge", person.statsborgerskap)
@@ -178,62 +151,21 @@ class PersonMapperTest {
         val statsborgerskapPdl: List<PdlStatsborgerskap>? = null
         val pdlHentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl)
 
-        val ppsKlient =
-            mockk<ParallelleSannheterKlient> {
-                setupMockToPickFirst(pdlHentPerson)
-                coEvery { avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
-                coEvery { avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
-            }
-        val pdlKlient = mockk<PdlKlient>()
+        ppsKlient.setupMockToPickFirst(pdlHentPerson)
+        coEvery { ppsKlient.avklarAdressebeskyttelse(pdlHentPerson.adressebeskyttelse) } returns null
+        coEvery { ppsKlient.avklarDoedsfall(pdlHentPerson.doedsfall) } returns null
 
         val person =
-            PersonMapper.mapPerson(
-                ppsKlient = ppsKlient,
-                pdlKlient = pdlKlient,
+            parallelleSannheterService.mapPerson(
                 fnr = SOEKER_FOEDSELSNUMMER,
                 personRolle = PersonRolle.BARN,
-                hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
+                hentPerson = pdlHentPerson,
                 saktyper = listOf(SakType.BARNEPENSJON),
             )
         Assertions.assertNull(person.pdlStatsborgerskap)
         Assertions.assertNull(person.statsborgerskap)
     }
 }
-
-fun pdlmetadata(): PdlMetadata = PdlMetadata(endringer = listOf(), historisk = false, master = "", opplysningsId = "")
-
-fun pdlHentPerson(
-    navn: List<PdlNavn> = listOf(PdlNavn("fornavn", null, "etternavn", metadata = pdlmetadata())),
-    foedsel: List<PdlFoedselsdato> =
-        listOf(
-            PdlFoedselsdato(
-                foedselsdato = LocalDate.of(1990, 1, 1),
-                foedselsaar = 1990,
-                metadata = pdlmetadata(),
-            ),
-        ),
-    foedested: List<PdlFoedested> = emptyList(),
-    statsborgerskap: List<PdlStatsborgerskap>? = null,
-    sivilstand: List<PdlSivilstand>? = null,
-): PdlHentPerson =
-    PdlHentPerson(
-        adressebeskyttelse = listOf(),
-        navn = navn,
-        foedselsdato = foedsel,
-        foedested = foedested,
-        sivilstand = sivilstand,
-        doedsfall = listOf(),
-        bostedsadresse = null,
-        deltBostedsadresse = null,
-        kontaktadresse = null,
-        oppholdsadresse = null,
-        innflyttingTilNorge = null,
-        statsborgerskap = statsborgerskap,
-        utflyttingFraNorge = null,
-        foreldreansvar = null,
-        forelderBarnRelasjon = null,
-        vergemaalEllerFremtidsfullmakt = null,
-    )
 
 private fun ParallelleSannheterKlient.setupMockToPickFirst(pdlHentPerson: PdlHentPerson) {
     coEvery { avklarNavn(pdlHentPerson.navn) } returns pdlHentPerson.navn.first()

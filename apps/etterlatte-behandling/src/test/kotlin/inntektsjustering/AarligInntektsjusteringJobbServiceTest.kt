@@ -465,7 +465,6 @@ class AarligInntektsjusteringJobbServiceTest {
             service.startAarligInntektsjustering(request)
         }
 
-        // TODO verifer opprettelse rev
         verify {
             omregningService.oppdaterKjoering(
                 withArg {
@@ -474,6 +473,43 @@ class AarligInntektsjusteringJobbServiceTest {
                         status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
                         begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.UTDATERT_IDENT.name
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `sak som har opphoer fom skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        every { behandlingService.hentSisteIverksatte(any()) } returns
+            mockk {
+                every { id } returns sisteBehandling
+                every { utlandstilknytning } returns mockk()
+                every { boddEllerArbeidetUtlandet } returns mockk()
+                every { opphoerFraOgMed } returns YearMonth.of(2025, 5)
+            }
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.HAR_OPPHOER_FOM.name
                     }
                 },
             )

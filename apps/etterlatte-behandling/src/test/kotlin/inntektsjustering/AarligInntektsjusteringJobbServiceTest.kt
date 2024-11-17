@@ -105,6 +105,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 harInntektForAar = false,
                 harSanksjon = false,
             )
+        coEvery { grunnlagService.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(2050, 1)
         every { sakService.finnSak(SakId(123L)) } returns gyldigSak
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns
@@ -123,7 +124,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 every { id } returns sisteBehandling
                 every { utlandstilknytning } returns mockk()
                 every { boddEllerArbeidetUtlandet } returns mockk()
-                every { opphoerFraOgMed } returns mockk()
+                every { opphoerFraOgMed } returns null
             }
         coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
             mockk {
@@ -510,6 +511,37 @@ class AarligInntektsjusteringJobbServiceTest {
                         status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
                         begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.HAR_OPPHOER_FOM.name
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `sak som har aldersovergang 67 aar skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery { grunnlagService.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(2025, 3)
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.ALDERSOVERGANG_67.name
                     }
                 },
             )

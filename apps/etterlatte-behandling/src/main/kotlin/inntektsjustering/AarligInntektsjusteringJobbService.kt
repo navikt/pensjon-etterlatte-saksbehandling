@@ -39,6 +39,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
@@ -237,7 +238,7 @@ class AarligInntektsjusteringJobbService(
                     etternavn == opplysningerPdl.etternavn &&
                     foedselsdato == opplysningerPdl.foedselsdato &&
                     doedsdato == opplysningerPdl.doedsdato &&
-                    vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt
+                    erLikeVergemaal(vergemaalEllerFremtidsfullmakt, opplysningerPdl.vergemaalEllerFremtidsfullmakt)
             }
 
         if (!opplysningerErUendretIPdl) {
@@ -442,6 +443,16 @@ class AarligInntektsjusteringJobbService(
 
     private fun manuellBehandlingSkruddPaa(): Boolean =
         featureToggleService.isEnabled(ManuellBehandlingToggle.MANUELL_BEHANDLING, defaultValue = false)
+
+    private fun erLikeVergemaal(
+        vergerEn: List<VergemaalEllerFremtidsfullmakt>?,
+        vergerTo: List<VergemaalEllerFremtidsfullmakt>?,
+    ): Boolean {
+        if (vergerEn.isNullOrEmpty() && vergerTo.isNullOrEmpty()) {
+            return true
+        }
+        return vergerEn == vergerTo
+    }
 }
 
 enum class AarligInntektsjusteringAarsakManuell {

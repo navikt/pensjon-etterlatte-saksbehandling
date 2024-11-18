@@ -160,6 +160,8 @@ class OmregningDao(
                         SELECT kjoering, status, sak_id  
                         FROM omregningskjoering 
                         WHERE kjoering = ? AND sak_id = ?
+                        ORDER by tidspunkt DESC 
+                        LIMIT 1
                         """.trimIndent(),
                     )
                 statement.setString(1, kjoering)

@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
@@ -231,15 +232,23 @@ class AarligInntektsjusteringJobbService(
         }
         val opplysningerErUendretIPdl =
             with(opplysningerGjenny.opplysning) {
-                fornavn == opplysningerPdl.fornavn.verdi &&
-                    mellomnavn == opplysningerPdl.mellomnavn?.verdi &&
-                    etternavn == opplysningerPdl.etternavn.verdi &&
-                    foedselsdato == opplysningerPdl.foedselsdato?.verdi &&
-                    doedsdato == opplysningerPdl.doedsdato?.verdi &&
-                    vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt?.map { it.verdi }
+                fornavn == opplysningerPdl.fornavn &&
+                    mellomnavn == opplysningerPdl.mellomnavn &&
+                    etternavn == opplysningerPdl.etternavn &&
+                    foedselsdato == opplysningerPdl.foedselsdato &&
+                    doedsdato == opplysningerPdl.doedsdato &&
+                    vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt
             }
 
         if (!opplysningerErUendretIPdl) {
+            logger.info(
+                "PDL info forskjellig for årlig inntektsjustering i sak $sakId. " +
+                    "Denne går til manuell håndtering. Se sikkerlogg for detaljer om hva som er forskjellig",
+            )
+            sikkerlogger().info(
+                "PDL info forskjellig for årlig inntektsjustering i sak $sakId. " +
+                    "Data i grunnlag: ${opplysningerGjenny.opplysning}, data i PDL: $opplysningerPdl",
+            )
             nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, UTDATERTE_PERSONO_INFO)
             return true
         }
@@ -408,7 +417,9 @@ class AarligInntektsjusteringJobbService(
             ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 
     private fun hentPdlPersonopplysning(sak: Sak) =
-        pdlTjenesterKlient.hentPdlModellForSaktype(sak.ident, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        pdlTjenesterKlient
+            .hentPdlModellForSaktype(sak.ident, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+            .toPerson()
 
     private fun hentPdlPersonident(sak: Sak) =
         runBlocking {

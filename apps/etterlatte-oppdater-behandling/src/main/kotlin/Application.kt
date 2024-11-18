@@ -34,7 +34,7 @@ private fun settOppRivers(
     FinnSakerTilReguleringRiver(rapidsConnection, behandlingservice)
     ReguleringsforespoerselRiver(rapidsConnection, behandlingservice, featureToggleService)
     OmregningFeiletRiver(rapidsConnection, behandlingservice)
-    VedtakAttestertRiver(rapidsConnection, behandlingservice)
+    VedtakAttestertRiver(rapidsConnection, behandlingservice, featureToggleService)
     AvbrytBehandlingHvisMigreringFeilaRiver(rapidsConnection, behandlingservice)
     YtelseIkkeLoependeRiver(rapidsConnection, behandlingservice)
     TidshendelseRiver(rapidsConnection, tidshendelseService)

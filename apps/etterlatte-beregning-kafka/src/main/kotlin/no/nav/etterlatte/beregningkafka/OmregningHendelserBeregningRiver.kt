@@ -64,8 +64,11 @@ internal class OmregningHendelserBeregningRiver(
             val beregning = beregn(omregningData)
             packet[BEREGNING_KEY] = beregning.beregning
 
-            // TODO bør vi ha slike ting her?
-            if (omregningData.revurderingaarsak == Revurderingaarsak.REGULERING) {
+            if (
+                omregningData.revurderingaarsak == Revurderingaarsak.REGULERING ||
+                omregningData.revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING ||
+                omregningData.revurderingaarsak == Revurderingaarsak.INNTEKTSENDRING
+            ) {
                 sendMedInformasjonTilKontrollsjekking(beregning, packet)
             }
         }

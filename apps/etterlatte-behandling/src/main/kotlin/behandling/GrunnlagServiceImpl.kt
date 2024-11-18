@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.YearMonth
 import java.util.UUID
 
 interface GrunnlagService {
@@ -62,6 +63,12 @@ interface GrunnlagService {
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): PersonopplysningerResponse
+
+    suspend fun aldersovergangMaaned(
+        sakId: SakId,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): YearMonth
 }
 
 class GrunnlagServiceImpl(
@@ -129,6 +136,12 @@ class GrunnlagServiceImpl(
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): PersonopplysningerResponse = grunnlagKlient.hentPersonopplysningerForBehandling(behandlingId, brukerTokenInfo, sakType)
+
+    override suspend fun aldersovergangMaaned(
+        sakId: SakId,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = grunnlagKlient.aldersovergangMaaned(sakId, sakType, brukerTokenInfo)
 
     private fun grunnlagsbehovSak(
         sak: Sak,

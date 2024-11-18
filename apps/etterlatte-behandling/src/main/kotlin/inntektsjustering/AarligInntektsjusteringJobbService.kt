@@ -15,6 +15,8 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.ALDERSOVERGANG_67
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.HAR_OPPHOER_FOM
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.HAR_SANKSJON
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONO_INFO
@@ -109,12 +111,17 @@ class AarligInntektsjusteringJobbService(
     ) = inTransaction {
         logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
         try {
+            val forrigeBehandling = hentForrigeBehandling(sakId)
+
+            if (forrigeBehandling.opphoerFraOgMed?.year == loependeFom.year) {
+                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, HAR_OPPHOER_FOM)
+                return@inTransaction
+            }
+
             val vedtak =
                 runBlocking {
                     vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
                 }
-
-            val forrigeBehandling = hentForrigeBehandling(sakId)
 
             if (vedtak.underSamordning) {
                 nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, TIL_SAMORDNING)
@@ -123,6 +130,14 @@ class AarligInntektsjusteringJobbService(
 
             if (!vedtak.erLoepende) {
                 oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, "Sak er ikke løpende")
+                return@inTransaction
+            }
+            val aldersovergangMaaned =
+                runBlocking {
+                    grunnlagService.aldersovergangMaaned(sakId, SakType.OMSTILLINGSSTOENAD, HardkodaSystembruker.omregning)
+                }
+            if (aldersovergangMaaned.year == loependeFom.year) {
+                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, ALDERSOVERGANG_67)
                 return@inTransaction
             }
 
@@ -391,6 +406,8 @@ enum class AarligInntektsjusteringAarsakManuell {
     TIL_SAMORDNING,
     AAPEN_BEHANDLING,
     HAR_SANKSJON,
+    HAR_OPPHOER_FOM,
+    ALDERSOVERGANG_67,
 }
 
 enum class ManuellBehandlingToggle(

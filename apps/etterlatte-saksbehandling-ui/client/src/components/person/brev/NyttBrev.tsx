@@ -16,10 +16,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
-import { Box, Heading, VStack } from '@navikt/ds-react'
-import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
+import { BodyShort, Box, Detail, Heading, VStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
+import { formaterSpraak } from '~utils/formatering/formatering'
 
 export default function NyttBrev() {
   useSidetittel('Nytt brev')
@@ -63,7 +63,15 @@ export default function NyttBrev() {
               <VStack gap="4" margin="4">
                 <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
 
-                <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
+                <Box padding="4" borderWidth="1" borderRadius="small">
+                  <VStack gap="2" justify="space-between">
+                    <Heading level="2" size="medium">
+                      Språk / målform
+                    </Heading>
+                    <BodyShort spacing>{formaterSpraak(brev.spraak)}</BodyShort>
+                    <Detail>For å endre språk må du opprette et nytt manuelt brev.</Detail>
+                  </VStack>
+                </Box>
 
                 <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
               </VStack>

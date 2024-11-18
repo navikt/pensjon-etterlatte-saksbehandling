@@ -1,6 +1,9 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
@@ -25,12 +28,21 @@ import java.math.BigDecimal
 internal class VedtakAttestertRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
-            // TODO lytt på noe annet? eksplisitt klar for ferdigstil elns?
+        initialiserRiverUtenEventName(rapidsConnection) {
+            validate {
+                it.demandAny(
+                    EVENT_NAME_KEY,
+                    listOf(
+                        VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType(),
+                        VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
+                    ),
+                )
+            }
             validate { it.requireKey(OmregningDataPacket.KEY) }
             validate { it.requireKey(OmregningDataPacket.SAK_ID) }
             validate { it.requireKey(OmregningDataPacket.KJOERING) }
@@ -52,13 +64,27 @@ internal class VedtakAttestertRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        val erFattetVedtak = packet.eventName == VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType()
+        if (erFattetVedtak &&
+            !featureToggleService.isEnabled(
+                ReguleringFeatureToggle.SKAL_STOPPE_ETTER_FATTET_VEDTAK,
+                false,
+            )
+        ) {
+            return
+        }
+
         val sakId = packet.omregningData.sakId
         val kjoering = packet.omregningData.kjoering
         logger.info("Sak $sakId er ferdig omregnet, oppdaterer status")
         val request =
             LagreKjoeringRequest(
                 kjoering = kjoering,
-                status = KjoeringStatus.FERDIGSTILT,
+                status =
+                    when (erFattetVedtak) {
+                        true -> KjoeringStatus.FERDIGSTILT_FATTET
+                        false -> KjoeringStatus.FERDIGSTILT
+                    },
                 sakId = sakId,
                 beregningBeloepFoer = bigDecimal(packet, BEREGNING_BELOEP_FOER),
                 beregningBeloepEtter = bigDecimal(packet, BEREGNING_BELOEP_ETTER),
@@ -69,8 +95,6 @@ internal class VedtakAttestertRiver(
                 avkortingEtter = bigDecimal(packet, AVKORTING_ETTER),
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
-
-        // TODO Burde ikke ferdigstille kun basert på attestert men også om brev er ordentlig distribuert osv. Bør gjøre en sanity check er først?
 
         behandlingService.lagreFullfoertKjoering(request)
         logger.info("Sak $sakId er ferdig omregnet, status oppdatert til: ${request.status}")

@@ -92,6 +92,7 @@ fragment vergeEllerFullmektig on VergeEllerFullmektig {
 query(
     $ident: ID!,
     $bostedsadresse: Boolean!,
+    $folkeregisteridentHistorikk: Boolean!,
     $bostedsadresseHistorikk: Boolean!,
     $deltBostedsadresse: Boolean!,
     $oppholdsadresse: Boolean!,
@@ -105,6 +106,17 @@ query(
     $vergemaal: Boolean!,
 ) {
     hentPerson(ident: $ident) {
+        folkeregisteridentifikator(historikk: $folkeregisteridentHistorikk) {
+            identifikasjonsnummer
+            status
+            type
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
         adressebeskyttelse(historikk: false) {
             folkeregistermetadata {
                 ...folkeregistermetadata

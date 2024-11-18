@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.pdl.PdlFoedested
 import no.nav.etterlatte.pdl.PdlFoedselsdato
+import no.nav.etterlatte.pdl.PdlFolkeregisteridentifikator
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlMetadata
 import no.nav.etterlatte.pdl.PdlNavn
@@ -88,6 +89,12 @@ fun mockFolkeregisterident(fnr: String) = PdlIdentifikator.FolkeregisterIdent(Fo
 fun mockGeografiskTilknytning() = GeografiskTilknytning(kommune = "0301", ukjent = false)
 
 fun pdlHentPerson(
+    folkeregisteridentifikator: List<PdlFolkeregisteridentifikator> =
+        listOf(
+            pdlFolkeregisteridentifikator(
+                SOEKER_FOEDSELSNUMMER.value,
+            ),
+        ),
     navn: List<PdlNavn> = listOf(pdlNavn()),
     foedsel: List<PdlFoedselsdato> =
         listOf(
@@ -102,6 +109,7 @@ fun pdlHentPerson(
     sivilstand: List<PdlSivilstand>? = null,
 ): PdlHentPerson =
     PdlHentPerson(
+        folkeregisteridentifikator = folkeregisteridentifikator,
         adressebeskyttelse = listOf(),
         navn = navn,
         foedselsdato = foedsel,
@@ -119,6 +127,17 @@ fun pdlHentPerson(
         forelderBarnRelasjon = null,
         vergemaalEllerFremtidsfullmakt = null,
     )
+
+fun pdlFolkeregisteridentifikator(
+    ident: String,
+    historisk: Boolean = false,
+) = PdlFolkeregisteridentifikator(
+    identifikasjonsnummer = ident,
+    status = "status",
+    type = "type",
+    folkeregistermetadata = null,
+    metadata = pdlMetadata(historisk),
+)
 
 fun pdlNavn(
     fornavn: String = "fornavn",

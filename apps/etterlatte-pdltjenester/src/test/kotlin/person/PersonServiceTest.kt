@@ -39,6 +39,7 @@ import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlPersonResponse
 import no.nav.etterlatte.pdl.PdlPersonResponseBolk
 import no.nav.etterlatte.pdl.mapper.ParallelleSannheterService
+import no.nav.etterlatte.pdlFolkeregisteridentifikator
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -102,6 +103,7 @@ internal class PersonServiceTest {
                 ),
             )
         } returns personNpidResponse
+        coEvery { ppsKlientMock.avklarFolkeregisteridentifikator(any()) } returns hentPerson.folkeregisteridentifikator!!.first()
         coEvery { ppsKlientMock.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlientMock.avklarAdressebeskyttelse(any()) } returns null
         coEvery { ppsKlientMock.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
@@ -122,15 +124,24 @@ internal class PersonServiceTest {
 
     @Test
     fun `skal mappe avdoed med barnekull og ta med barnas foreldrerelasjoner`() {
+        val fnrBarn1 = pdlFolkeregisteridentifikator("09508229892")
+        val fnrBarn2 = pdlFolkeregisteridentifikator("17418340118")
+
+        val expectedBarnFnr = listOf("09508229892", "17418340118")
+
+        coEvery {
+            ppsKlientMock.avklarFolkeregisteridentifikator(match { it.any { it.identifikasjonsnummer == fnrBarn1.identifikasjonsnummer } })
+        } returns fnrBarn1
+        coEvery {
+            ppsKlientMock.avklarFolkeregisteridentifikator(match { it.any { it.identifikasjonsnummer == fnrBarn2.identifikasjonsnummer } })
+        } returns fnrBarn2
+
         val person =
             runBlocking {
                 personService.hentPerson(
                     HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED, listOf(SakType.BARNEPENSJON)),
                 )
             }
-
-        val expectedBarnFnr = listOf("09508229892", "17418340118")
-
         val avdoedesBarn = person.avdoedesBarn!!
         avdoedesBarn.map { it.foedselsnummer.value } shouldContainExactlyInAnyOrder expectedBarnFnr
 
@@ -300,7 +311,13 @@ internal class PersonServiceTest {
 
         runBlocking {
             assertThrows<FantIkkePersonException> {
-                personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)))
+                personService.hentPerson(
+                    HentPersonRequest(
+                        STOR_SNERK,
+                        rolle = PersonRolle.BARN,
+                        listOf(SakType.BARNEPENSJON),
+                    ),
+                )
             }
         }
     }

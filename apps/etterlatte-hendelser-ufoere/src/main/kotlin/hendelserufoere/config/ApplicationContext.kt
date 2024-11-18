@@ -20,7 +20,7 @@ class ApplicationContext(
             azureAppClientId = config.getString("azure.app.client.id"),
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("behandling.azure.scope"),
+            azureAppScope = config.getString("etterlatte.behandling.scope"),
         ),
     val behandlingKlient: BehandlingKlient =
         BehandlingKlient(

@@ -29,7 +29,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -214,6 +213,7 @@ class RevurderingService(
                             Revurderingaarsak.INNTEKTSENDRING,
                             Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                             -> it.prosesstype != Prosesstype.AUTOMATISK
+
                             else -> true
                         }
                     runBlocking {
@@ -263,8 +263,6 @@ class RevurderingService(
                             (prosessType == Prosesstype.AUTOMATISK && saksbehandlerIdent == Fagsaksystem.EY.navn)
                         ) {
                             oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
-                        } else {
-                            oppgaveService.oppdaterStatusOgMerknad(oppgave.id, "", Status.UNDER_BEHANDLING)
                         }
                     }
                 },

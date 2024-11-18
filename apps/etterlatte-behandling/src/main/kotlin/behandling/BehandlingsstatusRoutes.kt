@@ -11,7 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
@@ -175,9 +175,9 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
     route("/behandlinger") {
         post("/settTilbakeTilTrygdetidOppdatert") {
             kunSystembruker {
-                val saker = call.receive<Saker>()
+                val sakslisteDTO = call.receive<SakslisteDTO>()
                 val tilbakestilteBehandlinger =
-                    behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker)
+                    behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(sakslisteDTO)
                 call.respond(tilbakestilteBehandlinger)
             }
         }

@@ -90,7 +90,7 @@ class AarligInntektsjusteringJobbService(
         saksbehandler: Saksbehandler,
     ): Revurdering {
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
-        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak)
+        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak.id)
         if (aapneBehandlinger.isNotEmpty()) {
             logger.info("Sak har åpne behandlinger, kan ikke opprette revurdering")
             throw UgyldigForespoerselException(
@@ -175,7 +175,7 @@ class AarligInntektsjusteringJobbService(
     ): Boolean {
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
 
-        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak)
+        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak.id)
         if (aapneBehandlinger.isNotEmpty()) {
             nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)
             return true

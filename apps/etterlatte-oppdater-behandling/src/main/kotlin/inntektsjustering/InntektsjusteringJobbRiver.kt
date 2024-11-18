@@ -72,7 +72,7 @@ internal class InntektsjusteringJobbRiver(
                 val request =
                     AarligInntektsjusteringRequest(
                         kjoering = kjoering,
-                        saker = sakerSomSkalInformeres.saker.map { it.id },
+                        saker = sakerSomSkalInformeres.sakIdListe,
                     )
                 behandlingService.startAarligInntektsjustering(request)
             },

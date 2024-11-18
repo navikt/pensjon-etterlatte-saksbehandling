@@ -54,7 +54,8 @@ class SafKlient(
             when (re.response.status) {
                 HttpStatusCode.Forbidden -> {
                     val errorMessage = re.response.body<JsonNode>()["message"]?.asText()
-                    logger.error(errorMessage ?: "Feil fra Saf: ${re.response.bodyAsText()}")
+                    // TODO bedre håndtering av dette? https://jira.adeo.no/browse/EY-4755
+                    logger.warn(errorMessage ?: "Feil fra Saf: ${re.response.bodyAsText()}")
 
                     throw IkkeTilgangTilJournalpost()
                 }

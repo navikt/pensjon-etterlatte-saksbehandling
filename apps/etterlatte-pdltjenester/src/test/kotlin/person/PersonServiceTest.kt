@@ -38,6 +38,7 @@ import no.nav.etterlatte.pdl.PdlIdentResponse
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlPersonResponse
 import no.nav.etterlatte.pdl.PdlPersonResponseBolk
+import no.nav.etterlatte.pdl.mapper.ParallelleSannheterService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -50,10 +51,12 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
 internal class PersonServiceTest {
-    private val pdlKlient = mockk<PdlKlient>()
-    private val ppsKlient = mockk<ParallelleSannheterKlient>()
+    private val pdlKlientMock = mockk<PdlKlient>()
+    private val ppsKlientMock = mockk<ParallelleSannheterKlient>()
+
+    private val ppsService = ParallelleSannheterService(ppsKlientMock, pdlKlientMock, mockk())
     private val featureToggleService = mockk<FeatureToggleService>()
-    private val personService = PersonService(pdlKlient, ppsKlient)
+    private val personService = PersonService(pdlKlientMock, ppsService)
 
     private val aktorIdMedNpid = "1234567890123"
     private val aktorIdMedFolkeregisterIdent = AVDOED_FOEDSELSNUMMER.value
@@ -80,36 +83,36 @@ internal class PersonServiceTest {
 
         every { featureToggleService.isEnabled(any(), any()) } returns true
 
-        coEvery { pdlKlient.hentPerson(any()) } returns personResponse
-        coEvery { pdlKlient.hentPersonBolk(any(), any()) } returns personBolkResponse
+        coEvery { pdlKlientMock.hentPerson(any()) } returns personResponse
+        coEvery { pdlKlientMock.hentPersonBolk(any(), any()) } returns personBolkResponse
         coEvery {
-            pdlKlient.hentPdlIdentifikator(
+            pdlKlientMock.hentPdlIdentifikator(
                 HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent)),
             )
         } returns personIdentResponse
         coEvery {
-            pdlKlient.hentPdlIdentifikator(
+            pdlKlientMock.hentPdlIdentifikator(
                 HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent)),
             )
         } returns personIdentResponse
         coEvery {
-            pdlKlient.hentPdlIdentifikator(
+            pdlKlientMock.hentPdlIdentifikator(
                 HentPdlIdentRequest(
                     PersonIdent(aktorIdMedNpid),
                 ),
             )
         } returns personNpidResponse
-        coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
-        coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
-        coEvery { ppsKlient.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
-        coEvery { ppsKlient.avklarSivilstand(any(), any()) } returns null
-        coEvery { ppsKlient.avklarFoedselsdato(any()) } returns hentPerson.foedselsdato.first()
-        coEvery { ppsKlient.avklarFoedested(any()) } returns hentPerson.foedested.first()
-        coEvery { ppsKlient.avklarDoedsfall(any()) } returns null
-        coEvery { ppsKlient.avklarBostedsadresse(any()) } returns hentPerson.bostedsadresse?.first()
-        coEvery { ppsKlient.avklarKontaktadresse(any()) } returns hentPerson.kontaktadresse?.first()
-        coEvery { ppsKlient.avklarOppholdsadresse(any()) } returns hentPerson.oppholdsadresse?.first()
-        coEvery { pdlKlient.hentGeografiskTilknytning(any()) } returns geografiskTilknytning
+        coEvery { ppsKlientMock.avklarNavn(any()) } returns hentPerson.navn.first()
+        coEvery { ppsKlientMock.avklarAdressebeskyttelse(any()) } returns null
+        coEvery { ppsKlientMock.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
+        coEvery { ppsKlientMock.avklarSivilstand(any(), any()) } returns null
+        coEvery { ppsKlientMock.avklarFoedselsdato(any()) } returns hentPerson.foedselsdato.first()
+        coEvery { ppsKlientMock.avklarFoedested(any()) } returns hentPerson.foedested.first()
+        coEvery { ppsKlientMock.avklarDoedsfall(any()) } returns null
+        coEvery { ppsKlientMock.avklarBostedsadresse(any()) } returns hentPerson.bostedsadresse?.first()
+        coEvery { ppsKlientMock.avklarKontaktadresse(any()) } returns hentPerson.kontaktadresse?.first()
+        coEvery { ppsKlientMock.avklarOppholdsadresse(any()) } returns hentPerson.oppholdsadresse?.first()
+        coEvery { pdlKlientMock.hentGeografiskTilknytning(any()) } returns geografiskTilknytning
     }
 
     @AfterEach
@@ -280,7 +283,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `Person ikke finnes kaster exception`() {
-        coEvery { pdlKlient.hentPerson(any()) } returns PdlPersonResponse(data = null, errors = emptyList())
+        coEvery { pdlKlientMock.hentPerson(any()) } returns PdlPersonResponse(data = null, errors = emptyList())
 
         assertThrows<PdlForesporselFeilet> {
             runBlocking {
@@ -293,7 +296,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `Finner ikke person i PDL`() {
-        coEvery { pdlKlient.hentPerson(any()) } returns mockResponse("/pdl/person_ikke_funnet.json")
+        coEvery { pdlKlientMock.hentPerson(any()) } returns mockResponse("/pdl/person_ikke_funnet.json")
 
         runBlocking {
             assertThrows<FantIkkePersonException> {
@@ -336,7 +339,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `finner ikke folkeregisterident`() {
-        coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
+        coEvery { pdlKlientMock.hentPdlIdentifikator(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
         runBlocking {
             assertThrows<FantIkkePersonException> {
                 personService.hentPdlIdentifikator(HentPdlIdentRequest(PersonIdent("1234")))
@@ -359,7 +362,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `Bruker uten geografisk tilknytning`() {
-        coEvery { pdlKlient.hentGeografiskTilknytning(any()) } returns
+        coEvery { pdlKlientMock.hentGeografiskTilknytning(any()) } returns
             PdlGeografiskTilknytningResponse(
                 data =
                     PdlGeografiskTilknytningData(
@@ -381,7 +384,7 @@ internal class PersonServiceTest {
     @ParameterizedTest
     @EnumSource(PdlGradering::class)
     fun `Skal hente gradering for person`(pdlGradering: PdlGradering) {
-        coEvery { pdlKlient.hentAdressebeskyttelse(any()) } returns
+        coEvery { pdlKlientMock.hentAdressebeskyttelse(any()) } returns
             PdlAdressebeskyttelseResponse(
                 data =
                     PdlAdressebeskyttelseData(

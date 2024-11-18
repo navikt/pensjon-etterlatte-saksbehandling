@@ -2,12 +2,13 @@ package no.nav.etterlatte.pdl.mapper
 
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlVergeEllerFullmektig
 import no.nav.etterlatte.pdl.PdlVergemaalEllerFremtidsfullmakt
 
 object VergeMapper {
-    fun mapVerge(vergemaalsListe: List<PdlVergemaalEllerFremtidsfullmakt>): List<VergemaalEllerFremtidsfullmakt> =
-        vergemaalsListe.map(::mapVerge)
+    fun mapVerge(hentPerson: PdlHentPerson): List<VergemaalEllerFremtidsfullmakt>? =
+        hentPerson.vergemaalEllerFremtidsfullmakt?.map(::mapVerge)
 
     fun mapVerge(vergemaal: PdlVergemaalEllerFremtidsfullmakt): VergemaalEllerFremtidsfullmakt =
         toVergemaal(

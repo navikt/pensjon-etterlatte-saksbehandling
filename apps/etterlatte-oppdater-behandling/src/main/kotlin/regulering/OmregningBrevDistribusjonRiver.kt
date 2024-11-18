@@ -2,17 +2,13 @@ package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.brev.BrevHendelseType
-import no.nav.etterlatte.brev.Brevkoder
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.sak.DisttribuertEllerIverksatt
-import no.nav.etterlatte.rapidsandrivers.BREV_KODE
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.brevId
-import no.nav.etterlatte.rapidsandrivers.brevKode
-import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
+import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -26,9 +22,10 @@ internal class OmregningBrevDistribusjonRiver(
 
     init {
         initialiserRiver(rapidsConnection, BrevHendelseType.DISTRIBUERT) {
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(BREV_KODE) }
-            validate { it.demandValue(BREV_KODE, Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK.name) } // TODO kan bli flere
+            validate { it.requireKey(OmregningDataPacket.KEY) }
+            validate { it.requireKey(OmregningDataPacket.SAK_ID) }
+            validate { it.requireKey(OmregningDataPacket.KJOERING) }
+            validate { it.requireKey(OmregningDataPacket.REV_AARSAK) }
         }
     }
 
@@ -38,15 +35,15 @@ internal class OmregningBrevDistribusjonRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        logger.info("Setter status på brev til distribuert på omregning til sak=${packet.sakId}, brevid=${packet.brevId}")
+        val sakId = packet.omregningData.sakId
+        logger.info("Setter status på brev til distribuert på omregning til sak=$sakId")
         try {
-            val brevkode = packet.brevKode
-            when (brevkode) {
-                Brevkoder.OMS_INNTEKTSJUSTERING_VEDTAK.name -> {
-                    val kjoering = AarligInntektsjusteringRequest.utledKjoering()
+            val revurderingsaarsak = packet.omregningData.revurderingaarsak
+            when (revurderingsaarsak) {
+                Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> {
                     behandlingService.lagreKjoeringBrevDistribuertEllerIverksatt(
-                        packet.sakId,
-                        kjoering,
+                        sakId,
+                        packet.omregningData.kjoering,
                         DisttribuertEllerIverksatt.DISTRIBUERT,
                     )
                 }
@@ -55,11 +52,11 @@ internal class OmregningBrevDistribusjonRiver(
             }
         } catch (e: Exception) {
             logger.error(
-                "Kunne ikke oppdatere omregning sin status på brev distribusjon for sak ${packet.sakId} brevid: ${packet.brevId}",
+                "Kunne ikke oppdatere omregning sin status på brev distribusjon for sak $sakId",
                 e,
             )
             throw InternfeilException(
-                "Fikk ikke oppdatert kjøring med status på brev distribusjon for ${packet.sakId}",
+                "Fikk ikke oppdatert kjøring med status på brev distribusjon for $sakId",
                 e,
             )
         }

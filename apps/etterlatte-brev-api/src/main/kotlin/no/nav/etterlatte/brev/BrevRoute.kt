@@ -263,7 +263,6 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 logger.info("Oppretter nytt brev på sak=$sakId)")
                 val brevParametre = call.receive<BrevParametre>()
-                println(brevParametre.toString())
 
                 if (!grunnlagService.finnesGrunnlagForSak(sakId, brukerTokenInfo)) {
                     throw UgyldigForespoerselException(

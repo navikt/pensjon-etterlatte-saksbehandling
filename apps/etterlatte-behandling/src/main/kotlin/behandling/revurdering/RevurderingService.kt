@@ -209,10 +209,11 @@ class RevurderingService(
                         when (revurderingAarsak) {
                             Revurderingaarsak.REGULERING,
                             Revurderingaarsak.OMREGNING,
-                            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                             -> false
 
-                            Revurderingaarsak.INNTEKTSENDRING -> it.prosesstype != Prosesstype.AUTOMATISK
+                            Revurderingaarsak.INNTEKTSENDRING,
+                            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+                            -> it.prosesstype != Prosesstype.AUTOMATISK
                             else -> true
                         }
                     runBlocking {

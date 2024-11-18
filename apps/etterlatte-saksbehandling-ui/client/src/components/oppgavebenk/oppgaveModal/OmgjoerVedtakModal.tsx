@@ -10,9 +10,16 @@ import { Klage, Omgjoering, VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { formaterVedtakType } from '~utils/formatering/formatering'
 import { formaterKanskjeStringDato } from '~utils/formatering/dato'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { OppgaveDTO, erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 
 function hentOmgjoering(klage: Klage): Omgjoering | null {
+  if (klage.kabalResultat === 'MEDHOLD') {
+    return {
+      begrunnelse: 'Klagen har fått medhold i behandlingen i Klageinstansen',
+      grunnForOmgjoering: 'ANNET',
+    }
+  }
+
   if (klage.utfall?.utfall === 'DELVIS_OMGJOERING' || klage.utfall?.utfall === 'OMGJOERING') {
     return klage.utfall.omgjoering
   }
@@ -28,13 +35,15 @@ function erBehandlingVedtakOmgjoering(klage: Klage): boolean {
   if (omgjoering === null) {
     return false
   }
+
   const vedtakKlagesPaa = hentVedtakKlagesPaa(klage)
   switch (vedtakKlagesPaa?.vedtakType) {
-    case 'AVSLAG':
     case 'INNVILGELSE':
     case 'ENDRING':
     case 'OPPHOER':
       return true
+    case 'AVSLAG':
+      return false
     default:
       return false
   }
@@ -106,7 +115,7 @@ export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
                   </BodyShort>
                   {!erBehandlingVedtakOmgjoering(klage) && (
                     <Alert variant="warning">
-                      Det er ikke støttet å omgjøre vedtak som ikke er behanldinger enda.{' '}
+                      Det er ikke støttet å omgjøre vedtak som ikke er behandlinger enda.{' '}
                     </Alert>
                   )}
                 </>

@@ -85,7 +85,7 @@ class DoedshendelseKontrollpunktServiceTest {
 
         every { behandlingService.hentSisteIverksatte(any()) } returns null
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
@@ -96,7 +96,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
             )
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.BARN,
                 saktype = SakType.BARNEPENSJON,
@@ -115,7 +115,7 @@ class DoedshendelseKontrollpunktServiceTest {
                     ),
             )
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
@@ -156,7 +156,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         } returns foerstegangsbehandling(sakId = sak.id, status = BehandlingStatus.IVERKSATT)
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
@@ -194,7 +194,7 @@ class DoedshendelseKontrollpunktServiceTest {
         } returns listOf(sak)
         every { behandlingService.hentSisteIverksatte(sak.id) } returns null
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
@@ -231,7 +231,7 @@ class DoedshendelseKontrollpunktServiceTest {
         } returns emptyList()
 
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
@@ -274,7 +274,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         } returns foerstegangsbehandling(sakId = sakIdd, status = BehandlingStatus.IVERKSATT)
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = doedshendelseInternalAvdoed.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
@@ -360,7 +360,7 @@ class DoedshendelseKontrollpunktServiceTest {
     @Test
     fun `Skal gi kontrollpunkt dersom gjenlevende ikke har aktiv adresse`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.BARN,
                 saktype = SakType.BARNEPENSJON,

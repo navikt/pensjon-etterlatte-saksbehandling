@@ -73,7 +73,7 @@ class DoedshendelseJobServiceTest {
 
     private val pdlTjenesterKlient =
         mockk<PdlTjenesterKlient> {
-            every { hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+            every { hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         }
 
     private val krrKlient =

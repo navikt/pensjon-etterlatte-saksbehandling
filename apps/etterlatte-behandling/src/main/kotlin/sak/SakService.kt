@@ -40,14 +40,14 @@ import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
 interface SakService {
-    fun hentSaker(
+    fun hentSakIdListeForKjoering(
         kjoering: String,
         antall: Int,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
         sakType: SakType? = null,
         loependeFom: YearMonth? = null,
-    ): List<Sak>
+    ): List<SakId>
 
     fun finnSaker(ident: String): List<Sak>
 
@@ -139,19 +139,20 @@ class SakServiceImpl(
         return saker.associateBy { it.id }
     }
 
-    override fun hentSaker(
+    override fun hentSakIdListeForKjoering(
         kjoering: String,
         antall: Int,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
         sakType: SakType?,
         loependeFom: YearMonth?,
-    ): List<Sak> =
+    ): List<SakId> =
         lesDao
             .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType, loependeFom)
             .also { logger.info("Henta ${it.size} saker før filtrering") }
             .filterForEnheter()
             .also { logger.info("Henta ${it.size} saker etter filtrering") }
+            .map(Sak::id)
 
     private fun finnSakForPerson(
         ident: String,

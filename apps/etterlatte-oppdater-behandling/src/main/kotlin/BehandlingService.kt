@@ -34,14 +34,16 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
+import no.nav.etterlatte.libs.common.sak.DisttribuertEllerIverksatt
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
+import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.tidshendelser.JobbType
@@ -75,7 +77,7 @@ interface BehandlingService {
         ekskluderteSaker: List<SakId> = listOf(),
         sakType: SakType? = null,
         loependeFom: YearMonth? = null,
-    ): Saker
+    ): SakslisteDTO
 
     fun opprettAutomatiskRevurdering(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse
 
@@ -100,7 +102,7 @@ interface BehandlingService {
         jobbType: JobbType,
     ): OpprettOppgaveForAktivitetspliktResponse
 
-    fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
+    fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakslisteDTO: SakslisteDTO): SakIDListe
 
     fun avbryt(behandlingId: UUID): HttpResponse
 
@@ -132,6 +134,12 @@ interface BehandlingService {
         begrunnelse: String? = null,
         corrId: String? = null,
         feilendeSteg: String? = null,
+    )
+
+    fun lagreKjoeringBrevDistribuertEllerIverksatt(
+        sakId: SakId,
+        kjoering: String,
+        distEllerIverksatt: DisttribuertEllerIverksatt,
     )
 
     fun lagreFullfoertKjoering(request: LagreKjoeringRequest)
@@ -232,12 +240,12 @@ class BehandlingServiceImpl(
                 }.body()
         }
 
-    override fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe =
+    override fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakslisteDTO: SakslisteDTO): SakIDListe =
         runBlocking {
             behandlingKlient
                 .post("$url/behandlinger/settTilbakeTilTrygdetidOppdatert") {
                     contentType(ContentType.Application.Json)
-                    setBody(saker)
+                    setBody(sakslisteDTO)
                 }.body()
         }
 
@@ -248,7 +256,7 @@ class BehandlingServiceImpl(
         ekskluderteSaker: List<SakId>,
         sakType: SakType?,
         loependeFom: YearMonth?,
-    ): Saker =
+    ): SakslisteDTO =
         runBlocking {
             behandlingKlient
                 .post("$url/saker/$kjoering/$antall") {
@@ -418,6 +426,26 @@ class BehandlingServiceImpl(
                 )
             }
             logger.debug("$kjoering: kjoeringStatus for sak {} er oppdatert til: {}", sakId, status)
+        }
+    }
+
+    override fun lagreKjoeringBrevDistribuertEllerIverksatt(
+        sakId: SakId,
+        kjoering: String,
+        distEllerIverksatt: DisttribuertEllerIverksatt,
+    ) {
+        runBlocking {
+            behandlingKlient.put("$url/omregning/dist-eller-iverksatt") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    KjoeringDistEllerIverksattRequest(
+                        kjoering = kjoering,
+                        sakId = sakId,
+                        distEllerIverksatt = distEllerIverksatt,
+                    ),
+                )
+            }
+            logger.debug("$kjoering: har fullført distribuering av brev for sak $sakId")
         }
     }
 

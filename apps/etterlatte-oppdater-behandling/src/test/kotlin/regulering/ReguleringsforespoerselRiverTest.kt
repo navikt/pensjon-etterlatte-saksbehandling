@@ -18,10 +18,9 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import no.nav.etterlatte.rapidsandrivers.AAPNE_BEHANDLINGER_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
@@ -64,10 +63,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock =
             mockk<BehandlingService>(relaxed = true).also {
-                every { it.hentAlleSaker(any(), any(), any(), any()) } returns
-                    Saker(
-                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, randomSakId(), porsgrunn)),
-                    )
+                every { it.hentAlleSaker(any(), any(), any(), any()) } returns SakslisteDTO(listOf(randomSakId()))
             }
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
@@ -84,13 +80,8 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
         every { vedtakServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
-            Saker(
-                listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, sakId1, porsgrunn),
-                    Sak("saksbehandler2", SakType.BARNEPENSJON, sakId2, porsgrunn),
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, sakId3, porsgrunn),
-                ),
-            ) andThen Saker(listOf())
+            SakslisteDTO(listOf(sakId1, sakId2, sakId3)) andThen SakslisteDTO(listOf())
+
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
 
@@ -124,13 +115,8 @@ internal class ReguleringsforespoerselRiverTest {
         val sak2 = randomSakId()
         val sak3 = randomSakId()
         every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
-            Saker(
-                listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, sak1, porsgrunn),
-                    Sak("saksbehandler2", SakType.BARNEPENSJON, sak2, porsgrunn),
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, sak3, porsgrunn),
-                ),
-            )
+            SakslisteDTO(listOf(sak1, sak2, sak3))
+
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, behandlingServiceMock, featureToggleService) }
         inspector.sendTestMessage(melding.toJson())
@@ -150,11 +136,8 @@ internal class ReguleringsforespoerselRiverTest {
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         val sakId = randomSakId()
         every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
-            Saker(
-                listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, sakId, porsgrunn),
-                ),
-            )
+            SakslisteDTO(listOf(sakId))
+
         val behandlingId1 = UUID.randomUUID()
         val behandlingId2 = UUID.randomUUID()
         every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any()) } returns
@@ -183,9 +166,7 @@ internal class ReguleringsforespoerselRiverTest {
         val behandlingServiceMock =
             mockk<BehandlingService>(relaxed = true).also {
                 every { it.hentAlleSaker(any(), any(), any(), any()) } returns
-                    Saker(
-                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, randomSakId(), porsgrunn)),
-                    )
+                    SakslisteDTO(listOf(randomSakId()))
             }
         coEvery {
             behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
@@ -207,16 +188,11 @@ internal class ReguleringsforespoerselRiverTest {
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
         val kjoering = "Regulering2023"
         every { vedtakServiceMock.hentAlleSaker(kjoering, any(), any(), any()) } returns
-            Saker(
+            SakslisteDTO(
                 (0..MAKS_BATCHSTOERRELSE).map {
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, SakId(it.toLong()), porsgrunn)
+                    SakId(it.toLong())
                 },
-            ) andThen
-            Saker(
-                listOf(
-                    Sak("saksbehandler1", SakType.BARNEPENSJON, randomSakId(), porsgrunn),
-                ),
-            ) andThen Saker(listOf())
+            ) andThen SakslisteDTO(listOf(randomSakId())) andThen SakslisteDTO(listOf())
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
 

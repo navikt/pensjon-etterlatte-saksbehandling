@@ -35,14 +35,14 @@ class DoedshendelseKontrollpunktBarnServiceTest {
     @Test
     fun `Skal opprette kontrollpunkt ved samtidig doedsfall`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = KONTANT_FOT.value,
                 rolle = PersonRolle.AVDOED,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns avdoed
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
@@ -57,14 +57,14 @@ class DoedshendelseKontrollpunktBarnServiceTest {
     @Test
     fun `Skal opprette kontrollpunkt dersom vi ikke finner den andre forelderen`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = KONTANT_FOT.value,
                 rolle = PersonRolle.AVDOED,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns avdoed
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
@@ -91,14 +91,14 @@ class DoedshendelseKontrollpunktBarnServiceTest {
     @Test
     fun `Skal opprette kontrollpunkt ved iverksatt vedtak`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = KONTANT_FOT.value,
                 rolle = PersonRolle.AVDOED,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns avdoed
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
@@ -115,14 +115,14 @@ class DoedshendelseKontrollpunktBarnServiceTest {
     @Test
     fun `Skal ikke opprette kontrollpunkt ved dersom det kun eksisterer en sak`() {
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = KONTANT_FOT.value,
                 rolle = PersonRolle.AVDOED,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns avdoed
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,

@@ -1,9 +1,9 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.inntektsjustering.InntektsjusteringJobbRiver
-import no.nav.etterlatte.inntektsjustering.OppdaterInntektsjusteringBrevDistribuert
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
 import no.nav.etterlatte.regulering.FinnSakerTilReguleringRiver
+import no.nav.etterlatte.regulering.OmregningBrevDistribusjonRiver
 import no.nav.etterlatte.regulering.OmregningFeiletRiver
 import no.nav.etterlatte.regulering.OmregningsHendelserBehandlingRiver
 import no.nav.etterlatte.regulering.ReguleringsforespoerselRiver
@@ -13,7 +13,12 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 
 fun main() {
-    initRogR("oppdater-behandling") { rapidsConnection, rapidEnv -> settOppRivers(rapidsConnection, AppBuilder(rapidEnv)) }
+    initRogR("oppdater-behandling") { rapidsConnection, rapidEnv ->
+        settOppRivers(
+            rapidsConnection,
+            AppBuilder(rapidEnv),
+        )
+    }
 }
 
 private fun settOppRivers(
@@ -35,5 +40,5 @@ private fun settOppRivers(
     TidshendelseRiver(rapidsConnection, tidshendelseService)
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
     InntektsjusteringJobbRiver(rapidsConnection, behandlingservice, featureToggleService)
-    OppdaterInntektsjusteringBrevDistribuert(rapidsConnection, behandlingservice)
+    OmregningBrevDistribusjonRiver(rapidsConnection, behandlingservice)
 }

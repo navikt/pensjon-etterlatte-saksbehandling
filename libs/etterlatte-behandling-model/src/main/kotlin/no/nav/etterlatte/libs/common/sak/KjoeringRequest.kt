@@ -11,6 +11,12 @@ data class KjoeringRequest(
     val feilendeSteg: String? = null,
 )
 
+data class KjoeringDistEllerIverksattRequest(
+    val kjoering: String,
+    val sakId: SakId,
+    val distEllerIverksatt: DisttribuertEllerIverksatt,
+)
+
 data class LagreKjoeringRequest(
     val kjoering: String,
     val status: KjoeringStatus,
@@ -34,4 +40,10 @@ enum class KjoeringStatus {
     IKKE_LOEPENDE,
     FERDIGSTILT,
     TIL_MANUELL,
+    TIL_MANUELL_UTEN_OPPGAVE,
+}
+
+enum class DisttribuertEllerIverksatt {
+    IVERKSATT,
+    DISTRIBUERT,
 }

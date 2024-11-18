@@ -87,6 +87,7 @@ import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class GrunnlagKlientTest : GrunnlagKlient {
@@ -203,6 +204,12 @@ class GrunnlagKlientTest : GrunnlagKlient {
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): PersonopplysningerResponse = GrunnlagTestData().hentPersonopplysninger()
+
+    override suspend fun aldersovergangMaaned(
+        sakId: SakId,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = YearMonth.now()
 
     override val serviceName: String
         get() = TODO("Not yet implemented")
@@ -614,7 +621,7 @@ class KodeverkKlientTest : KodeverkKlient {
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {
-    override fun hentPdlModellFlereSaktyper(
+    override fun hentPdlModellForSaktype(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,

@@ -37,7 +37,7 @@ internal class PdlTjenesterKlientTest {
         val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModellFlereSaktyper(fnr.value, rolle, SakType.BARNEPENSJON)
+        val resultat = pdlService.hentPdlModellForSaktype(fnr.value, rolle, SakType.BARNEPENSJON)
         Assertions.assertEquals("Ola", resultat.fornavn.verdi)
         Assertions.assertEquals("Mellom", resultat.mellomnavn?.verdi)
         Assertions.assertEquals("Nordmann", resultat.etternavn.verdi)
@@ -49,7 +49,7 @@ internal class PdlTjenesterKlientTest {
         val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModellFlereSaktyper(fnr.value, rolle, SakType.BARNEPENSJON).hentDoedsdato()
+        val resultat = pdlService.hentPdlModellForSaktype(fnr.value, rolle, SakType.BARNEPENSJON).hentDoedsdato()
         Assertions.assertEquals(mockPerson().doedsdato?.verdi, resultat)
     }
 
@@ -61,7 +61,7 @@ internal class PdlTjenesterKlientTest {
         val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModellFlereSaktyper(fnr.value, rolle, SakType.BARNEPENSJON).hentAnsvarligeForeldre()
+        val resultat = pdlService.hentPdlModellForSaktype(fnr.value, rolle, SakType.BARNEPENSJON).hentAnsvarligeForeldre()
         Assertions.assertEquals(familierelasjon.ansvarligeForeldre, resultat)
     }
 
@@ -73,7 +73,7 @@ internal class PdlTjenesterKlientTest {
         val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModellFlereSaktyper(fnr.value, rolle, SakType.BARNEPENSJON).hentBarn()
+        val resultat = pdlService.hentPdlModellForSaktype(fnr.value, rolle, SakType.BARNEPENSJON).hentBarn()
         Assertions.assertEquals(familierelasjon.barn, resultat)
     }
 
@@ -104,7 +104,7 @@ internal class PdlTjenesterKlientTest {
         val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
-        val resultat = pdlService.hentPdlModellFlereSaktyper(fnr.value, rolle, SakType.BARNEPENSJON).hentUtland()
+        val resultat = pdlService.hentPdlModellForSaktype(fnr.value, rolle, SakType.BARNEPENSJON).hentUtland()
         Assertions.assertEquals(utland, resultat)
     }
 

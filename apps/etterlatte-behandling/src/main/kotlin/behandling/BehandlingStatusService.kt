@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.SakIDListe
-import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -99,7 +99,7 @@ interface BehandlingStatusService {
         vedtakHendelse: VedtakHendelse,
     )
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): SakIDListe
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(sakslisteDTO: SakslisteDTO): SakIDListe
 }
 
 class BehandlingStatusServiceImpl(
@@ -337,10 +337,11 @@ class BehandlingStatusServiceImpl(
         }
     }
 
-    override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker) =
+    override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(sakslisteDTO: SakslisteDTO) =
         inTransaction {
-            val tilbakestilte = behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker)
-            val aapne = behandlingDao.hentAapneBehandlinger(saker)
+            val tilbakestilte =
+                behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(sakslisteDTO.sakIdListe)
+            val aapne = behandlingDao.hentAapneBehandlinger(sakslisteDTO.sakIdListe)
             SakIDListe(
                 tilbakestilte,
                 aapne,

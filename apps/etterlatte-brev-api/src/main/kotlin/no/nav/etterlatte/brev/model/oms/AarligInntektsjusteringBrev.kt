@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
@@ -109,7 +108,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                 innhold = innholdMedVedlegg.innhold(),
                 beregning =
                     OmstillingsstoenadBeregning(
-                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
+                        innhold = emptyList(), // Skal ikke sende med noe vedlegg for denne brevtypen
                         virkningsdato = virk,
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,

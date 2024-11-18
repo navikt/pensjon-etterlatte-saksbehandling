@@ -10,9 +10,13 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.Personopplysning
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.AAPEN_BEHANDLING
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.ALDERSOVERGANG_67
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.HAR_OPPHOER_FOM
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.HAR_SANKSJON
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.TIL_SAMORDNING
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringAarsakManuell.UTDATERTE_PERSONO_INFO
@@ -41,6 +45,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -51,7 +56,6 @@ import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
-import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
@@ -66,6 +70,7 @@ class AarligInntektsjusteringJobbService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val oppgaveService: OppgaveService,
     private val rapid: KafkaProdusent<String, String>,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -85,7 +90,7 @@ class AarligInntektsjusteringJobbService(
         saksbehandler: Saksbehandler,
     ): Revurdering {
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
-        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak)
+        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak.id)
         if (aapneBehandlinger.isNotEmpty()) {
             logger.info("Sak har åpne behandlinger, kan ikke opprette revurdering")
             throw UgyldigForespoerselException(
@@ -94,8 +99,7 @@ class AarligInntektsjusteringJobbService(
             )
         }
 
-        // TODO: bør defineres i en utils slik at den kan gjenbrukes på tvers av all logikk knytt til inntektsjustering
-        val loependeFom = YearMonth.of(Year.now().value, 1).plusYears(1)
+        val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
         val revurdering = nyManuellRevurdering(sakId, hentForrigeBehandling(sakId), loependeFom)
         oppgaveService.ferdigstillOppgave(oppgaveId, saksbehandler)
         return revurdering
@@ -112,74 +116,16 @@ class AarligInntektsjusteringJobbService(
                 runBlocking {
                     vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
                 }
-            if (!vedtak.erLoepende) {
-                oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, "Sak er ikke løpende")
-                return@inTransaction
-            }
 
             val forrigeBehandling = hentForrigeBehandling(sakId)
 
-            if (vedtak.underSamordning) {
-                nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, TIL_SAMORDNING)
-                return@inTransaction
-            }
-
             val avkortingSjekk = hentAvkortingSjekk(sakId, loependeFom, forrigeBehandling.id)
 
-            if (avkortingSjekk.harInntektForAar) {
-                oppdaterKjoering(
-                    kjoering,
-                    KjoeringStatus.FERDIGSTILT,
-                    sakId,
-                    "Sak har allerede oppgitt inntekt for ${loependeFom.year}",
-                )
-                return@inTransaction
-            }
-            if (avkortingSjekk.harSanksjon) {
-                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, HAR_SANKSJON)
+            if (skalIkkeKjoereJobb(kjoering, sakId, loependeFom, vedtak, avkortingSjekk)) {
                 return@inTransaction
             }
 
-            val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
-
-            val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak)
-            if (aapneBehandlinger.isNotEmpty()) {
-                nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)
-                return@inTransaction
-            }
-
-            hentPdlPersonident(sak).let { sisteIdentifikatorPdl ->
-                val sisteIdent =
-                    when (sisteIdentifikatorPdl) {
-                        is PdlIdentifikator.FolkeregisterIdent -> sisteIdentifikatorPdl.folkeregisterident.value
-                        is PdlIdentifikator.Npid -> sisteIdentifikatorPdl.npid.ident
-                    }
-                if (sak.ident != sisteIdent) {
-                    nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, UTDATERT_IDENT)
-                    return@inTransaction
-                }
-            }
-
-            val opplysningerGjenny = hentOpplysningerGjenny(sak, forrigeBehandling.id)
-
-            val opplysningerErUendretIPdl =
-                hentPdlPersonopplysning(sak).let { opplysningerPdl ->
-                    with(opplysningerGjenny.opplysning) {
-                        fornavn == opplysningerPdl.fornavn.verdi &&
-                            mellomnavn == opplysningerPdl.mellomnavn?.verdi &&
-                            etternavn == opplysningerPdl.etternavn.verdi &&
-                            foedselsdato == opplysningerPdl.foedselsdato?.verdi &&
-                            doedsdato == opplysningerPdl.doedsdato?.verdi &&
-                            vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt?.map { it.verdi }
-                    }
-                }
-            if (!opplysningerErUendretIPdl) {
-                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, UTDATERTE_PERSONO_INFO)
-                return@inTransaction
-            }
-
-            if (opplysningerGjenny.opplysning.vergemaalEllerFremtidsfullmakt?.isNotEmpty() == true) {
-                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, VERGEMAAL)
+            if (maaGjoeresManuelt(kjoering, sakId, loependeFom, vedtak, avkortingSjekk, forrigeBehandling)) {
                 return@inTransaction
             }
 
@@ -194,6 +140,111 @@ class AarligInntektsjusteringJobbService(
                 begrunnelse = e.message ?: e.toString(),
             )
         }
+    }
+
+    fun skalIkkeKjoereJobb(
+        kjoering: String,
+        sakId: SakId,
+        loependeFom: YearMonth,
+        vedtak: LoependeYtelseDTO,
+        avkortingSjekk: AarligInntektsjusteringAvkortingSjekkResponse,
+    ): Boolean {
+        if (!vedtak.erLoepende) {
+            oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, "Sak er ikke løpende")
+            return true
+        }
+        if (avkortingSjekk.harInntektForAar) {
+            oppdaterKjoering(
+                kjoering,
+                KjoeringStatus.FERDIGSTILT,
+                sakId,
+                "Sak har allerede oppgitt inntekt for ${loependeFom.year}",
+            )
+            return true
+        }
+        return false
+    }
+
+    fun maaGjoeresManuelt(
+        kjoering: String,
+        sakId: SakId,
+        loependeFom: YearMonth,
+        vedtak: LoependeYtelseDTO,
+        avkortingSjekk: AarligInntektsjusteringAvkortingSjekkResponse,
+        forrigeBehandling: Behandling,
+    ): Boolean {
+        val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
+
+        val aapneBehandlinger = behandlingService.hentAapneBehandlingerForSak(sak.id)
+        if (aapneBehandlinger.isNotEmpty()) {
+            nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, AAPEN_BEHANDLING)
+            return true
+        }
+
+        if (vedtak.underSamordning) {
+            nyOppgaveOgOppdaterKjoering(sakId, forrigeBehandling.id, kjoering, TIL_SAMORDNING)
+            return true
+        }
+
+        if (forrigeBehandling.opphoerFraOgMed?.year == loependeFom.year) {
+            nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, HAR_OPPHOER_FOM)
+            return true
+        }
+
+        val aldersovergangMaaned =
+            runBlocking {
+                grunnlagService.aldersovergangMaaned(
+                    sakId,
+                    SakType.OMSTILLINGSSTOENAD,
+                    HardkodaSystembruker.omregning,
+                )
+            }
+        if (aldersovergangMaaned.year == loependeFom.year) {
+            nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, ALDERSOVERGANG_67)
+            return true
+        }
+
+        if (avkortingSjekk.harSanksjon) {
+            nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, HAR_SANKSJON)
+            return true
+        }
+
+        hentPdlPersonident(sak).let { sisteIdentifikatorPdl ->
+            val sisteIdent =
+                when (sisteIdentifikatorPdl) {
+                    is PdlIdentifikator.FolkeregisterIdent -> sisteIdentifikatorPdl.folkeregisterident.value
+                    is PdlIdentifikator.Npid -> sisteIdentifikatorPdl.npid.ident
+                }
+            if (sak.ident != sisteIdent) {
+                nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, UTDATERT_IDENT)
+                return true
+            }
+        }
+
+        val opplysningerGjenny = hentOpplysningerGjenny(sak, forrigeBehandling.id)
+
+        val opplysningerPdl = hentPdlPersonopplysning(sak)
+
+        if (!opplysningerPdl.vergemaalEllerFremtidsfullmakt.isNullOrEmpty()) {
+            nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, VERGEMAAL)
+            return true
+        }
+        val opplysningerErUendretIPdl =
+            with(opplysningerGjenny.opplysning) {
+                fornavn == opplysningerPdl.fornavn.verdi &&
+                    mellomnavn == opplysningerPdl.mellomnavn?.verdi &&
+                    etternavn == opplysningerPdl.etternavn.verdi &&
+                    foedselsdato == opplysningerPdl.foedselsdato?.verdi &&
+                    doedsdato == opplysningerPdl.doedsdato?.verdi &&
+                    vergemaalEllerFremtidsfullmakt == opplysningerPdl.vergemaalEllerFremtidsfullmakt?.map { it.verdi }
+            }
+
+        if (!opplysningerErUendretIPdl) {
+            nyBehandlingOgOppdaterKjoering(sakId, loependeFom, forrigeBehandling, kjoering, UTDATERTE_PERSONO_INFO)
+            return true
+        }
+
+        return false
     }
 
     private fun hentAvkortingSjekk(
@@ -220,6 +271,15 @@ class AarligInntektsjusteringJobbService(
         kjoering: String,
         aarsakTilManuell: AarligInntektsjusteringAarsakManuell,
     ) {
+        if (!manuellBehandlingSkruddPaa()) {
+            oppdaterKjoering(
+                kjoering,
+                KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE,
+                sakId,
+                aarsakTilManuell.name,
+            )
+            return
+        }
         oppgaveService.opprettOppgave(
             referanse = forrigeBehandlingId.toString(),
             sakId = sakId,
@@ -242,6 +302,15 @@ class AarligInntektsjusteringJobbService(
         kjoering: String,
         aarsakTilManuell: AarligInntektsjusteringAarsakManuell,
     ) {
+        if (!manuellBehandlingSkruddPaa()) {
+            oppdaterKjoering(
+                kjoering,
+                KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE,
+                sakId,
+                aarsakTilManuell.name,
+            )
+            return
+        }
         nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
         oppdaterKjoering(
             kjoering,
@@ -339,7 +408,7 @@ class AarligInntektsjusteringJobbService(
             ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 
     private fun hentPdlPersonopplysning(sak: Sak) =
-        pdlTjenesterKlient.hentPdlModellFlereSaktyper(sak.ident, PersonRolle.INNSENDER, SakType.OMSTILLINGSSTOENAD)
+        pdlTjenesterKlient.hentPdlModellForSaktype(sak.ident, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
 
     private fun hentPdlPersonident(sak: Sak) =
         runBlocking {
@@ -359,6 +428,9 @@ class AarligInntektsjusteringJobbService(
                     HardkodaSystembruker.omregning,
                 ).innsender ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
         }
+
+    private fun manuellBehandlingSkruddPaa(): Boolean =
+        featureToggleService.isEnabled(ManuellBehandlingToggle.MANUELL_BEHANDLING, defaultValue = false)
 }
 
 enum class AarligInntektsjusteringAarsakManuell {
@@ -368,4 +440,15 @@ enum class AarligInntektsjusteringAarsakManuell {
     TIL_SAMORDNING,
     AAPEN_BEHANDLING,
     HAR_SANKSJON,
+    HAR_OPPHOER_FOM,
+    ALDERSOVERGANG_67,
+}
+
+enum class ManuellBehandlingToggle(
+    val value: String,
+) : FeatureToggle {
+    MANUELL_BEHANDLING("aarlig-inntektsjustering-la-manuell-behandling"),
+    ;
+
+    override fun key(): String = this.value
 }

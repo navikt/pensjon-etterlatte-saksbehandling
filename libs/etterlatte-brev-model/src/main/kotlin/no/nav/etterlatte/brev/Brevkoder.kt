@@ -120,7 +120,7 @@ enum class Brevkoder(
     OMS_INNTEKTSJUSTERING_VEDTAK(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VEDTAK_UTFALL,
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNTEKTSJUSTERING_VEDTAK,
-        "Varsel og midlertidig vedtak for å oppdatere endringer i inntekt",
+        "Varsel og utkast til vedtak inntekt nytt år",
         Brevtype.VEDTAK,
     ),
 

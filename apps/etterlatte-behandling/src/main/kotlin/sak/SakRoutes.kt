@@ -28,7 +28,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
@@ -63,16 +63,17 @@ internal fun Route.sakSystemRoutes(
                 val loependeFom = request.loependeFom
 
                 call.respond(
-                    Saker(
+                    SakslisteDTO(
                         inTransaction {
-                            sakService.hentSaker(
-                                kjoering,
-                                antall,
-                                spesifikkeSaker,
-                                ekskluderteSaker,
-                                sakstype,
-                                loependeFom,
-                            )
+                            sakService
+                                .hentSakIdListeForKjoering(
+                                    kjoering,
+                                    antall,
+                                    spesifikkeSaker,
+                                    ekskluderteSaker,
+                                    sakstype,
+                                    loependeFom,
+                                )
                         },
                     ),
                 )

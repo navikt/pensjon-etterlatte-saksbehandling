@@ -88,6 +88,11 @@ class BehandlingKlient(
                                 KabalStatus.FERDIGSTILT,
                                 requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
                             )
+                        BehandlingEventType.OMGJOERINGSKRAVBEHANDLING_AVSLUTTET ->
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
+                            )
                     }
                 } catch (e: Exception) {
                     logger.error("Kunne ikke mappe ut kabalresponsen riktig. Hendelsen er logget til sikkerlogg")
@@ -118,4 +123,5 @@ fun KlageinstansUtfall.tilResultat(): BehandlingResultat =
         KlageinstansUtfall.AVVIST -> BehandlingResultat.IKKE_MEDHOLD
         KlageinstansUtfall.INNSTILLING_STADFESTELSE -> BehandlingResultat.IKKE_MEDHOLD
         KlageinstansUtfall.INNSTILLING_AVVIST -> BehandlingResultat.IKKE_MEDHOLD
+        KlageinstansUtfall.MEDHOLD_ETTER_FVL_35 -> BehandlingResultat.MEDHOLD
     }

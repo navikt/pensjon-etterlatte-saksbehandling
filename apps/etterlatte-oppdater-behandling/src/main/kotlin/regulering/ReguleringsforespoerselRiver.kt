@@ -8,9 +8,9 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
-import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -85,8 +85,8 @@ internal class ReguleringsforespoerselRiver(
             },
             haandterSaker = { sakerTilOmregning ->
                 val sakListe = flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
-                sakerTilOmregning.saker.forEach {
-                    publiserSak(it, kjoering, packet, sakListe, context)
+                sakerTilOmregning.sakIdListe.forEach { sakId ->
+                    publiserSak(sakId, kjoering, packet, sakListe, context)
                 }
             },
         )
@@ -98,9 +98,9 @@ internal class ReguleringsforespoerselRiver(
             else -> SakType.valueOf(node.asText())
         }
 
-    private fun flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakerTilOmregning: Saker): SakIDListe =
+    private fun flyttBehandlingerUnderArbeidTilbakeTilTrygdetidOppdatert(sakslisteDTOTilOmregning: SakslisteDTO): SakIDListe =
         behandlingService
-            .migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
+            .migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakslisteDTOTilOmregning)
             .also { sakIdListe ->
                 logger.info(
                     "Tilbakeført ${sakIdListe.tilbakestileBehandlinger.size} behandlinger til trygdetid oppdatert:\n" +
@@ -109,25 +109,25 @@ internal class ReguleringsforespoerselRiver(
             }
 
     private fun publiserSak(
-        sak: Sak,
+        sakId: SakId,
         kjoering: String,
         packet: JsonMessage,
         sakListe: SakIDListe,
         context: MessageContext,
     ) {
-        logger.debug("Lagrer kjøring starta for sak ${sak.id}")
-        behandlingService.lagreKjoering(sak.id, KjoeringStatus.STARTA, kjoering)
-        logger.debug("Ferdig lagra kjøring starta for sak ${sak.id}")
+        logger.debug("Lagrer kjøring starta for sak $sakId")
+        behandlingService.lagreKjoering(sakId, KjoeringStatus.STARTA, kjoering)
+        logger.debug("Ferdig lagra kjøring starta for sak $sakId")
         packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
-        packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(sak.id)
-        packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(sak.id)
+        packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(sakId)
+        packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(sakId)
         packet[HENDELSE_DATA_KEY] =
             OmregningData(
                 kjoering = kjoering,
-                sakId = sak.id,
+                sakId = sakId,
                 revurderingaarsak = Revurderingaarsak.REGULERING,
             )
-        logger.debug("Sender til omregning for sak ${sak.id}")
+        logger.debug("Sender til omregning for sak $sakId")
         context.publish(packet.toJson())
     }
 }

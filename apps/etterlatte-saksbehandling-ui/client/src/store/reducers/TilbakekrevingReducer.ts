@@ -7,6 +7,7 @@ export const resetTilbakekreving = createAction('tilbakekreving/reset')
 const initialState: { tilbakekrevingBehandling: TilbakekrevingBehandling | null } = {
   tilbakekrevingBehandling: null,
 }
+
 export const tilbakekrevingReducer = createReducer(initialState, (builder) => {
   builder.addCase(addTilbakekreving, (state, action) => {
     state.tilbakekrevingBehandling = action.payload

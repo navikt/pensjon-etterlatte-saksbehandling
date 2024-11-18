@@ -5,6 +5,7 @@ import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.tidshendelser.JobbKategori
+import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -38,6 +39,7 @@ class JobbPoller(
     private val aldersovergangerService: AldersovergangerService,
     private val omstillingsstoenadService: OmstillingsstoenadService,
     private val reguleringService: ReguleringService,
+    private val inntektsjusteringService: AarligInntektsjusteringService,
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
 
@@ -54,6 +56,7 @@ class JobbPoller(
                         JobbKategori.ALDERSOVERGANG -> aldersovergangerService.execute(it)
                         JobbKategori.OMS_DOEDSDATO -> omstillingsstoenadService.execute(it)
                         JobbKategori.REGULERING -> reguleringService.execute(it)
+                        JobbKategori.AARLIG_INNTEKTSJUSTERING -> inntektsjusteringService.execute(it)
                     }
 
                 if (saker.isEmpty()) {

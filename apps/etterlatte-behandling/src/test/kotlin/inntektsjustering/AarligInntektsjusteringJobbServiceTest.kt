@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -62,6 +63,7 @@ class AarligInntektsjusteringJobbServiceTest {
     private val pdlTjenesterKlient: PdlTjenesterKlient = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val rapid: KafkaProdusent<String, String> = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     val service =
         AarligInntektsjusteringJobbService(
@@ -75,6 +77,7 @@ class AarligInntektsjusteringJobbServiceTest {
             pdlTjenesterKlient,
             oppgaveService,
             rapid,
+            featureToggleService,
         )
 
     @BeforeAll
@@ -85,6 +88,7 @@ class AarligInntektsjusteringJobbServiceTest {
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
+        every { featureToggleService.isEnabled(any(), any()) } returns true
 
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
         coEvery {
@@ -101,6 +105,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 harInntektForAar = false,
                 harSanksjon = false,
             )
+        coEvery { grunnlagService.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(2050, 1)
         every { sakService.finnSak(SakId(123L)) } returns gyldigSak
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
         coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns
@@ -108,7 +113,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 Folkeregisteridentifikator.of(fnrGyldigSak),
             )
         coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 any(),
                 any(),
                 SakType.OMSTILLINGSSTOENAD,
@@ -119,7 +124,7 @@ class AarligInntektsjusteringJobbServiceTest {
                 every { id } returns sisteBehandling
                 every { utlandstilknytning } returns mockk()
                 every { boddEllerArbeidetUtlandet } returns mockk()
-                every { opphoerFraOgMed } returns mockk()
+                every { opphoerFraOgMed } returns null
             }
         coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
             mockk {
@@ -168,19 +173,6 @@ class AarligInntektsjusteringJobbServiceTest {
             personPdl.copy(etternavn = OpplysningDTO("endret etternavn", "")),
             personPdl.copy(foedselsdato = OpplysningDTO(LocalDate.of(1990, 2, 25), "")),
             personPdl.copy(doedsdato = OpplysningDTO(LocalDate.of(1990, 2, 25), "")),
-            personPdl.copy(
-                vergemaalEllerFremtidsfullmakt =
-                    listOf(
-                        OpplysningDTO(
-                            VergemaalEllerFremtidsfullmakt(
-                                embete = null,
-                                type = null,
-                                vergeEllerFullmektig = VergeEllerFullmektig(null, null, null, null, null),
-                            ),
-                            "",
-                        ),
-                    ),
-            ),
         )
 
     @Test
@@ -474,7 +466,6 @@ class AarligInntektsjusteringJobbServiceTest {
             service.startAarligInntektsjustering(request)
         }
 
-        // TODO verifer opprettelse rev
         verify {
             omregningService.oppdaterKjoering(
                 withArg {
@@ -483,6 +474,74 @@ class AarligInntektsjusteringJobbServiceTest {
                         status shouldBe KjoeringStatus.TIL_MANUELL
                         sakId shouldBe SakId(123L)
                         begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.UTDATERT_IDENT.name
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `sak som har opphoer fom skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        every { behandlingService.hentSisteIverksatte(any()) } returns
+            mockk {
+                every { id } returns sisteBehandling
+                every { utlandstilknytning } returns mockk()
+                every { boddEllerArbeidetUtlandet } returns mockk()
+                every { opphoerFraOgMed } returns YearMonth.of(2025, 5)
+            }
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.HAR_OPPHOER_FOM.name
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `sak som har aldersovergang 67 aar skal gjoeres manuelt`() {
+        val request =
+            AarligInntektsjusteringRequest(
+                kjoering = "kjoering",
+                loependeFom = YearMonth.of(2025, 1),
+                saker = listOf(SakId(123L)),
+            )
+
+        coEvery { grunnlagService.aldersovergangMaaned(any(), any(), any()) } returns YearMonth.of(2025, 3)
+
+        every { omregningService.oppdaterKjoering(any()) } returns mockk()
+
+        runBlocking {
+            service.startAarligInntektsjustering(request)
+        }
+
+        verify {
+            omregningService.oppdaterKjoering(
+                withArg {
+                    with(it) {
+                        kjoering shouldBe "kjoering"
+                        status shouldBe KjoeringStatus.TIL_MANUELL
+                        sakId shouldBe SakId(123L)
+                        begrunnelse shouldBe AarligInntektsjusteringAarsakManuell.ALDERSOVERGANG_67.name
                     }
                 },
             )
@@ -502,7 +561,7 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 any(),
                 any(),
                 SakType.OMSTILLINGSSTOENAD,
@@ -557,7 +616,7 @@ class AarligInntektsjusteringJobbServiceTest {
             }
 
         coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+            pdlTjenesterKlient.hentPdlModellForSaktype(
                 any(),
                 any(),
                 SakType.OMSTILLINGSSTOENAD,

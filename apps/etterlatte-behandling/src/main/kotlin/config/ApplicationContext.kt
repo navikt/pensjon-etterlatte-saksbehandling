@@ -485,6 +485,7 @@ internal class ApplicationContext(
             pdlTjenesterKlient = pdlTjenesterKlient,
             oppgaveService = oppgaveService,
             rapid = rapid,
+            featureToggleService = featureToggleService,
         )
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)

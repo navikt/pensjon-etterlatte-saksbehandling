@@ -157,7 +157,7 @@ class OmregningDao(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT kjoering, status  
+                        SELECT kjoering, status, sak_id  
                         FROM omregningskjoering 
                         WHERE kjoering = ? AND sak_id = ?
                         """.trimIndent(),

@@ -16,6 +16,6 @@ data class VedtakSak(
     val id: SakId,
 )
 
-data class Saker(
-    val saker: List<Sak>,
+data class SakslisteDTO(
+    val sakIdListe: List<SakId>,
 )

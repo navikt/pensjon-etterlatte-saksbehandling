@@ -42,8 +42,8 @@ class FinnSakerTilReguleringRiver(
                 behandlingService.hentAlleSaker(kjoering = kjoering, antall = antall)
             },
             haandterSaker = { saker ->
-                saker.saker.forEach { sak ->
-                    behandlingService.lagreKjoering(sak.id, KjoeringStatus.KLAR_TIL_REGULERING, kjoering)
+                saker.sakIdListe.forEach { sakId ->
+                    behandlingService.lagreKjoering(sakId, KjoeringStatus.KLAR_TIL_REGULERING, kjoering)
                 }
             },
             venteperiode = Duration.ofSeconds(1),

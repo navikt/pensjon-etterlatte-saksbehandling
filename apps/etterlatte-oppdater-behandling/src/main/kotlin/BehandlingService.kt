@@ -41,7 +41,7 @@ import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.tidshendelser.JobbType
@@ -75,7 +75,7 @@ interface BehandlingService {
         ekskluderteSaker: List<SakId> = listOf(),
         sakType: SakType? = null,
         loependeFom: YearMonth? = null,
-    ): Saker
+    ): SakslisteDTO
 
     fun opprettAutomatiskRevurdering(request: AutomatiskRevurderingRequest): AutomatiskRevurderingResponse
 
@@ -100,7 +100,7 @@ interface BehandlingService {
         jobbType: JobbType,
     ): OpprettOppgaveForAktivitetspliktResponse
 
-    fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
+    fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakslisteDTO: SakslisteDTO): SakIDListe
 
     fun avbryt(behandlingId: UUID): HttpResponse
 
@@ -232,12 +232,12 @@ class BehandlingServiceImpl(
                 }.body()
         }
 
-    override fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe =
+    override fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakslisteDTO: SakslisteDTO): SakIDListe =
         runBlocking {
             behandlingKlient
                 .post("$url/behandlinger/settTilbakeTilTrygdetidOppdatert") {
                     contentType(ContentType.Application.Json)
-                    setBody(saker)
+                    setBody(sakslisteDTO)
                 }.body()
         }
 
@@ -248,7 +248,7 @@ class BehandlingServiceImpl(
         ekskluderteSaker: List<SakId>,
         sakType: SakType?,
         loependeFom: YearMonth?,
-    ): Saker =
+    ): SakslisteDTO =
         runBlocking {
             behandlingKlient
                 .post("$url/saker/$kjoering/$antall") {

@@ -56,7 +56,6 @@ import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedUtlandstilknytning
-import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.route.lagGrunnlagsopplysning
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -271,7 +270,7 @@ interface BehandlingService {
 
     fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier?
 
-    fun hentAapneBehandlingerForSak(sak: Sak): List<BehandlingOgSak>
+    fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak>
 }
 
 internal class BehandlingServiceImpl(
@@ -909,10 +908,7 @@ internal class BehandlingServiceImpl(
     override fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
 
-    override fun hentAapneBehandlingerForSak(sak: Sak): List<BehandlingOgSak> =
-        behandlingDao.hentAapneBehandlinger(
-            Saker(listOf(sak)),
-        )
+    override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)

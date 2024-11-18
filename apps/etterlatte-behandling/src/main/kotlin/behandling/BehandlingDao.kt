@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -141,7 +140,7 @@ class BehandlingDao(
             }
         }
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): List<BehandlingOgSak> =
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(sakIder: List<SakId>): List<BehandlingOgSak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
@@ -158,13 +157,13 @@ class BehandlingDao(
                     1,
                     createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()),
                 )
-                stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
+                stmt.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
 
                 stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), SakId(getLong("sak_id"))) }
             }
         }
 
-    fun hentAapneBehandlinger(saker: Saker): List<BehandlingOgSak> =
+    fun hentAapneBehandlinger(sakIder: List<SakId>): List<BehandlingOgSak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
@@ -176,7 +175,7 @@ class BehandlingDao(
                         """.trimIndent(),
                     )
                 stmt.setArray(1, createArrayOf("text", BehandlingStatus.underBehandling().toTypedArray()))
-                stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
+                stmt.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
 
                 stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), SakId(getLong("sak_id"))) }
             }

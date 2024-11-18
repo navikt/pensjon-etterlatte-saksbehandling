@@ -1,8 +1,15 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.GenererOgFerdigstillVedtaksbrev
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.no.nav.etterlatte.klienter.BrevKlient
 import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
@@ -29,6 +36,7 @@ internal class OpprettVedtakforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService,
     private val utbetalingKlient: UtbetalingKlient,
+    private val brevKlient: BrevKlient,
     private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -39,6 +47,7 @@ internal class OpprettVedtakforespoerselRiver(
             validate { it.requireKey(OmregningDataPacket.SAK_ID) }
             validate { it.requireKey(OmregningDataPacket.BEHANDLING_ID) }
             validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
+            validate { it.requireKey(OmregningDataPacket.REV_AARSAK) }
         }
     }
 
@@ -53,23 +62,38 @@ internal class OpprettVedtakforespoerselRiver(
         logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
         val behandlingId = omregningData.hentBehandlingId()
         val dato = omregningData.hentFraDato()
+        val revurderingaarsak = omregningData.revurderingaarsak
+
+        val skalSendeBrev =
+            when (omregningData.revurderingaarsak) {
+                Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> true
+                else -> false
+            }
 
         val respons =
             if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
-                vedtak.opprettVedtakOgFatt(sakId, behandlingId)
+                val vedtak = vedtak.opprettVedtakOgFatt(sakId, behandlingId)
+                opprettBrev(behandlingId, sakId, revurderingaarsak)
+                vedtak
             } else {
                 when (omregningData.utbetalingVerifikasjon) {
-                    UtbetalingVerifikasjon.INGEN -> vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
-                    UtbetalingVerifikasjon.SIMULERING -> {
-                        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
-                        verifiserUendretUtbetaling(behandlingId, skalAvbryte = false)
-                        vedtak.attesterVedtak(sakId, behandlingId)
+                    UtbetalingVerifikasjon.INGEN -> {
+                        if (skalSendeBrev) {
+                            vedtakOgBrev(sakId, behandlingId, revurderingaarsak)
+                        } else {
+                            vedtak.opprettVedtakFattOgAttester(sakId, behandlingId)
+                        }
                     }
-                    UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING -> {
-                        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
-                        verifiserUendretUtbetaling(behandlingId, skalAvbryte = true)
-                        vedtak.attesterVedtak(sakId, behandlingId)
-                    }
+
+                    UtbetalingVerifikasjon.SIMULERING -> vedtakOgBrev(sakId, behandlingId, revurderingaarsak, false)
+
+                    UtbetalingVerifikasjon.SIMULERING_AVBRYT_ETTERBETALING_ELLER_TILBAKEKREVING ->
+                        vedtakOgBrev(
+                            sakId,
+                            behandlingId,
+                            revurderingaarsak,
+                            true,
+                        )
                 }
             }
 
@@ -110,6 +134,52 @@ internal class OpprettVedtakforespoerselRiver(
 
         if (!etterbetaling && !tilbakekreving) {
             logger.info("Omregningen førte ikke til tilbakekreving eller etterbetaling")
+        }
+    }
+
+    private fun vedtakOgBrev(
+        sakId: SakId,
+        behandlingId: UUID,
+        revurderingaarsak: Revurderingaarsak,
+        skalAvbryteUtbetaling: Boolean? = null,
+    ): VedtakOgRapid {
+        vedtak.opprettVedtakOgFatt(sakId, behandlingId)
+        val brev = opprettBrev(behandlingId, sakId, revurderingaarsak)
+
+        if (skalAvbryteUtbetaling != null) {
+            verifiserUendretUtbetaling(behandlingId, skalAvbryte = skalAvbryteUtbetaling)
+        }
+
+        if (brev != null) {
+            ferdigstillBrev(behandlingId, brev.id, revurderingaarsak)
+        }
+
+        return vedtak.attesterVedtak(sakId, behandlingId)
+    }
+
+    private fun opprettBrev(
+        behandlingId: UUID,
+        sakId: SakId,
+        revurderingaarsak: Revurderingaarsak,
+    ): Brev? =
+        when (revurderingaarsak) {
+            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING -> brevKlient.opprettBrev(behandlingId, sakId)
+            else -> null
+        }
+
+    private fun ferdigstillBrev(
+        behandlingId: UUID,
+        brevId: BrevID,
+        revurderingaarsak: Revurderingaarsak,
+    ) {
+        when (revurderingaarsak) {
+            Revurderingaarsak.AARLIG_INNTEKTSJUSTERING ->
+                brevKlient.genererPdfOgFerdigstillVedtaksbrev(
+                    behandlingId,
+                    GenererOgFerdigstillVedtaksbrev(behandlingId, brevId),
+                )
+
+            else -> throw InternfeilException("Støtter ikke brev under automatisk omregning for $revurderingaarsak")
         }
     }
 

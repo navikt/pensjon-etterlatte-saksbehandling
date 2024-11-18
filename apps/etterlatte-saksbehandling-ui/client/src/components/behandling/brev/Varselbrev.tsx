@@ -10,7 +10,7 @@ import Spinner from '~shared/Spinner'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
+import { oppdaterDetaljertBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
 import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
@@ -77,7 +77,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
       fetchBehandling(
         behandlingId,
         (behandling) => {
-          dispatch(oppdaterBehandling(behandling))
+          dispatch(oppdaterDetaljertBehandling(behandling))
         },
         () => dispatch(resetBehandling())
       )
@@ -205,7 +205,4 @@ const Sidebar = styled.div`
   min-width: 40%;
   width: 40%;
   border-right: 1px solid #c6c2bf;
-`
-styled(Alert).attrs({ variant: 'warning' })`
-  margin-bottom: 1em;
 `

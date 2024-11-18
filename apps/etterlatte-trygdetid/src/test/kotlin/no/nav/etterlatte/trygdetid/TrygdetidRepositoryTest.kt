@@ -1,6 +1,8 @@
 package no.nav.etterlatte.trygdetid
 
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -381,6 +383,67 @@ internal class TrygdetidRepositoryTest(
                 trygdetidMedBeregnetTrygdetid.nullstillBeregnetTrygdetid(),
             )
         trygdetidUtenBeregning.beregnetTrygdetid shouldBe null
+    }
+
+    @Test
+    fun `trygdetiderForAvdoede finner behandling med trygdetid for samme avdøde`() {
+        val behandling1 = behandlingMock()
+        val behandling2 = behandlingMock()
+        val behandling3 = behandlingMock()
+        val fnr1 = "02438311109"
+        val fnr2 = "18498248795"
+        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr1))
+        repository.opprettTrygdetid(trygdetid(behandling2.id, behandling2.sak, ident = fnr2))
+        repository.opprettTrygdetid(trygdetid(behandling3.id, behandling3.sak, ident = fnr1))
+
+        val behandlinger: List<TrygdetidPartial> =
+            repository
+                .hentTrygdetiderForAvdoede(
+                    listOf(fnr1),
+                ).sortedBy { it.ident }
+
+        behandlinger shouldHaveSize 2
+        behandlinger.find { it.behandlingId == behandling1.id }?.ident shouldBe fnr1
+        behandlinger.find { it.behandlingId == behandling3.id }?.ident shouldBe fnr1
+    }
+
+    @Test
+    fun `trygdetiderForAvdoede finner behandling med trygdetid for to avdøde`() {
+        val behandling1 = behandlingMock()
+        val behandling2 = behandlingMock()
+        val behandling3 = behandlingMock()
+        val fnr1 = "02438311109"
+        val fnr2 = "18498248795"
+        val fnr3 = "31488338237"
+        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr1))
+        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr2))
+        repository.opprettTrygdetid(trygdetid(behandling2.id, behandling2.sak, ident = fnr1))
+        repository.opprettTrygdetid(trygdetid(behandling3.id, behandling3.sak, ident = fnr3))
+
+        val trygdetider: List<TrygdetidPartial> =
+            repository.hentTrygdetiderForAvdoede(listOf(fnr1, fnr2))
+        trygdetider shouldHaveSize 3
+        trygdetider.groupBy { it.behandlingId }.let { byBehandling ->
+            byBehandling[behandling1.id]!!.map { it.ident } shouldContainExactlyInAnyOrder listOf(fnr1, fnr2)
+            byBehandling[behandling2.id]!!.map { it.ident } shouldContainExactlyInAnyOrder listOf(fnr1)
+        }
+    }
+
+    @Test
+    fun `trygdetiderForAvdoede returnerer tom liste hvis ingen matchende`() {
+        val behandling1 = behandlingMock()
+
+        val fnr1 = "02438311109"
+        val fnr2 = "18498248795"
+        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr1))
+
+        val trygdetider: List<TrygdetidPartial> =
+            repository.hentTrygdetiderForAvdoede(
+                listOf(
+                    fnr2,
+                ),
+            )
+        trygdetider shouldBe emptyList()
     }
 
     private fun behandlingMock() =

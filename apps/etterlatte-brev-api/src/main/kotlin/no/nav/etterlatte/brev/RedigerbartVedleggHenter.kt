@@ -106,6 +106,8 @@ class RedigerbartVedleggHenter(
                 VedtakType.ENDRING -> {
                     if (brevtype == Brevtype.VARSEL && revurderingaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
                         emptyList()
+                    } else if (revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
+                        emptyList()
                     } else {
                         if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {
                             listOf(

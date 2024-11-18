@@ -33,13 +33,14 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktVarigUnntakDto
+import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -457,7 +458,7 @@ class AktivitetspliktServiceTest {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT
                 }
 
-            assertThrows<IllegalArgumentException> {
+            assertThrows<InternfeilException> {
                 service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
             }
         }
@@ -783,7 +784,7 @@ class AktivitetspliktServiceTest {
         private val sakId = sakId1
         private val frist = Tidspunkt.now()
         private val request =
-            OpprettOppgaveForAktivitetspliktVarigUnntakDto(
+            OpprettOppgaveForAktivitetspliktDto(
                 sakId = sakId,
                 frist = frist,
                 jobbType = JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK,

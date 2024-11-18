@@ -10,7 +10,7 @@ export const toggleBlock = (editor: Editor, format: string) => {
     split: true,
   })
   const type = isActive ? 'paragraph' : isList ? 'list-item' : format
-  const newProperties: Partial<SlateElement> = { type: type as ElementTypes } // eslint-disable-line
+  const newProperties: Partial<SlateElement> = { type: type as ElementTypes }
   Transforms.setNodes<SlateElement>(editor, newProperties)
 
   if (!isActive && isList) {

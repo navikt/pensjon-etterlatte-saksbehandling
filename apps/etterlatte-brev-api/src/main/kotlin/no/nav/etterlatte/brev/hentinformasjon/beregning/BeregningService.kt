@@ -137,11 +137,10 @@ class BeregningService(
     ): Avkortingsinfo? {
         if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
 
-        val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
-        val beregningsGrunnlag = hentBeregningsGrunnlag(behandlingId, brukerTokenInfo)
+        val beregningOgAvkorting = beregningKlient.hentBeregningOgAvkorting(behandlingId, brukerTokenInfo)
 
         val beregningsperioder =
-            ytelseMedGrunnlag.perioder.map {
+            beregningOgAvkorting.perioder.map {
                 AvkortetBeregningsperiode(
                     datoFOM = it.periode.fom.atDay(1),
                     datoTOM = it.periode.tom?.atEndOfMonth(),
@@ -162,10 +161,12 @@ class BeregningService(
                     restanse = Kroner(it.restanse),
                     utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
                     trygdetid = it.trygdetid,
-                    beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
+                    beregningsMetodeAnvendt =
+                        it.beregningsMetode
+                            ?: throw InternfeilException("OMS Brevdata krever anvendt beregningsmetode"),
                     beregningsMetodeFraGrunnlag =
-                        beregningsGrunnlag?.beregningsMetode?.beregningsMetode
-                            ?: requireNotNull(it.beregningsMetode),
+                        it.beregningsMetodeFraGrunnlag
+                            ?: throw InternfeilException("OMS Brevdata krever valgt beregningsmetode fra beregningsgrunnlag"),
                     // ved manuelt overstyrt beregning har vi ikke grunnlag
                     sanksjon = it.sanksjon,
                     institusjon = it.institusjonsopphold,
@@ -176,6 +177,7 @@ class BeregningService(
         return Avkortingsinfo(
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder = beregningsperioder,
+            beregningOgAvkorting.endringIUtbetalingVedVirk,
         )
     }
 }

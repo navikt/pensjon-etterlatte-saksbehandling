@@ -10,12 +10,10 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.KJOERING
-import no.nav.etterlatte.rapidsandrivers.RapidEvents.LOEPENDE_FOM
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.antall
 import no.nav.etterlatte.rapidsandrivers.ekskluderteSaker
 import no.nav.etterlatte.rapidsandrivers.kjoering
-import no.nav.etterlatte.rapidsandrivers.loependeFom
 import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.regulering.kjoerIBatch
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -34,7 +32,6 @@ internal class InntektsjusteringJobbRiver(
         initialiserRiver(rapidsConnection, InntektsjusteringHendelseType.START_INNTEKTSJUSTERING_JOBB) {
             validate { it.requireKey(KJOERING) }
             validate { it.requireKey(ANTALL) }
-            validate { it.requireKey(LOEPENDE_FOM) }
             validate { it.interestedIn(SPESIFIKKE_SAKER) }
             validate { it.interestedIn(EKSKLUDERTE_SAKER) }
         }
@@ -54,7 +51,7 @@ internal class InntektsjusteringJobbRiver(
 
         val antall = packet.antall
         val sakType = SakType.OMSTILLINGSSTOENAD
-        val loependeFom = packet.loependeFom
+        val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
 
         kjoerIBatch(
             logger = logger,
@@ -75,7 +72,6 @@ internal class InntektsjusteringJobbRiver(
                 val request =
                     AarligInntektsjusteringRequest(
                         kjoering = kjoering,
-                        loependeFom = loependeFom,
                         saker = sakerSomSkalInformeres.saker.map { it.id },
                     )
                 behandlingService.startAarligInntektsjustering(request)

@@ -22,6 +22,7 @@ include(
     "apps:etterlatte-hendelser-pdl",
     "apps:etterlatte-hendelser-joark",
     "apps:etterlatte-hendelser-samordning",
+    "apps:etterlatte-hendelser-ufoere",
     "apps:etterlatte-migrering",
     "apps:etterlatte-statistikk",
     "apps:etterlatte-vilkaarsvurdering-kafka",

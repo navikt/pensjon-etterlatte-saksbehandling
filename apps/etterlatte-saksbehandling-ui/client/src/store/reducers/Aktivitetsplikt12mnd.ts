@@ -4,6 +4,7 @@ import { useAppSelector } from '~store/Store'
 import { IBrevAktivitetspliktDto } from '~shared/api/aktivitetsplikt'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
+//Reduceren er kun klar til å brukes etter at setStartdata er kalt
 const initialState: AktivitetspliktOppgaveVurdering = {} as AktivitetspliktOppgaveVurdering
 
 export const setStartdata = createAction<AktivitetspliktOppgaveVurdering>('set/AktivitetspliktOppgaveVurdering')
@@ -16,10 +17,10 @@ export const setAktivitetspliktVurdering = createAction<IAktivitetspliktVurderin
 )
 export const setAktivitetspliktOppgave = createAction<OppgaveDTO>('set/AktivitetspliktOppgaveVurdering/oppgave')
 
-export const Aktivitetsplikt12mndReducer = createReducer(initialState, (builder) => {
+export const aktivitetsplikt12mndReducer = createReducer(initialState, (builder) => {
   builder.addCase(setStartdata, (_, action) => action.payload)
   builder.addCase(setAktivtetspliktbrevdata, (state, action) => {
-    if (state.aktivtetspliktbrevdata) {
+    if (state) {
       state.aktivtetspliktbrevdata = action.payload
     }
   })
@@ -29,17 +30,17 @@ export const Aktivitetsplikt12mndReducer = createReducer(initialState, (builder)
     }
   })
   builder.addCase(setAktivitetspliktVurdering, (state, action) => {
-    if (state.vurdering) {
+    if (state) {
       state.vurdering = action.payload
     }
   })
   builder.addCase(setAktivitetspliktOppgave, (state, action) => {
-    if (state.oppgave) {
+    if (state) {
       state.oppgave = action.payload
     }
   })
 })
 
 export function useAktivitetspliktOppgaveVurderingState(): AktivitetspliktOppgaveVurdering {
-  return useAppSelector((state) => state.Aktivitetsplikt12mndReducer)
+  return useAppSelector((state) => state.aktivitetsplikt12mndReducer)
 }

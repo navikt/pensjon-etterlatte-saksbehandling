@@ -22,9 +22,10 @@ fragment metadata on Metadata {
 
 query(
     $ident: ID!,
+    $folkeregisteridentHistorikk: Boolean!,
 ) {
     hentPerson(ident: $ident) {
-        folkeregisteridentifikator(historikk: false) {
+        folkeregisteridentifikator(historikk: $folkeregisteridentHistorikk) {
             identifikasjonsnummer
             status
             type

@@ -4,7 +4,7 @@ import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 interface Props {
-  harKildePesys: Boolean
+  harKildePesys: boolean
 }
 
 export const Innsender = ({ harKildePesys }: Props) => {

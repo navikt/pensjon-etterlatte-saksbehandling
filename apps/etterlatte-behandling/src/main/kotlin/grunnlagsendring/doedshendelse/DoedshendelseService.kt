@@ -193,7 +193,7 @@ class DoedshendelseService(
             ?.map {
                 val annenForelder =
                     runBlocking {
-                        pdlTjenesterKlient.hentPdlModellFlereSaktyper(it, PersonRolle.TILKNYTTET_BARN, SakType.OMSTILLINGSSTOENAD)
+                        pdlTjenesterKlient.hentPdlModellForSaktype(it, PersonRolle.TILKNYTTET_BARN, SakType.OMSTILLINGSSTOENAD)
                     }
                 AvdoedOgAnnenForelderMedFellesbarn(avdoed, annenForelder)
             }?.filter { erSamboere(it) }

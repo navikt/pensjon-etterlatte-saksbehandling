@@ -44,7 +44,7 @@ export interface NyBehandlingRequest {
   spraak?: Spraak
   kilde?: string
   pesysId?: number
-  enhet?: String
+  enhet?: string
   foreldreloes?: boolean
   ufoere?: boolean
 }

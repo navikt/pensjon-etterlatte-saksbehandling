@@ -1,10 +1,12 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+
 data class Prosent(
     val verdi: Int,
 ) {
     init {
-        require(verdi in 0..100)
+        checkInternFeil(verdi in 0..100) { "Ugyldig prosent verdi: $verdi" }
     }
 
     fun minus(verdi: Prosent?) = minus(verdi?.verdi ?: 0)

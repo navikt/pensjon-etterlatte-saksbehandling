@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.tidshendelser.JobbType
+import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -34,10 +35,17 @@ class JobbPollerIntegrationTest(
     private val aldersovergangerService = mockk<AldersovergangerService>()
     private val omstillingsstoenadService = mockk<OmstillingsstoenadService>()
     private val reguleringService = mockk<ReguleringService>()
+    private val inntektsjusteringService = mockk<AarligInntektsjusteringService>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val jobbPoller =
-        JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService, reguleringService)
+        JobbPoller(
+            hendelseDao,
+            aldersovergangerService,
+            omstillingsstoenadService,
+            reguleringService,
+            inntektsjusteringService,
+        )
 
     @BeforeEach
     fun beforeEach() {

@@ -85,7 +85,6 @@ app.use(
     '/api/sjekkliste',
     '/api/bosattutland',
     '/api/kodeverk',
-    '/api/krr',
     '/api/vilkaarsvurdering',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),

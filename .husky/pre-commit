@@ -1,7 +1,7 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+cd ./apps/etterlatte-saksbehandling-ui
+yarn lint-staged --cwd ./client
+yarn lint-staged --cwd ./server
 
-cd ./apps/etterlatte-saksbehandling-ui && yarn lint-staged
 changedKotlinFiles=$(git diff --name-only --cached | grep '\.kt[s"]\?$' || true)
 
 if [ -n "${changedKotlinFiles-unset}" ]; then

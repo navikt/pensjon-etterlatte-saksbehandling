@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -85,8 +86,11 @@ class BehandlingInfoDao(
                     setObject(1, brevutfall.behandlingId)
                     setJsonb(2, brevutfall)
                 }.run { executeUpdate() }
-                    .also { require(it == 1) }
-                    .let {
+                    .also {
+                        checkInternFeil(it == 1) {
+                            "Kunne ikke lagreBrevutfall behandling for ${brevutfall.behandlingId}"
+                        }
+                    }.let {
                         hentBrevutfall(brevutfall.behandlingId)
                             ?: throw InternfeilException("Feilet under lagring av brevutfall")
                     }
@@ -125,8 +129,11 @@ class BehandlingInfoDao(
                     setObject(1, etterbetaling.behandlingId)
                     setJsonb(2, etterbetaling)
                 }.run { executeUpdate() }
-                    .also { require(it == 1) }
-                    .let {
+                    .also {
+                        checkInternFeil(it == 1) {
+                            "Kunne ikke lagreBrevutfall behandling for ${etterbetaling.behandlingId}"
+                        }
+                    }.let {
                         hentEtterbetaling(etterbetaling.behandlingId)
                             ?: throw InternfeilException("Feilet under lagring av etterbetaling")
                     }
@@ -145,7 +152,11 @@ class BehandlingInfoDao(
                     setJsonb(1, null)
                     setObject(2, behandlingId)
                 }.run { executeUpdate() }
-                    .also { require(it == 1) }
+                    .also {
+                        checkInternFeil(it == 1) {
+                            "Kunne ikke slettEtterbetaling behandling for $behandlingId"
+                        }
+                    }
             }
         }
 

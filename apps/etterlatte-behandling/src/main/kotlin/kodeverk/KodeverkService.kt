@@ -23,10 +23,45 @@ class KodeverkService(
     suspend fun hentAlleLand(brukerTokenInfo: BrukerTokenInfo): List<Land> {
         val landkoder =
             cache.getIfPresent(CacheKey.LANDKODER)
-                ?: klient.hentLandkoder(brukerTokenInfo).also { cache.put(CacheKey.LANDKODER, it) }
+                ?: klient
+                    .hent(KodeverkNavn.LANDKODER, brukerTokenInfo)
+                    .also { cache.put(CacheKey.LANDKODER, it) }
 
-        return landkoder
+        return mapLandkoder(landkoder)
+    }
+
+    suspend fun hentAlleLandISO2(brukerTokenInfo: BrukerTokenInfo): List<Land> {
+        val landkoder =
+            cache.getIfPresent(CacheKey.LANDKODER_ISO2)
+                ?: klient
+                    .hent(KodeverkNavn.LANDKODERISO2, brukerTokenInfo)
+                    .also { cache.put(CacheKey.LANDKODER_ISO2, it) }
+
+        return mapLandkoder(landkoder)
+    }
+
+    suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): List<Beskrivelse> {
+        val arkivtemaer =
+            cacheArkivtemaer.getIfPresent(CacheKey.ARKIVTEMAER)
+                ?: klient
+                    .hent(KodeverkNavn.ARKIVTEMAER, brukerTokenInfo)
+                    .also { cacheArkivtemaer.put(CacheKey.ARKIVTEMAER, it) }
+
+        return arkivtemaer.betydninger.map { (tema, betydninger) ->
+            Beskrivelse(
+                tema,
+                betydninger
+                    .first()
+                    .beskrivelser["nb"]!!
+                    .tekst,
+            )
+        }
+    }
+
+    private fun mapLandkoder(response: KodeverkResponse): List<Land> =
+        response
             .betydninger
+            .filter { (isoLandkode) -> isoLandkode.matches(Regex("[A-Z]+")) }
             .flatMap { (isoLandkode, betydninger) ->
                 betydninger.map {
                     BetydningMedIsoKode(
@@ -49,26 +84,11 @@ class KodeverkService(
                     )
                 }
             }
-    }
-
-    suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): List<Beskrivelse> {
-        val arkivtemaer =
-            cacheArkivtemaer.getIfPresent(CacheKey.ARKIVTEMAER)
-                ?: klient.hentArkivTemaer(brukerTokenInfo).also { cacheArkivtemaer.put(CacheKey.ARKIVTEMAER, it) }
-        return arkivtemaer.betydninger.map {
-            Beskrivelse(
-                it.key,
-                it.value
-                    .first()
-                    .beskrivelser["nb"]!!
-                    .tekst,
-            )
-        }
-    }
 }
 
 private enum class CacheKey {
     LANDKODER,
+    LANDKODER_ISO2,
     ARKIVTEMAER,
 }
 

@@ -24,6 +24,7 @@ export const grunnlagsendringsTittel: Record<GrunnlagendringshendelseSamsvarType
   INSTITUSJONSOPPHOLD: 'Institusjonsopphold',
   ADRESSE: 'Flytting med endret geografisktilknytning ',
   FOLKEREGISTERIDENTIFIKATOR: 'Endring av folkeregisteridentifikator',
+  UFOERETRYGD: 'Uføretrygd',
 }
 
 export const grunnlagsendringsBeskrivelse: Record<GrunnlagendringshendelseSamsvarType, string> = {
@@ -34,9 +35,10 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagendringshendelseSamsva
   UTLAND: 'ny ut-/innflytting i PDL',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'annet vergemål i PDL',
   SIVILSTAND: 'endring på sivilstand i PDL',
-  INSTITUSJONSOPPHOLD: 'INSTITUSJONSOPPHOLD',
+  INSTITUSJONSOPPHOLD: 'institusjonsopphold',
   ADRESSE: 'fått ny geografisk tilknytning men saken kunne ikke flyttes på grunn av åpen behandling',
   FOLKEREGISTERIDENTIFIKATOR: 'endring av folkeregisteridentifikator',
+  UFOERETRYGD: 'uføretrygd',
 }
 
 export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType): string => {
@@ -45,6 +47,8 @@ export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType
       return 'Gjenny'
     case 'INSTITUSJONSOPPHOLD':
       return 'Inst2'
+    case 'UFOERETRYGD':
+      return 'Pesys'
     case 'DOEDSDATO':
     case 'UTLAND':
     case 'BARN':
@@ -66,6 +70,7 @@ const grunnlagsEndringstyperTilRevurderingsAarsaker: Record<GrunnlagsendringsTyp
   SIVILSTAND: [Revurderingaarsak.SIVILSTAND],
   INSTITUSJONSOPPHOLD: [Revurderingaarsak.SOESKENJUSTERING],
   ADRESSE: [Revurderingaarsak.ANNEN],
+  UFOERETRYGD: [Revurderingaarsak.ANNEN],
 }
 
 export const stoetterRevurderingAvHendelse = (
@@ -142,7 +147,7 @@ export const revurderingKanOpprettes = (
   behandlinger: IBehandlingsammendrag[],
   enhetId: string,
   enheter: string[]
-): Boolean => {
+): boolean => {
   return (
     behandlinger.filter((behandling) => behandlingErIverksatt(behandling.status)).length > 0 &&
     enhetErSkrivbar(enhetId, enheter)
@@ -153,7 +158,7 @@ export const omgjoeringAvslagKanOpprettes = (
   behandlinger: IBehandlingsammendrag[],
   enhet: string,
   enheter: Array<string>
-): Boolean => {
+): boolean => {
   return (
     behandlinger.length > 0 &&
     behandlinger.every(

@@ -107,22 +107,6 @@ export function VurderingAktivitetsgradForm(props: {
   return (
     <form onSubmit={handleSubmit(lagreOgOppdater)}>
       <VStack gap="6">
-        <HStack gap="6">
-          <ControlledDatoVelger
-            name="vurderingAvAktivitet.fom"
-            label="Fra og med"
-            control={control}
-            description="Fra dato oppgitt"
-          />
-          <ControlledDatoVelger
-            name="vurderingAvAktivitet.tom"
-            label="Til og med"
-            control={control}
-            required={false}
-            description="Hvis det er oppgitt sluttdato"
-          />
-        </HStack>
-
         <ControlledRadioGruppe
           control={control}
           name="vurderingAvAktivitet.aktivitetsgrad"
@@ -144,7 +128,21 @@ export function VurderingAktivitetsgradForm(props: {
             </>
           }
         />
-
+        <HStack gap="6">
+          <ControlledDatoVelger
+            name="vurderingAvAktivitet.fom"
+            label="Fra og med"
+            control={control}
+            description="Fra dato oppgitt"
+          />
+          <ControlledDatoVelger
+            name="vurderingAvAktivitet.tom"
+            label="Til og med"
+            control={control}
+            required={false}
+            description="Hvis det er oppgitt sluttdato"
+          />
+        </HStack>
         {harKanskjeUnntak && (
           <ControlledRadioGruppe
             name="harUnntak"
@@ -176,19 +174,29 @@ export function VurderingAktivitetsgradForm(props: {
               name="vurderingAvAktivitet.skjoennsmessigVurdering"
               legend="Vil bruker være selvforsørget etter stønaden utløper?"
               errorVedTomInput="Du må vurdere om bruker vil være selvforsørget ved 50-99 % grad aktivitet"
+              description="Vurderingen her blir ikke grunnlag for innhold i infobrev, men styrer hvilke oppgaver Gjenny lager for oppfølging av aktiviteten til bruker."
               radios={
                 <>
-                  <Radio value={AktivitetspliktSkjoennsmessigVurdering.JA}>
+                  <Radio
+                    value={AktivitetspliktSkjoennsmessigVurdering.JA}
+                    description="Gjenny lager ingen oppfølgingsoppgave"
+                  >
                     {teksterAktivitetspliktSkjoennsmessigVurdering[AktivitetspliktSkjoennsmessigVurdering.JA]}
                   </Radio>
-                  <Radio value={AktivitetspliktSkjoennsmessigVurdering.MED_OPPFOELGING}>
+                  <Radio
+                    value={AktivitetspliktSkjoennsmessigVurdering.MED_OPPFOELGING}
+                    description="Bruker skal ha oppfølging. Gjenny oppretter oppfølgingsoppgave. Send oppgave til lokalkontor hvis det ikke er gjort."
+                  >
                     {
                       teksterAktivitetspliktSkjoennsmessigVurdering[
                         AktivitetspliktSkjoennsmessigVurdering.MED_OPPFOELGING
                       ]
                     }
                   </Radio>
-                  <Radio value={AktivitetspliktSkjoennsmessigVurdering.NEI}>
+                  <Radio
+                    value={AktivitetspliktSkjoennsmessigVurdering.NEI}
+                    description="Gjenny lager en revurdering neste måned med mulighet for å varsle og fatte sanksjon"
+                  >
                     {teksterAktivitetspliktSkjoennsmessigVurdering[AktivitetspliktSkjoennsmessigVurdering.NEI]}
                   </Radio>
                 </>

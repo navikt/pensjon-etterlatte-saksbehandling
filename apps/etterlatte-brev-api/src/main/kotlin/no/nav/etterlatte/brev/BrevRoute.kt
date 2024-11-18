@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -74,6 +75,19 @@ fun Route.brevRoute(
                     logger.info("Oppretting av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(pdf)
                 }
+            }
+        }
+
+        get("kanal") {
+            withSakId(tilgangssjekker) {
+                val mottakerId =
+                    call.parameters["mottakerId"]?.let(UUID::fromString)
+                        ?: throw UgyldigForespoerselException("MOTTAKER_ID_MANGLER", "MottakerID mangler")
+
+                val sak = behandlingService.hentSak(sakId, brukerTokenInfo)
+                val response = service.bestemDistribusjonskanal(brevId, mottakerId, sak, brukerTokenInfo)
+
+                call.respond(response)
             }
         }
 
@@ -295,7 +309,8 @@ fun Route.brevRoute(
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
-                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts(), brukerTokenInfo)
+                    val brev =
+                        pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts(), brukerTokenInfo)
                     brev.onSuccess {
                         call.respond(brev)
                     }

@@ -97,7 +97,7 @@ export interface IAktivitetspliktVurderingNyDto {
 }
 
 export function harVurdering(vurdering: IAktivitetspliktVurderingNyDto): boolean {
-  return vurdering && !!(vurdering.aktivitet.length && vurdering.unntak.length)
+  return vurdering && !!(vurdering.aktivitet.length || vurdering.unntak.length)
 }
 
 export interface IAktivitetspliktAktivitetsgrad {

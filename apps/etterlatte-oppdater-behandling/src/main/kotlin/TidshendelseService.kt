@@ -43,19 +43,7 @@ class TidshendelseService(
             }
         } else {
             return when (hendelse.jobbtype) {
-                JobbType.OMS_DOED_4MND ->
-                    opprettOppgave(hendelse).let { oppgaveId ->
-                        TidshendelseResult.OpprettetOppgave(
-                            oppgaveId,
-                        )
-                    }
-                JobbType.OMS_DOED_10MND ->
-                    opprettOppgave(hendelse).let { oppgaveId ->
-                        TidshendelseResult.OpprettetOppgave(
-                            oppgaveId,
-                        )
-                    }
-
+                JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> opprettAktivitetspliktOppgave(hendelse)
                 JobbType.OMS_DOED_6MND -> opprettRevurderingForAktivitetsplikt(hendelse)
                 JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
                 else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
@@ -68,7 +56,13 @@ class TidshendelseService(
             logger.info("Har migrert yrkesskadefordel: utvidet aldersgrense [sak=${hendelse.sakId}]")
             return true
         }
-        if (hendelse.jobbtype in arrayOf(JobbType.OMS_DOED_3AAR, JobbType.OMS_DOED_5AAR) && hendelse.harRettUtenTidsbegrensning) {
+        if (hendelse.jobbtype in
+            arrayOf(
+                JobbType.OMS_DOED_3AAR,
+                JobbType.OMS_DOED_5AAR,
+            ) &&
+            hendelse.harRettUtenTidsbegrensning
+        ) {
             logger.info("Har omstillingsstønad med rett uten tidsbegrensning, opphører ikke [sak=${hendelse.sakId}]")
             return true
         }
@@ -105,6 +99,34 @@ class TidshendelseService(
             )
         logger.info("Opprettet oppgave $oppgaveId [sak=${hendelse.sakId}]")
         return oppgaveId
+    }
+
+    private fun opprettAktivitetspliktOppgave(hendelse: TidshendelsePacket): TidshendelseResult {
+        if (hendelse.jobbtype !in listOf(JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND)) {
+            throw InternfeilException(
+                "Ingen håndtering for jobbtype: ${hendelse.jobbtype} som " +
+                    "aktivitetspliktoppgave for sak: ${hendelse.sakId}",
+            )
+        }
+        val response =
+            behandlingService.opprettOppgaveOppfoelgingAktivitetsplikt(
+                sakId = hendelse.sakId,
+                frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
+                jobbType = hendelse.jobbtype,
+                referanse = null,
+            )
+
+        return when {
+            response.opprettetOppgave -> {
+                logger.info(
+                    "Opprettet oppgave for infobrev aktivitetsplikt for jobbtype ${hendelse.jobbtype}" +
+                        "i sak ${hendelse.sakId}",
+                )
+                TidshendelseResult.OpprettetOppgave(response.oppgaveId!!)
+            }
+
+            else -> TidshendelseResult.Skipped
+        }
     }
 
     private fun opprettRevurderingForAktivitetsplikt(hendelse: TidshendelsePacket): TidshendelseResult {
@@ -174,6 +196,7 @@ class TidshendelseService(
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> false
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
+            JobbType.AARLIG_INNTEKTSJUSTERING,
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: ${hendelse.jobbtype}")
         }
 
@@ -190,6 +213,7 @@ class TidshendelseService(
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
+            JobbType.AARLIG_INNTEKTSJUSTERING,
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: $type")
         }
 }

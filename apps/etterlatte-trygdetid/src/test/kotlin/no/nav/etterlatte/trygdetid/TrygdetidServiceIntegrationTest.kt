@@ -52,6 +52,8 @@ internal class TrygdetidServiceIntegrationTest(
 
     private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
 
+    private val behandlingKlient = mockk<BehandlingKlient>()
+
     @BeforeAll
     fun beforeAll() {
         no.nav.etterlatte.logger
@@ -59,7 +61,7 @@ internal class TrygdetidServiceIntegrationTest(
         trygdetidService =
             TrygdetidServiceImpl(
                 repository,
-                mockk<BehandlingKlient>(),
+                behandlingKlient,
                 grunnlagKlient,
                 TrygdetidBeregningService,
                 mockk<PesysKlient>(),
@@ -225,6 +227,9 @@ internal class TrygdetidServiceIntegrationTest(
             grunnlagKlient.hentGrunnlag(any(), any())
         } returns opplysningsgrunnlag
 
+        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+
         repository.opprettTrygdetid(
             trygdetid(
                 behandlingId = behandlingId,
@@ -256,6 +261,7 @@ internal class TrygdetidServiceIntegrationTest(
         val trygdetidList = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
         trygdetidList.size shouldBe 1
 
+        trygdetidList.first().kopiertGrunnlagFraBehandling shouldBe kildeBehandlingId
         with(trygdetidList.first().trygdetidGrunnlag.sortedBy { it.periode.fra }) {
             this[0].periode.fra shouldBe LocalDate.of(2020, 5, 1)
             this[0].periode.til shouldBe LocalDate.of(2020, 7, 1)

@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt.Companion.now
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -153,13 +153,25 @@ class GrunnlagsendringshendelseService(
         }
 
     fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> =
-        opprettHendelseInstitusjonsoppholdForPerson(
+        opprettHendelseAvTypeForPersonMedSamsvar(
             fnr = oppholdsHendelse.norskident,
+            type = GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
             samsvar =
                 SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
                     samsvar = false,
                     oppholdstype = oppholdsHendelse.institusjonsoppholdsType,
                     oppholdBeriket = oppholdsHendelse,
+                ),
+        )
+
+    fun opprettUfoerehendelse(hendelse: UfoereHendelse): List<Grunnlagsendringshendelse> =
+        opprettHendelseAvTypeForPersonMedSamsvar(
+            fnr = hendelse.personIdent,
+            type = GrunnlagsendringsType.UFOERETRYGD,
+            samsvar =
+                SamsvarMellomKildeOgGrunnlag.Ufoeretrygd(
+                    samsvar = false,
+                    hendelse = hendelse,
                 ),
         )
 
@@ -244,50 +256,64 @@ class GrunnlagsendringshendelseService(
         return opprettOppgave(grunnlagsendringshendelse)
     }
 
-    private fun opprettHendelseInstitusjonsoppholdForPerson(
+    private fun opprettHendelseAvTypeForPersonMedSamsvar(
         fnr: String,
+        type: GrunnlagsendringsType,
         samsvar: SamsvarMellomKildeOgGrunnlag,
     ): List<Grunnlagsendringshendelse> {
-        val grunnlagendringType: GrunnlagsendringsType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD
-        val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
-
-        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
-        val sakerOgRollerGruppert = sakerOgRoller.distinct()
-
-        val sakerForSoeker = sakerOgRollerGruppert.filter { Saksrolle.SOEKER == it.rolle }
-
-        return sakerForSoeker.let {
-            inTransaction {
-                it.filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }
-                it.map { rolleOgSak ->
+        val personMedSakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
+        return inTransaction {
+            personMedSakerOgRoller
+                .asSequence()
+                .distinct()
+                .filter(::harRolleSoeker)
+                .filter(::harSakIGjenny)
+                .filter { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(it.sakId, type) }
+                .map { sakIdOgRolle ->
+                    val sakId = sakIdOgRolle.sakId
                     val hendelseId = UUID.randomUUID()
+
                     logger.info(
-                        "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                            "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}",
+                        "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av type=$type på sak=$sakId",
                     )
-                    val hendelse =
-                        Grunnlagsendringshendelse(
-                            id = hendelseId,
-                            sakId = rolleOgSak.sakId,
-                            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                            type = grunnlagendringType,
-                            opprettet = tidspunktForMottakAvHendelse,
-                            hendelseGjelderRolle = rolleOgSak.rolle,
-                            gjelderPerson = fnr,
-                            samsvarMellomKildeOgGrunnlag = samsvar,
-                        )
-                    oppgaveService.opprettOppgave(
-                        referanse = hendelseId.toString(),
-                        sakId = rolleOgSak.sakId,
-                        kilde = OppgaveKilde.HENDELSE,
-                        type = OppgaveType.VURDER_KONSEKVENS,
-                        merknad = hendelse.beskrivelse(),
-                    )
-                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
-                }
-            }
+
+                    grunnlagsendringshendelseDao
+                        .opprettGrunnlagsendringshendelse(
+                            Grunnlagsendringshendelse(
+                                id = hendelseId,
+                                sakId = sakId,
+                                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                                type = type,
+                                opprettet = now().toLocalDatetimeUTC(),
+                                hendelseGjelderRolle = sakIdOgRolle.rolle,
+                                gjelderPerson = fnr,
+                                samsvarMellomKildeOgGrunnlag = samsvar,
+                            ),
+                        ).let { hendelse ->
+                            logger.info("Oppretter oppgave for grunnlagsendringshendelse med id=$hendelseId")
+
+                            val oppgave =
+                                oppgaveService.opprettOppgave(
+                                    referanse = hendelseId.toString(),
+                                    sakId = sakId,
+                                    kilde = OppgaveKilde.HENDELSE,
+                                    type = OppgaveType.VURDER_KONSEKVENS,
+                                    merknad = hendelse.beskrivelse(),
+                                )
+
+                            logger.info(
+                                "Oppgave med id=${oppgave.id} opprettet for grunnlagsendringshendelse med id=$hendelseId",
+                            )
+
+                            hendelse
+                        }
+                }.toList()
         }
     }
+
+    private fun harSakIGjenny(rolleOgSak: SakidOgRolle) = sakService.finnSak(rolleOgSak.sakId) != null
+
+    private fun harRolleSoeker(it: SakidOgRolle) = Saksrolle.SOEKER == it.rolle
 
     data class SakOgRolle(
         val sak: Sak,
@@ -298,7 +324,7 @@ class GrunnlagsendringshendelseService(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
-        val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
+        val tidspunktForMottakAvHendelse = now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
 
         val sakerOgRollerGruppert = sakerOgRoller.distinct()
@@ -350,7 +376,7 @@ class GrunnlagsendringshendelseService(
                 id = hendelseId,
                 sakId = sakId,
                 type = grunnlagendringType,
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                opprettet = now().toLocalDatetimeUTC(),
                 hendelseGjelderRolle = Saksrolle.SOEKER,
                 gjelderPerson = sak?.ident!!,
             )
@@ -366,7 +392,7 @@ class GrunnlagsendringshendelseService(
     ) {
         val personRolle = grunnlagsendringshendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
         val pdlData =
-            pdltjenesterKlient.hentPdlModellFlereSaktyper(
+            pdltjenesterKlient.hentPdlModellForSaktype(
                 grunnlagsendringshendelse.gjelderPerson,
                 personRolle,
                 sak.sakType,

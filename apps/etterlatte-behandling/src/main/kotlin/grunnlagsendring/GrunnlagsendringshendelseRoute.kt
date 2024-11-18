@@ -23,11 +23,12 @@ import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
+import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseService: GrunnlagsendringshendelseService) {
-    val logger = routeLogger
+    val logger = LoggerFactory.getLogger("GrunnlagsendringhendelseRoute")
 
     route("/grunnlagsendringshendelse") {
         post("/doedshendelse") {
@@ -113,6 +114,15 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
             }
         }
 
+        post("/ufoeretrygd") {
+            kunSystembruker {
+                val hendelse = call.receive<UfoereHendelse>()
+                logger.info("Mottar en hendelse fra uføre")
+                grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         route("/{$SAKID_CALL_PARAMETER}") {
             get {
                 call.respond(GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)))
@@ -136,3 +146,16 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
 data class GrunnlagsendringsListe(
     val hendelser: List<Grunnlagsendringshendelse>,
 )
+
+data class UfoereHendelse(
+    val personIdent: String,
+    val fodselsdato: LocalDate,
+    val virkningsdato: LocalDate,
+    val vedtaksType: VedtaksType,
+)
+
+enum class VedtaksType {
+    INNV,
+    ENDR,
+    OPPH,
+}

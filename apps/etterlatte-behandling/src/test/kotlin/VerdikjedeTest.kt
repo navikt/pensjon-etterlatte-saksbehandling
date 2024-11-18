@@ -593,6 +593,25 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         UUID.fromString(it.body())
                     }
 
+            val nyOppgaveliste: List<OppgaveIntern> =
+                client
+                    .get("/api/oppgaver") {
+                        addAuthToken(tokenAttestant)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.also {
+                        assertEquals(HttpStatusCode.OK, it.status)
+                    }.body()
+            val nyOppgavelisteForAttestant =
+                nyOppgaveliste.filter { it.referanse == behandlingIdNyFoerstegangsbehandling.toString() }
+            client
+                .post("/api/oppgaver/${nyOppgavelisteForAttestant[0].id}/tildel-saksbehandler") {
+                    addAuthToken(tokenAttestant)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(SaksbehandlerEndringDto(saksbehandler02))
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }
+
             client
                 .post("/api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
                     addAuthToken(systemBruker)

@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
+import { BrevProsessType, BrevStatus, Spraak } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import styled from 'styled-components'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
@@ -61,7 +61,13 @@ export default function NyttBrev() {
           <GridContainer>
             <Column>
               <VStack gap="4" margin="4">
-                <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
+                <BrevTittel
+                  brevId={brev.id}
+                  sakId={brev.sakId}
+                  tittel={brev.tittel}
+                  kanRedigeres={kanRedigeres}
+                  manueltBrev={brev.spraak !== Spraak.NB}
+                />
 
                 <Box padding="4" borderWidth="1" borderRadius="small">
                   <VStack gap="2" justify="space-between">

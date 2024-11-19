@@ -26,9 +26,14 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres }: Prop
       {nyTittel ? (
         <>
           <BodyShort spacing>{nyTittel}</BodyShort>
-          {tittel !== nyTittel && (
+
+          {tittel !== nyTittel ? (
             <Alert variant="success" size="small">
               Tittel oppdatert!
+            </Alert>
+          ) : (
+            <Alert variant="warning" size="small">
+              Språk er ikke bokmål, så dobbeltsjekk tittelen
             </Alert>
           )}
         </>

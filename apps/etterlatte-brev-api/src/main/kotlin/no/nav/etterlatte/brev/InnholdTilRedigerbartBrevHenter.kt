@@ -34,9 +34,10 @@ class InnholdTilRedigerbartBrevHenter(
         bruker: BrukerTokenInfo,
         brevKode: Brevkoder,
         brevData: BrevDataRedigerbar,
+        spraak: Spraak? = null,
     ): OpprettBrevRequest {
         val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, null, bruker) }
+            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, spraak, bruker) }
         return opprettBrevRequest(generellBrevData, brevKode, brevData, bruker)
     }
 

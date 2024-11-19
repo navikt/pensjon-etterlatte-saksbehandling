@@ -157,6 +157,7 @@ class BrevService(
         bruker: BrukerTokenInfo,
         brevkode: Brevkoder,
         brevData: BrevDataRedigerbar,
+        spraak: Spraak? = null,
     ): Brev =
         brevoppretter
             .opprettBrevSomHarInnhold(
@@ -165,6 +166,7 @@ class BrevService(
                 bruker = bruker,
                 brevKode = brevkode,
                 brevData = brevData,
+                spraak = spraak,
             ).first
 
     data class BrevPayload(

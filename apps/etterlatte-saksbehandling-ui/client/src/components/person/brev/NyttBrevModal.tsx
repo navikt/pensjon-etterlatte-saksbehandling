@@ -11,6 +11,8 @@ import { ControlledRadioGruppe } from '~shared/components/radioGruppe/Controlled
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { Spraak } from '~shared/types/Brev'
+import { formaterSpraak } from '~utils/formatering/formatering'
 
 const NasjonalEllerUtlandRadio = ({ control }: { control: Control<FilledFormData, any> }) => (
   <ControlledRadioGruppe
@@ -89,6 +91,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
   const defaultData: FilledFormData = {
     type: FormType.TOMT_BREV,
+    spraak: Spraak.NB,
     utbetaling: '',
   }
 
@@ -169,6 +172,23 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     </option>
                   </>
                 )}
+              </Select>
+              <Select
+                {...register('spraak', {
+                  required: {
+                    value: true,
+                    message: 'Du må velge ',
+                  },
+                })}
+                label="Språk/målform"
+                error={errors.spraak?.message}
+                defaultValue={defaultData.spraak}
+              >
+                {Object.values(Spraak).map((spraak) => (
+                  <option key={spraak} value={spraak}>
+                    {formaterSpraak(spraak)}
+                  </option>
+                ))}
               </Select>
               {skjemaet.type === FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND && (
                 <>
@@ -283,6 +303,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 export type BrevParametre =
   | {
       type: FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND
+      spraak: Spraak
       aktivitetsgrad: string
       utbetaling: boolean
       redusertEtterInntekt: boolean
@@ -290,31 +311,37 @@ export type BrevParametre =
     }
   | {
       type: FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND
+      spraak: Spraak
       redusertEtterInntekt: boolean
       nasjonalEllerUtland: NasjonalEllerUtland
     }
   | {
       type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD
+      spraak: Spraak
       bosattUtland: boolean
       avdoedNavn: string
     }
   | {
       type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD
+      spraak: Spraak
       mottattDato: Date
       borINorgeEllerIkkeAvtaleland: boolean
     }
   | {
       type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
+      spraak: Spraak
       borIUtlandet: boolean
     }
   | {
       type: FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD
+      spraak: Spraak
       bosattUtland: boolean
       avdoedNavn: string
       erOver18Aar: boolean
     }
   | {
       type: FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD
+      spraak: Spraak
       mottattDato: Date
       bosattUtland: boolean
       erOver18aar: boolean
@@ -322,15 +349,18 @@ export type BrevParametre =
     }
   | {
       type: FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
+      spraak: Spraak
       borIUtlandet: boolean
       erOver18aar: boolean
     }
   | {
       type: FormType.TOMT_BREV
+      spraak: Spraak
     }
 
 type FilledFormData = {
   type: FormType
+  spraak: Spraak
   aktivitetsgrad?: string
   utbetaling?: JaNei | ''
   redusertEtterInntekt?: JaNei | ''
@@ -363,6 +393,7 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
     case FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND:
       return {
         type: formdata.type,
+        spraak: formdata.spraak,
         aktivitetsgrad: formdata.aktivitetsgrad!!,
         utbetaling: formdata.utbetaling!! === JaNei.JA,
         redusertEtterInntekt: formdata.redusertEtterInntekt!! === JaNei.JA,
@@ -371,29 +402,34 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
     case FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND:
       return {
         type: formdata.type,
+        spraak: formdata.spraak,
         redusertEtterInntekt: formdata.redusertEtterInntekt!! === JaNei.JA,
         nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
     case FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD:
       return {
         type: formdata.type,
+        spraak: formdata.spraak,
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         avdoedNavn: formdata.avdoedNavn!!,
       }
     case FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD:
       return {
         type: formdata.type,
+        spraak: formdata.spraak,
         mottattDato: formdata.mottattDato!!,
         borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,
       }
     case FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
       return {
         type: formdata.type,
+        spraak: formdata.spraak,
         borIUtlandet: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
       }
     case FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD:
       return {
         type: formdata.type,
+        spraak: formdata.spraak,
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         avdoedNavn: formdata.avdoedNavn!!,
         erOver18Aar: formdata.erOver18Aar === JaNei.JA,
@@ -401,6 +437,7 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
     case FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD:
       return {
         type: formdata.type,
+        spraak: formdata.spraak,
         mottattDato: formdata.mottattDato!!,
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         erOver18aar: formdata.erOver18Aar === JaNei.JA,
@@ -409,12 +446,14 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
     case FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
       return {
         type: formdata.type,
+        spraak: formdata.spraak,
         borIUtlandet: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         erOver18aar: formdata.erOver18Aar === JaNei.JA,
       }
     case FormType.TOMT_BREV:
       return {
         type: formdata.type,
+        spraak: formdata.spraak,
       }
     default:
       throw new Error('Valgt type er ikke gyldig')

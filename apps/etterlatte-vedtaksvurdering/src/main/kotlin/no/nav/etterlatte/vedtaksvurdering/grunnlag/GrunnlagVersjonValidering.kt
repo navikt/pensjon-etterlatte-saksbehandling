@@ -39,7 +39,7 @@ object GrunnlagVersjonValidering {
         if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {
             logger.info("Vilkaar og/eller beregning er null – fortsetter ...")
         } else if (vilkaarsvurdering.grunnlagVersjon != beregningOgAvkorting.beregning.grunnlagMetadata.versjon) {
-            logger.error(
+            logger.warn(
                 "Ulik versjon av grunnlag i vilkaarsvurdering (versjon=${vilkaarsvurdering.grunnlagVersjon})" +
                     " og beregning (versjon=${beregningOgAvkorting.beregning.grunnlagMetadata.versjon}) ",
             )

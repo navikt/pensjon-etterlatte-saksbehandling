@@ -36,7 +36,7 @@ class OmregningService(
     }
 
     fun kjoeringFullfoert(request: LagreKjoeringRequest) {
-        if (request.status != KjoeringStatus.FERDIGSTILT) {
+        if (!listOf(KjoeringStatus.FERDIGSTILT, KjoeringStatus.FERDIGSTILT_FATTET).contains(request.status)) {
             throw IllegalStateException("Prøver å lagre at kjøring er fullført, men status er ikke ferdigstilt.")
         }
         omregningDao.lagreKjoering(request)

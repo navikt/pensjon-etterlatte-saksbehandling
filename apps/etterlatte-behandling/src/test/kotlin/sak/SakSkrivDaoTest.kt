@@ -212,6 +212,15 @@ internal class SakSkrivDaoTest(
             val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
+            listOf(sak1, sak2, sak3).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
+
             val saker = sakLesDao.hentSaker("", 2, listOf(sak2.id, sak3.id), emptyList())
 
             saker.size shouldBe 2
@@ -225,6 +234,15 @@ internal class SakSkrivDaoTest(
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak4 = sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
+            listOf(sak1, sak2, sak3, sak4).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
+
             val saker = sakLesDao.hentSaker("", 4, emptyList(), ekskluderteSaker = listOf(sak1.id, sak2.id))
 
             saker.size shouldBe 2
@@ -237,6 +255,15 @@ internal class SakSkrivDaoTest(
             val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            listOf(sak1, sak2, sak3).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
 
             val saker =
                 sakLesDao.hentSaker(
@@ -252,9 +279,18 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Skal hente alle saker dersom ingen spesifikke er angitt`() {
-            sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            listOf(sak1, sak2, sak3).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
 
             val saker = sakLesDao.hentSaker("", 3, emptyList(), emptyList())
 
@@ -264,6 +300,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er starta, skal vi ikke hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
 
@@ -275,6 +317,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er starta, og saa feila det, skal vi hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
@@ -287,6 +335,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er starta, og saa ferdigstilt, skal vi ikke hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
@@ -299,6 +353,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er starta, og saa feila, og saa ferdigstilt, skal vi ikke hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
@@ -313,6 +373,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er ferdigstilt, skal vi ikke hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
 
@@ -323,11 +389,18 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Skal hente saker for gitt sakstype hvis sakstype er angitt`() {
-            sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
-
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak4 = sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+            listOf(sak1, sak2, sak3, sak4).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
             sakLesDao
                 .hentSaker("", 100, emptyList(), emptyList(), SakType.BARNEPENSJON)
                 .map { it.ident } shouldContainExactlyInAnyOrder listOf("fnr1", "fnr2", "fnr3")
@@ -338,6 +411,28 @@ internal class SakSkrivDaoTest(
 
             val saker = sakLesDao.hentSaker("", 2, emptyList(), emptyList(), SakType.BARNEPENSJON)
             saker.map { it.ident } shouldContainAnyOf listOf("fnr1", "fnr2", "fnr3")
+            saker.size shouldBe 2
+        }
+
+        @Test
+        fun `skal ikke hente saker som ikke har behandlinger`() {
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            val sakerMedBehandlinger = listOf(sak1, sak2)
+            sakerMedBehandlinger.forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
+            val saker = sakLesDao.hentSaker("", 100, emptyList(), emptyList())
+            saker.map { it.ident } shouldContainExactlyInAnyOrder sakerMedBehandlinger.map { it.ident }
             saker.size shouldBe 2
         }
     }

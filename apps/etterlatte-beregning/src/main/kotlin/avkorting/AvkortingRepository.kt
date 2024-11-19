@@ -24,8 +24,8 @@ class AvkortingRepository(
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =
                 queryOf(
-                    "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id = ? AND aar = ?",
-                    harInntektForAarDto.sakId.sakId,
+                    "SELECT * FROM avkorting_aarsoppgjoer WHERE behandling_id = ? AND aar = ?",
+                    harInntektForAarDto.sisteBehandling,
                     harInntektForAarDto.aar,
                 ).let { query ->
                     tx.run(

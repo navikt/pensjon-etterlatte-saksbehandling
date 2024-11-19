@@ -50,7 +50,7 @@ internal class AvkortingRepositoryTest(
             AarligInntektsjusteringAvkortingSjekkRequest(
                 sakId,
                 aarsoppgjoer.aar,
-                sisteBehandling = UUID.randomUUID(),
+                sisteBehandling = behandlingId,
             ),
         ) shouldBe true
     }

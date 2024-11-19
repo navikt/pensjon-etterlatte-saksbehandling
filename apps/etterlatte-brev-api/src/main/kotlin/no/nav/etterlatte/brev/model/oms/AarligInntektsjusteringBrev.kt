@@ -1,13 +1,11 @@
 package no.nav.etterlatte.brev.model.oms
 
-import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
-import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -66,26 +64,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
         ): OmstillingsstoenadInntektsjusteringVedtak {
             // TODO duplikater som bør vurderes å trekkes ut felles
             val beregningsperioder =
-                avkortingsinfo.beregningsperioder.map {
-                    OmstillingsstoenadBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        inntekt = it.inntekt,
-                        oppgittInntekt = it.oppgittInntekt,
-                        fratrekkInnAar = it.fratrekkInnAar,
-                        innvilgaMaaneder = it.innvilgaMaaneder,
-                        grunnbeloep = it.grunnbeloep,
-                        ytelseFoerAvkorting = it.ytelseFoerAvkorting,
-                        restanse = it.restanse,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        trygdetid = it.trygdetid,
-                        beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
-                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
-                        sanksjon = it.sanksjon != null,
-                        institusjon = it.institusjon != null && it.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
-                        erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
-                    )
-                }
+                avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
 
             val sisteBeregningsperiode =
                 beregningsperioder

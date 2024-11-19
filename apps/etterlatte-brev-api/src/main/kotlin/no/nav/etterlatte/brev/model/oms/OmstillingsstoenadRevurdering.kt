@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.model.oms
 
-import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
@@ -11,7 +10,6 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
-import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
@@ -66,26 +64,7 @@ data class OmstillingsstoenadRevurdering(
             opphoerFom: YearMonth?,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
-                avkortingsinfo.beregningsperioder.map {
-                    OmstillingsstoenadBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        inntekt = it.inntekt,
-                        oppgittInntekt = it.oppgittInntekt,
-                        fratrekkInnAar = it.fratrekkInnAar,
-                        innvilgaMaaneder = it.innvilgaMaaneder,
-                        grunnbeloep = it.grunnbeloep,
-                        ytelseFoerAvkorting = it.ytelseFoerAvkorting,
-                        restanse = it.restanse,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        trygdetid = it.trygdetid,
-                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
-                        beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
-                        sanksjon = it.sanksjon != null,
-                        institusjon = it.institusjon != null && it.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
-                        erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
-                    )
-                }
+                avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
 
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
             val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }

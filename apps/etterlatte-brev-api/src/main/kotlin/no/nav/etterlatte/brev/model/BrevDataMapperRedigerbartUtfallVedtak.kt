@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbart
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoerRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall
+import no.nav.etterlatte.brev.model.oms.utledOpphoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -381,9 +382,13 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             }
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
+        val beregningsperioder =
+            avkortingsinfo.await().beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
+        val opphoerDato = utledOpphoer(behandling, beregningsperioder)
+
         OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall.fra(
             avkortingsinfo = avkortingsinfo.await(),
-            opphoerDato = behandling.opphoerFraOgMed?.atDay(1),
+            opphoerDato = opphoerDato,
         )
     }
 

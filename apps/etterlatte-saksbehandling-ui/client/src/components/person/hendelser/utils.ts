@@ -4,6 +4,7 @@ import {
   GrunnlagsendringsType,
   IBehandlingsammendrag,
   Saksrolle,
+  UfoeretrygdVedtakstype,
 } from '~components/person/typer'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
 import React from 'react'
@@ -38,7 +39,7 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagendringshendelseSamsva
   INSTITUSJONSOPPHOLD: 'institusjonsopphold',
   ADRESSE: 'fått ny geografisk tilknytning men saken kunne ikke flyttes på grunn av åpen behandling',
   FOLKEREGISTERIDENTIFIKATOR: 'endring av folkeregisteridentifikator',
-  UFOERETRYGD: 'uføretrygd',
+  UFOERETRYGD: 'et nytt vedtak om uføretrygd',
 }
 
 export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType): string => {
@@ -99,6 +100,12 @@ export const formaterRolle = (sakType: SakType, rolle: Saksrolle) => {
     case 'UKJENT':
       return 'Ukjent person i saken'
   }
+}
+
+export const ufoeretrygdVedtakstypeBeskrivelse: Record<UfoeretrygdVedtakstype, string> = {
+  INNV: 'Innvilgelse',
+  ENDR: 'Endring',
+  OPPH: 'Opphør',
 }
 
 export const formaterLandList = (

@@ -675,6 +675,7 @@ class OppgaveService(
                         OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
                         OppgaveType.AARLIG_INNTEKTSJUSTERING,
+                        OppgaveType.MOTTATT_INNTEKTSJUSTERING,
                         OppgaveType.MANUELL_UTSENDING_BREV,
                         -> {
                             logger.info(

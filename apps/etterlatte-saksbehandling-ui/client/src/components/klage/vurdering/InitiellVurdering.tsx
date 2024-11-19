@@ -8,12 +8,12 @@ import { isPending } from '~shared/api/apiUtils'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { useAppDispatch } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { FieldOrNull } from '~shared/types/util'
 import { useForm } from 'react-hook-form'
 import { ButtonNavigerTilBrev } from '~components/klage/vurdering/KlageVurderingFelles'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 const getTextFromutfall = (utfall: Utfall): string => {
   switch (utfall) {
@@ -69,7 +69,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
     )
   }
 
-  const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
+  const stoetterDelvisOmgjoering = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering)
 
   return (
     <VStack gap="4" width="30rem">

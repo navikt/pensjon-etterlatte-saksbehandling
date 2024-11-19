@@ -2,7 +2,7 @@ import { apiClient, ApiError, ApiResponse } from '~shared/api/apiClient'
 import { IFeature } from '~shared/types/IFeature'
 import { logger } from '~utils/logger'
 
-export const hentFunksjonsbrytere = async (brytere: string[]): Promise<ApiResponse<IFeature[]>> => {
+export const hentFeatureToggles = async (brytere: string[]): Promise<ApiResponse<IFeature[]>> => {
   function post(): Promise<ApiResponse<IFeature[]>> {
     return apiClient.post(`/feature`, { features: brytere })
   }

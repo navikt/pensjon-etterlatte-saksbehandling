@@ -124,7 +124,7 @@ class OmregningDao(
                     prepareStatement(
                         """
                         INSERT INTO omregningskjoering (
-                        kjoering, sak_id, status
+                        kjoering, sak_id, status,
                         ${
                             when (request.distEllerIverksatt) {
                                 DisttribuertEllerIverksatt.IVERKSATT -> "iverkksatt_behandling"

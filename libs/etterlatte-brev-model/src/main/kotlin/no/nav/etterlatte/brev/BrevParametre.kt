@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonMottattSoeknad
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnhentingAvOpplysninger
@@ -18,6 +19,7 @@ import java.time.LocalDate
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class BrevParametre {
     abstract val brevkode: Brevkoder
+    abstract val spraak: Spraak
 
     abstract fun brevDataMapping(): BrevDataRedigerbar
 
@@ -27,6 +29,7 @@ sealed class BrevParametre {
         val utbetaling: Boolean,
         val redusertEtterInntekt: Boolean,
         val nasjonalEllerUtland: NasjonalEllerUtland,
+        override val spraak: Spraak,
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(): BrevDataRedigerbar =
@@ -35,6 +38,7 @@ sealed class BrevParametre {
 
     @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND")
     data class AktivitetspliktInformasjon10Mnd(
+        override val spraak: Spraak,
         val aktivitetsgrad: Aktivitetsgrad,
         val utbetaling: Boolean,
         val redusertEtterInntekt: Boolean,
@@ -47,6 +51,7 @@ sealed class BrevParametre {
 
     @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND")
     data class AktivitetspliktInformasjon6Mnd(
+        override val spraak: Spraak,
         val redusertEtterInntekt: Boolean,
         val nasjonalEllerUtland: NasjonalEllerUtland,
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
@@ -57,6 +62,7 @@ sealed class BrevParametre {
 
     @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD")
     data class OmstillingsstoenadInformasjonMottattSoeknadRedigerbar(
+        override val spraak: Spraak,
         val mottattDato: LocalDate,
         val borINorgeEllerIkkeAvtaleland: Boolean,
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD,
@@ -70,6 +76,7 @@ sealed class BrevParametre {
 
     @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER")
     data class OmstillingsstoenadInformasjonInnhentingAvOpplysninger(
+        override val spraak: Spraak,
         val borIUtlandet: Boolean,
         override val brevkode: Brevkoder = Brevkoder.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
     ) : BrevParametre() {
@@ -78,6 +85,7 @@ sealed class BrevParametre {
 
     @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD")
     data class OmstillingsstoenadInformasjonDoedsfallRedigerbar(
+        override val spraak: Spraak,
         val bosattUtland: Boolean,
         val avdoedNavn: String,
         override val brevkode: Brevkoder = Brevkoder.OMS_INFORMASJON_DOEDSFALL,
@@ -91,6 +99,7 @@ sealed class BrevParametre {
 
     @JsonTypeName("BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD")
     data class BarnepensjonInformasjonDoedsfallRedigerbar(
+        override val spraak: Spraak,
         val bosattUtland: Boolean,
         val avdoedNavn: String,
         val erOver18Aar: Boolean,
@@ -106,6 +115,7 @@ sealed class BrevParametre {
 
     @JsonTypeName("BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD")
     data class BarnepensjonMottattSoeknad(
+        override val spraak: Spraak,
         val mottattDato: LocalDate,
         val borINorgeEllerIkkeAvtaleland: Boolean,
         val erOver18aar: Boolean,
@@ -123,6 +133,7 @@ sealed class BrevParametre {
 
     @JsonTypeName("BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER")
     data class BarnepensjonInformasjonInnhentingAvOpplysninger(
+        override val spraak: Spraak,
         val erOver18aar: Boolean,
         val borIUtlandet: Boolean,
         override val brevkode: Brevkoder = Brevkoder.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
@@ -135,7 +146,9 @@ sealed class BrevParametre {
     }
 
     @JsonTypeName("TOMT_BREV")
-    class TomtBrev : BrevParametre() {
+    data class TomtBrev(
+        override val spraak: Spraak,
+    ) : BrevParametre() {
         override val brevkode: Brevkoder = Brevkoder.TOMT_INFORMASJONSBREV
 
         override fun brevDataMapping(): BrevDataRedigerbar = ManueltBrevData()

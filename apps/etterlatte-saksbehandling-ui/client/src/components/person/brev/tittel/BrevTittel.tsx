@@ -7,9 +7,10 @@ interface Props {
   sakId: number
   tittel: string
   kanRedigeres: boolean
+  manueltBrev?: boolean
 }
 
-export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres }: Props) {
+export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres, manueltBrev = false }: Props) {
   const [nyTittel, setNyTittel] = useState(tittel)
 
   return (
@@ -29,6 +30,11 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres }: Prop
           {tittel !== nyTittel && (
             <Alert variant="success" size="small">
               Tittel oppdatert!
+            </Alert>
+          )}
+          {tittel !== nyTittel && manueltBrev && (
+            <Alert variant="warning" size="small">
+              Språk er ikke bokmål, så dobbeltsjekk tittelen
             </Alert>
           )}
         </>

@@ -279,6 +279,7 @@ fun Route.brevRoute(
                         brukerTokenInfo,
                         brevParametre.brevkode,
                         brevParametre.brevDataMapping(),
+                        brevParametre.spraak,
                     )
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")

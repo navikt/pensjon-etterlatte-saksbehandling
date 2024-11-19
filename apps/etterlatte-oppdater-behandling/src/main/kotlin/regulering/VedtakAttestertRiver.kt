@@ -80,11 +80,7 @@ internal class VedtakAttestertRiver(
         val request =
             LagreKjoeringRequest(
                 kjoering = kjoering,
-                status =
-                    when (erFattetVedtak) {
-                        true -> KjoeringStatus.FERDIGSTILT_FATTET
-                        false -> KjoeringStatus.FERDIGSTILT
-                    },
+                status = KjoeringStatus.FERDIGSTILT,
                 sakId = sakId,
                 beregningBeloepFoer = bigDecimal(packet, BEREGNING_BELOEP_FOER),
                 beregningBeloepEtter = bigDecimal(packet, BEREGNING_BELOEP_ETTER),

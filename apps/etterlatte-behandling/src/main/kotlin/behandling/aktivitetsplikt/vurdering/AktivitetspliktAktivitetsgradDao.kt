@@ -27,7 +27,7 @@ class AktivitetspliktAktivitetsgradDao(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun upsertAktivitetsgradForOppgave(
-        aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
+        aktivitetsgrad: LagreAktivitetspliktAktivitetsgradMedUnntak,
         sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
         oppgaveId: UUID? = null,
@@ -72,7 +72,7 @@ class AktivitetspliktAktivitetsgradDao(
     }
 
     fun oppdaterAktivitetsgrad(
-        aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
+        aktivitetsgrad: LagreAktivitetspliktAktivitetsgradMedUnntak,
         kilde: Grunnlagsopplysning.Kilde,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {
@@ -306,7 +306,7 @@ enum class AktivitetspliktSkjoennsmessigVurdering {
     NEI,
 }
 
-data class LagreAktivitetspliktAktivitetsgrad(
+data class LagreAktivitetspliktAktivitetsgradMedUnntak(
     val id: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,
     val skjoennsmessigVurdering: AktivitetspliktSkjoennsmessigVurdering? = null,
@@ -314,6 +314,7 @@ data class LagreAktivitetspliktAktivitetsgrad(
     val fom: LocalDate = LocalDate.now(),
     val tom: LocalDate? = null,
     val beskrivelse: String,
+    val unntak: LagreAktivitetspliktUnntak,
 ) {
     fun erGyldigUtfylt(): Boolean =
         if (vurdertFra12Mnd) {

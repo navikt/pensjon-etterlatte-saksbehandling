@@ -3,7 +3,6 @@ import {
   AktivitetspliktSkjoennsmessigVurdering,
   AktivitetspliktVurderingType,
   IAktivitetspliktAktivitetsgrad,
-  IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNyDto,
   IOpprettAktivitetspliktAktivitetsgrad,
   tekstAktivitetspliktVurderingType,
@@ -21,12 +20,17 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
 import { addMonths, startOfMonth } from 'date-fns'
 import { JaNei } from '~shared/types/ISvar'
+import {
+  IOpprettAktivitetspliktUnntak,
+  UnntakAktivitetspliktOppgave,
+} from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
+import { UseFormRegisterReturn } from 'react-hook-form/dist/types/form'
 
 interface NyVurdering {
   typeVurdering: AktivitetspliktOppgaveVurderingType
   vurderingAvAktivitet: IOpprettAktivitetspliktAktivitetsgrad
   harUnntak?: JaNei
-  unntak?: Partial<IAktivitetspliktUnntak>
+  unntak?: IOpprettAktivitetspliktUnntak
 }
 
 function maanederForVurdering(typeVurdering: AktivitetspliktOppgaveVurderingType): number {
@@ -55,6 +59,7 @@ export function VurderingAktivitetsgradForm(props: {
     ? startOfMonth(addMonths(doedsdato, maanederForVurdering(typeVurdering)))
     : startOfMonth(new Date())
 
+  //TODO: nytt endepunkt eller 2 kall? eller bare fikse backend lol
   const [lagreStatus, lagreVurdering, reset] = useApiCall(opprettAktivitetspliktAktivitetsgrad)
 
   const { handleSubmit, register, watch, control } = useForm<Partial<NyVurdering>>({
@@ -76,10 +81,6 @@ export function VurderingAktivitetsgradForm(props: {
       setFeilmelding('Du må fylle ut vurderingen av aktivitetsgraden.')
       return
     }
-    if (formdata.harUnntak === JaNei.JA) {
-      setFeilmelding('Du kan ikke lagre ned unntak i vurderingen enda.')
-      return
-    }
 
     lagreVurdering(
       {
@@ -87,11 +88,12 @@ export function VurderingAktivitetsgradForm(props: {
         oppgaveId: oppgave.id,
         request: {
           id: aktivitet?.id,
-          vurdertFra12Mnd: formdata.typeVurdering === 'TOLV_MAANEDER',
+          vurdertFra12Mnd: formdata.typeVurdering === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER,
           skjoennsmessigVurdering: formdata.vurderingAvAktivitet.skjoennsmessigVurdering,
           aktivitetsgrad: formdata.vurderingAvAktivitet.aktivitetsgrad,
           fom: formdata.vurderingAvAktivitet.fom,
           beskrivelse: formdata.vurderingAvAktivitet.beskrivelse || '',
+          //unntak: formdata.unntak
         },
       },
       onSuccess
@@ -103,6 +105,11 @@ export function VurderingAktivitetsgradForm(props: {
     erNyVurdering &&
     (svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 ||
       svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50)
+
+  const registeroverride = (name: string, obj?: any): UseFormRegisterReturn => {
+    // @ts-expect-error wgwrgwrgr
+    return register(`unntak.${name}`, obj)
+  }
 
   return (
     <form onSubmit={handleSubmit(lagreOgOppdater)}>
@@ -159,12 +166,9 @@ export function VurderingAktivitetsgradForm(props: {
         )}
 
         {watch('harUnntak') === JaNei.JA && harKanskjeUnntak && (
-          <Box maxWidth="50rem">
-            <Alert variant="info">
-              Du kan ikke legge til unntak enda. Vi jobber med å få dette på plass. Du kan ta opp denne behandlingen
-              igjen neste uke.
-            </Alert>
-          </Box>
+          <>
+            <UnntakAktivitetspliktOppgave register={registeroverride} control={control} />
+          </>
         )}
 
         {watch('typeVurdering') === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER &&

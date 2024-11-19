@@ -10,7 +10,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAkt
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgradMedUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -245,7 +245,7 @@ class AktivitetspliktService(
     }
 
     fun upsertAktivitetsgradForOppgave(
-        aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
+        aktivitetsgrad: LagreAktivitetspliktAktivitetsgradMedUnntak,
         oppgaveId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
@@ -258,13 +258,17 @@ class AktivitetspliktService(
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
 
-        return hentVurderingForOppgave(oppgaveId) ?: throw InternfeilException(
-            "Vi har ingen vurderinger men vi " +
-                "oppdaterte nettopp en vurdering i en oppgave. Gjelder oppgave med id=$oppgaveId i sak $sakId",
-        )
+        val vurdering = hentVurderingForOppgave(oppgaveId)
+        if (vurdering.erTom()) {
+            throw InternfeilException(
+                "Vi har ingen vurderinger men vi " +
+                    "oppdaterte nettopp en vurdering i en oppgave. Gjelder oppgave med id=$oppgaveId i sak $sakId",
+            )
+        }
+        return vurdering
     }
 
-    private fun sjekkOmAktivitetsgradErGyldig(aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad) {
+    private fun sjekkOmAktivitetsgradErGyldig(aktivitetsgrad: LagreAktivitetspliktAktivitetsgradMedUnntak) {
         if (!aktivitetsgrad.erGyldigUtfylt()) {
             throw UgyldigForespoerselException(
                 "AKTIVITETSVURDERING_HAR_MANGLER",
@@ -275,7 +279,7 @@ class AktivitetspliktService(
     }
 
     fun upsertAktivitetsgradForBehandling(
-        aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
+        aktivitetsgradOgUnntak: LagreAktivitetspliktAktivitetsgradMedUnntak,
         behandlingId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
@@ -288,9 +292,10 @@ class AktivitetspliktService(
         }
 
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        sjekkOmAktivitetsgradErGyldig(aktivitetsgrad)
-        if (aktivitetsgrad.id != null) {
-            aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgrad, kilde, behandlingId)
+        sjekkOmAktivitetsgradErGyldig(aktivitetsgradOgUnntak)
+        if (aktivitetsgradOgUnntak.id != null) {
+            aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgradOgUnntak, kilde, behandlingId)
+            aktivitetspliktUnntakDao.upsertUnntak(aktivitetsgradOgUnntak.unntak, sakId, kilde)
         } else {
             checkInternFeil(
                 aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId).isEmpty(),
@@ -301,7 +306,7 @@ class AktivitetspliktService(
             }
 
             aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(
-                aktivitetsgrad,
+                aktivitetsgradOgUnntak,
                 sakId,
                 kilde,
                 behandlingId = behandlingId,

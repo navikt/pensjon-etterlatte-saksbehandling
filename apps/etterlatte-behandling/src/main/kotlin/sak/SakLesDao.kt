@@ -77,6 +77,7 @@ class SakLesDao(
                             AND k.tidspunkt > (SELECT MAX(o.tidspunkt) FROM omregningskjoering o WHERE o.sak_id=k.sak_id AND o.kjoering=k.kjoering AND o.status != '${KjoeringStatus.FEILA.name}')
                     )
                     )
+                    AND EXISTS(SELECT 1 FROM behandling b WHERE b.sak_id= s.id)
                     ${if (spesifikkeSaker.isEmpty()) "" else " AND id = ANY(?)"}
                     ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(id = ANY(?))"}
                     ${if (sakType == null) "" else " AND s.saktype = ?"}

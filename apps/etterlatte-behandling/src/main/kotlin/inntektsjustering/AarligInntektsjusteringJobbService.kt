@@ -119,11 +119,22 @@ class AarligInntektsjusteringJobbService(
                     vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
                 }
 
+            if (!vedtak.erLoepende) {
+                oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, "Sak er ikke løpende")
+                return@inTransaction
+            }
+
             val forrigeBehandling = hentForrigeBehandling(sakId)
 
             val avkortingSjekk = hentAvkortingSjekk(sakId, loependeFom, forrigeBehandling.id)
 
-            if (skalIkkeKjoereJobb(kjoering, sakId, loependeFom, vedtak, avkortingSjekk)) {
+            if (avkortingSjekk.harInntektForAar) {
+                oppdaterKjoering(
+                    kjoering,
+                    KjoeringStatus.FERDIGSTILT,
+                    sakId,
+                    "Sak har allerede oppgitt inntekt for ${loependeFom.year}",
+                )
                 return@inTransaction
             }
 
@@ -142,29 +153,6 @@ class AarligInntektsjusteringJobbService(
                 begrunnelse = e.message ?: e.toString(),
             )
         }
-    }
-
-    fun skalIkkeKjoereJobb(
-        kjoering: String,
-        sakId: SakId,
-        loependeFom: YearMonth,
-        vedtak: LoependeYtelseDTO,
-        avkortingSjekk: AarligInntektsjusteringAvkortingSjekkResponse,
-    ): Boolean {
-        if (!vedtak.erLoepende) {
-            oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, "Sak er ikke løpende")
-            return true
-        }
-        if (avkortingSjekk.harInntektForAar) {
-            oppdaterKjoering(
-                kjoering,
-                KjoeringStatus.FERDIGSTILT,
-                sakId,
-                "Sak har allerede oppgitt inntekt for ${loependeFom.year}",
-            )
-            return true
-        }
-        return false
     }
 
     fun maaGjoeresManuelt(

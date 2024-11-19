@@ -71,7 +71,7 @@ const grunnlagsEndringstyperTilRevurderingsAarsaker: Record<GrunnlagsendringsTyp
   SIVILSTAND: [Revurderingaarsak.SIVILSTAND],
   INSTITUSJONSOPPHOLD: [Revurderingaarsak.SOESKENJUSTERING],
   ADRESSE: [Revurderingaarsak.ANNEN],
-  UFOERETRYGD: [Revurderingaarsak.ANNEN],
+  UFOERETRYGD: [Revurderingaarsak.AVKORTING_MOT_UFOERETRYGD],
 }
 
 export const stoetterRevurderingAvHendelse = (

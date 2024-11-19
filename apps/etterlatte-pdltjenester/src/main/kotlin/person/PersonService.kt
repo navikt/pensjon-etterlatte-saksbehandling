@@ -206,7 +206,7 @@ class PersonService(
             }
         } else {
             response.data.hentIdenter.identer
-                .filterNot { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
+                .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
                 .map {
                     PdlIdentifikator.FolkeregisterIdent(
                         Folkeregisteridentifikator.of(it.ident),

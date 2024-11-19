@@ -38,8 +38,8 @@ export const MottattInntektsjusteringModal = ({ oppgave, oppdaterStatus }: Props
   }
 
   useEffect(() => {
-    hentJournalpostFetch(oppgave.referanse!)
-  }, [])
+    if (open) hentJournalpostFetch(oppgave.referanse!)
+  }, [open])
 
   return (
     <>

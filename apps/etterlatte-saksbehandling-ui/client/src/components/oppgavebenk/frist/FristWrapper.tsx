@@ -1,6 +1,6 @@
 import { isBefore } from 'date-fns'
 import { formaterDato } from '~utils/formatering/dato'
-import { ErrorMessage } from '@navikt/ds-react'
+import { BodyShort, ErrorMessage } from '@navikt/ds-react'
 
 export const FristWrapper = ({ dato }: { dato?: string }) => {
   const fristHarPassert = !!dato && isBefore(new Date(dato), new Date())
@@ -10,6 +10,6 @@ export const FristWrapper = ({ dato }: { dato?: string }) => {
   if (fristHarPassert) {
     return <ErrorMessage>{frist}</ErrorMessage>
   } else {
-    return <span>{frist}</span>
+    return <BodyShort>{frist}</BodyShort>
   }
 }

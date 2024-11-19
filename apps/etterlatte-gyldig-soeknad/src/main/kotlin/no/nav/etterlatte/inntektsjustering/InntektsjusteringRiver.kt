@@ -56,7 +56,7 @@ internal class InntektsjusteringRiver(
                     sak.id,
                     NyOppgaveDto(
                         OppgaveKilde.BRUKERDIALOG,
-                        OppgaveType.GENERELL_OPPGAVE,
+                        OppgaveType.MOTTATT_INNTEKTSJUSTERING,
                         merknad = "Mottatt inntektsjustering",
                         referanse = journalpostResponse.journalpostId,
                     ),

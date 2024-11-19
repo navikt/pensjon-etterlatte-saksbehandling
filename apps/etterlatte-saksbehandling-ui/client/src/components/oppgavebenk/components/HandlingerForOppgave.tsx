@@ -199,7 +199,7 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.MOTTATT_INNTEKTSJUSTERING:
-      return <MottattInntektsjusteringModal />
+      return <MottattInntektsjusteringModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
       return mapResult(opprettManuellRevurderingStatus, {
         initial: (

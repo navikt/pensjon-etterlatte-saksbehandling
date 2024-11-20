@@ -1,4 +1,4 @@
-import { Alert, Button, Heading, HelpText, HStack, Table, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, HelpText, HStack, Table, Tooltip, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { NOK } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
@@ -11,7 +11,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { lastDayOfMonth } from 'date-fns'
 import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
 import { IAvkortingGrunnlagFrontend } from '~shared/types/IAvkorting'
-import { PencilIcon } from '@navikt/aksel-icons'
+import { ArrowCirclepathIcon, PencilIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const AvkortingInntekt = ({
@@ -134,7 +134,16 @@ export const AvkortingInntekt = ({
                       <Table.DataCell key="InntektTotalt">
                         {NOK(forventetInntekt + forventetInntektUtland)}
                       </Table.DataCell>
-                      <Table.DataCell>{avkortingGrunnlag.innvilgaMaaneder}</Table.DataCell>
+                      <Table.DataCell>
+                        <HStack gap="4" align="center">
+                          <BodyShort>{avkortingGrunnlag.innvilgaMaaneder}</BodyShort>
+                          {!!avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
+                            <Tooltip content="Antall innvilga måneder er overstyrt">
+                              <ArrowCirclepathIcon aria-hidden fontSize="1.5rem" />
+                            </Tooltip>
+                          )}
+                        </HStack>
+                      </Table.DataCell>
                       <Table.DataCell key="Periode">
                         {avkortingGrunnlag.fom && formaterDato(avkortingGrunnlag.fom)} -{' '}
                         {avkortingGrunnlag.tom && formaterDato(lastDayOfMonth(new Date(avkortingGrunnlag.tom)))}

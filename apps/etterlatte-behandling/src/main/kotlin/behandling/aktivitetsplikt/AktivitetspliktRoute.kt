@@ -407,15 +407,16 @@ internal fun Route.aktivitetspliktRoutes(
             kunSkrivetilgang {
                 logger.info("Oppretter aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
                 val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>()
-                inTransaction {
-                    aktivitetspliktService.upsertAktivitetsgradForBehandling(
-                        aktivitetsgrad = aktivitetsgrad,
-                        behandlingId = behandlingId,
-                        sakId = sakId,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
-                }
-                call.respond(HttpStatusCode.Created)
+                val vurderingGammel =
+                    inTransaction {
+                        aktivitetspliktService.upsertAktivitetsgradForBehandling(
+                            aktivitetsgrad = aktivitetsgrad,
+                            behandlingId = behandlingId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(vurderingGammel)
             }
         }
 

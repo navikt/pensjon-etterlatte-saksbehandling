@@ -322,7 +322,7 @@ class AktivitetspliktService(
         behandlingId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): AktivitetspliktVurderingGammel {
         val behandling = behandlingService.hentBehandling(behandlingId) ?: throw BehandlingNotFoundException(behandlingId)
 
         if (!behandling.status.kanEndres()) {
@@ -350,6 +350,10 @@ class AktivitetspliktService(
         }
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
+        val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
+        val aktivitet = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
+
+        return AktivitetspliktVurderingGammel(unntak = unntak.firstOrNull(), aktivitet = aktivitet.firstOrNull())
     }
 
     fun upsertUnntakForOppgave(

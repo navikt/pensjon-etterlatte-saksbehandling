@@ -24,10 +24,6 @@ export interface IOpprettAktivitetspliktUnntak {
   beskrivelse: string
 }
 
-function formdataErUtfylt(formdata: Partial<IOpprettAktivitetspliktUnntak>): formdata is IOpprettAktivitetspliktUnntak {
-  return !!formdata.fom && !!formdata.unntak
-}
-
 export function UnntakAktivitetspliktOppgaveMedForm(props: {
   unntak?: IAktivitetspliktUnntak
   onSuccess: (data: IAktivitetspliktVurderingNyDto) => void
@@ -42,23 +38,21 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
   const [lagreUnntakStatus, lagreUnntak] = useApiCall(opprettAktivitetspliktUnntak)
 
   const sendInn = (formdata: Partial<IOpprettAktivitetspliktUnntak>) => {
-    if (!formdataErUtfylt(formdata)) {
-      lagreUnntak(
-        {
-          sakId: oppgave.sakId,
-          oppgaveId: oppgave.id,
-          request: {
-            id: formdata.id,
-            unntak: formdata.unntak!!,
-            fom: formdata.fom!!,
-            beskrivelse: formdata.beskrivelse || '',
-          },
+    lagreUnntak(
+      {
+        sakId: oppgave.sakId,
+        oppgaveId: oppgave.id,
+        request: {
+          id: formdata.id,
+          unntak: formdata.unntak!!,
+          fom: formdata.fom!!,
+          beskrivelse: formdata.beskrivelse || '',
         },
-        (data) => {
-          props.onSuccess(data)
-        }
-      )
-    }
+      },
+      (data) => {
+        props.onSuccess(data)
+      }
+    )
   }
 
   return (
@@ -123,15 +117,7 @@ export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?:
           </option>
         </Select>
 
-        <Textarea
-          {...register(`${formPrefix}beskrivelse`, {
-            required: {
-              value: true,
-              message: 'Du må fylle ut en beskrivelse',
-            },
-          })}
-          label="Beskrivelse"
-        />
+        <Textarea {...register(`${formPrefix}beskrivelse`)} label="Beskrivelse" />
       </VStack>
     </Box>
   )

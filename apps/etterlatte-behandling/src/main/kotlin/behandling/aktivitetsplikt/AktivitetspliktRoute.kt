@@ -87,7 +87,7 @@ internal fun Route.aktivitetspliktRoutes(
                             )
                         }
                     call.respond(result)
-                } catch (e: TilstandException.UgyldigTilstand) {
+                } catch (_: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
                 }
             }
@@ -333,6 +333,23 @@ internal fun Route.aktivitetspliktRoutes(
             }
         }
 
+        post("/aktivitetsgrad-og-unntak") {
+            kunSkrivetilgang {
+                logger.info("Oppretter aktivitetsgrad og unntak for sakId=$sakId og oppgaveId=$oppgaveId")
+                val aktivitetsgradOgUnntak = call.receive<AktivitetspliktAktivitetsgradOgUnntak>()
+                val oppgave =
+                    inTransaction {
+                        aktivitetspliktService.upsertAktivtetsgradOgUnntak(
+                            aktivitetsgradOgUnntak = aktivitetsgradOgUnntak,
+                            oppgaveId = oppgaveId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(oppgave)
+            }
+        }
+
         route("/unntak") {
             post {
                 kunSkrivetilgang {
@@ -393,22 +410,6 @@ internal fun Route.aktivitetspliktRoutes(
                 inTransaction {
                     aktivitetspliktService.upsertAktivitetsgradForBehandling(
                         aktivitetsgrad = aktivitetsgrad,
-                        behandlingId = behandlingId,
-                        sakId = sakId,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
-                }
-                call.respond(HttpStatusCode.Created)
-            }
-        }
-
-        post("/aktivitetsgrad-og-unntak") {
-            kunSkrivetilgang {
-                logger.info("Oppretter aktivitetsgrad og unntak for sakId=$sakId og behandlingId=$behandlingId")
-                val aktivitetsgradOgUnntak = call.receive<AktivitetspliktAktivitetsgradOgUnntak>()
-                inTransaction {
-                    aktivitetspliktService.upsertAktivtetsGradOgUnntak(
-                        aktivitetsgradOgUnntak = aktivitetsgradOgUnntak,
                         behandlingId = behandlingId,
                         sakId = sakId,
                         brukerTokenInfo = brukerTokenInfo,

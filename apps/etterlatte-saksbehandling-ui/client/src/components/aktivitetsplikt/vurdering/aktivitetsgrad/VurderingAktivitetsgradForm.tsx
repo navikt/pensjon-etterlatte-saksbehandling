@@ -49,7 +49,7 @@ export function VurderingAktivitetsgradForm(props: {
 
   const [lagreStatus, lagreVurdering, reset] = useApiCall(opprettAktivitetspliktAktivitetsgrad)
 
-  const { handleSubmit, register, watch, control } = useForm<Partial<RedigerAktivitetsgrad>>({
+  const { handleSubmit, register, watch, control } = useForm<RedigerAktivitetsgrad>({
     defaultValues: {
       typeVurdering: typeVurdering,
       vurderingAvAktivitet: aktivitet,
@@ -60,7 +60,7 @@ export function VurderingAktivitetsgradForm(props: {
     reset()
   }, [aktivitet])
 
-  function lagreOgOppdater(formdata: Partial<RedigerAktivitetsgrad>) {
+  function lagreOgOppdater(formdata: RedigerAktivitetsgrad) {
     setFeilmelding('')
     if (!formdata.vurderingAvAktivitet?.aktivitetsgrad || !formdata.vurderingAvAktivitet.fom) {
       setFeilmelding('Du må fylle ut vurderingen av aktivitetsgraden.')

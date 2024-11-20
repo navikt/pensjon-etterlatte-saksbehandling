@@ -11,7 +11,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { lastDayOfMonth } from 'date-fns'
 import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
 import { IAvkortingGrunnlagFrontend } from '~shared/types/IAvkorting'
-import { ArrowCirclepathIcon, PencilIcon } from '@navikt/aksel-icons'
+import { ArrowCirclepathIcon, PencilIcon, PersonSuitIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const AvkortingInntekt = ({
@@ -137,6 +137,11 @@ export const AvkortingInntekt = ({
                       <Table.DataCell>
                         <HStack gap="4" align="center">
                           <BodyShort>{avkortingGrunnlag.innvilgaMaaneder}</BodyShort>
+                          {fyller67 && !avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
+                            <Tooltip content="Fyller 67 år">
+                              <PersonSuitIcon aria-hidden fontSize="1.5rem" />
+                            </Tooltip>
+                          )}
                           {!!avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
                             <Tooltip content="Antall innvilga måneder er overstyrt">
                               <ArrowCirclepathIcon aria-hidden fontSize="1.5rem" />

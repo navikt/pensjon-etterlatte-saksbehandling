@@ -278,7 +278,7 @@ class AktivitetspliktService(
         }
     }
 
-    fun upsertAktivtetsgradOgUnntak(
+    fun upsertAktivtetsgradOgUnntakForOppgave(
         aktivitetsgradOgUnntak: AktivitetspliktAktivitetsgradOgUnntak,
         oppgaveId: UUID,
         sakId: SakId,

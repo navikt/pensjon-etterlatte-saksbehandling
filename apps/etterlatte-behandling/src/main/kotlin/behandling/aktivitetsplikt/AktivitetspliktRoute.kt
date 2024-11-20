@@ -339,7 +339,7 @@ internal fun Route.aktivitetspliktRoutes(
                 val aktivitetsgradOgUnntak = call.receive<AktivitetspliktAktivitetsgradOgUnntak>()
                 val oppgave =
                     inTransaction {
-                        aktivitetspliktService.upsertAktivtetsgradOgUnntak(
+                        aktivitetspliktService.upsertAktivtetsgradOgUnntakForOppgave(
                             aktivitetsgradOgUnntak = aktivitetsgradOgUnntak,
                             oppgaveId = oppgaveId,
                             sakId = sakId,

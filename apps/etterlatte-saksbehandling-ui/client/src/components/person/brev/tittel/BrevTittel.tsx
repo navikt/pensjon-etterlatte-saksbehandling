@@ -32,7 +32,7 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres, manuel
               Tittel oppdatert!
             </Alert>
           )}
-          {tittel !== nyTittel && manueltBrev && (
+          {tittel === nyTittel && manueltBrev && (
             <Alert variant="warning" size="small">
               Språk er ikke bokmål, så dobbeltsjekk tittelen
             </Alert>

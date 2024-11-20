@@ -287,8 +287,6 @@ class AktivitetspliktService(
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 
-        val behandlingId = UUID.fromString(oppgave.referanse)
-
         sjekkOmAktivitetsgradErGyldig(aktivitetsgradOgUnntak.aktivitetsgrad)
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
 

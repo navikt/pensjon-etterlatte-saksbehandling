@@ -74,7 +74,7 @@ class SakLesDao(
                             WHERE k.sak_id=s.id 
                             AND k.kjoering='$kjoering' 
                             AND k.status = '${KjoeringStatus.FEILA.name}'
-                            AND k.tidspunkt > (SELECT MAX(o.tidspunkt) FROM omregningskjoering o WHERE o.sak_id=k.sak_id AND o.kjoering=k.kjoering AND o.status != '${KjoeringStatus.FEILA.name}')
+                            AND k.tidspunkt >= (SELECT MAX(o.tidspunkt) FROM omregningskjoering o WHERE o.sak_id=k.sak_id AND o.kjoering=k.kjoering)
                     )
                     )
                     AND EXISTS(SELECT 1 FROM behandling b WHERE b.sak_id= s.id)

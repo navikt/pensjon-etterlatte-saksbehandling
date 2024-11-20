@@ -61,7 +61,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
         val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
         val aktivitetsgrad =
-            LagreAktivitetspliktAktivitetsgradMedUnntak(
+            LagreAktivitetspliktAktivitetsgrad(
                 aktivitetsgrad = AKTIVITET_OVER_50,
                 beskrivelse = "Beskrivelse",
             )
@@ -89,7 +89,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
         val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
         val aktivitetsgrad =
-            LagreAktivitetspliktAktivitetsgradMedUnntak(
+            LagreAktivitetspliktAktivitetsgrad(
                 aktivitetsgrad = AKTIVITET_UNDER_50,
                 beskrivelse = "Beskrivelse",
                 vurdertFra12Mnd = false,
@@ -132,7 +132,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
         val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
         val aktivitetsgrad =
-            LagreAktivitetspliktAktivitetsgradMedUnntak(
+            LagreAktivitetspliktAktivitetsgrad(
                 aktivitetsgrad = AKTIVITET_OVER_50,
                 beskrivelse = "Beskrivelse",
                 skjoennsmessigVurdering = AktivitetspliktSkjoennsmessigVurdering.JA,
@@ -162,7 +162,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
         val kilde2 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         val kilde3 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now().minus(3, ChronoUnit.DAYS))
         val aktivitetsgrad =
-            LagreAktivitetspliktAktivitetsgradMedUnntak(
+            LagreAktivitetspliktAktivitetsgrad(
                 aktivitetsgrad = AKTIVITET_OVER_50,
                 beskrivelse = "Beskrivelse",
                 fom = LocalDate.of(2024, 4, 1),
@@ -263,7 +263,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
             )
         behandlingDao.opprettBehandling(opprettBehandling)
         val aktivitetsgrad =
-            LagreAktivitetspliktAktivitetsgradMedUnntak(
+            LagreAktivitetspliktAktivitetsgrad(
                 aktivitetsgrad = AKTIVITET_OVER_50,
                 beskrivelse = "Beskrivelse",
             )
@@ -295,7 +295,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
             )
         behandlingDao.opprettBehandling(opprettBehandling)
         val aktivitetsgrad =
-            LagreAktivitetspliktAktivitetsgradMedUnntak(
+            LagreAktivitetspliktAktivitetsgrad(
                 aktivitetsgrad = AKTIVITET_OVER_50,
                 beskrivelse = "Beskrivelse",
                 skjoennsmessigVurdering = AktivitetspliktSkjoennsmessigVurdering.NEI,
@@ -331,7 +331,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 )
             behandlingDao.opprettBehandling(opprettBehandling)
             val aktivitetsgrad =
-                LagreAktivitetspliktAktivitetsgradMedUnntak(
+                LagreAktivitetspliktAktivitetsgrad(
                     aktivitetsgrad = AKTIVITET_OVER_50,
                     beskrivelse = "Beskrivelse",
                 )
@@ -341,7 +341,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
             val aktivitet = dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single()
 
             val aktivitetsgradMedId =
-                LagreAktivitetspliktAktivitetsgradMedUnntak(
+                LagreAktivitetspliktAktivitetsgrad(
                     id = aktivitet.id,
                     aktivitetsgrad = AKTIVITET_100,
                     beskrivelse = "Beskrivelse er oppdatert",
@@ -371,7 +371,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 )
             behandlingDao.opprettBehandling(opprettBehandling)
             val aktivitetsgrad =
-                LagreAktivitetspliktAktivitetsgradMedUnntak(
+                LagreAktivitetspliktAktivitetsgrad(
                     aktivitetsgrad = AKTIVITET_UNDER_50,
                     beskrivelse = "Beskrivelse",
                 )
@@ -381,7 +381,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
             val aktivitet = dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single()
 
             val aktivitetsgradMedId =
-                LagreAktivitetspliktAktivitetsgradMedUnntak(
+                LagreAktivitetspliktAktivitetsgrad(
                     id = aktivitet.id,
                     aktivitetsgrad = AKTIVITET_100,
                     beskrivelse = "Beskrivelse er oppdatert",
@@ -413,7 +413,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 sakId = sak.id,
             )
         private val aktivitetsgrad =
-            LagreAktivitetspliktAktivitetsgradMedUnntak(
+            LagreAktivitetspliktAktivitetsgrad(
                 aktivitetsgrad = AKTIVITET_OVER_50,
                 beskrivelse = "Beskrivelse",
             )
@@ -456,7 +456,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
         private val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
 
         val lagreAktivitetsgrad =
-            LagreAktivitetspliktAktivitetsgradMedUnntak(
+            LagreAktivitetspliktAktivitetsgrad(
                 aktivitetsgrad = AKTIVITET_OVER_50,
                 beskrivelse = "Beskrivelse",
             )

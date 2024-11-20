@@ -12,7 +12,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgradMedUnntak
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradOgUnntak
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.brev.model.BrevID
@@ -301,7 +302,7 @@ internal fun Route.aktivitetspliktRoutes(
             post {
                 kunSkrivetilgang {
                     logger.info("Oppretter aktivitetsgrad for sakId=$sakId og oppgaveId=$oppgaveId")
-                    val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgradMedUnntak>()
+                    val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>()
                     val aktivitetspliktVurdering =
                         inTransaction {
                             aktivitetspliktService.upsertAktivitetsgradForOppgave(
@@ -388,9 +389,25 @@ internal fun Route.aktivitetspliktRoutes(
         post("/aktivitetsgrad") {
             kunSkrivetilgang {
                 logger.info("Oppretter aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
-                val aktivitetsgradOgUnntak = call.receive<LagreAktivitetspliktAktivitetsgradMedUnntak>()
+                val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>()
                 inTransaction {
                     aktivitetspliktService.upsertAktivitetsgradForBehandling(
+                        aktivitetsgrad = aktivitetsgrad,
+                        behandlingId = behandlingId,
+                        sakId = sakId,
+                        brukerTokenInfo = brukerTokenInfo,
+                    )
+                }
+                call.respond(HttpStatusCode.Created)
+            }
+        }
+
+        post("/aktivitetsgrad-og-unntak") {
+            kunSkrivetilgang {
+                logger.info("Oppretter aktivitetsgrad og unntak for sakId=$sakId og behandlingId=$behandlingId")
+                val aktivitetsgradOgUnntak = call.receive<AktivitetspliktAktivitetsgradOgUnntak>()
+                inTransaction {
+                    aktivitetspliktService.upsertAktivtetsGradOgUnntak(
                         aktivitetsgradOgUnntak = aktivitetsgradOgUnntak,
                         behandlingId = behandlingId,
                         sakId = sakId,

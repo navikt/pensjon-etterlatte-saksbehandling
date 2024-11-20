@@ -18,7 +18,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAkt
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgradMedUnntak
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -204,7 +204,7 @@ class AktivitetspliktServiceTest {
         @Test
         fun `Skal opprette en ny aktivitetsgrad`() {
             val aktivitetsgrad =
-                LagreAktivitetspliktAktivitetsgradMedUnntak(
+                LagreAktivitetspliktAktivitetsgrad(
                     aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
                     beskrivelse = "Beskrivelse",
                 )
@@ -380,7 +380,7 @@ class AktivitetspliktServiceTest {
             val aktivitetsgradId = UUID.randomUUID()
 
             val aktivitetsgrad =
-                LagreAktivitetspliktAktivitetsgradMedUnntak(
+                LagreAktivitetspliktAktivitetsgrad(
                     aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
                     beskrivelse = "Beskrivelse",
                 )

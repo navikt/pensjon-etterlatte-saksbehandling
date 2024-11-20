@@ -67,6 +67,20 @@ export const opprettAktivitetspliktAktivitetsgrad = async (args: {
     ...args.request,
   })
 
+export interface AktvitetspliktAktivitetsgradOgUnntak {
+  aktivitetsgrad: IOpprettAktivitetspliktAktivitetsgrad
+  unntak?: IOpprettAktivitetspliktUnntak
+}
+
+export const opprettAktivitetspliktAktivitetsgradOgUnntak = async (args: {
+  sakId: number
+  oppgaveId: string
+  request: AktvitetspliktAktivitetsgradOgUnntak
+}): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
+  apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/aktivitetsgrad-og-unntak`, {
+    ...args.request,
+  })
+
 export const slettAktivitetspliktVurdering = async (args: {
   sakId: number
   oppgaveId: string

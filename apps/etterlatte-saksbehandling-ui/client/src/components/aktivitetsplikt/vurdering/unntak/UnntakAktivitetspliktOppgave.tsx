@@ -4,7 +4,7 @@ import {
   IAktivitetspliktVurderingNyDto,
   tekstAktivitetspliktUnntakType,
 } from '~shared/types/Aktivitetsplikt'
-import { Control, useForm } from 'react-hook-form'
+import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import { Box, Button, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { FloppydiskIcon } from '@navikt/aksel-icons'
@@ -15,7 +15,6 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { startOfMonth } from 'date-fns'
-import { UseFormRegisterReturn } from 'react-hook-form/dist/types/form'
 
 export interface IOpprettAktivitetspliktUnntak {
   id: string | undefined
@@ -36,9 +35,10 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
 }) {
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
 
-  const { control, register, handleSubmit } = useForm<Partial<IOpprettAktivitetspliktUnntak>>({
+  const methods = useForm<IOpprettAktivitetspliktUnntak>({
     defaultValues: props.unntak ?? { fom: startOfMonth(new Date()).toISOString() },
   })
+  const { handleSubmit } = methods
   const [lagreUnntakStatus, lagreUnntak] = useApiCall(opprettAktivitetspliktUnntak)
 
   const sendInn = (formdata: Partial<IOpprettAktivitetspliktUnntak>) => {
@@ -60,44 +60,45 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
       )
     }
   }
-  const registerOverride = (name: string, obj?: any): UseFormRegisterReturn => {
-    // @ts-expect-error wrgwefwe
-    return register(name, obj)
-  }
+
   return (
-    <form onSubmit={handleSubmit(sendInn)}>
-      <UnntakAktivitetspliktOppgave register={registerOverride} control={control} />
-      <HStack gap="4">
-        {!!props.onAvbryt && (
-          <Button variant="secondary" onClick={props.onAvbryt}>
-            Avbryt
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(sendInn)}>
+        <UnntakAktivitetspliktOppgave />
+        <HStack gap="4">
+          {!!props.onAvbryt && (
+            <Button variant="secondary" onClick={props.onAvbryt}>
+              Avbryt
+            </Button>
+          )}
+          <Button variant="primary" type="submit" icon={<FloppydiskIcon />} loading={isPending(lagreUnntakStatus)}>
+            Lagre
           </Button>
+        </HStack>
+        {isFailure(lagreUnntakStatus) && (
+          <ApiErrorAlert>Kunne ikke lagre unntak: {lagreUnntakStatus.error.detail}</ApiErrorAlert>
         )}
-        <Button variant="primary" type="submit" icon={<FloppydiskIcon />} loading={isPending(lagreUnntakStatus)}>
-          Lagre
-        </Button>
-      </HStack>
-      {isFailure(lagreUnntakStatus) && (
-        <ApiErrorAlert>Kunne ikke lagre unntak: {lagreUnntakStatus.error.detail}</ApiErrorAlert>
-      )}
-    </form>
+      </form>
+    </FormProvider>
   )
 }
 
-export function UnntakAktivitetspliktOppgave(props: {
-  register: (path: string, obj?: any) => UseFormRegisterReturn
-  control: Control<any>
-}) {
-  const { control, register } = props
+export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?: string }) {
+  const { register, control } = useFormContext()
   return (
     <Box maxWidth="40rem">
       <VStack gap="4">
         <HStack gap="4">
-          <ControlledDatoVelger name="fom" label="Unntak fra og med" control={control} />
-          <ControlledDatoVelger name="tom" label="Unntak til og med" required={false} control={control} />
+          <ControlledDatoVelger name={`${formPrefix}fom`} label="Unntak fra og med" control={control} />
+          <ControlledDatoVelger
+            name={`${formPrefix}tom`}
+            label="Unntak til og med"
+            required={false}
+            control={control}
+          />
         </HStack>
         <Select
-          {...register('unntak', {
+          {...register(`${formPrefix}unntak`, {
             required: {
               value: true,
               message: 'Du må velge type unntak.',
@@ -122,7 +123,15 @@ export function UnntakAktivitetspliktOppgave(props: {
           </option>
         </Select>
 
-        <Textarea {...register('beskrivelse')} label="Beskrivelse" />
+        <Textarea
+          {...register(`${formPrefix}beskrivelse`, {
+            required: {
+              value: true,
+              message: 'Du må fylle ut en beskrivelse',
+            },
+          })}
+          label="Beskrivelse"
+        />
       </VStack>
     </Box>
   )

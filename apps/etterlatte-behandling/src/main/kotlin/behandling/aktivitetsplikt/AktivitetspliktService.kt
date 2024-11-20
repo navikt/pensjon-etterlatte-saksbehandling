@@ -315,8 +315,7 @@ class AktivitetspliktService(
             oppgaveId = oppgaveId,
         )
 
-        // TODO: er denne feil?
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
         return hentVurderingForOppgave(oppgaveId)
     }
 

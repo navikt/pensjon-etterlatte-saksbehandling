@@ -99,6 +99,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         behandlingId,
                     ),
                 )
+            coEvery { vedtakService.hentVedtakForBehandling(any(), any()) } returns null
             coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
                 listOf(lagOppgave(behandlingId, Status.ATTESTERING))
             coEvery { behandlingKlient.tildelSaksbehandler(any(), any()) } returns true
@@ -163,6 +164,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             testApplication {
                 val opprettetVedtak = vedtak()
                 val behandlingId = UUID.randomUUID()
+                coEvery { vedtakService.hentVedtakForBehandling(any(), any()) } returns null
                 coEvery { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } returns
                     opprettetVedtak
                 coEvery { vedtakService.fattVedtak(behandlingId, any(), any()) } returns
@@ -238,6 +240,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             testApplication {
                 val opprettetVedtak = vedtak()
                 val behandlingId = UUID.randomUUID()
+                coEvery { vedtakService.hentVedtakForBehandling(any(), any()) } returns null
                 coEvery { runBlocking { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } } returns
                     opprettetVedtak
                 coEvery { runBlocking { vedtakService.fattVedtak(behandlingId, any(), any()) } } returns
@@ -289,6 +292,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         @Test
         fun `Fortsett etter pause skal attestere vedtak`() {
             testApplication {
+                coEvery { vedtakService.hentVedtakForBehandling(any(), any()) } returns null
                 val opprettetVedtak = vedtak()
                 val behandlingId = UUID.randomUUID()
                 coEvery {

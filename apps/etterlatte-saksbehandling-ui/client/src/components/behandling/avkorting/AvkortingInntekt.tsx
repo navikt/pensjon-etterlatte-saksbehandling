@@ -81,19 +81,25 @@ export const AvkortingInntekt = ({
                   <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
                   <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
                   <Table.HeaderCell>
-                    Forventet inntekt totalt
-                    <HelpText title="Hva innebærer forventet inntekt totalt">
-                      Forventet inntekt totalt er registrert inntekt Norge pluss inntekt utland minus eventuelt fratrekk
-                      for inn-år. Beløpet vil automatisk avrundes ned til nærmeste tusen når avkorting beregnes.
-                    </HelpText>
+                    <HStack gap="2" align="center" wrap={false}>
+                      Forventet inntekt totalt
+                      <HelpText title="Hva innebærer forventet inntekt totalt">
+                        Forventet inntekt totalt er registrert inntekt Norge pluss inntekt utland minus eventuelt
+                        fratrekk for inn-år. Beløpet vil automatisk avrundes ned til nærmeste tusen når avkorting
+                        beregnes.
+                      </HelpText>
+                    </HStack>
                   </Table.HeaderCell>
                   <Table.HeaderCell>
-                    Innvilgede måneder
-                    <HelpText title="Hva betyr innvilgede måneder">
-                      Her vises antall måneder med innvilget stønad i gjeldende inntektsår. Registrert forventet
-                      inntekt, med eventuelt fratrekk for inntekt opptjent før/etter innvilgelse, blir fordelt på de
-                      innvilgede månedene. Antallet vil ikke endres selv om man tar en inntektsendring i løpet av året.
-                    </HelpText>
+                    <HStack gap="2" align="center" wrap={false}>
+                      Innvilgede måneder
+                      <HelpText title="Hva betyr innvilgede måneder">
+                        Her vises antall måneder med innvilget stønad i gjeldende inntektsår. Registrert forventet
+                        inntekt, med eventuelt fratrekk for inntekt opptjent før/etter innvilgelse, blir fordelt på de
+                        innvilgede månedene. Antallet vil ikke endres selv om man tar en inntektsendring i løpet av
+                        året.
+                      </HelpText>
+                    </HStack>
                   </Table.HeaderCell>
                   <Table.HeaderCell>Periode</Table.HeaderCell>
                   <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
@@ -111,24 +117,28 @@ export const AvkortingInntekt = ({
                   return (
                     <Table.Row key={index}>
                       <Table.DataCell key="Inntekt">
-                        {NOK(forventetInntekt)}
-                        <HelpText title="Se hva forventet inntekt består av">
-                          Forventet inntekt beregnes utfra forventet årsinntekt med fratrekk for måneder før
-                          innvilgelse.
-                          <br />
-                          Forventet inntekt Norge = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
-                          {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}).
-                        </HelpText>
+                        <HStack gap="2">
+                          <BodyShort>{NOK(forventetInntekt)}</BodyShort>
+                          <HelpText title="Se hva forventet inntekt består av">
+                            Forventet inntekt beregnes utfra forventet årsinntekt med fratrekk for måneder før
+                            innvilgelse.
+                            <br />
+                            Forventet inntekt Norge = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
+                            {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}).
+                          </HelpText>
+                        </HStack>
                       </Table.DataCell>
                       <Table.DataCell key="InntektUtland">
-                        {NOK(forventetInntektUtland)}
-                        <HelpText title="Se hva forventet inntekt består av">
-                          Forventet inntekt utland beregnes utfra inntekt utland med fratrekk for måneder før
-                          innvilgelse.
-                          <br />
-                          Forventet inntekt utland = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
-                          {` ${NOK(inntektutland)} - ${NOK(fratrekkUtland)} = ${NOK(forventetInntektUtland)}`}).
-                        </HelpText>
+                        <HStack gap="2">
+                          <BodyShort>{NOK(forventetInntektUtland)}</BodyShort>
+                          <HelpText title="Se hva forventet inntekt består av">
+                            Forventet inntekt utland beregnes utfra inntekt utland med fratrekk for måneder før
+                            innvilgelse.
+                            <br />
+                            Forventet inntekt utland = forventet årsinntekt - inntekt i måneder før innvilgelse måneder
+                            ({` ${NOK(inntektutland)} - ${NOK(fratrekkUtland)} = ${NOK(forventetInntektUtland)}`}).
+                          </HelpText>
+                        </HStack>
                       </Table.DataCell>
                       <Table.DataCell key="InntektTotalt">
                         {NOK(forventetInntekt + forventetInntektUtland)}

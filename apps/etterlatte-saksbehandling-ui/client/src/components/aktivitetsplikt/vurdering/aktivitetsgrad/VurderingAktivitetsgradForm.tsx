@@ -33,7 +33,7 @@ export function maanederForVurdering(typeVurdering: AktivitetspliktOppgaveVurder
     return 12
   }
 }
-//TODO: formet her kunne kanskje vært kombinert med den som legger til  ny med unntak med formprovider + children men usikker på om det er verdt det
+
 export function VurderingAktivitetsgradForm(props: {
   aktivitet: IAktivitetspliktAktivitetsgrad
   onAvbryt: () => void

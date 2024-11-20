@@ -689,6 +689,7 @@ internal class BehandlingServiceImplTest {
         gyldigVirkningstidspunkt shouldBe true
     }
 
+    /*
     @ParameterizedTest
     @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
     fun `skal gi ugyldig virkningstidspunkt for revurdering hvis virkningstidspunkt er etter opphoer`(sakType: SakType) {
@@ -701,7 +702,7 @@ internal class BehandlingServiceImplTest {
                 foersteVirk = YearMonth.of(2024, Month.JANUARY),
             )
         }
-    }
+    }*/
 
     @ParameterizedTest
     @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)

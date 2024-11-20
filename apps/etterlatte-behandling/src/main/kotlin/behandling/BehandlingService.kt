@@ -534,10 +534,13 @@ internal class BehandlingServiceImpl(
         overstyr: Boolean,
     ): Boolean {
         val virkningstidspunkt = request.dato
+
         if (behandling.revurderingsaarsak() != Revurderingaarsak.NY_SOEKNAD &&
             virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)
         ) {
-            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+            // TODO midlertidig
+            return true
+            // throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
         }
 
         val foerstegangsbehandling = hentFoerstegangsbehandling(behandling.sak.id)

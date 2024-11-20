@@ -142,7 +142,9 @@ internal class AutomatiskBehandlingRoutesKtTest {
             assertEquals(respons.vedtak.id, opprettetVedtak.id)
             assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseHendelseType.FATTET)
             assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseHendelseType.ATTESTERT)
-
+            coVerify(atMost = 1) {
+                vedtakService.hentVedtakForBehandling(any(), any())
+            }
             coVerify(exactly = 1) {
                 vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
                 behandlingKlient.hentOppgaverForSak(sakId1, any())
@@ -221,8 +223,8 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 assertEquals(respons.vedtak.id, opprettetVedtak.id)
                 assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseHendelseType.FATTET)
                 assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseHendelseType.ATTESTERT)
-
                 coVerify(exactly = 1) {
+                    vedtakService.hentVedtakForBehandling(behandlingId, any())
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
                     behandlingKlient.hentOppgaverForSak(sakId1, any())
                     vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
@@ -276,7 +278,9 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         }
 
                 assertEquals(respons.vedtak.id, opprettetVedtak.id)
-
+                coVerify(atMost = 1) {
+                    vedtakService.hentVedtakForBehandling(any(), any())
+                }
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
                     behandlingKlient.hentOppgaverForSak(sakId1, any())
@@ -292,7 +296,6 @@ internal class AutomatiskBehandlingRoutesKtTest {
         @Test
         fun `Fortsett etter pause skal attestere vedtak`() {
             testApplication {
-                coEvery { vedtakService.hentVedtakForBehandling(any(), any()) } returns null
                 val opprettetVedtak = vedtak()
                 val behandlingId = UUID.randomUUID()
                 coEvery {
@@ -334,7 +337,6 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         }
 
                 assertEquals(respons.vedtak.id, opprettetVedtak.id)
-
                 coVerify(exactly = 1) {
                     vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
                 }

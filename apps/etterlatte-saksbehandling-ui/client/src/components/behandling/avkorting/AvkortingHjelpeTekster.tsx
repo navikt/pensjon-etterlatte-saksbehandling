@@ -29,7 +29,7 @@ export const InnvilgaMaanederHeaderHjelpeTekst = () => {
   const sendAmplitudeKlikkEvent = () => {
     if (!aapen) {
       setAapen(true)
-      trackClick('avkorting forventet inntekt hjelpetekst klikk')
+      trackClick('avkorting innvilga måneder hjelpetekst klikk')
     } else {
       setAapen(false)
     }

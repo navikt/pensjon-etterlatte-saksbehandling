@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVKORTET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
@@ -963,6 +964,7 @@ class TrygdetidServiceImpl(
                 listOf(
                     IVERKSATT,
                     BEREGNET,
+                    AVKORTET,
                     FATTET_VEDTAK,
                     ATTESTERT,
                     TIL_SAMORDNING,

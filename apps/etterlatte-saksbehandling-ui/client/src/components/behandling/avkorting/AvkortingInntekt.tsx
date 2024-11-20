@@ -12,6 +12,7 @@ import { AvkortingInntektForm } from '~components/behandling/avkorting/Avkorting
 import { IAvkortingGrunnlagFrontend } from '~shared/types/IAvkorting'
 import { ArrowCirclepathIcon, HeadCloudIcon, PencilIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { ForventetInntektHjelpeTekst } from '~components/behandling/avkorting/AvkortingHjelpeTekster'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -119,13 +120,11 @@ export const AvkortingInntekt = ({
                       <Table.DataCell key="Inntekt">
                         <HStack gap="2">
                           <BodyShort>{NOK(forventetInntekt)}</BodyShort>
-                          <HelpText title="Se hva forventet inntekt består av">
-                            Forventet inntekt beregnes utfra forventet årsinntekt med fratrekk for måneder før
-                            innvilgelse.
-                            <br />
-                            Forventet inntekt Norge = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
-                            {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}).
-                          </HelpText>
+                          <ForventetInntektHjelpeTekst
+                            aarsinntekt={aarsinntekt}
+                            fratrekkInnAar={fratrekkInnAar}
+                            forventetInntekt={forventetInntekt}
+                          />
                         </HStack>
                       </Table.DataCell>
                       <Table.DataCell key="InntektUtland">

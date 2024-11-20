@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -54,6 +55,8 @@ interface PdlTjenesterKlient : Pingable {
     ): GeografiskTilknytning
 
     suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator?
+
+    suspend fun hentPdlFolkeregisterIdenter(ident: String): PdlFolkeregisterIdentListe
 
     suspend fun hentAdressebeskyttelseForPerson(hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest): AdressebeskyttelseGradering
 
@@ -161,6 +164,26 @@ class PdlTjenesterKlientImpl(
                 is RetryResult.Success -> result.content
                 is RetryResult.Failure -> {
                     logger.error("Feil ved henting av ident fra PDL for fnr=${ident.maskerFnr()}")
+                    throw result.samlaExceptions()
+                }
+            }
+        }
+    }
+
+    override suspend fun hentPdlFolkeregisterIdenter(ident: String): PdlFolkeregisterIdentListe {
+        logger.info("Henter folkeregisteridenter fra PDL for fnr=${ident.maskerFnr()}")
+
+        return retry<PdlFolkeregisterIdentListe> {
+            client
+                .post("$url/folkeregisteridenter") {
+                    contentType(ContentType.Application.Json)
+                    setBody(HentPdlIdentRequest(PersonIdent(ident)))
+                }.body()
+        }.let { result ->
+            when (result) {
+                is RetryResult.Success -> result.content
+                is RetryResult.Failure -> {
+                    logger.error("Feil ved henting av folkeregisteridenter fra PDL for fnr=${ident.maskerFnr()}")
                     throw result.samlaExceptions()
                 }
             }

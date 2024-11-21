@@ -128,7 +128,7 @@ class AarligInntektsjusteringJobbServiceTest {
             }
         coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
             mockk {
-                every { innsender } returns
+                every { soeker } returns
                     mockk {
                         every { opplysning } returns personGjenny
                     }
@@ -606,7 +606,7 @@ class AarligInntektsjusteringJobbServiceTest {
 
         coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
             mockk {
-                every { innsender } returns
+                every { soeker } returns
                     mockk {
                         every { opplysning } returns
                             personGjenny.copy(

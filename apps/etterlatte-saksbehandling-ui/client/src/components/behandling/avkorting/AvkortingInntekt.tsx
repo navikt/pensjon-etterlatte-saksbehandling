@@ -1,11 +1,10 @@
-import { Alert, BodyShort, Button, Heading, HelpText, HStack, Table, Tooltip, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, HStack, Table, Tooltip, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { NOK } from '~utils/formatering/formatering'
 import { formaterDato } from '~utils/formatering/dato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
-import { ToolTip } from '~components/behandling/felles/ToolTip'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { lastDayOfMonth } from 'date-fns'
@@ -13,6 +12,12 @@ import { AvkortingInntektForm } from '~components/behandling/avkorting/Avkorting
 import { IAvkortingGrunnlagFrontend } from '~shared/types/IAvkorting'
 import { ArrowCirclepathIcon, HeadCloudIcon, PencilIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import {
+  ForventetInntektHeaderHjelpeTekst,
+  ForventetInntektHjelpeTekst,
+  ForventetInntektUtlandHjelpeTekst,
+  InnvilgaMaanederHeaderHjelpeTekst,
+} from '~components/behandling/avkorting/AvkortingHjelpeTekster'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -82,19 +87,16 @@ export const AvkortingInntekt = ({
                   <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
                   <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
                   <Table.HeaderCell>
-                    Forventet inntekt totalt
-                    <HelpText title="Hva innebærer forventet inntekt totalt">
-                      Forventet inntekt totalt er registrert inntekt Norge pluss inntekt utland minus eventuelt fratrekk
-                      for inn-år. Beløpet vil automatisk avrundes ned til nærmeste tusen når avkorting beregnes.
-                    </HelpText>
+                    <HStack gap="2" align="center" wrap={false}>
+                      Forventet inntekt totalt
+                      <ForventetInntektHeaderHjelpeTekst />
+                    </HStack>
                   </Table.HeaderCell>
                   <Table.HeaderCell>
-                    Innvilgede måneder
-                    <HelpText title="Hva betyr innvilgede måneder">
-                      Her vises antall måneder med innvilget stønad i gjeldende inntektsår. Registrert forventet
-                      inntekt, med eventuelt fratrekk for inntekt opptjent før/etter innvilgelse, blir fordelt på de
-                      innvilgede månedene. Antallet vil ikke endres selv om man tar en inntektsendring i løpet av året.
-                    </HelpText>
+                    <HStack gap="2" align="center" wrap={false}>
+                      Innvilgede måneder
+                      <InnvilgaMaanederHeaderHjelpeTekst />
+                    </HStack>
                   </Table.HeaderCell>
                   <Table.HeaderCell>Periode</Table.HeaderCell>
                   <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
@@ -106,30 +108,30 @@ export const AvkortingInntekt = ({
                   const aarsinntekt = avkortingGrunnlag.inntektTom ?? 0
                   const fratrekkInnAar = avkortingGrunnlag.fratrekkInnAar ?? 0
                   const forventetInntekt = aarsinntekt - fratrekkInnAar
-                  const inntektutland = avkortingGrunnlag.inntektUtlandTom ?? 0
+                  const inntektUtland = avkortingGrunnlag.inntektUtlandTom ?? 0
                   const fratrekkUtland = avkortingGrunnlag.fratrekkInnAarUtland ?? 0
-                  const forventetInntektUtland = inntektutland - fratrekkUtland
+                  const forventetInntektUtland = inntektUtland - fratrekkUtland
                   return (
                     <Table.Row key={index}>
                       <Table.DataCell key="Inntekt">
-                        {NOK(forventetInntekt)}
-                        <ToolTip title="Se hva forventet inntekt består av">
-                          Forventet inntekt beregnes utfra forventet årsinntekt med fratrekk for måneder før
-                          innvilgelse.
-                          <br />
-                          Forventet inntekt Norge = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
-                          {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}).
-                        </ToolTip>
+                        <HStack gap="2">
+                          <BodyShort>{NOK(forventetInntekt)}</BodyShort>
+                          <ForventetInntektHjelpeTekst
+                            aarsinntekt={aarsinntekt}
+                            fratrekkInnAar={fratrekkInnAar}
+                            forventetInntekt={forventetInntekt}
+                          />
+                        </HStack>
                       </Table.DataCell>
                       <Table.DataCell key="InntektUtland">
-                        {NOK(forventetInntektUtland)}
-                        <ToolTip title="Se hva forventet inntekt består av">
-                          Forventet inntekt utland beregnes utfra inntekt utland med fratrekk for måneder før
-                          innvilgelse.
-                          <br />
-                          Forventet inntekt utland = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
-                          {` ${NOK(inntektutland)} - ${NOK(fratrekkUtland)} = ${NOK(forventetInntektUtland)}`}).
-                        </ToolTip>
+                        <HStack gap="2">
+                          <BodyShort>{NOK(forventetInntektUtland)}</BodyShort>
+                          <ForventetInntektUtlandHjelpeTekst
+                            inntektUtland={inntektUtland}
+                            fratrekkUtland={fratrekkUtland}
+                            forventetInntektUtland={forventetInntektUtland}
+                          />
+                        </HStack>
                       </Table.DataCell>
                       <Table.DataCell key="InntektTotalt">
                         {NOK(forventetInntekt + forventetInntektUtland)}

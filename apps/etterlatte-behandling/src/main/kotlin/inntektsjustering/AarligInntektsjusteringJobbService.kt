@@ -76,10 +76,6 @@ class AarligInntektsjusteringJobbService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    companion object {
-        const val BEGRUNNELSE_AUTOMATISK_JOBB = "Årlig inntektsjustering." // TODO må avklares med fag
-    }
-
     fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest) {
         request.saker.forEach { sakId ->
             startEnkeltSak(request.kjoering, request.loependeFom, sakId)
@@ -101,8 +97,9 @@ class AarligInntektsjusteringJobbService(
             )
         }
 
+        val begrunnelse = oppgaveService.hentOppgave(oppgaveId).merknad
         val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
-        val revurdering = nyManuellRevurdering(sakId, hentForrigeBehandling(sakId), loependeFom)
+        val revurdering = nyManuellRevurdering(sakId, hentForrigeBehandling(sakId), loependeFom, begrunnelse!!)
         oppgaveService.ferdigstillOppgave(oppgaveId, saksbehandler)
         return revurdering
     }
@@ -283,7 +280,7 @@ class AarligInntektsjusteringJobbService(
             sakId = sakId,
             kilde = OppgaveKilde.BEHANDLING,
             type = OppgaveType.AARLIG_INNTEKTSJUSTERING,
-            merknad = "Kan ikke behandles automatisk. Årsak: ${aarsakTilManuell.name}",
+            merknad = genererManuellBegrunnelseTekst(aarsakTilManuell),
         )
         oppdaterKjoering(
             kjoering,
@@ -309,7 +306,7 @@ class AarligInntektsjusteringJobbService(
             )
             return
         }
-        nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
+        nyManuellRevurdering(sakId, forrigeBehandling, loependeFom, genererManuellBegrunnelseTekst(aarsakTilManuell))
         oppdaterKjoering(
             kjoering,
             KjoeringStatus.TIL_MANUELL,
@@ -322,6 +319,7 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
         forrigeBehandling: Behandling,
         loependeFom: YearMonth,
+        begrunnelse: String,
     ): Revurdering {
         val persongalleri =
             runBlocking {
@@ -338,10 +336,10 @@ class AarligInntektsjusteringJobbService(
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
-                    virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
+                    virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(begrunnelse),
                     utlandstilknytning = forrigeBehandling.utlandstilknytning,
                     boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-                    begrunnelse = BEGRUNNELSE_AUTOMATISK_JOBB,
+                    begrunnelse = begrunnelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
                     opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
@@ -401,7 +399,7 @@ class AarligInntektsjusteringJobbService(
         )
     }
 
-    fun hentForrigeBehandling(sakId: SakId) =
+    private fun hentForrigeBehandling(sakId: SakId) =
         behandlingService.hentSisteIverksatte(sakId)
             ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 
@@ -441,6 +439,9 @@ class AarligInntektsjusteringJobbService(
         }
         return vergerEn == vergerTo
     }
+
+    private fun genererManuellBegrunnelseTekst(aarsakTilManuell: AarligInntektsjusteringAarsakManuell): String =
+        "Kan ikke behandles automatisk. Årsak: ${aarsakTilManuell.name}"
 }
 
 enum class AarligInntektsjusteringAarsakManuell {

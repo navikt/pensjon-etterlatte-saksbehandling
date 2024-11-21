@@ -56,7 +56,12 @@ const FolkeregisterSamsvarVisning = ({ samsvar }: { samsvar: Folkeregisteridenti
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Label>{samsvar.samsvar ? 'Er samsvar' : 'Er ikke samsvar'}</Label>
+        <Label>Ny folkeregisteridentifikator (PDL)</Label>
+        <KortTekst size="small">{samsvar.fraPdl}</KortTekst>
+      </div>
+      <div>
+        <Label>Eksisterende folkeregisteridentifikator (grunnlag)</Label>
+        <KortTekst size="small">{samsvar.fraGrunnlag}</KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
   )

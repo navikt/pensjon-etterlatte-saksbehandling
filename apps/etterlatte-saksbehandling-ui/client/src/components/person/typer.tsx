@@ -60,6 +60,8 @@ export enum GrunnlagsendringsType {
 export interface Folkeregisteridentifikatorsamsvar {
   type: 'FOLKEREGISTERIDENTIFIKATOR'
   samsvar: boolean
+  fraPdl?: string
+  fraGrunnlag?: string
 }
 
 export interface DoedsdatoSamsvar {

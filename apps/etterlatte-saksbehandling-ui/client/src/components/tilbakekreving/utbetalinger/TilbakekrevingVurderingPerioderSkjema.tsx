@@ -189,7 +189,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
                     <Table.DataCell key="skyld">
                       <Select
                         {...register(`values.${index}.ytelse.skyld`, {
-                          setValueAs: (value) => (value === '' ? null : value),
+                          setValueAs: (value) => (!!value ? value : null),
                         })}
                         label="Skyld"
                         hideLabel={true}
@@ -205,7 +205,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
                     <Table.DataCell key="resultat">
                       <Select
                         {...register(`values.${index}.ytelse.resultat`, {
-                          setValueAs: (value) => (value === '' ? null : value),
+                          setValueAs: (value) => (!!value ? value : null),
                         })}
                         label="Resultat"
                         hideLabel={true}

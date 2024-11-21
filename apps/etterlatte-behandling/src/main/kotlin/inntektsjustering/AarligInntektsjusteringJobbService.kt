@@ -424,7 +424,7 @@ class AarligInntektsjusteringJobbService(
                     sisteBehandlingId,
                     sak.sakType,
                     HardkodaSystembruker.omregning,
-                ).innsender ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
+                ).soeker ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
         }
 
     private fun manuellBehandlingSkruddPaa(): Boolean =

@@ -146,10 +146,7 @@ class GrunnlagsendringshendelseService(
 
     fun opprettFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse): List<Grunnlagsendringshendelse> =
         inTransaction {
-            opprettHendelseAvTypeForPerson(
-                hendelse.fnr,
-                GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR,
-            )
+            opprettHendelseForEndretFolkeregisterident(hendelse)
         }
 
     fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> =
@@ -210,7 +207,11 @@ class GrunnlagsendringshendelseService(
         }
 
         if (sakIder.isNotEmpty() &&
-            gradering in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)
+            gradering in
+            listOf(
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+            )
         ) {
             logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
         }
@@ -360,6 +361,24 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
+    private fun opprettHendelseForEndretFolkeregisterident(hendelse: Folkeregisteridentifikatorhendelse): List<Grunnlagsendringshendelse> {
+        val tidspunktForMottakAvHendelse = now().toLocalDatetimeUTC()
+
+        return runBlocking { sakService.finnSaker(hendelse.fnr) }
+            .map { sak ->
+                Grunnlagsendringshendelse(
+                    id = UUID.randomUUID(),
+                    sakId = sak.id,
+                    type = GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR,
+                    opprettet = tidspunktForMottakAvHendelse,
+                    hendelseGjelderRolle = Saksrolle.SOEKER,
+                    gjelderPerson = sak.ident,
+                ).also {
+                    verifiserOgHaandterHendelse(it, sak)
+                }
+            }
+    }
+
     private fun opprettHendelseAvTypeForSak(
         sakId: SakId,
         grunnlagendringType: GrunnlagsendringsType,
@@ -440,7 +459,10 @@ class GrunnlagsendringshendelseService(
                     "Hendelsen vises derfor til saksbehandler.",
             )
             grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                hendelse.copy(
+                    samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+                    status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                ),
             )
             opprettOppgave(hendelse)
         }
@@ -464,7 +486,10 @@ class GrunnlagsendringshendelseService(
     ) {
         logger.info("Forkaster grunnlagsendringshendelse med id ${hendelse.id}.")
         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-            hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.FORKASTET),
+            hendelse.copy(
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+                status = GrunnlagsendringStatus.FORKASTET,
+            ),
         )
     }
 

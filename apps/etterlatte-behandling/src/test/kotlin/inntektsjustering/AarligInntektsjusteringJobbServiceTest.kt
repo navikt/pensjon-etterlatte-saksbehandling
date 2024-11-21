@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -128,7 +129,7 @@ class AarligInntektsjusteringJobbServiceTest {
             }
         coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
             mockk {
-                every { innsender } returns
+                every { soeker } returns
                     mockk {
                         every { opplysning } returns personGjenny
                     }
@@ -193,7 +194,12 @@ class AarligInntektsjusteringJobbServiceTest {
     fun `skal opprette manuell inntektsjustering og slette oppgave`() {
         val oppgaveId = UUID.randomUUID()
         val sakId = SakId(123L)
+
+        val oppgave = mockk<OppgaveIntern>(relaxed = true)
+        every { oppgave.merknad } returns "merknad"
+
         coEvery { oppgaveService.ferdigstillOppgave(oppgaveId, any()) } returns mockk()
+        coEvery { oppgaveService.hentOppgave(oppgaveId) } returns oppgave
         val revurdering = service.opprettManuellInntektsjustering(sakId, oppgaveId, mockk())
         verify {
             revurderingService.opprettRevurdering(
@@ -216,6 +222,8 @@ class AarligInntektsjusteringJobbServiceTest {
                 opphoerFraOgMed = any(),
                 tidligereFamiliepleier = any(),
             )
+
+            oppgaveService.ferdigstillOppgave(oppgaveId, any())
         }
 
         revurdering shouldNotBe null
@@ -606,7 +614,7 @@ class AarligInntektsjusteringJobbServiceTest {
 
         coEvery { grunnlagService.hentPersonopplysninger(any(), any(), any()) } returns
             mockk {
-                every { innsender } returns
+                every { soeker } returns
                     mockk {
                         every { opplysning } returns
                             personGjenny.copy(

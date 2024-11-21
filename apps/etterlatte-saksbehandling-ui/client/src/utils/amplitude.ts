@@ -42,7 +42,6 @@ export const initAmplitude = () => {
   return amplitudeInstance
 }
 
-// Eksempelfunksjon for track av klikk
 export const trackClick = (name: string) => {
   if (!amplitudeInstance) {
     console.warn('Amplitude is not initialized. Ignoring')

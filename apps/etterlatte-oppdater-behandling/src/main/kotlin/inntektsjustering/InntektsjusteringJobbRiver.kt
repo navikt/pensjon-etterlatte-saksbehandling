@@ -57,7 +57,6 @@ internal class InntektsjusteringJobbRiver(
             logger = logger,
             antall = antall,
             finnSaker = { antallIDenneRunden ->
-                // TODO eksludere de som allerede er kjørt?
                 behandlingService.hentAlleSaker(
                     kjoering,
                     antallIDenneRunden,
@@ -68,13 +67,17 @@ internal class InntektsjusteringJobbRiver(
                 )
             },
             haandterSaker = { sakerSomSkalInformeres ->
-                logger.info("Starter årlig inntektsjustering $kjoering")
-                val request =
-                    AarligInntektsjusteringRequest(
-                        kjoering = kjoering,
-                        saker = sakerSomSkalInformeres.sakIdListe,
-                    )
-                behandlingService.startAarligInntektsjustering(request)
+                if (sakerSomSkalInformeres.sakIdListe.isEmpty()) {
+                    logger.warn("Ingen saker funnet til årlig inntektsjustering $kjoering")
+                } else {
+                    logger.info("Starter årlig inntektsjustering $kjoering")
+                    val request =
+                        AarligInntektsjusteringRequest(
+                            kjoering = kjoering,
+                            saker = sakerSomSkalInformeres.sakIdListe,
+                        )
+                    behandlingService.startAarligInntektsjustering(request)
+                }
             },
         )
     }

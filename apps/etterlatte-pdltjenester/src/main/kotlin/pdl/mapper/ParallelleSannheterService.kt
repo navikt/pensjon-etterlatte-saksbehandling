@@ -51,12 +51,14 @@ class ParallelleSannheterService(
         runBlocking {
             val fnr =
                 if (hentPerson.folkeregisteridentifikator == null) {
-                    logger.warn(
-                        "Fikk person som mangler folkeregisteridentifikator i PDL. Se sikkerlogg for fnr som oppslaget ble utført med.",
-                    )
-                    sikkerLogg.error(
-                        "Person med fnr=${oppslagFnr.value} og rolle=$personRolle mangler folkeregisteridentifikator i PDL",
-                    )
+                    if (personRolle != PersonRolle.TILKNYTTET_BARN) {
+                        logger.warn(
+                            "Fikk person som mangler folkeregisteridentifikator i PDL. Se sikkerlogg for fnr som oppslaget ble utført med.",
+                        )
+                        sikkerLogg.warn(
+                            "Person med fnr=${oppslagFnr.value} og rolle=$personRolle mangler folkeregisteridentifikator i PDL",
+                        )
+                    }
                     oppslagFnr
                 } else {
                     ppsKlient

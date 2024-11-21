@@ -249,16 +249,9 @@ class ParallelleSannheterService(
                     )
                     request.foedselsnummer
                 } else {
-                    sikkerLogg.info(
-                        "Fikk identer fra PDL: ${hentPerson.folkeregisteridentifikator.joinToString { it.identifikasjonsnummer }}",
-                    )
-
                     ppsKlient
                         .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
-                        .let {
-                            sikkerLogg.info("Fikk ident fra PPS: ${it.identifikasjonsnummer}")
-                            Folkeregisteridentifikator.of(it.identifikasjonsnummer)
-                        }
+                        .let { Folkeregisteridentifikator.of(it.identifikasjonsnummer) }
                 }
 
             val navn = ppsKlient.avklarNavn(hentPerson.navn)

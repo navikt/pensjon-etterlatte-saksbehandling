@@ -3,6 +3,7 @@ package no.nav.etterlatte.grunnlagsendring
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
+import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -20,6 +21,7 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
@@ -33,6 +35,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
@@ -44,9 +47,11 @@ import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.pdlhendelse.Folkeregisteridentifikatorhendelse
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
@@ -59,6 +64,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -859,9 +865,23 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
 
         every { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any()) } returns mockk(relaxed = true)
-        every { oppgaveService.opprettOppgave(any(), sakId, OppgaveKilde.HENDELSE, OppgaveType.VURDER_KONSEKVENS, any(), any()) } returns
+        every {
+            oppgaveService.opprettOppgave(
+                any(),
+                sakId,
+                OppgaveKilde.HENDELSE,
+                OppgaveType.VURDER_KONSEKVENS,
+                any(),
+                any(),
+            )
+        } returns
             mockk(relaxed = true)
-        every { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(sakId, GrunnlagsendringsType.UFOERETRYGD) } returns true
+        every {
+            grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(
+                sakId,
+                GrunnlagsendringsType.UFOERETRYGD,
+            )
+        } returns true
 
         val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
 
@@ -891,7 +911,12 @@ internal class GrunnlagsendringshendelseServiceTest {
                 ),
             )
 
-        every { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(sakId, GrunnlagsendringsType.UFOERETRYGD) } returns false
+        every {
+            grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(
+                sakId,
+                GrunnlagsendringsType.UFOERETRYGD,
+            )
+        } returns false
 
         val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
 
@@ -924,5 +949,160 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringsshendelser = grunnlagsendringshendelseService.opprettUfoerehendelse(hendelse)
 
         grunnlagsendringsshendelser.shouldBeEmpty()
+    }
+
+    @Nested
+    inner class TestHendelserFolkeregisterident {
+        @Test
+        fun `Håndter hendelse for endret folkeregisteridentifikator - bruker har ingen saker`() {
+            every { sakService.finnSaker(any()) } returns emptyList()
+
+            val hendelse =
+                Folkeregisteridentifikatorhendelse(
+                    hendelseId = randomUUID().toString(),
+                    endringstype = Endringstype.KORRIGERT,
+                    fnr = KONTANT_FOT.value,
+                    gammeltFnr = null,
+                )
+
+            grunnlagsendringshendelseService.opprettFolkeregisteridentifikatorhendelse(hendelse)
+
+            coVerify { grunnlagKlient wasNot Called }
+            verify {
+                sakService.finnSaker(hendelse.fnr)
+                pdlService wasNot Called
+                grunnlagshendelsesDao wasNot Called
+            }
+        }
+
+        @Test
+        fun `Håndter hendelse for endret folkeregisteridentifikator - OMS`() {
+            val sak =
+                Sak(
+                    JOVIAL_LAMA.value,
+                    SakType.OMSTILLINGSSTOENAD,
+                    SakId(1L),
+                    Enheter.defaultEnhet.enhetNr,
+                )
+
+            every { sakService.finnSaker(any()) } returns listOf(sak)
+            every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.OMSTILLINGSSTOENAD) } returns mockPerson()
+            coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
+            every {
+                grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+            } returns emptyList()
+            every { behandlingService.hentBehandlingerForSak(any()) } returns
+                listOf(
+                    mockk<Behandling> { every { status } returns BehandlingStatus.OPPRETTET },
+                )
+            every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk(relaxed = true)
+
+            val grunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
+            every { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(grunnlagsendringshendelse)) } returns mockk()
+
+            val hendelse =
+                Folkeregisteridentifikatorhendelse(
+                    hendelseId = randomUUID().toString(),
+                    endringstype = Endringstype.KORRIGERT,
+                    fnr = KONTANT_FOT.value,
+                    gammeltFnr = null,
+                )
+
+            grunnlagsendringshendelseService.opprettFolkeregisteridentifikatorhendelse(hendelse)
+
+            with(grunnlagsendringshendelse.captured) {
+                assertEquals(sak.id, this.sakId)
+                assertEquals(sak.ident, this.gjelderPerson)
+                assertEquals(GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR, this.type)
+                assertEquals(GrunnlagsendringStatus.SJEKKET_AV_JOBB, this.status)
+                assertFalse(this.samsvarMellomKildeOgGrunnlag!!.samsvar)
+                assertEquals(
+                    hendelse.fnr,
+                    (this.samsvarMellomKildeOgGrunnlag as SamsvarMellomKildeOgGrunnlag.Folkeregisteridentifikatorsamsvar).fraPdl!!.value,
+                )
+            }
+
+            coVerify { grunnlagKlient.hentGrunnlag(sak.id) }
+            verify {
+                sakService.finnSaker(hendelse.fnr)
+                pdlService.hentPdlModellForSaktype(sak.ident, PersonRolle.GJENLEVENDE, sak.sakType)
+                grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sak.id, any())
+                grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
+                oppgaveService.opprettOppgave(
+                    any(),
+                    sak.id,
+                    OppgaveKilde.HENDELSE,
+                    OppgaveType.VURDER_KONSEKVENS,
+                    any(),
+                    null,
+                    null,
+                )
+            }
+        }
+
+        @Test
+        fun `Håndter hendelse for endret folkeregisteridentifikator - BP`() {
+            val sak =
+                Sak(
+                    JOVIAL_LAMA.value,
+                    SakType.BARNEPENSJON,
+                    SakId(1L),
+                    Enheter.defaultEnhet.enhetNr,
+                )
+
+            every { sakService.finnSaker(any()) } returns listOf(sak)
+            every { pdlService.hentPdlModellForSaktype(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+            coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
+            every {
+                grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+            } returns emptyList()
+            every { behandlingService.hentBehandlingerForSak(any()) } returns
+                listOf(
+                    mockk<Behandling> { every { status } returns BehandlingStatus.OPPRETTET },
+                )
+            every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk(relaxed = true)
+
+            val grunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
+            every { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(grunnlagsendringshendelse)) } returns mockk()
+
+            val hendelse =
+                Folkeregisteridentifikatorhendelse(
+                    hendelseId = randomUUID().toString(),
+                    endringstype = Endringstype.KORRIGERT,
+                    fnr = KONTANT_FOT.value,
+                    gammeltFnr = null,
+                )
+
+            grunnlagsendringshendelseService.opprettFolkeregisteridentifikatorhendelse(hendelse)
+
+            with(grunnlagsendringshendelse.captured) {
+                assertEquals(sak.id, this.sakId)
+                assertEquals(sak.ident, this.gjelderPerson)
+                assertEquals(GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR, this.type)
+                assertEquals(GrunnlagsendringStatus.SJEKKET_AV_JOBB, this.status)
+                assertFalse(this.samsvarMellomKildeOgGrunnlag!!.samsvar)
+                assertEquals(
+                    hendelse.fnr,
+                    (this.samsvarMellomKildeOgGrunnlag as SamsvarMellomKildeOgGrunnlag.Folkeregisteridentifikatorsamsvar).fraPdl!!.value,
+                )
+            }
+
+            coVerify { grunnlagKlient.hentGrunnlag(sak.id) }
+            verify {
+                sakService.finnSaker(hendelse.fnr)
+                pdlService.hentPdlModellForSaktype(sak.ident, PersonRolle.BARN, sak.sakType)
+                grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sak.id, any())
+                grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
+                oppgaveService.opprettOppgave(
+                    any(),
+                    sak.id,
+                    OppgaveKilde.HENDELSE,
+                    OppgaveType.VURDER_KONSEKVENS,
+                    any(),
+                    null,
+                    null,
+                )
+            }
+        }
     }
 }

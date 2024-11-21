@@ -100,7 +100,7 @@ export function KlageSidemeny() {
                 beslutning={beslutning}
                 vedtak={vedtak}
                 erFattet={klage?.status === KlageStatus.FATTET_VEDTAK}
-                gyldigStegForBeslutning={true}
+                gyldigStegForBeslutning={true} // TODO lage en måte å sjekke at vi er på riktig steg her (https://jira.adeo.no/browse/EY-4780)
               />
             )
           )}

@@ -100,6 +100,7 @@ export function KlageSidemeny() {
                 beslutning={beslutning}
                 vedtak={vedtak}
                 erFattet={klage?.status === KlageStatus.FATTET_VEDTAK}
+                gyldigStegForBeslutning={true}
               />
             )
           )}

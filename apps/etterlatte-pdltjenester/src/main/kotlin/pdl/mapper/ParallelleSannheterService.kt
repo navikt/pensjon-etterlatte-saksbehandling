@@ -239,6 +239,21 @@ class ParallelleSannheterService(
         request: HentPersonRequest,
     ): PersonDTO =
         runBlocking {
+            val folkeregisteridentifikator =
+                if (hentPerson.folkeregisteridentifikator == null) {
+                    logger.warn(
+                        "Fikk person som mangler folkeregisteridentifikator i PDL. Se sikkerlogg for fnr som oppslaget ble utført med.",
+                    )
+                    sikkerLogg.warn(
+                        "Person med fnr=${request.foedselsnummer} og mangler folkeregisteridentifikator i PDL",
+                    )
+                    request.foedselsnummer
+                } else {
+                    ppsKlient
+                        .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
+                        .let { Folkeregisteridentifikator.of(it.identifikasjonsnummer) }
+                }
+
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
             val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
             val (statsborgerskap, statsborgerskapPdl) =
@@ -266,7 +281,7 @@ class ParallelleSannheterService(
                 fornavn = OpplysningDTO(navn.fornavn, navn.metadata.opplysningsId),
                 mellomnavn = navn.mellomnavn?.let { OpplysningDTO(navn.mellomnavn, navn.metadata.opplysningsId) },
                 etternavn = OpplysningDTO(navn.etternavn, navn.metadata.opplysningsId),
-                foedselsnummer = OpplysningDTO(request.foedselsnummer, null),
+                foedselsnummer = OpplysningDTO(folkeregisteridentifikator, null),
                 foedselsdato =
                     foedselsdato.foedselsdato?.let {
                         OpplysningDTO(

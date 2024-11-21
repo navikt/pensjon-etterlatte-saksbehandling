@@ -229,7 +229,8 @@ const Virkningstidspunkt = (props: {
                 fastsettVirkStatus,
                 (error) =>
                   behandling.behandlingType === IBehandlingsType.REVURDERING &&
-                  error.code === 'VIRK_FOER_FOERSTE_IVERKSATT_VIRK' && (
+                  error.code &&
+                  ['VIRK_FOER_FOERSTE_IVERKSATT_VIRK', 'VIRK_KAN_IKKE_VAERE_ETTER_OPPHOER'].includes(error.code) && (
                     <ConfirmationPanel
                       label="Ja, jeg er sikker"
                       checked={overstyr}

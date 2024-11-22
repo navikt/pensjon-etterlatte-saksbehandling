@@ -15,15 +15,16 @@ import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import java.time.LocalDate
-import java.time.YearMonth
 
 data class OmstillingsstoenadRevurdering(
     override val innhold: List<Slate.Element>,
@@ -61,13 +62,14 @@ data class OmstillingsstoenadRevurdering(
             vilkaarsVurdering: VilkaarsvurderingDto,
             datoVedtakOmgjoering: LocalDate?,
             utlandstilknytning: UtlandstilknytningType?,
-            opphoerFom: YearMonth?,
+            behandling: DetaljertBehandling,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
 
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
-            val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
+            val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
+            val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
 
             val omsRettUtenTidsbegrensning =
                 vilkaarsVurdering.vilkaar.single {
@@ -99,15 +101,16 @@ data class OmstillingsstoenadRevurdering(
                         virkningsdato = avkortingsinfo.virkningsdato,
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
-                        sisteBeregningsperiodeNesteAar = null,
+                        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
                         trygdetid =
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = navnAvdoed,
                             ),
-                        oppphoersdato = opphoerFom?.atDay(1),
-                        opphoerNesteAar = false, // inntekt neste år ikke implementert for revurdering
+                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                        opphoerNesteAar =
+                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
                     ),
                 etterbetaling =
                     etterbetalingDTO?.let {

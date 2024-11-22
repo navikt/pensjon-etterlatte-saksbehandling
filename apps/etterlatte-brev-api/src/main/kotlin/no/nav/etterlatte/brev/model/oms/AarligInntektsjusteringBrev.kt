@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -62,16 +63,10 @@ class OmstillingsstoenadInntektsjusteringVedtak(
             behandling: DetaljertBehandling,
             navnAvdoed: String,
         ): OmstillingsstoenadInntektsjusteringVedtak {
-            // TODO duplikater som bør vurderes å trekkes ut felles
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
-
-            val sisteBeregningsperiode =
-                beregningsperioder
-                    .filter {
-                        it.datoFOM.year == beregningsperioder.first().datoFOM.year
-                    }.maxBy { it.datoFOM }
-
+            val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
+            val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
             val virk = behandling.virkningstidspunkt!!.dato.atDay(1)
 
             val omsRettUtenTidsbegrensning =
@@ -98,8 +93,9 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = navnAvdoed,
                             ),
-                        oppphoersdato = behandling.opphoerFraOgMed?.atDay(1),
-                        opphoerNesteAar = false, // inntekt neste år ikke implementert for revurdering
+                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                        opphoerNesteAar =
+                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
                     ),
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning,
                 tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,

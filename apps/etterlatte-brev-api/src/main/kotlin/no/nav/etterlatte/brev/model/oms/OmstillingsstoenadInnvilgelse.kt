@@ -60,17 +60,7 @@ data class OmstillingsstoenadInnvilgelse(
                         )
                 }
 
-            val sisteBeregningsperiode =
-                beregningsperioder
-                    .filter {
-                        it.datoFOM.year == beregningsperioder.first().datoFOM.year
-                    }.maxBy { it.datoFOM }
-            val sisteBeregningsperiodeNesteAar =
-                beregningsperioder
-                    .filter {
-                        it.datoFOM.year == beregningsperioder.first().datoFOM.year + 1
-                    }.maxByOrNull { it.datoFOM }
-
+            val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
             val avdoed =
                 if (erTidligereFamiliepleier) {
                     null
@@ -85,7 +75,6 @@ data class OmstillingsstoenadInnvilgelse(
                     avdoede.single().doedsdato
                 }
 
-            val opphoersdato = utledOpphoer(behandling, beregningsperioder)
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
                 avdoed = avdoed,
@@ -94,19 +83,20 @@ data class OmstillingsstoenadInnvilgelse(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         virkningsdato = avkortingsinfo.virkningsdato,
                         beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = sisteBeregningsperiode,
-                        sisteBeregningsperiodeNesteAar = sisteBeregningsperiodeNesteAar,
+                        sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode,
+                        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
                         trygdetid =
                             trygdetid.fromDto(
-                                beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
+                                beregningsMetodeFraGrunnlag = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                                beregningsMetodeAnvendt = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed =
                                     avdoed?.navn
                                         ?: "",
                                 // TODO: navnAvdoed brukes ikke i oms så burde ikke være påkrevd
                             ),
-                        oppphoersdato = opphoersdato,
-                        opphoerNesteAar = opphoersdato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                        opphoerNesteAar =
+                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
                     doedsdatoEllerOpphoertPleieforhold

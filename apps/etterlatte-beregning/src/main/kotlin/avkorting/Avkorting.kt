@@ -2,7 +2,6 @@ package no.nav.etterlatte.avkorting
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
-import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -198,8 +197,10 @@ data class Avkorting(
                                 overstyrtInnvilgaMaanederAarsak =
                                     nyttGrunnlag.overstyrtInnvilgaMaaneder?.aarsak?.let {
                                         OverstyrtInnvilgaMaanederAarsak.valueOf(it)
-                                    },
-                                overstyrtInnvilgaMaanederBegrunnelse = nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse,
+                                    } ?: aldersovergang?.let { OverstyrtInnvilgaMaanederAarsak.BLIR_67 },
+                                overstyrtInnvilgaMaanederBegrunnelse =
+                                    nyttGrunnlag.overstyrtInnvilgaMaaneder?.begrunnelse
+                                        ?: aldersovergang?.let { "Bruker har aldersovergang" },
                                 spesifikasjon = nyttGrunnlag.spesifikasjon,
                                 kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
                             ),

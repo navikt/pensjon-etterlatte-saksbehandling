@@ -290,13 +290,6 @@ class AktivitetspliktService(
         sjekkOmAktivitetsgradErGyldig(aktivitetsgradOgUnntak.aktivitetsgrad)
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
 
-        if (aktivitetsgradOgUnntak.aktivitetsgrad.aktivitetsgrad == AKTIVITET_100 && aktivitetsgradOgUnntak.unntak != null) {
-            logger.warn("Kan ikke ha unntak hvis aktivitet er 100%")
-            val unntak = aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId)
-            unntak.forEach {
-                aktivitetspliktUnntakDao.slettUnntakForOppgave(it.id, oppgaveId)
-            }
-        }
         if (aktivitetsgradOgUnntak.unntak != null) {
             aktivitetspliktUnntakDao.upsertUnntak(
                 unntak = aktivitetsgradOgUnntak.unntak,

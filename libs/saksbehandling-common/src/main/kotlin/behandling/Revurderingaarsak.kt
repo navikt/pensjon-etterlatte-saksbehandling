@@ -106,7 +106,7 @@ enum class Revurderingaarsak(
     fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
 
     fun erStoettaRevurdering(sakType: SakType): Boolean {
-        val erIkkeStoetta = listOf(NY_SOEKNAD, AARLIG_INNTEKTSJUSTERING)
+        val erIkkeStoetta = listOf(AARLIG_INNTEKTSJUSTERING)
         return kanBrukesIMiljo() && gyldigForSakType(sakType) && !erIkkeStoetta.contains(this)
     }
 }

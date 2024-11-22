@@ -3,12 +3,15 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.harAktivAdresse
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -16,6 +19,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
+import org.slf4j.LoggerFactory
 
 class DoedshendelseKontrollpunktService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
@@ -25,6 +29,8 @@ class DoedshendelseKontrollpunktService(
     pesysKlient: PesysKlient,
     private val behandlingService: BehandlingService,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     private val kontrollpunktEktefelleService = DoedshendelseKontrollpunktEktefelleService()
     private val kontrollpunktAvdoedService = DoedshendelseKontrollpunktAvdoedService()
     private val kontrollpunktBarnService = DoedshendelseKontrollpunktBarnService(pdlTjenesterKlient, behandlingService)
@@ -102,12 +108,47 @@ class DoedshendelseKontrollpunktService(
         beroert: PersonRolle,
     ): Triple<Sak?, PersonDTO, PersonDTO> {
         val sakType = hendelse.sakTypeForEpsEllerBarn()
-        val sak = sakService.finnSak(hendelse.beroertFnr, sakType)
+        val sak = hentSakForDoedshendelse(hendelse.beroertFnr, sakType)
+
         val avdoed = pdlTjenesterKlient.hentPdlModellForSaktype(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
-        val gjenlevende = pdlTjenesterKlient.hentPdlModellForSaktype(hendelse.beroertFnr, beroert, hendelse.sakTypeForEpsEllerBarn())
+        val gjenlevende =
+            pdlTjenesterKlient.hentPdlModellForSaktype(hendelse.beroertFnr, beroert, hendelse.sakTypeForEpsEllerBarn())
 
         return Triple(sak, avdoed, gjenlevende)
     }
+
+    /**
+     * Midlertidig løsning inntil vi får nøstet opp i tilfellene hvor det finnes flere saker på én person
+     * Gjelder i hovedsak personer som har fått endret identifikator
+     **/
+    private fun hentSakForDoedshendelse(
+        beroertFnr: String,
+        sakType: SakType,
+    ): Sak? =
+        try {
+            sakService.finnSak(beroertFnr, sakType)
+        } catch (e: InternfeilException) {
+            val saker = sakService.finnSaker(beroertFnr)
+
+            if (saker.size > 1) {
+                logger.error("Fikk flere saker på ident ved henting av data for dødshendelse. Se sikkerlogg.")
+                sikkerLogg.error("Det finnes flere saker på bruker med ident=$beroertFnr: ${saker.joinToString()} ")
+
+                val sakMedBehandlinger = behandlingService.hentSakMedBehandlinger(saker)
+                sikkerLogg.error("Bruker sak ${sakMedBehandlinger.sak.id} for dødshendelsen")
+
+                with(sakMedBehandlinger.sak) {
+                    Sak(
+                        ident = ident,
+                        sakType = sakType,
+                        id = id,
+                        enhet = enhet,
+                    )
+                }
+            } else {
+                saker.firstOrNull()
+            }
+        }
 
     private fun kontrollerAvdoedHarYtelseIGjenny(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> {
         val sakerForAvdoed = sakService.finnSaker(hendelse.avdoedFnr)

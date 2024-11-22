@@ -127,7 +127,6 @@ class ManuellRevurderingService(
                     utlandstilknytning = forrigeBehandling.utlandstilknytning,
                     boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                     begrunnelse = begrunnelse ?: triggendeOppgave?.merknad,
-                    fritekstAarsak = fritekstAarsak,
                     saksbehandlerIdent = saksbehandler.ident,
                     frist = triggendeOppgave?.frist,
                     paaGrunnAvOppgave = paaGrunnAvOppgave,
@@ -136,7 +135,7 @@ class ManuellRevurderingService(
                 .also { revurdering ->
                     // Eller sjekke revurdering annen?
                     if (!fritekstAarsak.isNullOrEmpty()) {
-                        revurderingService.lagreRevurderingsaarsakFritekst(
+                        revurderingService.lagreRevurderingsaarsakFritekstForRevurderingAnnen(
                             fritekstAarsak,
                             revurdering.id,
                             saksbehandler.ident,

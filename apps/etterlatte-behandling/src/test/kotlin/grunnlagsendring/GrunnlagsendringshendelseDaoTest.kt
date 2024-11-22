@@ -335,7 +335,6 @@ internal class GrunnlagsendringshendelseDaoTest(
                 soeknadMottattDato = null,
                 virkningstidspunkt = null,
                 revurderingsAarsak = Revurderingaarsak.SOESKENJUSTERING,
-                fritekstAarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
                 sendeBrev = true,

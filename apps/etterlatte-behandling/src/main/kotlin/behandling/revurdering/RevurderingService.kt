@@ -155,7 +155,6 @@ class RevurderingService(
         utlandstilknytning: Utlandstilknytning?,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
         begrunnelse: String?,
-        fritekstAarsak: String? = null,
         saksbehandlerIdent: String?,
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
@@ -175,7 +174,6 @@ class RevurderingService(
             kilde = kilde,
             prosesstype = prosessType,
             begrunnelse = begrunnelse,
-            fritekstAarsak = fritekstAarsak,
             relatertBehandlingId = relatertBehandlingId,
             sendeBrev = revurderingAarsak.skalSendeBrev,
             opphoerFraOgMed = opphoerFraOgMed,
@@ -279,7 +277,7 @@ class RevurderingService(
         }
     }
 
-    fun lagreRevurderingsaarsakFritekst(
+    fun lagreRevurderingsaarsakFritekstForRevurderingAnnen(
         fritekstAarsak: String,
         behandlingId: UUID,
         saksbehandlerIdent: String,

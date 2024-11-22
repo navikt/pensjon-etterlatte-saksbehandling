@@ -24,24 +24,22 @@ fun finnEventuellForskjelligAvdoedPeriode(
 ): ForskjelligAvdoedPeriode? {
     val foerstePeriode = utbetalingsinfo.beregningsperioder.minBy { it.datoFOM }
     val sistePeriode = utbetalingsinfo.beregningsperioder.maxBy { it.datoFOM }
-    val foerstePeriodeAvdoede =
-        if (foerstePeriode.datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) {
-            listOfNotNull(foerstePeriode.trygdetidForIdent)
-        } else {
-            foerstePeriode.avdoedeForeldre
-        }
-    if (foerstePeriodeAvdoede?.toSet() == sistePeriode.avdoedeForeldre?.toSet()) {
+    val foerstePeriodeAvdoede = foerstePeriode.finnAvdoedeForeldreForPeriode()
+    val sistePeriodeAvdoede = sistePeriode.finnAvdoedeForeldreForPeriode()
+
+    if (foerstePeriodeAvdoede.toSet() == sistePeriodeAvdoede.toSet()) {
         return null
     }
-    val foersteAvdoedIdent = foerstePeriodeAvdoede?.singleOrNull()
+
+    val foersteAvdoedIdent = foerstePeriodeAvdoede.singleOrNull()
     val foersteAvdoed = avdoede.find { it.fnr.value == foersteAvdoedIdent }
 
     foersteAvdoed ?: run {
         sikkerlogger().error(
             "Har en beregning som bruker forskjellige avdøde i første og siste periode, men unik avdød i " +
                 "første periode kunne ikke finnes i listen over avdøde. Avdøde i første beregningperiode:" +
-                " ${foerstePeriode.avdoedeForeldre}, avdøde i siste beregningsperiode: " +
-                "${sistePeriode.avdoedeForeldre}, avdøde vi kjenner til: $avdoede.",
+                " $foerstePeriodeAvdoede, avdøde i siste beregningsperiode: " +
+                "$sistePeriodeAvdoede, avdøde vi kjenner til: $avdoede.",
         )
         throw BeregningForskjelligeAvdoedeFoersteOgSistePeriode(
             "Har en beregning som bruker forskjellige avdøde i første og siste periode, men unik avdød i første periode" +
@@ -49,15 +47,15 @@ fun finnEventuellForskjelligAvdoedPeriode(
         )
     }
 
-    val sisteAvdoedIdent = sistePeriode.avdoedeForeldre?.singleOrNull { it != foersteAvdoedIdent }
+    val sisteAvdoedIdent = sistePeriodeAvdoede.singleOrNull { it != foersteAvdoedIdent }
     val sisteAvdoed = avdoede.find { it.fnr.value == sisteAvdoedIdent }
 
     sisteAvdoed ?: run {
         sikkerlogger().error(
             "Har en beregning som bruker forskjellige avdøde i første og siste periode, men avdød i " +
                 "siste periode kunne ikke finnes i listen over avdøde. Avdøde i første beregningperiode:" +
-                " ${foerstePeriode.avdoedeForeldre}, avdøde i siste beregningsperiode: " +
-                "${sistePeriode.avdoedeForeldre}, avdøde vi kjenner til: $avdoede.",
+                " $foerstePeriodeAvdoede, avdøde i siste beregningsperiode: " +
+                "$sistePeriodeAvdoede, avdøde vi kjenner til: $avdoede.",
         )
         throw BeregningForskjelligeAvdoedeFoersteOgSistePeriodeMenAvdoedFantesIkkeISistePeriode(
             "Har en beregning som bruker forskjellige avdøde i første og siste periode, men avdød i siste periode" +
@@ -68,7 +66,7 @@ fun finnEventuellForskjelligAvdoedPeriode(
 
     val foerstePeriodeMedSisteAvdoed =
         utbetalingsinfo.beregningsperioder
-            .filter { it.avdoedeForeldre?.contains(sisteAvdoedIdent) ?: false }
+            .filter { it.finnAvdoedeForeldreForPeriode().contains(sisteAvdoedIdent) }
             .minByOrNull { it.datoFOM }
 
     foerstePeriodeMedSisteAvdoed ?: run {

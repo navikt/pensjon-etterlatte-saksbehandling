@@ -771,6 +771,11 @@ class VedtakBehandlingService(
     private fun Vedtak.isRegulering() =
         this.innhold is VedtakInnhold.Behandling &&
             Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
+
+    fun hentVedtakForBehandling(
+        behandlingId: UUID,
+        info: BrukerTokenInfo,
+    ): Vedtak? = repository.hentVedtak(behandlingId)
 }
 
 class VedtakTilstandException(

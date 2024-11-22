@@ -76,7 +76,7 @@ class TilbakekrevingService(
 
             val oppgaveFraBehandlingMedFeilutbetaling =
                 oppgaveService
-                    .hentOppgaverForReferanse(kravgrunnlag.sakId.value.toString())
+                    .hentOppgaverForSak(sak.id)
                     .filter { it.type == OppgaveType.TILBAKEKREVING }
                     .filter { !it.erAvsluttet() }
                     .maxByOrNull { it.opprettet }

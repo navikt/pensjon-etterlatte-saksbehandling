@@ -23,7 +23,10 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
@@ -98,7 +101,15 @@ internal class EgenAnsattServiceTest(
         val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, sakLesDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient),
+                SakServiceImpl(
+                    sakRepo,
+                    sakLesDao,
+                    skjermingKlient,
+                    brukerService,
+                    grunnlagservice,
+                    krrKlient,
+                    pdlTjenesterKlient,
+                ),
             )
         oppgaveService =
             spyk(
@@ -116,7 +127,12 @@ internal class EgenAnsattServiceTest(
         every { user.name() } returns "User"
 
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
-        every { pdlTjenesterKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
+        every {
+            pdlTjenesterKlient.hentGeografiskTilknytning(
+                any(),
+                any(),
+            )
+        } returns GeografiskTilknytning(kommune = "0301")
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest("EYB", "0301"))
         } returns listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
@@ -131,12 +147,25 @@ internal class EgenAnsattServiceTest(
 
     @Test
     fun sjekkAtSettingAvSkjermingFungererEtterOpprettelseAvSak() {
+        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val fnr2 = AVDOED2_FOEDSELSNUMMER.value
+
+        coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(fnr) } returns
+            PdlFolkeregisterIdentListe(
+                listOf(
+                    PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(fnr)),
+                ),
+            )
+        coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(fnr2) } returns
+            PdlFolkeregisterIdentListe(
+                listOf(
+                    PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(fnr)),
+                ),
+            )
         every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
-        val fnr = AVDOED_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
-        val fnr2 = AVDOED2_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSakMedGrunnlag(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSakMedGrunnlag(fnr2, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
         assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))

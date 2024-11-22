@@ -16,8 +16,8 @@ import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-export function VisAktivitetsgrad(props: { doedsdato?: Date; aktivitet: IAktivitetspliktAktivitetsgrad }) {
-  const { doedsdato, aktivitet } = props
+export function VisAktivitetsgrad(props: { aktivitet: IAktivitetspliktAktivitetsgrad }) {
+  const { aktivitet } = props
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
 
   const [slettStatus, slettSpesifikkAktivitet] = useApiCall(slettAktivitetspliktVurdering)
@@ -50,7 +50,6 @@ export function VisAktivitetsgrad(props: { doedsdato?: Date; aktivitet: IAktivit
         onSuccess={oppdaterTilstandLagretVurdering}
         onAvbryt={() => setRedigerer(false)}
         aktivitet={aktivitet}
-        doedsdato={doedsdato}
       />
     )
   }

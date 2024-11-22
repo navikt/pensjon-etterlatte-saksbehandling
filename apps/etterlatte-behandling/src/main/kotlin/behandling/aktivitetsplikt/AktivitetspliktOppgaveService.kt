@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
@@ -182,6 +183,7 @@ class AktivitetspliktOppgaveService(
                     utbetaling = brevData.utbetaling!!,
                     redusertEtterInntekt = brevData.redusertEtterInntekt!!,
                     nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
+                    spraak = Spraak.NB,
                 )
             val opprettetBrev =
                 runBlocking {

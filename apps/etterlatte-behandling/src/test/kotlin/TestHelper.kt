@@ -228,7 +228,6 @@ fun opprettBehandling(
     soeknadMottattDato = soeknadMottattDato,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsAarsak = revurderingAarsak,
-    fritekstAarsak = fritekstAarsak,
     prosesstype = prosesstype,
     kilde = kilde,
     sendeBrev = true,

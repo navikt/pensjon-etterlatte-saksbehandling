@@ -152,6 +152,14 @@ export interface UfoeretrygdSamsvar {
 
 export interface UfoereHendelse {
   personIdent: string
+  virkningsdato: string
+  vedtaksType: UfoeretrygdVedtakstype
+}
+
+export enum UfoeretrygdVedtakstype {
+  INNV = 'INNV',
+  OPPH = 'OPPH',
+  ENDR = 'ENDR',
 }
 
 interface InstitusjonsoppholdHendelseBeriket {

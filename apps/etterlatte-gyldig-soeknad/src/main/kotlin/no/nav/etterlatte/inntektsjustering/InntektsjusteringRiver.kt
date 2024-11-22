@@ -28,7 +28,6 @@ internal class InntektsjusteringRiver(
 
     init {
         initialiserRiver(rapidsConnection, InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT) {
-            validate { it.requireKey(InntektsjusteringInnsendt.fnrBruker) }
             validate { it.requireKey(InntektsjusteringInnsendt.inntektsjusteringInnhold) }
         }
     }
@@ -56,7 +55,7 @@ internal class InntektsjusteringRiver(
                     sak.id,
                     NyOppgaveDto(
                         OppgaveKilde.BRUKERDIALOG,
-                        OppgaveType.GENERELL_OPPGAVE,
+                        OppgaveType.MOTTATT_INNTEKTSJUSTERING,
                         merknad = "Mottatt inntektsjustering",
                         referanse = journalpostResponse.journalpostId,
                     ),

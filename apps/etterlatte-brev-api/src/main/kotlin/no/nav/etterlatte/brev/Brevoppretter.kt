@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.VERGENAVN_FOR_MOTTAKER
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -35,6 +36,7 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKode: Brevkoder,
         brevData: BrevDataRedigerbar,
+        spraak: Spraak? = null,
     ): Pair<Brev, Enhetsnummer> {
         with(
             innholdTilRedigerbartBrevHenter.hentInnDataForBrevMedData(
@@ -43,6 +45,7 @@ class Brevoppretter(
                 bruker,
                 brevKode,
                 brevData,
+                spraak,
             ),
         ) {
             val nyttBrev =

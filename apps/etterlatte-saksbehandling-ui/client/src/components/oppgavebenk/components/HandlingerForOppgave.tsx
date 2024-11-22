@@ -21,6 +21,7 @@ import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi }
 import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { MottattInntektsjusteringModal } from '~components/oppgavebenk/oppgaveModal/MottattInntektsjusteringModal'
 
 export const FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT = 'aktivitetsplikt.ny-vurdering'
 
@@ -197,6 +198,8 @@ export const HandlingerForOppgave = ({
           <AktivitetspliktInfo6MndVarigUnntakModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
+    case Oppgavetype.MOTTATT_INNTEKTSJUSTERING:
+      return <MottattInntektsjusteringModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
       return mapResult(opprettManuellRevurderingStatus, {
         initial: (

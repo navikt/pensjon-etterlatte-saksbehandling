@@ -235,9 +235,9 @@ class BehandlingDao(
                         """
                         INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                         soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
-                        revurdering_aarsak, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
+                        revurdering_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
                         sende_brev, opphoer_fom, tidligere_familiepleier)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -253,14 +253,13 @@ class BehandlingDao(
                     stmt.setJsonb(9, utlandstilknytning)
                     stmt.setString(10, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
                     stmt.setString(11, revurderingsAarsak?.name)
-                    stmt.setString(12, fritekstAarsak)
-                    stmt.setString(13, prosesstype.toString())
-                    stmt.setString(14, kilde.toString())
-                    stmt.setString(15, begrunnelse)
-                    stmt.setString(16, relatertBehandlingId)
-                    stmt.setBoolean(17, sendeBrev)
-                    stmt.setString(18, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
-                    stmt.setJsonb(19, tidligereFamiliepleier)
+                    stmt.setString(12, prosesstype.toString())
+                    stmt.setString(13, kilde.toString())
+                    stmt.setString(14, begrunnelse)
+                    stmt.setString(15, relatertBehandlingId)
+                    stmt.setBoolean(16, sendeBrev)
+                    stmt.setString(17, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
+                    stmt.setJsonb(18, tidligereFamiliepleier)
                 }
                 checkInternFeil(stmt.executeUpdate() == 1) {
                     "Kunne ikke opprette behandling for ${behandling.id}"

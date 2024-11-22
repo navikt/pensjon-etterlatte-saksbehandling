@@ -97,7 +97,7 @@ class AktivitetspliktUnntakDao(
         }
     }
 
-    fun slettUnntak(
+    fun slettUnntakForBehandling(
         unntakId: UUID,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {

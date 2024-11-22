@@ -1,7 +1,10 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
@@ -42,10 +45,43 @@ class AutomatiskBehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
         logger.info("Håndterer behandling $behandlingId")
-        service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
-        logger.info("Fatter vedtak for behandling $behandlingId")
-        val vedtakOgRapid = service.fattVedtak(behandlingId, brukerTokenInfo, saksbehandler = Fagsaksystem.EY.navn)
+        val vedtak = service.hentVedtakForBehandling(behandlingId, brukerTokenInfo)
+        if (vedtak != null) {
+            logger.warn(
+                "Skal opprette og fatte vedtak, men har allerede et vedtak for behandlingen" +
+                    " med id=$behandlingId med status ${vedtak.status}",
+            )
+            if (vedtak.status !in listOf(VedtakStatus.OPPRETTET, VedtakStatus.FATTET_VEDTAK)) {
+                throw InternfeilException(
+                    "Vi skal opprette og fatte vedtak, men vedtaket har allerde kommet " +
+                        "lengre i statusflyten (${vedtak.status}). Da kan vi ikke trygt recovere fra situasjonen." +
+                        " Noe må manuelt legges til for at denne meldingen skal passere ok.",
+                )
+            }
+        }
 
+        if (vedtak == null) {
+            service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+        }
+        val vedtakOgRapid =
+            if (vedtak?.status != VedtakStatus.FATTET_VEDTAK) {
+                logger.info("Fatter vedtak for behandling $behandlingId")
+                service.fattVedtak(behandlingId, brukerTokenInfo, saksbehandler = Fagsaksystem.EY.navn)
+            } else {
+                logger.warn(
+                    "Skal opprette og fatte vedtak, men har allerede et fattet vedtak for behandlingen" +
+                        " med id=$behandlingId. Bare returnerer det.",
+                )
+                VedtakOgRapid(
+                    vedtak.toDto(),
+                    RapidInfo(
+                        vedtakhendelse = VedtakKafkaHendelseHendelseType.FATTET,
+                        vedtak = vedtak.toDto(),
+                        tekniskTid = vedtak.vedtakFattet!!.tidspunkt,
+                        behandlingId = behandlingId,
+                    ),
+                )
+            }
         logger.info("Tildeler attesteringsoppgave til systembruker")
         val oppgaveTilAttestering =
             behandlingKlient

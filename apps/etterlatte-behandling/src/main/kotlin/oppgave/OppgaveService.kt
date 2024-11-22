@@ -198,17 +198,23 @@ class OppgaveService(
                 OppgaveType.TILBAKEKREVING,
                 OppgaveType.KLAGE,
                 -> {
-                    if (nyStatus == Status.PAA_VENT) {
-                        hendelser.sendMeldingForHendelsePaaVent(
-                            UUID.fromString(oppgave.referanse),
-                            BehandlingHendelseType.PAA_VENT,
-                            aarsak!!,
-                        )
-                    } else {
-                        hendelser.sendMeldingForHendelseAvVent(
-                            UUID.fromString(oppgave.referanse),
-                            BehandlingHendelseType.AV_VENT,
-                        )
+                    // Oppgaver for tilbakekreving har referanse som er sakId og ikke behandlingId (uuid) inntil
+                    // kravgrunnlag mottas og tilbakekrevingsbehandlingen opprettes. Disse er derfor ikke relevante her
+                    // før dette inntreffer og vi kan få en gyldig uuid fra behandlingen.
+                    val behandlingId = safeUUIDFromString(oppgave.referanse)
+                    if (behandlingId != null) {
+                        if (nyStatus == Status.PAA_VENT) {
+                            hendelser.sendMeldingForHendelsePaaVent(
+                                UUID.fromString(oppgave.referanse),
+                                BehandlingHendelseType.PAA_VENT,
+                                aarsak!!,
+                            )
+                        } else {
+                            hendelser.sendMeldingForHendelseAvVent(
+                                UUID.fromString(oppgave.referanse),
+                                BehandlingHendelseType.AV_VENT,
+                            )
+                        }
                     }
                 }
 
@@ -675,6 +681,7 @@ class OppgaveService(
                         OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
                         OppgaveType.AARLIG_INNTEKTSJUSTERING,
+                        OppgaveType.MOTTATT_INNTEKTSJUSTERING,
                         OppgaveType.MANUELL_UTSENDING_BREV,
                         -> {
                             logger.info(
@@ -692,6 +699,13 @@ class OppgaveService(
             }
         }
     }
+
+    private fun safeUUIDFromString(value: String): UUID? =
+        try {
+            UUID.fromString(value)
+        } catch (e: Exception) {
+            null
+        }
 }
 
 class BrukerManglerAttestantRolleException(

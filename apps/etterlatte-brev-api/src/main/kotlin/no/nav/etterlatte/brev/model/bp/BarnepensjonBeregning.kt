@@ -114,14 +114,10 @@ fun finnForskjelligTrygdetid(
 
     // For beregninger gjort på gammelt regelverk har vi kun en avdød, og den er ikke fylt inn
     // i "avdoedeForeldre" siden flere avdøde foreldre-regelen kjører kun på nytt regelverk
-    val avdoedeForeldreFoerstePeriode =
-        if (foersteBeregningsperiode.datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) {
-            listOfNotNull(foersteBeregningsperiode.trygdetidForIdent)
-        } else {
-            foersteBeregningsperiode.avdoedeForeldre
-        }
+    val avdoedeForeldreFoerstePeriode = foersteBeregningsperiode.finnAvdoedeForeldreForPeriode()
+    val avdoedeForeldreSistePeriode = sisteBeregningsperiode.finnAvdoedeForeldreForPeriode()
 
-    if (avdoedeForeldreFoerstePeriode?.toSet() == sisteBeregningsperiode.avdoedeForeldre?.toSet()) {
+    if (avdoedeForeldreFoerstePeriode.toSet() == avdoedeForeldreSistePeriode.toSet()) {
         // Vi har det samme trygdetidsgrunnlaget over alle periodene
         return null
     }
@@ -151,6 +147,13 @@ fun finnForskjelligTrygdetid(
         erForskjellig = trygdetidBruktSenere.ident != trygdetidForFoersteAvdoed.ident,
     )
 }
+
+fun Beregningsperiode.finnAvdoedeForeldreForPeriode(): List<String> =
+    if (datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) {
+        listOfNotNull(trygdetidForIdent)
+    } else {
+        avdoedeForeldre?.filterNotNull() ?: emptyList()
+    }
 
 internal fun trygdetidMedBeregningsmetode(
     trygdetidDto: TrygdetidDto,

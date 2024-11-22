@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -160,8 +161,15 @@ class SakServiceImpl(
     ) = finnSakerForPerson(ident, sakType).let {
         if (it.isEmpty()) {
             null
-        } else {
+        } else if (it.size == 1) {
             it.single()
+        } else {
+            sikkerLogg.error("Fant ${it.size} saker av type $sakType på person: ${it.joinToString()}}")
+
+            throw InternfeilException(
+                "Personen har ${it.size} saker av type $sakType. " +
+                    "Dette må meldes i Porten for manuell kontroll og opprydding.",
+            )
         }
     }
 
@@ -188,7 +196,13 @@ class SakServiceImpl(
     private fun finnSakerForPerson(
         ident: String,
         sakType: SakType? = null,
-    ) = lesDao.finnSaker(ident, sakType)
+    ): List<Sak> =
+        runBlocking {
+            pdltjenesterKlient
+                .hentPdlFolkeregisterIdenter(ident)
+                .identifikatorer
+                .flatMap { lesDao.finnSaker(it.folkeregisterident.value, sakType) }
+        }
 
     override fun markerSakerMedSkjerming(
         sakIder: List<SakId>,

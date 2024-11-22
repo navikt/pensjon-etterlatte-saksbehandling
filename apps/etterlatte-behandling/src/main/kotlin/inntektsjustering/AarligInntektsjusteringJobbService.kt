@@ -76,10 +76,6 @@ class AarligInntektsjusteringJobbService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    companion object {
-        const val BEGRUNNELSE_AUTOMATISK_JOBB = "Årlig inntektsjustering." // TODO må avklares med fag
-    }
-
     fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest) {
         request.saker.forEach { sakId ->
             startEnkeltSak(request.kjoering, request.loependeFom, sakId)
@@ -101,8 +97,9 @@ class AarligInntektsjusteringJobbService(
             )
         }
 
+        val begrunnelse = oppgaveService.hentOppgave(oppgaveId).merknad
         val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
-        val revurdering = nyManuellRevurdering(sakId, hentForrigeBehandling(sakId), loependeFom)
+        val revurdering = nyManuellRevurdering(sakId, hentForrigeBehandling(sakId), loependeFom, begrunnelse!!)
         oppgaveService.ferdigstillOppgave(oppgaveId, saksbehandler)
         return revurdering
     }
@@ -119,11 +116,22 @@ class AarligInntektsjusteringJobbService(
                     vedtakKlient.sakHarLopendeVedtakPaaDato(sakId, loependeFom.atDay(1), HardkodaSystembruker.omregning)
                 }
 
+            if (!vedtak.erLoepende) {
+                oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, "Sak er ikke løpende")
+                return@inTransaction
+            }
+
             val forrigeBehandling = hentForrigeBehandling(sakId)
 
             val avkortingSjekk = hentAvkortingSjekk(sakId, loependeFom, forrigeBehandling.id)
 
-            if (skalIkkeKjoereJobb(kjoering, sakId, loependeFom, vedtak, avkortingSjekk)) {
+            if (avkortingSjekk.harInntektForAar) {
+                oppdaterKjoering(
+                    kjoering,
+                    KjoeringStatus.FERDIGSTILT,
+                    sakId,
+                    "Sak har allerede oppgitt inntekt for ${loependeFom.year}",
+                )
                 return@inTransaction
             }
 
@@ -142,29 +150,6 @@ class AarligInntektsjusteringJobbService(
                 begrunnelse = e.message ?: e.toString(),
             )
         }
-    }
-
-    fun skalIkkeKjoereJobb(
-        kjoering: String,
-        sakId: SakId,
-        loependeFom: YearMonth,
-        vedtak: LoependeYtelseDTO,
-        avkortingSjekk: AarligInntektsjusteringAvkortingSjekkResponse,
-    ): Boolean {
-        if (!vedtak.erLoepende) {
-            oppdaterKjoering(kjoering, KjoeringStatus.FERDIGSTILT, sakId, "Sak er ikke løpende")
-            return true
-        }
-        if (avkortingSjekk.harInntektForAar) {
-            oppdaterKjoering(
-                kjoering,
-                KjoeringStatus.FERDIGSTILT,
-                sakId,
-                "Sak har allerede oppgitt inntekt for ${loependeFom.year}",
-            )
-            return true
-        }
-        return false
     }
 
     fun maaGjoeresManuelt(
@@ -295,7 +280,7 @@ class AarligInntektsjusteringJobbService(
             sakId = sakId,
             kilde = OppgaveKilde.BEHANDLING,
             type = OppgaveType.AARLIG_INNTEKTSJUSTERING,
-            merknad = "Kan ikke behandles automatisk. Årsak: ${aarsakTilManuell.name}",
+            merknad = genererManuellBegrunnelseTekst(aarsakTilManuell),
         )
         oppdaterKjoering(
             kjoering,
@@ -321,7 +306,7 @@ class AarligInntektsjusteringJobbService(
             )
             return
         }
-        nyManuellRevurdering(sakId, forrigeBehandling, loependeFom)
+        nyManuellRevurdering(sakId, forrigeBehandling, loependeFom, genererManuellBegrunnelseTekst(aarsakTilManuell))
         oppdaterKjoering(
             kjoering,
             KjoeringStatus.TIL_MANUELL,
@@ -334,6 +319,7 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
         forrigeBehandling: Behandling,
         loependeFom: YearMonth,
+        begrunnelse: String,
     ): Revurdering {
         val persongalleri =
             runBlocking {
@@ -350,10 +336,10 @@ class AarligInntektsjusteringJobbService(
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
-                    virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(BEGRUNNELSE_AUTOMATISK_JOBB),
+                    virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(begrunnelse),
                     utlandstilknytning = forrigeBehandling.utlandstilknytning,
                     boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-                    begrunnelse = BEGRUNNELSE_AUTOMATISK_JOBB,
+                    begrunnelse = begrunnelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
                     opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
@@ -413,7 +399,7 @@ class AarligInntektsjusteringJobbService(
         )
     }
 
-    fun hentForrigeBehandling(sakId: SakId) =
+    private fun hentForrigeBehandling(sakId: SakId) =
         behandlingService.hentSisteIverksatte(sakId)
             ?: throw InternfeilException("Fant ikke iverksatt behandling sak=$sakId")
 
@@ -438,7 +424,7 @@ class AarligInntektsjusteringJobbService(
                     sisteBehandlingId,
                     sak.sakType,
                     HardkodaSystembruker.omregning,
-                ).innsender ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
+                ).soeker ?: throw InternfeilException("Fant ikke opplysninger for behandling=$sisteBehandlingId")
         }
 
     private fun manuellBehandlingSkruddPaa(): Boolean =
@@ -453,6 +439,9 @@ class AarligInntektsjusteringJobbService(
         }
         return vergerEn == vergerTo
     }
+
+    private fun genererManuellBegrunnelseTekst(aarsakTilManuell: AarligInntektsjusteringAarsakManuell): String =
+        "Inntektsjustering kan ikke behandles automatisk. Årsak: ${aarsakTilManuell.name}"
 }
 
 enum class AarligInntektsjusteringAarsakManuell {

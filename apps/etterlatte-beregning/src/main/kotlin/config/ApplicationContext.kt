@@ -112,6 +112,7 @@ class ApplicationContext {
             beregningService = beregningService,
             sanksjonService = sanksjonService,
             grunnlagKlient = grunnlagKlient,
+            vedtakKlient = vedtaksvurderingKlient,
             featureToggleService = featureToggleService,
         )
     val avkortingTidligAlderspensjonService =

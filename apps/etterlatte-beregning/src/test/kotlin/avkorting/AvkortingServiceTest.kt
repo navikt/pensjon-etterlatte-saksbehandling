@@ -18,12 +18,13 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.junit.jupiter.api.AfterEach
@@ -40,10 +41,12 @@ internal class AvkortingServiceTest {
     private val beregningService: BeregningService = mockk()
     private val sanksjonService: SanksjonService = mockk()
     private val grunnlagKlient: GrunnlagKlient = mockk()
+    private val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
     private val featureToggleService: FeatureToggleService =
         mockk(relaxed = true) {
             every { isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, any(), any()) } returns false
         }
+
     private val service =
         AvkortingService(
             behandlingKlient,
@@ -51,6 +54,7 @@ internal class AvkortingServiceTest {
             beregningService,
             sanksjonService,
             grunnlagKlient,
+            vedtaksvurderingKlient,
             featureToggleService,
         )
 
@@ -185,9 +189,9 @@ internal class AvkortingServiceTest {
             val avkortingFrontend = mockk<AvkortingFrontend>()
 
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
-                SisteIverksatteBehandling(
-                    forrigeBehandlingId,
+            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+                listOf(
+                    vedtakSammendragDto(behandlingId = forrigeBehandlingId),
                 )
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
@@ -200,7 +204,7 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
-                behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
                 eksisterendeAvkorting.toFrontend(YearMonth.of(2024, 1), forrigeAvkorting, BehandlingStatus.AVKORTET)
             }
@@ -226,9 +230,9 @@ internal class AvkortingServiceTest {
             val avkortingFrontend = mockk<AvkortingFrontend>()
 
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
-                SisteIverksatteBehandling(
-                    forrigeBehandlingId,
+            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+                listOf(
+                    vedtakSammendragDto(behandlingId = forrigeBehandlingId),
                 )
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(behandlingId) } returns null andThen lagretAvkorting
@@ -247,7 +251,7 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
-                behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
@@ -284,9 +288,9 @@ internal class AvkortingServiceTest {
             val avkortingFrontend = mockk<AvkortingFrontend>()
 
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
-                SisteIverksatteBehandling(
-                    forrigeBehandlingId,
+            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+                listOf(
+                    vedtakSammendragDto(behandlingId = forrigeBehandlingId),
                 )
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting andThen lagretAvkorting
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
@@ -304,7 +308,7 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
-                behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
+                vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
@@ -417,9 +421,9 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
-                SisteIverksatteBehandling(
-                    forrigeBehandling,
+            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+                listOf(
+                    vedtakSammendragDto(behandlingId = forrigeBehandling),
                 )
             every { avkortingRepository.hentAvkorting(forrigeBehandling) } returns forrigeAvkorting
             every { lagretAvkorting.toFrontend(any(), any(), any()) } returns avkortingFrontend
@@ -449,7 +453,7 @@ internal class AvkortingServiceTest {
                     any(),
                 )
                 avkortingRepository.lagreAvkorting(revurderingId, sakId, beregnetAvkorting)
-                behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker)
+                vedtaksvurderingKlient.hentIverksatteVedtak(sakId, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandling)
                 lagretAvkorting.toFrontend(YearMonth.of(2024, 3), forrigeAvkorting, BehandlingStatus.BEREGNET)
                 behandlingKlient.avkort(revurderingId, bruker, true)
@@ -684,5 +688,20 @@ internal class AvkortingServiceTest {
                 avkortingRepository.hentAvkorting(behandlingId)
             }
         }
+    }
+
+    companion object {
+        fun vedtakSammendragDto(behandlingId: UUID) =
+            VedtakSammendragDto(
+                id = "id",
+                behandlingId = behandlingId,
+                vedtakType = null,
+                behandlendeSaksbehandler = null,
+                datoFattet = null,
+                attesterendeSaksbehandler = null,
+                datoAttestert = null,
+                virkningstidspunkt = null,
+                opphoerFraOgMed = null,
+            )
     }
 }

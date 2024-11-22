@@ -1070,8 +1070,8 @@ internal class AvkortingTest {
                     .grunnlag,
             ) {
                 innvilgaMaaneder shouldBe 5
-                overstyrtInnvilgaMaanederAarsak shouldBe null
-                overstyrtInnvilgaMaanederBegrunnelse shouldBe null
+                overstyrtInnvilgaMaanederAarsak shouldBe OverstyrtInnvilgaMaanederAarsak.BLIR_67
+                overstyrtInnvilgaMaanederBegrunnelse shouldNotBe null
             }
         }
 

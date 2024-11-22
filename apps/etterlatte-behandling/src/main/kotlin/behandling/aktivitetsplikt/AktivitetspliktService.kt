@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradOgUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_100
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
@@ -194,8 +196,7 @@ class AktivitetspliktService(
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
 
         if (behandlingId != null) {
-            val behandling =
-                requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            val behandling = behandlingService.hentBehandling(behandlingId) ?: throw BehandlingNotFoundException(behandlingId)
             if (!behandling.status.kanEndres()) {
                 throw BehandlingKanIkkeEndres()
             }
@@ -230,8 +231,7 @@ class AktivitetspliktService(
         sakId: SakId? = null,
     ) {
         if (behandlingId != null) {
-            val behandling =
-                requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            val behandling = behandlingService.hentBehandling(behandlingId) ?: throw BehandlingNotFoundException(behandlingId)
             if (!behandling.status.kanEndres()) {
                 throw BehandlingKanIkkeEndres()
             }
@@ -258,10 +258,14 @@ class AktivitetspliktService(
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
 
-        return hentVurderingForOppgave(oppgaveId) ?: throw InternfeilException(
-            "Vi har ingen vurderinger men vi " +
-                "oppdaterte nettopp en vurdering i en oppgave. Gjelder oppgave med id=$oppgaveId i sak $sakId",
-        )
+        val vurdering = hentVurderingForOppgave(oppgaveId)
+        if (vurdering.erTom()) {
+            throw InternfeilException(
+                "Vi har ingen vurderinger men vi " +
+                    "oppdaterte nettopp en vurdering i en oppgave. Gjelder oppgave med id=$oppgaveId i sak $sakId",
+            )
+        }
+        return vurdering
     }
 
     private fun sjekkOmAktivitetsgradErGyldig(aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad) {
@@ -274,21 +278,51 @@ class AktivitetspliktService(
         }
     }
 
+    fun upsertAktivtetsgradOgUnntakForOppgave(
+        aktivitetsgradOgUnntak: AktivitetspliktAktivitetsgradOgUnntak,
+        oppgaveId: UUID,
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AktivitetspliktVurdering {
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
+
+        sjekkOmAktivitetsgradErGyldig(aktivitetsgradOgUnntak.aktivitetsgrad)
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
+
+        if (aktivitetsgradOgUnntak.unntak != null) {
+            aktivitetspliktUnntakDao.upsertUnntak(
+                unntak = aktivitetsgradOgUnntak.unntak,
+                sakId = sakId,
+                oppgaveId = oppgaveId,
+                kilde = kilde,
+            )
+        }
+
+        aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(
+            aktivitetsgradOgUnntak.aktivitetsgrad,
+            sakId,
+            kilde,
+            oppgaveId = oppgaveId,
+        )
+
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
+        return hentVurderingForOppgave(oppgaveId)
+    }
+
     fun upsertAktivitetsgradForBehandling(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         behandlingId: UUID,
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        val behandling =
-            requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+    ): AktivitetspliktVurderingGammel {
+        val behandling = behandlingService.hentBehandling(behandlingId) ?: throw BehandlingNotFoundException(behandlingId)
 
         if (!behandling.status.kanEndres()) {
             throw BehandlingKanIkkeEndres()
         }
-
-        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         sjekkOmAktivitetsgradErGyldig(aktivitetsgrad)
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         if (aktivitetsgrad.id != null) {
             aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgrad, kilde, behandlingId)
         } else {
@@ -297,7 +331,7 @@ class AktivitetspliktService(
             ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
             val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
             unntak.forEach {
-                aktivitetspliktUnntakDao.slettUnntak(it.id, behandlingId)
+                aktivitetspliktUnntakDao.slettUnntakForBehandling(it.id, behandlingId)
             }
 
             aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgave(
@@ -309,6 +343,10 @@ class AktivitetspliktService(
         }
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, behandlingId) }
+        val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
+        val aktivitet = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
+
+        return AktivitetspliktVurderingGammel(unntak = unntak.firstOrNull(), aktivitet = aktivitet.firstOrNull())
     }
 
     fun upsertUnntakForOppgave(
@@ -347,7 +385,7 @@ class AktivitetspliktService(
 
         aktivitetspliktAktivitetsgradDao.slettAktivitetsgradForOppgave(aktivitetsgradId, oppgaveId)
 
-        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
+        runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo) }
         return hentVurderingForOppgave(oppgaveId)
     }
 
@@ -371,8 +409,7 @@ class AktivitetspliktService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val behandling =
-            requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+        val behandling = behandlingService.hentBehandling(behandlingId) ?: throw BehandlingNotFoundException(behandlingId)
 
         if (!behandling.status.kanEndres()) {
             throw BehandlingKanIkkeEndres()
@@ -557,7 +594,7 @@ class AktivitetspliktService(
     private suspend fun sendDtoTilStatistikk(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID?,
+        behandlingId: UUID? = null,
     ) {
         try {
             val dto = hentAktivitetspliktDto(sakId, brukerTokenInfo, behandlingId)
@@ -737,6 +774,24 @@ fun hentVurderingForSakHelper(
     return AktivitetspliktVurdering(aktivitet, unntak)
 }
 
+data class AktivitetspliktVurderingGammel(
+    val aktivitet: AktivitetspliktAktivitetsgrad?,
+    val unntak: AktivitetspliktUnntak?,
+)
+
+data class AktivitetspliktVurdering(
+    val aktivitet: List<AktivitetspliktAktivitetsgrad>,
+    val unntak: List<AktivitetspliktUnntak>,
+) {
+    fun erTom() = aktivitet.isEmpty() && unntak.isEmpty()
+}
+
+interface AktivitetspliktVurderingOpprettetDato {
+    val opprettet: Grunnlagsopplysning.Kilde
+}
+
+fun Grunnlagsopplysning.Kilde.endretDatoOrNull(): Tidspunkt? = if (this is Grunnlagsopplysning.Saksbehandler) this.tidspunkt else null
+
 class SakidTilhoererIkkeBehandlingException :
     UgyldigForespoerselException(
         code = "SAK_ID_TILHOERER_IKKE_BEHANDLING",
@@ -755,20 +810,9 @@ class ManglerSakEllerBehandlingIdException :
         detail = "Forespørsel mangler sak eller behandling id",
     )
 
-data class AktivitetspliktVurderingGammel(
-    val aktivitet: AktivitetspliktAktivitetsgrad?,
-    val unntak: AktivitetspliktUnntak?,
-)
-
-data class AktivitetspliktVurdering(
-    val aktivitet: List<AktivitetspliktAktivitetsgrad>,
-    val unntak: List<AktivitetspliktUnntak>,
-) {
-    fun erTom() = aktivitet.isEmpty() && unntak.isEmpty()
-}
-
-interface AktivitetspliktVurderingOpprettetDato {
-    val opprettet: Grunnlagsopplysning.Kilde
-}
-
-fun Grunnlagsopplysning.Kilde.endretDatoOrNull(): Tidspunkt? = if (this is Grunnlagsopplysning.Saksbehandler) this.tidspunkt else null
+class BehandlingNotFoundException(
+    behandlingId: UUID,
+) : IkkeFunnetException(
+        code = "FANT_IKKE_BEHANDLING",
+        detail = "Kunne ikke finne ønsket behandling, id: $behandlingId",
+    )

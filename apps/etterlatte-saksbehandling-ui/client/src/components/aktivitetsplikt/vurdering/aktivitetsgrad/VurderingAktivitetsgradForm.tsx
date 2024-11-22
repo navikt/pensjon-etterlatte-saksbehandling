@@ -3,7 +3,6 @@ import {
   AktivitetspliktSkjoennsmessigVurdering,
   AktivitetspliktVurderingType,
   IAktivitetspliktAktivitetsgrad,
-  IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNyDto,
   IOpprettAktivitetspliktAktivitetsgrad,
   tekstAktivitetspliktVurderingType,
@@ -19,17 +18,15 @@ import { ControlledRadioGruppe } from '~shared/components/radioGruppe/Controlled
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
-import { addMonths, startOfMonth } from 'date-fns'
 import { JaNei } from '~shared/types/ISvar'
 
-interface NyVurdering {
+interface RedigerAktivitetsgrad {
   typeVurdering: AktivitetspliktOppgaveVurderingType
   vurderingAvAktivitet: IOpprettAktivitetspliktAktivitetsgrad
   harUnntak?: JaNei
-  unntak?: Partial<IAktivitetspliktUnntak>
 }
 
-function maanederForVurdering(typeVurdering: AktivitetspliktOppgaveVurderingType): number {
+export function maanederForVurdering(typeVurdering: AktivitetspliktOppgaveVurderingType): number {
   if (typeVurdering === AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER) {
     return 6
   } else {
@@ -38,12 +35,11 @@ function maanederForVurdering(typeVurdering: AktivitetspliktOppgaveVurderingType
 }
 
 export function VurderingAktivitetsgradForm(props: {
-  aktivitet?: IAktivitetspliktAktivitetsgrad
-  doedsdato?: Date
-  onAvbryt?: () => void
+  aktivitet: IAktivitetspliktAktivitetsgrad
+  onAvbryt: () => void
   onSuccess: (data: IAktivitetspliktVurderingNyDto) => void
 }) {
-  const { aktivitet, onSuccess, onAvbryt, doedsdato } = props
+  const { aktivitet, onSuccess, onAvbryt } = props
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
   const [feilmelding, setFeilmelding] = useState('')
   const typeVurdering =
@@ -51,33 +47,23 @@ export function VurderingAktivitetsgradForm(props: {
       ? AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
       : AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
 
-  const defaultFom = doedsdato
-    ? startOfMonth(addMonths(doedsdato, maanederForVurdering(typeVurdering)))
-    : startOfMonth(new Date())
-
   const [lagreStatus, lagreVurdering, reset] = useApiCall(opprettAktivitetspliktAktivitetsgrad)
 
-  const { handleSubmit, register, watch, control } = useForm<Partial<NyVurdering>>({
+  const { handleSubmit, register, watch, control } = useForm<RedigerAktivitetsgrad>({
     defaultValues: {
       typeVurdering: typeVurdering,
-      vurderingAvAktivitet: !!aktivitet ? aktivitet : { fom: defaultFom.toISOString() },
+      vurderingAvAktivitet: aktivitet,
     },
   })
-
-  const erNyVurdering = aktivitet === undefined
 
   useEffect(() => {
     reset()
   }, [aktivitet])
 
-  function lagreOgOppdater(formdata: Partial<NyVurdering>) {
+  function lagreOgOppdater(formdata: RedigerAktivitetsgrad) {
     setFeilmelding('')
     if (!formdata.vurderingAvAktivitet?.aktivitetsgrad || !formdata.vurderingAvAktivitet.fom) {
       setFeilmelding('Du må fylle ut vurderingen av aktivitetsgraden.')
-      return
-    }
-    if (formdata.harUnntak === JaNei.JA) {
-      setFeilmelding('Du kan ikke lagre ned unntak i vurderingen enda.')
       return
     }
 
@@ -87,7 +73,7 @@ export function VurderingAktivitetsgradForm(props: {
         oppgaveId: oppgave.id,
         request: {
           id: aktivitet?.id,
-          vurdertFra12Mnd: formdata.typeVurdering === 'TOLV_MAANEDER',
+          vurdertFra12Mnd: formdata.typeVurdering === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER,
           skjoennsmessigVurdering: formdata.vurderingAvAktivitet.skjoennsmessigVurdering,
           aktivitetsgrad: formdata.vurderingAvAktivitet.aktivitetsgrad,
           fom: formdata.vurderingAvAktivitet.fom,
@@ -99,10 +85,6 @@ export function VurderingAktivitetsgradForm(props: {
   }
 
   const svarAktivitetsgrad = watch('vurderingAvAktivitet.aktivitetsgrad')
-  const harKanskjeUnntak =
-    erNyVurdering &&
-    (svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 ||
-      svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50)
 
   return (
     <form onSubmit={handleSubmit(lagreOgOppdater)}>
@@ -134,6 +116,7 @@ export function VurderingAktivitetsgradForm(props: {
             label="Fra og med"
             control={control}
             description="Fra dato oppgitt"
+            errorVedTomInput="Du må velge fra og med dato"
           />
           <ControlledDatoVelger
             name="vurderingAvAktivitet.tom"
@@ -143,29 +126,6 @@ export function VurderingAktivitetsgradForm(props: {
             description="Hvis det er oppgitt sluttdato"
           />
         </HStack>
-        {harKanskjeUnntak && (
-          <ControlledRadioGruppe
-            name="harUnntak"
-            control={control}
-            legend="Er det unntak for bruker?"
-            radios={
-              <>
-                <Radio value={JaNei.JA}>Ja</Radio>
-                <Radio value={JaNei.NEI}>Nei</Radio>
-              </>
-            }
-            errorVedTomInput="Du må svare om bruker har unntak"
-          />
-        )}
-
-        {watch('harUnntak') === JaNei.JA && harKanskjeUnntak && (
-          <Box maxWidth="50rem">
-            <Alert variant="info">
-              Du kan ikke legge til unntak enda. Vi jobber med å få dette på plass. Du kan ta opp denne behandlingen
-              igjen neste uke.
-            </Alert>
-          </Box>
-        )}
 
         {watch('typeVurdering') === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER &&
           svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 && (

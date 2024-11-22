@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.inntektsjustering.InntektsjusteringRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -51,6 +52,24 @@ class BehandlingClient(
             }
             UUID.fromString(response.body())
         }
+
+    fun startInntektsjusteringJobb(
+        sakId: SakId,
+        journalPostId: String,
+    ) {
+        runBlocking {
+            sakOgBehandlingApp
+                .post("$url/inntektsjustering/enkel-jobb") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        InntektsjusteringRequest(
+                            sak = sakId,
+                            journalpostId = journalPostId,
+                        ),
+                    )
+                }.body<InntektsjusteringRequest>()
+        }
+    }
 
     fun finnEllerOpprettSak(
         fnr: String,

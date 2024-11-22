@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.omregning.OmregningKlassifikasjonskodeJobService.Companion.kjoering
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -33,6 +34,7 @@ import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingS
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
+import no.nav.etterlatte.libs.common.inntektsjustering.InntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -76,13 +78,46 @@ class AarligInntektsjusteringJobbService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest) {
+    // for å starte inntektsjusteringJobb for alle saker som er løpende i neste inntektsår
+    fun startAarligInntektsjusteringJobb(request: AarligInntektsjusteringRequest) {
+        logger.info("Starter årlig inntektsjusteringjobb $kjoering")
         request.saker.forEach { sakId ->
             startEnkeltSak(request.kjoering, request.loependeFom, sakId)
         }
     }
 
-    fun opprettManuellInntektsjustering(
+    // for å behandle inntektsjustering via innsendt skjema
+    fun startInntektsjusteringJobb(request: InntektsjusteringRequest) {
+        logger.info("Starter inntektsjusteringjobb for sak ${request.sak.sakId}")
+        val skalGjoeresAutomatisk =
+            featureToggleService.isEnabled(
+                InntektsjusterinFeatureToggle.AUTOMATISK_BEHANDLE,
+                false,
+            )
+
+        if (skalGjoeresAutomatisk) {
+            logger.info("Automatisk behandling: starter omregning for sak ${request.sak.sakId}")
+            startEnkeltSak(
+                AarligInntektsjusteringRequest.utledKjoering(),
+                AarligInntektsjusteringRequest.utledLoependeFom(),
+                SakId(request.sak.sakId),
+            )
+        } else {
+            logger.info("Manuell behandling: oppretter oppgave Mottatt inntektsjustering for sak ${request.sak.sakId}")
+            oppgaveService.opprettOppgave(
+                sakId = SakId(request.sak.sakId),
+                kilde = OppgaveKilde.BRUKERDIALOG,
+                type = OppgaveType.MOTTATT_INNTEKTSJUSTERING,
+                merknad = "Mottatt inntektsjustering",
+                referanse = request.journalpostId,
+            )
+        }
+    }
+
+    // i det tilfelle hvor aarligInntektsjusteringJobb ikka kan behandle sak atuomatisk,
+    // blir det opprettet en oppgave. Saksbehandler må opprette revurdering via oppgaven
+    // dette for å få aarsak AARLIG_INNTEKTSJUSTERING som ikke er
+    fun opprettRevurderingForAarligInntektsjustering(
         sakId: SakId,
         oppgaveId: UUID,
         saksbehandler: Saksbehandler,
@@ -109,7 +144,7 @@ class AarligInntektsjusteringJobbService(
         loependeFom: YearMonth,
         sakId: SakId,
     ) = inTransaction {
-        logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
+        logger.info("Inntektsjusteringsjobb $kjoering for sak $sakId")
         try {
             val vedtak =
                 runBlocking {
@@ -152,7 +187,7 @@ class AarligInntektsjusteringJobbService(
         }
     }
 
-    fun maaGjoeresManuelt(
+    private fun maaGjoeresManuelt(
         kjoering: String,
         sakId: SakId,
         loependeFom: YearMonth,

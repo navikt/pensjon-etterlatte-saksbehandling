@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
+import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -45,22 +44,14 @@ internal class InntektsjusteringRiver(
                     behandlingKlient.finnEllerOpprettSak(inntektsjustering.fnr, SakType.OMSTILLINGSSTOENAD)
                 }
 
-            val journalpostResponse = journalfoerInntektsjusteringService.opprettJournalpost(sak, inntektsjustering)
+            val journalpostResponse =
+                journalfoerInntektsjusteringService.opprettJournalpost(sak, inntektsjustering)
+                    ?: run {
+                        logger.warn("Kan ikke fortsette uten respons fra dokarkiv. Retry kjøres automatisk...")
+                        return
+                    }
 
-            if (journalpostResponse == null) {
-                logger.warn("Kan ikke fortsette uten respons fra dokarkiv. Retry kjøres automatisk...")
-                return
-            } else {
-                behandlingKlient.opprettOppgave(
-                    sak.id,
-                    NyOppgaveDto(
-                        OppgaveKilde.BRUKERDIALOG,
-                        OppgaveType.MOTTATT_INNTEKTSJUSTERING,
-                        merknad = "Mottatt inntektsjustering",
-                        referanse = journalpostResponse.journalpostId,
-                    ),
-                )
-            }
+            startInntektsjusteringJobb(sak, journalpostResponse)
         } catch (e: JsonMappingException) {
             sikkerLogg.error("Feil under deserialisering", e)
             logger.error("Feil under deserialisering av inntektsjustering (id=${inntektsjustering.id}). Se sikkerlogg for detaljer.")
@@ -69,6 +60,16 @@ internal class InntektsjusteringRiver(
             logger.error("Uhåndtert feilsituasjon TODO : $", e)
             throw e
         }
+    }
+
+    private fun startInntektsjusteringJobb(
+        sak: Sak,
+        journalpostResponse: OpprettJournalpostResponse,
+    ) {
+        behandlingKlient.startInntektsjusteringJobb(
+            sak.id,
+            journalpostResponse.journalpostId,
+        )
     }
 
     private fun JsonMessage.inntektsjustering(): Inntektsjustering =

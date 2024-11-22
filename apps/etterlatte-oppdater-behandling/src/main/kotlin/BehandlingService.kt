@@ -299,7 +299,7 @@ class BehandlingServiceImpl(
 
     override fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest) =
         runBlocking {
-            behandlingKlient.post("$url/inntektsjustering/jobb") {
+            behandlingKlient.post("$url/inntektsjustering/aarlig-jobb") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }

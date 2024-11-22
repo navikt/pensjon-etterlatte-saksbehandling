@@ -15,3 +15,8 @@ data class AarligInntektsjusteringRequest(
         fun utledLoependeFom() = YearMonth.of(Year.now().value, 1).plusYears(1)
     }
 }
+
+data class InntektsjusteringRequest(
+    val sak: SakId,
+    val journalpostId: String,
+)

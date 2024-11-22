@@ -8,12 +8,19 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
+import no.nav.etterlatte.libs.common.inntektsjustering.InntektsjusteringRequest
 
 internal fun Route.aarligInntektsjusteringRoute(service: AarligInntektsjusteringJobbService) {
     route("/inntektsjustering") {
-        post("jobb") {
+        post("aarlig-jobb") {
             val request = call.receive<AarligInntektsjusteringRequest>()
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
+            call.respond(HttpStatusCode.OK)
+        }
+
+        post("enkel-jobb") {
+            val request = call.receive<InntektsjusteringRequest>()
+            service.startInntektsjusteringJobb(request)
             call.respond(HttpStatusCode.OK)
         }
     }

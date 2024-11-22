@@ -104,6 +104,12 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: innsendt-soeknad
+          namespace: etterlatte
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-sak
         - application: selvbetjening-backend
           namespace: etterlatte
           cluster: dev-gcp

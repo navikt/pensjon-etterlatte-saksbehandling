@@ -15,7 +15,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradOgUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
-import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
@@ -76,20 +75,15 @@ internal fun Route.aktivitetspliktRoutes(
         post {
             kunSkrivetilgang {
                 val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
-
-                try {
-                    val result =
-                        inTransaction {
-                            aktivitetspliktService.lagreAktivitetspliktOppfolging(
-                                behandlingId,
-                                oppfolging,
-                                brukerTokenInfo.ident(),
-                            )
-                        }
-                    call.respond(result)
-                } catch (_: TilstandException.UgyldigTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
-                }
+                val result =
+                    inTransaction {
+                        aktivitetspliktService.lagreAktivitetspliktOppfolging(
+                            behandlingId,
+                            oppfolging,
+                            brukerTokenInfo.ident(),
+                        )
+                    }
+                call.respond(result)
             }
         }
 

@@ -157,7 +157,6 @@ class AktivitetspliktUnntakDaoTest(
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 revurderingsAarsak = null,
-                fritekstAarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
                 begrunnelse = null,

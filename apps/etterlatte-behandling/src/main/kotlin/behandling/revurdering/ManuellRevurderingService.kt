@@ -45,7 +45,7 @@ class ManuellRevurderingService(
         val paaGrunnAvHendelseUuid =
             try {
                 paaGrunnAvHendelseId?.let { UUID.fromString(it) }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 throw BadRequestException(
                     "$aarsak har en ugyldig hendelse id for sakid" +
                         " $sakId. " +
@@ -56,7 +56,7 @@ class ManuellRevurderingService(
         val paaGrunnAvOppgaveUuid =
             try {
                 paaGrunnAvOppgaveId?.let { UUID.fromString(it) }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 throw BadRequestException("Ugyldig oppgaveId $paaGrunnAvOppgaveId (sakid=$sakId).")
             }
 
@@ -127,21 +127,20 @@ class ManuellRevurderingService(
                     utlandstilknytning = forrigeBehandling.utlandstilknytning,
                     boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                     begrunnelse = begrunnelse ?: triggendeOppgave?.merknad,
-                    fritekstAarsak = fritekstAarsak,
                     saksbehandlerIdent = saksbehandler.ident,
                     frist = triggendeOppgave?.frist,
                     paaGrunnAvOppgave = paaGrunnAvOppgave,
                     opphoerFraOgMed = opphoerFraOgMed,
                 ).oppdater()
                 .also { revurdering ->
-                    // Eller sjekke revurdering annen?
-                    if (!fritekstAarsak.isNullOrEmpty()) {
-                        revurderingService.lagreRevurderingsaarsakFritekst(
+                    if (!fritekstAarsak.isNullOrEmpty() && revurdering.revurderingsaarsak!!.kanLagreFritekstFeltForManuellRevurdering()) {
+                        revurderingService.lagreRevurderingsaarsakFritekstForRevurderingAnnenMedEllerUtenBrev(
                             fritekstAarsak,
-                            revurdering.id,
+                            revurdering,
                             saksbehandler.ident,
                         )
                     }
+
                     if (paaGrunnAvHendelse != null) {
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
                             paaGrunnAvHendelse,

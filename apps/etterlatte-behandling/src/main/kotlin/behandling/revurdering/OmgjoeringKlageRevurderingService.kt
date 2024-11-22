@@ -82,7 +82,6 @@ class OmgjoeringKlageRevurderingService(
                 utlandstilknytning = behandlingSomOmgjoeres.utlandstilknytning,
                 boddEllerArbeidetUtlandet = behandlingSomOmgjoeres.boddEllerArbeidetUtlandet,
                 begrunnelse = "Omgjøring på grunn av klage",
-                fritekstAarsak = omgjoeringsoppgave.merknad,
                 saksbehandlerIdent = saksbehandler.ident,
                 relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id.toString(),
             ).oppdater()

@@ -109,6 +109,8 @@ enum class Revurderingaarsak(
         val erIkkeStoetta = listOf(AARLIG_INNTEKTSJUSTERING)
         return kanBrukesIMiljo() && gyldigForSakType(sakType) && !erIkkeStoetta.contains(this)
     }
+
+    fun kanLagreFritekstFeltForManuellRevurdering(): Boolean = this in listOf<Revurderingaarsak>(ANNEN, ANNEN_UTEN_BREV)
 }
 
 enum class GcpEnv(

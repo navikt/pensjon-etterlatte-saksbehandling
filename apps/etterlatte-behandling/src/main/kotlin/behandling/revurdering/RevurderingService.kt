@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -277,13 +278,19 @@ class RevurderingService(
         }
     }
 
-    fun lagreRevurderingsaarsakFritekstForRevurderingAnnen(
+    fun lagreRevurderingsaarsakFritekstForRevurderingAnnenMedEllerUtenBrev(
         fritekstAarsak: String,
-        behandlingId: UUID,
+        revurdering: Revurdering,
         saksbehandlerIdent: String,
     ) {
-        val revurderingInfo = RevurderingInfo.RevurderingAarsakAnnen(fritekstAarsak)
-        lagreRevurderingInfo(behandlingId, RevurderingInfoMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
+        val revurderingInfo =
+            when (revurdering.revurderingsaarsak) {
+                Revurderingaarsak.ANNEN -> RevurderingInfo.RevurderingAarsakAnnen(fritekstAarsak)
+                Revurderingaarsak.ANNEN_UTEN_BREV -> RevurderingInfo.RevurderingAarsakAnnenUtenBrev(fritekstAarsak)
+                else -> throw FeilRevurderingAarsakForFritekstLagring(revurdering)
+            }
+
+        lagreRevurderingInfo(revurdering.id, RevurderingInfoMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
     }
 }
 
@@ -304,3 +311,9 @@ data class RevurderingOgOppfoelging(
 
     fun sakType() = revurdering.sak.sakType
 }
+
+class FeilRevurderingAarsakForFritekstLagring(
+    revurdering: Revurdering,
+) : InternfeilException(
+        detail = "Prøvde å lagre revurdering info annen/annen uten brev med årsak ${revurdering.revurderingsaarsak} id: ${revurdering.id}",
+    )

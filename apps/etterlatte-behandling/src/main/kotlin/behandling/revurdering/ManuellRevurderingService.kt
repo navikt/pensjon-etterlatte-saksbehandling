@@ -134,6 +134,14 @@ class ManuellRevurderingService(
                     opphoerFraOgMed = opphoerFraOgMed,
                 ).oppdater()
                 .also { revurdering ->
+                    // Eller sjekke revurdering annen?
+                    if (!fritekstAarsak.isNullOrEmpty()) {
+                        revurderingService.lagreRevurderingsaarsakFritekst(
+                            fritekstAarsak,
+                            revurdering.id,
+                            saksbehandler.ident,
+                        )
+                    }
                     if (paaGrunnAvHendelse != null) {
                         grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
                             paaGrunnAvHendelse,

@@ -113,7 +113,10 @@ class GrunnlagsendringshendelseDao(
         }
     }
 
-    fun arkiverGrunnlagsendringStatus(hendelse: Grunnlagsendringshendelse) {
+    fun arkiverGrunnlagsendringStatus(
+        hendelseId: UUID,
+        kommentar: String?,
+    ) {
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
@@ -124,9 +127,9 @@ class GrunnlagsendringshendelseDao(
                     WHERE id = ?
                     """.trimIndent(),
                 ).use {
-                    it.setString(1, hendelse.kommentar)
+                    it.setString(1, kommentar)
                     it.setString(2, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT.toString())
-                    it.setObject(3, hendelse.id)
+                    it.setObject(3, hendelseId)
                     it.executeUpdate()
                 }
             }

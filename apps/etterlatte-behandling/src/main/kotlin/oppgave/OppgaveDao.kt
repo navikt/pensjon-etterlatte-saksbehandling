@@ -73,6 +73,11 @@ interface OppgaveDao {
         enhet: Enhetsnummer,
     )
 
+    fun oppdaterIdent(
+        oppgaveId: UUID,
+        nyttFnr: String,
+    )
+
     fun fjernSaksbehandler(oppgaveId: UUID)
 
     fun settForrigeSaksbehandlerFraSaksbehandler(oppgaveId: UUID)
@@ -467,6 +472,26 @@ class OppgaveDaoImpl(
                 statement.setObject(2, oppgaveId)
 
                 statement.executeUpdate()
+            }
+        }
+    }
+
+    override fun oppdaterIdent(
+        oppgaveId: UUID,
+        nyttFnr: String,
+    ) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    UPDATE oppgave
+                    SET fnr = ?
+                    WHERE id = ?::UUID
+                    """.trimIndent(),
+                ).apply {
+                    setString(1, nyttFnr)
+                    setObject(2, oppgaveId)
+                }.executeUpdate()
             }
         }
     }

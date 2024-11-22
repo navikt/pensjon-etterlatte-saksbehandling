@@ -16,6 +16,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
@@ -29,12 +30,15 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -45,6 +49,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.UUID
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SakRoutesTest {
@@ -214,8 +219,45 @@ internal class SakRoutesTest {
         }
     }
 
+    @Test
+    fun `Oppdater ident på sak`() {
+        val nyIdent = KONTANT_FOT
+        val sakId = SakId(Random.nextLong())
+        val hendelseId = UUID.randomUUID()
+        val sak =
+            Sak(
+                "ident",
+                SakType.OMSTILLINGSSTOENAD,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
+
+        every { sakService.finnSak(any()) } returns sak
+        every { sakService.oppdaterIdentForSak(any()) } returns sak.copy(ident = nyIdent.value)
+        val behandlingOgSak = BehandlingOgSak(UUID.randomUUID(), sakId)
+        every { behandlingService.hentAapneBehandlingerForSak(sakId) } returns listOf(behandlingOgSak)
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/$sakId/oppdater_ident?hendelseId=$hendelseId") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                }
+            assertEquals(200, response.status.value)
+        }
+
+        verify(exactly = 1) {
+            sakService.finnSak(sakId)
+            sakService.oppdaterIdentForSak(sak)
+            behandlingService.hentAapneBehandlingerForSak(sakId)
+            behandlingService.avbrytBehandling(behandlingOgSak.behandlingId, any(), AarsakTilAvbrytelse.ANNET, any())
+            grunnlagsendringshendelseService.arkiverHendelseMedKommentar(hendelseId, any(), any())
+        }
+    }
+
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
+        val user =
+            mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
 
         every { user.enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
 

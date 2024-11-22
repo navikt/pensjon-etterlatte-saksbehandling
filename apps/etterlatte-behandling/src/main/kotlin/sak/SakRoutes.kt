@@ -19,6 +19,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.behandling.FoersteVirkDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
@@ -39,6 +40,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 const val KJOERING = "kjoering"
 const val ANTALL = "antall"
@@ -208,6 +210,47 @@ internal fun Route.sakWebRoutes(
                 )
             }
 
+            post("/oppdater_ident") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    val hendelseId =
+                        call.request.queryParameters["hendelseId"]?.let(UUID::fromString)
+                            ?: throw UgyldigForespoerselException("HENDELSE_ID_MANGLER", "HendelseID mangler")
+
+                    val oppdatertSak =
+                        inTransaction {
+                            val sak =
+                                sakService.finnSak(sakId)
+                                    ?: throw SakIkkeFunnetException("Fant ikke sak med id=$sakId")
+
+                            logger.info("Oppdaterer sak ${sak.id} og tilhørende oppgaver med nyeste ident fra PDL")
+
+                            val oppdatertSak = sakService.oppdaterIdentForSak(sak)
+                            oppgaveService.oppdaterIdentForOppgaver(oppdatertSak)
+
+                            behandlingService.hentAapneBehandlingerForSak(sakId).forEach {
+                                behandlingService.avbrytBehandling(
+                                    behandlingId = it.behandlingId,
+                                    saksbehandler = brukerTokenInfo,
+                                    aarsak = AarsakTilAvbrytelse.ANNET,
+                                    kommentar =
+                                        "Avbrytes pga. overføring av sak fra fnr. ${sak.ident} " +
+                                            "til ny ident ${oppdatertSak.ident}",
+                                )
+                            }
+
+                            grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
+                                hendelseId = hendelseId,
+                                kommentar = "Sak er oppdatert med ny ident på bruker (fra=${sak.ident}, til=${oppdatertSak.ident})",
+                                saksbehandler = saksbehandler,
+                            )
+
+                            oppdatertSak
+                        }
+
+                    call.respond(oppdatertSak)
+                }
+            }
+
             post("/endre_enhet") {
                 kunSaksbehandlerMedSkrivetilgang { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
@@ -324,10 +367,14 @@ internal fun Route.sakWebRoutes(
             post("arkivergrunnlagsendringshendelse") {
                 kunSaksbehandler { saksbehandler ->
                     val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()
-                    grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
-                        hendelse = arkivertHendelse,
-                        saksbehandler,
-                    )
+
+                    inTransaction {
+                        grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
+                            hendelseId = arkivertHendelse.id,
+                            kommentar = arkivertHendelse.kommentar,
+                            saksbehandler = saksbehandler,
+                        )
+                    }
                     call.respond(HttpStatusCode.OK)
                 }
             }

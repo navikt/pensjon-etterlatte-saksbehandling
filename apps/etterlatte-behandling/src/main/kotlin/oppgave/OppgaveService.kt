@@ -439,6 +439,17 @@ class OppgaveService(
         }
     }
 
+    fun oppdaterIdentForOppgaver(sak: Sak) {
+        logger.info("Oppdaterer ident på oppgaver som ikke er avsluttet på sak ${sak.id}")
+
+        oppgaveDao
+            .hentOppgaverForSakMedType(sak.id, OppgaveType.entries)
+            .filterNot(OppgaveIntern::erAvsluttet)
+            .forEach {
+                oppgaveDao.oppdaterIdent(it.id, sak.ident)
+            }
+    }
+
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
             fjernSaksbehandlerFraOppgaveVedFlytt(it.id)

@@ -803,6 +803,16 @@ internal class SakServiceTest {
         }
     }
 
+    @Nested
+    inner class TestOppdaterIdentForSak {
+        @Test
+        fun `Sak ident ikke funnet i PDL`() {
+            val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
+
+//            service.oppdaterIdentForSak()
+        }
+    }
+
     private fun dummySak(
         ident: String,
         sakType: SakType,

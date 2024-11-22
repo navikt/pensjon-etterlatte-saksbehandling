@@ -98,6 +98,8 @@ interface SakService {
         sakId: SakId,
         bruker: Systembruker,
     ): SakMedGraderingOgSkjermet
+
+    fun oppdaterIdentForSak(sak: Sak): Sak
 }
 
 class ManglerTilgangTilEnhet(
@@ -216,7 +218,13 @@ class SakServiceImpl(
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
-        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident), HardkodaSystembruker.opprettGrunnlag) }
+        runBlocking {
+            grunnlagService.leggInnNyttGrunnlagSak(
+                sak,
+                Persongalleri(sak.ident),
+                HardkodaSystembruker.opprettGrunnlag,
+            )
+        }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
         val spraak = hentSpraak(sak.ident)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
@@ -228,6 +236,31 @@ class SakServiceImpl(
             )
         }
         return sak
+    }
+
+    override fun oppdaterIdentForSak(sak: Sak): Sak {
+        val identListe = runBlocking { pdltjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident) }
+
+        val alleIdenter = identListe.identifikatorer.map { it.folkeregisterident.value }
+        if (sak.ident !in alleIdenter) {
+            sikkerLogg.error("Ident ${sak.ident} fra sak ${sak.id} matcher ingen av identene fra PDL: $alleIdenter")
+            throw InternfeilException(
+                "Ident i sak ${sak.id} stemmer ikke overens med identer vi fikk fra PDL",
+            )
+        }
+
+        val gjeldendeIdent = identListe.identifikatorer.single { !it.historisk }.folkeregisterident
+
+        dao.oppdaterIdent(sak.id, gjeldendeIdent)
+
+        logger.info("Oppdaterte sak ${sak.id} med bruker sin nyeste ident. Se sikkerlogg for detailjer")
+        sikkerLogg.info(
+            "Oppdaterte sak ${sak.id}: Endret ident fra ${sak.ident} til ${gjeldendeIdent.value}. " +
+                "Alle identer fra PDL: ${identListe.identifikatorer.joinToString()}",
+        )
+
+        return lesDao.hentSak(sak.id)
+            ?: throw InternfeilException("Kunne ikke hente ut sak ${sak.id} som nettopp ble endret")
     }
 
     private fun hentSpraak(fnr: String): Spraak {

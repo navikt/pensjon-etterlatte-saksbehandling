@@ -81,20 +81,19 @@ class GrunnlagsendringshendelseService(
     }
 
     fun arkiverHendelseMedKommentar(
-        hendelse: Grunnlagsendringshendelse,
+        hendelseId: UUID,
+        kommentar: String?,
         saksbehandler: Saksbehandler,
     ) {
-        logger.info("Arkiverer hendelse med id ${hendelse.id}")
+        logger.info("Arkiverer hendelse med id $hendelseId")
 
-        inTransaction {
-            grunnlagsendringshendelseDao.arkiverGrunnlagsendringStatus(hendelse = hendelse)
+        grunnlagsendringshendelseDao.arkiverGrunnlagsendringStatus(hendelseId, kommentar)
 
-            oppgaveService.ferdigStillOppgaveUnderBehandling(
-                referanse = hendelse.id.toString(),
-                type = OppgaveType.VURDER_KONSEKVENS,
-                saksbehandler = saksbehandler,
-            )
-        }
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            referanse = hendelseId.toString(),
+            type = OppgaveType.VURDER_KONSEKVENS,
+            saksbehandler = saksbehandler,
+        )
     }
 
     fun settHendelseTilHistorisk(behandlingId: UUID) {

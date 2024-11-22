@@ -38,7 +38,12 @@ export const Behandling = () => {
     if (behandlingIdFraURL !== behandlingFraRedux?.id) {
       fetchBehandling(
         behandlingIdFraURL,
-        (behandling) => dispatch(setBehandling(behandling)),
+        (behandling) => {
+          if (behandling.hendelser) {
+            console.log(behandling.hendelser)
+          }
+          dispatch(setBehandling(behandling))
+        },
         () => dispatch(resetBehandling())
       )
     }

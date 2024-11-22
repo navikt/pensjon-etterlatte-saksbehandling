@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -68,6 +69,23 @@ class SakSkrivDao(
                 ) { "Kunne ikke opprette sak for fnr: $fnr" }
             }
         }
+
+    fun oppdaterIdent(
+        sakId: SakId,
+        nyIdent: Folkeregisteridentifikator,
+    ) = sakendringerDao.lagreEndringerPaaSak(sakId, "oppdaterIdent") {
+        it
+            .prepareStatement(
+                """
+                UPDATE sak 
+                SET fnr = ? 
+                WHERE id = ?
+                """.trimIndent(),
+            ).apply {
+                setString(1, nyIdent.value)
+                setLong(2, sakId.sakId)
+            }.executeUpdate()
+    }
 
     fun oppdaterEnheterPaaSaker(saker: List<SakMedEnhet>) {
         sakendringerDao.lagreEndringerPaaSaker(saker.map { it.id }, "oppdaterEnheterPaaSaker") {

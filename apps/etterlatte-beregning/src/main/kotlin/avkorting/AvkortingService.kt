@@ -6,6 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -15,7 +16,9 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
@@ -36,6 +39,7 @@ class AvkortingService(
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
     private val grunnlagKlient: GrunnlagKlient,
+    private val vedtakKlient: VedtaksvurderingKlient,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -235,7 +239,14 @@ class AvkortingService(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
-        val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
+        val forrigeBehandlingId =
+            vedtakKlient
+                .hentIverksatteVedtak(sakId, brukerTokenInfo)
+                .filter {
+                    it.vedtakType != VedtakType.OPPHOER
+                }.maxBy {
+                    it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
+                }.behandlingId
         return hentForrigeAvkorting(forrigeBehandlingId)
     }
 

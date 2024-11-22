@@ -367,7 +367,6 @@ class AktivitetspliktService(
             sendDtoTilStatistikk(
                 sakId = sakId,
                 brukerTokenInfo = brukerTokenInfo,
-                behandlingId = UUID.fromString(oppgave.referanse),
             )
         }
 

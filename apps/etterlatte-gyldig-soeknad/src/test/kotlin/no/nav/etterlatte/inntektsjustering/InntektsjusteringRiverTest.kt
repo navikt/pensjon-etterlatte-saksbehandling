@@ -2,8 +2,10 @@ package no.nav.etterlatte.inntektsjustering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.behandling.randomSakId
@@ -22,9 +24,6 @@ import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -71,7 +70,7 @@ internal class InntektsjusteringRiverTest {
                 "JournalId123",
                 true,
             )
-        coEvery { behandlingKlientMock.opprettOppgave(any(), any()) } returns UUID.randomUUID()
+        coEvery { behandlingKlientMock.startInntektsjusteringJobb(any(), any()) } just Runs
 
         val melding =
             JsonMessage
@@ -93,15 +92,7 @@ internal class InntektsjusteringRiverTest {
             dokarkivKlientMock.opprettJournalpost(capture(journalRequest))
             pdfgenKlient.genererPdf(capture(pdfDataSlot), "inntektsjustering_nytt_aar_v1")
 
-            behandlingKlientMock.opprettOppgave(
-                sak.id,
-                NyOppgaveDto(
-                    OppgaveKilde.BRUKERDIALOG,
-                    OppgaveType.MOTTATT_INNTEKTSJUSTERING,
-                    merknad = "Mottatt inntektsjustering",
-                    referanse = "JournalId123",
-                ),
-            )
+            behandlingKlientMock.startInntektsjusteringJobb(sak.id, any())
         }
         with(journalRequest.captured) {
             tittel shouldBe "Inntektsjustering 2025"

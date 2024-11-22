@@ -87,7 +87,6 @@ enum class InntektsjusterinFeatureToggle(
     private val key: String,
 ) : FeatureToggle {
     START_INNTEKTSJUSTERING_JOBB("start-inntektsjustering-jobb"),
-    AUTOMATISK_BEHANDLE("inntektsjustering-automatisk-behandle"),
     ;
 
     override fun key() = key

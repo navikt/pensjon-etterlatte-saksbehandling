@@ -498,3 +498,12 @@ enum class ManuellBehandlingToggle(
 
     override fun key(): String = this.value
 }
+
+enum class InntektsjusterinFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    AUTOMATISK_BEHANDLE("inntektsjustering-automatisk-behandle"),
+    ;
+
+    override fun key() = key
+}

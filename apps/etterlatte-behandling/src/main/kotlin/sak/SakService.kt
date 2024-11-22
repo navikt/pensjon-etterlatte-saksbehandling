@@ -164,8 +164,10 @@ class SakServiceImpl(
         } else if (it.size == 1) {
             it.single()
         } else {
+            sikkerLogg.error("Fant ${it.size} saker av type $sakType på person: ${it.joinToString()}}")
+
             throw InternfeilException(
-                "Personen har flere saker (${it.joinToString()} av type $sakType. " +
+                "Personen har ${it.size} saker av type $sakType. " +
                     "Dette må meldes i Porten for manuell kontroll og opprydding.",
             )
         }

@@ -156,7 +156,7 @@ class RevurderingService(
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
         begrunnelse: String?,
         fritekstAarsak: String? = null,
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: String?,
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
@@ -182,10 +182,6 @@ class RevurderingService(
             tidligereFamiliepleier = tidligereFamiliepleier,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
-
-            if (!fritekstAarsak.isNullOrEmpty()) {
-                lagreRevurderingsaarsakFritekst(fritekstAarsak, opprettBehandling.id, saksbehandlerIdent)
-            }
 
             forrigeBehandling?.let { behandlingId ->
                 kommerBarnetTilGodeService
@@ -259,7 +255,8 @@ class RevurderingService(
                                 merknad = begrunnelse,
                                 frist = frist,
                             )
-                        if ((prosessType == Prosesstype.MANUELL && saksbehandlerIdent != Fagsaksystem.EY.navn) ||
+                        if (saksbehandlerIdent != null &&
+                            (prosessType == Prosesstype.MANUELL && saksbehandlerIdent != Fagsaksystem.EY.navn) ||
                             (prosessType == Prosesstype.AUTOMATISK && saksbehandlerIdent == Fagsaksystem.EY.navn)
                         ) {
                             oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
@@ -282,7 +279,7 @@ class RevurderingService(
         }
     }
 
-    private fun lagreRevurderingsaarsakFritekst(
+    fun lagreRevurderingsaarsakFritekst(
         fritekstAarsak: String,
         behandlingId: UUID,
         saksbehandlerIdent: String,

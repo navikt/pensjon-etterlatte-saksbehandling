@@ -42,6 +42,9 @@ internal class AvkortingServiceTest {
     private val sanksjonService: SanksjonService = mockk()
     private val grunnlagKlient: GrunnlagKlient = mockk()
     private val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
+
+    private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret = mockk()
+
     private val featureToggleService: FeatureToggleService =
         mockk(relaxed = true) {
             every { isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, any(), any()) } returns false
@@ -55,6 +58,7 @@ internal class AvkortingServiceTest {
             sanksjonService,
             grunnlagKlient,
             vedtaksvurderingKlient,
+            avkortingReparerAarsoppgjoeret,
             featureToggleService,
         )
 
@@ -187,12 +191,22 @@ internal class AvkortingServiceTest {
             val eksisterendeAvkorting = mockk<Avkorting>()
             val forrigeAvkorting = mockk<Avkorting>()
             val avkortingFrontend = mockk<AvkortingFrontend>()
-
-            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+            val alleVedtak =
                 listOf(
                     vedtakSammendragDto(behandlingId = forrigeBehandlingId),
                 )
+
+            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns alleVedtak
+
+            every {
+                avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { eksisterendeAvkorting.toFrontend(any(), any(), any()) } returns avkortingFrontend
@@ -205,6 +219,12 @@ internal class AvkortingServiceTest {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
                 vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+                avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+                    forrigeAvkorting,
+                    YearMonth.of(2024, 1),
+                    behandling.sak,
+                    alleVedtak,
+                )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
                 eksisterendeAvkorting.toFrontend(YearMonth.of(2024, 1), forrigeAvkorting, BehandlingStatus.AVKORTET)
             }
@@ -228,12 +248,21 @@ internal class AvkortingServiceTest {
             val beregnetAvkorting = mockk<Avkorting>()
             val lagretAvkorting = mockk<Avkorting>()
             val avkortingFrontend = mockk<AvkortingFrontend>()
-
-            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+            val alleVedtak =
                 listOf(
                     vedtakSammendragDto(behandlingId = forrigeBehandlingId),
                 )
+
+            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns alleVedtak
+            every {
+                avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(behandlingId) } returns null andThen lagretAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
@@ -252,6 +281,12 @@ internal class AvkortingServiceTest {
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+                avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+                    forrigeAvkorting,
+                    YearMonth.of(2024, 1),
+                    behandling.sak,
+                    alleVedtak,
+                )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
@@ -286,12 +321,21 @@ internal class AvkortingServiceTest {
             val reberegnetAvkorting = mockk<Avkorting>()
             val lagretAvkorting = mockk<Avkorting>()
             val avkortingFrontend = mockk<AvkortingFrontend>()
-
-            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+            val alleVedtak =
                 listOf(
                     vedtakSammendragDto(behandlingId = forrigeBehandlingId),
                 )
+
+            coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns alleVedtak
+            every {
+                avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting andThen lagretAvkorting
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
@@ -309,6 +353,12 @@ internal class AvkortingServiceTest {
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+                avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+                    forrigeAvkorting,
+                    YearMonth.of(2024, 1),
+                    behandling.sak,
+                    alleVedtak,
+                )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
@@ -408,6 +458,10 @@ internal class AvkortingServiceTest {
                 )
             val forrigeBehandling = UUID.randomUUID()
             val forrigeAvkorting = mockk<Avkorting>()
+            val alleVedtak =
+                listOf(
+                    vedtakSammendragDto(behandlingId = forrigeBehandling),
+                )
 
             every { avkortingRepository.hentAvkorting(revurderingId) } returns eksisterendeAvkorting andThen lagretAvkorting
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns revurdering
@@ -421,10 +475,15 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
-            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
-                listOf(
-                    vedtakSammendragDto(behandlingId = forrigeBehandling),
+            coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns alleVedtak
+            every {
+                avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
                 )
+            } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(forrigeBehandling) } returns forrigeAvkorting
             every { lagretAvkorting.toFrontend(any(), any(), any()) } returns avkortingFrontend
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -454,6 +513,12 @@ internal class AvkortingServiceTest {
                 )
                 avkortingRepository.lagreAvkorting(revurderingId, sakId, beregnetAvkorting)
                 vedtaksvurderingKlient.hentIverksatteVedtak(sakId, bruker)
+                avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+                    forrigeAvkorting,
+                    YearMonth.of(2024, 3),
+                    revurdering.sak,
+                    alleVedtak,
+                )
                 avkortingRepository.hentAvkorting(forrigeBehandling)
                 lagretAvkorting.toFrontend(YearMonth.of(2024, 3), forrigeAvkorting, BehandlingStatus.BEREGNET)
                 behandlingKlient.avkort(revurderingId, bruker, true)

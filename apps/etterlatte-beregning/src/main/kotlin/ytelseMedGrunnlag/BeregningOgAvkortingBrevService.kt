@@ -72,7 +72,11 @@ class BeregningOgAvkortingBrevService(
                     BehandlingType.FØRSTEGANGSBEHANDLING -> false
                     else -> {
                         val forrigeAvkorting =
-                            avkortingService.hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
+                            avkortingService.hentAvkortingForrigeBehandling(
+                                behandling.sak,
+                                brukerTokenInfo,
+                                behandling.virkningstidspunkt().dato,
+                            )
                         val sisteBeloep =
                             forrigeAvkorting
                                 .toDto()

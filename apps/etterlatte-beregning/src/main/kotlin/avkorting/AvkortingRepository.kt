@@ -501,4 +501,23 @@ class AvkortingRepository(
             sanksjonId = uuid("sanksjon_id"),
             sanksjonType = enumValueOf(string("sanksjon_type")),
         )
+
+    fun hentAlleAarsoppgjoer(sakId: SakId): List<Aarsoppgjoer> =
+        dataSource.transaction { tx ->
+            queryOf(
+                "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id= ? ORDER BY aar ASC",
+                sakId,
+            ).let { query ->
+                tx.run(
+                    query
+                        .map { row ->
+                            Aarsoppgjoer(
+                                id = row.uuid("id"),
+                                aar = row.int("aar"),
+                                fom = row.sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                            )
+                        }.asList,
+                )
+            }
+        }
 }

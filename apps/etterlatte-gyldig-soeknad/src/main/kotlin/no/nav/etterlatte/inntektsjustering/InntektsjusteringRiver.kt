@@ -28,7 +28,6 @@ internal class InntektsjusteringRiver(
 
     init {
         initialiserRiver(rapidsConnection, InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT) {
-            validate { it.requireKey(InntektsjusteringInnsendt.fnrBruker) }
             validate { it.requireKey(InntektsjusteringInnsendt.inntektsjusteringInnhold) }
         }
     }

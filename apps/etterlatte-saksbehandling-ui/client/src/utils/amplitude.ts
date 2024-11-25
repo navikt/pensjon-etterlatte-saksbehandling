@@ -24,10 +24,15 @@ export enum ClickEvent {
   SLETT_BREV = 'slett brev',
   LAST_OPP_BREV = 'last opp brev',
 
+  // Notat
+  OPPRETT_NYTT_NOTAT = 'opprett nytt notat',
+  SLETT_NOTAT = 'slett notat',
+  JOURNALFOER_NOTAT = 'journalfoer notat',
+
   // Avkorting
   AVKORTING_FORVENTET_INNTEKT_HJELPETEKST = 'avkorting forventet inntekt hjelpetekst',
   AVKORTING_INNVILGA_MAANEDER_HJELPETEKST = 'avkorting innvilga måneder hjelpetekst',
-  
+
   // Trygdetid
   KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
 }

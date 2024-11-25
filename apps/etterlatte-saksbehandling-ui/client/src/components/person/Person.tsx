@@ -27,7 +27,6 @@ import { Personopplysninger } from '~components/person/personopplysninger/Person
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { usePersonLocationState } from '~components/person/lenker/usePersonLocationState'
 import { Aktivitet } from '~components/person/aktivitet/Aktivitet'
 
@@ -50,7 +49,6 @@ export const Person = () => {
 
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
-  const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
@@ -110,11 +108,9 @@ export const Person = () => {
         <Tabs.Panel value={PersonOversiktFane.BREV}>
           <BrevOversikt sakResult={sakResult} />
         </Tabs.Panel>
-        {skalViseNotater && (
-          <Tabs.Panel value={PersonOversiktFane.NOTATER}>
-            <NotatOversikt sakResult={sakResult} />
-          </Tabs.Panel>
-        )}
+        <Tabs.Panel value={PersonOversiktFane.NOTATER}>
+          <NotatOversikt sakResult={sakResult} />
+        </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
           <SamordningSak fnr={fnr} sakResult={sakResult} />
         </Tabs.Panel>

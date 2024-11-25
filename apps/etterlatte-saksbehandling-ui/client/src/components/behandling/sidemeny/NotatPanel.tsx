@@ -10,6 +10,7 @@ import { NotatVisningModal } from '~components/person/notat/NotatVisningModal'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const NotatPanel = ({ sakId, behandlingId, fnr }: { sakId: number; behandlingId: string; fnr: string }) => {
   const [notatResult, hentNotater] = useApiCall(hentNotaterForReferanse)
@@ -22,6 +23,8 @@ export const NotatPanel = ({ sakId, behandlingId, fnr }: { sakId: number; behand
   }, [behandlingId])
 
   const opprettNyttNotat = () => {
+    trackClick(ClickEvent.OPPRETT_NYTT_NOTAT)
+
     opprettNotat({ sakId, referanse: behandlingId, mal: NotatMal.TOM_MAL }, () => {
       hentNotater(behandlingId)
     })

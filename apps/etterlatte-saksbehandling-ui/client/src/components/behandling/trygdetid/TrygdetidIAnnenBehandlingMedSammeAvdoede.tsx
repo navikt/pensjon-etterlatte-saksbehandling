@@ -10,7 +10,7 @@ import { Alert, BodyShort, Box, Button, Heading, HStack, Link, Spacer, VStack } 
 import { ExternalLinkIcon, PlusCircleIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
   behandlingId,
@@ -42,7 +42,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
   const skalViseDetaljer = visDetaljer ?? !harRedigertTrygdetidGrunnlag()
 
   const kopierTrygdetid = (kildeBehandlingId: string) => {
-    trackClick('kopier-trygdetidsgrunnlag-fra-behandling-med-samme-avdoede')
+    trackClick(ClickEvent.KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE)
     kopierTrygdetidReq(
       {
         behandlingId: behandlingId,

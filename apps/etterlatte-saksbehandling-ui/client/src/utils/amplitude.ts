@@ -6,6 +6,9 @@ export enum LogEvents {
 
 export enum ClickEvent {
   SLETT_VILKAARSVURDERING = 'slett vilkaarsvurdering',
+  AVKORTING_FORVENTET_INNTEKT_HJELPETEKST = 'avkorting forventet inntekt hjelpetekst',
+  AVKORTING_INNVILGA_MAANEDER_HJELPETEKST = 'avkorting innvilga måneder hjelpetekst',
+  KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
 }
 
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined
@@ -46,7 +49,7 @@ export const initAmplitude = () => {
   return amplitudeInstance
 }
 
-export const trackClick = (name: string | ClickEvent) => {
+export const trackClick = (name: ClickEvent) => {
   if (!amplitudeInstance) {
     console.warn('Amplitude is not initialized. Ignoring')
     return

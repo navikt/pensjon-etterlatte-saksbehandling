@@ -70,7 +70,7 @@ internal class InntektsjusteringRiverTest {
                 "JournalId123",
                 true,
             )
-        coEvery { behandlingKlientMock.startInntektsjusteringJobb(any(), any()) } just Runs
+        coEvery { behandlingKlientMock.behandleInntektsjustering(any(), any()) } just Runs
 
         val melding =
             JsonMessage
@@ -92,7 +92,7 @@ internal class InntektsjusteringRiverTest {
             dokarkivKlientMock.opprettJournalpost(capture(journalRequest))
             pdfgenKlient.genererPdf(capture(pdfDataSlot), "inntektsjustering_nytt_aar_v1")
 
-            behandlingKlientMock.startInntektsjusteringJobb(sak.id, any())
+            behandlingKlientMock.behandleInntektsjustering(sak.id, any())
         }
         with(journalRequest.captured) {
             tittel shouldBe "Inntektsjustering 2025"

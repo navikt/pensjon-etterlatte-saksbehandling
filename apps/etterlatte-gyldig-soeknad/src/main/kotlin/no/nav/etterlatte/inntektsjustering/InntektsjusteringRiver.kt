@@ -37,7 +37,7 @@ internal class InntektsjusteringRiver(
     ) {
         val inntektsjustering = packet.inntektsjustering()
         try {
-            logger.info("Mottatt inntektsjustering (id=${inntektsjustering.id})")
+            logger.info("Mottatt innmeldt inntektsjustering (id=${inntektsjustering.id})")
 
             val sak =
                 runBlocking {
@@ -51,7 +51,7 @@ internal class InntektsjusteringRiver(
                         return
                     }
 
-            startInntektsjusteringJobb(sak, journalpostResponse)
+            startBehandlingAvInntektsjustering(sak, journalpostResponse)
         } catch (e: JsonMappingException) {
             sikkerLogg.error("Feil under deserialisering", e)
             logger.error("Feil under deserialisering av inntektsjustering (id=${inntektsjustering.id}). Se sikkerlogg for detaljer.")
@@ -62,11 +62,11 @@ internal class InntektsjusteringRiver(
         }
     }
 
-    private fun startInntektsjusteringJobb(
+    private fun startBehandlingAvInntektsjustering(
         sak: Sak,
         journalpostResponse: OpprettJournalpostResponse,
     ) {
-        behandlingKlient.startInntektsjusteringJobb(
+        behandlingKlient.behandleInntektsjustering(
             sak.id,
             journalpostResponse.journalpostId,
         )

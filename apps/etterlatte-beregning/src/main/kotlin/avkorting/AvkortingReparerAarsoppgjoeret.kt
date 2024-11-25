@@ -28,59 +28,42 @@ class AvkortingReparerAarsoppgjoeret(
         alleVedtak: List<VedtakSammendragDto>,
     ): Avkorting {
         val alleAarMedAarsoppgjoer = avkortingRepository.hentAlleAarsoppgjoer(sakId).map { it.aar }.distinct()
-        val manglerAar = alleAarMedAarsoppgjoer != forrigeAvkorting.aarsoppgjoer.map { it.aar }
+        val alleAarNyAvkortng = forrigeAvkorting.aarsoppgjoer.map { it.aar }
+        val manglerAar = alleAarMedAarsoppgjoer != alleAarNyAvkortng
 
         if (manglerAar) {
             val sisteAarsoppgjoer = forrigeAvkorting.aarsoppgjoer.maxBy { it.aar }
             if (sisteAarsoppgjoer.aar < virkningstidspunkt.year) {
-                // TODO to unittester
                 if (virkningstidspunkt != YearMonth.of(virkningstidspunkt.year, 1)) {
                     throw FoersteRevurderingSenereEnnJanuar()
                 }
                 return forrigeAvkorting
             }
 
-            // TODO en unittester - mock liste med vedtak som har opphør i mellom
-            val sisteBehandlingSammeAar = alleVedtak.sisteLoependeVedtakForAar(virkningstidspunkt.year).behandlingId
+            val manglendeAar =
+                when (alleAarNyAvkortng.contains(virkningstidspunkt.year)) {
+                    true -> virkningstidspunkt.year.minus(1)
+                    false -> virkningstidspunkt.year
+                }
 
-            val forrigeAvkortingSammeAar =
-                avkortingRepository.hentAvkorting(sisteBehandlingSammeAar)
-                    ?: throw TidligereAvkortingFinnesIkkeException(sisteBehandlingSammeAar)
+            val sisteBehandlingManglendeAar = alleVedtak.sisteLoependeVedtakForAar(manglendeAar).behandlingId
+            val sisteAvkortingManglendeAar =
+                avkortingRepository.hentAvkorting(sisteBehandlingManglendeAar)
+                    ?: throw TidligereAvkortingFinnesIkkeException(sisteBehandlingManglendeAar)
 
-            // TODO to unittester
-            val forrigeAvkortingHarAarsoppgjoerForVirk =
-                forrigeAvkortingSammeAar.aarsoppgjoer.map { it.aar }.contains(virkningstidspunkt.year)
-            return forrigeAvkortingSammeAar.copy(
-                aarsoppgjoer =
-                    if (forrigeAvkortingHarAarsoppgjoerForVirk) {
-                        val nyttAarsoppgjoer =
-                            forrigeAvkorting.aarsoppgjoer.single {
-                                it.aar == virkningstidspunkt.year
-                            }
-                        forrigeAvkortingSammeAar.aarsoppgjoer.erstattEtAarsoppgjoer(nyttAarsoppgjoer)
-                    } else {
-                        forrigeAvkortingSammeAar.aarsoppgjoer + forrigeAvkorting.aarsoppgjoer
-                    },
+            return sisteAvkortingManglendeAar.copy(
+                aarsoppgjoer = sisteAvkortingManglendeAar.aarsoppgjoer + forrigeAvkorting.aarsoppgjoer,
             )
         } else {
-            // TODO en unittester
             return forrigeAvkorting
         }
     }
 }
 
-fun List<Aarsoppgjoer>.erstattEtAarsoppgjoer(nyttAarsoppgjoer: Aarsoppgjoer) =
-    map {
-        when (it.aar) {
-            nyttAarsoppgjoer.aar -> nyttAarsoppgjoer
-            else -> it
-        }
-    }
-
 fun List<VedtakSammendragDto>.sisteLoependeVedtakForAar(aar: Int) =
     filter {
         val vedtakAar = it.virkningstidspunkt?.year ?: throw InternfeilException("Vedtak mangler virk")
-        it.vedtakType != VedtakType.OPPHOER && (vedtakAar) != aar
+        it.vedtakType != VedtakType.OPPHOER && vedtakAar == aar
     }.maxBy {
         it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
     }

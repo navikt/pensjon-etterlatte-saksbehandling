@@ -144,6 +144,7 @@ data class ManuellRevurdering(
                 BehandlingStatus.BEREGNET,
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,
+                BehandlingStatus.TRYGDETID_OPPDATERT,
             ),
             BehandlingStatus.FATTET_VEDTAK,
         ) {

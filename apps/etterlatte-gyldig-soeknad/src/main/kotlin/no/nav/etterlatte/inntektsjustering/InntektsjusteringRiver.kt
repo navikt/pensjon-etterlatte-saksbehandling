@@ -17,6 +17,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class InntektsjusteringRiver(
     rapidsConnection: RapidsConnection,
@@ -51,7 +52,7 @@ internal class InntektsjusteringRiver(
                         return
                     }
 
-            startBehandlingAvInntektsjustering(sak, journalpostResponse)
+            startBehandlingAvInntektsjustering(sak, journalpostResponse, inntektsjustering.id)
         } catch (e: JsonMappingException) {
             sikkerLogg.error("Feil under deserialisering", e)
             logger.error("Feil under deserialisering av inntektsjustering (id=${inntektsjustering.id}). Se sikkerlogg for detaljer.")
@@ -65,10 +66,12 @@ internal class InntektsjusteringRiver(
     private fun startBehandlingAvInntektsjustering(
         sak: Sak,
         journalpostResponse: OpprettJournalpostResponse,
+        id: UUID,
     ) {
         behandlingKlient.behandleInntektsjustering(
             sak.id,
             journalpostResponse.journalpostId,
+            id,
         )
     }
 

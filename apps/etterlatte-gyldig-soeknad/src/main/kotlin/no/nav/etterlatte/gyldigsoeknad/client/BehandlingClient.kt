@@ -56,6 +56,7 @@ class BehandlingClient(
     fun behandleInntektsjustering(
         sakId: SakId,
         journalPostId: String,
+        id: UUID,
     ) {
         runBlocking {
             sakOgBehandlingApp
@@ -65,6 +66,7 @@ class BehandlingClient(
                         InntektsjusteringRequest(
                             sak = sakId,
                             journalpostId = journalPostId,
+                            mottattId = id,
                         ),
                     )
                 }.body<InntektsjusteringRequest>()

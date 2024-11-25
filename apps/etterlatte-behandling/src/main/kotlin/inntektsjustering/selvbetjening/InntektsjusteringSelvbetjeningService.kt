@@ -1,32 +1,26 @@
 package no.nav.etterlatte.inntektsjustering.selvbetjening
 
-import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.GrunnlagService
-import no.nav.etterlatte.behandling.klienter.BeregningKlient
-import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.omregning.OmregningService
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inntektsjustering.InntektsjusterinFeatureToggle
+import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.inntektsjustering.InntektsjusteringRequest
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.rapidsandrivers.OmregningData
+import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
+import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 
 class InntektsjusteringSelvbetjeningService(
-    private val omregningService: OmregningService,
-    private val sakService: SakService,
-    private val behandlingService: BehandlingService,
-    private val revurderingService: RevurderingService,
-    private val grunnlagService: GrunnlagService,
-    private val vedtakKlient: VedtakKlient,
-    private val beregningKlient: BeregningKlient,
-    private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val oppgaveService: OppgaveService,
     private val rapid: KafkaProdusent<String, String>,
     private val featureToggleService: FeatureToggleService,
@@ -35,13 +29,8 @@ class InntektsjusteringSelvbetjeningService(
 
     fun behandleInntektsjustering(request: InntektsjusteringRequest) {
         logger.info("Starter behandling av innmeldt inntektsjustering for sak ${request.sak.sakId}")
-        val skalGjoeresAutomatisk =
-            featureToggleService.isEnabled(
-                InntektsjusterinFeatureToggle.AUTOMATISK_BEHANDLE,
-                false,
-            )
 
-        if (skalGjoeresAutomatisk) {
+        if (skalGjoeresAutomatisk()) {
             startAutomatiskBehandling(
                 request,
                 SakId(request.sak.sakId),
@@ -56,7 +45,11 @@ class InntektsjusteringSelvbetjeningService(
         sakId: SakId,
     ) {
         logger.info("Behandles automatisk: starter omregning for sak ${request.sak.sakId}")
-        // TODO: behandle automatisk
+        publiserKlarForOmregning(
+            sakId,
+            InntektsjusteringRequest.utledLoependeFom(),
+            InntektsjusteringRequest.utledKjoering(request.mottattId),
+        )
     }
 
     private fun startManuellBehandling(request: InntektsjusteringRequest) {
@@ -68,5 +61,48 @@ class InntektsjusteringSelvbetjeningService(
             merknad = "Mottatt inntektsjustering",
             referanse = request.journalpostId,
         )
+    }
+
+    private fun publiserKlarForOmregning(
+        sakId: SakId,
+        loependeFom: YearMonth,
+        kjoering: String,
+    ) {
+        val correlationId = getCorrelationId()
+        rapid
+            .publiser(
+                "inntektsjustering-$sakId",
+                JsonMessage
+                    .newMessage(
+                        OmregningHendelseType.KLAR_FOR_OMREGNING.lagEventnameForType(),
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to Tidspunkt.now(),
+                            OmregningDataPacket.KEY to
+                                OmregningData(
+                                    kjoering = kjoering,
+                                    sakId = sakId,
+                                    revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING,
+                                    fradato = loependeFom.atDay(1),
+                                ).toPacket(),
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Publiserte klar for omregningshendelse for $sakId på partition " +
+                        "$partition, offset $offset, correlationid: $correlationId",
+                )
+            }
+    }
+
+    private fun skalGjoeresAutomatisk(): Boolean {
+        val featureToggle =
+            featureToggleService.isEnabled(
+                InntektsjusterinFeatureToggle.AUTOMATISK_BEHANDLE,
+                false,
+            )
+
+        // TODO: sjekke om riktig tilstand for automatisk behandling
+        return featureToggle
     }
 }

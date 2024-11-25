@@ -518,7 +518,7 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
             datoVedtakOmgjoering,
             utlandstilknytningType,
-            behandling.opphoerFraOgMed,
+            behandling,
         )
     }
 

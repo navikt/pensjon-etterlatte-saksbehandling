@@ -1,16 +1,15 @@
 package no.nav.etterlatte.brev.model.oms
 
-import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.brev.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
-import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -64,35 +63,10 @@ class OmstillingsstoenadInntektsjusteringVedtak(
             behandling: DetaljertBehandling,
             navnAvdoed: String,
         ): OmstillingsstoenadInntektsjusteringVedtak {
-            // TODO duplikater som bør vurderes å trekkes ut felles
             val beregningsperioder =
-                avkortingsinfo.beregningsperioder.map {
-                    OmstillingsstoenadBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        inntekt = it.inntekt,
-                        oppgittInntekt = it.oppgittInntekt,
-                        fratrekkInnAar = it.fratrekkInnAar,
-                        innvilgaMaaneder = it.innvilgaMaaneder,
-                        grunnbeloep = it.grunnbeloep,
-                        ytelseFoerAvkorting = it.ytelseFoerAvkorting,
-                        restanse = it.restanse,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        trygdetid = it.trygdetid,
-                        beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
-                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
-                        sanksjon = it.sanksjon != null,
-                        institusjon = it.institusjon != null && it.institusjon.reduksjon != Reduksjon.NEI_KORT_OPPHOLD,
-                        erOverstyrtInnvilgaMaaneder = it.erOverstyrtInnvilgaMaaneder,
-                    )
-                }
-
-            val sisteBeregningsperiode =
-                beregningsperioder
-                    .filter {
-                        it.datoFOM.year == beregningsperioder.first().datoFOM.year
-                    }.maxBy { it.datoFOM }
-
+                avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
+            val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
+            val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
             val virk = behandling.virkningstidspunkt!!.dato.atDay(1)
 
             val omsRettUtenTidsbegrensning =
@@ -119,8 +93,9 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = navnAvdoed,
                             ),
-                        oppphoersdato = behandling.opphoerFraOgMed?.atDay(1),
-                        opphoerNesteAar = false, // inntekt neste år ikke implementert for revurdering
+                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                        opphoerNesteAar =
+                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
                     ),
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning,
                 tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,

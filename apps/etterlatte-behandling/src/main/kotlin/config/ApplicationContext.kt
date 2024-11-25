@@ -474,14 +474,6 @@ internal class ApplicationContext(
 
     val inntektsjusteringSelvbetjeningService =
         InntektsjusteringSelvbetjeningService(
-            omregningService = omregningService,
-            sakService = sakService,
-            behandlingService = behandlingService,
-            revurderingService = revurderingService,
-            vedtakKlient = vedtakKlient,
-            grunnlagService = grunnlagsService,
-            beregningKlient = beregningsKlient,
-            pdlTjenesterKlient = pdlTjenesterKlient,
             oppgaveService = oppgaveService,
             rapid = rapid,
             featureToggleService = featureToggleService,

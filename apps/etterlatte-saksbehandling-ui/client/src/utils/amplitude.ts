@@ -4,6 +4,10 @@ export enum LogEvents {
   CLICK = 'klikk',
 }
 
+export enum ClickEvent {
+  SLETT_VILKAARSVURDERING = 'slett vilkaarsvurdering',
+}
+
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined
 
 declare global {
@@ -42,7 +46,7 @@ export const initAmplitude = () => {
   return amplitudeInstance
 }
 
-export const trackClick = (name: string) => {
+export const trackClick = (name: string | ClickEvent) => {
   if (!amplitudeInstance) {
     console.warn('Amplitude is not initialized. Ignoring')
     return

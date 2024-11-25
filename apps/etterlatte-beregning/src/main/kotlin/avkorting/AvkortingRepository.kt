@@ -506,7 +506,7 @@ class AvkortingRepository(
         dataSource.transaction { tx ->
             queryOf(
                 "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id= ? ORDER BY aar ASC",
-                sakId,
+                sakId.sakId,
             ).let { query ->
                 tx.run(
                     query

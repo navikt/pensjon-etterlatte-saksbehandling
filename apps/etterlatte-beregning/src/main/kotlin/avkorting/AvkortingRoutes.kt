@@ -35,7 +35,7 @@ fun Route.avkorting(
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter avkorting med behandlingId=$it")
-                when (val avkorting = avkortingService.hentAvkorting(it, brukerTokenInfo)) {
+                when (val avkorting = avkortingService.hentOpprettEllerReberegnAvkorting(it, brukerTokenInfo)) {
                     null -> call.response.status(HttpStatusCode.NoContent)
                     else -> call.respond(avkorting)
                 }

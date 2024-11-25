@@ -5,7 +5,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.avkorting.AvkortingRepository
+import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
@@ -29,21 +29,21 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BeregningOgAvkortingBrevServiceTest {
-    private val avkortingRepository = mockk<AvkortingRepository>()
+    private val avkortingService = mockk<AvkortingService>()
     private val beregningRepository = mockk<BeregningRepository>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val service =
         BeregningOgAvkortingBrevService(
             beregningRepository,
-            avkortingRepository,
+            avkortingService,
             beregningsGrunnlagService,
             behandlingKlient,
         )
 
     @Test
     fun `returnerer null hvis avkorting ikke finnes`() {
-        every { avkortingRepository.hentAvkorting(any()) } returns null
+        every { avkortingService.hentAvkorting(any()) } returns null
         every { beregningRepository.hent(any()) } returns null
         runBlocking {
             service.hentBeregningOgAvkorting(UUID.randomUUID(), bruker) shouldBe null
@@ -82,7 +82,7 @@ internal class BeregningOgAvkortingBrevServiceTest {
                         ),
                     ),
             )
-        every { avkortingRepository.hentAvkorting(behandlingsId) } returns
+        every { avkortingService.hentAvkorting(behandlingsId) } returns
             avkorting(
                 inntektsavkorting =
                     listOf(

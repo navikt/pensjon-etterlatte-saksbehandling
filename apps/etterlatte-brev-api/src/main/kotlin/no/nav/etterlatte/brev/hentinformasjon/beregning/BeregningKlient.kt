@@ -82,7 +82,7 @@ class BeregningKlient(
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningOgAvkortingDto {
         try {
-            logger.info("Henter utregnet ytelse med grunnlag for behandlingId=$behandlingId")
+            logger.info("Henter beregning og avkorting for behandlingId=$behandlingId")
 
             return downstreamResourceClient
                 .get(
@@ -94,14 +94,14 @@ class BeregningKlient(
                 )
         } catch (re: ResponseException) {
             logger.error(
-                "Henting av utregnet ytelse med grunnlag for behandling med behandlingId=$behandlingId feilet",
+                "Henting av beregning og avkorting for behandling med behandlingId=$behandlingId feilet",
                 re,
             )
 
             throw ForespoerselException(
                 status = re.response.status.value,
-                code = "FEIL_HENT_UTREGNET_YTELSE",
-                detail = "Henting av utregnet ytelse med grunnlag for behandling med behandlingId=$behandlingId feilet",
+                code = "FEIL_HENT_BEREGNING_AVKORTING",
+                detail = "Henting av beregning og avkorting for behandling med behandlingId=$behandlingId feilet",
             )
         }
     }

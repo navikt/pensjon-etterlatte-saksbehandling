@@ -31,7 +31,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GrunnlagsendringsHendelseFilterTest {
+internal class GrunnlagsendringsHendelseFilterTest {
     private val vedtakklient = mockk<VedtakKlient>()
     private val behandlingService = mockk<BehandlingService>()
     private lateinit var service: GrunnlagsendringsHendelseFilter

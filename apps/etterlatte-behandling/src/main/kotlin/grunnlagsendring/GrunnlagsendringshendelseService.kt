@@ -210,7 +210,11 @@ class GrunnlagsendringshendelseService(
         }
 
         if (sakIder.isNotEmpty() &&
-            gradering in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)
+            gradering in
+            listOf(
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+            )
         ) {
             logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
         }
@@ -401,14 +405,15 @@ class GrunnlagsendringshendelseService(
         try {
             val samsvarMellomPdlOgGrunnlag =
                 finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
-            val erDuplikat =
-                erDuplikatHendelse(
-                    sak.id,
-                    grunnlagsendringshendelse,
-                    samsvarMellomPdlOgGrunnlag,
-                )
 
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
+                val erDuplikat =
+                    erDuplikatHendelse(
+                        sak.id,
+                        grunnlagsendringshendelse,
+                        samsvarMellomPdlOgGrunnlag,
+                    )
+
                 if (erDuplikat) {
                     forkastHendelse(grunnlagsendringshendelse, samsvarMellomPdlOgGrunnlag)
                 } else {
@@ -440,7 +445,10 @@ class GrunnlagsendringshendelseService(
                     "Hendelsen vises derfor til saksbehandler.",
             )
             grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                hendelse.copy(
+                    samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+                    status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                ),
             )
             opprettOppgave(hendelse)
         }
@@ -464,7 +472,10 @@ class GrunnlagsendringshendelseService(
     ) {
         logger.info("Forkaster grunnlagsendringshendelse med id ${hendelse.id}.")
         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-            hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.FORKASTET),
+            hendelse.copy(
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+                status = GrunnlagsendringStatus.FORKASTET,
+            ),
         )
     }
 

@@ -66,12 +66,12 @@ internal class InntektsjusteringRiver(
     private fun startBehandlingAvInntektsjustering(
         sak: Sak,
         journalpostResponse: OpprettJournalpostResponse,
-        id: UUID,
+        inntektsjusteringId: UUID,
     ) {
         behandlingKlient.behandleInntektsjustering(
             sak.id,
             journalpostResponse.journalpostId,
-            id,
+            inntektsjusteringId,
         )
     }
 

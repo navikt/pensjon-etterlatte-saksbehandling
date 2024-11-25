@@ -48,7 +48,7 @@ class InntektsjusteringSelvbetjeningService(
         publiserKlarForOmregning(
             sakId,
             InntektsjusteringRequest.utledLoependeFom(),
-            InntektsjusteringRequest.utledKjoering(request.mottattId),
+            InntektsjusteringRequest.utledKjoering(request.inntektsjusteringId),
         )
     }
 

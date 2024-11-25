@@ -20,10 +20,10 @@ data class AarligInntektsjusteringRequest(
 data class InntektsjusteringRequest(
     val sak: SakId,
     val journalpostId: String,
-    val mottattId: UUID,
+    val inntektsjusteringId: UUID,
 ) {
     companion object {
-        fun utledKjoering(mottatt: UUID) = "INNTEKTSJUSTERING_${utledLoependeFom()}_$mottatt"
+        fun utledKjoering(id: UUID) = "INNTEKTSJUSTERING_${utledLoependeFom()}_$id"
 
         fun utledLoependeFom() = YearMonth.of(Year.now().value, 1).plusYears(1)
     }

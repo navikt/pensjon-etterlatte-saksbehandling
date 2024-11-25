@@ -169,6 +169,49 @@ class BrevService(
                 spraak = spraak,
             ).first
 
+    suspend fun oppdaterManueltBrev(
+        sakId: SakId,
+        brevId: BrevID,
+        bruker: BrukerTokenInfo,
+        parametre: BrevParametre,
+    ): Brev {
+        val brev = db.hentBrev(brevId)
+        if (!brev.kanEndres()) {
+            throw UgyldigForespoerselException(
+                "BREV_KAN_IKKE_ENDRES",
+                "Innholdet i brev med id=$brevId kan ikke oppdateres, siden brevet har status ${brev.status}",
+            )
+        }
+        if (brev.sakId != sakId) {
+            throw UgyldigForespoerselException(
+                "SAK_ID_STEMMER_IKKE",
+                "SakId angitt ($sakId) stemmer ikke med sakId'en til brevet med id=$brevId",
+            )
+        }
+        val spraak = parametre.spraak
+
+        // Oppdater språket hvis nødvendig, _før_ vi henter data basert på språket til brevet
+        if (brev.spraak != spraak) {
+            db.oppdaterSpraak(brevId, spraak, bruker)
+        }
+        val innhold =
+            brevoppretter.hentNyttInnhold(
+                sakId = sakId,
+                brevId = brevId,
+                behandlingId = null,
+                bruker = bruker,
+                brevDataMapping = { parametre.brevDataMapping() },
+                brevKodeMapping = { parametre.brevkode },
+            )
+        if (innhold.hoveddel != null) {
+            db.oppdaterPayload(brevId, innhold.hoveddel, bruker)
+        }
+        if (innhold.vedlegg != null) {
+            db.oppdaterPayloadVedlegg(brevId, innhold.vedlegg, bruker)
+        }
+        return db.hentBrev(brevId)
+    }
+
     data class BrevPayload(
         val hoveddel: Slate?,
         val vedlegg: List<BrevInnholdVedlegg>?,

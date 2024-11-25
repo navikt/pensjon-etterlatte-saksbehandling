@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAkt
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.model.BrevStatusResponse
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -163,7 +164,8 @@ class AktivitetspliktOppgaveServiceTest {
             }
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
 
-        val skalIkkeSendebrev = AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, false, kilde = kilde)
+        val skalIkkeSendebrev =
+            AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, false, kilde = kilde, spraak = Spraak.NB)
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalIkkeSendebrev
         assertThrows<BrevFeil> {
             service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
@@ -193,6 +195,7 @@ class AktivitetspliktOppgaveServiceTest {
                 redusertEtterInntekt = true,
                 utbetaling = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalsendeBrev
 
@@ -217,7 +220,15 @@ class AktivitetspliktOppgaveServiceTest {
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
 
         val skalIkkeSendebrev =
-            AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, true, redusertEtterInntekt = true, kilde = kilde)
+            AktivitetspliktInformasjonBrevdata(
+                oppgaveId,
+                sakIdForOppgave,
+                null,
+                true,
+                redusertEtterInntekt = true,
+                kilde = kilde,
+                spraak = Spraak.NB,
+            )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalIkkeSendebrev
         assertThrows<ManglerBrevdata> { service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler) }
         verify(exactly = 0) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
@@ -234,7 +245,8 @@ class AktivitetspliktOppgaveServiceTest {
                 every { sakId } returns sakIdForOppgave
             }
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
-        val skalIkkeSendebrev = AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, true, utbetaling = true, kilde = kilde)
+        val skalIkkeSendebrev =
+            AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, null, true, utbetaling = true, kilde = kilde, spraak = Spraak.NB)
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalIkkeSendebrev
         assertThrows<ManglerBrevdata> { service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler) }
     }
@@ -251,7 +263,7 @@ class AktivitetspliktOppgaveServiceTest {
 
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
 
-        val brevIdfinnes = AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, 2L, true, kilde = kilde)
+        val brevIdfinnes = AktivitetspliktInformasjonBrevdata(oppgaveId, sakIdForOppgave, 2L, true, kilde = kilde, spraak = Spraak.NB)
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns brevIdfinnes
         service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         verify(exactly = 0) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
@@ -299,6 +311,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalSendeBrev
         coEvery { brevApiKlient.opprettSpesifiktBrev(any(), any(), any()) } returns
@@ -351,6 +364,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalSendeBrev
         coEvery { brevApiKlient.opprettSpesifiktBrev(any(), any(), any()) } returns
@@ -386,6 +400,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } throws OppgaveKanIkkeEndres(oppgaveId, Status.AVBRUTT)
         every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
@@ -420,6 +435,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
         every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } just Runs
@@ -452,6 +468,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
         every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } just Runs
@@ -484,6 +501,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
         assertThrows<OppgaveErAvsluttet> {
@@ -513,6 +531,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
@@ -546,6 +565,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
@@ -579,6 +599,7 @@ class AktivitetspliktOppgaveServiceTest {
                 utbetaling = true,
                 redusertEtterInntekt = true,
                 kilde = kilde,
+                spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs

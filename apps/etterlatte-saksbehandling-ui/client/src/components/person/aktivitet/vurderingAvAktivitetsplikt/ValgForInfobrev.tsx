@@ -21,11 +21,13 @@ import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/Aktivi
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { handlinger } from '~components/behandling/handlinger/typer'
+import { Spraak } from '~shared/types/Brev'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
   utbetaling: JaNei
   redusertEtterInntekt: JaNei
+  spraak?: Spraak
 }
 
 function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
@@ -33,6 +35,7 @@ function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
     skalSendeBrev: brevdata.skalSendeBrev === JaNei.JA,
     utbetaling: brevdata.utbetaling ? brevdata.utbetaling === JaNei.JA : undefined,
     redusertEtterInntekt: brevdata.redusertEtterInntekt ? brevdata.redusertEtterInntekt === JaNei.JA : undefined,
+    spraak: brevdata.spraak,
   }
 }
 
@@ -115,6 +118,20 @@ export const ValgForInfobrev = () => {
                       <>
                         <Radio value={JaNei.JA}>{JaNeiRec.JA}</Radio>
                         <Radio value={JaNei.NEI}>{JaNeiRec.NEI}</Radio>
+                      </>
+                    }
+                  />
+
+                  <ControlledRadioGruppe
+                    name="spraak"
+                    control={control}
+                    legend="Hvilken målform skal brevet ha?"
+                    errorVedTomInput="Du må velge målformen til brevet."
+                    radios={
+                      <>
+                        <Radio value={Spraak.NB}>Bokmål</Radio>
+                        <Radio value={Spraak.NN}>Nynorsk</Radio>
+                        <Radio value={Spraak.EN}>Engelsk</Radio>
                       </>
                     }
                   />

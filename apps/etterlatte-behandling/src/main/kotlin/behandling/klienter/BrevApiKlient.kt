@@ -9,6 +9,7 @@ import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -36,6 +37,13 @@ interface BrevApiKlient {
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun oppdaterSpesifiktBrev(
+        sakId: SakId,
+        brevId: BrevID,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev
 
     suspend fun ferdigstillBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
@@ -161,6 +169,22 @@ class BrevApiKlientObo(
     ): Brev =
         post(
             url = "$resourceUrl/api/brev/sak/$sakId/spesifikk",
+            onSuccess = { resource ->
+                resource.response?.let { objectMapper.readValue(it.toJson()) }
+                    ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
+            },
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = brevParametre.toJson(),
+        )
+
+    override suspend fun oppdaterSpesifiktBrev(
+        sakId: SakId,
+        brevId: Long,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev =
+        post(
+            url = "$resourceUrl/api/brev/sak/$sakId/spesifikk/$brevId",
             onSuccess = { resource ->
                 resource.response?.let { objectMapper.readValue(it.toJson()) }
                     ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")

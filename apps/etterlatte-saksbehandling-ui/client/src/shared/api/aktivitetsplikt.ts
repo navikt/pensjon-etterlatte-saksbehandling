@@ -11,6 +11,7 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { OppgaveDTO } from '~shared/types/oppgave'
+import { Spraak } from '~shared/types/Brev'
 
 export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string
@@ -136,6 +137,7 @@ export interface IBrevAktivitetspliktRequest {
   skalSendeBrev: boolean
   utbetaling?: boolean
   redusertEtterInntekt?: boolean
+  spraak?: Spraak
 }
 
 export const lagreAktivitetspliktBrevdata = async (args: {

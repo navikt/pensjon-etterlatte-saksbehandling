@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
@@ -29,6 +30,38 @@ class Brevoppretter(
     private val innholdTilRedigerbartBrevHenter: InnholdTilRedigerbartBrevHenter,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    suspend fun oppdaterBrevInnhold(
+        sakId: SakId,
+        brevID: BrevID,
+        behandlingId: UUID?,
+        brevKode: Brevkoder,
+        brevData: BrevDataRedigerbar,
+        spraak: Spraak? = null,
+        bruker: BrukerTokenInfo,
+    ): Brev =
+        with(
+            innholdTilRedigerbartBrevHenter.hentInnDataForBrevMedData(
+                sakId = sakId,
+                behandlingId = behandlingId,
+                bruker = bruker,
+                brevKode = brevKode,
+                brevData = brevData,
+                spraak = spraak,
+            ),
+        ) {
+            db.oppdaterPayload(
+                id = brevID,
+                payload = this.innhold.payload!!,
+                bruker = bruker,
+            )
+            db.oppdaterPayloadVedlegg(
+                id = brevID,
+                payload = this.innholdVedlegg!!,
+                bruker = bruker,
+            )
+            db.hentBrev(brevID)
+        }
 
     suspend fun opprettBrevSomHarInnhold(
         sakId: SakId,

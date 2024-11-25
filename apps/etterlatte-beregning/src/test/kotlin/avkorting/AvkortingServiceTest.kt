@@ -84,7 +84,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
-                service.hentAvkorting(behandlingId, bruker) shouldBe null
+                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker) shouldBe null
             }
 
             coVerify {
@@ -117,7 +117,7 @@ internal class AvkortingServiceTest {
             } returns avkortingFrontend
 
             runBlocking {
-                service.hentAvkorting(behandlingId, bruker) shouldBe avkortingFrontend
+                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker) shouldBe avkortingFrontend
             }
             coVerify {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
@@ -153,7 +153,7 @@ internal class AvkortingServiceTest {
             every { lagretAvkorting.toFrontend(any(), any(), any()) } returns avkortinDto
 
             runBlocking {
-                service.hentAvkorting(behandlingId, bruker) shouldBe avkortinDto
+                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker) shouldBe avkortinDto
             }
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
@@ -198,7 +198,7 @@ internal class AvkortingServiceTest {
             every { eksisterendeAvkorting.toFrontend(any(), any(), any()) } returns avkortingFrontend
 
             runBlocking {
-                service.hentAvkorting(behandlingId, bruker)
+                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker)
             }
 
             coVerify(exactly = 1) {
@@ -245,7 +245,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
             runBlocking {
-                service.hentAvkorting(behandlingId, bruker)
+                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker)
             }
 
             coVerify(exactly = 1) {
@@ -302,7 +302,7 @@ internal class AvkortingServiceTest {
             every { lagretAvkorting.toFrontend(any(), any(), any()) } returns avkortingFrontend
 
             runBlocking {
-                service.hentAvkorting(behandlingId, bruker)
+                service.hentOpprettEllerReberegnAvkorting(behandlingId, bruker)
             }
 
             coVerify(exactly = 1) {

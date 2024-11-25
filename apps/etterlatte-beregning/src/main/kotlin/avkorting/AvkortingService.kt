@@ -44,13 +44,13 @@ class AvkortingService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hentAvkorting(
+    suspend fun hentOpprettEllerReberegnAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AvkortingFrontend? {
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandling.id)
+        val eksisterendeAvkorting = hentAvkorting(behandlingId)
 
         if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             return eksisterendeAvkorting?.let {
@@ -87,6 +87,8 @@ class AvkortingService(
             avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
         }
     }
+
+    fun hentAvkorting(behandlingId: UUID) = avkortingRepository.hentAvkorting(behandlingId)
 
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,
@@ -235,7 +237,7 @@ class AvkortingService(
         forrigeAvkorting: Avkorting? = null,
     ): AvkortingFrontend = avkorting.toFrontend(behandling.virkningstidspunkt().dato, forrigeAvkorting, behandling.status)
 
-    private suspend fun hentAvkortingForrigeBehandling(
+    suspend fun hentAvkortingForrigeBehandling(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {

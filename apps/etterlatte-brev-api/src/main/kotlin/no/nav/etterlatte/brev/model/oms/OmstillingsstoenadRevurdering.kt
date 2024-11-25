@@ -54,7 +54,6 @@ data class OmstillingsstoenadRevurdering(
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
             avkortingsinfo: Avkortingsinfo,
-            forrigeAvkortingsinfo: Avkortingsinfo?,
             etterbetalingDTO: EtterbetalingDTO?,
             trygdetid: TrygdetidDto,
             brevutfall: BrevutfallDto,
@@ -107,10 +106,7 @@ data class OmstillingsstoenadRevurdering(
                         BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
                     ),
                 erEndret =
-                    erEndret(
-                        forrigeAvkortingsinfo,
-                        avkortingsinfo,
-                    ) ||
+                    avkortingsinfo.endringIUtbetalingVedVirk ||
                         revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 datoVedtakOmgjoering = datoVedtakOmgjoering,
@@ -143,18 +139,6 @@ data class OmstillingsstoenadRevurdering(
                 feilutbetaling = feilutbetaling,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
             )
-        }
-
-        private fun erEndret(
-            forrigeAvkortingsinfo: Avkortingsinfo?,
-            avkortingsinfo: Avkortingsinfo,
-        ): Boolean {
-            // Sjekker siste periode på forrige iverksatte og gjeldende behandling - mulig dette ikke holder
-            // med litt mer komplekse behandlinger?
-            val beloepForrigeBehandling =
-                forrigeAvkortingsinfo?.beregningsperioder?.maxBy { it.datoFOM }?.utbetaltBeloep
-            val beloepGjeldendeBehandling = avkortingsinfo.beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep
-            return beloepForrigeBehandling == null || beloepForrigeBehandling != beloepGjeldendeBehandling
         }
     }
 }

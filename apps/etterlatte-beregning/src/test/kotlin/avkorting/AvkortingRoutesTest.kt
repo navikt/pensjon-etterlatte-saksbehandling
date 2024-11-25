@@ -58,7 +58,7 @@ class AvkortingRoutesTest {
 
     @Test
     fun `skal returnere 204 naar avkorting ikke finnes`() {
-        coEvery { avkortingService.hentAvkorting(any(), any()) } returns null
+        coEvery { avkortingService.hentOpprettEllerReberegnAvkorting(any(), any()) } returns null
 
         testApplication {
             val response =

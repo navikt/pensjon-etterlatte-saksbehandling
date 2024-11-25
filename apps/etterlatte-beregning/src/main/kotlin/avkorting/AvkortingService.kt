@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 enum class AvkortingToggles(
@@ -40,6 +41,7 @@ class AvkortingService(
     private val sanksjonService: SanksjonService,
     private val grunnlagKlient: GrunnlagKlient,
     private val vedtakKlient: VedtaksvurderingKlient,
+    private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -69,7 +71,8 @@ class AvkortingService(
             }
         }
 
-        val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
+        val forrigeAvkorting =
+            hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo, behandling.virkningstidspunkt().dato)
         return if (eksisterendeAvkorting == null) {
             val nyAvkorting =
                 kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
@@ -148,7 +151,12 @@ class AvkortingService(
             if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
                 avkortingMedTillegg(lagretAvkorting, behandling)
             } else {
-                val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
+                val forrigeAvkorting =
+                    hentAvkortingForrigeBehandling(
+                        behandling.sak,
+                        brukerTokenInfo,
+                        behandling.virkningstidspunkt().dato,
+                    )
                 avkortingMedTillegg(
                     lagretAvkorting,
                     behandling,
@@ -240,16 +248,23 @@ class AvkortingService(
     suspend fun hentAvkortingForrigeBehandling(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
+        virkningstidspunkt: YearMonth,
     ): Avkorting {
+        val alleVedtak = vedtakKlient.hentIverksatteVedtak(sakId, brukerTokenInfo)
         val forrigeBehandlingId =
-            vedtakKlient
-                .hentIverksatteVedtak(sakId, brukerTokenInfo)
+            alleVedtak
                 .filter {
                     it.vedtakType != VedtakType.OPPHOER
                 }.maxBy {
                     it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
                 }.behandlingId
-        return hentForrigeAvkorting(forrigeBehandlingId)
+        val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
+        return avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+            forrigeAvkorting,
+            virkningstidspunkt,
+            sakId,
+            alleVedtak,
+        )
     }
 
     fun hentForrigeAvkorting(forrigeBehandlingId: UUID): Avkorting =

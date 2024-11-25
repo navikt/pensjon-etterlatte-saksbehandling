@@ -3,6 +3,7 @@ package no.nav.etterlatte.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.avkorting.AarligInntektsjusteringService
+import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.AvkortingTidligAlderspensjonService
@@ -105,6 +106,9 @@ class ApplicationContext {
             sanksjonService = sanksjonService,
         )
     val avkortingRepository = AvkortingRepository(dataSource)
+
+    val avkortingReparerAarsoppgjoeret = AvkortingReparerAarsoppgjoeret(avkortingRepository)
+
     val avkortingService =
         AvkortingService(
             behandlingKlient = behandlingKlient,
@@ -113,6 +117,7 @@ class ApplicationContext {
             sanksjonService = sanksjonService,
             grunnlagKlient = grunnlagKlient,
             vedtakKlient = vedtaksvurderingKlient,
+            avkortingReparerAarsoppgjoeret = avkortingReparerAarsoppgjoeret,
             featureToggleService = featureToggleService,
         )
     val avkortingTidligAlderspensjonService =

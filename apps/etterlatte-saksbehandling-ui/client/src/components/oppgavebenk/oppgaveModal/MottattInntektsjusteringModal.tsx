@@ -9,6 +9,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { hentJournalpost } from '~shared/api/dokument'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
+import { PersonLink } from '~components/person/lenker/PersonLink'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -94,8 +95,15 @@ export const MottattInntektsjusteringModal = ({ oppgave, oppdaterStatus }: Props
                             for å se inntektsopplysningen.
                           </List.Item>
                           <List.Item>
-                            Vurder om det skal opprettes en revurdering, eller om det er nok å sende informasjon til
-                            bruker.
+                            Vurder om det skal opprettes en revurdering, eller om det er nok å sende informasjon til{' '}
+                            {!!oppgave.fnr ? (
+                              <PersonLink fnr={oppgave.fnr} target="_blank">
+                                bruker
+                              </PersonLink>
+                            ) : (
+                              'bruker'
+                            )}
+                            .
                           </List.Item>
                           <List.Item>
                             Ved revurdering, opprett en revurdering og velg årsak “endring av inntekt”.

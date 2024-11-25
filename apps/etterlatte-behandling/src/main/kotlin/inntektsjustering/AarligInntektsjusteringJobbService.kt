@@ -441,7 +441,7 @@ class AarligInntektsjusteringJobbService(
     }
 
     private fun genererManuellBegrunnelseTekst(aarsakTilManuell: AarligInntektsjusteringAarsakManuell): String =
-        "Inntektsjustering kan ikke behandles automatisk. Årsak: ${aarsakTilManuell.name}"
+        "Inntektsjustering for neste år må behandles manuelt. Årsak: ${aarsakTilManuell.name}"
 }
 
 enum class AarligInntektsjusteringAarsakManuell {

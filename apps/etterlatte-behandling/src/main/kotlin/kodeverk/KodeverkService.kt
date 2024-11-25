@@ -12,40 +12,35 @@ class KodeverkService(
         Caffeine
             .newBuilder()
             .expireAfterWrite(1, TimeUnit.DAYS)
-            .build<CacheKey, KodeverkResponse>()
-
-    private val cacheArkivtemaer =
-        Caffeine
-            .newBuilder()
-            .expireAfterWrite(1, TimeUnit.DAYS)
-            .build<CacheKey, KodeverkResponse>()
+            .build<KodeverkNavn, KodeverkResponse>()
 
     suspend fun hentAlleLand(brukerTokenInfo: BrukerTokenInfo): List<Land> {
-        val landkoder =
-            cache.getIfPresent(CacheKey.LANDKODER)
-                ?: klient
-                    .hent(KodeverkNavn.LANDKODER, false, brukerTokenInfo)
-                    .also { cache.put(CacheKey.LANDKODER, it) }
+        val landkoder = hent(KodeverkNavn.LANDKODER, false, brukerTokenInfo)
 
         return mapLandkoder(landkoder)
     }
 
     suspend fun hentAlleLandISO2(brukerTokenInfo: BrukerTokenInfo): List<Land> {
-        val landkoder =
-            cache.getIfPresent(CacheKey.LANDKODER_ISO2)
-                ?: klient
-                    .hent(KodeverkNavn.LANDKODERISO2, false, brukerTokenInfo)
-                    .also { cache.put(CacheKey.LANDKODER_ISO2, it) }
+        val landkoder = hent(KodeverkNavn.LANDKODERISO2, false, brukerTokenInfo)
 
         return mapLandkoder(landkoder)
     }
 
+    suspend fun hentAlleOppgavetyper(brukerTokenInfo: BrukerTokenInfo): Map<String, String> {
+        val oppgavetyper = hent(KodeverkNavn.OPPGAVETYPER, true, brukerTokenInfo)
+
+        return oppgavetyper.betydninger.mapValues { (_, betydninger) ->
+            betydninger
+                .first()
+                .beskrivelser["nb"]!!
+                .let {
+                    it.tekst.takeUnless(String::isBlank) ?: it.term
+                }
+        }
+    }
+
     suspend fun hentArkivTemaer(brukerTokenInfo: BrukerTokenInfo): List<Beskrivelse> {
-        val arkivtemaer =
-            cacheArkivtemaer.getIfPresent(CacheKey.ARKIVTEMAER)
-                ?: klient
-                    .hent(KodeverkNavn.ARKIVTEMAER, true, brukerTokenInfo)
-                    .also { cacheArkivtemaer.put(CacheKey.ARKIVTEMAER, it) }
+        val arkivtemaer = hent(KodeverkNavn.ARKIVTEMAER, true, brukerTokenInfo)
 
         return arkivtemaer.betydninger.map { (tema, betydninger) ->
             Beskrivelse(
@@ -57,6 +52,16 @@ class KodeverkService(
             )
         }
     }
+
+    private suspend fun hent(
+        kodeverkNavn: KodeverkNavn,
+        ekskluderUgyldige: Boolean,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): KodeverkResponse =
+        cache.getIfPresent(kodeverkNavn)
+            ?: klient
+                .hent(kodeverkNavn, ekskluderUgyldige, brukerTokenInfo)
+                .also { cache.put(kodeverkNavn, it) }
 
     private fun mapLandkoder(response: KodeverkResponse): List<Land> =
         response
@@ -84,12 +89,6 @@ class KodeverkService(
                     )
                 }
             }
-}
-
-private enum class CacheKey {
-    LANDKODER,
-    LANDKODER_ISO2,
-    ARKIVTEMAER,
 }
 
 data class Land(

@@ -72,6 +72,7 @@ enum class KodeverkNavn(
     ARKIVTEMAER("Arkivtemaer"),
     LANDKODER("Landkoder"),
     LANDKODERISO2("LandkoderISO2"),
+    OPPGAVETYPER("Oppgavetyper"), // Gosys-oppgavetyper
     ;
 
     override fun toString(): String = verdi

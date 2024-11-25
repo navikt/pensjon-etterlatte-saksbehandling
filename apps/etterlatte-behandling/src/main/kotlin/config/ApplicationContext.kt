@@ -570,6 +570,7 @@ internal class ApplicationContext(
             oppgaveService,
             saksbehandlerService,
             saksbehandlerInfoDao,
+            kodeverkService,
             pdlTjenesterKlient,
         )
 

@@ -9,6 +9,7 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -75,7 +76,7 @@ interface GosysOppgaveService {
         oppgaveId: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysOppgave
+    )
 
     suspend fun feilregistrer(
         oppgaveId: String,
@@ -89,6 +90,7 @@ class GosysOppgaveServiceImpl(
     private val oppgaveService: OppgaveService,
     private val saksbehandlerService: SaksbehandlerService,
     private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
+    private val kodeverkService: KodeverkService,
     private val pdltjeneserKlient: PdlTjenesterKlient,
 ) : GosysOppgaveService {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -165,9 +167,11 @@ class GosysOppgaveServiceImpl(
 
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $temaListe")
 
+        val oppgavetyper = kodeverkService.hentAlleOppgavetyper(brukerTokenInfo)
+
         return inTransaction {
             gosysOppgaver.oppgaver
-                .map { it.tilGosysOppgave() }
+                .map { it.tilGosysOppgave(oppgavetyper) }
                 .filterForEnheter(Kontekst.get().AppUser)
         }
     }
@@ -192,9 +196,11 @@ class GosysOppgaveServiceImpl(
 
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) på person ${foedselsnummer.maskerFnr()}")
 
+        val oppgavetyper = kodeverkService.hentAlleOppgavetyper(brukerTokenInfo)
+
         return inTransaction {
             gosysOppgaver.oppgaver
-                .map { it.tilGosysOppgave() }
+                .map { it.tilGosysOppgave(oppgavetyper) }
                 .filterForEnheter(Kontekst.get().AppUser)
         }
     }
@@ -205,9 +211,11 @@ class GosysOppgaveServiceImpl(
     ): List<GosysOppgave> {
         val gosysOppgaver = gosysOppgaveKlient.hentJournalfoeringsoppgave(journalpostId, brukerTokenInfo)
 
+        val oppgavetyper = kodeverkService.hentAlleOppgavetyper(brukerTokenInfo)
+
         return inTransaction {
             gosysOppgaver.oppgaver
-                .map { it.tilGosysOppgave() }
+                .map { it.tilGosysOppgave(oppgavetyper) }
                 .filterForEnheter(Kontekst.get().AppUser)
         }
     }
@@ -229,8 +237,10 @@ class GosysOppgaveServiceImpl(
     ): GosysOppgave =
         cache.getIfPresent(id) ?: gosysOppgaveKlient
             .hentOppgave(id, brukerTokenInfo)
-            .run { inTransaction { tilGosysOppgave() } }
-            .also { cache.put(id, it) }
+            .run {
+                val oppgavetyper = kodeverkService.hentAlleOppgavetyper(brukerTokenInfo)
+                inTransaction { tilGosysOppgave(oppgavetyper) }
+            }.also { cache.put(id, it) }
 
     override suspend fun flyttTilGjenny(
         oppgaveId: Long,
@@ -306,10 +316,12 @@ class GosysOppgaveServiceImpl(
         oppgaveId: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysOppgave =
+    ) {
+        logger.info("Ferdigstiller Gosys-oppgave id=$oppgaveId")
+
         gosysOppgaveKlient
             .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
-            .run { inTransaction { tilGosysOppgave() } }
+    }
 
     override suspend fun feilregistrer(
         oppgaveId: String,
@@ -326,13 +338,13 @@ class GosysOppgaveServiceImpl(
         return gosysOppgaveKlient.feilregistrer(oppgaveId, endreStatusRequest, brukerTokenInfo).id
     }
 
-    private fun GosysApiOppgave.tilGosysOppgave(): GosysOppgave =
+    private fun GosysApiOppgave.tilGosysOppgave(oppgavetyper: Map<String, String>): GosysOppgave =
         GosysOppgave(
             id = this.id,
             versjon = this.versjon,
             status = this.status,
             tema = this.tema,
-            oppgavetype = this.oppgavetype,
+            oppgavetype = oppgavetyper[this.oppgavetype] ?: this.oppgavetype,
             opprettet = this.opprettetTidspunkt,
             frist =
                 this.fristFerdigstillelse?.let { frist ->

@@ -6,6 +6,7 @@ export interface GosysOppgave {
   versjon: number
   status: string
   tema: GosysTema
+  // TODO: Burde være key value
   oppgavetype: string
   saksbehandler?: OppgaveSaksbehandler
   enhet: string

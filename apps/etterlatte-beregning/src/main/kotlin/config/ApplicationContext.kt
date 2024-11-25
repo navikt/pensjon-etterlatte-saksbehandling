@@ -112,6 +112,7 @@ class ApplicationContext {
             beregningService = beregningService,
             sanksjonService = sanksjonService,
             grunnlagKlient = grunnlagKlient,
+            vedtakKlient = vedtaksvurderingKlient,
             featureToggleService = featureToggleService,
         )
     val avkortingTidligAlderspensjonService =
@@ -128,7 +129,7 @@ class ApplicationContext {
     val beregningOgAvkortingBrevService =
         BeregningOgAvkortingBrevService(
             beregningRepository = beregningRepository,
-            avkortingRepository = avkortingRepository,
+            avkortingService = avkortingService,
             beregningsGrunnlagService = beregningsGrunnlagService,
             behandlingKlient = behandlingKlient,
         )

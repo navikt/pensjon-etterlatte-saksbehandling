@@ -6,6 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -15,7 +16,9 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
@@ -36,17 +39,18 @@ class AvkortingService(
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
     private val grunnlagKlient: GrunnlagKlient,
+    private val vedtakKlient: VedtaksvurderingKlient,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hentAvkorting(
+    suspend fun hentOpprettEllerReberegnAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AvkortingFrontend? {
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandling.id)
+        val eksisterendeAvkorting = hentAvkorting(behandlingId)
 
         if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             return eksisterendeAvkorting?.let {
@@ -83,6 +87,8 @@ class AvkortingService(
             avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
         }
     }
+
+    fun hentAvkorting(behandlingId: UUID) = avkortingRepository.hentAvkorting(behandlingId)
 
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,
@@ -231,11 +237,18 @@ class AvkortingService(
         forrigeAvkorting: Avkorting? = null,
     ): AvkortingFrontend = avkorting.toFrontend(behandling.virkningstidspunkt().dato, forrigeAvkorting, behandling.status)
 
-    private suspend fun hentAvkortingForrigeBehandling(
+    suspend fun hentAvkortingForrigeBehandling(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
-        val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
+        val forrigeBehandlingId =
+            vedtakKlient
+                .hentIverksatteVedtak(sakId, brukerTokenInfo)
+                .filter {
+                    it.vedtakType != VedtakType.OPPHOER
+                }.maxBy {
+                    it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
+                }.behandlingId
         return hentForrigeAvkorting(forrigeBehandlingId)
     }
 

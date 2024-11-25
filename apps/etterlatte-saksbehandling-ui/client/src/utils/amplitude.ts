@@ -5,7 +5,24 @@ export enum LogEvents {
 }
 
 export enum ClickEvent {
+  // Vilkaarsvurdering
   SLETT_VILKAARSVURDERING = 'slett vilkaarsvurdering',
+
+  // Gosys
+  FERDIGSTILL_GOSYS_OPPGAVE = 'ferdigstill gosys oppgave',
+  FLYTT_GOSYS_OPPGAVE = 'flytt gosys oppgave',
+
+  // Journalpost
+  FEILREGISTRER_JOURNALPOST = 'feilregistrer journalpost',
+  OPPHEV_FEILREGISTRERING_JOURNALPOST = 'opphev feilregistrering journalpost',
+  FLYTT_JOURNALPOST = 'flytt journalpost',
+  KNYTT_JOURNALPOST_TIL_ANNEN_SAK = 'knytt journalpost til annen sak',
+  OPPRETT_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave',
+
+  // Brev
+  OPPRETT_NYTT_BREV = 'opprett nytt brev',
+  SLETT_BREV = 'slett brev',
+  LAST_OPP_BREV = 'last opp brev',
 }
 
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined

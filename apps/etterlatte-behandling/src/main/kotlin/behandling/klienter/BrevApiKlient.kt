@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -140,7 +141,11 @@ class BrevApiKlientObo(
     ) {
         downstreamResourceClient
             .delete(
-                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/$brevId?${SAKID_CALL_PARAMETER}=${sakId.sakId}"),
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/brev/$brevId?${SAKID_CALL_PARAMETER}=${sakId.sakId}",
+                    ),
                 brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
                 success = { },
@@ -171,7 +176,10 @@ class BrevApiKlientObo(
             url = "$resourceUrl/api/brev/sak/$sakId/spesifikk",
             onSuccess = { resource ->
                 resource.response?.let { objectMapper.readValue(it.toJson()) }
-                    ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
+                    ?: throw InternfeilException(
+                        "Fikk ikke en riktig respons fra oppretting av brev av " +
+                            "type ${brevParametre.brevkode} i sak $sakId",
+                    )
             },
             brukerTokenInfo = brukerTokenInfo,
             postBody = brevParametre.toJson(),
@@ -187,7 +195,10 @@ class BrevApiKlientObo(
             url = "$resourceUrl/api/brev/sak/$sakId/spesifikk/$brevId",
             onSuccess = { resource ->
                 resource.response?.let { objectMapper.readValue(it.toJson()) }
-                    ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
+                    ?: throw InternfeilException(
+                        "Fikk ikke en riktig respons fra oppdatering av brev med " +
+                            "id=$brevId av type ${brevParametre.brevkode} i sak $sakId",
+                    )
             },
             brukerTokenInfo = brukerTokenInfo,
             postBody = brevParametre.toJson(),
@@ -324,7 +335,11 @@ class BrevApiKlientObo(
     ) {
         downstreamResourceClient
             .delete(
-                resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse"),
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse",
+                    ),
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = "",
             ).mapError { error -> throw error }

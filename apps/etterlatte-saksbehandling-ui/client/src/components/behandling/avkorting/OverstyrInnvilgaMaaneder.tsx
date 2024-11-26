@@ -45,7 +45,8 @@ export default function OverstyrInnvilgaMaander() {
               <option value="">Velg årsak</option>
               {watch('overstyrtInnvilgaMaaneder.aarsak') === SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67 && (
                 <option value={SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67} disabled={true}>
-                  Blir 67 år
+                  {hentLesbarTekstForInnvilgaMaanederType(SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67)} (satt av
+                  Gjenny)
                 </option>
               )}
               {Object.values(OverstyrtInnvilgaMaanederAarsak).map((type) => (

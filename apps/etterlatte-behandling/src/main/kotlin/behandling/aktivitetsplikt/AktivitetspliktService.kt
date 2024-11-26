@@ -540,7 +540,7 @@ class AktivitetspliktService(
             OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
         } else {
             if (behandlingService.hentBehandlingerForSak(request.sakId).any { it.status.aapenBehandling() }) {
-                opprettOppgaveForRevurdering(request, forrigeBehandling, oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING)
+                opprettOppgaveForRevurdering(request, forrigeBehandling)
             } else {
                 opprettRevurdering(request, forrigeBehandling, aktivitetspliktDato, persongalleri)
             }
@@ -557,7 +557,6 @@ class AktivitetspliktService(
     private fun opprettOppgaveForRevurdering(
         request: OpprettRevurderingForAktivitetspliktDto,
         forrigeBehandling: Behandling,
-        oppgaveType: OppgaveType,
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter oppgave for revurdering av aktivitetsplikt for sak ${request.sakId}")
         return oppgaveService
@@ -565,7 +564,7 @@ class AktivitetspliktService(
                 sakId = request.sakId,
                 referanse = forrigeBehandling.id.toString(),
                 kilde = OppgaveKilde.HENDELSE,
-                type = oppgaveType,
+                type = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
                 merknad = request.jobbType.beskrivelse,
                 frist = request.frist,
             ).let { oppgave ->

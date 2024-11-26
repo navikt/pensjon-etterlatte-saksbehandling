@@ -182,6 +182,7 @@ class AktivitetspliktOppgaveServiceTest {
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
                 every { sakId } returns sakIdForOppgave
+                every { id } returns oppgaveId
                 every { type } returns OppgaveType.AKTIVITETSPLIKT_12MND
             }
         val kilde = Grunnlagsopplysning.Saksbehandler.create("ident")
@@ -214,6 +215,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = SakId(1L)
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
             }
 
@@ -258,6 +260,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = SakId(1L)
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
             }
 
@@ -277,6 +280,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = SakId(1L)
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
                 every { type } returns OppgaveType.AKTIVITETSPLIKT_12MND
             }
@@ -330,6 +334,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = SakId(1L)
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
                 every { type } returns OppgaveType.AKTIVITETSPLIKT_12MND
             }
@@ -385,6 +390,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = sak.id
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
                 every { status } returns Status.AVBRUTT
             }
@@ -420,6 +426,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = sak.id
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
                 every { status } returns Status.UNDER_BEHANDLING
             }
@@ -453,6 +460,7 @@ class AktivitetspliktOppgaveServiceTest {
         val sakIdForOppgave = sak.id
         every { oppgaveService.hentOppgave(oppgaveId) } returns
             mockk {
+                every { id } returns oppgaveId
                 every { sakId } returns sakIdForOppgave
             }
 

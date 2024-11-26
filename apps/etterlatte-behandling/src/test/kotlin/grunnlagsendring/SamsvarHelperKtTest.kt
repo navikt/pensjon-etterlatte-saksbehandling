@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -133,5 +134,27 @@ internal class SamsvarHelperKtTest {
 
         val resultat = samsvarSivilstandOMS(sivilstand1, sivilstand2)
         assertFalse(resultat.samsvar)
+    }
+
+    @Test
+    fun `Sjekk samsvar folkeregisterident - endret ident`() {
+        val pdlIdent = KONTANT_FOT
+        val grunnlagIdent = JOVIAL_LAMA
+
+        val resultat = samsvarFolkeregisterIdent(pdlIdent, grunnlagIdent)
+        assertFalse(resultat.samsvar)
+        assertEquals(pdlIdent, resultat.fraPdl)
+        assertEquals(grunnlagIdent, resultat.fraGrunnlag)
+    }
+
+    @Test
+    fun `Sjekk samsvar folkeregisterident - ingen endring`() {
+        val pdlIdent = KONTANT_FOT
+        val grunnlagIdent = KONTANT_FOT
+
+        val resultat = samsvarFolkeregisterIdent(pdlIdent, grunnlagIdent)
+        assertTrue(resultat.samsvar)
+        assertEquals(pdlIdent, resultat.fraPdl)
+        assertEquals(grunnlagIdent, resultat.fraGrunnlag)
     }
 }

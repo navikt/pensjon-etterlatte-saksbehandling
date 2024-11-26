@@ -131,6 +131,7 @@ class AktivitetspliktOppgaveService(
                         sakId = sak.id,
                         brevParametre = brevParametre,
                         brukerTokenInfo = saksbehandler,
+                        brevId = oppdatertData.brevId,
                     )
                 }
             }

@@ -251,7 +251,7 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            post("/endre_enhet") {
+            post("/endre-enhet") {
                 kunSaksbehandlerMedSkrivetilgang { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {

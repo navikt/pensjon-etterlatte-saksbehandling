@@ -140,7 +140,7 @@ internal class SakRoutesTest {
             )
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/1/endre_enhet") {
+                client.post("/api/sak/1/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
                     setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))
@@ -162,7 +162,7 @@ internal class SakRoutesTest {
 
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/1/endre_enhet") {
+                client.post("/api/sak/1/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
                     setBody(EnhetRequest(enhet = Enhetsnummer("4805")))
@@ -183,7 +183,7 @@ internal class SakRoutesTest {
         every { sakService.finnSak(any()) } returns null
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/1/endre_enhet") {
+                client.post("/api/sak/1/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
                     setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))

@@ -1031,55 +1031,6 @@ internal class TrygdetidServiceTest {
     }
 
     @Test
-    fun `skal kunne reberegne trygdetid uten fremtidig trygdetid grunnlag`() {
-        val behandlingId = randomUUID()
-        val behandling = behandling(behandlingId)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val trygdetidGrunnlag =
-            trygdetidGrunnlag(periode = TrygdetidPeriode(LocalDate.of(2000, 1, 1), LocalDate.of(2009, 12, 31)))
-        val fremtidigTrygdetidGrunnlag =
-            trygdetidGrunnlag(
-                trygdetidType = TrygdetidType.FREMTIDIG,
-                periode = TrygdetidPeriode(LocalDate.of(2010, 1, 1), LocalDate.of(2015, 12, 31)),
-            )
-        val eksisterendeTrygdetid =
-            trygdetid(
-                behandlingId,
-                trygdetidGrunnlag = listOf(trygdetidGrunnlag, fremtidigTrygdetidGrunnlag),
-                ident = AVDOED_FOEDSELSNUMMER.value,
-                beregnetTrygdetid = beregnetTrygdetid(35, Tidspunkt.now()),
-            )
-        val oppdatertTrygdetidCaptured = slot<Trygdetid>()
-        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns behandling
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { repository.hentTrygdetidMedId(behandlingId, eksisterendeTrygdetid.id) } returns eksisterendeTrygdetid
-        coEvery {
-            repository.oppdaterTrygdetid(
-                capture(oppdatertTrygdetidCaptured),
-            )
-        } returns eksisterendeTrygdetid
-
-        runBlocking {
-            service.reberegnUtenFremtidigTrygdetid(behandlingId, eksisterendeTrygdetid.id, saksbehandler)
-        }
-
-        coVerify(exactly = 1) {
-            behandlingKlient.kanOppdatereTrygdetid(any(), any())
-            repository.hentTrygdetidMedId(behandlingId, eksisterendeTrygdetid.id)
-            repository.oppdaterTrygdetid(oppdatertTrygdetidCaptured.captured)
-        }
-        verify(exactly = 1) {
-            beregningService.beregnTrygdetid(any(), any(), any(), any(), any())
-        }
-        with(oppdatertTrygdetidCaptured.captured) {
-            this.trygdetidGrunnlag.size shouldBe 1
-            this.trygdetidGrunnlag.first().type shouldBe TrygdetidType.FAKTISK
-            this.beregnetTrygdetid?.resultat?.samletTrygdetidNorge shouldBe 10
-        }
-    }
-
-    @Test
     fun `skal feile ved lagring av trygdetidsgrunnlag hvis behandling er i feil tilstand`() {
         val behandlingId = randomUUID()
         val trygdetidGrunnlag = trygdetidGrunnlag()

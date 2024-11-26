@@ -1,13 +1,16 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
+import io.ktor.client.request.request
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradOgUnntak
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_100
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktSkjoennsmessigVurdering
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
@@ -49,6 +52,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.collections.filter
 
 class AktivitetspliktService(
     private val aktivitetspliktDao: AktivitetspliktDao,
@@ -121,7 +125,7 @@ class AktivitetspliktService(
         )
     }
 
-    fun oppfyllerAktivitetsplikt(
+    fun oppfyllerAktivitetsplikt6mnd(
         sakId: SakId,
         aktivitetspliktDato: LocalDate,
     ): Boolean {
@@ -476,7 +480,68 @@ class AktivitetspliktService(
     fun hentVurderingForSak(sakId: SakId): AktivitetspliktVurdering =
         hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId)
 
-    fun opprettRevurderingHvisKravIkkeOppfylt(
+    fun opprettRevurderingHvisKravIkkeOppfylt12Mnd(
+        request: OpprettRevurderingForAktivitetspliktDto,
+        bruker: BrukerTokenInfo,
+    ): OpprettRevurderingForAktivitetspliktResponse {
+        val forrigeBehandling =
+            requireNotNull(behandlingService.hentSisteIverksatte(request.sakId)) {
+                "Fant ikke forrige behandling i sak ${request.sakId}sakId"
+            }
+        val persongalleri =
+            runBlocking {
+                requireNotNull(
+                    grunnlagKlient
+                        .hentPersongalleri(
+                            forrigeBehandling.id,
+                            bruker,
+                        )?.opplysning,
+                ) {
+                    "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"
+                }
+            }
+        val aktivitetspliktDato = request.behandlingsmaaned.atDay(1).plusMonths(1)
+        return if (oppfyllerAktivitetsplikt12mnd(request.sakId)) {
+            OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
+        } else {
+            if (behandlingService.hentBehandlingerForSak(request.sakId).any { it.status.aapenBehandling() }) {
+                opprettOppgaveForRevurdering(request, forrigeBehandling, oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING12MND)
+            } else {
+                // TODO: trenger vi ny revurderingAarsak her?
+                opprettRevurdering(request, forrigeBehandling, aktivitetspliktDato, persongalleri)
+            }
+        }
+    }
+
+    fun oppfyllerAktivitetsplikt12mnd(sakId: SakId): Boolean {
+        val oppgave12mnd =
+            oppgaveService
+                .hentOppgaverForSak(sakId, OppgaveType.AKTIVITETSPLIKT_12MND)
+                .filter { !it.erAvsluttet() }
+                .filter { it.erFerdigstilt() } // TODO: asserte på at det kun finnes en her?
+                .maxByOrNull { it.opprettet }
+                ?: throw InternfeilException("Fant ikke aktivitetsplikt12mnd for sak: $sakId")
+
+        val vurderingForOppgave = hentVurderingForOppgave(oppgave12mnd.id)
+        val sistevurdering =
+            vurderingForOppgave.aktivitet.maxByOrNull { it.endret.tidspunkt }
+
+        if (sistevurdering == null) {
+            return vurderingForOppgave.unntak.isEmpty()
+        } else {
+            if (sistevurdering.aktivitetsgrad == AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50) {
+                return true
+            }
+            if (sistevurdering.aktivitetsgrad == AKTIVITET_OVER_50 &&
+                sistevurdering.skjoennsmessigVurdering == AktivitetspliktSkjoennsmessigVurdering.NEI
+            ) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun opprettRevurderingHvisKravIkkeOppfylt6mnd(
         request: OpprettRevurderingForAktivitetspliktDto,
         bruker: BrukerTokenInfo,
     ): OpprettRevurderingForAktivitetspliktResponse {
@@ -498,11 +563,11 @@ class AktivitetspliktService(
             }
 
         val aktivitetspliktDato = request.behandlingsmaaned.atDay(1).plusMonths(1)
-        return if (oppfyllerAktivitetsplikt(request.sakId, aktivitetspliktDato)) {
+        return if (oppfyllerAktivitetsplikt6mnd(request.sakId, aktivitetspliktDato)) {
             OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
         } else {
             if (behandlingService.hentBehandlingerForSak(request.sakId).any { it.status.aapenBehandling() }) {
-                opprettOppgaveForRevurdering(request, forrigeBehandling)
+                opprettOppgaveForRevurdering(request, forrigeBehandling, oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING)
             } else {
                 opprettRevurdering(request, forrigeBehandling, aktivitetspliktDato, persongalleri)
             }
@@ -516,9 +581,11 @@ class AktivitetspliktService(
             OpprettOppgaveForAktivitetspliktResponse()
         }
 
+    // TODO: gjør denne gjenbrukbar med å sende inn oppgavetype
     private fun opprettOppgaveForRevurdering(
         request: OpprettRevurderingForAktivitetspliktDto,
         forrigeBehandling: Behandling,
+        oppgaveType: OppgaveType,
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter oppgave for revurdering av aktivitetsplikt for sak ${request.sakId}")
         return oppgaveService
@@ -526,7 +593,7 @@ class AktivitetspliktService(
                 sakId = request.sakId,
                 referanse = forrigeBehandling.id.toString(),
                 kilde = OppgaveKilde.HENDELSE,
-                type = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+                type = oppgaveType,
                 merknad = request.jobbType.beskrivelse,
                 frist = request.frist,
             ).let { oppgave ->
@@ -785,11 +852,11 @@ data class AktivitetspliktVurdering(
     fun erTom() = aktivitet.isEmpty() && unntak.isEmpty()
 }
 
+fun Grunnlagsopplysning.Kilde.endretDatoOrNull(): Tidspunkt? = if (this is Grunnlagsopplysning.Saksbehandler) this.tidspunkt else null
+
 interface AktivitetspliktVurderingOpprettetDato {
     val opprettet: Grunnlagsopplysning.Kilde
 }
-
-fun Grunnlagsopplysning.Kilde.endretDatoOrNull(): Tidspunkt? = if (this is Grunnlagsopplysning.Saksbehandler) this.tidspunkt else null
 
 class SakidTilhoererIkkeBehandlingException :
     UgyldigForespoerselException(

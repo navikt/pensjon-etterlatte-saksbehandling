@@ -42,6 +42,8 @@ data class OppgaveIntern(
 
     fun erAttestering(): Boolean = status == Status.ATTESTERING
 
+    fun erFerdigstilt(): Boolean = status == Status.FERDIGSTILT
+
     fun typeKanAttesteres() =
         type in
             listOf(
@@ -116,6 +118,7 @@ enum class OppgaveType {
     AKTIVITETSPLIKT,
     AKTIVITETSPLIKT_12MND,
     AKTIVITETSPLIKT_REVURDERING,
+    AKTIVITETSPLIKT_REVURDERING12MND, // TODO: eller bruke den over? må også legge til i frontend mapping
     AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
     GENERELL_OPPGAVE,
     MOTTATT_INNTEKTSJUSTERING,

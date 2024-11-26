@@ -243,8 +243,7 @@ class AktivitetspliktOppgaveService(
             )
         val brevrespons: BrevStatusResponse = runBlocking { brevApiKlient.ferdigstillBrev(req, brukerTokenInfo) }
         if (brevrespons.status.erDistribuert()) {
-            oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
-            return oppgaveService.hentOppgave(oppgaveId)
+            return oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
         } else {
             throw BrevBleIkkeFerdig(brevrespons.status)
         }

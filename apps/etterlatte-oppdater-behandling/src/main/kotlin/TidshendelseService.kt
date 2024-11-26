@@ -45,9 +45,8 @@ class TidshendelseService(
         } else {
             return when (hendelse.jobbtype) {
                 JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> opprettAktivitetspliktOppgave(hendelse)
-                JobbType.OMS_DOED_6MND -> opprettRevurderingForAktivitetsplikt(hendelse)
+                JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> opprettRevurderingForAktivitetsplikt(hendelse)
                 JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
-                JobbType.OMS_DOED_12MND -> opprettRevurderingForAktivitetsplikt(hendelse)
                 else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
             }
         }

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
@@ -32,6 +33,7 @@ import tidspunkt.erFoerEllerPaa
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import kotlin.math.abs
 
@@ -49,6 +51,7 @@ internal class OmregningHendelserBeregningRiver(
             validate { it.requireKey(OmregningDataPacket.FORRIGE_BEHANDLING_ID) }
             validate { it.requireKey(OmregningDataPacket.SAK_TYPE) }
             validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
+            validate { it.interestedIn(OmregningDataPacket.INNTEKTSJUSTERING) }
         }
     }
 
@@ -103,6 +106,19 @@ internal class OmregningHendelserBeregningRiver(
                                 aar = fraDato.year,
                                 behandlingId = behandlingId,
                                 forrigeBehandlingId = behandlingViOmregnerFra,
+                            ).body<AvkortingDto>()
+                    }
+
+                    Revurderingaarsak.INNTEKTSENDRING -> {
+                        val omregningInntekt = omregningData.hentInntektsjustering()
+                        beregningService
+                            .omregnMottattInntektsjustering(
+                                MottattInntektsjusteringAvkortigRequest(
+                                    behandlingId = behandlingId,
+                                    virkningstidspunkt = YearMonth.from(omregningData.hentFraDato()),
+                                    inntekt = omregningInntekt.inntekt,
+                                    inntektUtland = omregningInntekt.inntektUtland,
+                                ),
                             ).body<AvkortingDto>()
                     }
 

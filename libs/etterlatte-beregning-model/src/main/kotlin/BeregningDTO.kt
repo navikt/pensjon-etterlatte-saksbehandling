@@ -165,3 +165,10 @@ data class AarligInntektsjusteringAvkortingRequest(
     val forrigeBehandling: UUID,
     val nyBehandling: UUID,
 )
+
+data class MottattInntektsjusteringAvkortigRequest(
+    val behandlingId: UUID,
+    val virkningstidspunkt: YearMonth,
+    val inntekt: Int,
+    val inntektUtland: Int,
+)

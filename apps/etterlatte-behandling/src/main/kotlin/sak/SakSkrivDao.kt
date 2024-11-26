@@ -73,18 +73,20 @@ class SakSkrivDao(
     fun oppdaterIdent(
         sakId: SakId,
         nyIdent: Folkeregisteridentifikator,
-    ) = sakendringerDao.lagreEndringerPaaSak(sakId, "oppdaterIdent") {
-        it
-            .prepareStatement(
-                """
-                UPDATE sak 
-                SET fnr = ? 
-                WHERE id = ?
-                """.trimIndent(),
-            ).apply {
-                setString(1, nyIdent.value)
-                setLong(2, sakId.sakId)
-            }.executeUpdate()
+    ) {
+        sakendringerDao.lagreEndringerPaaSak(sakId, "oppdaterIdent") {
+            it
+                .prepareStatement(
+                    """
+                    UPDATE sak 
+                    SET fnr = ? 
+                    WHERE id = ?
+                    """.trimIndent(),
+                ).apply {
+                    setString(1, nyIdent.value)
+                    setLong(2, sakId.sakId)
+                }.executeUpdate()
+        }
     }
 
     fun oppdaterEnheterPaaSaker(saker: List<SakMedEnhet>) {

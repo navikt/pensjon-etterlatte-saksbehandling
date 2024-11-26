@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.ktor.client.plugins.ResponseException
 import io.mockk.Called
@@ -11,6 +12,7 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
@@ -764,7 +766,13 @@ internal class SakServiceTest {
             val ident1 = LITE_BARN.value
             val ident2 = KONTANT_FOT.value
 
-            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(ident1, ident2)
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    listOf(
+                        PdlIdentifikator.FolkeregisterIdent(LITE_BARN, true),
+                        PdlIdentifikator.FolkeregisterIdent(KONTANT_FOT, false),
+                    ),
+                )
             every { sakLesDao.finnSaker(ident1, sakType) } returns listOf(dummySak(ident1, sakType))
             every { sakLesDao.finnSaker(ident2, sakType) } returns emptyList()
 
@@ -785,7 +793,14 @@ internal class SakServiceTest {
             val ident1 = LITE_BARN.value
             val ident2 = KONTANT_FOT.value
 
-            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(ident1, ident2)
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    listOf(
+                        PdlIdentifikator.FolkeregisterIdent(LITE_BARN, true),
+                        PdlIdentifikator.FolkeregisterIdent(KONTANT_FOT, false),
+                    ),
+                )
+
             every { sakLesDao.finnSaker(ident1, sakType) } returns listOf(dummySak(ident1, sakType))
             every { sakLesDao.finnSaker(ident2, sakType) } returns listOf(dummySak(ident2, sakType))
 
@@ -809,7 +824,56 @@ internal class SakServiceTest {
         fun `Sak ident ikke funnet i PDL`() {
             val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
 
-//            service.oppdaterIdentForSak()
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    emptyList(),
+                )
+
+            assertThrows<InternfeilException> {
+                service.oppdaterIdentForSak(sak)
+            }
+
+            coVerify(exactly = 1) {
+                pdlTjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident)
+            }
+
+            verify {
+                sakLesDao wasNot Called
+                sakSkrivDao wasNot Called
+            }
+        }
+
+        @Test
+        fun `Bruker har historisk ident`() {
+            val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
+
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    listOf(
+                        PdlIdentifikator.FolkeregisterIdent(KONTANT_FOT, true),
+                        PdlIdentifikator.FolkeregisterIdent(JOVIAL_LAMA, false),
+                    ),
+                )
+            justRun { sakSkrivDao.oppdaterIdent(any(), any()) }
+            every { sakLesDao.hentSak(any()) } returns sak.copy(ident = JOVIAL_LAMA.value)
+
+            val oppdatertSak = service.oppdaterIdentForSak(sak)
+
+            oppdatertSak.id shouldBe sak.id
+            oppdatertSak.enhet shouldBe sak.enhet
+            oppdatertSak.sakType shouldBe sak.sakType
+
+            oppdatertSak.ident shouldNotBe sak.ident
+            oppdatertSak.ident shouldBe JOVIAL_LAMA.value
+
+            coVerify(exactly = 1) {
+                pdlTjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident)
+            }
+
+            verify(exactly = 1) {
+                sakSkrivDao.oppdaterIdent(sak.id, JOVIAL_LAMA)
+                sakLesDao.hentSak(sak.id)
+            }
         }
     }
 
@@ -824,13 +888,13 @@ internal class SakServiceTest {
         enhet = enhet.enhetNr,
     )
 
-    private fun dummyPdlResponse(vararg identer: String) =
+    private fun dummyPdlResponse(ident: String) =
         PdlFolkeregisterIdentListe(
-            identer.mapIndexed { index, ident ->
-                PdlIdentifikator.FolkeregisterIdent(
-                    folkeregisterident = Folkeregisteridentifikator.of(ident),
-                    historisk = (identer.size > 1 && index == 1), // første i listen vil bli historisk hvis flere enn 1
-                )
-            },
+            identifikatorer =
+                listOf(
+                    PdlIdentifikator.FolkeregisterIdent(
+                        folkeregisterident = Folkeregisteridentifikator.of(ident),
+                    ),
+                ),
         )
 }

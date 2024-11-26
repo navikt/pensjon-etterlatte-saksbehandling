@@ -140,7 +140,6 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 }
             }
 
-            // TODO: Standardisere opprettelse av oppgave
             post("/opprett") {
                 kunSaksbehandlerMedSkrivetilgang {
                     val nyOppgaveDto = call.receive<NyOppgaveDto>()

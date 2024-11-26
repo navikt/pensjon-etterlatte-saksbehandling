@@ -1,7 +1,7 @@
 package no.nav.etterlatte.inntektsjustering
 
 import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
@@ -84,5 +84,5 @@ internal class InntektsjusteringRiver(
     }
 
     private fun JsonMessage.inntektsjustering(): Inntektsjustering =
-        objectMapper.readValue<Inntektsjustering>(this[InntektsjusteringInnsendt.inntektsjusteringInnhold].textValue())
+        objectMapper.treeToValue<Inntektsjustering>(this[InntektsjusteringInnsendt.inntektsjusteringInnhold])
 }

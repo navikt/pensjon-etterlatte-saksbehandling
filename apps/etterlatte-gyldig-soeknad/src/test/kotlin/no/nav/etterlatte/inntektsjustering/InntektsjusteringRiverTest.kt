@@ -77,7 +77,7 @@ internal class InntektsjusteringRiverTest {
                 .newMessage(
                     mapOf(
                         "@event_name" to InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT.eventname,
-                        InntektsjusteringInnsendt.inntektsjusteringInnhold to inntektsjustering.toJson(),
+                        InntektsjusteringInnsendt.inntektsjusteringInnhold to inntektsjustering,
                     ),
                 ).toJson()
 

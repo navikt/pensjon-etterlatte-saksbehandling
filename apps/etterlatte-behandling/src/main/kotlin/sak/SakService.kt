@@ -249,7 +249,9 @@ class SakServiceImpl(
             )
         }
 
-        val gjeldendeIdent = identListe.identifikatorer.single { !it.historisk }.folkeregisterident
+        val gjeldendeIdent =
+            identListe.identifikatorer.singleOrNull { !it.historisk }?.folkeregisterident
+                ?: throw InternfeilException("Sak ${sak.id} har flere eller ingen gyldige identer samtidig. Kan ikke oppdatere ident.")
 
         dao.oppdaterIdent(sak.id, gjeldendeIdent)
 

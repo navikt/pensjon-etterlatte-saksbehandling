@@ -70,6 +70,8 @@ export const OppdaterIdentModal = ({
 
               <Alert variant="warning">
                 Endring av identifikator vil avbryte alle pågående behandlinger for å sikre at grunnlaget blir korrekt
+                <br />
+                Behandlinger tilknyttet klage, tilbakekreving, eller kravpakke må manuelt avbrytes.
               </Alert>
 
               {mapFailure(oppdaterIdentResult, (error) => (

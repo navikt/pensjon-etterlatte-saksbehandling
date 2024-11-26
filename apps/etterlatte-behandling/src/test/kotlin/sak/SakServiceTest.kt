@@ -844,6 +844,32 @@ internal class SakServiceTest {
         }
 
         @Test
+        fun `Bruker har flere gyldige identer i PDL`() {
+            val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
+
+            coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
+                PdlFolkeregisterIdentListe(
+                    listOf(
+                        PdlIdentifikator.FolkeregisterIdent(KONTANT_FOT),
+                        PdlIdentifikator.FolkeregisterIdent(JOVIAL_LAMA),
+                    ),
+                )
+
+            assertThrows<InternfeilException> {
+                service.oppdaterIdentForSak(sak)
+            }
+
+            coVerify(exactly = 1) {
+                pdlTjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident)
+            }
+
+            verify {
+                sakLesDao wasNot Called
+                sakSkrivDao wasNot Called
+            }
+        }
+
+        @Test
         fun `Bruker har historisk ident`() {
             val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
 

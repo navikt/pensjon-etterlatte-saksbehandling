@@ -7,7 +7,7 @@ import { Folkeregisteridentifikatorsamsvar, Grunnlagsendringshendelse } from '~c
 import { ISakMedUtlandstilknytning } from '~shared/types/sak'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const OppdaterIdentModal = ({
   sak,
@@ -22,7 +22,7 @@ export const OppdaterIdentModal = ({
   const [isOpen, setIsOpen] = useState(false)
 
   const [oppdaterIdentResult, apiOppdaterIdentPaaSak] = useApiCall(oppdaterIdentPaaSak)
-  const kanOppdatereIdentPaaSak = useFeatureEnabledMedDefault('pensjon-etterlatte.oppdater-ident-paa-sak', false)
+  const kanOppdatereIdentPaaSak = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak)
 
   const oppdaterIdent = () => {
     apiOppdaterIdentPaaSak({ sakId: sak.id, hendelseId: hendelse.id }, (sak) => {

@@ -18,6 +18,7 @@ export const enum FeatureToggle {
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
+  pensjon_etterlatte_oppdater_ident_paa_sak = 'pensjon-etterlatte.oppdater-ident-paa-sak',
 }
 
 export interface Toggle {
@@ -63,6 +64,10 @@ const pensjon_etterlatte_kan_opprette_vedtak_avvist_klage: Toggle = {
   togglename: FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
   enabled: false,
 }
+const pensjon_etterlatte_oppdater_ident_paa_sak: Toggle = {
+  togglename: FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak,
+  enabled: false,
+}
 
 export const unleashStartState: Record<string, Toggle> = {
   sanksjon: sanksjon,
@@ -76,6 +81,7 @@ export const unleashStartState: Record<string, Toggle> = {
   'pensjon-etterlatte.klage-delvis-omgjoering': pensjon_etterlatte_klage_delvis_omgjoering,
   'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage': pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
   'overstyr-beregning-knapp': overstyr_beregning_knapp,
+  [FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak]: pensjon_etterlatte_oppdater_ident_paa_sak,
 }
 
 export const Unleashcontext = createContext<{

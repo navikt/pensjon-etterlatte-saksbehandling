@@ -44,7 +44,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -184,10 +183,9 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
         request: DataHentetForOpprettBehandling,
-        prosessType: Prosesstype = Prosesstype.MANUELL,
     ): BehandlingOgOppgave {
         logger.info("Starter behandling i sak $sakId")
-
+        val prosessType = Prosesstype.MANUELL
         return if (request.harIverksattBehandling()) {
             if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
                 throw ManuellMigreringHarEksisterendeIverksattBehandling()
@@ -206,7 +204,7 @@ class BehandlingFactory(
                     utlandstilknytning = forrigeBehandling.utlandstilknytning,
                     boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                     begrunnelse = null,
-                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    saksbehandlerIdent = null,
                     frist = null,
                     opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
                 ).oppdater()

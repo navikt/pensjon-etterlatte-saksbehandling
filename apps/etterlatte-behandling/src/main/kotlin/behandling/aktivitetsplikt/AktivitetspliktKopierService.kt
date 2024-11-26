@@ -70,7 +70,4 @@ class AktivitetspliktKopierService(
         }
         nyesteVurdering.unntak.forEach { aktivitetspliktUnntakDao.kopierUnntakTilOppgave(it.id, oppgaveId) }
     }
-
-    fun kopierVurderingForOppgave() {
-    }
 }

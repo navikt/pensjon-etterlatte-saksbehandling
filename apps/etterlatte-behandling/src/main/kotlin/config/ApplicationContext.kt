@@ -100,6 +100,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
+import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbetjeningService
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
@@ -470,6 +471,13 @@ internal class ApplicationContext(
             pdlTjenesterKlient,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
+
+    val inntektsjusteringSelvbetjeningService =
+        InntektsjusteringSelvbetjeningService(
+            oppgaveService = oppgaveService,
+            rapid = rapid,
+            featureToggleService = featureToggleService,
+        )
 
     val aarligInntektsjusteringJobbService =
         AarligInntektsjusteringJobbService(

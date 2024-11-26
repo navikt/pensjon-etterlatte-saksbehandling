@@ -13,6 +13,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formatering/formatering'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 const NasjonalEllerUtlandRadio = ({ control }: { control: Control<FilledFormData, any> }) => (
   <ControlledRadioGruppe
@@ -107,6 +108,8 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
   const opprettBrev = (formData: FilledFormData) => {
     const brevParametre = mapFormdataToBrevParametre(formData)
+
+    trackClick(ClickEvent.OPPRETT_NYTT_BREV)
 
     opprettBrevApiCall({ sakId: sakId, body: brevParametre }, (brev) => {
       setOpen(false)

@@ -426,14 +426,15 @@ class GrunnlagsendringshendelseService(
         try {
             val samsvarMellomPdlOgGrunnlag =
                 finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
-            val erDuplikat =
-                erDuplikatHendelse(
-                    sak.id,
-                    grunnlagsendringshendelse,
-                    samsvarMellomPdlOgGrunnlag,
-                )
 
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
+                val erDuplikat =
+                    erDuplikatHendelse(
+                        sak.id,
+                        grunnlagsendringshendelse,
+                        samsvarMellomPdlOgGrunnlag,
+                    )
+
                 if (erDuplikat) {
                     forkastHendelse(grunnlagsendringshendelse, samsvarMellomPdlOgGrunnlag)
                 } else {

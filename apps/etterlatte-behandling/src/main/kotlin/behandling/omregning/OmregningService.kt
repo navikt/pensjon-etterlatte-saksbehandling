@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.logger
 
 class OmregningService(
     private val behandlingService: BehandlingService,
@@ -26,6 +27,15 @@ class OmregningService(
         bruker: BrukerTokenInfo,
     ) {
         if (request.status == KjoeringStatus.FEILA) {
+            omregningDao.hentNyligsteLinjeForKjoering(request.kjoering, request.sakId)?.let { (_, sisteStatus) ->
+                if (sisteStatus.erFerdigstilt()) {
+                    logger.error(
+                        "Omregning har kjørt og feilet etter å ha blitt ferdigstilt. kjøring=${request.kjoering}, sak=${request.sakId}, feilendeSteg=${request.feilendeSteg}",
+                    )
+                    return
+                }
+            }
+
             behandlingService.hentAapenOmregning(request.sakId)?.let {
                 if (it.status.kanAvbrytes()) {
                     behandlingService.avbrytBehandling(it.id, bruker)
@@ -42,8 +52,8 @@ class OmregningService(
         omregningDao.lagreKjoering(request)
     }
 
-    fun lagreDistribuertBrevEllerIverksattBehandlinga(request: KjoeringDistEllerIverksattRequest) {
-        val (_, sisteStatus) = omregningDao.hentNyligsteLinjeForKjoering(request.kjoering, request.sakId)
-        omregningDao.lagreDistribuertBrevEllerIverksattBehandlinga(request, sisteStatus)
-    }
+    fun lagreDistribuertBrevEllerIverksattBehandlinga(request: KjoeringDistEllerIverksattRequest) =
+        omregningDao.hentNyligsteLinjeForKjoering(request.kjoering, request.sakId)?.let { (_, sisteStatus) ->
+            omregningDao.lagreDistribuertBrevEllerIverksattBehandlinga(request, sisteStatus)
+        }
 }

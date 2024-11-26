@@ -157,7 +157,6 @@ class AktivitetspliktUnntakDaoTest(
                 utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 revurderingsAarsak = null,
-                fritekstAarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
                 begrunnelse = null,
@@ -308,7 +307,7 @@ class AktivitetspliktUnntakDaoTest(
             dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
             val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
-            dao.slettUnntak(unntak.id, opprettBehandling.id)
+            dao.slettUnntakForBehandling(unntak.id, opprettBehandling.id)
 
             dao.hentUnntakForBehandling(opprettBehandling.id) shouldBe emptyList()
         }
@@ -320,7 +319,7 @@ class AktivitetspliktUnntakDaoTest(
             dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
             val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
-            dao.slettUnntak(unntak.id, UUID.randomUUID())
+            dao.slettUnntakForBehandling(unntak.id, UUID.randomUUID())
 
             dao.hentUnntakForBehandling(opprettBehandling.id).single().asClue {
                 it.id shouldBe unntak.id

@@ -38,7 +38,7 @@ class TidshendelseService(
                 }
             } catch (e: Exception) {
                 logger.error("Kunne ikke opprette omregning [sak=${hendelse.sakId}]", e)
-                return opprettOppgave(hendelse)
+                return opprettOppgaveOpphoerYtelse(hendelse)
                     .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
             }
         } else {
@@ -88,12 +88,12 @@ class TidshendelseService(
             oppgavefrist = hendelse.behandlingsmaaned.atEndOfMonth(),
         )
 
-    private fun opprettOppgave(hendelse: TidshendelsePacket): UUID {
+    private fun opprettOppgaveOpphoerYtelse(hendelse: TidshendelsePacket): UUID {
         val oppgaveId =
             behandlingService.opprettOppgave(
                 hendelse.sakId,
                 oppgaveTypeFor(hendelse.jobbtype),
-                referanse = hendelse.behandlingId?.toString(),
+                referanse = null, // Settes til null da opprettelse av behandling feilet. Har da ingen gyldig referanse.
                 merknad = hendelse.jobbtype.beskrivelse,
                 frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
             )

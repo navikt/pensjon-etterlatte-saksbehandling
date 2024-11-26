@@ -5,6 +5,7 @@ import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOpp
 import Spinner from '~shared/Spinner'
 import { ferdigstilleGosysOppgave } from '~shared/api/gosys'
 import { GosysOppgave } from '~shared/types/Gosys'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const FerdigstillGosysOppgave = ({
   oppgave,
@@ -15,10 +16,13 @@ export const FerdigstillGosysOppgave = ({
 }) => {
   const [ferdigstillResult, ferdigstillOppgave] = useApiCall(ferdigstilleGosysOppgave)
 
-  const ferdigstill = () =>
+  const ferdigstill = () => {
+    trackClick(ClickEvent.FERDIGSTILL_GOSYS_OPPGAVE)
+
     ferdigstillOppgave({ oppgaveId: oppgave.id, versjon: oppgave.versjon || 0 }, () => {
       setTimeout(() => window.location.reload(), 2000)
     })
+  }
 
   return mapResult(ferdigstillResult, {
     success: () => (

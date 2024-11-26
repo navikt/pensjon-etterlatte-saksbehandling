@@ -9,7 +9,7 @@ import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { lastDayOfMonth } from 'date-fns'
 import { AvkortingInntektForm } from '~components/behandling/avkorting/AvkortingInntektForm'
-import { IAvkortingGrunnlagFrontend } from '~shared/types/IAvkorting'
+import { IAvkortingGrunnlagFrontend, SystemOverstyrtInnvilgaMaanederAarsak } from '~shared/types/IAvkorting'
 import { ArrowCirclepathIcon, HeadCloudIcon, PencilIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import {
@@ -139,11 +139,14 @@ export const AvkortingInntekt = ({
                       <Table.DataCell>
                         <HStack gap="4" align="center">
                           <BodyShort>{avkortingGrunnlag.innvilgaMaaneder}</BodyShort>
-                          {fyller67 && !avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
-                            <Tooltip content="Fyller 67 år">
-                              <HeadCloudIcon aria-hidden fontSize="1.5rem" />
-                            </Tooltip>
-                          )}
+                          {fyller67 &&
+                            (!avkortingGrunnlag.overstyrtInnvilgaMaaneder ||
+                              avkortingGrunnlag.overstyrtInnvilgaMaaneder.aarsak ===
+                                SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67) && (
+                              <Tooltip content="Fyller 67 år">
+                                <HeadCloudIcon aria-hidden fontSize="1.5rem" />
+                              </Tooltip>
+                            )}
                           {!!avkortingGrunnlag.overstyrtInnvilgaMaaneder && (
                             <Tooltip content="Antall innvilga måneder er overstyrt">
                               <ArrowCirclepathIcon aria-hidden fontSize="1.5rem" />

@@ -5,6 +5,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { journalfoerNotat } from '~shared/api/notat'
 import { NotatRedigeringFane } from '~components/person/notat/NotatRedigeringModal'
 import { formaterTidspunktTimeMinutterSekunder } from '~utils/formatering/dato'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const NotatHandlinger = ({
   notatId,
@@ -24,6 +25,8 @@ export const NotatHandlinger = ({
   const [journalfoerStatus, apiJournalfoerNotat] = useApiCall(journalfoerNotat)
 
   const journalfoer = () => {
+    trackClick(ClickEvent.JOURNALFOER_NOTAT)
+
     apiJournalfoerNotat(notatId, () => {
       window.location.reload()
     })

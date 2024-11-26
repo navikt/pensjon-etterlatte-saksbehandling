@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
-import no.nav.etterlatte.libs.database.single
+import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 
 class OmregningDao(
@@ -151,7 +151,7 @@ class OmregningDao(
     fun hentNyligsteLinjeForKjoering(
         kjoering: String,
         sakId: SakId,
-    ): Pair<Long, KjoeringStatus> =
+    ): Pair<Long, KjoeringStatus>? =
         connection.hentConnection { connection ->
             with(connection) {
                 val statement =
@@ -166,7 +166,7 @@ class OmregningDao(
                     )
                 statement.setString(1, kjoering)
                 statement.setLong(2, sakId.sakId)
-                statement.executeQuery().single {
+                statement.executeQuery().singleOrNull {
                     Pair(
                         getLong("sak_id"),
                         KjoeringStatus.valueOf(getString("status")),

@@ -186,8 +186,8 @@ class BehandlingStatusServiceImpl(
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.FATTET)
 
         val merknadBehandling =
-            when (val bruker = brukerTokenInfo) {
-                is Saksbehandler -> "Behandlet av ${bruker.ident}"
+            when (brukerTokenInfo) {
+                is Saksbehandler -> "Behandlet av ${brukerTokenInfo.ident}"
                 is Systembruker -> "Behandlet av systemet"
             }
 

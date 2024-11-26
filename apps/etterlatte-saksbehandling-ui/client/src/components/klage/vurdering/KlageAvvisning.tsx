@@ -12,8 +12,8 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
 import { erSkjemaUtfylt, KlageOmgjoering } from '~components/klage/vurdering/KlageVurderingForms'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -60,10 +60,8 @@ export function KlageAvvisning(props: { klage: Klage }) {
     })
   }
 
-  const vedtakOmAvvistErAktivert = useFeatureEnabledMedDefault(
-    'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
-    false
-  )
+  const vedtakOmAvvistErAktivert = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage)
+
   const lagreUtfallAktivert = valgtUtfall !== Utfall.AVVIST || vedtakOmAvvistErAktivert
 
   return (

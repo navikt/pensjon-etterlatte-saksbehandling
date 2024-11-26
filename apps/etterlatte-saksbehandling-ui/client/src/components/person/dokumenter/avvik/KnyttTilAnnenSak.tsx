@@ -17,6 +17,7 @@ import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { JaNei } from '~shared/types/ISvar'
 import { formaterSakstype } from '~utils/formatering/formatering'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   const { sak: journalpostSak, tema } = journalpost
@@ -57,6 +58,8 @@ export const KnyttTilAnnenSak = ({
   const [oppgaveResult, apiOpprettOppgave] = useApiCall(opprettOppgave)
 
   const flyttJournalpost = (sak: ISak) => {
+    trackClick(ClickEvent.KNYTT_JOURNALPOST_TIL_ANNEN_SAK)
+
     apiKnyttTilAnnenSak({
       journalpostId: journalpost.journalpostId,
       request: {

@@ -4,6 +4,7 @@ import { TrashIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNotat: (id: number) => void }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -11,6 +12,8 @@ export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNota
   const [slettStatus, apiSlettNotat] = useApiCall(slettNotat)
 
   const slett = () => {
+    trackClick(ClickEvent.SLETT_NOTAT)
+
     apiSlettNotat(notat.id, () => {
       fjernNotat(notat.id)
     })

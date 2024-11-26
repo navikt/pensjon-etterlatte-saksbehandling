@@ -81,10 +81,12 @@ class VirkningstidspunktMaaHaUtenlandstilknytning(
     message: String,
 ) : UgyldigForespoerselException(code = "VIRK_MAA_HA_UTENLANDSTILKNYTNING", detail = message)
 
-class VirkningstidspunktKanIkkeVaereEtterOpphoer :
-    UgyldigForespoerselException(
+class VirkningstidspunktKanIkkeVaereEtterOpphoer(
+    virk: YearMonth?,
+    opphoerVirk: YearMonth?,
+) : UgyldigForespoerselException(
         code = "VIRK_KAN_IKKE_VAERE_ETTER_OPPHOER",
-        detail = "Virkningstidspunkt kan ikke være etter opphør",
+        detail = "Virkningstidspunkt ($virk) kan ikke være etter opphør ($opphoerVirk)",
     )
 
 class VirkFoerIverksattVirk(
@@ -480,7 +482,7 @@ internal class BehandlingServiceImpl(
     ): Boolean {
         val virkningstidspunkt = request.dato
         if (virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)) {
-            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer(virkningstidspunkt, behandling.opphoerFraOgMed)
         }
         if (behandling.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
             return true
@@ -537,7 +539,12 @@ internal class BehandlingServiceImpl(
         if (behandling.revurderingsaarsak() != Revurderingaarsak.NY_SOEKNAD &&
             virkningstidspunktErEtterOpphoerFraOgMed(virkningstidspunkt, behandling.opphoerFraOgMed)
         ) {
-            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+            // Vi tillater virkningstidspunkt etter opphør dersom saksbehandler vil overstyre
+            if (overstyr) {
+                return true
+            } else {
+                throw VirkningstidspunktKanIkkeVaereEtterOpphoer(virkningstidspunkt, behandling.opphoerFraOgMed)
+            }
         }
 
         val foerstegangsbehandling = hentFoerstegangsbehandling(behandling.sak.id)
@@ -836,7 +843,7 @@ internal class BehandlingServiceImpl(
         }
 
         if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
-            throw VirkningstidspunktKanIkkeVaereEtterOpphoer()
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)
         }
 
         behandling

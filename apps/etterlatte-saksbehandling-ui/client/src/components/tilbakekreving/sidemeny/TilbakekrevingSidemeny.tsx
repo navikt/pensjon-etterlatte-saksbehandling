@@ -105,6 +105,7 @@ export function TilbakekrevingSidemeny() {
                 beslutning={beslutning}
                 vedtak={vedtak}
                 erFattet={tilbakekreving?.status === TilbakekrevingStatus.FATTET_VEDTAK}
+                gyldigStegForBeslutning={true} // TODO lage en måte å sjekke at vi er på riktig steg her (https://jira.adeo.no/browse/EY-4780)
               />
             )
           )}

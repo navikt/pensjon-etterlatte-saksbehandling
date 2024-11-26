@@ -37,11 +37,22 @@ enum class KjoeringStatus {
     KLAR,
     STARTA,
     FEILA,
-    IKKE_LOEPENDE,
+    IKKE_LOEPENDE, // Muligens ikke i bruk lenger?
     FERDIGSTILT,
     FERDIGSTILT_FATTET,
     TIL_MANUELL,
     TIL_MANUELL_UTEN_OPPGAVE,
+    ;
+
+    fun erFerdigstilt() =
+        this in
+            listOf(
+                FERDIGSTILT,
+                FERDIGSTILT_FATTET,
+                TIL_MANUELL,
+                TIL_MANUELL_UTEN_OPPGAVE,
+                IKKE_LOEPENDE,
+            )
 }
 
 enum class DisttribuertEllerIverksatt {

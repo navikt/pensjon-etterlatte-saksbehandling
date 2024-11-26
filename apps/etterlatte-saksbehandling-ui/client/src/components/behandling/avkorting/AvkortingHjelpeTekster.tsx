@@ -1,7 +1,7 @@
 import { NOK } from '~utils/formatering/formatering'
 import { HelpText } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const ForventetInntektHeaderHjelpeTekst = () => {
   const [aapen, setAapen] = useState<boolean>(false)
@@ -9,7 +9,7 @@ export const ForventetInntektHeaderHjelpeTekst = () => {
   const sendAmplitudeKlikkEvent = () => {
     if (!aapen) {
       setAapen(true)
-      trackClick('avkorting forventet inntekt hjelpetekst klikk')
+      trackClick(ClickEvent.AVKORTING_FORVENTET_INNTEKT_HJELPETEKST)
     } else {
       setAapen(false)
     }
@@ -29,7 +29,7 @@ export const InnvilgaMaanederHeaderHjelpeTekst = () => {
   const sendAmplitudeKlikkEvent = () => {
     if (!aapen) {
       setAapen(true)
-      trackClick('avkorting innvilga måneder hjelpetekst klikk')
+      trackClick(ClickEvent.AVKORTING_INNVILGA_MAANEDER_HJELPETEKST)
     } else {
       setAapen(false)
     }

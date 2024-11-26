@@ -1,23 +1,22 @@
 import React, { ReactNode } from 'react'
 import { HStack, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
-import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'
-import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavestatusTag } from '~shared/tags/OppgavestatusTag'
-import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
+import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 import styled from 'styled-components'
 import { PersonLink } from '~components/person/lenker/PersonLink'
+import { OppgaveFrist } from '~components/oppgavebenk/frist/OppgaveFrist'
 
 interface Props {
   oppgave: OppgaveDTO
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
-  oppdaterFrist?: (id: string, nyfrist: string) => void
+  oppdaterFrist: (id: string, nyfrist: string) => void
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }
 
@@ -32,16 +31,7 @@ export const OppgaverTableRow = ({
     <Table.DataCell>{oppgave.sakId}</Table.DataCell>
     <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
     <Table.DataCell>
-      {oppdaterFrist ? (
-        <FristHandlinger
-          orginalFrist={oppgave.frist}
-          oppgaveId={oppgave.id}
-          oppdaterFrist={oppdaterFrist}
-          erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
-        />
-      ) : (
-        <FristWrapper dato={oppgave.frist} />
-      )}
+      <OppgaveFrist oppgave={oppgave} oppdaterFrist={oppdaterFrist} />
     </Table.DataCell>
     <Table.DataCell>
       {oppgave.fnr ? <PersonLink fnr={oppgave.fnr}>{oppgave.fnr}</PersonLink> : 'Mangler'}

@@ -80,6 +80,14 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
     }, 2000)
   }
 
+  const oppdaterFrist = (oppgaveId: string, frist: string) => {
+    setTimeout(() => {
+      dispatcher.setOppgavelistaOppgaver(
+        finnOgOppdaterOppgave(oppgavebenkState.oppgavelistaOppgaver, oppgaveId, { frist })
+      )
+    }, 2000)
+  }
+
   const hentOppgavelistaOppgaver = (oppgavestatusFilter?: Array<string>) =>
     hentOppgavelistaOppgaverFetch(
       {
@@ -118,6 +126,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
           oppdaterStatus={oppdaterStatus}
+          oppdaterFrist={oppdaterFrist}
           filter={filter}
         />
       ) : (

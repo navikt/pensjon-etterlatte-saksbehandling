@@ -1,5 +1,4 @@
 import { Alert, Button, Heading, HStack, Label, Select, Textarea, VStack } from '@navikt/ds-react'
-import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { ClockDashedIcon, ClockIcon } from '@navikt/aksel-icons'
 import { formaterDato } from '~utils/formatering/dato'
@@ -10,6 +9,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { useAppDispatch } from '~store/Store'
 import { settOppgave } from '~store/reducers/OppgaveReducer'
+import { OppgaveFrist } from '~components/oppgavebenk/frist/OppgaveFrist'
 
 interface Props {
   oppgave: OppgaveDTO | null
@@ -28,7 +28,7 @@ export const SettPaaVent = ({ oppgave }: Props) => {
   const dispatch = useAppDispatch()
   type settPaaVentTyper = keyof typeof PaaventAarsak
 
-  const [frist, setFrist] = useState<string>(oppgave.frist)
+  const [, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
   const [settPaaVent, setVisPaaVent] = useState(false)
   const [aarsak, setAarsak] = useState<settPaaVentTyper[number]>()
@@ -91,12 +91,9 @@ export const SettPaaVent = ({ oppgave }: Props) => {
 
               <VStack gap="2" justify="start">
                 <Label>Frist</Label>
-                <FristHandlinger
-                  orginalFrist={frist}
-                  oppgaveId={oppgave.id}
-                  oppdaterFrist={(_, frist: string) => setFrist(frist)}
-                  erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
-                />
+                <div>
+                  <OppgaveFrist oppgave={oppgave} oppdaterFrist={(_, frist: string) => setFrist(frist)} />
+                </div>
               </VStack>
             </VStack>
           )}

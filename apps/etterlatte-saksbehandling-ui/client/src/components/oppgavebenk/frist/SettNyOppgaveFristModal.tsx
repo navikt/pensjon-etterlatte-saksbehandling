@@ -51,10 +51,10 @@ export const SettNyOppgaveFristModal = ({ oppgave, oppdaterFrist }: Props) => {
           icon={<PencilIcon aria-hidden />}
           onClick={() => setAapen(!aapen)}
         >
-          <StatusPaaOppgaveFrist oppgave={oppgave} />
+          <StatusPaaOppgaveFrist oppgaveFrist={oppgave.frist} oppgaveStatus={oppgave.status} />
         </Button>
       ) : (
-        <StatusPaaOppgaveFrist oppgave={oppgave} />
+        <StatusPaaOppgaveFrist oppgaveFrist={oppgave.frist} oppgaveStatus={oppgave.status} />
       )}
 
       <Modal open={aapen} onClose={() => setAapen(false)} aria-labelledby="modal for å sette ny oppgave frist">

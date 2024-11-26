@@ -1,15 +1,21 @@
-import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
+import { Oppgavestatus } from '~shared/types/oppgave'
 import { isBefore } from 'date-fns'
 import { BodyShort, ErrorMessage } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 
-export const StatusPaaOppgaveFrist = ({ oppgave }: { oppgave: OppgaveDTO }) => {
+export const StatusPaaOppgaveFrist = ({
+  oppgaveFrist,
+  oppgaveStatus,
+}: {
+  oppgaveFrist: string
+  oppgaveStatus: Oppgavestatus | string
+}) => {
   const visAtFristHarPassert =
-    isBefore(new Date(oppgave.frist), new Date()) && oppgave.status !== Oppgavestatus.FERDIGSTILT
+    isBefore(new Date(oppgaveFrist), new Date()) && oppgaveStatus !== Oppgavestatus.FERDIGSTILT
 
   return visAtFristHarPassert ? (
-    <ErrorMessage>{formaterDato(oppgave.frist)}</ErrorMessage>
+    <ErrorMessage>{formaterDato(oppgaveFrist)}</ErrorMessage>
   ) : (
-    <BodyShort>{formaterDato(oppgave.frist)}</BodyShort>
+    <BodyShort>{formaterDato(oppgaveFrist)}</BodyShort>
   )
 }

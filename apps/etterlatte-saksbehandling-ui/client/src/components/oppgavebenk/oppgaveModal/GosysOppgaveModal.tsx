@@ -4,13 +4,13 @@ import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
 import React, { useContext, useState } from 'react'
 import { formaterDato } from '~utils/formatering/dato'
 import { ConfigContext } from '~clientConfig'
-import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { FerdigstillGosysOppgave } from '../gosys/FerdigstillGosysOppgave'
 import { OverfoerOppgaveTilGjenny } from '../gosys/OverfoerOppgaveTilGjenny'
 import { formaterOppgavetype, GosysOppgave } from '~shared/types/Gosys'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { GosysBrukerWrapper } from '~components/oppgavebenk/gosys/GosysBrukerWrapper'
 import { GosysTemaTag } from '~shared/tags/GosysTemaTag'
+import { StatusPaaOppgaveFrist } from '~components/oppgavebenk/frist/StatusPaaOppgaveFrist'
 
 const TagRow = styled.div`
   display: flex;
@@ -65,9 +65,11 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
             </div>
             <div>
               <Label>Frist</Label>
-              <BodyShort>
-                <FristWrapper dato={frist} />
-              </BodyShort>
+              {frist ? (
+                <StatusPaaOppgaveFrist oppgaveFrist={frist} oppgaveStatus={oppgave.status} />
+              ) : (
+                <BodyShort>Ingen frist</BodyShort>
+              )}
             </div>
             <div>
               <Label>Status</Label>

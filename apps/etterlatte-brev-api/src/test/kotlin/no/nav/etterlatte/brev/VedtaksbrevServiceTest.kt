@@ -675,6 +675,7 @@ internal class VedtaksbrevServiceTest {
                 )
 
             verify {
+                db.hentBrev(brev.id)
                 db.hentBrevInnhold(brev.id)
                 db.oppdaterPayload(brev.id, opphoerPayload, SAKSBEHANDLER)
                 db.oppdaterPayload(brev.id, tomPayload, SAKSBEHANDLER)

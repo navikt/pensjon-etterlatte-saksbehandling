@@ -56,6 +56,18 @@ class OpprettJobberIntegrationTest(
     }
 
     @Test
+    fun `skal ikke lage jobber om de er laget fra før OMS 12mnd`() {
+        jobbTestdata.opprettJobb(
+            JobbType.OMS_DOED_12MND,
+            nesteMaaned,
+            nesteMaaned.atDay(5),
+        )
+        opprettJobb.poll()
+
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize FasteJobber.entries.size
+    }
+
+    @Test
     fun `skal lage jobber om selv om det fins andre ikke faste jobber`() {
         jobbTestdata.opprettJobb(
             JobbType.AO_BP20,

@@ -10,6 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -21,6 +22,7 @@ import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import javax.sql.DataSource
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SakSkrivDaoTest(
@@ -434,6 +437,52 @@ internal class SakSkrivDaoTest(
             val saker = sakLesDao.hentSaker("", 100, emptyList(), emptyList())
             saker.map { it.ident } shouldContainExactlyInAnyOrder sakerMedBehandlinger.map { it.ident }
             saker.size shouldBe 2
+        }
+    }
+
+    @Test
+    fun `oppdater ident på sak`() {
+        val opprinneligIdent = Random.nextLong().toString()
+        val sak = sakRepo.opprettSak(opprinneligIdent, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        val nyIdent = KONTANT_FOT
+
+        sakRepo.oppdaterIdent(sak.id, nyIdent)
+
+        val oppdatertSak = sakLesDao.hentSak(sak.id)!!
+
+        oppdatertSak.id shouldBe sak.id
+        oppdatertSak.enhet shouldBe sak.enhet
+        oppdatertSak.sakType shouldBe sak.sakType
+
+        oppdatertSak.ident shouldNotBe sak.ident
+        oppdatertSak.ident shouldBe nyIdent.value
+
+        val endringer: List<Pair<Sak, Sak>> =
+            dataSource.connection.use {
+                it
+                    .prepareStatement(
+                        """
+                        SELECT foer, etter
+                        FROM endringer
+                        WHERE tabell = 'sak'
+                        AND foer ->> 'id' = '${sak.id}' 
+                        """.trimIndent(),
+                    ).executeQuery()
+                    .toList {
+                        deserialize<Sak>(getString("foer")) to deserialize<Sak>(getString("etter"))
+                    }
+            }
+
+        endringer.size shouldBe 1
+
+        endringer.single().let { (foer, etter) ->
+            foer.id shouldBe etter.id
+            foer.enhet shouldBe etter.enhet
+            foer.sakType shouldBe etter.sakType
+
+            foer.ident shouldBe opprinneligIdent
+            etter.ident shouldBe nyIdent.value
         }
     }
 }

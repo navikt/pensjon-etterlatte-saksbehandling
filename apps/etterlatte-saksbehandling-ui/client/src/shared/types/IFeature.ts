@@ -1,5 +1,7 @@
+import { FeatureToggle } from '~useUnleash'
+
 export interface IFeature {
-  toggle: string
+  toggle: FeatureToggle
   enabled: Status
 }
 

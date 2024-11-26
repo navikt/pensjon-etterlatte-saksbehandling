@@ -53,22 +53,12 @@ class BehandlingClient(
             UUID.fromString(response.body())
         }
 
-    fun behandleInntektsjustering(
-        sakId: SakId,
-        journalPostId: String,
-        inntektsjusteringId: UUID,
-    ) {
+    fun behandleInntektsjustering(request: InntektsjusteringRequest) {
         runBlocking {
             sakOgBehandlingApp
                 .post("$url/inntektsjustering/behandle") {
                     contentType(ContentType.Application.Json)
-                    setBody(
-                        InntektsjusteringRequest(
-                            sak = sakId,
-                            journalpostId = journalPostId,
-                            inntektsjusteringId = inntektsjusteringId,
-                        ),
-                    )
+                    setBody(request)
                 }.body<InntektsjusteringRequest>()
         }
     }

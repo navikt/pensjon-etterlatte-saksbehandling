@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendt
 import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
+import no.nav.etterlatte.libs.common.inntektsjustering.InntektsjusteringRequest
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
@@ -17,7 +18,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class InntektsjusteringRiver(
     rapidsConnection: RapidsConnection,
@@ -52,7 +52,7 @@ internal class InntektsjusteringRiver(
                         return
                     }
 
-            startBehandlingAvInntektsjustering(sak, journalpostResponse, inntektsjustering.id)
+            startBehandlingAvInntektsjustering(sak, journalpostResponse, inntektsjustering)
         } catch (e: JsonMappingException) {
             sikkerLogg.error("Feil under deserialisering", e)
             logger.error("Feil under deserialisering av inntektsjustering (id=${inntektsjustering.id}). Se sikkerlogg for detaljer.")
@@ -66,12 +66,20 @@ internal class InntektsjusteringRiver(
     private fun startBehandlingAvInntektsjustering(
         sak: Sak,
         journalpostResponse: OpprettJournalpostResponse,
-        inntektsjusteringId: UUID,
+        inntektsjustering: Inntektsjustering,
     ) {
         behandlingKlient.behandleInntektsjustering(
-            sak.id,
-            journalpostResponse.journalpostId,
-            inntektsjusteringId,
+            InntektsjusteringRequest(
+                sak = sak.id,
+                journalpostId = journalpostResponse.journalpostId,
+                inntektsjusteringId = inntektsjustering.id,
+                inntekt =
+                    inntektsjustering.arbeidsinntekt + inntektsjustering.naeringsinntekt + (
+                        inntektsjustering.afpInntekt
+                            ?: 0
+                    ),
+                inntektUtland = inntektsjustering.inntektFraUtland,
+            ),
         )
     }
 

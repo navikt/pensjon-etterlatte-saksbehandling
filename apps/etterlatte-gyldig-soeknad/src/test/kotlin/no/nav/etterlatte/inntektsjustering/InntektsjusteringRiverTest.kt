@@ -46,7 +46,7 @@ internal class InntektsjusteringRiverTest {
     private fun testRapid() = TestRapid().apply { InntektsjusteringRiver(this, behandlingKlientMock, journalfoerInntektsjusteringService) }
 
     @Test
-    fun `Skal journalføre inntektsjustering og opprette oppgave i Gjenny`() {
+    fun `Skal journalføre inntektsjustering og starte behandling med summert inntekt`() {
         val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)
         val inntektsjustering =
             Inntektsjustering(
@@ -70,7 +70,7 @@ internal class InntektsjusteringRiverTest {
                 "JournalId123",
                 true,
             )
-        coEvery { behandlingKlientMock.behandleInntektsjustering(any(), any(), any()) } just Runs
+        coEvery { behandlingKlientMock.behandleInntektsjustering(any()) } just Runs
 
         val melding =
             JsonMessage
@@ -92,7 +92,14 @@ internal class InntektsjusteringRiverTest {
             dokarkivKlientMock.opprettJournalpost(capture(journalRequest))
             pdfgenKlient.genererPdf(capture(pdfDataSlot), "inntektsjustering_nytt_aar_v1")
 
-            behandlingKlientMock.behandleInntektsjustering(sak.id, any(), any())
+            behandlingKlientMock.behandleInntektsjustering(
+                withArg {
+                    it.sak shouldBe sak.id
+                    it.inntektsjusteringId shouldBe inntektsjustering.id
+                    it.inntekt shouldBe 700
+                    it.inntektUtland shouldBe 300
+                },
+            )
         }
         with(journalRequest.captured) {
             tittel shouldBe "Inntektsjustering 2025"

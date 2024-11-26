@@ -49,6 +49,7 @@ data class OmregningData(
     private var behandlingId: UUID? = null,
     private var forrigeBehandlingId: UUID? = null,
     val utbetalingVerifikasjon: UtbetalingVerifikasjon = UtbetalingVerifikasjon.INGEN,
+    private var inntektsjustering: OmregningInntektsjustering? = null,
 ) {
     fun toPacket() =
         OmregningDataPacket(
@@ -60,6 +61,7 @@ data class OmregningData(
             behandlingId,
             forrigeBehandlingId,
             utbetalingVerifikasjon,
+            inntektsjustering,
         )
 
     fun hentFraDato(): LocalDate = fradato ?: throw OmregningshendelseHarFeilTilstand(OmregningData::fradato.name)
@@ -97,6 +99,15 @@ data class OmregningData(
         }
         forrigeBehandlingId = value
     }
+
+    fun hentInntektsjustering() = inntektsjustering ?: throw OmregningshendelseHarFeilTilstand(OmregningData::inntektsjustering.name)
+
+    fun endreInntektsjustering(value: OmregningInntektsjustering) {
+        if (inntektsjustering != null) {
+            throw OmregningshendelseSkalIkkeMuteres(OmregningData::inntektsjustering.name)
+        }
+        inntektsjustering = value
+    }
 }
 
 data class OmregningDataPacket(
@@ -108,6 +119,7 @@ data class OmregningDataPacket(
     val behandlingId: UUID?,
     val forrigeBehandlingId: UUID?,
     val utbetalingVerifikasjon: UtbetalingVerifikasjon,
+    val inntektsjustering: OmregningInntektsjustering?,
 ) {
     companion object KEYS {
         val KEY = HENDELSE_DATA_KEY
@@ -118,8 +130,14 @@ data class OmregningDataPacket(
         val BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::behandlingId.name}"
         val FORRIGE_BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::forrigeBehandlingId.name}"
         val REV_AARSAK = "$HENDELSE_DATA_KEY.${OmregningDataPacket::revurderingaarsak.name}"
+        val INNTEKTSJUSTERING = "$HENDELSE_DATA_KEY.${OmregningDataPacket::inntektsjustering.name}"
     }
 }
+
+data class OmregningInntektsjustering(
+    val inntekt: Int,
+    val inntektUtland: Int,
+)
 
 var JsonMessage.omregningData: OmregningData
     get() = objectMapper.treeToValue(this[HENDELSE_DATA_KEY])

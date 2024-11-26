@@ -47,7 +47,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
     fun `skal behandle inntektsjustering automatisk hvis featureToggle = true`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
 
-        val inntektsjusteringRequest = InntektsjusteringRequest(SakId(123L), "123", UUID.randomUUID())
+        val inntektsjusteringRequest = InntektsjusteringRequest(SakId(123L), "123", UUID.randomUUID(), 100, 0)
         service.behandleInntektsjustering(inntektsjusteringRequest)
         verify(exactly = 1) {
             rapid.publiser(
@@ -67,7 +67,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { featureToggleService.isEnabled(any(), any()) } returns false
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
 
-        val inntektsjusteringRequest = InntektsjusteringRequest(SakId(123L), "123", UUID.randomUUID())
+        val inntektsjusteringRequest = InntektsjusteringRequest(SakId(123L), "123", UUID.randomUUID(), 100, 0)
         service.behandleInntektsjustering(inntektsjusteringRequest)
 
         verify(exactly = 1) {

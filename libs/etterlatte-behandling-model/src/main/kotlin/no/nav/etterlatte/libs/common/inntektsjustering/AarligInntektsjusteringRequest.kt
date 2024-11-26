@@ -21,6 +21,8 @@ data class InntektsjusteringRequest(
     val sak: SakId,
     val journalpostId: String,
     val inntektsjusteringId: UUID,
+    val inntekt: Int,
+    val inntektUtland: Int,
 ) {
     companion object {
         fun utledKjoering(id: UUID) = "INNTEKTSJUSTERING_${utledLoependeFom()}_$id"

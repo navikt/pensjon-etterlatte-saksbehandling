@@ -82,11 +82,11 @@ internal fun Route.revurderingRoutes(
 
             post("manuell-inntektsjustering") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                    logger.info("Oppretter ny revurdering for årlig inntektsjustering på sak $sakId")
+                    logger.info("Oppretter ny revurdering for årlig manuell inntektsjustering på sak $sakId")
                     medBody<OpprettManuellInntektsjustering> {
                         val revurdering =
                             inTransaction {
-                                aarligInntektsjusteringJobbService.opprettManuellInntektsjustering(
+                                aarligInntektsjusteringJobbService.opprettRevurderingForAarligInntektsjustering(
                                     sakId,
                                     it.oppgaveId,
                                     saksbehandler,

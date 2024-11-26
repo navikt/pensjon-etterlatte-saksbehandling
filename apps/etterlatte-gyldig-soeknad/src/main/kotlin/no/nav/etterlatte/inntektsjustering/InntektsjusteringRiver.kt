@@ -59,7 +59,7 @@ internal class InntektsjusteringRiver(
             throw e
         } catch (e: Exception) {
             logger.error("Uhåndtert feilsituasjon TODO : $", e)
-            throw e
+            // throw e TODO ta stilling til hvordan feil her skal håndteres...
         }
     }
 

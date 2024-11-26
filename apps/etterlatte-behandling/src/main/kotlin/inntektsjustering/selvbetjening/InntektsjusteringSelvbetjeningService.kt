@@ -1,5 +1,6 @@
 package no.nav.etterlatte.inntektsjustering.selvbetjening
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inntektsjustering.InntektsjusterinFeatureToggle
 import no.nav.etterlatte.kafka.JsonMessage
@@ -104,5 +105,14 @@ class InntektsjusteringSelvbetjeningService(
 
         // TODO: sjekke om riktig tilstand for automatisk behandling
         return featureToggle
+    }
+
+    enum class InntektsjusterinFeatureToggle(
+        private val key: String,
+    ) : FeatureToggle {
+        AUTOMATISK_BEHANDLE("inntektsjustering-automatisk-behandle"),
+        ;
+
+        override fun key() = key
     }
 }

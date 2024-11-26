@@ -114,7 +114,7 @@ class AarligInntektsjusteringJobbService(
         loependeFom: YearMonth,
         sakId: SakId,
     ) = inTransaction {
-        logger.info("Inntektsjusteringsjobb $kjoering for sak $sakId")
+        logger.info("Årlig inntektsjusteringsjobb $kjoering for sak $sakId")
         try {
             val vedtak =
                 runBlocking {
@@ -465,13 +465,4 @@ enum class ManuellBehandlingToggle(
     ;
 
     override fun key(): String = this.value
-}
-
-enum class InntektsjusterinFeatureToggle(
-    private val key: String,
-) : FeatureToggle {
-    AUTOMATISK_BEHANDLE("inntektsjustering-automatisk-behandle"),
-    ;
-
-    override fun key() = key
 }

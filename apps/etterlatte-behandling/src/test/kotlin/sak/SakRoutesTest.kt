@@ -239,7 +239,7 @@ internal class SakRoutesTest {
 
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/$sakId/oppdater_ident?hendelseId=$hendelseId") {
+                client.post("/api/sak/$sakId/oppdater-ident?hendelseId=$hendelseId") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
                 }
@@ -250,7 +250,12 @@ internal class SakRoutesTest {
             sakService.finnSak(sakId)
             sakService.oppdaterIdentForSak(sak)
             behandlingService.hentAapneBehandlingerForSak(sakId)
-            behandlingService.avbrytBehandling(behandlingOgSak.behandlingId, any(), AarsakTilAvbrytelse.ANNET, any())
+            behandlingService.avbrytBehandling(
+                behandlingOgSak.behandlingId,
+                any(),
+                AarsakTilAvbrytelse.ENDRET_FOLKEREGISTERIDENT,
+                any(),
+            )
             grunnlagsendringshendelseService.arkiverHendelseMedKommentar(hendelseId, any(), any())
         }
     }

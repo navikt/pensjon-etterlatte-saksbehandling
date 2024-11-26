@@ -210,7 +210,7 @@ internal fun Route.sakWebRoutes(
                 )
             }
 
-            post("/oppdater_ident") {
+            post("/oppdater-ident") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     val hendelseId =
                         call.request.queryParameters["hendelseId"]?.let(UUID::fromString)
@@ -231,7 +231,7 @@ internal fun Route.sakWebRoutes(
                                 behandlingService.avbrytBehandling(
                                     behandlingId = it.behandlingId,
                                     saksbehandler = brukerTokenInfo,
-                                    aarsak = AarsakTilAvbrytelse.ANNET,
+                                    aarsak = AarsakTilAvbrytelse.ENDRET_FOLKEREGISTERIDENT,
                                     kommentar =
                                         "Avbrytes pga. overføring av sak fra fnr. ${sak.ident} " +
                                             "til ny ident ${oppdatertSak.ident}",

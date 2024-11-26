@@ -44,5 +44,5 @@ export const byttEnhetPaaSak = async (args: { sakId: number; enhet: string }): P
 }
 
 export const oppdaterIdentPaaSak = async (args: { sakId: number; hendelseId: string }): Promise<ApiResponse<ISak>> => {
-  return apiClient.post(`sak/${args.sakId}/oppdater_ident?hendelseId=${args.hendelseId}`, {})
+  return apiClient.post(`sak/${args.sakId}/oppdater-ident?hendelseId=${args.hendelseId}`, {})
 }

@@ -4,14 +4,18 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { feilregistrerSakstilknytning } from '~shared/api/dokument'
 import { Journalpost } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journalpost }) => {
   const [feilSakstilknytningStatus, apiFeilregistrerSakstilknytning] = useApiCall(feilregistrerSakstilknytning)
 
-  const feilregistrer = () =>
+  const feilregistrer = () => {
+    trackClick(ClickEvent.FEILREGISTRER_JOURNALPOST)
+
     apiFeilregistrerSakstilknytning(journalpost.journalpostId, () => {
       setTimeout(() => window.location.reload(), 2000)
     })
+  }
 
   if (isSuccess(feilSakstilknytningStatus)) {
     return (

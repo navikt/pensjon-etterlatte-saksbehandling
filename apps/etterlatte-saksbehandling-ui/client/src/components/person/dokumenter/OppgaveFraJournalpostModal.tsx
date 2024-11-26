@@ -15,6 +15,7 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { flyttTilGjenny, hentJournalfoeringsoppgaverFraGosys } from '~shared/api/gosys'
 import { GosysOppgave } from '~shared/types/Gosys'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const OppgaveFraJournalpostModal = ({
   isOpen,
@@ -56,6 +57,8 @@ export const OppgaveFraJournalpostModal = ({
 
   const opprettJournalfoeringsoppgave = () => {
     if (isSuccess(sakStatus)) {
+      trackClick(ClickEvent.OPPRETT_JOURNALFOERINGSOPPGAVE)
+
       apiOpprettOppgave(
         {
           sakId: sakStatus.data.sak.id,
@@ -76,6 +79,8 @@ export const OppgaveFraJournalpostModal = ({
 
   const konverterTilGjennyoppgave = (oppgave: GosysOppgave) => {
     if (isSuccess(sakStatus)) {
+      trackClick(ClickEvent.FLYTT_GOSYS_OPPGAVE)
+
       flyttOppgaveTilGjenny({ oppgaveId: oppgave.id, sakId: sakStatus.data.sak.id }, (oppgave) => {
         navigate(`/oppgave/${oppgave.id}`)
       })

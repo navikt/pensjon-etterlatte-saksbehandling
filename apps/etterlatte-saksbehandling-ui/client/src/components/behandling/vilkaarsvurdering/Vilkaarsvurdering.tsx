@@ -24,6 +24,7 @@ import {
 import { isFailure, isInitial, isPending, mapFailure } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -79,6 +80,8 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
   const resetVilkaarsvurdering = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
+
+    trackClick(ClickEvent.SLETT_VILKAARSVURDERING)
     slettGammelVilkaarsvurdering(behandlingId, () => {
       dispatch(updateVilkaarsvurdering(undefined))
       createVilkaarsvurdering(behandlingId, false)

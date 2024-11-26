@@ -10,6 +10,7 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const OpprettJournalfoeringsoppgave = ({
   journalpost,
@@ -23,7 +24,9 @@ export const OpprettJournalfoeringsoppgave = ({
 
   const [oppgaveResult, apiOpprettOppgave] = useApiCall(opprettOppgave)
 
-  const opprettJournalfoeringsoppgave = (sakId: number, journalpostId: string) =>
+  const opprettJournalfoeringsoppgave = (sakId: number, journalpostId: string) => {
+    trackClick(ClickEvent.OPPRETT_JOURNALFOERINGSOPPGAVE)
+
     apiOpprettOppgave(
       {
         sakId,
@@ -39,6 +42,7 @@ export const OpprettJournalfoeringsoppgave = ({
         navigate(`/oppgave/${oppgave.id}`)
       }
     )
+  }
 
   if (journalpost.journalstatus === Journalstatus.FEILREGISTRERT)
     return <Alert variant="warning">Kan ikke opprette oppgave for feilregistrert journalpost</Alert>

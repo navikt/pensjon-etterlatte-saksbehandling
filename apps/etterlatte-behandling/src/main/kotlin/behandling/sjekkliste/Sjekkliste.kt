@@ -62,7 +62,7 @@ internal val sjekklisteItemsFoerstegangsbehandlingOMS =
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
         "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
         "Sjekk om bruker har overgangsstønad",
-        "Forutsigbart opphør før desember neste år: Oppgitt inntekt for neste år i søknaden er kontrollert, og måneder etter opphør er trukket fra i beregningen.",
+        "Forutsigbart opphør (aldersovergang e.l.) før desember i år eller neste år: Oppgitt inntekt for i år/ neste år i søknaden er kontrollert, og måneder etter opphør er trukket fra i beregningen.",
     )
 
 internal val sjekklisteItemsRevurderingBP =
@@ -80,6 +80,7 @@ internal val sjekklisteItemsRevurderingOMS =
         "Refusjonskrav (annen Nav-ytelse) i etterbetaling av OMS - opprettet oppgave til NØP",
         "Gjenlevende er innvilget AAP/OMS - oppgave sendt til Nav lokal pga spesiell oppfølging for de med OMS",
         "Inntekt neste år: sjekket at bruker har oppgitt inntekt frem til forutsigbart opphør pga aldersovergang e.l.",
+        "Sjekket at forutsigbart opphør (aldersovergang e.l.) inneværende år er tatt hensyn til i beregningen av forventet inntekt for innvilget periode i år",
     )
 
 internal val sjekklisteItemsBosattNorgeSluttbehandling =

@@ -11,9 +11,9 @@ import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRe
 
 internal fun Route.aarligInntektsjusteringRoute(service: AarligInntektsjusteringJobbService) {
     route("/inntektsjustering") {
-        post("jobb") {
+        post("aarlig-jobb") {
             val request = call.receive<AarligInntektsjusteringRequest>()
-            service.startAarligInntektsjustering(request)
+            service.startAarligInntektsjusteringJobb(request)
             call.respond(HttpStatusCode.OK)
         }
     }

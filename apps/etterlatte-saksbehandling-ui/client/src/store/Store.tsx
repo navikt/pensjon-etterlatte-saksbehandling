@@ -14,6 +14,7 @@ import { behandlingsidemenyReducer } from '~store/reducers/BehandlingSidemenyRed
 import { oppgaveReducer } from '~store/reducers/OppgaveReducer'
 import { personopplysningerReducer } from '~store/reducers/PersonopplysningerReducer'
 import { aktivitetsplikt12mndReducer } from '~store/reducers/Aktivitetsplikt12mnd'
+import { unleashReducer } from '~store/reducers/UnleashReducer'
 
 const reducer = {
   menuReducer: menuReducer,
@@ -29,6 +30,7 @@ const reducer = {
   sjekklisteReducer: sjekklisteReducer,
   personopplysningerReducer: personopplysningerReducer,
   aktivitetsplikt12mndReducer: aktivitetsplikt12mndReducer,
+  unleashReducer: unleashReducer,
 }
 export const store = configureStore({
   reducer,

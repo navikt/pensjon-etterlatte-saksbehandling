@@ -29,7 +29,7 @@ import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -58,7 +58,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   const [manglerBrevutfall, setManglerbrevutfall] = useState(false)
   const [manglerAvkorting, setManglerAvkorting] = useState(false)
-  const skalHaInntektNesteAar = useFeatureEnabledMedDefault('validere_aarsintnekt_neste_aar', false)
+
+  const skalHaInntektNesteAar = useFeaturetoggle(FeatureToggle.validere_aarsintnekt_neste_aar)
 
   const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 

@@ -5,6 +5,7 @@ import { BodyShort, Button, HStack, Modal } from '@navikt/ds-react'
 import { TrashIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 const kanSlettes = (brev: IBrev) => {
   return !brev.behandlingId && [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)
@@ -23,6 +24,8 @@ export const SlettBrev = ({ brev }: { brev: IBrev }) => {
   }
 
   const slett = () => {
+    trackClick(ClickEvent.SLETT_BREV)
+
     apiSlettBrev({ brevId: brev.id, sakId: brev.sakId }, () => {
       window.location.reload()
     })

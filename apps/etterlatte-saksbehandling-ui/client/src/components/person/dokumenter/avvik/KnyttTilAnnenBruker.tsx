@@ -15,6 +15,7 @@ import { opprettOppgave } from '~shared/api/oppgaver'
 import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 export const KnyttTilAnnenBruker = ({
   journalpost,
@@ -35,6 +36,8 @@ export const KnyttTilAnnenBruker = ({
   const [opprettOppgaveStatus, apiOpprettOppgave] = useApiCall(opprettOppgave)
 
   const flyttJournalpost = (sak: ISak) => {
+    trackClick(ClickEvent.FLYTT_JOURNALPOST)
+
     apiOppdaterJournalpost(
       {
         journalpost: {

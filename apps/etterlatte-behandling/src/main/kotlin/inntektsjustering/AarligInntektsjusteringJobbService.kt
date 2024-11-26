@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.omregning.OmregningKlassifikasjonskodeJobService.Companion.kjoering
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -76,13 +77,15 @@ class AarligInntektsjusteringJobbService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun startAarligInntektsjustering(request: AarligInntektsjusteringRequest) {
+    fun startAarligInntektsjusteringJobb(request: AarligInntektsjusteringRequest) {
+        logger.info("Starter årlig inntektsjusteringjobb $kjoering")
         request.saker.forEach { sakId ->
             startEnkeltSak(request.kjoering, request.loependeFom, sakId)
         }
     }
 
-    fun opprettManuellInntektsjustering(
+    // i det tilfelle hvor aarligInntektsjusteringJobb ikka kan behandle sak atuomatisk,
+    fun opprettRevurderingForAarligInntektsjustering(
         sakId: SakId,
         oppgaveId: UUID,
         saksbehandler: Saksbehandler,
@@ -100,7 +103,9 @@ class AarligInntektsjusteringJobbService(
         val begrunnelse = oppgaveService.hentOppgave(oppgaveId).merknad
         val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
         val revurdering = nyManuellRevurdering(sakId, hentForrigeBehandling(sakId), loependeFom, begrunnelse!!)
+
         oppgaveService.ferdigstillOppgave(oppgaveId, saksbehandler)
+
         return revurdering
     }
 
@@ -109,7 +114,7 @@ class AarligInntektsjusteringJobbService(
         loependeFom: YearMonth,
         sakId: SakId,
     ) = inTransaction {
-        logger.info("Årlig inntektsjusteringsjobb $kjoering for $sakId")
+        logger.info("Årlig inntektsjusteringsjobb $kjoering for sak $sakId")
         try {
             val vedtak =
                 runBlocking {
@@ -122,7 +127,6 @@ class AarligInntektsjusteringJobbService(
             }
 
             val forrigeBehandling = hentForrigeBehandling(sakId)
-
             val avkortingSjekk = hentAvkortingSjekk(sakId, loependeFom, forrigeBehandling.id)
 
             if (avkortingSjekk.harInntektForAar) {
@@ -152,7 +156,7 @@ class AarligInntektsjusteringJobbService(
         }
     }
 
-    fun maaGjoeresManuelt(
+    private fun maaGjoeresManuelt(
         kjoering: String,
         sakId: SakId,
         loependeFom: YearMonth,
@@ -209,7 +213,6 @@ class AarligInntektsjusteringJobbService(
         }
 
         val opplysningerGjenny = hentOpplysningerGjenny(sak, forrigeBehandling.id)
-
         val opplysningerPdl = hentPdlPersonopplysning(sak)
 
         if (!opplysningerPdl.vergemaalEllerFremtidsfullmakt.isNullOrEmpty()) {
@@ -370,7 +373,7 @@ class AarligInntektsjusteringJobbService(
                                 OmregningData(
                                     kjoering = kjoering,
                                     sakId = sakId,
-                                    revurderingaarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+                                    revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING,
                                     fradato = loependeFom.atDay(1),
                                 ).toPacket(),
                         ),
@@ -441,7 +444,7 @@ class AarligInntektsjusteringJobbService(
     }
 
     private fun genererManuellBegrunnelseTekst(aarsakTilManuell: AarligInntektsjusteringAarsakManuell): String =
-        "Inntektsjustering kan ikke behandles automatisk. Årsak: ${aarsakTilManuell.name}"
+        "Inntektsjustering for neste år må behandles manuelt. Årsak: ${aarsakTilManuell.name}"
 }
 
 enum class AarligInntektsjusteringAarsakManuell {

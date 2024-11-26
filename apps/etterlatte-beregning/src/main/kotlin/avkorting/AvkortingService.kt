@@ -6,6 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -15,10 +16,13 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 enum class AvkortingToggles(
@@ -36,17 +40,19 @@ class AvkortingService(
     private val beregningService: BeregningService,
     private val sanksjonService: SanksjonService,
     private val grunnlagKlient: GrunnlagKlient,
+    private val vedtakKlient: VedtaksvurderingKlient,
+    private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hentAvkorting(
+    suspend fun hentOpprettEllerReberegnAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): AvkortingFrontend? {
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandling.id)
+        val eksisterendeAvkorting = hentAvkorting(behandlingId)
 
         if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             return eksisterendeAvkorting?.let {
@@ -65,7 +71,8 @@ class AvkortingService(
             }
         }
 
-        val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
+        val forrigeAvkorting =
+            hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo, behandling.virkningstidspunkt().dato)
         return if (eksisterendeAvkorting == null) {
             val nyAvkorting =
                 kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
@@ -83,6 +90,8 @@ class AvkortingService(
             avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
         }
     }
+
+    fun hentAvkorting(behandlingId: UUID) = avkortingRepository.hentAvkorting(behandlingId)
 
     suspend fun hentFullfoertAvkorting(
         behandlingId: UUID,
@@ -142,7 +151,12 @@ class AvkortingService(
             if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
                 avkortingMedTillegg(lagretAvkorting, behandling)
             } else {
-                val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)
+                val forrigeAvkorting =
+                    hentAvkortingForrigeBehandling(
+                        behandling.sak,
+                        brukerTokenInfo,
+                        behandling.virkningstidspunkt().dato,
+                    )
                 avkortingMedTillegg(
                     lagretAvkorting,
                     behandling,
@@ -231,12 +245,26 @@ class AvkortingService(
         forrigeAvkorting: Avkorting? = null,
     ): AvkortingFrontend = avkorting.toFrontend(behandling.virkningstidspunkt().dato, forrigeAvkorting, behandling.status)
 
-    private suspend fun hentAvkortingForrigeBehandling(
+    suspend fun hentAvkortingForrigeBehandling(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
+        virkningstidspunkt: YearMonth,
     ): Avkorting {
-        val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
-        return hentForrigeAvkorting(forrigeBehandlingId)
+        val alleVedtak = vedtakKlient.hentIverksatteVedtak(sakId, brukerTokenInfo)
+        val forrigeBehandlingId =
+            alleVedtak
+                .filter {
+                    it.vedtakType != VedtakType.OPPHOER
+                }.maxBy {
+                    it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
+                }.behandlingId
+        val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
+        return avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
+            forrigeAvkorting,
+            virkningstidspunkt,
+            sakId,
+            alleVedtak,
+        )
     }
 
     fun hentForrigeAvkorting(forrigeBehandlingId: UUID): Avkorting =

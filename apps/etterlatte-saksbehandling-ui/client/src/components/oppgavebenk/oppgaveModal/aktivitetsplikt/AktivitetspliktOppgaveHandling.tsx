@@ -15,7 +15,6 @@ export const AktivitetspliktOppgaveHandling = ({
   oppgave: OppgaveDTO
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }) => {
-  console.log('AktivitetspliktOppgaveHandling renders')
   const brukNyVurderingssideAktivitetsplikt = useFeaturetoggle(FeatureToggle.aktivitetsplikt_ny_vurdering)
 
   return brukNyVurderingssideAktivitetsplikt ? (

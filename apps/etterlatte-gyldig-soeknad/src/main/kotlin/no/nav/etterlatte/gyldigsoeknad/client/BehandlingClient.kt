@@ -59,7 +59,7 @@ class BehandlingClient(
                 .post("$url/inntektsjustering/behandle") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
-                }.body<InntektsjusteringRequest>()
+                }
         }
     }
 

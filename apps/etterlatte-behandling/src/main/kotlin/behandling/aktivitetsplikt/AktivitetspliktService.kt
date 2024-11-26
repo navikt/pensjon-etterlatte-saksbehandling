@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
-import io.ktor.client.request.request
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
@@ -480,40 +479,7 @@ class AktivitetspliktService(
     fun hentVurderingForSak(sakId: SakId): AktivitetspliktVurdering =
         hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId)
 
-    fun opprettRevurderingHvisKravIkkeOppfylt12Mnd(
-        request: OpprettRevurderingForAktivitetspliktDto,
-        bruker: BrukerTokenInfo,
-    ): OpprettRevurderingForAktivitetspliktResponse {
-        val forrigeBehandling =
-            requireNotNull(behandlingService.hentSisteIverksatte(request.sakId)) {
-                "Fant ikke forrige behandling i sak ${request.sakId}sakId"
-            }
-        val persongalleri =
-            runBlocking {
-                requireNotNull(
-                    grunnlagKlient
-                        .hentPersongalleri(
-                            forrigeBehandling.id,
-                            bruker,
-                        )?.opplysning,
-                ) {
-                    "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"
-                }
-            }
-        val aktivitetspliktDato = request.behandlingsmaaned.atDay(1).plusMonths(1)
-        return if (oppfyllerAktivitetsplikt12mnd(request.sakId)) {
-            OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
-        } else {
-            if (behandlingService.hentBehandlingerForSak(request.sakId).any { it.status.aapenBehandling() }) {
-                opprettOppgaveForRevurdering(request, forrigeBehandling, oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING12MND)
-            } else {
-                // TODO: trenger vi ny revurderingAarsak her?
-                opprettRevurdering(request, forrigeBehandling, aktivitetspliktDato, persongalleri)
-            }
-        }
-    }
-
-    fun oppfyllerAktivitetsplikt12mnd(sakId: SakId): Boolean {
+    private fun oppfyllerAktivitetsplikt12mnd(sakId: SakId): Boolean {
         val oppgave12mnd =
             oppgaveService
                 .hentOppgaverForSak(sakId, OppgaveType.AKTIVITETSPLIKT_12MND)
@@ -541,7 +507,7 @@ class AktivitetspliktService(
         return false
     }
 
-    fun opprettRevurderingHvisKravIkkeOppfylt6mnd(
+    fun opprettRevurderingHvisKravIkkeOppfylt(
         request: OpprettRevurderingForAktivitetspliktDto,
         bruker: BrukerTokenInfo,
     ): OpprettRevurderingForAktivitetspliktResponse {
@@ -563,7 +529,14 @@ class AktivitetspliktService(
             }
 
         val aktivitetspliktDato = request.behandlingsmaaned.atDay(1).plusMonths(1)
-        return if (oppfyllerAktivitetsplikt6mnd(request.sakId, aktivitetspliktDato)) {
+        val jobbType = request.jobbType
+        val oppfyllerKrav =
+            when (jobbType) {
+                JobbType.OMS_DOED_6MND -> oppfyllerAktivitetsplikt6mnd(request.sakId, aktivitetspliktDato)
+                JobbType.OMS_DOED_12MND -> oppfyllerAktivitetsplikt12mnd(request.sakId)
+                else -> throw InternfeilException("Oppretting av revurdering støttes ikke for jobb ${jobbType.name}")
+            }
+        return if (oppfyllerKrav) {
             OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
         } else {
             if (behandlingService.hentBehandlingerForSak(request.sakId).any { it.status.aapenBehandling() }) {

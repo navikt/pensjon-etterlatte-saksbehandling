@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetsp
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -337,16 +336,10 @@ class BehandlingServiceImpl(
         frist: Tidspunkt,
         behandlingsmaaned: YearMonth,
         jobbType: JobbType,
-    ): OpprettRevurderingForAktivitetspliktResponse {
-        val urlSuffix =
-            when (jobbType) {
-                JobbType.OMS_DOED_6MND -> "revurdering"
-                JobbType.OMS_DOED_12MND -> "revurdering-tolv-mnd"
-                else -> throw InternfeilException("Støtter ikke jobbtype ${jobbType.beskrivelse} ${jobbType.kategori.name}")
-            }
-        return runBlocking {
+    ): OpprettRevurderingForAktivitetspliktResponse =
+        runBlocking {
             behandlingKlient
-                .post("$url/api/sak/${sakId.sakId}/aktivitetsplikt/$urlSuffix") {
+                .post("$url/api/sak/${sakId.sakId}/aktivitetsplikt/revurdering") {
                     contentType(ContentType.Application.Json)
                     setBody(
                         OpprettRevurderingForAktivitetspliktDto(
@@ -358,7 +351,6 @@ class BehandlingServiceImpl(
                     )
                 }.body<OpprettRevurderingForAktivitetspliktResponse>()
         }
-    }
 
     override fun opprettOppgaveAktivitetspliktVarigUnntak(
         sakId: SakId,

@@ -698,7 +698,7 @@ class AktivitetspliktServiceTest {
                 )
             every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt6mnd(request, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -736,7 +736,7 @@ class AktivitetspliktServiceTest {
                 )
             } returns oppgave
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt6mnd(request, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -765,7 +765,7 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt6mnd(request, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false

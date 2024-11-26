@@ -673,7 +673,6 @@ class OppgaveService(
                         OppgaveType.AKTIVITETSPLIKT_12MND,
                         OppgaveType.AKTIVITETSPLIKT_REVURDERING,
                         OppgaveType.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
-                        OppgaveType.AKTIVITETSPLIKT_REVURDERING12MND,
                         ->
                             true
 

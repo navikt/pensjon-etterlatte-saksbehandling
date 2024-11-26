@@ -581,7 +581,6 @@ class AktivitetspliktService(
             OpprettOppgaveForAktivitetspliktResponse()
         }
 
-    // TODO: gjør denne gjenbrukbar med å sende inn oppgavetype
     private fun opprettOppgaveForRevurdering(
         request: OpprettRevurderingForAktivitetspliktDto,
         forrigeBehandling: Behandling,

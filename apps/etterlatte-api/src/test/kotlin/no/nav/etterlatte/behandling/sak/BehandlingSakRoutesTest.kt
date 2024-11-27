@@ -1,4 +1,4 @@
-package no.nav.etterlatte.samordning.sak
+package no.nav.etterlatte.behandling.sak
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -150,7 +150,12 @@ class BehandlingSakRoutesTest {
     @Test
     fun `skal gi 500 når body mangler pensjonSaksbehandler`() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
+        val conff =
+            config(
+                mockOAuth2Server.config.httpServer.port(),
+                Issuer.AZURE.issuerName,
+                pensjonSaksbehandler = pensjonSaksbehandler,
+            )
         applicationConfig = HoconApplicationConfig(conff)
         testApplication {
             environment { config = applicationConfig }
@@ -179,7 +184,12 @@ class BehandlingSakRoutesTest {
     @Test
     fun `pensjonSaksbehandler kan hente saksliste for fnr`() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
+        val conff =
+            config(
+                mockOAuth2Server.config.httpServer.port(),
+                Issuer.AZURE.issuerName,
+                pensjonSaksbehandler = pensjonSaksbehandler,
+            )
         applicationConfig = HoconApplicationConfig(conff)
         val requestFnr = FoedselsnummerDTO(fnr)
         val sakIdListesvar = listOf(sakId1)
@@ -222,7 +232,12 @@ class BehandlingSakRoutesTest {
     @Test
     fun `Kan hente sak men sak er null og kaster da exception IkkeFunnetException men logges `() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
+        val conff =
+            config(
+                mockOAuth2Server.config.httpServer.port(),
+                Issuer.AZURE.issuerName,
+                pensjonSaksbehandler = pensjonSaksbehandler,
+            )
         applicationConfig = HoconApplicationConfig(conff)
         coEvery { behandlingService.hentSak(any()) } returns null
         testApplication {
@@ -262,7 +277,12 @@ class BehandlingSakRoutesTest {
     @Test
     fun `Kan hente sak, verifiserer at den blir returnert`() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
+        val conff =
+            config(
+                mockOAuth2Server.config.httpServer.port(),
+                Issuer.AZURE.issuerName,
+                pensjonSaksbehandler = pensjonSaksbehandler,
+            )
         applicationConfig = HoconApplicationConfig(conff)
         val sakId: Long = 12
         val funnetSak =

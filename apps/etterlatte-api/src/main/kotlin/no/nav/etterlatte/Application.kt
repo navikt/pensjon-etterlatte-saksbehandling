@@ -1,11 +1,11 @@
 package no.nav.etterlatte
 
 import io.ktor.server.application.install
+import no.nav.etterlatte.behandling.sak.behandlingSakRoutes
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.run
-import no.nav.etterlatte.samordning.sak.behandlingSakRoutes
 import no.nav.etterlatte.samordning.serverRequestLoggerPlugin
 import no.nav.etterlatte.samordning.userIdMdcPlugin
 import no.nav.etterlatte.samordning.vedtak.barnepensjonVedtakRoute

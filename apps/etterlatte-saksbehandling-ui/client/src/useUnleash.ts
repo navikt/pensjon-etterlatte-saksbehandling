@@ -13,7 +13,7 @@ export const enum FeatureToggle {
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',
   notater = 'notater',
   kun_en_registrert_juridisk_forelder = 'kun-en-registrert-juridisk-forelder',
-  kopier_trygdetidsgrunnlag = 'kopier_trygdetidsgrunnlag',
+  kopier_trygdetidsgrunnlag = 'kopier-trygdetidsgrunnlag',
   kan_redigere_journalpost_bruker = 'kan_redigere_journalpost_bruker',
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',

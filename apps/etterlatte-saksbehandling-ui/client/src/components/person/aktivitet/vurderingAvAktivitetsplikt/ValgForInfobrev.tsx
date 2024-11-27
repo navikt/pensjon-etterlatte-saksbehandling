@@ -196,7 +196,9 @@ export const ValgForInfobrev = () => {
                     Rediger
                   </Button>
                 </Box>
-                <Alert variant="info">Hvis valgene redigeres vil innholdet i brevet tilbakestilles.</Alert>
+                {aktivtetspliktbrevdata?.brevId && (
+                  <Alert variant="info">Hvis valgene redigeres vil innholdet i brevet tilbakestilles.</Alert>
+                )}
               </>
             )}
           </VStack>

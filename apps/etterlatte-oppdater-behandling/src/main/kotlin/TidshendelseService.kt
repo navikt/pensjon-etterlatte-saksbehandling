@@ -130,11 +130,6 @@ class TidshendelseService(
     }
 
     private fun opprettRevurderingForAktivitetsplikt(hendelse: TidshendelsePacket): TidshendelseResult {
-        if (!(hendelse.jobbtype == JobbType.OMS_DOED_6MND || hendelse.jobbtype == JobbType.OMS_DOED_12MND)) {
-            throw IllegalArgumentException(
-                "Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}",
-            )
-        }
         val response =
             behandlingService.opprettRevurderingAktivitetsplikt(
                 sakId = hendelse.sakId,

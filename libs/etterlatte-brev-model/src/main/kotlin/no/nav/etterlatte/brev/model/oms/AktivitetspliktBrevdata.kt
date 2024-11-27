@@ -21,6 +21,6 @@ data class AktivitetspliktInformasjon6MndBrevdata(
     val nasjonalEllerUtland: NasjonalEllerUtland,
 ) : BrevDataRedigerbar
 
-enum class Aktivitetsgrad { IKKE_I_AKTIVITET, UNDER_50_PROSENT, OVER_50_PROSENT, UNDER_100_PROSENT, AKKURAT_100_PROSENT }
+enum class Aktivitetsgrad { IKKE_I_AKTIVITET, UNDER_50_PROSENT, OVER_50_PROSENT, AKKURAT_100_PROSENT }
 
 enum class NasjonalEllerUtland { NASJONAL, UTLAND }

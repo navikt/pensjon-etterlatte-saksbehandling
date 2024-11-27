@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
@@ -364,6 +365,15 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun oppdaterSpesifiktBrev(
+        sakId: SakId,
+        brevId: BrevID,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev {
         TODO("Not yet implemented")
     }
 

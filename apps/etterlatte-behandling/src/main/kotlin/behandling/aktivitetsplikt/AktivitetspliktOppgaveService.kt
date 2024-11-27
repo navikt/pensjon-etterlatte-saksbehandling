@@ -99,26 +99,75 @@ class AktivitetspliktOppgaveService(
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         if (oppgave.status.erAvsluttet()) {
             throw OppgaveErAvsluttet("Oppgave er avsluttet, id $oppgaveId. Kan ikke fjerne brevid")
-        } else {
-            val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-            val saksbehandler =
-                Kontekst.get().brukerTokenInfo
-                    ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
-            val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
-            aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
-            val hentBrevId = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
-            if (!data.skalSendeBrev && hentBrevId?.brevId != null) {
+        }
+
+        val sak = sakService.finnSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+        val saksbehandler =
+            Kontekst.get().brukerTokenInfo
+                ?: throw IngenSaksbehandler("Fant ingen saksbehandler til lagring av brevdata for oppgave $oppgaveId")
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident())
+
+        val eksisterendeData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId)
+
+        aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
+        val oppdatertData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
+
+        // Hvis brev allerede er opprettet kan det hende vi må endre / slette det
+        if (oppdatertData?.brevId != null) {
+            // Hvis brevet ikke er relevant skal det slettes
+            if (!data.skalSendeBrev) {
                 aktivitetspliktBrevDao.fjernBrevId(oppgaveId, kilde)
                 runBlocking {
                     brevApiKlient.slettBrev(
-                        brevId = hentBrevId.brevId,
+                        brevId = oppdatertData.brevId,
                         sakId = sak.id,
                         brukerTokenInfo = saksbehandler,
                     )
                 }
+                // Hvis brevdata er endret må vi oppdatere brevet
+            } else if (!oppdatertData.harLikeUtfall(eksisterendeData)) {
+                val brevParametre = mapOgValiderBrevParametre(oppgave, oppdatertData)
+                runBlocking {
+                    brevApiKlient.oppdaterSpesifiktBrev(
+                        sakId = sak.id,
+                        brevParametre = brevParametre,
+                        brukerTokenInfo = saksbehandler,
+                        brevId = oppdatertData.brevId,
+                    )
+                }
             }
-            return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)!!
         }
+        return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)!!
+    }
+
+    private fun mapOgValiderBrevParametre(
+        oppgave: OppgaveIntern,
+        brevdata: AktivitetspliktInformasjonBrevdata,
+    ): BrevParametre {
+        val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgave.id)
+
+        val sisteAktivtetsgrad =
+            vurderingForOppgave.aktivitet.maxByOrNull { it.fom }
+                ?: throw ManglerAktivitetsgrad("Mangler aktivitetsgrad for oppgave: ${oppgave.id}")
+
+        sjekkOmHarNyVurdering(oppgave, vurderingForOppgave.aktivitet)
+
+        if (brevdata.manglerUtfylling()) {
+            throw UgyldigForespoerselException(
+                "MANGLER_UTFYLLING",
+                "Data for brev mangler utfylling, og må redigeres og lagres på nytt for å opprette brevet.",
+            )
+        }
+
+        val nasjonalEllerUtland =
+            behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+        return BrevParametre.AktivitetspliktInformasjon10Mnd(
+            aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
+            utbetaling = brevdata.utbetaling!!,
+            redusertEtterInntekt = brevdata.redusertEtterInntekt!!,
+            nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
+            spraak = brevdata.spraak!!,
+        )
     }
 
     private fun mapAktivitetsgradstypeTilAktivtetsgrad(aktivitetsgrad: AktivitetspliktAktivitetsgradType): Aktivitetsgrad =
@@ -167,24 +216,7 @@ class AktivitetspliktOppgaveService(
         }
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
-            val vurderingForOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId)
-
-            val sisteAktivtetsgrad =
-                vurderingForOppgave.aktivitet.maxByOrNull { it.fom }
-                    ?: throw ManglerAktivitetsgrad("Mangler aktivitetsgrad for oppgave: $oppgaveId")
-
-            sjekkOmHarNyVurdering(oppgave, vurderingForOppgave.aktivitet)
-
-            val nasjonalEllerUtland =
-                behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-            val brevParametreAktivitetsplikt10mnd =
-                BrevParametre.AktivitetspliktInformasjon10Mnd(
-                    aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
-                    utbetaling = brevData.utbetaling!!,
-                    redusertEtterInntekt = brevData.redusertEtterInntekt!!,
-                    nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
-                    spraak = Spraak.NB,
-                )
+            val brevParametreAktivitetsplikt10mnd = mapOgValiderBrevParametre(oppgave, brevData)
             val opprettetBrev =
                 runBlocking {
                     brevApiKlient.opprettSpesifiktBrev(
@@ -304,6 +336,7 @@ data class AktivitetspliktInformasjonBrevdataRequest(
     val skalSendeBrev: Boolean,
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
+    val spraak: Spraak? = null,
 ) {
     fun toDaoObjektBrevutfall(
         oppgaveId: UUID,
@@ -317,6 +350,7 @@ data class AktivitetspliktInformasjonBrevdataRequest(
             utbetaling = this.utbetaling,
             redusertEtterInntekt = this.redusertEtterInntekt,
             skalSendeBrev = this.skalSendeBrev,
+            spraak = this.spraak,
         )
 }
 
@@ -327,8 +361,17 @@ data class AktivitetspliktInformasjonBrevdata(
     val skalSendeBrev: Boolean,
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
+    val spraak: Spraak?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
-)
+) {
+    fun manglerUtfylling(): Boolean = skalSendeBrev && listOf(utbetaling, spraak, redusertEtterInntekt, spraak).any { it == null }
+
+    fun harLikeUtfall(annen: AktivitetspliktInformasjonBrevdata?): Boolean =
+        this.skalSendeBrev == annen?.skalSendeBrev &&
+            this.utbetaling == annen.utbetaling &&
+            this.redusertEtterInntekt == annen.redusertEtterInntekt &&
+            this.spraak == annen.spraak
+}
 
 data class AktivitetspliktOppgaveVurdering(
     val vurderingType: VurderingType,

@@ -64,7 +64,13 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
                 <Heading size="large">Infobrev aktivitetsplikt</Heading>
               </Box>
               <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
-              <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
+              <BrevSpraak brev={brev} kanRedigeres={false} />
+              {kanRedigeres && (
+                <Alert size="small" variant="info">
+                  For å endre målform i brevet må det endres på forrige steg. Endring i brevdata vil fjerne alt innhold
+                  i brevet.
+                </Alert>
+              )}
 
               <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
             </VStack>

@@ -9,7 +9,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -28,6 +27,7 @@ import no.nav.etterlatte.ktor.token.CLIENT_ID
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -250,11 +250,10 @@ class BehandlingSakRoutesTest {
                         "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf("les-oms-sak"))}",
                     )
                 }
-            response.status shouldBe HttpStatusCode.OK
-            println(response.bodyAsText())
-            val sakliste: Sak? = response.body()
-
-            sakliste shouldBe null
+            response.status shouldBe HttpStatusCode.NotFound
+            val feil: ExceptionResponse = response.body()
+            feil.code shouldBe "SAK_IKKE_FUNNET"
+            feil.status shouldBe HttpStatusCode.NotFound.value
 
             coVerify(exactly = 1) { behandlingService.hentSak(any()) }
         }

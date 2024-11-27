@@ -2,12 +2,15 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import {
   AktivitetspliktOppfolging,
   AktivitetspliktOppgaveVurdering,
-  IAktivitet,
+  IAktivitetPeriode,
+  IAktivitetHendelse,
   IAktivitetspliktVurdering,
   IAktivitetspliktVurderingNyDto,
   IOpprettAktivitet,
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
+  IAktivitetPerioderOgHendelser,
+  IOpprettHendelse,
 } from '~shared/types/Aktivitetsplikt'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { OppgaveDTO } from '~shared/types/oppgave'
@@ -16,36 +19,71 @@ export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string
 }): Promise<ApiResponse<AktivitetspliktOppfolging>> => apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt`)
 
+export const hentAktiviteterOgHendelserForBehandling = async (args: {
+  behandlingId: string
+}): Promise<ApiResponse<IAktivitetPerioderOgHendelser>> =>
+  apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet-og-hendelser`)
+
 export const hentAktiviteterForBehandling = async (args: {
   behandlingId: string
-}): Promise<ApiResponse<IAktivitet[]>> => apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`)
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
+  apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`)
 
 export const opprettAktivitet = async (args: {
   behandlingId: string
   request: IOpprettAktivitet
-}): Promise<ApiResponse<IAktivitet[]>> =>
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`, { ...args.request })
+
+export const opprettHendelse = async (args: {
+  behandlingId: string
+  request: IOpprettHendelse
+}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
+  apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse`, { ...args.request })
+
+export const slettAktivitetHendelse = async (args: {
+  behandlingId: string
+  hendelseId: string
+}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
+  apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse/${args.hendelseId}`)
 
 export const slettAktivitet = async (args: {
   behandlingId: string
   aktivitetId: string
-}): Promise<ApiResponse<IAktivitet[]>> =>
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet/${args.aktivitetId}`)
 
-export const hentAktiviteterForSak = async (args: { sakId: number }): Promise<ApiResponse<IAktivitet[]>> =>
+export const hentAktiviteterOgHendelserForSak = async (args: {
+  sakId: number
+}): Promise<ApiResponse<IAktivitetPerioderOgHendelser>> =>
+  apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/aktivitet-og-hendelser`)
+
+export const hentAktiviteterForSak = async (args: { sakId: number }): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`)
 
 export const opprettAktivitetForSak = async (args: {
   sakId: number
   request: IOpprettAktivitet
-}): Promise<ApiResponse<IAktivitet[]>> =>
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`, { ...args.request })
+
+export const opprettHendelseForSak = async (args: {
+  sakId: number
+  request: IOpprettHendelse
+}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
+  apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/hendelse`, { ...args.request })
 
 export const slettAktivitetForSak = async (args: {
   sakId: number
   aktivitetId: string
-}): Promise<ApiResponse<IAktivitet[]>> =>
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.delete(`/sak/${args.sakId}/aktivitetsplikt/aktivitet/${args.aktivitetId}`)
+
+export const slettAktivitetHendelseForSak = async (args: {
+  sakId: number
+  hendelseId: string
+}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
+  apiClient.delete(`/sak/${args.sakId}/aktivitetsplikt/hendelse/${args.hendelseId}`)
 
 export const hentAktivitspliktVurderingForSak = async (args: {
   sakId: number

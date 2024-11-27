@@ -8,16 +8,21 @@ import { formatISO } from 'date-fns'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Alert, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { PlusIcon } from '@navikt/aksel-icons'
-import { AktivitetspliktType, IAktivitet, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
-import { opprettAktivitet, opprettAktivitetForSak } from '~shared/api/aktivitetsplikt'
+import { AktivitetspliktType, IAktivitetPeriode, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
+import {
+  opprettAktivitet,
+  opprettAktivitetForSak,
+  opprettHendelse,
+  opprettHendelseForSak,
+} from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { mapAktivitetstypeProps } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
 interface AktivitetDefaultValue {
   id: string | undefined
   type: AktivitetspliktType | ''
-  datoFom?: Date
-  datoTom?: Date | null
+  datoFom?: string
+  datoTom?: string | null
   beskrivelse: string
 }
 
@@ -34,15 +39,16 @@ export const NyAktivitet = ({
   redigerAktivitet,
   behandling = undefined,
   sakId = undefined,
+  avbryt,
 }: {
-  oppdaterAktiviteter: (aktiviteter: IAktivitet[]) => void
-  redigerAktivitet: IAktivitet | undefined
+  oppdaterAktiviteter: (aktiviteter: IAktivitetPeriode[]) => void
+  redigerAktivitet: IAktivitetPeriode | undefined
   behandling?: IBehandlingReducer
   sakId?: number
+  avbryt: () => void
 }) => {
   const [opprettAktivitetResponse, opprettAktivitetRequest] = useApiCall(opprettAktivitet)
   const [opprettAktivitetForSakResponse, opprettAktivitetForSakRequest] = useApiCall(opprettAktivitetForSak)
-  const [visForm, setVisForm] = useState(false)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandling
@@ -56,20 +62,23 @@ export const NyAktivitet = ({
     control,
     reset,
     formState: { errors },
+    watch,
   } = useForm<AktivitetDefaultValue>({
     defaultValues: aktivitetDefaultValue,
   })
+
+  console.log('rediger aktivitet', redigerAktivitet)
+  console.log('form', watch())
 
   useEffect(() => {
     if (redigerAktivitet) {
       reset({
         id: redigerAktivitet.id,
         type: redigerAktivitet.type,
-        datoFom: new Date(redigerAktivitet.fom),
-        datoTom: redigerAktivitet.tom ? new Date(redigerAktivitet.tom) : null,
+        datoFom: redigerAktivitet.fom,
+        datoTom: redigerAktivitet.tom ? redigerAktivitet.tom : null,
         beskrivelse: redigerAktivitet.beskrivelse,
       })
-      setVisForm(true)
     }
   }, [redigerAktivitet])
 
@@ -93,7 +102,6 @@ export const NyAktivitet = ({
         },
         (aktiviteter) => {
           reset(aktivitetDefaultValue)
-          setVisForm(false)
           oppdaterAktiviteter(aktiviteter)
         }
       )
@@ -105,7 +113,6 @@ export const NyAktivitet = ({
         },
         (aktiviteter) => {
           reset(aktivitetDefaultValue)
-          setVisForm(false)
           oppdaterAktiviteter(aktiviteter)
         }
       )
@@ -114,92 +121,73 @@ export const NyAktivitet = ({
 
   return (
     <>
-      {visForm && (
-        <form onSubmit={handleSubmit(submitAktivitet)}>
-          <Heading size="small" level="3" spacing>
-            {getValues('id') ? 'Endre' : 'Ny'} aktivitet
-          </Heading>
-          <VStack gap="4">
-            <HStack gap="4">
-              <ControlledDatoVelger name="datoFom" label="Fra dato" control={control} errorVedTomInput="Obligatorisk" />
-              <ControlledDatoVelger label="Dato til og med" name="datoTom" control={control} required={false} />
-              <Select
-                {...register('type', {
-                  required: { value: true, message: 'Du må velge aktivitetstype' },
-                })}
-                label="Aktivitetstype"
-                error={errors.type?.message}
-              >
-                <option value="">Velg aktivitet</option>
-                {Object.keys(AktivitetspliktType).map((type, index) => (
-                  <option key={index} value={type}>
-                    {mapAktivitetstypeProps(type as AktivitetspliktType).beskrivelse}
-                  </option>
-                ))}
-              </Select>
-            </HStack>
-            <HStack>
-              <Textarea
-                style={{ width: '630px' }}
-                {...register('beskrivelse', {
-                  required: { value: true, message: 'Må fylles ut' },
-                })}
-                label="Beskrivelse"
-                error={errors.beskrivelse?.message}
-              />
-            </HStack>
-            <HStack gap="4">
-              <Button
-                size="small"
-                variant="secondary"
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault()
-                  reset(aktivitetDefaultValue)
-                  setVisForm(false)
-                }}
-              >
-                Avbryt
-              </Button>
-              <Button
-                size="small"
-                variant="primary"
-                type="submit"
-                loading={isPending(opprettAktivitetResponse) || isPending(opprettAktivitetForSakResponse)}
-              >
-                Lagre
-              </Button>
-            </HStack>
-            {isFailure(opprettAktivitetResponse) && (
-              <Alert variant="error">
-                {opprettAktivitetResponse.error.detail || 'Det skjedde en feil ved lagring av aktivitet'}
-              </Alert>
-            )}
-
-            {isFailure(opprettAktivitetForSakResponse) && (
-              <Alert variant="error">
-                {opprettAktivitetForSakResponse.error.detail || 'Det skjedde en feil ved lagring av aktivitet'}
-              </Alert>
-            )}
-          </VStack>
-        </form>
+      <form onSubmit={handleSubmit(submitAktivitet)}>
+        <Heading size="small" level="3" spacing>
+          {getValues('id') ? 'Endre' : 'Ny'} aktivitet
+        </Heading>
+        <VStack gap="4">
+          <HStack gap="4">
+            <ControlledDatoVelger name="datoFom" label="Fra dato" control={control} errorVedTomInput="Obligatorisk" />
+            <ControlledDatoVelger label="Dato til og med" name="datoTom" control={control} required={false} />
+            <Select
+              {...register('type', {
+                required: { value: true, message: 'Du må velge aktivitetstype' },
+              })}
+              label="Aktivitetstype"
+              error={errors.type?.message}
+            >
+              <option value="">Velg aktivitet</option>
+              {Object.keys(AktivitetspliktType).map((type, index) => (
+                <option key={index} value={type}>
+                  {mapAktivitetstypeProps(type as AktivitetspliktType).beskrivelse}
+                </option>
+              ))}
+            </Select>
+          </HStack>
+          <HStack>
+            <Textarea
+              style={{ width: '630px' }}
+              {...register('beskrivelse', {
+                required: { value: true, message: 'Må fylles ut' },
+              })}
+              label="Beskrivelse"
+              error={errors.beskrivelse?.message}
+            />
+          </HStack>
+          <HStack gap="4">
+            <Button
+              size="small"
+              variant="secondary"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                reset(aktivitetDefaultValue)
+                avbryt()
+              }}
+            >
+              Avbryt
+            </Button>
+            <Button
+              size="small"
+              variant="primary"
+              type="submit"
+              loading={isPending(opprettAktivitetResponse) || isPending(opprettAktivitetForSakResponse)}
+            >
+              Lagre
+            </Button>
+          </HStack>
+        </VStack>
+      </form>
+      )
+      {isFailure(opprettAktivitetResponse) && (
+        <Alert variant="error">
+          {opprettAktivitetResponse.error.detail || 'Det skjedde en feil ved lagring av aktivitet'}
+        </Alert>
       )}
-
-      {!visForm && redigerbar && (
-        <HStack>
-          <Button
-            size="small"
-            variant="secondary"
-            icon={<PlusIcon aria-hidden fontSize="1.5rem" />}
-            loading={isPending(opprettAktivitetResponse) || isPending(opprettAktivitetForSakResponse)}
-            onClick={(e) => {
-              e.preventDefault()
-              setVisForm(true)
-            }}
-          >
-            Legg til aktivitet
-          </Button>
-        </HStack>
+      {isFailure(opprettAktivitetForSakResponse) && (
+        <Alert variant="error">
+          {opprettAktivitetForSakResponse.error.detail || 'Det skjedde en feil ved lagring av aktivitet'}
+        </Alert>
       )}
     </>
   )

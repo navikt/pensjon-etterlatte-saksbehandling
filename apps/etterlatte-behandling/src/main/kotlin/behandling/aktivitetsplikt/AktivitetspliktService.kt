@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
@@ -168,6 +169,24 @@ class AktivitetspliktService(
         return varigUnntak != null
     }
 
+    fun hentAktiviteterHendelser(
+        behandlingId: UUID? = null,
+        sakId: SakId? = null,
+    ): AktivitetspliktAktivitet =
+        (
+            if (behandlingId != null) {
+                val perioder = aktivitetspliktDao.hentAktiviteterForBehandling(behandlingId)
+                val hendelser = aktivitetspliktDao.hentHendelserForBehandling(behandlingId)
+                AktivitetspliktAktivitet(hendelser, perioder)
+            } else if (sakId != null) {
+                val perioder = aktivitetspliktDao.hentAktiviteterForSak(sakId)
+                val hendelser = aktivitetspliktDao.hentHendelserForSak(sakId)
+                AktivitetspliktAktivitet(hendelser, perioder)
+            } else {
+                throw ManglerSakEllerBehandlingIdException()
+            }
+        )
+
     fun hentAktiviteter(
         behandlingId: UUID? = null,
         sakId: SakId? = null,
@@ -241,6 +260,73 @@ class AktivitetspliktService(
             aktivitetspliktDao.slettAktivitetForSak(aktivitetId, sakId)
         } else {
             throw ManglerSakEllerBehandlingIdException()
+        }
+    }
+
+    fun hentHendelser(
+        behandlingId: UUID? = null,
+        sakId: SakId? = null,
+    ): List<AktivitetspliktAktivitetHendelse> =
+        (
+            if (behandlingId != null) {
+                aktivitetspliktDao.hentHendelserForBehandling(behandlingId)
+            } else if (sakId != null) {
+                aktivitetspliktDao.hentHendelserForSak(sakId)
+            } else {
+                throw ManglerSakEllerBehandlingIdException()
+            }
+        )
+
+    fun upsertHendelse(
+        hendelse: LagreAktivitetspliktHendelse,
+        brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID? = null,
+        sakId: SakId? = null,
+    ) {
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
+
+        if (behandlingId != null) {
+            val behandling =
+                requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            if (!behandling.status.kanEndres()) {
+                throw BehandlingKanIkkeEndres()
+            }
+            if (hendelse.sakId != behandling.sak.id) {
+                throw SakidTilhoererIkkeBehandlingException()
+            }
+            aktivitetspliktDao.upsertHendelseForSak(behandlingId, hendelse, kilde)
+
+            runBlocking { sendDtoTilStatistikk(hendelse.sakId, brukerTokenInfo, behandlingId) }
+        } else if (sakId != null) {
+            if (hendelse.sakId != sakId) {
+                throw SakidTilhoererIkkeBehandlingException()
+            }
+            aktivitetspliktDao.upsertHendelseForSak(null, hendelse, kilde)
+        } else {
+            throw ManglerSakEllerBehandlingIdException()
+        }
+    }
+
+    fun slettHendelse(
+        hendelseId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        sakId: SakId,
+    ) {
+        val hendelseForSak =
+            aktivitetspliktDao.hentHendelserForSak(sakId).firstOrNull { it.id == hendelseId } ?: throw GenerellIkkeFunnetException()
+
+        if (hendelseForSak.behandlingId != null) {
+            val behandling =
+                requireNotNull(
+                    behandlingService.hentBehandling(hendelseForSak.behandlingId),
+                ) { "Fant ikke behandling ${hendelseForSak.behandlingId}" }
+            if (!behandling.status.kanEndres()) {
+                throw BehandlingKanIkkeEndres()
+            }
+            aktivitetspliktDao.slettHendelse(hendelseId)
+            runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo, hendelseForSak.behandlingId) }
+        } else {
+            aktivitetspliktDao.slettHendelse(hendelseId)
         }
     }
 

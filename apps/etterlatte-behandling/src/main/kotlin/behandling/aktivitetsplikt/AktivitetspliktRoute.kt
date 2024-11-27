@@ -92,6 +92,13 @@ internal fun Route.aktivitetspliktRoutes(
             }
         }
 
+        route("/aktivitet-og-hendelser") {
+            get {
+                logger.info("Henter aktiviteter og hendelser for behandlingId=$behandlingId")
+                call.respond(inTransaction { aktivitetspliktService.hentAktiviteterHendelser(behandlingId = behandlingId) })
+            }
+        }
+
         route("/aktivitet") {
             get {
                 logger.info("Henter aktiviteter for behandlingId=$behandlingId")
@@ -167,6 +174,62 @@ internal fun Route.aktivitetspliktRoutes(
 
                         val aktiviteter =
                             inTransaction {
+                                aktivitetspliktService.slettAktivitet(aktivitetId, brukerTokenInfo, sakId = sakId)
+                                aktivitetspliktService.hentAktiviteter(sakId = sakId)
+                            }
+
+                        call.respond(aktiviteter)
+                    }
+                }
+            }
+        }
+
+        route("/aktivitet-og-hendelser") {
+            get {
+                logger.info("Henter aktiviteter og hendelser for sak=$sakId")
+                call.respond(inTransaction { aktivitetspliktService.hentAktiviteterHendelser(sakId = sakId) })
+            }
+        }
+
+        route("hendelse") {
+            get {
+                kunSaksbehandler {
+                    logger.info("Henter hendelser for sak $sakId")
+                    val dto =
+                        inTransaction {
+                            runBlocking {
+                                // TODO
+                                aktivitetspliktService.hentAktiviteter(
+                                    sakId = sakId,
+                                )
+                            }
+                        }
+                    call.respond(dto)
+                }
+            }
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter eller oppdaterer hendelser for sakId=$sakId")
+                    val aktivitet = call.receive<LagreAktivitetspliktAktivitet>()
+
+                    val aktiviteter =
+                        inTransaction {
+                            // TODO
+                            aktivitetspliktService.upsertAktivitet(aktivitet, brukerTokenInfo, sakId = sakId)
+                            aktivitetspliktService.hentAktiviteter(sakId = sakId)
+                        }
+                    call.respond(aktiviteter)
+                }
+            }
+
+            route("/{$AKTIVITET_ID_CALL_PARAMETER}") {
+                delete {
+                    kunSkrivetilgang {
+                        logger.info("Sletter aktivitet $aktivitetId for sakId $sakId")
+
+                        val aktiviteter =
+                            inTransaction {
+                                // TODO
                                 aktivitetspliktService.slettAktivitet(aktivitetId, brukerTokenInfo, sakId = sakId)
                                 aktivitetspliktService.hentAktiviteter(sakId = sakId)
                             }

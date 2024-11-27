@@ -17,6 +17,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
+import no.nav.etterlatte.rapidsandrivers.OmregningInntektsjustering
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
@@ -49,6 +50,10 @@ class InntektsjusteringSelvbetjeningService(
             sakId,
             InntektsjusteringRequest.utledLoependeFom(),
             InntektsjusteringRequest.utledKjoering(request.inntektsjusteringId),
+            OmregningInntektsjustering(
+                inntekt = request.inntekt,
+                inntektUtland = request.inntektUtland,
+            ),
         )
     }
 
@@ -67,6 +72,7 @@ class InntektsjusteringSelvbetjeningService(
         sakId: SakId,
         loependeFom: YearMonth,
         kjoering: String,
+        inntektsjustering: OmregningInntektsjustering,
     ) {
         val correlationId = getCorrelationId()
         rapid
@@ -84,6 +90,7 @@ class InntektsjusteringSelvbetjeningService(
                                     sakId = sakId,
                                     revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING,
                                     fradato = loependeFom.atDay(1),
+                                    inntektsjustering = inntektsjustering,
                                 ).toPacket(),
                         ),
                     ).toJson(),

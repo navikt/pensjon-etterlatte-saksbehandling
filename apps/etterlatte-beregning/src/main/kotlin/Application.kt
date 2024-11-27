@@ -36,6 +36,7 @@ class Server(
                     behandlingKlient,
                     avkortingTidligAlderspensjonService,
                     aarligInntektsjusteringService,
+                    mottattInntektsjusteringService,
                 )
                 ytelseMedGrunnlag(beregningOgAvkortingBrevService, behandlingKlient)
                 grunnbeloep(grunnbeloepService)

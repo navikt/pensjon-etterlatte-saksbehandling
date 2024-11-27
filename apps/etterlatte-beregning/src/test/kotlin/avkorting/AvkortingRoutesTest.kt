@@ -44,6 +44,7 @@ class AvkortingRoutesTest {
     private val avkortingService = mockk<AvkortingService>()
     private val avkortingTidligAlderspensjonService = mockk<AvkortingTidligAlderspensjonService>()
     private val aarligInntektsjusteringService = mockk<AarligInntektsjusteringService>()
+    private val mottattInntektsjusteringService = mockk<MottattInntektsjusteringService>()
 
     @BeforeAll
     fun beforeAll() {
@@ -186,6 +187,7 @@ class AvkortingRoutesTest {
                     behandlingKlient,
                     avkortingTidligAlderspensjonService,
                     aarligInntektsjusteringService,
+                    mottattInntektsjusteringService,
                 )
             }
             block(this)

@@ -450,7 +450,7 @@ class AktivitetspliktService(
     }
 
     fun hentVurderingForOppgaveGammel(oppgaveId: UUID): AktivitetspliktVurderingGammel? =
-        hentVurderingForOppgave(oppgaveId)?.let {
+        hentVurderingForOppgave(oppgaveId).let {
             AktivitetspliktVurderingGammel(
                 aktivitet = it.aktivitet.firstOrNull(),
                 unntak = it.unntak.firstOrNull(),
@@ -483,8 +483,7 @@ class AktivitetspliktService(
         val oppgave12mnd =
             oppgaveService
                 .hentOppgaverForSak(sakId, OppgaveType.AKTIVITETSPLIKT_12MND)
-                .filter { !it.erAvsluttet() }
-                .filter { it.erFerdigstilt() } // TODO: asserte på at det kun finnes en her?
+                .filter { it.erFerdigstilt() }
                 .maxByOrNull { it.opprettet }
                 ?: throw InternfeilException("Fant ikke aktivitetsplikt12mnd for sak: $sakId")
 
@@ -493,18 +492,18 @@ class AktivitetspliktService(
             vurderingForOppgave.aktivitet.maxByOrNull { it.endret.tidspunkt }
 
         if (sistevurdering == null) {
-            return vurderingForOppgave.unntak.isEmpty()
+            return vurderingForOppgave.unntak.isNotEmpty()
         } else {
             if (sistevurdering.aktivitetsgrad == AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50) {
-                return true
+                return false
             }
             if (sistevurdering.aktivitetsgrad == AKTIVITET_OVER_50 &&
                 sistevurdering.skjoennsmessigVurdering == AktivitetspliktSkjoennsmessigVurdering.NEI
             ) {
-                return true
+                return false
             }
         }
-        return false
+        return true
     }
 
     fun opprettRevurderingHvisKravIkkeOppfylt(
@@ -530,6 +529,7 @@ class AktivitetspliktService(
 
         val aktivitetspliktDato = request.behandlingsmaaned.atDay(1).plusMonths(1)
         val jobbType = request.jobbType
+        // Hvis man oppfyller kravene skal det ikke opprettes en revurdering
         val oppfyllerKrav =
             when (jobbType) {
                 JobbType.OMS_DOED_6MND -> oppfyllerAktivitetsplikt6mnd(request.sakId, aktivitetspliktDato)
@@ -657,7 +657,7 @@ class AktivitetspliktService(
     fun kopierInnTilOppgave(
         sakId: SakId,
         oppgaveId: UUID,
-    ): AktivitetspliktVurdering? {
+    ): AktivitetspliktVurdering {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
 

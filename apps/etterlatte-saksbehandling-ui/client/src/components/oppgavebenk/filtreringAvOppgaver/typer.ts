@@ -64,7 +64,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   GJENOPPRETTING_ALDERSOVERGANG: 'Gjenoppretting',
   AKTIVITETSPLIKT: 'Aktivitetsplikt oppfølging',
   AKTIVITETSPLIKT_12MND: 'Aktivitetsplikt 12 Måneder',
-  AKTIVITETSPLIKT_REVURDERING: 'Aktivitetsplikt revurdering 6 mnd',
+  AKTIVITETSPLIKT_REVURDERING: 'Aktivitetsplikt revurdering',
   AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK: 'Aktivitetsplikt informasjon - varig unntak',
   GENERELL_OPPGAVE: 'Generell oppgave',
   MANUELL_UTSENDING_BREV: 'Manuell brevutsending',

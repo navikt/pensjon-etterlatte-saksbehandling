@@ -2,6 +2,7 @@ package no.nav.etterlatte.inntektsjustering.selvbetjening
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -57,16 +58,17 @@ class InntektsjusteringSelvbetjeningService(
         )
     }
 
-    private fun startManuellBehandling(request: InntektsjusteringRequest) {
-        logger.info("Behandles manuelt: oppretter oppgave for mottatt inntektsjustering for sak ${request.sak.sakId}")
-        oppgaveService.opprettOppgave(
-            sakId = SakId(request.sak.sakId),
-            kilde = OppgaveKilde.BRUKERDIALOG,
-            type = OppgaveType.MOTTATT_INNTEKTSJUSTERING,
-            merknad = "Mottatt inntektsjustering",
-            referanse = request.journalpostId,
-        )
-    }
+    private fun startManuellBehandling(request: InntektsjusteringRequest) =
+        inTransaction {
+            logger.info("Behandles manuelt: oppretter oppgave for mottatt inntektsjustering for sak ${request.sak.sakId}")
+            oppgaveService.opprettOppgave(
+                sakId = SakId(request.sak.sakId),
+                kilde = OppgaveKilde.BRUKERDIALOG,
+                type = OppgaveType.MOTTATT_INNTEKTSJUSTERING,
+                merknad = "Mottatt inntektsjustering",
+                referanse = request.journalpostId,
+            )
+        }
 
     private fun publiserKlarForOmregning(
         sakId: SakId,

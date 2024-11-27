@@ -107,7 +107,7 @@ const mapStatusForToggle = (featureToggle: IFeature, defaultValue: boolean): boo
   }
 }
 
-const logWithThrottle = (featureToggle: FeatureToggle) => {
+const logMissingFeatureToggle = (featureToggle: FeatureToggle) => {
   const msg = `Ugyldig toggle registrert: ${featureToggle}`
   console.error(msg)
   logger.generalError({ msg: msg })
@@ -134,7 +134,7 @@ export const useUnleash = () => {
     )
   }
 
-  return { updateToggle: throttle(updateToggle, 1000), logWithThrottle: throttle(logWithThrottle, 1000) }
+  return { updateToggle: throttle(updateToggle, 1000), logWithThrottle: throttle(logMissingFeatureToggle, 1000) }
 }
 
 export const useFeaturetoggle = (featureToggle: FeatureToggle): boolean => {

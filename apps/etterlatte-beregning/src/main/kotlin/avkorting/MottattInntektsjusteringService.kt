@@ -2,7 +2,9 @@ package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.util.UUID
 
 class MottattInntektsjusteringService(
     private val avkortingService: AvkortingService,
@@ -15,11 +17,14 @@ class MottattInntektsjusteringService(
 
         avkortingService.tilstandssjekk(behandlingId, brukerTokenInfo)
 
-        // Avkorting opprettes her med tidligere årsoppgjør
-        avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, brukerTokenInfo)
+        val eksisterende =
+            avkortingService.hentOpprettEllerReberegnAvkorting(behandlingId, brukerTokenInfo)
+                ?: throw InternfeilException("Fant ikke og klarte opprette avkorting under inntektsjustering")
+        val eksisterendeInntekt = eksisterende.avkortingGrunnlag.find { it.aar == virkningstidspunkt.year }?.fraVirk
 
         val nyttGrunnlag =
             AvkortingGrunnlagLagreDto(
+                id = eksisterendeInntekt?.id ?: UUID.randomUUID(),
                 inntektTom = inntekt,
                 fratrekkInnAar = 0, // TODO må tilpasses når vi skal støtte inntektsjustering inneværende år
                 inntektUtlandTom = inntektUtland,

@@ -42,12 +42,19 @@ class OpprettJobb(
         val nesteMaaned = YearMonth.now().plusMonths(1)
         logger.info("Sjekker for jobber å legge til for måned: $nesteMaaned")
         val kjoeringerNesteMaaned = hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned)
-        FasteJobber.entries.forEach { fasteJobber ->
-            if (kjoeringerNesteMaaned.none { fasteJobber.jobbType == it.type }) {
-                hendelseDao.opprettJobb(fasteJobber, nesteMaaned)
-            }
+
+        fjernDuplikateKjoeringerFraFasteJobber(kjoeringerNesteMaaned).forEach { fasteJobber ->
+            hendelseDao.opprettJobb(fasteJobber, nesteMaaned)
         }
     }
+
+    private fun fjernDuplikateKjoeringerFraFasteJobber(kjoreringNesteMaaned: List<HendelserJobb>) =
+        FasteJobber.entries.filter { fastJobb ->
+            kjoreringNesteMaaned.none { kjoringNesteMaaned ->
+                kjoringNesteMaaned.type ==
+                    fastJobb.jobbType
+            }
+        }
 
     enum class FasteJobber(
         val jobbType: JobbType,
@@ -57,5 +64,6 @@ class OpprettJobb(
         OMS_DOED_4MND(JobbType.OMS_DOED_4MND, 1, 0),
         OMS_DOED_6MND(JobbType.OMS_DOED_6MND, 1, 0),
         OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK(JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK, 8, 0),
+        // TODO: EY-4519 legg inn når ferdigtestet OMS_DOED_12MND(JobbType.OMS_DOED_12MND, 1, 0),
     }
 }

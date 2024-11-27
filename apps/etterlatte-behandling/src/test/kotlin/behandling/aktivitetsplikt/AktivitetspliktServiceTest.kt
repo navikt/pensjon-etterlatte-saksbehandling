@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktSkjoennsmessigVurdering
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
@@ -28,8 +29,6 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -46,6 +45,8 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -71,7 +72,6 @@ class AktivitetspliktServiceTest {
     private val oppgaveService: OppgaveService = mockk()
     private val statistikkProduer: BehandlingHendelserKafkaProducer = mockk()
     private val kopierService: AktivitetspliktKopierService = mockk()
-    private val featureToggleService: FeatureToggleService = DummyFeatureToggleService()
     private val service =
         AktivitetspliktService(
             aktivitetspliktDao,
@@ -551,7 +551,7 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns emptyList()
 
-            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
+            val result = service.oppfyllerAktivitetsplikt6mnd(aktivitet.sakId, aktivitet.fom)
 
             result shouldBe true
         }
@@ -570,7 +570,7 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns emptyList()
 
-            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
+            val result = service.oppfyllerAktivitetsplikt6mnd(aktivitet.sakId, aktivitet.fom)
 
             result shouldBe false
         }
@@ -603,7 +603,7 @@ class AktivitetspliktServiceTest {
                     },
                 )
 
-            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
+            val result = service.oppfyllerAktivitetsplikt6mnd(aktivitet.sakId, aktivitet.fom)
 
             result shouldBe true
         }
@@ -623,7 +623,7 @@ class AktivitetspliktServiceTest {
                     },
                 )
 
-            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
+            val result = service.oppfyllerAktivitetsplikt6mnd(aktivitet.sakId, aktivitet.fom)
 
             result shouldBe false
         }
@@ -641,12 +641,19 @@ class AktivitetspliktServiceTest {
                 every { opphoerFraOgMed } returns null
             }
         private val frist = Tidspunkt.now()
-        private val request =
+        private val request6mnd =
             OpprettRevurderingForAktivitetspliktDto(
                 sakId = sakId,
                 frist = frist,
                 behandlingsmaaned = YearMonth.now(),
                 jobbType = JobbType.OMS_DOED_6MND,
+            )
+        private val request12mnd =
+            OpprettRevurderingForAktivitetspliktDto(
+                sakId = sakId,
+                frist = frist,
+                behandlingsmaaned = YearMonth.now(),
+                jobbType = JobbType.OMS_DOED_12MND,
             )
         private val persongalleri: Persongalleri = mockk()
         private val persongalleriOpplysning =
@@ -655,7 +662,7 @@ class AktivitetspliktServiceTest {
             }
 
         @Test
-        fun `Skal opprette revurdering hvis kravene for aktivitetsplikt ikke er oppfylt`() {
+        fun `Skal opprette revurdering hvis kravene for aktivitetsplikt ikke er oppfylt 6mnd`() {
             val revurdering =
                 mockk<Revurdering> {
                     every { id } returns UUID.randomUUID()
@@ -674,13 +681,13 @@ class AktivitetspliktServiceTest {
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
                     virkningstidspunkt =
-                        request.behandlingsmaaned
+                        request6mnd.behandlingsmaaned
                             .atDay(1)
                             .plusMonths(1)
                             .tilVirkningstidspunkt("Aktivitetsplikt"),
                     utlandstilknytning = null,
                     boddEllerArbeidetUtlandet = null,
-                    begrunnelse = request.jobbType.beskrivelse,
+                    begrunnelse = request6mnd.jobbType.beskrivelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
                     opphoerFraOgMed = null,
@@ -692,13 +699,13 @@ class AktivitetspliktServiceTest {
             every { oppgaveService.hentOppgaverForReferanse(any()) } returns
                 listOf(
                     mockk {
-                        every { type } returns OppgaveType.REVURDERING
+                        every { type } returns OppgaveType.AKTIVITETSPLIKT_REVURDERING
                         every { id } returns UUID.randomUUID()
                     },
                 )
             every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd, systembruker())
 
             with(resultat) {
                 opprettetRevurdering shouldBe true
@@ -708,6 +715,290 @@ class AktivitetspliktServiceTest {
                 forrigeBehandlingId shouldBe forrigeBehandling.id
             }
             verify(exactly = 1) { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) }
+        }
+
+        @Test
+        fun `Skal opprette revurdering hvis kravene for aktivitetsplikt ikke er oppfylt, ingen vurdering eller unntak 12 mnd`() {
+            val revurdering =
+                mockk<Revurdering> {
+                    every { id } returns UUID.randomUUID()
+                }
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
+            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
+            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            every {
+                revurderingService.opprettRevurdering(
+                    sakId = sakId,
+                    persongalleri = persongalleriOpplysning.opplysning,
+                    forrigeBehandling = forrigeBehandling.id,
+                    prosessType = Prosesstype.MANUELL,
+                    kilde = Vedtaksloesning.GJENNY,
+                    revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                    virkningstidspunkt =
+                        request12mnd.behandlingsmaaned
+                            .atDay(1)
+                            .plusMonths(1)
+                            .tilVirkningstidspunkt("Aktivitetsplikt"),
+                    utlandstilknytning = null,
+                    boddEllerArbeidetUtlandet = null,
+                    begrunnelse = request12mnd.jobbType.beskrivelse,
+                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    frist = frist,
+                    opphoerFraOgMed = null,
+                    mottattDato = null,
+                )
+            } returns
+                mockk { every { oppdater() } returns revurdering }
+            every { oppgaveService.fjernSaksbehandler(any()) } just runs
+            every { oppgaveService.hentOppgaverForSak(any(), OppgaveType.AKTIVITETSPLIKT_12MND) } returns
+                listOf(
+                    lagNyOppgave(
+                        status = Status.FERDIGSTILT,
+                        oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
+                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                    ),
+                )
+            every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(any()) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentUnntakForOppgave(any()) } returns emptyList()
+
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd, systembruker())
+
+            with(resultat) {
+                opprettetRevurdering shouldBe true
+                opprettetOppgave shouldBe false
+                oppgaveId shouldBe null
+                nyBehandlingId shouldBe revurdering.id
+                forrigeBehandlingId shouldBe forrigeBehandling.id
+            }
+            verify(exactly = 1) { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) }
+        }
+
+        @Test
+        fun `Skal opprette revurdering hvis kravene for aktivitetsplikt ikke er oppfylt, aktivitetsgrad under 50 12 mnd`() {
+            val revurdering =
+                mockk<Revurdering> {
+                    every { id } returns UUID.randomUUID()
+                }
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
+            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
+            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            every {
+                revurderingService.opprettRevurdering(
+                    sakId = sakId,
+                    persongalleri = persongalleriOpplysning.opplysning,
+                    forrigeBehandling = forrigeBehandling.id,
+                    prosessType = Prosesstype.MANUELL,
+                    kilde = Vedtaksloesning.GJENNY,
+                    revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                    virkningstidspunkt =
+                        request12mnd.behandlingsmaaned
+                            .atDay(1)
+                            .plusMonths(1)
+                            .tilVirkningstidspunkt("Aktivitetsplikt"),
+                    utlandstilknytning = null,
+                    boddEllerArbeidetUtlandet = null,
+                    begrunnelse = request12mnd.jobbType.beskrivelse,
+                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    frist = frist,
+                    opphoerFraOgMed = null,
+                    mottattDato = null,
+                )
+            } returns
+                mockk { every { oppdater() } returns revurdering }
+            every { oppgaveService.fjernSaksbehandler(any()) } just runs
+            every { oppgaveService.hentOppgaverForSak(any(), OppgaveType.AKTIVITETSPLIKT_12MND) } returns
+                listOf(
+                    lagNyOppgave(
+                        status = Status.FERDIGSTILT,
+                        oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
+                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                    ),
+                )
+            every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(any()) } returns
+                listOf(
+                    AktivitetspliktAktivitetsgrad(
+                        aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
+                        oppgaveId = UUID.randomUUID(),
+                        behandlingId = null,
+                        beskrivelse = "",
+                        sakId = sakId,
+                        endret = Grunnlagsopplysning.automatiskSaksbehandler,
+                        opprettet = Grunnlagsopplysning.automatiskSaksbehandler,
+                        vurdertFra12Mnd = false,
+                        skjoennsmessigVurdering = null,
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now().plusMonths(3L),
+                        id = UUID.randomUUID(),
+                    ),
+                )
+            every { aktivitetspliktUnntakDao.hentUnntakForOppgave(any()) } returns emptyList()
+
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd, systembruker())
+
+            with(resultat) {
+                opprettetRevurdering shouldBe true
+                opprettetOppgave shouldBe false
+                oppgaveId shouldBe null
+                nyBehandlingId shouldBe revurdering.id
+                forrigeBehandlingId shouldBe forrigeBehandling.id
+            }
+            verify(exactly = 1) { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) }
+        }
+
+        @Test
+        fun `opprette revurdering aktivitetsplikt ikke er oppfylt, aktivitetsgrad over 50skjønnsmessig nei - 12 mnd`() {
+            val revurdering =
+                mockk<Revurdering> {
+                    every { id } returns UUID.randomUUID()
+                }
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
+            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
+            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            every {
+                revurderingService.opprettRevurdering(
+                    sakId = sakId,
+                    persongalleri = persongalleriOpplysning.opplysning,
+                    forrigeBehandling = forrigeBehandling.id,
+                    prosessType = Prosesstype.MANUELL,
+                    kilde = Vedtaksloesning.GJENNY,
+                    revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                    virkningstidspunkt =
+                        request12mnd.behandlingsmaaned
+                            .atDay(1)
+                            .plusMonths(1)
+                            .tilVirkningstidspunkt("Aktivitetsplikt"),
+                    utlandstilknytning = null,
+                    boddEllerArbeidetUtlandet = null,
+                    begrunnelse = request12mnd.jobbType.beskrivelse,
+                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    frist = frist,
+                    opphoerFraOgMed = null,
+                    mottattDato = null,
+                )
+            } returns
+                mockk { every { oppdater() } returns revurdering }
+            every { oppgaveService.fjernSaksbehandler(any()) } just runs
+            every { oppgaveService.hentOppgaverForSak(any(), OppgaveType.AKTIVITETSPLIKT_12MND) } returns
+                listOf(
+                    lagNyOppgave(
+                        status = Status.FERDIGSTILT,
+                        oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
+                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                    ),
+                )
+            every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(any()) } returns
+                listOf(
+                    AktivitetspliktAktivitetsgrad(
+                        aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50,
+                        oppgaveId = UUID.randomUUID(),
+                        behandlingId = null,
+                        beskrivelse = "",
+                        sakId = sakId,
+                        endret = Grunnlagsopplysning.automatiskSaksbehandler,
+                        opprettet = Grunnlagsopplysning.automatiskSaksbehandler,
+                        vurdertFra12Mnd = false,
+                        skjoennsmessigVurdering = AktivitetspliktSkjoennsmessigVurdering.NEI,
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now().plusMonths(3L),
+                        id = UUID.randomUUID(),
+                    ),
+                )
+            every { aktivitetspliktUnntakDao.hentUnntakForOppgave(any()) } returns emptyList()
+
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd, systembruker())
+
+            with(resultat) {
+                opprettetRevurdering shouldBe true
+                opprettetOppgave shouldBe false
+                oppgaveId shouldBe null
+                nyBehandlingId shouldBe revurdering.id
+                forrigeBehandlingId shouldBe forrigeBehandling.id
+            }
+            verify(exactly = 1) { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) }
+        }
+
+        @Test
+        fun `Skal ikke opprette revurdering hvis kravene for aktivitetsplikt er oppfylt - 12 mnd`() {
+            val revurdering =
+                mockk<Revurdering> {
+                    every { id } returns UUID.randomUUID()
+                }
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns emptyList()
+            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
+            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            every {
+                revurderingService.opprettRevurdering(
+                    sakId = sakId,
+                    persongalleri = persongalleriOpplysning.opplysning,
+                    forrigeBehandling = forrigeBehandling.id,
+                    prosessType = Prosesstype.MANUELL,
+                    kilde = Vedtaksloesning.GJENNY,
+                    revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                    virkningstidspunkt =
+                        request12mnd.behandlingsmaaned
+                            .atDay(1)
+                            .plusMonths(1)
+                            .tilVirkningstidspunkt("Aktivitetsplikt"),
+                    utlandstilknytning = null,
+                    boddEllerArbeidetUtlandet = null,
+                    begrunnelse = request12mnd.jobbType.beskrivelse,
+                    saksbehandlerIdent = Fagsaksystem.EY.navn,
+                    frist = frist,
+                    opphoerFraOgMed = null,
+                    mottattDato = null,
+                )
+            } returns
+                mockk { every { oppdater() } returns revurdering }
+            every { oppgaveService.fjernSaksbehandler(any()) } just runs
+            every { oppgaveService.hentOppgaverForSak(any(), OppgaveType.AKTIVITETSPLIKT_12MND) } returns
+                listOf(
+                    lagNyOppgave(
+                        status = Status.FERDIGSTILT,
+                        oppgaveType = OppgaveType.AKTIVITETSPLIKT_12MND,
+                        sak = Sak("ident", SakType.OMSTILLINGSSTOENAD, SakId(1213L), Enheter.defaultEnhet.enhetNr),
+                    ),
+                )
+            every { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) } just runs
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(any()) } returns
+                listOf(
+                    AktivitetspliktAktivitetsgrad(
+                        aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50,
+                        oppgaveId = UUID.randomUUID(),
+                        behandlingId = null,
+                        beskrivelse = "",
+                        sakId = sakId,
+                        endret = Grunnlagsopplysning.automatiskSaksbehandler,
+                        opprettet = Grunnlagsopplysning.automatiskSaksbehandler,
+                        vurdertFra12Mnd = false,
+                        skjoennsmessigVurdering = AktivitetspliktSkjoennsmessigVurdering.JA,
+                        fom = LocalDate.now(),
+                        tom = LocalDate.now().plusMonths(3L),
+                        id = UUID.randomUUID(),
+                    ),
+                )
+            every { aktivitetspliktUnntakDao.hentUnntakForOppgave(any()) } returns emptyList()
+
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request12mnd, systembruker())
+
+            with(resultat) {
+                opprettetRevurdering shouldBe false
+                opprettetOppgave shouldBe false
+                oppgaveId shouldBe null
+                nyBehandlingId shouldBe null
+                forrigeBehandlingId shouldBe forrigeBehandling.id
+            }
+            verify(exactly = 0) { revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(any()) }
         }
 
         @Test
@@ -736,7 +1027,7 @@ class AktivitetspliktServiceTest {
                 )
             } returns oppgave
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd, systembruker())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -765,7 +1056,7 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
             coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
 
-            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request, systembruker())
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request6mnd, systembruker())
 
             with(resultat) {
                 opprettetRevurdering shouldBe false
@@ -860,3 +1151,23 @@ class AktivitetspliktServiceTest {
             )
     }
 }
+
+fun lagNyOppgave(
+    sak: Sak,
+    oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
+    oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+    status: Status,
+) = OppgaveIntern(
+    id = UUID.randomUUID(),
+    status = status,
+    enhet = sak.enhet,
+    sakId = sak.id,
+    kilde = oppgaveKilde,
+    referanse = "referanse",
+    merknad = "merknad",
+    opprettet = Tidspunkt.now(),
+    sakType = sak.sakType,
+    fnr = sak.ident,
+    frist = null,
+    type = oppgaveType,
+)

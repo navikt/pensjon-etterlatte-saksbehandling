@@ -44,7 +44,7 @@ class TidshendelseService(
         } else {
             return when (hendelse.jobbtype) {
                 JobbType.OMS_DOED_4MND, JobbType.OMS_DOED_10MND -> opprettAktivitetspliktOppgave(hendelse)
-                JobbType.OMS_DOED_6MND -> opprettRevurderingForAktivitetsplikt(hendelse)
+                JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> opprettRevurderingForAktivitetsplikt(hendelse)
                 JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> opprettOppgaveForAktivitetspliktVarigUnntak(hendelse)
                 else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
             }
@@ -193,6 +193,7 @@ class TidshendelseService(
             JobbType.OMS_DOED_4MND -> false
             JobbType.OMS_DOED_6MND -> false
             JobbType.OMS_DOED_10MND -> false
+            JobbType.OMS_DOED_12MND -> false
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> false
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
@@ -209,7 +210,7 @@ class TidshendelseService(
             JobbType.OMS_DOED_5AAR -> REVURDERING
             JobbType.OMS_DOED_4MND -> AKTIVITETSPLIKT
             JobbType.OMS_DOED_10MND -> AKTIVITETSPLIKT_12MND
-            JobbType.OMS_DOED_6MND -> AKTIVITETSPLIKT_REVURDERING
+            JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> AKTIVITETSPLIKT_REVURDERING
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,

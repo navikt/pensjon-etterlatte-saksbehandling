@@ -22,6 +22,7 @@ private fun generateRoles(config: Config): Set<String> {
             config.getString("roller.pensjon-saksbehandler"),
             config.getString("roller.gjenny-saksbehandler"),
         )
+    // TODO: les-oms-sak-for-person kan fjernes siden de kaller oss med OBO......
     return defaultRoles + "les-oms-sak-for-person"
 }
 
@@ -55,7 +56,7 @@ fun Route.behandlingSakRoutes(
             }
         }
 
-        route("/${SAKID_CALL_PARAMETER}") {
+        route("/{$SAKID_CALL_PARAMETER}") {
             install(AuthorizationPlugin) {
                 accessPolicyRolesEllerAdGrupper = setOf("les-bp-sak", "les-oms-sak")
             }

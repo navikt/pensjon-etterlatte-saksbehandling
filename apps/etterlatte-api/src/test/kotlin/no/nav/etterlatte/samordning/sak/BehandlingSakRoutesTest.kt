@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -25,7 +26,10 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.CLIENT_ID
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.restModule
@@ -207,12 +211,102 @@ class BehandlingSakRoutesTest {
                     )
                 }
             response.status shouldBe HttpStatusCode.OK
-            println(response.bodyAsText())
             val sakliste: List<SakId> = response.body()
 
             sakliste shouldBe sakIdListesvar
 
             coVerify(exactly = 1) { behandlingService.hentSakforPerson(requestFnr) }
+        }
+    }
+
+    @Test
+    fun `Kan hente sak men sak er null og kaster da kastes exception IkkeFunnetException men logges `() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
+        applicationConfig = HoconApplicationConfig(conff)
+        coEvery { behandlingService.hentSak(any()) } returns null
+        testApplication {
+            environment { config = applicationConfig }
+            application {
+                restModule(routeLogger) {
+                    behandlingSakRoutes(
+                        behandlingService = behandlingService,
+                        config = conff,
+                    )
+                }
+            }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
+                }
+
+            val response =
+                client.get("/api/sak/25895819") {
+                    contentType(ContentType.Application.Json)
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf("les-oms-sak"))}",
+                    )
+                }
+            response.status shouldBe HttpStatusCode.OK
+            println(response.bodyAsText())
+            val sakliste: Sak? = response.body()
+
+            sakliste shouldBe null
+
+            coVerify(exactly = 1) { behandlingService.hentSak(any()) }
+        }
+    }
+
+    @Test
+    fun `Kan hente sak, verifiserer at den blir returnert`() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
+        applicationConfig = HoconApplicationConfig(conff)
+        val sakId: Long = 12
+        val funnetSak =
+            Sak(
+                "ident",
+                SakType.OMSTILLINGSSTOENAD,
+                SakId(sakId),
+                Enhetsnummer(
+                    "4808",
+                ),
+            )
+        coEvery { behandlingService.hentSak(any()) } returns funnetSak
+        testApplication {
+            environment { config = applicationConfig }
+            application {
+                restModule(routeLogger) {
+                    behandlingSakRoutes(
+                        behandlingService = behandlingService,
+                        config = conff,
+                    )
+                }
+            }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
+                }
+
+            val response =
+                client.get("/api/sak/$sakId") {
+                    contentType(ContentType.Application.Json)
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf("les-oms-sak"))}",
+                    )
+                }
+            response.status shouldBe HttpStatusCode.OK
+            val hentetSak: Sak? = response.body()
+
+            hentetSak shouldBe funnetSak
+
+            coVerify(exactly = 1) { behandlingService.hentSak(SakId(sakId)) }
         }
     }
 }

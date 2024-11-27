@@ -41,6 +41,7 @@ class OppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
+    // TODO: hvorfor ikke ha med oppgavetype?
     fun finnOppgaverForBruker(
         bruker: SaksbehandlerMedEnheterOgRoller,
         oppgaveStatuser: List<String>,

@@ -485,8 +485,9 @@ class AktivitetspliktService(
                 .hentOppgaverForSak(sakId, OppgaveType.AKTIVITETSPLIKT_12MND)
                 .filter { it.erFerdigstilt() }
                 .maxByOrNull { it.opprettet }
-                ?: throw InternfeilException("Fant ikke aktivitetsplikt12mnd for sak: $sakId")
-
+        if (oppgave12mnd == null) {
+            return false
+        }
         val vurderingForOppgave = hentVurderingForOppgave(oppgave12mnd.id)
         val sistevurdering =
             vurderingForOppgave.aktivitet.maxByOrNull { it.endret.tidspunkt }

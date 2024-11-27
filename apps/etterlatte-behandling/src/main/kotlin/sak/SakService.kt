@@ -11,6 +11,8 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -117,6 +119,7 @@ class SakServiceImpl(
     private val grunnlagService: GrunnlagService,
     private val krrKlient: KrrKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
+    private val featureToggle: FeatureToggleService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -151,8 +154,17 @@ class SakServiceImpl(
         loependeFom: YearMonth?,
     ): List<SakId> =
         lesDao
-            .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType, loependeFom)
-            .also { logger.info("Henta ${it.size} saker før filtrering") }
+            .hentSaker(
+                kjoering,
+                antall,
+                spesifikkeSaker,
+                ekskluderteSaker,
+                sakType,
+                !featureToggle.isEnabled(
+                    ReguleringFeatureToggle.OMREGING_REKJOERE_MANUELL_UTEN_OPPGAVE,
+                    false,
+                ),
+            ).also { logger.info("Henta ${it.size} saker før filtrering") }
             .filterForEnheter()
             .also { logger.info("Henta ${it.size} saker etter filtrering") }
             .map(Sak::id)
@@ -475,4 +487,13 @@ class SakServiceImpl(
         enheterSomSkalFiltreres: List<Enhetsnummer>,
         saker: List<Sak>,
     ): List<Sak> = saker.filter { it.enhet !in enheterSomSkalFiltreres }
+}
+
+enum class ReguleringFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    OMREGING_REKJOERE_MANUELL_UTEN_OPPGAVE("aarlig-inntektsjustering-la-manuell-behandling"),
+    ;
+
+    override fun key() = key
 }

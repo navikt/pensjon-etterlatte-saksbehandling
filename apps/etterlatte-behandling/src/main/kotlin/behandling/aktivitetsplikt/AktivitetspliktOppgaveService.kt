@@ -112,7 +112,7 @@ class AktivitetspliktOppgaveService(
         aktivitetspliktBrevDao.lagreBrevdata(data.toDaoObjektBrevutfall(oppgaveId, sakid = sak.id, kilde = kilde))
         val oppdatertData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId = oppgaveId)
 
-        // Hvis vi har knyttet opp et brev må dette endres på
+        // Hvis brev allerede er opprettet kan det hende vi må endre / slette det
         if (oppdatertData?.brevId != null) {
             // Hvis brevet ikke er relevant skal det slettes
             if (!data.skalSendeBrev) {
@@ -124,8 +124,9 @@ class AktivitetspliktOppgaveService(
                         brukerTokenInfo = saksbehandler,
                     )
                 }
+                // Hvis brevdata er endret må vi oppdatere brevet
             } else if (!oppdatertData.harLikeUtfall(eksisterendeData)) {
-                val brevParametre = mapBrevParametre(oppgave, oppdatertData)
+                val brevParametre = mapOgValiderBrevParametre(oppgave, oppdatertData)
                 runBlocking {
                     brevApiKlient.oppdaterSpesifiktBrev(
                         sakId = sak.id,
@@ -139,7 +140,7 @@ class AktivitetspliktOppgaveService(
         return aktivitetspliktBrevDao.hentBrevdata(oppgaveId)!!
     }
 
-    private fun mapBrevParametre(
+    private fun mapOgValiderBrevParametre(
         oppgave: OppgaveIntern,
         brevdata: AktivitetspliktInformasjonBrevdata,
     ): BrevParametre {
@@ -215,7 +216,7 @@ class AktivitetspliktOppgaveService(
         }
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
-            val brevParametreAktivitetsplikt10mnd = mapBrevParametre(oppgave, brevData)
+            val brevParametreAktivitetsplikt10mnd = mapOgValiderBrevParametre(oppgave, brevData)
             val opprettetBrev =
                 runBlocking {
                     brevApiKlient.opprettSpesifiktBrev(

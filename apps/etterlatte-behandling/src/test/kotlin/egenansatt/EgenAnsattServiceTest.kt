@@ -69,6 +69,7 @@ internal class EgenAnsattServiceTest(
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     @BeforeAll
     fun beforeAll() {
@@ -109,6 +110,7 @@ internal class EgenAnsattServiceTest(
                     grunnlagservice,
                     krrKlient,
                     pdlTjenesterKlient,
+                    featureToggleService,
                 ),
             )
         oppgaveService =

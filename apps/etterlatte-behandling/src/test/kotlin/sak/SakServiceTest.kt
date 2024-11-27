@@ -33,6 +33,7 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -77,6 +78,7 @@ internal class SakServiceTest {
     private val sakLesDao = mockk<SakLesDao>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val service: SakService =
         SakServiceImpl(
@@ -87,6 +89,7 @@ internal class SakServiceTest {
             grunnlagservice,
             krrKlient,
             pdlTjenesterKlient,
+            featureToggleService
         )
 
     @BeforeEach
@@ -917,10 +920,10 @@ internal class SakServiceTest {
     private fun dummyPdlResponse(ident: String) =
         PdlFolkeregisterIdentListe(
             identifikatorer =
-                listOf(
-                    PdlIdentifikator.FolkeregisterIdent(
-                        folkeregisterident = Folkeregisteridentifikator.of(ident),
-                    ),
+            listOf(
+                PdlIdentifikator.FolkeregisterIdent(
+                    folkeregisterident = Folkeregisteridentifikator.of(ident),
                 ),
+            ),
         )
 }

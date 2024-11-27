@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
-import java.time.YearMonth
 
 class SakLesDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
@@ -53,7 +52,7 @@ class SakLesDao(
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
         sakType: SakType? = null,
-        loependeFom: YearMonth? = null,
+        rekjoereManuellUtenOppgave: Boolean = false,
     ): List<Sak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
@@ -69,11 +68,18 @@ class SakLesDao(
                         AND k.status!='${KjoeringStatus.KLAR_TIL_REGULERING.name}'
                     )
                     OR EXISTS(
-                        -- nyeste kjøring har feila
+                        -- nyeste kjøring har feila eller har satt til manuell uten oppgave (hvis bryter er på)
                         SELECT 1 FROM omregningskjoering k
                             WHERE k.sak_id=s.id 
                             AND k.kjoering='$kjoering' 
-                            AND k.status = '${KjoeringStatus.FEILA.name}'
+                            AND k.status in ${
+                            rekjoereManuellUtenOppgave.let {
+                                when (it) {
+                                    true -> "('${KjoeringStatus.FEILA.name}', '${KjoeringStatus.TIL_MANUELL_UTEN_OPPGAVE.name}')"
+                                    false -> "('${KjoeringStatus.FEILA.name}')"
+                                }
+                            }
+                        }
                             AND k.tidspunkt >= (SELECT MAX(o.tidspunkt) FROM omregningskjoering o WHERE o.sak_id=k.sak_id AND o.kjoering=k.kjoering)
                     )
                     )

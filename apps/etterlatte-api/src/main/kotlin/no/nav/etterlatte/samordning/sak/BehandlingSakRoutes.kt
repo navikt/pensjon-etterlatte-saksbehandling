@@ -11,23 +11,19 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
-import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.Issuer
 
-fun generateRoles(config: Config): Set<String> {
+private fun generateRoles(config: Config): Set<String> {
     val defaultRoles =
         setOf(
             config.getString("roller.pensjon-saksbehandler"),
             config.getString("roller.gjenny-saksbehandler"),
         )
-    if (isProd()) {
-        return defaultRoles
-    } else {
-        return defaultRoles + "les-oms-sak-for-person"
-    }
+    // TODO: les-oms-sak-for-person kan fjernes siden de kaller oss med OBO......
+    return defaultRoles + "les-oms-sak-for-person"
 }
 
 fun Route.behandlingSakRoutes(
@@ -42,7 +38,8 @@ fun Route.behandlingSakRoutes(
 
         post("/person/sak") {
             val foedselsnummer = call.receive<FoedselsnummerDTO>()
-            call.respond(behandlingService.hentSakforPerson(foedselsnummer))
+            val saker = behandlingService.hentSakforPerson(foedselsnummer)
+            call.respond(saker)
         }
     }
 
@@ -59,7 +56,7 @@ fun Route.behandlingSakRoutes(
             }
         }
 
-        route("/${SAKID_CALL_PARAMETER}") {
+        route("/{$SAKID_CALL_PARAMETER}") {
             install(AuthorizationPlugin) {
                 accessPolicyRolesEllerAdGrupper = setOf("les-bp-sak", "les-oms-sak")
             }

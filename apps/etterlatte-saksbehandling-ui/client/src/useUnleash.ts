@@ -5,6 +5,7 @@ import { hentFeatureToggles } from '~shared/api/unleash'
 import { useDispatch } from 'react-redux'
 import { endreToggle, useUnleashReducer, useUnleashReducerToggle } from '~store/reducers/UnleashReducer'
 import { throttle } from 'lodash'
+import { logger } from '~utils/logger'
 
 export const enum FeatureToggle {
   sanksjon = 'sanksjon',
@@ -87,8 +88,10 @@ export const unleashStartState: Record<string, Toggle> = {
 
 export const Unleashcontext = createContext<{
   updateToggle: () => void
+  logWithThrottle: (featureToggle: FeatureToggle) => void
 }>({
   updateToggle: () => {},
+  logWithThrottle: () => {},
 })
 
 const mapStatusForToggle = (featureToggle: IFeature, defaultValue: boolean): boolean => {
@@ -102,6 +105,12 @@ const mapStatusForToggle = (featureToggle: IFeature, defaultValue: boolean): boo
     case Status.PAA:
       return true
   }
+}
+
+const logWithThrottle = (featureToggle: FeatureToggle) => {
+  const msg = `Ugyldig toggle registrert: ${featureToggle}`
+  console.error(msg)
+  logger.generalError({ msg: msg })
 }
 
 export const useUnleash = () => {
@@ -125,16 +134,20 @@ export const useUnleash = () => {
     )
   }
 
-  return { updateToggle: throttle(updateToggle, 1000) }
+  return { updateToggle: throttle(updateToggle, 1000), logWithThrottle: throttle(logWithThrottle, 1000) }
 }
 
 export const useFeaturetoggle = (featureToggle: FeatureToggle): boolean => {
-  const { updateToggle } = useContext(Unleashcontext)
+  const { updateToggle, logWithThrottle } = useContext(Unleashcontext)
   const toggle = useUnleashReducerToggle(featureToggle)
 
   useEffect(() => {
-    updateToggle()
+    if (toggle) {
+      updateToggle()
+    } else {
+      logWithThrottle(featureToggle)
+    }
   }, [])
 
-  return toggle.enabled
+  return toggle ? toggle.enabled : false
 }

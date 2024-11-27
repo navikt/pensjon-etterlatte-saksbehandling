@@ -1,9 +1,10 @@
-import { Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { JaNei, JaNeiRec } from '~shared/types/ISvar'
+import { JaNei, JaNeiRec, mapBooleanToJaNei } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
+  IBrevAktivitetspliktDto,
   IBrevAktivitetspliktRequest,
   lagreAktivitetspliktBrevdata,
   opprettAktivitetspliktsbrev,
@@ -22,12 +23,22 @@ import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Spraak } from '~shared/types/Brev'
+import { formaterSpraak } from '~utils/formatering/formatering'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
   utbetaling: JaNei
   redusertEtterInntekt: JaNei
   spraak?: Spraak
+}
+
+function mapFromDto(brevdata: IBrevAktivitetspliktDto): Partial<IBrevAktivitetsplikt> {
+  return {
+    skalSendeBrev: mapBooleanToJaNei(brevdata.skalSendeBrev),
+    utbetaling: mapBooleanToJaNei(brevdata.utbetaling),
+    redusertEtterInntekt: mapBooleanToJaNei(brevdata.redusertEtterInntekt),
+    spraak: brevdata.spraak,
+  }
 }
 
 function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
@@ -41,7 +52,7 @@ function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
 
 export const ValgForInfobrev = () => {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
-  const { handleSubmit, watch, control, resetField } = useForm<IBrevAktivitetsplikt>({})
+  const { handleSubmit, watch, control, resetField, reset } = useForm<IBrevAktivitetsplikt>({})
 
   const dispatch = useDispatch()
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
@@ -59,6 +70,12 @@ export const ValgForInfobrev = () => {
       () => {}
     )
   }
+
+  useEffect(() => {
+    if (redigeres && !!aktivtetspliktbrevdata) {
+      reset(mapFromDto(aktivtetspliktbrevdata))
+    }
+  }, [redigeres])
 
   const skalsendebrev = watch('skalSendeBrev')
 
@@ -161,22 +178,26 @@ export const ValgForInfobrev = () => {
                       label="Redusert etter inntekt"
                       tekst={brevdata.redusertEtterInntekt ? JaNeiRec.JA : JaNeiRec.NEI}
                     />
+                    <Info label="Målform" tekst={brevdata.spraak ? formaterSpraak(brevdata.spraak) : '-'} />
                   </>
                 )}
               </HStack>
             )}
             {erOppgaveRedigerbar(oppgave.status) && (
-              <Box>
-                <Button
-                  type="button"
-                  size="small"
-                  icon={<PencilIcon />}
-                  variant="secondary"
-                  onClick={() => setRedigeres(true)}
-                >
-                  Rediger
-                </Button>
-              </Box>
+              <>
+                <Box>
+                  <Button
+                    type="button"
+                    size="small"
+                    icon={<PencilIcon />}
+                    variant="secondary"
+                    onClick={() => setRedigeres(true)}
+                  >
+                    Rediger
+                  </Button>
+                </Box>
+                <Alert variant="info">Hvis valgene redigeres vil innholdet i brevet tilbakestilles.</Alert>
+              </>
             )}
           </VStack>
         )}

@@ -163,5 +163,6 @@ export interface IBrevAktivitetspliktDto {
   skalSendeBrev: boolean
   utbetaling?: boolean
   redusertEtterInntekt?: boolean
+  spraak?: Spraak
   kilde: KildeSaksbehandler
 }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev
 
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 
 /*
@@ -19,6 +20,7 @@ enum class Brevkoder(
     val ferdigstilling: EtterlatteBrevKode,
     val tittel: String,
     val brevtype: Brevtype,
+    val titlerPaaSpraak: Map<Spraak, String> = emptyMap(),
 ) {
     OMREGNING(
         EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
@@ -155,12 +157,24 @@ enum class Brevkoder(
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om aktivitetsplikt for omstillingsstønad",
         Brevtype.INFORMASJON,
+        titlerPaaSpraak =
+            mapOf(
+                Spraak.NB to "Informasjon om aktivitetsplikt for omstillingsstønad",
+                Spraak.NN to "Informasjon om aktivitetsplikt for omstillingsstønad",
+                Spraak.EN to "Information about the activity requirement for adjustment allowance",
+            ),
     ),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om aktivitetsplikt for omstillingsstønad",
         Brevtype.INFORMASJON,
+        titlerPaaSpraak =
+            mapOf(
+                Spraak.NB to "Informasjon om aktivitetsplikt for omstillingsstønad",
+                Spraak.NN to "Informasjon om aktivitetsplikt for omstillingsstønad",
+                Spraak.EN to "Information about the activity requirement for adjustment allowance",
+            ),
     ),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,

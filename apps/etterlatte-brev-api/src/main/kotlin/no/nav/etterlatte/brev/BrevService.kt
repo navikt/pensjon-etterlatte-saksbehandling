@@ -193,6 +193,10 @@ class BrevService(
         // Oppdater språket hvis nødvendig, _før_ vi henter data basert på språket til brevet
         if (brev.spraak != spraak) {
             db.oppdaterSpraak(brevId, spraak, bruker)
+            val tittel = parametre.brevkode.titlerPaaSpraak[spraak]
+            if (tittel != null) {
+                db.oppdaterTittel(brevId, tittel, bruker)
+            }
         }
         val innhold =
             brevoppretter.hentNyttInnhold(

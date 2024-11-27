@@ -67,8 +67,8 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
               <BrevSpraak brev={brev} kanRedigeres={false} />
               {kanRedigeres && (
                 <Alert size="small" variant="info">
-                  For å endre målform i brevet må det endres på forrige steg. Endring i brevdata vil fjerne alt innhold
-                  i brevet.
+                  For å endre målform i brevet må det endres på forrige steg. Endring i brevvalg vil nullstille
+                  innholdet i brevet.
                 </Alert>
               )}
 

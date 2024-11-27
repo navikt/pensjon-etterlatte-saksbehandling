@@ -220,7 +220,7 @@ class BehandlingSakRoutesTest {
     }
 
     @Test
-    fun `Kan hente sak men sak er null og kaster da kastes exception IkkeFunnetException men logges `() {
+    fun `Kan hente sak men sak er null og kaster da exception IkkeFunnetException men logges `() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
         val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
         applicationConfig = HoconApplicationConfig(conff)

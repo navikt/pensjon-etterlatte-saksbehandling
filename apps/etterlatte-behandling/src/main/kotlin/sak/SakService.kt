@@ -160,7 +160,7 @@ class SakServiceImpl(
                 spesifikkeSaker,
                 ekskluderteSaker,
                 sakType,
-                !featureToggle.isEnabled(
+                featureToggle.isEnabled(
                     ReguleringFeatureToggle.OMREGING_REKJOERE_MANUELL_UTEN_OPPGAVE,
                     false,
                 ),

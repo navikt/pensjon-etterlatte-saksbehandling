@@ -24,6 +24,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formatering/formatering'
+import { LoependeUnntakInfo } from '~components/aktivitetsplikt/brev/LoependeUnntakInfo'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
@@ -58,7 +59,6 @@ export const ValgForInfobrev = () => {
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
   const [redigeres, setRedigeres] = useState<boolean>(!aktivtetspliktbrevdata)
   const brevdata = aktivtetspliktbrevdata
-
   const lagreBrevutfall = (data: IBrevAktivitetsplikt) => {
     const brevdatamappedToDo = mapToDto(data)
     lagrebrevdata(
@@ -199,6 +199,7 @@ export const ValgForInfobrev = () => {
                 {aktivtetspliktbrevdata?.brevId && (
                   <Alert variant="info">Hvis valgene redigeres vil innholdet i brevet tilbakestilles.</Alert>
                 )}
+                <LoependeUnntakInfo />
               </>
             )}
           </VStack>

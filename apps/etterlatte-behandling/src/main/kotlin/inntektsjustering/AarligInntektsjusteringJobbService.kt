@@ -373,7 +373,7 @@ class AarligInntektsjusteringJobbService(
                                 OmregningData(
                                     kjoering = kjoering,
                                     sakId = sakId,
-                                    revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING,
+                                    revurderingaarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                                     fradato = loependeFom.atDay(1),
                                 ).toPacket(),
                         ),

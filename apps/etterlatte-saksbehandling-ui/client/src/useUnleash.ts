@@ -70,17 +70,18 @@ const pensjon_etterlatte_oppdater_ident_paa_sak: Toggle = {
 }
 
 export const unleashStartState: Record<string, Toggle> = {
-  sanksjon: sanksjon,
-  'aktivitetsplikt.ny-vurdering': aktivitetsplikt_ny_vurdering,
-  validere_aarsintnekt_neste_aar: validere_aarsintnekt_neste_aar,
-  notater: notater,
-  'kun-en-registrert-juridisk-forelder': kun_en_registrert_juridisk_forelder,
-  kopier_trygdetidsgrunnlag: kopier_trygdetidsgrunnlag,
-  kan_redigere_journalpost_bruker: kan_redigere_journalpost_bruker,
-  'opprette-generell-oppgave': opprette_generell_oppgave,
-  'pensjon-etterlatte.klage-delvis-omgjoering': pensjon_etterlatte_klage_delvis_omgjoering,
-  'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage': pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
-  'overstyr-beregning-knapp': overstyr_beregning_knapp,
+  [FeatureToggle.sanksjon]: sanksjon,
+  [FeatureToggle.aktivitetsplikt_ny_vurdering]: aktivitetsplikt_ny_vurdering,
+  [FeatureToggle.validere_aarsintnekt_neste_aar]: validere_aarsintnekt_neste_aar,
+  [FeatureToggle.notater]: notater,
+  [FeatureToggle.kun_en_registrert_juridisk_forelder]: kun_en_registrert_juridisk_forelder,
+  [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,
+  [FeatureToggle.kan_redigere_journalpost_bruker]: kan_redigere_journalpost_bruker,
+  [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
+  [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,
+  [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:
+    pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
+  [FeatureToggle.overstyr_beregning_knapp]: overstyr_beregning_knapp,
   [FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak]: pensjon_etterlatte_oppdater_ident_paa_sak,
 }
 

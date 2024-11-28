@@ -188,6 +188,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                                 virkningstidspunkt!!,
                                 sakType,
                                 vedtakType,
+                                revurderingaarsak,
                             )
                         }
                     }
@@ -342,6 +343,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         virkningstidspunkt: YearMonth,
         sakType: SakType,
         vedtakType: VedtakType,
+        revurderingaarsak: Revurderingaarsak?,
     ) = coroutineScope {
         val avkortingsinfo =
             async {
@@ -355,11 +357,14 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
-            etterbetaling.await(),
+            behandling,
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
+            etterbetaling.await(),
+            revurderingaarsak,
         )
     }
 

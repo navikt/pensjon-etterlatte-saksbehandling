@@ -1,0 +1,23 @@
+name: etterlatte-omregning-model
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+  push:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-omregning-model/**
+      - gradle/libs.versions.toml
+      - "!**/test/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - libs/etterlatte-omregning-model/**
+      - gradle/libs.versions.toml
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.lib-test.yaml
+    secrets: inherit

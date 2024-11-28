@@ -19,9 +19,11 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import no.nav.etterlatte.libs.ktor.feilhaandtering.EscapeUtils.escape
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.skjulAllePotensielleFnr
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+private val routeLogger = LoggerFactory.getLogger("Route")
 
 class StatusPagesKonfigurasjon(
     private val sikkerLogg: Logger,

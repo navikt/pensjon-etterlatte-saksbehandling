@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingResponse
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException

@@ -11,13 +11,13 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.revurdering.AutomatiskRevurderingRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.omregning.OmregningData
+import no.nav.etterlatte.omregning.OmregningDataPacket
+import no.nav.etterlatte.omregning.OmregningHendelseType
+import no.nav.etterlatte.omregning.omregningData
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.OmregningData
-import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
-import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
-import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection

@@ -19,11 +19,11 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.omregning.OmregningData
+import no.nav.etterlatte.omregning.OmregningHendelseType
+import no.nav.etterlatte.omregning.UtbetalingVerifikasjon
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.OmregningData
-import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.UtbetalingVerifikasjon
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime

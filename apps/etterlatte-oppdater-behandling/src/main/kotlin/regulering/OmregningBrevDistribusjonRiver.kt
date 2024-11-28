@@ -5,10 +5,10 @@ import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.DisttribuertEllerIverksatt
+import no.nav.etterlatte.omregning.OmregningDataPacket
+import no.nav.etterlatte.omregning.omregningData
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
-import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection

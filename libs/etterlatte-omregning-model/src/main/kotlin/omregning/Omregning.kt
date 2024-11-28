@@ -1,4 +1,4 @@
-package no.nav.etterlatte.rapidsandrivers
+package no.nav.etterlatte.omregning
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -122,15 +122,15 @@ data class OmregningDataPacket(
     val inntektsjustering: OmregningInntektsjustering?,
 ) {
     companion object KEYS {
-        val KEY = HENDELSE_DATA_KEY
-        val KJOERING = "$HENDELSE_DATA_KEY.${OmregningDataPacket::kjoering.name}"
-        val SAK_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::sakId.name}"
-        val SAK_TYPE = "$HENDELSE_DATA_KEY.${OmregningDataPacket::sakType.name}"
-        val FRA_DATO = "$HENDELSE_DATA_KEY.${OmregningDataPacket::fradato.name}"
-        val BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::behandlingId.name}"
-        val FORRIGE_BEHANDLING_ID = "$HENDELSE_DATA_KEY.${OmregningDataPacket::forrigeBehandlingId.name}"
-        val REV_AARSAK = "$HENDELSE_DATA_KEY.${OmregningDataPacket::revurderingaarsak.name}"
-        val INNTEKTSJUSTERING = "$HENDELSE_DATA_KEY.${OmregningDataPacket::inntektsjustering.name}"
+        val KEY = "hendelse_data"
+        val KJOERING = "$KEY.${OmregningDataPacket::kjoering.name}"
+        val SAK_ID = "$KEY.${OmregningDataPacket::sakId.name}"
+        val SAK_TYPE = "$KEY.${OmregningDataPacket::sakType.name}"
+        val FRA_DATO = "$KEY.${OmregningDataPacket::fradato.name}"
+        val BEHANDLING_ID = "$KEY.${OmregningDataPacket::behandlingId.name}"
+        val FORRIGE_BEHANDLING_ID = "$KEY.${OmregningDataPacket::forrigeBehandlingId.name}"
+        val REV_AARSAK = "$KEY.${OmregningDataPacket::revurderingaarsak.name}"
+        val INNTEKTSJUSTERING = "$KEY.${OmregningDataPacket::inntektsjustering.name}"
     }
 }
 
@@ -140,9 +140,9 @@ data class OmregningInntektsjustering(
 )
 
 var JsonMessage.omregningData: OmregningData
-    get() = objectMapper.treeToValue(this[HENDELSE_DATA_KEY])
+    get() = objectMapper.treeToValue(this[OmregningDataPacket.KEY])
     set(name) {
-        this[HENDELSE_DATA_KEY] = name.toPacket()
+        this[OmregningDataPacket.KEY] = name.toPacket()
     }
 
 class OmregningshendelseHarFeilTilstand(

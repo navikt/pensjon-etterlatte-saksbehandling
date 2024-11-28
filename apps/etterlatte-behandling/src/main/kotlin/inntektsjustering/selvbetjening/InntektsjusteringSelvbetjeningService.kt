@@ -18,11 +18,11 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.omregning.OmregningData
+import no.nav.etterlatte.omregning.OmregningDataPacket
+import no.nav.etterlatte.omregning.OmregningHendelseType
+import no.nav.etterlatte.omregning.OmregningInntektsjustering
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.rapidsandrivers.OmregningData
-import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
-import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
-import no.nav.etterlatte.rapidsandrivers.OmregningInntektsjustering
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 

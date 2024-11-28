@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.rapidsandrivers.OmregningData
+import no.nav.etterlatte.omregning.OmregningData
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.junit.jupiter.api.Assertions.assertNotNull

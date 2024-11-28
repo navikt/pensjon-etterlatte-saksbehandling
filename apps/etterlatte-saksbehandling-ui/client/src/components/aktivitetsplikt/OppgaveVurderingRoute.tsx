@@ -11,7 +11,7 @@ import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAkt
 import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurderingState } from '~store/reducers/Aktivitetsplikt12mnd'
-import { ValgForInfobrev } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/ValgForInfobrev'
+import { ValgForInfobrev } from '~components/aktivitetsplikt/brev/ValgForInfobrev'
 
 const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurdering>(
   {} as AktivitetspliktOppgaveVurdering

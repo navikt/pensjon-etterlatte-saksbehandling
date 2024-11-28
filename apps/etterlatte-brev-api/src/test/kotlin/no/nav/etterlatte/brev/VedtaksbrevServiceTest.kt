@@ -810,7 +810,7 @@ internal class VedtaksbrevServiceTest {
                 LetterMetadata.Distribusjonstype.VEDTAK,
                 LetterMetadata.Brevtype.VEDTAKSBREV,
             ),
-        ).let { Base64.getDecoder().decode(it.base64pdf) }
+        ).let { Base64.getDecoder().decode(it.file) }
             .let { Pdf(it) }
 
     private fun opprettAvsender() =

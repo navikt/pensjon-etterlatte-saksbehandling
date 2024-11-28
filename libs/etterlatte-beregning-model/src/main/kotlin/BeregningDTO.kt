@@ -171,4 +171,5 @@ data class MottattInntektsjusteringAvkortigRequest(
     val virkningstidspunkt: YearMonth,
     val inntekt: Int,
     val inntektUtland: Int,
+    val datoForAlderspensjon: YearMonth? = null,
 )

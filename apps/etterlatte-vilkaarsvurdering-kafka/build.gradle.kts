@@ -8,6 +8,7 @@ dependencies {
     }
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
+    implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
 

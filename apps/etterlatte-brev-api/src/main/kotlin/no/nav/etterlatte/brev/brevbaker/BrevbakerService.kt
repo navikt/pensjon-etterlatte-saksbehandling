@@ -22,7 +22,7 @@ class BrevbakerService(
 
         return Base64
             .getDecoder()
-            .decode(brevbakerResponse.base64pdf)
+            .decode(brevbakerResponse.file)
             .let { Pdf(it) }
             .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
     }

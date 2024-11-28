@@ -77,6 +77,7 @@ export function VurderingAktivitetsgradForm(props: {
           skjoennsmessigVurdering: formdata.vurderingAvAktivitet.skjoennsmessigVurdering,
           aktivitetsgrad: formdata.vurderingAvAktivitet.aktivitetsgrad,
           fom: formdata.vurderingAvAktivitet.fom,
+          tom: formdata.vurderingAvAktivitet.tom,
           beskrivelse: formdata.vurderingAvAktivitet.beskrivelse || '',
         },
       },

@@ -130,6 +130,7 @@ class InntektsjusteringSelvbetjeningService(
                     HardkodaSystembruker.omregning,
                 )
             }
+
         if (!vedtak.erLoepende || vedtak.underSamordning) return false
 
         // TODO: flere sjekker?

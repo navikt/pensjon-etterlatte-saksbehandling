@@ -115,6 +115,7 @@ data class OmstillingsstoenadRevurdering(
 
 data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val beregning: OmstillingsstoenadBeregningRedigerbartUtfall,
+    val erEndret: Boolean,
     val erEtterbetaling: Boolean,
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
     val feilutbetaling: FeilutbetalingType,
@@ -127,6 +128,7 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
             behandling: DetaljertBehandling,
             brevutfall: BrevutfallDto,
             etterbetaling: EtterbetalingDTO?,
+            revurderingaarsak: Revurderingaarsak?,
         ): OmstillingsstoenadRevurderingRedigerbartUtfall {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
@@ -145,6 +147,9 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
                         opphoerNesteAar =
                             beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
                     ),
+                erEndret =
+                    avkortingsinfo.endringIUtbetalingVedVirk ||
+                        revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
                 erEtterbetaling = etterbetaling != null,
                 etterbetaling =
                     etterbetaling?.let {

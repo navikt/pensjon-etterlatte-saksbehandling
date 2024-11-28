@@ -355,11 +355,13 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
-            etterbetaling.await(),
+            behandling,
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
+            etterbetaling.await(),
         )
     }
 

@@ -492,7 +492,6 @@ class BrevDataMapperFerdigstillingVedtak(
                 )
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
-        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
@@ -508,7 +507,6 @@ class BrevDataMapperFerdigstillingVedtak(
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
             avkortingsinfo.await(),
-            etterbetaling.await(),
             requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
             revurderingaarsak,

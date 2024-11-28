@@ -7,7 +7,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.inntektsjustering.InntektsjusteringRequest
+import no.nav.etterlatte.libs.inntektsjustering.InntektsjusteringRequest
 
 internal fun Route.inntektsjusteringSelvbetjeningRoute(service: InntektsjusteringSelvbetjeningService) {
     route("/inntektsjustering") {

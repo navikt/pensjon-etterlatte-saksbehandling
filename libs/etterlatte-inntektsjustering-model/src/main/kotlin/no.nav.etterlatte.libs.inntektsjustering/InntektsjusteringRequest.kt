@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.inntektsjustering
+package no.nav.etterlatte.libs.inntektsjustering
 
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.util.UUID
@@ -13,6 +13,7 @@ data class InntektsjusteringRequest(
     companion object {
         fun utledKjoering(id: UUID) = "INNTEKTSJUSTERING_${utledLoependeFom()}_$id"
 
+        // TODO må endres når vi mottar inntektsjusteringt inneværende år
         fun utledLoependeFom() = AarligInntektsjusteringRequest.utledLoependeFom()
     }
 }

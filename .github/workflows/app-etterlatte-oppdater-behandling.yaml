@@ -20,6 +20,7 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-migrering-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-omregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
@@ -37,6 +38,7 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-migrering-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-omregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**

@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - libs/etterlatte-omregning-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
       - "!**/test/**"
@@ -14,7 +14,7 @@ on:
     branches:
       - main
     paths:
-      - libs/etterlatte-omregning-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 

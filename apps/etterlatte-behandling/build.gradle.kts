@@ -25,6 +25,7 @@ dependencies {
     implementation(project(":libs:etterlatte-trygdetid-model"))
     implementation(project(":libs:etterlatte-beregning-model"))
     implementation(project(":libs:etterlatte-omregning-model"))
+    implementation(project(":libs:etterlatte-inntektsjustering-model"))
 
     implementation(libs.cache.caffeine)
     implementation(libs.navfelles.tokenvalidationktor2) {

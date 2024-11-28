@@ -1,9 +1,11 @@
 package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.YearMonth
 import java.util.UUID
 
 class MottattInntektsjusteringService(
@@ -13,7 +15,7 @@ class MottattInntektsjusteringService(
         request: MottattInntektsjusteringAvkortigRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
-        val (behandlingId, virkningstidspunkt, inntekt, inntektUtland) = request
+        val (behandlingId, virkningstidspunkt, inntekt, inntektUtland, datoAlderspensjon) = request
 
         avkortingService.tilstandssjekk(behandlingId, brukerTokenInfo)
 
@@ -29,11 +31,19 @@ class MottattInntektsjusteringService(
                 fratrekkInnAar = 0, // TODO må tilpasses når vi skal støtte inntektsjustering inneværende år
                 inntektUtlandTom = inntektUtland,
                 fratrekkInnAarUtland = 0, // TODO må tilpasses når vi skal støtte inntektsjustering inneværende år
-                spesifikasjon = "Mottatt inntekt fra bruker gjennom selvbetjening", // TODO avklar med fag
+                spesifikasjon = "Mottatt inntekt fra bruker gjennom selvbetjening", // TODO avklar med fag - muligens noe om afp osv bør inn
                 fom = virkningstidspunkt,
+                overstyrtInnvilgaMaaneder = datoAlderspensjon?.let { overstyrMedTidligAlderspensjon(it) },
             )
         avkortingService.beregnAvkortingMedNyttGrunnlag(behandlingId, brukerTokenInfo, nyttGrunnlag)
 
         return avkortingService.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
     }
+
+    private fun overstyrMedTidligAlderspensjon(datoAlderspensjon: YearMonth) =
+        AvkortingOverstyrtInnvilgaMaanederDto(
+            antall = datoAlderspensjon.monthValue - 1,
+            aarsak = OverstyrtInnvilgaMaanederAarsak.TAR_UT_PENSJON_TIDLIG.name,
+            begrunnelse = "Bruker har oppgitt tidlig alderspensjon i inntektsjusteringskjema",
+        )
 }

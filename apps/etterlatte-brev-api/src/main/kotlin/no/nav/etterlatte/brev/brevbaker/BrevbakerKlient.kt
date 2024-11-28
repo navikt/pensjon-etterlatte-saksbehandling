@@ -71,7 +71,7 @@ class BrevbakerException(
 ) : Exception(msg, cause)
 
 class BrevbakerPdfResponse(
-    val base64pdf: String,
+    val file: String,
     val letterMetadata: LetterMetadata,
 )
 

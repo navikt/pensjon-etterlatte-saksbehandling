@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
+    implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:etterlatte-tidshendelser-model"))
 

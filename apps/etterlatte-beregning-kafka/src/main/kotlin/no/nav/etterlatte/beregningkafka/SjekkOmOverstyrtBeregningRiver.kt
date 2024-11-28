@@ -2,12 +2,12 @@ package no.nav.etterlatte.beregningkafka
 
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.AAPNE_BEHANDLINGER_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.aapneBehandlinger
 import no.nav.helse.rapids_rivers.JsonMessage

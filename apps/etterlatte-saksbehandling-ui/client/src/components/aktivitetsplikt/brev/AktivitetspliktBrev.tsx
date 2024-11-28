@@ -15,6 +15,7 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { FerdigstillAktivitetspliktBrevModal } from '~components/aktivitetsplikt/brev/FerdigstillBrevModal'
+import { LoependeUnntakInfo } from '~components/aktivitetsplikt/brev/LoependeUnntakInfo'
 
 export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
   const { oppgave, sistEndret } = useAktivitetspliktOppgaveVurdering()
@@ -63,6 +64,8 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
               <Box marginInline="0 8">
                 <Heading size="large">Infobrev aktivitetsplikt</Heading>
               </Box>
+
+              <LoependeUnntakInfo />
               <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
               <BrevSpraak brev={brev} kanRedigeres={false} />
               {kanRedigeres && (

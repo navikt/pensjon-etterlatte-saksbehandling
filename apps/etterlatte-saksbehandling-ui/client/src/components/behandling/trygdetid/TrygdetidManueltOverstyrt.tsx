@@ -9,7 +9,6 @@ import {
 } from '~shared/api/trygdetid'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Toast } from '~shared/alerts/Toast'
@@ -77,6 +76,7 @@ export const TrygdetidManueltOverstyrt = ({
     if (ident !== 'UKJENT_AVDOED') {
       return <Alert variant="error">Fant ikke avdød ident {ident} (trygdetid) i behandlingsgrunnlaget</Alert>
     }
+    /*
     if (ident === 'UKJENT_AVDOED' && behandling.behandlingType !== IBehandlingsType.REVURDERING) {
       return (
         <>
@@ -98,6 +98,7 @@ export const TrygdetidManueltOverstyrt = ({
         </>
       )
     }
+    */
   }
 
   return (
@@ -116,7 +117,12 @@ export const TrygdetidManueltOverstyrt = ({
                   behandlingen og lage en ny behandling med riktig avdød i familieoversikten.
                 </Alert>
                 <Box maxWidth="20rem">
-                  <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
+                  <Button
+                    variant="danger"
+                    size="small"
+                    onClick={overskrivOverstyrtTrygdetid}
+                    loading={isPending(opprettStatus)}
+                  >
                     Opprett overstyrt trygdetid på nytt
                   </Button>
                 </Box>
@@ -164,11 +170,12 @@ export const TrygdetidManueltOverstyrt = ({
 
             <Button
               variant="secondary"
+              size="small"
               onClick={lagre}
               loading={isPending(oppdaterStatus)}
               disabled={anvendtTrygdetid == null || (skalHaProrata && (prorataNevner == null || prorataTeller == null))}
             >
-              Send inn
+                Lagre overstyrt trygdetid
             </Button>
           </VStack>
           {mapResult(oppdaterStatus, {

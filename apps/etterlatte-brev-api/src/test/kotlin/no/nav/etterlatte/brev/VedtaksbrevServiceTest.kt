@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
@@ -238,22 +239,52 @@ internal class VedtaksbrevServiceTest {
             val behandling = opprettGenerellBrevdata(sakType, vedtakType)
             val mottaker = opprettMottaker()
 
-            every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
+            every { db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any(), any()) } returns opprettAvsender()
             coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns mottaker
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns Slate(emptyList())
             coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
-            coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns mockk()
+            coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns null
             coEvery { behandlingService.hentBrevutfall(any(), any()) } returns
                 mockk<BrevutfallDto> {
                     every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL
                     every { aldersgruppe } returns Aldersgruppe.UNDER_18
                 }
+
             if (sakType == SakType.OMSTILLINGSSTOENAD) {
+                coEvery { behandlingService.hentBehandling(any(), any()) } returns
+                    mockk {
+                        every { opphoerFraOgMed } returns null
+                    }
+
                 coEvery { beregningService.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns
-                    Avkortingsinfo(LocalDate.now(), listOf(), false)
+                    Avkortingsinfo(
+                        LocalDate.now(),
+                        listOf(
+                            AvkortetBeregningsperiode(
+                                LocalDate.now(),
+                                LocalDate.now().plusYears(4),
+                                Kroner(120000),
+                                Kroner(100000),
+                                Kroner(20000),
+                                Kroner(10000),
+                                40,
+                                Kroner(5000),
+                                Kroner(0),
+                                40,
+                                Kroner(5000),
+                                BeregningsMetode.NASJONAL,
+                                BeregningsMetode.BEST,
+                                null,
+                                null,
+                                false,
+                            ),
+                        ),
+                        false,
+                    )
             }
+
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
                     sakId,
@@ -276,6 +307,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify {
+                db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 db.opprettBrev(capture(brevSlot), ATTESTANT)
                 brevbaker wasNot Called
                 dokarkivService wasNot Called

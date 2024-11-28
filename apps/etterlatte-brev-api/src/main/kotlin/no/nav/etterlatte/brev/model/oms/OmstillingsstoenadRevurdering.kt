@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
+import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningRedigerbartUtfall
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
@@ -33,9 +34,6 @@ data class OmstillingsstoenadRevurdering(
     val erOmgjoering: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
     val beregning: OmstillingsstoenadBeregning,
-    val etterbetaling: OmstillingsstoenadEtterbetaling?,
-    val harFlereUtbetalingsperioder: Boolean,
-    val harUtbetaling: Boolean,
     val omsRettUtenTidsbegrensning: Boolean,
     val feilutbetaling: FeilutbetalingType,
     val bosattUtland: Boolean,
@@ -53,7 +51,6 @@ data class OmstillingsstoenadRevurdering(
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
             avkortingsinfo: Avkortingsinfo,
-            etterbetalingDTO: EtterbetalingDTO?,
             trygdetid: TrygdetidDto,
             brevutfall: BrevutfallDto,
             revurderingaarsak: Revurderingaarsak?,
@@ -108,15 +105,6 @@ data class OmstillingsstoenadRevurdering(
                         opphoerNesteAar =
                             beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
                     ),
-                etterbetaling =
-                    etterbetalingDTO?.let {
-                        Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
-                            etterbetalingDTO,
-                            beregningsperioder,
-                        )
-                    },
-                harFlereUtbetalingsperioder = beregningsperioder.size > 1,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 feilutbetaling = feilutbetaling,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
@@ -126,20 +114,54 @@ data class OmstillingsstoenadRevurdering(
 }
 
 data class OmstillingsstoenadRevurderingRedigerbartUtfall(
-    val feilutbetaling: FeilutbetalingType,
-    val harUtbetaling: Boolean,
+    val beregning: OmstillingsstoenadBeregningRedigerbartUtfall,
+    val erEndret: Boolean,
     val erEtterbetaling: Boolean,
+    val etterbetaling: OmstillingsstoenadEtterbetaling?,
+    val feilutbetaling: FeilutbetalingType,
+    val harFlereUtbetalingsperioder: Boolean,
+    val harUtbetaling: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             avkortingsinfo: Avkortingsinfo,
-            etterbetaling: EtterbetalingDTO?,
+            behandling: DetaljertBehandling,
             brevutfall: BrevutfallDto,
-        ): OmstillingsstoenadRevurderingRedigerbartUtfall =
-            OmstillingsstoenadRevurderingRedigerbartUtfall(
-                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
-                harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+            etterbetaling: EtterbetalingDTO?,
+            revurderingaarsak: Revurderingaarsak?,
+        ): OmstillingsstoenadRevurderingRedigerbartUtfall {
+            val beregningsperioder =
+                avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
+
+            val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
+            val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
+
+            return OmstillingsstoenadRevurderingRedigerbartUtfall(
+                beregning =
+                    OmstillingsstoenadBeregningRedigerbartUtfall(
+                        virkningsdato = avkortingsinfo.virkningsdato,
+                        beregningsperioder = beregningsperioder,
+                        sisteBeregningsperiode = sisteBeregningsperiode,
+                        sisteBeregningsperiodeNesteAar = beregningsperioderOpphoer.sisteBeregningsperiodeNesteAar,
+                        oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
+                        opphoerNesteAar =
+                            beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                    ),
+                erEndret =
+                    avkortingsinfo.endringIUtbetalingVedVirk ||
+                        revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
                 erEtterbetaling = etterbetaling != null,
+                etterbetaling =
+                    etterbetaling?.let {
+                        Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
+                            etterbetaling,
+                            beregningsperioder,
+                        )
+                    },
+                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
+                harFlereUtbetalingsperioder = beregningsperioder.size > 1,
+                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
             )
+        }
     }
 }

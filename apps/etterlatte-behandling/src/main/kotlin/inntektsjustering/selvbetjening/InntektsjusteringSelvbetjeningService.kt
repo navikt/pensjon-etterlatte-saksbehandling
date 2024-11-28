@@ -1,5 +1,8 @@
 package no.nav.etterlatte.inntektsjustering.selvbetjening
 
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -14,6 +17,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
@@ -24,6 +28,8 @@ import java.time.YearMonth
 
 class InntektsjusteringSelvbetjeningService(
     private val oppgaveService: OppgaveService,
+    private val behandlingService: BehandlingService,
+    private val vedtakKlient: VedtakKlient,
     private val rapid: KafkaProdusent<String, String>,
     private val featureToggleService: FeatureToggleService,
 ) {
@@ -32,7 +38,7 @@ class InntektsjusteringSelvbetjeningService(
     fun behandleInntektsjustering(request: InntektsjusteringRequest) {
         logger.info("Starter behandling av innmeldt inntektsjustering for sak ${request.sak.sakId}")
 
-        if (skalGjoeresAutomatisk()) {
+        if (skalGjoeresAutomatisk(request.sak)) {
             startAutomatiskBehandling(
                 request,
                 SakId(request.sak.sakId),
@@ -104,15 +110,31 @@ class InntektsjusteringSelvbetjeningService(
             }
     }
 
-    private fun skalGjoeresAutomatisk(): Boolean {
-        val featureToggle =
-            featureToggleService.isEnabled(
+    private fun skalGjoeresAutomatisk(sakId: SakId): Boolean {
+        if (!featureToggleService.isEnabled(
                 InntektsjusterinFeatureToggle.AUTOMATISK_BEHANDLE,
                 false,
             )
+        ) {
+            return false
+        }
 
-        // TODO: sjekke om riktig tilstand for automatisk behandling
-        return featureToggle
+        val aapneBehandlinger = runBlocking { behandlingService.hentAapneBehandlingerForSak(sakId) }
+        if (aapneBehandlinger.isNotEmpty()) return false
+
+        val vedtak =
+            runBlocking {
+                vedtakKlient.sakHarLopendeVedtakPaaDato(
+                    sakId,
+                    InntektsjusteringRequest.utledLoependeFom().atDay(1),
+                    HardkodaSystembruker.omregning,
+                )
+            }
+        if (!vedtak.erLoepende || vedtak.underSamordning) return false
+
+        // TODO: flere sjekker?
+
+        return true
     }
 
     enum class InntektsjusterinFeatureToggle(

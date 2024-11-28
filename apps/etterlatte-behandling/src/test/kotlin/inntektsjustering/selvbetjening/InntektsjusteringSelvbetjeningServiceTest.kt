@@ -5,6 +5,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.inntektsjustering.InntektsjusteringRequest
@@ -24,10 +26,14 @@ class InntektsjusteringSelvbetjeningServiceTest {
     private val oppgaveService: OppgaveService = mockk()
     private val rapid: KafkaProdusent<String, String> = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
+    private val behandlingService: BehandlingService = mockk()
+    private val vedtakKlient: VedtakKlient = mockk()
 
     val service =
         InntektsjusteringSelvbetjeningService(
             oppgaveService,
+            behandlingService,
+            vedtakKlient,
             rapid,
             featureToggleService,
         )

@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
+    implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(libs.ktor2.mustache)
 

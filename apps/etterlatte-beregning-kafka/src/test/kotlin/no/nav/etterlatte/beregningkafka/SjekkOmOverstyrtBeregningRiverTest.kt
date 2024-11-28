@@ -6,8 +6,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
+import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.EventNames
-import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

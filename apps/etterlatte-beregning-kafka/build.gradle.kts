@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":libs:etterlatte-beregning-model"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:rapidsandrivers-extras"))
+    implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))

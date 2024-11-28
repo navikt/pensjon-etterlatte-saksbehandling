@@ -35,6 +35,7 @@ export enum ClickEvent {
 
   // Trygdetid
   KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
+  IKKE_KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'ikke kopier trygdetidsgrunnlag fra behandling med samme avdoede',
 }
 
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined

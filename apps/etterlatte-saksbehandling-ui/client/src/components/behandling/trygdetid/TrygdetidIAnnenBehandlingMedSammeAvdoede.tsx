@@ -55,6 +55,11 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
     )
   }
 
+  const ikkeKopierTrygdetid = () => {
+    trackClick(ClickEvent.IKKE_KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE)
+    setVisDetaljer(false)
+  }
+
   useEffect(() => {
     hentKandidatForKopieringAvTrygdetidReq(behandlingId)
   }, [])
@@ -97,7 +102,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
                           variant="secondary"
                           size="small"
                           icon={<XMarkOctagonIcon />}
-                          onClick={() => setVisDetaljer(false)}
+                          onClick={ikkeKopierTrygdetid}
                         >
                           Nei, jeg ønsker å fylle ut manuelt
                         </Button>

@@ -29,6 +29,8 @@ class DollyFeature(
         get() = "Opprett søknad automatisk via Dolly"
     override val path: String
         get() = "dolly"
+    override val kunEtterlatte: Boolean
+        get() = true
 
     override val routes: Route.() -> Unit
         get() = {

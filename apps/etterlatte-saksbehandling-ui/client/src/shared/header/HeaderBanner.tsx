@@ -6,6 +6,7 @@ import { AppSwitcher } from '~shared/header/AppSwitcher'
 
 export const HeaderBanner = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
   return (
     <InternalHeader data-theme="light">
       <InternalHeader.Title href="/">Gjenny</InternalHeader.Title>

@@ -1,8 +1,6 @@
 package no.nav.etterlatte.testdata.features.egendefinert
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
@@ -11,13 +9,11 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
+import no.nav.etterlatte.no.nav.etterlatte.testdata.kunEtterlatteUtvikling
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.OmregningData
@@ -28,6 +24,8 @@ object EgendefinertMeldingFeature : TestDataFeature {
         get() = "Post egendefinert melding"
     override val path: String
         get() = "egendefinert"
+    override val kunEtterlatte: Boolean
+        get() = true
     override val routes: Route.() -> Unit
         get() = {
             get {
@@ -106,17 +104,4 @@ object EgendefinertMeldingFeature : TestDataFeature {
                 }
             }
         }
-
-    private suspend inline fun PipelineContext<*, ApplicationCall>.kunEtterlatteUtvikling(onSuccess: () -> Unit) {
-        val rollerEllerAdGrupper =
-            when (brukerTokenInfo) {
-                is Saksbehandler -> (call.brukerTokenInfo as Saksbehandler).groups
-                is Systembruker -> (call.brukerTokenInfo as Systembruker).roller
-            }
-        if (rollerEllerAdGrupper.any { it == "650684ff-8107-4ae4-98fc-e18b5cf3188b" }) {
-            onSuccess()
-        } else {
-            call.respond(HttpStatusCode.Unauthorized, "Mangler etterlatte-rolle")
-        }
-    }
 }

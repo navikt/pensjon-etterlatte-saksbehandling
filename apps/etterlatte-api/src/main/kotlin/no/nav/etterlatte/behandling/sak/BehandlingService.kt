@@ -1,4 +1,4 @@
-package no.nav.etterlatte.samordning.sak
+package no.nav.etterlatte.behandling.sak
 
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId

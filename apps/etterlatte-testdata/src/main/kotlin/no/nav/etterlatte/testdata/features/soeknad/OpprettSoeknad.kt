@@ -25,6 +25,8 @@ object OpprettSoeknadFeature : TestDataFeature {
         get() = "Opprett søknad manuelt"
     override val path: String
         get() = "soeknad"
+    override val kunEtterlatte: Boolean
+        get() = false
     override val routes: Route.() -> Unit
         get() = {
             get {

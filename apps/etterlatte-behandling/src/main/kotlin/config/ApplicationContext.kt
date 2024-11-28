@@ -476,6 +476,8 @@ internal class ApplicationContext(
     val inntektsjusteringSelvbetjeningService =
         InntektsjusteringSelvbetjeningService(
             oppgaveService = oppgaveService,
+            behandlingService = behandlingService,
+            vedtakKlient = vedtakKlient,
             rapid = rapid,
             featureToggleService = featureToggleService,
         )

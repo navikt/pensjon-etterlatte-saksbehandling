@@ -73,7 +73,7 @@ class OversendelseBrevServiceImplTest(
     fun setUp() {
         coEvery { behandlingService.hentKlage(any(), any()) } returns klage()
         coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns brevData()
-        coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns opprettMottaker()
+        coEvery { adresseService.hentMottakere(any(), any()) } returns listOf(opprettMottaker())
         coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
     }
 

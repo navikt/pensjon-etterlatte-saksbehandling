@@ -56,8 +56,8 @@ export const AktivitetspliktRevurderingModal = ({
           <Modal.Body>
             <VStack gap="4">
               <BodyLong>
-                Den etterlatte skal være i minst 50% aktivitet 6 måneder etter dødsfallet. Det ser ikke ut til å ha
-                blitt registrert noe aktivitet over 50% eller unntak på denne brukeren.
+                Den etterlatte har ikke oppfylt aktivitetskravene for omstillingsstønad. Kontroller dette opp mot
+                forrige vurdering for den etterlatte eller den pågående åpne behandlingen.
               </BodyLong>
               <BodyLong>
                 Sak {oppgave.sakId} har en åpen behandling som forhindret Gjenny fra å opprette en revurdering

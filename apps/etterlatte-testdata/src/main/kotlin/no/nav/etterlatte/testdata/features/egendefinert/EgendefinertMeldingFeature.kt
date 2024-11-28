@@ -14,9 +14,9 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.no.nav.etterlatte.testdata.kunEtterlatteUtvikling
+import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.OmregningData
 import no.nav.etterlatte.testdata.JsonMessage
 
 object EgendefinertMeldingFeature : TestDataFeature {

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.inntektsjustering
 
+import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.YearMonth
 import java.util.UUID
@@ -21,4 +22,11 @@ data class MottattInntektsjustering(
         // TODO må endres når vi mottar inntektsjusteringt inneværende år
         fun utledLoependeFom() = AarligInntektsjusteringRequest.utledLoependeFom()
     }
+}
+
+enum class MottattInntektsjusteringHendelseType : EventnameHendelseType {
+    MOTTAK_FULLFOERT,
+    ;
+
+    override fun lagEventnameForType(): String = "INNTEKTSJUSTERING:${this.name}"
 }

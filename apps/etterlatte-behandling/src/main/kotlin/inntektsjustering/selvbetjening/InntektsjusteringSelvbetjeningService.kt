@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjusteringHendelseType
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.omregning.OmregningDataPacket
@@ -40,6 +41,7 @@ class InntektsjusteringSelvbetjeningService(
         } else {
             startManuellBehandling(mottattInntektsjustering)
         }
+        mottakInntektsjsuteringFullfoert(mottattInntektsjustering.sak)
     }
 
     private fun startAutomatiskBehandling(mottattInntektsjustering: MottattInntektsjustering) {
@@ -108,6 +110,29 @@ class InntektsjusteringSelvbetjeningService(
         // TODO: flere sjekker?
 
         return true
+    }
+
+    private fun mottakInntektsjsuteringFullfoert(sakId: SakId) {
+        logger.info("Mottak av inntektsjustering fullført sender melding til selvbetjening sak=$sakId")
+        val correlationId = getCorrelationId()
+        val hendelsetype = MottattInntektsjusteringHendelseType.MOTTAK_FULLFOERT.lagEventnameForType()
+        rapid
+            .publiser(
+                "mottak-inntektsjustering-fullfoert-$sakId",
+                JsonMessage
+                    .newMessage(
+                        hendelsetype,
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to Tidspunkt.now(),
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Publiserte $hendelsetype for $sakId på partition " +
+                        "$partition, offset $offset, correlationid: $correlationId",
+                )
+            }
     }
 
     enum class InntektsjusterinFeatureToggle(

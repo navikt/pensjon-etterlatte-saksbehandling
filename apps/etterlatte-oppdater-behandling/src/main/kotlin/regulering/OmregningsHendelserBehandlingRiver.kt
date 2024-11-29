@@ -59,7 +59,8 @@ internal class OmregningsHendelserBehandlingRiver(
                 ),
             )
 
-        if (omregningData.revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
+        val revurderingaarsak = omregningData.revurderingaarsak
+        if (revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING || revurderingaarsak == Revurderingaarsak.INNTEKTSENDRING) {
             behandlinger.leggInnBrevutfall(
                 BrevutfallOgEtterbetalingDto(
                     behandlingId = behandlingId,

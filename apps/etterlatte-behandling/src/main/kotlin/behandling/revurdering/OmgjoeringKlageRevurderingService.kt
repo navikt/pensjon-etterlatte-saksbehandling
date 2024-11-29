@@ -64,7 +64,7 @@ class OmgjoeringKlageRevurderingService(
             behandlingDao.hentBehandling(behandlingSomOmgjoeresId)
                 ?: throw FeilIOmgjoering.ManglerBehandlingForOmgjoering(klagenViOmgjoerPaaGrunnAv)
 
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(behandlingSomOmgjoeres.id) }
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
         return revurderingService
             .opprettRevurdering(
                 sakId = sakId,

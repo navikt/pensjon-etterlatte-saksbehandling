@@ -480,6 +480,9 @@ class AktivitetspliktService(
         hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId)
 
     private fun oppfyllerAktivitetsplikt12mnd(sakId: SakId): Boolean {
+        if (harVarigUnntak(sakId)) {
+            return true
+        }
         val oppgave12mnd =
             oppgaveService
                 .hentOppgaverForSak(sakId, OppgaveType.AKTIVITETSPLIKT_12MND)
@@ -488,21 +491,24 @@ class AktivitetspliktService(
         if (oppgave12mnd == null) {
             return false
         }
+
         val vurderingForOppgave = hentVurderingForOppgave(oppgave12mnd.id)
         val sistevurdering =
-            vurderingForOppgave.aktivitet.maxByOrNull { it.endret.tidspunkt }
-
+            vurderingForOppgave.aktivitet.maxByOrNull { it.fom }
         if (sistevurdering == null) {
-            return vurderingForOppgave.unntak.isNotEmpty()
-        } else {
-            if (sistevurdering.aktivitetsgrad == AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50) {
-                return false
-            }
-            if (sistevurdering.aktivitetsgrad == AKTIVITET_OVER_50 &&
-                sistevurdering.skjoennsmessigVurdering == AktivitetspliktSkjoennsmessigVurdering.NEI
-            ) {
-                return false
-            }
+            return false
+        }
+        if (!sistevurdering.vurdertFra12Mnd) {
+            return false
+        }
+
+        if (sistevurdering.aktivitetsgrad == AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50) {
+            return false
+        }
+        if (sistevurdering.aktivitetsgrad == AKTIVITET_OVER_50 &&
+            sistevurdering.skjoennsmessigVurdering == AktivitetspliktSkjoennsmessigVurdering.NEI
+        ) {
+            return false
         }
         return true
     }

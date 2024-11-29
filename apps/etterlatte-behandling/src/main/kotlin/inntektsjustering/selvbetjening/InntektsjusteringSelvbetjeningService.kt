@@ -16,15 +16,13 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.inntektsjustering.InntektsjusteringRequest
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.omregning.OmregningDataPacket
 import no.nav.etterlatte.omregning.OmregningHendelseType
-import no.nav.etterlatte.omregning.OmregningInntektsjustering
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 
 class InntektsjusteringSelvbetjeningService(
     private val oppgaveService: OppgaveService,
@@ -35,57 +33,22 @@ class InntektsjusteringSelvbetjeningService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun behandleInntektsjustering(request: InntektsjusteringRequest) {
-        logger.info("Starter behandling av innmeldt inntektsjustering for sak ${request.sak.sakId}")
+    fun behandleInntektsjustering(mottattInntektsjustering: MottattInntektsjustering) {
+        logger.info("Starter behandling av innmeldt inntektsjustering for sak ${mottattInntektsjustering.sak.sakId}")
 
-        if (skalGjoeresAutomatisk(request.sak)) {
-            startAutomatiskBehandling(
-                request,
-                SakId(request.sak.sakId),
-            )
+        if (skalGjoeresAutomatisk(mottattInntektsjustering.sak)) {
+            startAutomatiskBehandling(mottattInntektsjustering)
         } else {
-            startManuellBehandling(request)
+            startManuellBehandling(mottattInntektsjustering)
         }
     }
 
-    private fun startAutomatiskBehandling(
-        request: InntektsjusteringRequest,
-        sakId: SakId,
-    ) {
-        logger.info("Behandles automatisk: starter omregning for sak ${request.sak.sakId}")
-        publiserKlarForOmregning(
-            sakId,
-            InntektsjusteringRequest.utledLoependeFom(),
-            InntektsjusteringRequest.utledKjoering(request.inntektsjusteringId),
-            OmregningInntektsjustering(
-                inntekt = request.inntekt,
-                inntektUtland = request.inntektUtland,
-            ),
-        )
-    }
-
-    private fun startManuellBehandling(request: InntektsjusteringRequest) =
-        inTransaction {
-            logger.info("Behandles manuelt: oppretter oppgave for mottatt inntektsjustering for sak ${request.sak.sakId}")
-            oppgaveService.opprettOppgave(
-                sakId = SakId(request.sak.sakId),
-                kilde = OppgaveKilde.BRUKERDIALOG,
-                type = OppgaveType.MOTTATT_INNTEKTSJUSTERING,
-                merknad = "Mottatt inntektsjustering",
-                referanse = request.journalpostId,
-            )
-        }
-
-    private fun publiserKlarForOmregning(
-        sakId: SakId,
-        loependeFom: YearMonth,
-        kjoering: String,
-        inntektsjustering: OmregningInntektsjustering,
-    ) {
+    private fun startAutomatiskBehandling(mottattInntektsjustering: MottattInntektsjustering) {
+        logger.info("Behandles automatisk: starter omregning for sak ${mottattInntektsjustering.sak.sakId}")
         val correlationId = getCorrelationId()
         rapid
             .publiser(
-                "inntektsjustering-$sakId",
+                "inntektsjustering-${mottattInntektsjustering.sak}",
                 JsonMessage
                     .newMessage(
                         OmregningHendelseType.KLAR_FOR_OMREGNING.lagEventnameForType(),
@@ -94,21 +57,33 @@ class InntektsjusteringSelvbetjeningService(
                             TEKNISK_TID_KEY to Tidspunkt.now(),
                             OmregningDataPacket.KEY to
                                 OmregningData(
-                                    kjoering = kjoering,
-                                    sakId = sakId,
+                                    kjoering = MottattInntektsjustering.utledKjoering(mottattInntektsjustering.inntektsjusteringId),
+                                    sakId = mottattInntektsjustering.sak,
                                     revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING,
-                                    fradato = loependeFom.atDay(1),
-                                    inntektsjustering = inntektsjustering,
+                                    fradato = MottattInntektsjustering.utledLoependeFom().atDay(1),
+                                    inntektsjustering = mottattInntektsjustering,
                                 ).toPacket(),
                         ),
                     ).toJson(),
             ).also { (partition, offset) ->
                 logger.info(
-                    "Publiserte klar for omregningshendelse for $sakId på partition " +
+                    "Publiserte klar for omregningshendelse for ${mottattInntektsjustering.sak} på partition " +
                         "$partition, offset $offset, correlationid: $correlationId",
                 )
             }
     }
+
+    private fun startManuellBehandling(mottattInntektsjustering: MottattInntektsjustering) =
+        inTransaction {
+            logger.info("Behandles manuelt: oppretter oppgave for mottatt inntektsjustering for sak ${mottattInntektsjustering.sak.sakId}")
+            oppgaveService.opprettOppgave(
+                sakId = SakId(mottattInntektsjustering.sak.sakId),
+                kilde = OppgaveKilde.BRUKERDIALOG,
+                type = OppgaveType.MOTTATT_INNTEKTSJUSTERING,
+                merknad = "Mottatt inntektsjustering",
+                referanse = mottattInntektsjustering.journalpostId,
+            )
+        }
 
     private fun skalGjoeresAutomatisk(sakId: SakId): Boolean {
         if (!featureToggleService.isEnabled(
@@ -126,7 +101,7 @@ class InntektsjusteringSelvbetjeningService(
             runBlocking {
                 vedtakKlient.sakHarLopendeVedtakPaaDato(
                     sakId,
-                    InntektsjusteringRequest.utledLoependeFom().atDay(1),
+                    MottattInntektsjustering.utledLoependeFom().atDay(1),
                     HardkodaSystembruker.omregning,
                 )
             }

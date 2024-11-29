@@ -20,6 +20,8 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 import java.util.UUID
@@ -37,9 +39,18 @@ class MottattInntektsjusteringServiceTest {
             MottattInntektsjusteringAvkortigRequest(
                 behandlingId = UUID.randomUUID(),
                 virkningstidspunkt = YearMonth.of(2025, 1),
-                inntekt = 100,
-                inntektUtland = 200,
-                datoForAlderspensjon = null,
+                mottattInntektsjustering =
+                    MottattInntektsjustering(
+                        SakId(123L),
+                        UUID.randomUUID(),
+                        "123",
+                        2025,
+                        100,
+                        100,
+                        100,
+                        100,
+                        null,
+                    ),
             )
         val eksisterendeInntekt =
             avkortinggrunnlag(
@@ -75,9 +86,9 @@ class MottattInntektsjusteringServiceTest {
 
         with(inntektSomLagres.captured) {
             id shouldBe eksisterendeInntekt.id
-            inntektTom shouldBe request.inntekt
+            inntektTom shouldBe 300
             fratrekkInnAar shouldBe 0
-            inntektUtlandTom shouldBe request.inntektUtland
+            inntektUtlandTom shouldBe 100
             fratrekkInnAarUtland shouldBe 0
             spesifikasjon shouldBe "Mottatt inntekt fra bruker gjennom selvbetjening"
             fom shouldBe request.virkningstidspunkt
@@ -91,9 +102,18 @@ class MottattInntektsjusteringServiceTest {
             MottattInntektsjusteringAvkortigRequest(
                 behandlingId = UUID.randomUUID(),
                 virkningstidspunkt = YearMonth.of(2025, 1),
-                inntekt = 100,
-                inntektUtland = 200,
-                datoForAlderspensjon = YearMonth.of(2025, 6),
+                mottattInntektsjustering =
+                    MottattInntektsjustering(
+                        SakId(123L),
+                        UUID.randomUUID(),
+                        "123",
+                        2025,
+                        100,
+                        100,
+                        100,
+                        100,
+                        YearMonth.of(2025, 6),
+                    ),
             )
         val eksisterendeInntekt =
             avkortinggrunnlag(

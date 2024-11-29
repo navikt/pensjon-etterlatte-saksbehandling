@@ -1,14 +1,19 @@
 package no.nav.etterlatte.libs.inntektsjustering
 
 import no.nav.etterlatte.libs.common.sak.SakId
+import java.time.YearMonth
 import java.util.UUID
 
-data class InntektsjusteringRequest(
+data class MottattInntektsjustering(
     val sak: SakId,
-    val journalpostId: String,
     val inntektsjusteringId: UUID,
-    val inntekt: Int,
-    val inntektUtland: Int,
+    val journalpostId: String,
+    val inntektsaar: Int,
+    val arbeidsinntekt: Int,
+    val naeringsinntekt: Int,
+    val afpInntekt: Int?,
+    val inntektFraUtland: Int,
+    val datoForAaGaaAvMedAlderspensjon: YearMonth?,
 ) {
     companion object {
         fun utledKjoering(id: UUID) = "INNTEKTSJUSTERING_${utledLoependeFom()}_$id"

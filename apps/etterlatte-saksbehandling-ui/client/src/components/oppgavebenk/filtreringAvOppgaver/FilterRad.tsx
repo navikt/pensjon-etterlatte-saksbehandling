@@ -22,8 +22,7 @@ import { ArrowCirclepathIcon, ArrowUndoIcon } from '@navikt/aksel-icons'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 
 interface Props {
-  hentAlleOppgaver: () => void
-  hentOppgaverStatus: (oppgavestatusFilter: Array<string>) => void
+  hentAlleOppgaver: (oppgavestatusFilter?: Array<string>) => void
   filter: Filter
   setFilter: (filter: Filter) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -33,7 +32,6 @@ interface Props {
 
 export const FilterRad = ({
   hentAlleOppgaver,
-  hentOppgaverStatus,
   filter,
   setFilter,
   saksbehandlereIEnhet,
@@ -114,7 +112,7 @@ export const FilterRad = ({
               values={filter.oppgavestatusFilter}
               onChange={(statuser) => {
                 const statusFilter = statuser.includes(OPPGAVESTATUSFILTER.visAlle) ? [] : statuser
-                hentOppgaverStatus(statusFilter)
+                hentAlleOppgaver(statusFilter)
                 setFilter({ ...filter, oppgavestatusFilter: statusFilter })
               }}
             />
@@ -140,10 +138,10 @@ export const FilterRad = ({
         <Button
           variant="secondary"
           onClick={() => {
-            setFilter(
+            const filter =
               oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA ? initialFilter() : initialMinOppgavelisteFiltre()
-            )
-            hentAlleOppgaver()
+            hentAlleOppgaver(filter.oppgavestatusFilter)
+            setFilter(filter)
           }}
           size="small"
           icon={<ArrowUndoIcon />}

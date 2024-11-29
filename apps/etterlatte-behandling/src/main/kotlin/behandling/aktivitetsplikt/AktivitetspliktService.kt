@@ -480,6 +480,9 @@ class AktivitetspliktService(
         hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId)
 
     private fun oppfyllerAktivitetsplikt12mnd(sakId: SakId): Boolean {
+        if (harVarigUnntak(sakId)) {
+            return true
+        }
         val oppgave12mnd =
             oppgaveService
                 .hentOppgaverForSak(sakId, OppgaveType.AKTIVITETSPLIKT_12MND)
@@ -492,9 +495,6 @@ class AktivitetspliktService(
         val sistevurdering =
             vurderingForOppgave.aktivitet.maxByOrNull { it.endret.tidspunkt }
 
-        if (harVarigUnntak(sakId)) {
-            return true
-        }
         if (sistevurdering == null) {
             return vurderingForOppgave.unntak.isNotEmpty()
         } else {

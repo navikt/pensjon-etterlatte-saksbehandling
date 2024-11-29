@@ -41,7 +41,7 @@ class InntektsjusteringSelvbetjeningService(
         } else {
             startManuellBehandling(mottattInntektsjustering)
         }
-        mottakInntektsjsuteringFullfoert(mottattInntektsjustering.sak)
+        mottattInntektsjsuteringFullfoert(mottattInntektsjustering.sak)
     }
 
     private fun startAutomatiskBehandling(mottattInntektsjustering: MottattInntektsjustering) {
@@ -112,7 +112,7 @@ class InntektsjusteringSelvbetjeningService(
         return true
     }
 
-    private fun mottakInntektsjsuteringFullfoert(sakId: SakId) {
+    private fun mottattInntektsjsuteringFullfoert(sakId: SakId) {
         logger.info("Mottak av inntektsjustering fullført sender melding til selvbetjening sak=$sakId")
         val correlationId = getCorrelationId()
         val hendelsetype = MottattInntektsjusteringHendelseType.MOTTAK_FULLFOERT.lagEventnameForType()

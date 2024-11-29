@@ -23,6 +23,7 @@ import no.nav.etterlatte.omregning.OmregningDataPacket
 import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class InntektsjusteringSelvbetjeningService(
     private val oppgaveService: OppgaveService,
@@ -41,7 +42,7 @@ class InntektsjusteringSelvbetjeningService(
         } else {
             startManuellBehandling(mottattInntektsjustering)
         }
-        mottattInntektsjsuteringFullfoert(mottattInntektsjustering.sak)
+        mottattInntektsjsuteringFullfoert(mottattInntektsjustering.sak, mottattInntektsjustering.inntektsjusteringId)
     }
 
     private fun startAutomatiskBehandling(mottattInntektsjustering: MottattInntektsjustering) {
@@ -112,7 +113,10 @@ class InntektsjusteringSelvbetjeningService(
         return true
     }
 
-    private fun mottattInntektsjsuteringFullfoert(sakId: SakId) {
+    private fun mottattInntektsjsuteringFullfoert(
+        sakId: SakId,
+        inntektsjusteirngId: UUID,
+    ) {
         logger.info("Mottak av inntektsjustering fullført sender melding til selvbetjening sak=$sakId")
         val correlationId = getCorrelationId()
         val hendelsetype = MottattInntektsjusteringHendelseType.MOTTAK_FULLFOERT.lagEventnameForType()
@@ -125,6 +129,7 @@ class InntektsjusteringSelvbetjeningService(
                         mapOf(
                             CORRELATION_ID_KEY to correlationId,
                             TEKNISK_TID_KEY to Tidspunkt.now(),
+                            "inntektsjustering_id" to inntektsjusteirngId,
                         ),
                     ).toJson(),
             ).also { (partition, offset) ->

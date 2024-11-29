@@ -91,6 +91,7 @@ export const SettPaaVent = ({ oppgave }: Props) => {
 
               <VStack gap="2" justify="start">
                 <Label>Frist</Label>
+                {/*TODO: etter at frist har blitt endret, må man hente frist/oppgave på nytt*/}
                 <div>
                   <OppgaveFrist oppgave={oppgave} oppdaterFrist={(_, frist: string) => setFrist(frist)} />
                 </div>

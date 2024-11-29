@@ -2,12 +2,12 @@ import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { useState } from 'react'
 import { Button, DatePicker, ErrorMessage, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { add } from 'date-fns'
 import { StatusPaaOppgaveFrist } from '~components/oppgavebenk/frist/StatusPaaOppgaveFrist'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFristApi } from '~shared/api/oppgaver'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { isPending } from '~shared/api/apiUtils'
+import { datoIMorgen, datoToAarFramITid } from '~components/oppgavebenk/frist/utils'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -20,14 +20,6 @@ export const SettNyOppgaveFristModal = ({ oppgave, oppdaterFrist }: Props) => {
   const [fristFeilmelding, setFristFeilmelding] = useState<string>('')
 
   const [redigerFristResult, redigerFristFunc] = useApiCall(redigerFristApi)
-
-  const datoIMorgen = (): Date => {
-    return add(new Date(), { days: 1 })
-  }
-
-  const datoToAarFramITid = (): Date => {
-    return add(new Date(), { years: 2 })
-  }
 
   const settNyFristForOppgave = () => {
     if (nyFrist) {

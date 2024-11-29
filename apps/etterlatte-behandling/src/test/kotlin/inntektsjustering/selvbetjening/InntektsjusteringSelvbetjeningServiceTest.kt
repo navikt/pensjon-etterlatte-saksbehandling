@@ -7,6 +7,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -73,7 +74,9 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 100,
                 YearMonth.of(2025, 1),
             )
-        service.behandleInntektsjustering(mottattInntektsjustering)
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         verify(exactly = 1) {
             behandlingService.hentAapneBehandlingerForSak(any())
@@ -108,7 +111,9 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 100,
                 YearMonth.of(2025, 1),
             )
-        service.behandleInntektsjustering(mottattInntektsjustering)
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         coVerify(exactly = 1) {
             behandlingService.hentAapneBehandlingerForSak(any())
@@ -140,7 +145,9 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 100,
                 YearMonth.of(2025, 1),
             )
-        service.behandleInntektsjustering(mottattInntektsjustering)
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         coVerify(exactly = 1) {
             behandlingService.hentAapneBehandlingerForSak(any())
@@ -172,7 +179,9 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 100,
                 YearMonth.of(2025, 1),
             )
-        service.behandleInntektsjustering(mottattInntektsjustering)
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         verifyAutomatiskBehandling()
     }
@@ -193,7 +202,9 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 100,
                 YearMonth.of(2025, 1),
             )
-        service.behandleInntektsjustering(mottattInntektsjustering)
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         verify(exactly = 0) {
             behandlingService wasNot Called

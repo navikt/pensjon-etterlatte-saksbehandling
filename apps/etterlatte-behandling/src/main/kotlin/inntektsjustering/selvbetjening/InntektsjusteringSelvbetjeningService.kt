@@ -1,6 +1,5 @@
 package no.nav.etterlatte.inntektsjustering.selvbetjening
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -33,15 +32,13 @@ class InntektsjusteringSelvbetjeningService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun behandleInntektsjustering(mottattInntektsjustering: MottattInntektsjustering) {
+    suspend fun behandleInntektsjustering(mottattInntektsjustering: MottattInntektsjustering) {
         logger.info("Starter behandling av innmeldt inntektsjustering for sak ${mottattInntektsjustering.sak.sakId}")
 
-        inTransaction {
-            if (skalGjoeresAutomatisk(mottattInntektsjustering.sak)) {
-                startAutomatiskBehandling(mottattInntektsjustering)
-            } else {
-                startManuellBehandling(mottattInntektsjustering)
-            }
+        if (skalGjoeresAutomatisk(mottattInntektsjustering.sak)) {
+            startAutomatiskBehandling(mottattInntektsjustering)
+        } else {
+            startManuellBehandling(mottattInntektsjustering)
         }
     }
 
@@ -87,7 +84,7 @@ class InntektsjusteringSelvbetjeningService(
             )
         }
 
-    private fun skalGjoeresAutomatisk(sakId: SakId): Boolean {
+    private suspend fun skalGjoeresAutomatisk(sakId: SakId): Boolean {
         if (!featureToggleService.isEnabled(
                 InntektsjusterinFeatureToggle.AUTOMATISK_BEHANDLE,
                 false,
@@ -100,13 +97,11 @@ class InntektsjusteringSelvbetjeningService(
         if (aapneBehandlinger.isNotEmpty()) return false
 
         val vedtak =
-            runBlocking {
-                vedtakKlient.sakHarLopendeVedtakPaaDato(
-                    sakId,
-                    MottattInntektsjustering.utledLoependeFom().atDay(1),
-                    HardkodaSystembruker.omregning,
-                )
-            }
+            vedtakKlient.sakHarLopendeVedtakPaaDato(
+                sakId,
+                MottattInntektsjustering.utledLoependeFom().atDay(1),
+                HardkodaSystembruker.omregning,
+            )
 
         if (!vedtak.erLoepende || vedtak.underSamordning) return false
 

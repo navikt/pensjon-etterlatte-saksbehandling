@@ -492,6 +492,16 @@ class AktivitetspliktService(
         val sistevurdering =
             vurderingForOppgave.aktivitet.maxByOrNull { it.endret.tidspunkt }
 
+        if (vurderingForOppgave.unntak.isNotEmpty()) {
+            val harVarigUnntak =
+                vurderingForOppgave.unntak.find {
+                    it.unntak ==
+                        AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                }
+            if (harVarigUnntak != null) {
+                return true
+            }
+        }
         if (sistevurdering == null) {
             return vurderingForOppgave.unntak.isNotEmpty()
         } else {

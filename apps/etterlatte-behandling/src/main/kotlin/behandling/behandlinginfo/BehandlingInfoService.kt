@@ -33,7 +33,7 @@ class BehandlingInfoService(
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
-        if (behandling.revurderingsaarsak() != Revurderingaarsak.AARLIG_INNTEKTSJUSTERING ||
+        if (behandling.revurderingsaarsak() != Revurderingaarsak.AARLIG_INNTEKTSJUSTERING &&
             !(
                 behandling.revurderingsaarsak() == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING &&
                     behandling.prosesstype == Prosesstype.AUTOMATISK

@@ -35,7 +35,7 @@ class BehandlingInfoService(
 
         if (behandling.revurderingsaarsak() != Revurderingaarsak.AARLIG_INNTEKTSJUSTERING &&
             !(
-                behandling.revurderingsaarsak() == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING &&
+                behandling.revurderingsaarsak() == Revurderingaarsak.INNTEKTSENDRING &&
                     behandling.prosesstype == Prosesstype.AUTOMATISK
             )
         ) {

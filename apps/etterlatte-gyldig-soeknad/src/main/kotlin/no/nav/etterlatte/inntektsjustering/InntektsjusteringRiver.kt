@@ -76,7 +76,12 @@ internal class InntektsjusteringRiver(
                 naeringsinntekt = inntektsjustering.naeringsinntekt,
                 afpInntekt = inntektsjustering.afpInntekt,
                 inntektFraUtland = inntektsjustering.inntektFraUtland,
-                datoForAaGaaAvMedAlderspensjon = YearMonth.from(inntektsjustering.datoForAaGaaAvMedAlderspensjon),
+                datoForAaGaaAvMedAlderspensjon =
+                    inntektsjustering.datoForAaGaaAvMedAlderspensjon?.let {
+                        YearMonth.from(
+                            it,
+                        )
+                    },
             ),
         )
     }

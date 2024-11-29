@@ -110,14 +110,12 @@ internal class OmregningHendelserBeregningRiver(
                     }
 
                     Revurderingaarsak.INNTEKTSENDRING -> {
-                        val omregningInntekt = omregningData.hentInntektsjustering()
                         beregningService
                             .omregnMottattInntektsjustering(
                                 MottattInntektsjusteringAvkortigRequest(
                                     behandlingId = behandlingId,
                                     virkningstidspunkt = YearMonth.from(omregningData.hentFraDato()),
-                                    inntekt = omregningInntekt.inntekt,
-                                    inntektUtland = omregningInntekt.inntektUtland,
+                                    mottattInntektsjustering = omregningData.hentInntektsjustering(),
                                 ),
                             ).body<AvkortingDto>()
                     }

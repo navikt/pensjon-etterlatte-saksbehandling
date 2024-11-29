@@ -11,13 +11,14 @@ import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.inntektsjustering.InntektsjusteringRequest
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 
 internal class InntektsjusteringRiver(
     rapidsConnection: RapidsConnection,
@@ -69,16 +70,16 @@ internal class InntektsjusteringRiver(
         inntektsjustering: Inntektsjustering,
     ) {
         behandlingKlient.behandleInntektsjustering(
-            InntektsjusteringRequest(
+            MottattInntektsjustering(
                 sak = sak.id,
-                journalpostId = journalpostResponse.journalpostId,
                 inntektsjusteringId = inntektsjustering.id,
-                inntekt =
-                    inntektsjustering.arbeidsinntekt + inntektsjustering.naeringsinntekt + (
-                        inntektsjustering.afpInntekt
-                            ?: 0
-                    ),
-                inntektUtland = inntektsjustering.inntektFraUtland,
+                journalpostId = journalpostResponse.journalpostId,
+                inntektsaar = inntektsjustering.inntektsaar,
+                arbeidsinntekt = inntektsjustering.arbeidsinntekt,
+                naeringsinntekt = inntektsjustering.naeringsinntekt,
+                afpInntekt = inntektsjustering.afpInntekt,
+                inntektFraUtland = inntektsjustering.inntektFraUtland,
+                datoForAaGaaAvMedAlderspensjon = YearMonth.from(inntektsjustering.datoForAaGaaAvMedAlderspensjon),
             ),
         )
     }

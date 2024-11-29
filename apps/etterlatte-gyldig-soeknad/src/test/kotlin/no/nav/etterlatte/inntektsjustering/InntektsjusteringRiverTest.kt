@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -96,8 +97,11 @@ internal class InntektsjusteringRiverTest {
                 withArg {
                     it.sak shouldBe sak.id
                     it.inntektsjusteringId shouldBe inntektsjustering.id
-                    it.inntekt shouldBe 700
-                    it.inntektUtland shouldBe 300
+                    it.arbeidsinntekt shouldBe 100
+                    it.naeringsinntekt shouldBe 200
+                    it.afpInntekt shouldBe 400
+                    it.inntektFraUtland shouldBe 300
+                    it.datoForAaGaaAvMedAlderspensjon shouldBe YearMonth.of(2025, 6)
                 },
             )
         }

@@ -291,4 +291,36 @@ internal class OpprettVedtakforespoerselRiverTest {
         verify { brevKlientMock.opprettBrev(behandlingId, sakId) }
         verify { brevKlientMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, any()) }
     }
+
+    @Test
+    fun `Mottatt inntektsjustering skal stoppe ved fattet med brev`() {
+        val behandlingId = UUID.randomUUID()
+        val melding =
+            genererOpprettVedtakforespoersel(
+                behandlingId,
+                revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING,
+            )
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        val utbetalingKlientMock = mockk<UtbetalingKlient>(relaxed = true)
+        val brevKlientMock = mockk<BrevKlient>(relaxed = true)
+
+        val inspector =
+            TestRapid().apply {
+                OpprettVedtakforespoerselRiver(
+                    this,
+                    vedtakServiceMock,
+                    utbetalingKlientMock,
+                    brevKlientMock,
+                    DummyFeatureToggleService(),
+                )
+            }
+
+        inspector.sendTestMessage(melding.toJson())
+
+        verify { vedtakServiceMock.opprettVedtakOgFatt(sakId, behandlingId) }
+        verify { brevKlientMock.opprettBrev(behandlingId, sakId) }
+
+        verify(exactly = 0) { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
+        verify(exactly = 0) { brevKlientMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, any()) }
+    }
 }

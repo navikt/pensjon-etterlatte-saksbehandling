@@ -46,34 +46,36 @@ class RegoppslagKlient(
                     .post("$url/rest/postadresse") {
                         behandlingsnummer(sakType)
                         contentType(ContentType.Application.Json)
-                        setBody(RegoppslagRequest(ident))
+                        setBody(RegoppslagRequest(ident, sakType.tema))
                     }.body<RegoppslagResponseDTO>()
                     .also {
                         cache.put(ident, it)
                     }
             }
         } catch (re: ResponseException) {
-            if (re.response.status == HttpStatusCode.NotFound) {
-                null
-            } else if (re.response.status == HttpStatusCode.Gone) {
-                logger.warn(re.response.bodyAsText())
-                null
-            } else {
-                logger.error("Uhåndtert feil fra regoppslag: ${re.response.bodyAsText()}")
+            when (re.response.status) {
+                HttpStatusCode.NotFound -> null
+                HttpStatusCode.Gone -> {
+                    logger.warn(re.response.bodyAsText())
+                    null
+                }
 
-                throw ForespoerselException(
-                    status = re.response.status.value,
-                    code = "UKJENT_FEIL_REGOPPSLAG",
-                    detail = "Ukjent feil oppsto ved uthenting av mottakers adresse fra regoppslag",
-                )
+                else -> {
+                    logger.error("Uhåndtert feil fra regoppslag: ${re.response.bodyAsText()}")
+
+                    throw ForespoerselException(
+                        status = re.response.status.value,
+                        code = "UKJENT_FEIL_REGOPPSLAG",
+                        detail = "Ukjent feil oppsto ved uthenting av mottakers adresse fra regoppslag",
+                    )
+                }
             }
         }
 }
 
 data class RegoppslagRequest(
     val ident: String,
-    // Todo: mulig bytte tema til et av de nye
-    val tema: String = "PEN",
+    val tema: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -130,7 +130,7 @@ class OversendelseBrevServiceImpl(
             )
         val verge =
             grunnlagService.hentVergeForSak(
-                sakType = behandlingService.hentSak(klage.sak.id, brukerTokenInfo).sakType,
+                sakType = klage.sak.sakType,
                 brevutfallDto = null,
                 grunnlag = grunnlag,
             )

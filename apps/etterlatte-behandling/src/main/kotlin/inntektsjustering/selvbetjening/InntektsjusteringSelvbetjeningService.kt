@@ -36,10 +36,12 @@ class InntektsjusteringSelvbetjeningService(
     fun behandleInntektsjustering(mottattInntektsjustering: MottattInntektsjustering) {
         logger.info("Starter behandling av innmeldt inntektsjustering for sak ${mottattInntektsjustering.sak.sakId}")
 
-        if (skalGjoeresAutomatisk(mottattInntektsjustering.sak)) {
-            startAutomatiskBehandling(mottattInntektsjustering)
-        } else {
-            startManuellBehandling(mottattInntektsjustering)
+        inTransaction {
+            if (skalGjoeresAutomatisk(mottattInntektsjustering.sak)) {
+                startAutomatiskBehandling(mottattInntektsjustering)
+            } else {
+                startManuellBehandling(mottattInntektsjustering)
+            }
         }
     }
 
@@ -94,7 +96,7 @@ class InntektsjusteringSelvbetjeningService(
             return false
         }
 
-        val aapneBehandlinger = runBlocking { behandlingService.hentAapneBehandlingerForSak(sakId) }
+        val aapneBehandlinger = inTransaction { behandlingService.hentAapneBehandlingerForSak(sakId) }
         if (aapneBehandlinger.isNotEmpty()) return false
 
         val vedtak =

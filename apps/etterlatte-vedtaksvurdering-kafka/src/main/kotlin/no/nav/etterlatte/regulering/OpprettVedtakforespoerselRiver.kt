@@ -126,9 +126,6 @@ internal class OpprettVedtakforespoerselRiver(
         }
     }
 
-    /*
-     *
-     */
     private fun vedtakOgBrev(
         sakId: SakId,
         behandlingId: UUID,

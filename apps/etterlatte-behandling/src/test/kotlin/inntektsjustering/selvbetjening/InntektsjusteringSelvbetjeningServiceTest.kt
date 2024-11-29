@@ -226,9 +226,8 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 saksbehandler = null,
             )
         }
-
-        verify(exactly = 0) {
-            rapid wasNot Called
+        coVerify(exactly = 1) {
+            rapid.publiser("mottak-inntektsjustering-fullfoert-123", any())
         }
     }
 
@@ -242,9 +241,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
             )
             behandlingService.hentAapneBehandlingerForSak(any())
             vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any())
-        }
-        verify(exactly = 0) {
-            oppgaveService wasNot Called
+            rapid.publiser("mottak-inntektsjustering-fullfoert-123", any())
         }
     }
 }

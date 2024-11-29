@@ -242,6 +242,10 @@ class TrygdetidServiceImpl(
                 val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
 
                 if (ukjentAvdoed || tidligereFamiliepleier) {
+                    logger.info(
+                        "Oppretter overstyrt trygdetid for behandling $behandlingId " +
+                            "(ukjentAvdoed=$ukjentAvdoed, tidligereFamiliepleier=$tidligereFamiliepleier)",
+                    )
                     listOf(opprettOverstyrtBeregnetTrygdetid(behandlingId, true, brukerTokenInfo))
                 } else {
                     logger.info("Oppretter trygdetid for behandling $behandlingId")
@@ -640,8 +644,7 @@ class TrygdetidServiceImpl(
                     ),
                 yrkesskade = false,
             )
-        val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
-        return trygdetidRepository.oppdaterTrygdetid(opprettet)
+        return trygdetidRepository.opprettTrygdetid(trygdetid)
     }
 
     override suspend fun setYrkesskade(

@@ -337,6 +337,7 @@ data class AktivitetspliktInformasjonBrevdataRequest(
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
     val spraak: Spraak? = null,
+    val begrunnelse: String? = null,
 ) {
     fun toDaoObjektBrevutfall(
         oppgaveId: UUID,
@@ -351,6 +352,7 @@ data class AktivitetspliktInformasjonBrevdataRequest(
             redusertEtterInntekt = this.redusertEtterInntekt,
             skalSendeBrev = this.skalSendeBrev,
             spraak = this.spraak,
+            begrunnelse = this.begrunnelse,
         )
 }
 
@@ -361,6 +363,7 @@ data class AktivitetspliktInformasjonBrevdata(
     val skalSendeBrev: Boolean,
     val utbetaling: Boolean? = null,
     val redusertEtterInntekt: Boolean? = null,
+    val begrunnelse: String? = null,
     val spraak: Spraak?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
 ) {

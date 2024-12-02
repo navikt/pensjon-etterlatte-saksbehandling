@@ -54,9 +54,12 @@ class RegoppslagKlient(
             }
         } catch (re: ResponseException) {
             when (re.response.status) {
-                HttpStatusCode.NotFound -> null
+                HttpStatusCode.NotFound -> {
+                    logger.info("Bruker har ukjent adresse")
+                    null
+                }
                 HttpStatusCode.Gone -> {
-                    logger.warn(re.response.bodyAsText())
+                    logger.warn("Person er død og har ukjent adresse: \n${re.response.bodyAsText()}")
                     null
                 }
 

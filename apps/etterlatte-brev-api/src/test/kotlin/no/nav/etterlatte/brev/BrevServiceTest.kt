@@ -353,7 +353,7 @@ internal class BrevServiceTest {
             every { db.hentBrev(any()) } returns brev
 
             assertThrows<BrevKanIkkeEndres> {
-                brevService.oppdaterMottaker(brev.id, tomMottaker(), bruker)
+                brevService.oppdaterMottaker(brev.id, tomMottaker(type = MottakerType.HOVED), bruker)
             }
 
             verify {

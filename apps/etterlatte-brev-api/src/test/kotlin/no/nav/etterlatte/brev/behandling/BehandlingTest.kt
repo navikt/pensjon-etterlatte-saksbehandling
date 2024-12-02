@@ -6,7 +6,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
-import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -212,9 +211,7 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        coEvery {
-            adresseService.hentMottakerAdresse(any<SakType>(), vergesFnr.value)
-        } returns Mottaker(UUID.randomUUID(), "Viggo Verge", null, null, mockk())
+        coEvery { adresseService.hentNavn(any<SakType>(), vergesFnr.value) } returns "Viggo Verge"
 
         val grunnlagService = GrunnlagService(mockk(), adresseService)
         val vergeBarnepensjon = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, grunnlag) }

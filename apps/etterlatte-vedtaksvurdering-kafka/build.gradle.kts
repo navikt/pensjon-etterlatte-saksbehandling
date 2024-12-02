@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
+    implementation(project(":libs:etterlatte-inntektsjustering-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:rapidsandrivers-extras"))
 

@@ -25,6 +25,7 @@ on:
       - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - gradle/libs.versions.toml
       - "!**/test/**"
   pull_request:

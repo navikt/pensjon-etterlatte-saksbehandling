@@ -15,7 +15,7 @@ class MottattInntektsjusteringService(
         request: MottattInntektsjusteringAvkortigRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
-        val (behandlingId, virkningstidspunkt, inntekt, inntektUtland, datoAlderspensjon) = request
+        val (behandlingId, virkningstidspunkt, mottattInntektsjustering) = request
 
         avkortingService.tilstandssjekk(behandlingId, brukerTokenInfo)
 
@@ -27,13 +27,21 @@ class MottattInntektsjusteringService(
         val nyttGrunnlag =
             AvkortingGrunnlagLagreDto(
                 id = eksisterendeInntekt?.id ?: UUID.randomUUID(),
-                inntektTom = inntekt,
+                inntektTom =
+                    with(mottattInntektsjustering) {
+                        arbeidsinntekt + naeringsinntekt + (afpInntekt ?: 0)
+                    },
                 fratrekkInnAar = 0, // TODO må tilpasses når vi skal støtte inntektsjustering inneværende år
-                inntektUtlandTom = inntektUtland,
+                inntektUtlandTom = mottattInntektsjustering.inntektFraUtland,
                 fratrekkInnAarUtland = 0, // TODO må tilpasses når vi skal støtte inntektsjustering inneværende år
                 spesifikasjon = "Mottatt inntekt fra bruker gjennom selvbetjening", // TODO avklar med fag - muligens noe om afp osv bør inn
                 fom = virkningstidspunkt,
-                overstyrtInnvilgaMaaneder = datoAlderspensjon?.let { overstyrMedTidligAlderspensjon(it) },
+                overstyrtInnvilgaMaaneder =
+                    mottattInntektsjustering.datoForAaGaaAvMedAlderspensjon?.let {
+                        overstyrMedTidligAlderspensjon(
+                            it,
+                        )
+                    },
             )
         avkortingService.beregnAvkortingMedNyttGrunnlag(behandlingId, brukerTokenInfo, nyttGrunnlag)
 

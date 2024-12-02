@@ -7,6 +7,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -16,13 +17,14 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.inntektsjustering.InntektsjusteringRequest
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -60,8 +62,21 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns listOf(behandlingOgSakMock)
 
-        val inntektsjusteringRequest = InntektsjusteringRequest(SakId(123L), "123", UUID.randomUUID(), 100, 0)
-        service.behandleInntektsjustering(inntektsjusteringRequest)
+        val mottattInntektsjustering =
+            MottattInntektsjustering(
+                SakId(123L),
+                UUID.randomUUID(),
+                "123",
+                2025,
+                100,
+                100,
+                100,
+                100,
+                YearMonth.of(2025, 1),
+            )
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         verify(exactly = 1) {
             behandlingService.hentAapneBehandlingerForSak(any())
@@ -84,8 +99,21 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { loependeYtelseMock.erLoepende } returns true
         every { loependeYtelseMock.underSamordning } returns true
 
-        val inntektsjusteringRequest = InntektsjusteringRequest(SakId(123L), "123", UUID.randomUUID(), 100, 0)
-        service.behandleInntektsjustering(inntektsjusteringRequest)
+        val mottattInntektsjustering =
+            MottattInntektsjustering(
+                SakId(123L),
+                UUID.randomUUID(),
+                "123",
+                2025,
+                100,
+                100,
+                100,
+                100,
+                YearMonth.of(2025, 1),
+            )
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         coVerify(exactly = 1) {
             behandlingService.hentAapneBehandlingerForSak(any())
@@ -105,8 +133,21 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { loependeYtelseMock.erLoepende } returns false
         every { loependeYtelseMock.underSamordning } returns false
 
-        val inntektsjusteringRequest = InntektsjusteringRequest(SakId(123L), "123", UUID.randomUUID(), 100, 0)
-        service.behandleInntektsjustering(inntektsjusteringRequest)
+        val mottattInntektsjustering =
+            MottattInntektsjustering(
+                SakId(123L),
+                UUID.randomUUID(),
+                "123",
+                2025,
+                100,
+                100,
+                100,
+                100,
+                YearMonth.of(2025, 1),
+            )
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         coVerify(exactly = 1) {
             behandlingService.hentAapneBehandlingerForSak(any())
@@ -126,8 +167,21 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { loependeYtelseMock.erLoepende } returns true
         every { loependeYtelseMock.underSamordning } returns false
 
-        val inntektsjusteringRequest = InntektsjusteringRequest(SakId(123L), "123", UUID.randomUUID(), 100, 0)
-        service.behandleInntektsjustering(inntektsjusteringRequest)
+        val mottattInntektsjustering =
+            MottattInntektsjustering(
+                SakId(123L),
+                UUID.randomUUID(),
+                "123",
+                2025,
+                100,
+                100,
+                100,
+                100,
+                YearMonth.of(2025, 1),
+            )
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         verifyAutomatiskBehandling()
     }
@@ -136,8 +190,21 @@ class InntektsjusteringSelvbetjeningServiceTest {
     fun `skal behandle inntektsjustering manuelt hvis featureToggle = false`() {
         every { featureToggleService.isEnabled(any(), any()) } returns false
 
-        val inntektsjusteringRequest = InntektsjusteringRequest(SakId(123L), "123", UUID.randomUUID(), 100, 0)
-        service.behandleInntektsjustering(inntektsjusteringRequest)
+        val mottattInntektsjustering =
+            MottattInntektsjustering(
+                SakId(123L),
+                UUID.randomUUID(),
+                "123",
+                2025,
+                100,
+                100,
+                100,
+                100,
+                YearMonth.of(2025, 1),
+            )
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
+        }
 
         verify(exactly = 0) {
             behandlingService wasNot Called
@@ -159,9 +226,8 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 saksbehandler = null,
             )
         }
-
-        verify(exactly = 0) {
-            rapid wasNot Called
+        coVerify(exactly = 1) {
+            rapid.publiser("mottak-inntektsjustering-fullfoert-123", any())
         }
     }
 
@@ -175,9 +241,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
             )
             behandlingService.hentAapneBehandlingerForSak(any())
             vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any())
-        }
-        verify(exactly = 0) {
-            oppgaveService wasNot Called
+            rapid.publiser("mottak-inntektsjustering-fullfoert-123", any())
         }
     }
 }

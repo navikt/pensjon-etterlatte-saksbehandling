@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.util.UUID
@@ -49,7 +50,7 @@ data class OmregningData(
     private var behandlingId: UUID? = null,
     private var forrigeBehandlingId: UUID? = null,
     val utbetalingVerifikasjon: UtbetalingVerifikasjon = UtbetalingVerifikasjon.INGEN,
-    private var inntektsjustering: OmregningInntektsjustering? = null,
+    private var inntektsjustering: MottattInntektsjustering? = null,
 ) {
     fun toPacket() =
         OmregningDataPacket(
@@ -102,7 +103,7 @@ data class OmregningData(
 
     fun hentInntektsjustering() = inntektsjustering ?: throw OmregningshendelseHarFeilTilstand(OmregningData::inntektsjustering.name)
 
-    fun endreInntektsjustering(value: OmregningInntektsjustering) {
+    fun endreInntektsjustering(value: MottattInntektsjustering) {
         if (inntektsjustering != null) {
             throw OmregningshendelseSkalIkkeMuteres(OmregningData::inntektsjustering.name)
         }
@@ -119,7 +120,7 @@ data class OmregningDataPacket(
     val behandlingId: UUID?,
     val forrigeBehandlingId: UUID?,
     val utbetalingVerifikasjon: UtbetalingVerifikasjon,
-    val inntektsjustering: OmregningInntektsjustering?,
+    val inntektsjustering: MottattInntektsjustering?,
 ) {
     companion object KEYS {
         val KEY = "hendelse_data"

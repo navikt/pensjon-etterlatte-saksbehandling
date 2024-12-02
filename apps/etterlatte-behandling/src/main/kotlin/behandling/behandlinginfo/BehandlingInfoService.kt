@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -32,7 +33,12 @@ class BehandlingInfoService(
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
-        if (behandling.revurderingsaarsak() != Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
+        if (behandling.revurderingsaarsak() != Revurderingaarsak.AARLIG_INNTEKTSJUSTERING &&
+            !(
+                behandling.revurderingsaarsak() == Revurderingaarsak.INNTEKTSENDRING &&
+                    behandling.prosesstype == Prosesstype.AUTOMATISK
+            )
+        ) {
             sjekkBehandlingKanEndres(behandling, opphoer)
         }
 

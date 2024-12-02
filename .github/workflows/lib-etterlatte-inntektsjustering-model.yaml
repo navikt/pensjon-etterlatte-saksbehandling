@@ -7,8 +7,7 @@ on:
       - main
     paths:
       - libs/etterlatte-inntektsjustering-model/**
-      - libs/saksbehandling-common/**
-      - gradle/libs.versions.toml
+      - libs/saksbehandling-common/**l
       - "!**/test/**"
   pull_request:
     branches:

@@ -76,7 +76,7 @@ interface GrunnlagKlient : Pingable {
         brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
-    suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>?
+    suspend fun hentPersongalleri(sakId: SakId): Persongalleri
 
     suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
@@ -401,15 +401,11 @@ class GrunnlagKlientImpl(
                 failure = { errorResponse -> throw errorResponse },
             )
 
-    override suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>? =
+    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri =
         downstreamResourceClient
             .get(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}",
-                    ),
-                brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
+                Resource(clientId, "$resourceApiUrl/grunnlag/sak/$sakId/persongalleri"),
+                Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
                 success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },

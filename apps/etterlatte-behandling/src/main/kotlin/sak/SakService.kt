@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -101,7 +102,10 @@ interface SakService {
         bruker: Systembruker,
     ): SakMedGraderingOgSkjermet
 
-    fun oppdaterIdentForSak(sak: Sak): Sak
+    fun oppdaterIdentForSak(
+        sak: Sak,
+        bruker: BrukerTokenInfo,
+    ): Sak
 }
 
 class ManglerTilgangTilEnhet(
@@ -252,7 +256,10 @@ class SakServiceImpl(
         return sak
     }
 
-    override fun oppdaterIdentForSak(sak: Sak): Sak {
+    override fun oppdaterIdentForSak(
+        sak: Sak,
+        bruker: BrukerTokenInfo,
+    ): Sak {
         val identListe = runBlocking { pdltjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident) }
 
         val alleIdenter = identListe.identifikatorer.map { it.folkeregisterident.value }
@@ -268,6 +275,15 @@ class SakServiceImpl(
                 ?: throw InternfeilException("Sak ${sak.id} har flere eller ingen gyldige identer samtidig. Kan ikke oppdatere ident.")
 
         dao.oppdaterIdent(sak.id, gjeldendeIdent)
+
+        runBlocking {
+            val oppdatertPersongalleri =
+                grunnlagService
+                    .hentPersongalleri(sak.id)
+                    .copy(soeker = gjeldendeIdent.value)
+
+            grunnlagService.leggInnNyttGrunnlagSak(sak, oppdatertPersongalleri, bruker)
+        }
 
         logger.info("Oppdaterte sak ${sak.id} med bruker sin nyeste ident. Se sikkerlogg for detailjer")
         sikkerLogg.info(

@@ -36,6 +36,7 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -47,6 +48,7 @@ import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
@@ -89,7 +91,7 @@ internal class SakServiceTest {
             grunnlagservice,
             krrKlient,
             pdlTjenesterKlient,
-            featureToggleService
+            featureToggleService,
         )
 
     @BeforeEach
@@ -833,7 +835,7 @@ internal class SakServiceTest {
                 )
 
             assertThrows<InternfeilException> {
-                service.oppdaterIdentForSak(sak)
+                service.oppdaterIdentForSak(sak, simpleSaksbehandler())
             }
 
             coVerify(exactly = 1) {
@@ -859,7 +861,7 @@ internal class SakServiceTest {
                 )
 
             assertThrows<InternfeilException> {
-                service.oppdaterIdentForSak(sak)
+                service.oppdaterIdentForSak(sak, simpleSaksbehandler())
             }
 
             coVerify(exactly = 1) {
@@ -876,6 +878,8 @@ internal class SakServiceTest {
         fun `Bruker har historisk ident`() {
             val sak = dummySak(ident = KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD)
 
+            val persongalleri = Persongalleri("soeker", "innsender", listOf("soesken"), listOf("avdoed"))
+
             coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns
                 PdlFolkeregisterIdentListe(
                     listOf(
@@ -885,8 +889,9 @@ internal class SakServiceTest {
                 )
             justRun { sakSkrivDao.oppdaterIdent(any(), any()) }
             every { sakLesDao.hentSak(any()) } returns sak.copy(ident = JOVIAL_LAMA.value)
+            coEvery { grunnlagservice.hentPersongalleri(any<SakId>()) } returns persongalleri
 
-            val oppdatertSak = service.oppdaterIdentForSak(sak)
+            val oppdatertSak = service.oppdaterIdentForSak(sak, simpleSaksbehandler())
 
             oppdatertSak.id shouldBe sak.id
             oppdatertSak.enhet shouldBe sak.enhet
@@ -897,6 +902,7 @@ internal class SakServiceTest {
 
             coVerify(exactly = 1) {
                 pdlTjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident)
+                grunnlagservice.leggInnNyttGrunnlagSak(sak, persongalleri.copy(soeker = oppdatertSak.ident), any())
             }
 
             verify(exactly = 1) {
@@ -920,10 +926,10 @@ internal class SakServiceTest {
     private fun dummyPdlResponse(ident: String) =
         PdlFolkeregisterIdentListe(
             identifikatorer =
-            listOf(
-                PdlIdentifikator.FolkeregisterIdent(
-                    folkeregisterident = Folkeregisteridentifikator.of(ident),
+                listOf(
+                    PdlIdentifikator.FolkeregisterIdent(
+                        folkeregisterident = Folkeregisteridentifikator.of(ident),
+                    ),
                 ),
-            ),
         )
 }

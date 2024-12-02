@@ -76,29 +76,6 @@ export const TrygdetidManueltOverstyrt = ({
     if (ident !== 'UKJENT_AVDOED') {
       return <Alert variant="error">Fant ikke avdød ident {ident} (trygdetid) i behandlingsgrunnlaget</Alert>
     }
-    /*
-    if (ident === 'UKJENT_AVDOED' && behandling.behandlingType !== IBehandlingsType.REVURDERING) {
-      return (
-        <>
-          {!redigerbar && <Alert variant="warning">OBS! Trygdetiden er koblet til ukjent avdød.</Alert>}
-          {redigerbar && (
-            <>
-              <Alert variant="error">
-                Brev støtter ikke ukjent avdød. Dersom avdød ikke ble oppgitt ved opprettelse av behandlingen må du
-                opprette ny overstyrt trygdetid.
-              </Alert>
-              <br />
-              <Box maxWidth="20rem">
-                <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
-                  Opprett på nytt
-                </Button>
-              </Box>
-            </>
-          )}
-        </>
-      )
-    }
-    */
   }
 
   return (

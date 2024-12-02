@@ -1614,7 +1614,6 @@ internal class TrygdetidServiceTest {
             grunnlagKlient.hentGrunnlag(any(), any())
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.opprettTrygdetid(any())
-            repository.oppdaterTrygdetid(any())
         }
         verify {
             behandling.status
@@ -1680,7 +1679,6 @@ internal class TrygdetidServiceTest {
             grunnlagKlient.hentGrunnlag(any(), any())
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.opprettTrygdetid(any())
-            repository.oppdaterTrygdetid(any())
         }
         verify {
             behandling.status

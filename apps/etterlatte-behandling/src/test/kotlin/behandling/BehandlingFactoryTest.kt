@@ -574,7 +574,7 @@ class BehandlingFactoryTest {
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
-        coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
+        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
@@ -630,7 +630,7 @@ class BehandlingFactoryTest {
             vilkaarsvurderingService.kopierVilkaarsvurdering(any(), any(), any())
         }
         coVerify {
-            grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
+            grunnlagService.hentPersongalleri(sak.id)
             grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
         }
     }
@@ -658,7 +658,7 @@ class BehandlingFactoryTest {
 
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
-        coEvery { grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id) } returns Persongalleri(sak.ident)
+        coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
@@ -706,7 +706,7 @@ class BehandlingFactoryTest {
             behandlingDaoMock.lagreGyldighetsproeving(opprettetBehandling.id, any())
         }
         coVerify {
-            grunnlagService.hentPersongalleri(avslaattFoerstegangsbehandling.id)
+            grunnlagService.hentPersongalleri(sak.id)
             grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
         }
     }

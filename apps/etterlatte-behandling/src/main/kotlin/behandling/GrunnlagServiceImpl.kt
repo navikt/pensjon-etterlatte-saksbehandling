@@ -54,7 +54,7 @@ interface GrunnlagService {
         brukerTokenInfo: BrukerTokenInfo? = null,
     )
 
-    suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
+    suspend fun hentPersongalleri(sakId: SakId): Persongalleri
 
     suspend fun hentAlleSakerForPerson(fnr: String): PersonMedSakerOgRoller
 
@@ -117,11 +117,7 @@ class GrunnlagServiceImpl(
         brukerTokenInfo: BrukerTokenInfo?,
     ) = grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger, brukerTokenInfo)
 
-    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri =
-        grunnlagKlient
-            .hentPersongalleri(behandlingId)
-            ?.opplysning
-            ?: throw NoSuchElementException("Persongalleri mangler for behandling id=$behandlingId")
+    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri = grunnlagKlient.hentPersongalleri(sakId)
 
     override suspend fun laasTilGrunnlagIBehandling(
         revurdering: Revurdering,

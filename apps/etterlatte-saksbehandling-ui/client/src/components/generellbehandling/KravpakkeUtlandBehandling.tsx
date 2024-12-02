@@ -37,9 +37,7 @@ import { formaterNavn } from '~shared/types/Person'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { hentSak } from '~shared/api/sak'
 import { SendtilAttesteringModal } from '~components/generellbehandling/SendtilAttesteringModal'
-import { NavigateFunction } from 'react-router/dist/lib/hooks'
 import { GenerellbehandlingSidemeny } from '~components/generellbehandling/GenerellbehandlingSidemeny'
-
 import { isPending, isPendingOrInitial, isSuccess, mapApiResult, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
@@ -47,6 +45,7 @@ import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
+import { NavigateFunction } from 'react-router-dom'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;

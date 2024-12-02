@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
@@ -236,24 +237,38 @@ class SakServiceImpl(
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
+        leggTilGrunnlag(sak)
+
+        return sak
+    }
+
+    private fun leggTilGrunnlag(sak: Sak) {
         runBlocking {
+            val harGrunnlag = grunnlagService.grunnlagFinnes(sak.id, HardkodaSystembruker.opprettGrunnlag)
+
+            if (harGrunnlag) {
+                logger.info("Finnes allerede grunnlag på sak=${sak.id}")
+                return@runBlocking
+            }
+            logger.info("Fant ingen grunnlag på sak=${sak.id} - oppretter grunnlag")
+
+            val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
+            val spraak = hentSpraak(sak.ident)
+            val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
+
             grunnlagService.leggInnNyttGrunnlagSak(
                 sak,
                 Persongalleri(sak.ident),
                 HardkodaSystembruker.opprettGrunnlag,
             )
-        }
-        val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
-        val spraak = hentSpraak(sak.ident)
-        val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
-        runBlocking {
+
             grunnlagService.leggTilNyeOpplysningerBareSak(
                 sakId = sak.id,
                 opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
                 HardkodaSystembruker.opprettGrunnlag,
             )
+            logger.info("Grunnlag opprettet på sak=${sak.id}")
         }
-        return sak
     }
 
     override fun oppdaterIdentForSak(
@@ -321,6 +336,8 @@ class SakServiceImpl(
     ): Sak {
         var sak = finnSakForPerson(fnr, type)
         if (sak == null) {
+            logger.info("Fant ingen sak av type=$type på person ${fnr.maskerFnr()} - oppretter ny sak")
+
             val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
             sak = dao.opprettSak(fnr, type, enhet)
         }

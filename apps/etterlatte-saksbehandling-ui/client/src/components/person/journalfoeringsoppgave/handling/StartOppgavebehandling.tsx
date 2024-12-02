@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { formaterDato } from '~utils/formatering/dato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
 import { SidebarPanel } from '~shared/components/Sidebar'
@@ -18,6 +17,7 @@ import { isFailure, isSuccess } from '~shared/api/apiUtils'
 import { formaterOppgaveStatus, formaterSakstype } from '~utils/formatering/formatering'
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { logger } from '~utils/logger'
+import { StatusPaaOppgaveFrist } from '~components/oppgavebenk/frist/StatusPaaOppgaveFrist'
 
 export default function StartOppgavebehandling() {
   const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -160,7 +160,10 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       <Info label="Saksbehandler" tekst={oppgave.saksbehandler?.navn || <i>Ikke tildelt</i>} />
       <Info label="Bruker" tekst={oppgave.fnr ? <PersonLink fnr={oppgave.fnr}>{oppgave.fnr}</PersonLink> : '-'} />
       <Info label="Opprettet" tekst={formaterDato(oppgave.opprettet)} />
-      <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
+      <Info
+        label="Frist"
+        tekst={<StatusPaaOppgaveFrist oppgaveFrist={oppgave.frist} oppgaveStatus={oppgave.status} />}
+      />
     </VStack>
   </SidebarPanel>
 )

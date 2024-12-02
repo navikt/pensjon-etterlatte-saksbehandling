@@ -14,16 +14,16 @@ export const NyAktivitetHendelse = ({
   redigerHendelse,
   setHendelser,
   avbrytRedigering,
+  sakId,
   behandling = undefined,
-  sakId = undefined,
 }: {
   oppdaterAktiviteter: (aktiviteter: IAktivitetPeriode[]) => void
   redigerAktivitet: IAktivitetPeriode | undefined
   redigerHendelse: IAktivitetHendelse | undefined
   setHendelser: (aktiviteter: IAktivitetHendelse[]) => void
-  behandling?: IBehandlingReducer
-  sakId?: number
   avbrytRedigering: () => void
+  sakId: number
+  behandling?: IBehandlingReducer
 }) => {
   const [visForm, setVisForm] = useState<false | 'AKTIVITET' | 'HENDELSE'>(false)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()

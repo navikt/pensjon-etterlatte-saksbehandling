@@ -31,7 +31,7 @@ import { NyAktivitetHendelse } from '~components/behandling/aktivitetsplikt/Akti
 interface Props {
   behandling?: IDetaljertBehandling
   doedsdato: Date
-  sakId?: number
+  sakId: number
 }
 
 export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props) => {
@@ -56,7 +56,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
         oppdaterAktiviteter(aktiviteter.perioder)
         setHendelser(aktiviteter.hendelser)
       })
-    } else if (sakId) {
+    } else {
       hentForSak({ sakId: sakId }, (aktiviteter) => {
         oppdaterAktiviteter(aktiviteter.perioder)
         setHendelser(aktiviteter.hendelser)
@@ -74,7 +74,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
       slett({ behandlingId: behandling.id, aktivitetId: aktivitetId }, (aktiviteter) => {
         oppdaterAktiviteter(aktiviteter)
       })
-    } else if (sakId) {
+    } else {
       slettForSak({ sakId: sakId, aktivitetId: aktivitetId }, (aktiviteter) => {
         oppdaterAktiviteter(aktiviteter)
       })
@@ -86,7 +86,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
       slettHendelse({ behandlingId: behandling.id, hendelseId: hendelseId }, (hendelser) => {
         setHendelser(hendelser)
       })
-    } else if (sakId) {
+    } else {
       slettHendelseForSak({ sakId: sakId, hendelseId: hendelseId }, (hendelser) => {
         setHendelser(hendelser)
       })

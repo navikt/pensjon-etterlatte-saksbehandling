@@ -10,38 +10,44 @@ import { opprettAktivitet, opprettAktivitetForSak } from '~shared/api/aktivitets
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { mapAktivitetstypeProps } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
-interface AktivitetDefaultValue {
-  id: string | undefined
-  type: AktivitetspliktType | ''
-  datoFom?: string
-  datoTom?: string | null
-  beskrivelse: string
+function dtoTilSkjema(periode: IAktivitetPeriode): AktivitetSkjemaValue {
+  return {
+    id: periode.id,
+    type: periode.type,
+    datoFom: periode.fom ? new Date(periode.fom) : undefined,
+    datoTom: periode.tom ? new Date(periode.tom) : null,
+    behandlingId: periode.behandlingId,
+    sakId: periode.sakId,
+    beskrivelse: periode.beskrivelse,
+  }
 }
 
-const aktivitetDefaultValue: AktivitetDefaultValue = {
-  id: undefined,
-  type: '',
-  datoFom: undefined,
-  datoTom: undefined,
-  beskrivelse: '',
+interface AktivitetSkjemaValue {
+  id?: string
+  type?: AktivitetspliktType
+  datoFom?: Date
+  datoTom?: Date | null
+  sakId: number
+  behandlingId?: string
+  beskrivelse?: string
 }
 
 export const NyAktivitet = ({
   oppdaterAktiviteter,
+  sakId,
+  avbryt,
   redigerAktivitet,
   behandling = undefined,
-  sakId = undefined,
-  avbryt,
 }: {
   oppdaterAktiviteter: (aktiviteter: IAktivitetPeriode[]) => void
+  sakId: number
+  avbryt: () => void
   redigerAktivitet: IAktivitetPeriode | undefined
   behandling?: IBehandlingReducer
-  sakId?: number
-  avbryt: () => void
 }) => {
   const [opprettAktivitetResponse, opprettAktivitetRequest] = useApiCall(opprettAktivitet)
   const [opprettAktivitetForSakResponse, opprettAktivitetForSakRequest] = useApiCall(opprettAktivitetForSak)
-
+  const defaultValue: AktivitetSkjemaValue = { sakId, behandlingId: behandling?.id }
   const {
     getValues,
     register,
@@ -49,27 +55,17 @@ export const NyAktivitet = ({
     control,
     reset,
     formState: { errors },
-    watch,
-  } = useForm<AktivitetDefaultValue>({
-    defaultValues: aktivitetDefaultValue,
+  } = useForm<AktivitetSkjemaValue>({
+    defaultValues: redigerAktivitet ? dtoTilSkjema(redigerAktivitet) : defaultValue,
   })
-
-  console.log('rediger aktivitet', redigerAktivitet)
-  console.log('form', watch())
 
   useEffect(() => {
     if (redigerAktivitet) {
-      reset({
-        id: redigerAktivitet.id,
-        type: redigerAktivitet.type,
-        datoFom: redigerAktivitet.fom,
-        datoTom: redigerAktivitet.tom ? redigerAktivitet.tom : null,
-        beskrivelse: redigerAktivitet.beskrivelse,
-      })
+      reset(dtoTilSkjema(redigerAktivitet))
     }
   }, [redigerAktivitet])
 
-  const submitAktivitet = (data: AktivitetDefaultValue) => {
+  const submitAktivitet = (data: AktivitetSkjemaValue) => {
     const { id, type, datoFom, datoTom, beskrivelse } = data
 
     const opprettAktivitet: IOpprettAktivitet = {
@@ -77,8 +73,8 @@ export const NyAktivitet = ({
       sakId: behandling ? behandling.sakId : sakId!!,
       type: type as AktivitetspliktType,
       fom: formatISO(datoFom!, { representation: 'date' }),
-      tom: datoTom ? formatISO(datoTom!, { representation: 'date' }) : undefined,
-      beskrivelse: beskrivelse,
+      tom: datoTom ? formatISO(datoTom, { representation: 'date' }) : undefined,
+      beskrivelse: beskrivelse!,
     }
 
     if (behandling) {
@@ -88,7 +84,7 @@ export const NyAktivitet = ({
           request: opprettAktivitet,
         },
         (aktiviteter) => {
-          reset(aktivitetDefaultValue)
+          reset({})
           oppdaterAktiviteter(aktiviteter)
         }
       )
@@ -99,7 +95,7 @@ export const NyAktivitet = ({
           request: opprettAktivitet,
         },
         (aktiviteter) => {
-          reset(aktivitetDefaultValue)
+          reset({})
           oppdaterAktiviteter(aktiviteter)
         }
       )
@@ -148,7 +144,7 @@ export const NyAktivitet = ({
               type="button"
               onClick={(e) => {
                 e.preventDefault()
-                reset(aktivitetDefaultValue)
+                reset({})
                 avbryt()
               }}
             >

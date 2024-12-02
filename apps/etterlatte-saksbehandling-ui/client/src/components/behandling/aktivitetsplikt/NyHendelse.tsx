@@ -1,23 +1,30 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { isFailure, isPending } from '~shared/api/apiUtils'
-import { Alert, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
-import { IAktivitetHendelse, IAktivitetPeriode, IOpprettHendelse } from '~shared/types/Aktivitetsplikt'
+import { Alert, Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
+import { IAktivitetHendelse, IOpprettHendelse } from '~shared/types/Aktivitetsplikt'
 import { opprettHendelse, opprettHendelseForSak } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { formatISO } from 'date-fns'
 
-interface HendelseDefaultValue {
-  id: string | undefined
-  dato?: string
-  beskrivelse: string
+interface HendelseSkjemaValue {
+  id?: string
+  dato?: Date
+  beskrivelse?: string
+  sakId: number
+  behandlingId?: string
 }
 
-const hendelseDefaultValue: HendelseDefaultValue = {
-  id: undefined,
-  dato: undefined,
-  beskrivelse: '',
+function dtoTilSkjema(rediger: IAktivitetHendelse): HendelseSkjemaValue {
+  return {
+    id: rediger.id,
+    dato: new Date(rediger.dato),
+    beskrivelse: rediger.beskrivelse,
+    sakId: rediger.sakId,
+    behandlingId: rediger.behandlingId,
+  }
 }
 
 export const NyHendelse = ({
@@ -30,11 +37,13 @@ export const NyHendelse = ({
   redigerHendelse: IAktivitetHendelse | undefined
   oppdaterHendelser: (hendelser: IAktivitetHendelse[]) => void
   behandling?: IBehandlingReducer
-  sakId: number | undefined
+  sakId: number
   avbryt: () => void
 }) => {
   const [opprettHendelseResponse, opprettHendelseRequest] = useApiCall(opprettHendelse)
   const [opprettHendelseForSakResponse, opprettHendelseForSakRequest] = useApiCall(opprettHendelseForSak)
+  const defaultValue: HendelseSkjemaValue = { sakId, behandlingId: behandling?.id }
+
   const {
     getValues,
     register,
@@ -42,26 +51,29 @@ export const NyHendelse = ({
     control,
     reset,
     formState: { errors },
-  } = useForm<IOpprettHendelse>({
-    defaultValues: { ...hendelseDefaultValue, sakId },
+  } = useForm<HendelseSkjemaValue>({
+    defaultValues: redigerHendelse ? dtoTilSkjema(redigerHendelse) : defaultValue,
   })
 
   useEffect(() => {
     if (redigerHendelse) {
-      reset({
-        id: redigerHendelse.id,
-        dato: redigerHendelse.dato,
-        beskrivelse: redigerHendelse.beskrivelse,
-      })
+      reset(dtoTilSkjema(redigerHendelse))
     }
   }, [redigerHendelse])
 
-  const submitHendelse = (opprettHendelse: IOpprettHendelse) => {
+  const submitHendelse = (opprettHendelse: HendelseSkjemaValue) => {
+    const request: IOpprettHendelse = {
+      beskrivelse: opprettHendelse.beskrivelse!,
+      dato: formatISO(opprettHendelse.dato!, { representation: 'date' }),
+      id: opprettHendelse.id,
+      sakId: opprettHendelse.sakId,
+    }
+
     if (behandling) {
       opprettHendelseRequest(
         {
           behandlingId: behandling.id,
-          request: opprettHendelse,
+          request: request,
         },
         (hendelser) => {
           oppdaterHendelser(hendelser)
@@ -71,7 +83,7 @@ export const NyHendelse = ({
       opprettHendelseForSakRequest(
         {
           sakId: sakId,
-          request: opprettHendelse,
+          request: request,
         },
         (hendelser) => {
           oppdaterHendelser(hendelser)
@@ -107,7 +119,7 @@ export const NyHendelse = ({
               type="button"
               onClick={(e) => {
                 e.preventDefault()
-                reset(hendelseDefaultValue)
+                reset(defaultValue)
                 avbryt()
               }}
             >

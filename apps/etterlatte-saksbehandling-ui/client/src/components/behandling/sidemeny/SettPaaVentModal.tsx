@@ -43,24 +43,24 @@ export const SettPaaVentModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   if (!erOppgaveRedigerbar(oppgave.status)) return null
 
   const settPaaEllerAvVent = (data: SettPaaVentSkjema) => {
-    // Må wrappe "nyFrist" inn i en ny dato, for å kunne legge på tid til datoen
-    redigerFristFunc(
-      { oppgaveId: oppgave.id, redigerFristRequest: { frist: new Date(data.nyFrist), versjon: null } },
-      () => {
-        settOppgavePaaVentFunc(
-          {
+    settOppgavePaaVentFunc(
+      {
+        oppgaveId: oppgave.id,
+        settPaaVentRequest: {
+          aarsak: data.aarsak,
+          merknad: data.merknad,
+          paaVent: oppgave.status !== Oppgavestatus.PAA_VENT,
+        },
+      },
+      (oppgave) => {
+        if (oppgave.status === Oppgavestatus.PAA_VENT) {
+          redigerFristFunc({
             oppgaveId: oppgave.id,
-            settPaaVentRequest: {
-              aarsak: data.aarsak,
-              merknad: data.merknad,
-              paaVent: oppgave.status !== Oppgavestatus.PAA_VENT,
-            },
-          },
-          (oppgave) => {
-            dispatch(settOppgave(oppgave))
-            setAapen(false)
-          }
-        )
+            redigerFristRequest: { frist: new Date(data.nyFrist), versjon: null },
+          })
+        }
+        dispatch(settOppgave(oppgave))
+        setAapen(false)
       }
     )
   }

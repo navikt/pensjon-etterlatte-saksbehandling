@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
@@ -191,6 +192,7 @@ class TrygdetidServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService,
     private val pesysKlient: PesysKlient,
+    private val avtaleService: AvtaleService,
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -433,10 +435,30 @@ class TrygdetidServiceImpl(
 
         logger.info("Kopierer trygdetid for behandling ${behandling.id} fra behandling $forrigeBehandlingId")
 
+        kopierAvtale(behandlingId, forrigeBehandlingId)
+
         val forrigeTrygdetid = hentTrygdetiderIBehandling(forrigeBehandlingId, brukerTokenInfo)
         val eksisterendeTrygdetider = hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
 
         return kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid, eksisterendeTrygdetider)
+    }
+
+    private fun kopierAvtale(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+    ) {
+        val avtale =
+            avtaleService
+                .hentAvtaleForBehandling(forrigeBehandlingId)
+                ?.copy(id = UUID.randomUUID(), behandlingId)
+
+        if (avtale == null) {
+            logger.info("Fant ingen avtale på forrigeBehandling – hopper over kopiering av avtale")
+        } else {
+            logger.info("Kopierer avtale fra forrigeBehandling=$forrigeBehandlingId til nyBehandling=$behandlingId")
+
+            avtaleService.opprettAvtale(avtale)
+        }
     }
 
     private fun kopierSisteTrygdetidberegninger(
@@ -880,6 +902,9 @@ class TrygdetidServiceImpl(
                         brukerTokenInfo,
                     )
                 }
+
+            kopierAvtale(behandlingId, kildeBehandlingId)
+
             hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                 .map { it.toDto() }
         }

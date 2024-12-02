@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -293,8 +294,10 @@ class OppgaveService(
 
         val saksbehandlerIdent = saksbehandlerSomFattetVedtak(oppgave)
         if (saksbehandlerIdent != null) {
-            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandlerIdent)
-            oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
+            if (saksbehandlerIdent != Fagsaksystem.EY.navn) {
+                oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandlerIdent)
+                oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
+            }
         } else {
             logger.error("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
             oppgaveDao.fjernSaksbehandler(oppgaveId)

@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
@@ -167,7 +168,18 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 inntekt = sisteBeregningsperiode.inntekt,
                 inntektsAar = sisteBeregningsperiode.datoFOM.year,
-                mottattInntektendringAutomatisk = null, // TODO fikser i egen PR
+                mottattInntektendringAutomatisk =
+                    if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
+                        behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING
+                    ) {
+                        behandling
+                            .virkningstidspunkt()
+                            .dato
+                            .minusMonths(1)
+                            .atDay(1) // TODO fikser i egen PR
+                    } else {
+                        null
+                    },
             )
         }
     }

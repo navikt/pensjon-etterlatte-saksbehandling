@@ -92,6 +92,7 @@ internal class EgenAnsattServiceTest(
             mockk<GrunnlagService> {
                 coEvery { leggInnNyttGrunnlagSak(any(), any(), any()) } just runs
                 coEvery { leggTilNyeOpplysningerBareSak(any(), any(), any()) } just runs
+                coEvery { grunnlagFinnes(any(), any()) } returns false
             }
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlient>()

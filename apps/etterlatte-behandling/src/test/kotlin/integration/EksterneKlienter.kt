@@ -94,6 +94,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 class GrunnlagKlientTest : GrunnlagKlient {
+    override suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean = false
+
     override suspend fun finnPersonOpplysning(
         behandlingId: UUID,
         opplysningsType: Opplysningstype,

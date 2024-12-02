@@ -37,6 +37,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 interface GrunnlagKlient : Pingable {
+    suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
+
     suspend fun finnPersonOpplysning(
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
@@ -131,6 +136,22 @@ class GrunnlagKlientImpl(
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
     private val resourceApiUrl = resourceUrl.plus("/api")
+
+    override suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        logger.info("Sjekker om det allerede finnes grunnlag på sak=$sakId")
+
+        return downstreamResourceClient
+            .get(
+                Resource(clientId, "$resourceApiUrl/grunnlag/sak/$sakId/grunnlag-finnes"),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { deserialize(it.response!!.toString()) },
+                failure = { throw it },
+            )
+    }
 
     override suspend fun finnPersonOpplysning(
         behandlingId: UUID,

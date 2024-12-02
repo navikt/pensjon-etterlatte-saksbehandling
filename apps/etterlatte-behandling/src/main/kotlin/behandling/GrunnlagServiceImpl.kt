@@ -17,6 +17,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 interface GrunnlagService {
+    suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
+
     suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,
@@ -74,6 +79,11 @@ interface GrunnlagService {
 class GrunnlagServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
 ) : GrunnlagService {
+    override suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean = grunnlagKlient.grunnlagFinnes(sakId, brukerTokenInfo)
+
     override suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,

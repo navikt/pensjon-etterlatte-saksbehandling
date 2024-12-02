@@ -408,7 +408,7 @@ internal class SakServiceTest {
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
         every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
-
+        coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
                 ArbeidsFordelingRequest(
@@ -466,6 +466,7 @@ internal class SakServiceTest {
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(KONTANT_FOT.value)
         every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
+        coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
         every {
             sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
@@ -563,6 +564,7 @@ internal class SakServiceTest {
         every { sakSkrivDao.oppdaterEnheterPaaSaker(any()) } just runs
         every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
+        coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
 
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(

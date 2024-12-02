@@ -1,7 +1,7 @@
 import { Oppgavestatus } from '~shared/types/oppgave'
 import { Alert, BodyShort, VStack } from '@navikt/ds-react'
 import React from 'react'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { FerdigstillAktivitetspliktOppgaveModal } from '~components/aktivitetsplikt/brev/FerdigstillAktivitetspliktOppgaveModal'

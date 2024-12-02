@@ -2,7 +2,7 @@ import { tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt
 import { BodyShort, Box, Detail, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 import React from 'react'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { VisAktivitetsgrad } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VisAktivitetsgrad'
 
 export function AktivitetsgradIOppgave() {

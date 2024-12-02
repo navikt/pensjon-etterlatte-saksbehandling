@@ -1,4 +1,4 @@
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import React from 'react'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'

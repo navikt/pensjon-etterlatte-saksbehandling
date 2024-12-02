@@ -13,7 +13,7 @@ import { ControlledRadioGruppe } from '~shared/components/radioGruppe/Controlled
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { useDispatch } from 'react-redux'
 import { setAktivtetspliktbrevdata, setBrevid } from '~store/reducers/Aktivitetsplikt12mnd'

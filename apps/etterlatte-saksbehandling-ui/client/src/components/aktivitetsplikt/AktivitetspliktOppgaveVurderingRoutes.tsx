@@ -17,7 +17,7 @@ const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurder
   {} as AktivitetspliktOppgaveVurdering
 )
 
-export function OppgaveVurderingRoute(props: { vurderingOgOppgave: AktivitetspliktOppgaveVurdering }) {
+export function AktivitetspliktOppgaveVurderingRoutes(props: { vurderingOgOppgave: AktivitetspliktOppgaveVurdering }) {
   const { vurderingOgOppgave } = props
 
   return (
@@ -48,7 +48,7 @@ export const useAktivitetspliktOppgaveVurdering = (): AktivitetspliktOppgaveVurd
     }
     return oppgave
   } catch (e) {
-    const msg = 'Kan ikke bruke useOppgaveForVurdering utenfor OppgaveVurderingRoute-treet'
+    const msg = 'Kan ikke bruke useOppgaveForVurdering utenfor AktivitetspliktOppgaveVurderingRoutes-treet'
     console.error(msg)
     throw new Error(msg, { cause: e })
   }

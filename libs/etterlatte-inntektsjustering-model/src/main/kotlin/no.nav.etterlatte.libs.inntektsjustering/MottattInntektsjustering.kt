@@ -14,7 +14,7 @@ data class MottattInntektsjustering(
     val naeringsinntekt: Int,
     val afpInntekt: Int?,
     val inntektFraUtland: Int,
-    val datoForAaGaaAvMedAlderspensjon: YearMonth?, // TODO: hvis den er TRUE så manuell
+    val datoForAaGaaAvMedAlderspensjon: YearMonth?,
 ) {
     companion object {
         fun utledKjoering(id: UUID) = "INNTEKTSJUSTERING_${utledLoependeFom()}_$id"

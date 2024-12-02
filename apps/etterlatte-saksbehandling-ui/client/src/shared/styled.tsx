@@ -1,11 +1,5 @@
 import styled from 'styled-components'
 
-export const GridContainer = styled.div`
-  display: flex;
-  height: 100%;
-  min-height: 100vh;
-`
-
 export const Column = styled.div`
   min-width: 30rem;
   &:nth-child(2) {

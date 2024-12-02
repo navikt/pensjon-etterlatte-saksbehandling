@@ -6,7 +6,7 @@ import { BrevProsessType, BrevStatus, IBrev } from '~shared/types/Brev'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Column, GridContainer } from '~shared/styled'
+import { Column } from '~shared/styled'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
@@ -52,7 +52,7 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
       const brevErFerdigstilt =
         brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT
       return (
-        <GridContainer>
+        <HStack height="100%" minHeight="100vh" wrap={false}>
           <Column>
             {endringerHarKommetEtterBrevOpprettelse(brev) && (
               <Alert variant="warning">
@@ -97,7 +97,7 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
               </>
             )}
           </Column>
-        </GridContainer>
+        </HStack>
       )
     },
   })

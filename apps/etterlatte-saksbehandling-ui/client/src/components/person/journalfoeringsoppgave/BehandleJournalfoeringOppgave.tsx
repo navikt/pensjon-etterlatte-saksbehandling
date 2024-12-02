@@ -4,7 +4,7 @@ import { Route, Routes, useParams } from 'react-router-dom'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
-import { Column, GridContainer } from '~shared/styled'
+import { Column } from '~shared/styled'
 import styled from 'styled-components'
 import {
   settBruker,
@@ -33,7 +33,7 @@ import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { Alert, Box } from '@navikt/ds-react'
+import { Alert, Box, HStack } from '@navikt/ds-react'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
 import { logger } from '~utils/logger'
 
@@ -94,7 +94,7 @@ export default function BehandleJournalfoeringOppgave() {
         <NavigerTilbakeMeny to="/">Tilbake til oppgavebenken</NavigerTilbakeMeny>
       </StickyToppMeny>
 
-      <GridContainer>
+      <HStack height="100%" minHeight="100vh" wrap={false}>
         <Column>
           <Box padding="8">
             {!sakMedBehandlinger || isPendingOrInitial(journalpostStatus) ? (
@@ -141,7 +141,7 @@ export default function BehandleJournalfoeringOppgave() {
               )
           )}
         </Sidebar>
-      </GridContainer>
+      </HStack>
     </>
   )
 }

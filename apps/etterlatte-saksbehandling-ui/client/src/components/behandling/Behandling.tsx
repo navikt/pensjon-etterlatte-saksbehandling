@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
-import { GridContainer } from '~shared/styled'
 import { IBehandlingReducer, resetBehandling, setBehandling } from '~store/reducers/BehandlingReducer'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { BehandlingRouteContext, useBehandlingRoutes } from './BehandlingRoutes'
@@ -18,7 +17,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { Box } from '@navikt/ds-react'
+import { Box, HStack } from '@navikt/ds-react'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -69,7 +68,7 @@ export const Behandling = () => {
               <StatusBar ident={soeker?.foedselsnummer} />
               <StegMeny behandling={behandling} />
             </StickyToppMeny>
-            <GridContainer>
+            <HStack height="100%" minHeight="100vh" wrap={false}>
               <Box width="100%">
                 <Routes>
                   {routedata.behandlingRoutes.map((route) => (
@@ -79,7 +78,7 @@ export const Behandling = () => {
                 </Routes>
               </Box>
               <BehandlingSidemeny behandling={behandling} />
-            </GridContainer>
+            </HStack>
           </BehandlingRouteContext.Provider>
         )
       }

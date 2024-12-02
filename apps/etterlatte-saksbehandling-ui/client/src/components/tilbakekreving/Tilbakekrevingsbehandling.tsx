@@ -4,7 +4,6 @@ import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import Spinner from '~shared/Spinner'
-import { GridContainer } from '~shared/styled'
 import { hentTilbakekreving } from '~shared/api/tilbakekreving'
 import { addTilbakekreving, resetTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
@@ -21,7 +20,7 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { TilbakekrevingUtbetalinger } from '~components/tilbakekreving/utbetalinger/TilbakekrevingUtbetalinger'
 import { TilbakekrevingOppsummering } from '~components/tilbakekreving/oppsummering/TilbakekrevingOppsummering'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { Box } from '@navikt/ds-react'
+import { Box, HStack } from '@navikt/ds-react'
 
 export function Tilbakekrevingsbehandling() {
   useSidetittel('Tilbakekreving')
@@ -62,7 +61,7 @@ export function Tilbakekrevingsbehandling() {
       <Spinner visible={isPending(fetchTilbakekrevingStatus)} label="Henter tilbakekrevingsbehandling" />
 
       {!!tilbakekreving && viHarLastetRiktigTilbakekreving && (
-        <GridContainer>
+        <HStack height="100%" minHeight="100vh" wrap={false}>
           <Box width="100%">
             <Routes>
               <Route
@@ -82,7 +81,7 @@ export function Tilbakekrevingsbehandling() {
             </Routes>
           </Box>
           <TilbakekrevingSidemeny />
-        </GridContainer>
+        </HStack>
       )}
 
       {isFailureHandler({

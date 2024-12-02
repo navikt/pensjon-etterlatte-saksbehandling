@@ -4,7 +4,6 @@ import {
   generellbehandlingErRedigerbar,
   KravpakkeUtland,
 } from '~shared/types/Generellbehandling'
-import { GridContainer } from '~shared/styled'
 import {
   Alert,
   BodyShort,
@@ -160,7 +159,7 @@ const KravpakkeUtlandBehandling = (props: {
   }
 
   return (
-    <GridContainer>
+    <HStack height="100%" minHeight="100vh" wrap={false}>
       <Box width="100%" style={{ whiteSpace: 'pre-wrap' }}>
         <div style={{ maxWidth: '55rem', margin: 'auto' }}>
           <Box paddingInline="16" paddingBlock="16 4">
@@ -491,7 +490,7 @@ const KravpakkeUtlandBehandling = (props: {
         </div>
       </Box>
       <GenerellbehandlingSidemeny utlandsBehandling={generellBehandlingMedLocalState} />
-    </GridContainer>
+    </HStack>
   )
 }
 export default KravpakkeUtlandBehandling

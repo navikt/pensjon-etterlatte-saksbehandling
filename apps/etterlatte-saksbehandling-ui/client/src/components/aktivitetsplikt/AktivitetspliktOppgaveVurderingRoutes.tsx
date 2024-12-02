@@ -1,5 +1,4 @@
 import { StatusBar } from '~shared/statusbar/Statusbar'
-import { GridContainer } from '~shared/styled'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import React, { createContext, useContext } from 'react'
 import { AktivitetspliktSidemeny } from '~components/aktivitetsplikt/sidemeny/AktivitetspliktSidemeny'
@@ -12,7 +11,7 @@ import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/bre
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurderingState } from '~store/reducers/Aktivitetsplikt12mnd'
 import { ValgForInfobrev } from '~components/aktivitetsplikt/brev/ValgForInfobrev'
-import { Box } from '@navikt/ds-react'
+import { Box, HStack } from '@navikt/ds-react'
 
 const AktivitetspliktOppgaveContext = createContext<AktivitetspliktOppgaveVurdering>(
   {} as AktivitetspliktOppgaveVurdering
@@ -26,7 +25,7 @@ export function AktivitetspliktOppgaveVurderingRoutes(props: { vurderingOgOppgav
       <StatusBar ident={vurderingOgOppgave.oppgave.fnr} />
       <AktivitetspliktStegmeny />
 
-      <GridContainer>
+      <HStack height="100%" minHeight="100vh" wrap={false}>
         <Box width="100%">
           <Routes>
             <Route path={AktivitetspliktSteg.VURDERING} element={<VurderAktivitet />} />
@@ -36,7 +35,7 @@ export function AktivitetspliktOppgaveVurderingRoutes(props: { vurderingOgOppgav
           </Routes>
         </Box>
         <AktivitetspliktSidemeny />
-      </GridContainer>
+      </HStack>
     </AktivitetspliktOppgaveContext.Provider>
   )
 }

@@ -3,7 +3,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
 import React, { useEffect, useState } from 'react'
-import { Column, GridContainer } from '~shared/styled'
+import { Column } from '~shared/styled'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BrevProsessType, BrevStatus, Spraak } from '~shared/types/Brev'
@@ -16,7 +16,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
-import { BodyShort, Box, Detail, Heading, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Detail, Heading, HStack, VStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import { formaterSpraak } from '~utils/formatering/formatering'
@@ -58,7 +58,7 @@ export default function NyttBrev() {
           <ApiErrorAlert>Feil oppsto ved henting av brev</ApiErrorAlert>
         ),
         (brev) => (
-          <GridContainer>
+          <HStack height="100%" minHeight="100vh" wrap={false}>
             <Column>
               <VStack gap="4" margin="4">
                 <BrevTittel
@@ -104,7 +104,7 @@ export default function NyttBrev() {
                 <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} />
               </Box>
             </Column>
-          </GridContainer>
+          </HStack>
         )
       )}
     </>

@@ -111,7 +111,7 @@ class ManuellRevurderingService(
         opphoerFraOgMed: YearMonth? = null,
     ): Revurdering =
         forrigeBehandling.let {
-            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
+            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
             val triggendeOppgave = paaGrunnAvOppgave?.let { oppgaveService.hentOppgave(it) }
 
             revurderingService

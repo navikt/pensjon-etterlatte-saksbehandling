@@ -38,6 +38,16 @@ fun Route.sakGrunnlagRoute(
             }
         }
 
+        get("/persongalleri") {
+            withSakId(behandlingKlient) { sakId ->
+                val persongalleri =
+                    grunnlagService.hentPersongalleri(sakId)
+                        ?: throw GenerellIkkeFunnetException()
+
+                call.respond(persongalleri)
+            }
+        }
+
         post("opprett-grunnlag") {
             withSakId(behandlingKlient, skrivetilgang = true) { sakId ->
                 val opplysningsbehov = call.receive<Opplysningsbehov>()

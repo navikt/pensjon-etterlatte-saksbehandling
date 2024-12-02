@@ -233,7 +233,7 @@ internal class SakRoutesTest {
             )
 
         every { sakService.finnSak(any()) } returns sak
-        every { sakService.oppdaterIdentForSak(any()) } returns sak.copy(ident = nyIdent.value)
+        every { sakService.oppdaterIdentForSak(any(), any()) } returns sak.copy(ident = nyIdent.value)
         val behandlingOgSak = BehandlingOgSak(UUID.randomUUID(), sakId)
         every { behandlingService.hentAapneBehandlingerForSak(sakId) } returns listOf(behandlingOgSak)
 
@@ -248,7 +248,7 @@ internal class SakRoutesTest {
 
         verify(exactly = 1) {
             sakService.finnSak(sakId)
-            sakService.oppdaterIdentForSak(sak)
+            sakService.oppdaterIdentForSak(sak, any())
             behandlingService.hentAapneBehandlingerForSak(sakId)
             behandlingService.avbrytBehandling(
                 behandlingOgSak.behandlingId,

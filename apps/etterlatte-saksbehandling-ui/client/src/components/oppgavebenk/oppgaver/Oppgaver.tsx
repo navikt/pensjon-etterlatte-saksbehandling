@@ -19,7 +19,7 @@ export interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterSaksbehandlerTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
-  oppdaterFrist?: (id: string, nyfrist: string) => void
+  oppdaterFrist: (id: string, nyfrist: string) => void
   filter?: Filter
 }
 

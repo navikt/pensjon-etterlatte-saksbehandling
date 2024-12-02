@@ -331,8 +331,8 @@ class BehandlingFactory(
                 OmgjoerBehandling(nyFoerstegangsbehandling, sisteAvslaatteBehandling, foerstegangsbehandlingViOmgjoerer)
             }
 
-        val persongalleri =
-            runBlocking { grunnlagService.hentPersongalleri(behandlingerForOmgjoering.foerstegangsbehandlingViOmgjoerer.id) }
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
+
         runBlocking {
             grunnlagService.leggInnNyttGrunnlag(
                 behandlingerForOmgjoering.nyFoerstegangsbehandling,

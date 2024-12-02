@@ -103,26 +103,19 @@ class GrunnlagKlientTest : GrunnlagKlient {
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)
     }
 
+    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri =
+        Persongalleri(
+            "soeker",
+            "innsender",
+            listOf("soesken"),
+            listOf("avdoed"),
+            listOf("gjenlevende"),
+        )
+
     override suspend fun hentPersongalleri(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri> =
-        Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
-            meta = emptyMap<String, String>().toObjectNode(),
-            opplysningType = Opplysningstype.PERSONGALLERI_V1,
-            opplysning =
-                Persongalleri(
-                    "soeker",
-                    "innsender",
-                    listOf("soesken"),
-                    listOf("avdoed"),
-                    listOf("gjenlevende"),
-                ),
-        )
-
-    override suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>? =
         Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),

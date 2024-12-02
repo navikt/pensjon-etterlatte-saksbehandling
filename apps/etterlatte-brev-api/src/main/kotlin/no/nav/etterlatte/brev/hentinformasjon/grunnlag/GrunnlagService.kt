@@ -76,10 +76,9 @@ class GrunnlagService(
                 )
                 UkjentVergemaal()
             } else {
-                val vergenavn =
-                    adresseService
-                        .hentMottakerAdresse(sakType, vergeFnr.value)
-                        .navn
+                // TODO: Hente navn direkte fra Grunnlag eller PDL
+                val vergenavn = adresseService.hentNavn(sakType, vergeFnr.value)
+
                 Vergemaal(
                     vergenavn,
                     vergeFnr,

@@ -224,7 +224,7 @@ internal fun Route.sakWebRoutes(
 
                             logger.info("Oppdaterer sak ${sak.id} og tilhørende oppgaver med nyeste ident fra PDL")
 
-                            val oppdatertSak = sakService.oppdaterIdentForSak(sak)
+                            val oppdatertSak = sakService.oppdaterIdentForSak(sak, brukerTokenInfo)
                             oppgaveService.oppdaterIdentForOppgaver(oppdatertSak)
 
                             behandlingService.hentAapneBehandlingerForSak(sakId).forEach {

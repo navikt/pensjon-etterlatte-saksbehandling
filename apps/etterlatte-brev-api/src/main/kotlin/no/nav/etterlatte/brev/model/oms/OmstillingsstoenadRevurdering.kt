@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class OmstillingsstoenadRevurdering(
@@ -121,6 +122,9 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val feilutbetaling: FeilutbetalingType,
     val harFlereUtbetalingsperioder: Boolean,
     val harUtbetaling: Boolean,
+    val inntekt: Kroner,
+    val inntektsAar: Int,
+    val mottattInntektendringAutomatisk: LocalDate?,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -161,6 +165,9 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
                 feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
                 harFlereUtbetalingsperioder = beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                inntekt = sisteBeregningsperiode.inntekt,
+                inntektsAar = sisteBeregningsperiode.datoFOM.year,
+                mottattInntektendringAutomatisk = null, // TODO fikser i egen PR
             )
         }
     }

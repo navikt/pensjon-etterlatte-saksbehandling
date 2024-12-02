@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import { Box } from '@navikt/ds-react'
 
 export const GridContainer = styled.div`
   display: flex;
@@ -20,10 +19,4 @@ export const Column = styled.div`
     width: 320px;
     border-right: none;
   }
-`
-
-export const MainContent = styled(Box)`
-  width: 100%;
-  border-width: 0 1px 0 0;
-  border-color: var(--a-border-subtle);
 `

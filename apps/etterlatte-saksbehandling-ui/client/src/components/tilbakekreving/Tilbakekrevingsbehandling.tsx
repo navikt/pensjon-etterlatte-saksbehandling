@@ -4,7 +4,7 @@ import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import Spinner from '~shared/Spinner'
-import { GridContainer, MainContent } from '~shared/styled'
+import { GridContainer } from '~shared/styled'
 import { hentTilbakekreving } from '~shared/api/tilbakekreving'
 import { addTilbakekreving, resetTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
@@ -21,6 +21,7 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { TilbakekrevingUtbetalinger } from '~components/tilbakekreving/utbetalinger/TilbakekrevingUtbetalinger'
 import { TilbakekrevingOppsummering } from '~components/tilbakekreving/oppsummering/TilbakekrevingOppsummering'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { Box } from '@navikt/ds-react'
 
 export function Tilbakekrevingsbehandling() {
   useSidetittel('Tilbakekreving')
@@ -62,7 +63,7 @@ export function Tilbakekrevingsbehandling() {
 
       {!!tilbakekreving && viHarLastetRiktigTilbakekreving && (
         <GridContainer>
-          <MainContent>
+          <Box width="100%">
             <Routes>
               <Route
                 path="vurdering"
@@ -79,7 +80,7 @@ export function Tilbakekrevingsbehandling() {
               <Route path="brev" element={<TilbakekrevingBrev behandling={tilbakekreving} redigerbar={redigerbar} />} />
               <Route path="*" element={<Navigate to="vurdering" replace />} />
             </Routes>
-          </MainContent>
+          </Box>
           <TilbakekrevingSidemeny />
         </GridContainer>
       )}

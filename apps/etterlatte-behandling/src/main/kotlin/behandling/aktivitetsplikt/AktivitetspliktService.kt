@@ -297,14 +297,14 @@ class AktivitetspliktService(
             if (hendelse.sakId != behandling.sak.id) {
                 throw SakidTilhoererIkkeBehandlingException()
             }
-            aktivitetspliktDao.upsertHendelseForSak(behandlingId, hendelse, kilde)
+            aktivitetspliktDao.upsertHendelse(behandlingId, hendelse, kilde)
 
             runBlocking { sendDtoTilStatistikk(hendelse.sakId, brukerTokenInfo, behandlingId) }
         } else if (sakId != null) {
             if (hendelse.sakId != sakId) {
                 throw SakidTilhoererIkkeBehandlingException()
             }
-            aktivitetspliktDao.upsertHendelseForSak(null, hendelse, kilde)
+            aktivitetspliktDao.upsertHendelse(null, hendelse, kilde)
         } else {
             throw ManglerSakEllerBehandlingIdException()
         }

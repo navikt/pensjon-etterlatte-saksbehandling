@@ -303,7 +303,7 @@ class AktivitetspliktDao(
             }
         }
 
-    fun upsertHendelseForSak(
+    fun upsertHendelse(
         behandlingId: UUID?,
         hendelse: LagreAktivitetspliktHendelse,
         kilde: Grunnlagsopplysning.Kilde,

@@ -70,6 +70,8 @@ interface GrunnlagService {
 
     fun hentOpplysningsgrunnlagForSak(sakId: SakId): Grunnlag?
 
+    fun hentPersongalleri(sakId: SakId): Persongalleri?
+
     fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
 
     fun hentPersonopplysninger(
@@ -140,6 +142,17 @@ class RealGrunnlagService(
         val grunnlag = opplysningDao.hentAlleGrunnlagForSak(sakId)
 
         return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
+    }
+
+    override fun hentPersongalleri(sakId: SakId): Persongalleri? {
+        val persongalleriJsonNode =
+            opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
+
+        if (persongalleriJsonNode == null) {
+            logger.info("Fant ikke persongalleri i sak=$sakId")
+            return null
+        }
+        return objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
     }
 
     override fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag? {

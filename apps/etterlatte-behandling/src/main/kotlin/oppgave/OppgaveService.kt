@@ -518,10 +518,15 @@ class OppgaveService(
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
         try {
+            // TODO: Må undersøke konsekvensen av å legge til Status.NY på [hentOppgaveUnderBehandling]
             val oppgaveUnderbehandling =
-                checkNotNull(hentOppgaveUnderBehandling(referanse)) {
-                    "Fant ingen oppgave under behandling med referanse=$referanse"
-                }
+                oppgaveDao
+                    .hentOppgaverForReferanse(referanse)
+                    .singleOrNull { !it.erAvsluttet() }
+
+            checkNotNull(oppgaveUnderbehandling) {
+                "Fant ingen oppgave under behandling med referanse=$referanse"
+            }
 
             sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)

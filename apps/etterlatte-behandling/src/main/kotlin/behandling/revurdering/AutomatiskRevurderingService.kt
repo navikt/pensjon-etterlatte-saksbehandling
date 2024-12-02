@@ -53,7 +53,7 @@ class AutomatiskRevurderingService(
 
         gyldigForAutomatiskRevurdering(request, loepende, forrigeBehandling, systembruker)
 
-        val persongalleri = grunnlagService.hentPersongalleri(forrigeBehandling.id)
+        val persongalleri = grunnlagService.hentPersongalleri(request.sakId)
 
         val revurderingOgOppfoelging =
             inTransaction {

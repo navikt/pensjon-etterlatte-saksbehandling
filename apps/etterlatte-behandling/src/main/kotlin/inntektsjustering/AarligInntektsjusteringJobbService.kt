@@ -324,10 +324,7 @@ class AarligInntektsjusteringJobbService(
         loependeFom: YearMonth,
         begrunnelse: String,
     ): Revurdering {
-        val persongalleri =
-            runBlocking {
-                grunnlagService.hentPersongalleri(forrigeBehandling.id)
-            }
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
 
         val revurdering =
             revurderingService

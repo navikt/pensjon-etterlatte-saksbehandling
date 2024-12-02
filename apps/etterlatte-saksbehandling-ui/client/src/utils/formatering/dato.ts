@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { add, format } from 'date-fns'
 
 export enum DatoFormat {
   AAR_MAANED_DAG = 'yyyy-MM-dd',
@@ -35,3 +35,11 @@ export const formaterDatoMedKlokkeslett = (dato: Date | string) =>
 export const aarFraDatoString = (dato: string) => new Date(dato).getFullYear()
 
 export const maanedFraDatoString = (dato: string) => new Date(dato).getMonth()
+
+export const datoIMorgen = (): Date => {
+  return add(new Date(), { days: 1 })
+}
+
+export const datoToAarFramITid = (): Date => {
+  return add(new Date(), { years: 2 })
+}

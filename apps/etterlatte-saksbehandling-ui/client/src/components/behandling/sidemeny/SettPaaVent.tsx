@@ -1,4 +1,4 @@
-import { Alert, Heading, HStack } from '@navikt/ds-react'
+import { Alert, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import React from 'react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -13,25 +13,22 @@ export const SettPaaVent = ({ oppgave }: Props) => {
   if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) return null
 
   return (
-    <div>
-      <>
-        {oppgave?.status === 'PAA_VENT' && (
-          <>
-            <Alert variant="warning" size="small">
-              <Heading size="xsmall" spacing>
-                Oppgaven står på vent!
-              </Heading>
-              <Info label="Merknad" tekst={oppgave.merknad || 'Ingen'} />
-              <Info label="Ny frist" tekst={formaterDato(oppgave.frist)} />
-            </Alert>
-          </>
-        )}
+    <VStack gap="4">
+      {oppgave?.status === 'PAA_VENT' && (
+        <>
+          <Alert variant="warning" size="small">
+            <Heading size="xsmall" spacing>
+              Oppgaven står på vent!
+            </Heading>
+            <Info label="Merknad" tekst={oppgave.merknad || 'Ingen'} />
+            <Info label="Ny frist" tekst={formaterDato(oppgave.frist)} />
+          </Alert>
+        </>
+      )}
 
-        <br />
-        <HStack justify="end">
-          <SettPaaVentModal oppgave={oppgave} />
-        </HStack>
-      </>
-    </div>
+      <HStack justify="end">
+        <SettPaaVentModal oppgave={oppgave} />
+      </HStack>
+    </VStack>
   )
 }

@@ -542,15 +542,25 @@ class OppgaveService(
         }
     }
 
-    fun hentOppgaveUnderBehandling(referanse: String) =
-        oppgaveDao
-            .hentOppgaverForReferanse(referanse)
-            .singleOrNull(OppgaveIntern::erUnderBehandling)
-            .also {
-                if (it == null) {
-                    logger.warn("Ingen oppgave under behandling for referanse: $referanse")
-                }
-            }
+    /*
+     * Skal kun benyttes der man vet at det kun skal finnes én oppgave under arbeid.
+     * Eks. behandling skal aldri ha mer enn én oppgave.
+     */
+    fun hentOppgaveUnderBehandling(referanse: String): OppgaveIntern? {
+        val oppgaver =
+            oppgaveDao
+                .hentOppgaverForReferanse(referanse)
+                .filterNot(OppgaveIntern::erAvsluttet)
+
+        return if (oppgaver.isEmpty()) {
+            logger.warn("Ingen oppgave under behandling for referanse: $referanse")
+            null
+        } else if (oppgaver.size == 1) {
+            return oppgaver.single()
+        } else {
+            throw InternfeilException("For mange oppgaver med samme referanse (id=$referanse). Må korrigeres manuelt.")
+        }
+    }
 
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,

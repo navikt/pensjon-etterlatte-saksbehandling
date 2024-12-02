@@ -2,9 +2,9 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useEffect, useState } from 'react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { Alert, Button, HStack } from '@navikt/ds-react'
+import { Button, HStack } from '@navikt/ds-react'
 import { PlusIcon } from '@navikt/aksel-icons'
-import { AktivitetspliktType, IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
+import { IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsplikt'
 import { NyHendelse } from '~components/behandling/aktivitetsplikt/NyHendelse'
 import { NyAktivitet } from '~components/behandling/aktivitetsplikt/NyAktivitet'
 
@@ -13,6 +13,7 @@ export const NyAktivitetHendelse = ({
   redigerAktivitet,
   redigerHendelse,
   setHendelser,
+  avbrytRedigering,
   behandling = undefined,
   sakId = undefined,
 }: {
@@ -22,6 +23,7 @@ export const NyAktivitetHendelse = ({
   setHendelser: (aktiviteter: IAktivitetHendelse[]) => void
   behandling?: IBehandlingReducer
   sakId?: number
+  avbrytRedigering: () => void
 }) => {
   const [visForm, setVisForm] = useState<false | 'AKTIVITET' | 'HENDELSE'>(false)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -40,6 +42,7 @@ export const NyAktivitetHendelse = ({
   }, [redigerAktivitet, redigerHendelse])
 
   function avbryt() {
+    avbrytRedigering()
     setVisForm(false)
   }
 

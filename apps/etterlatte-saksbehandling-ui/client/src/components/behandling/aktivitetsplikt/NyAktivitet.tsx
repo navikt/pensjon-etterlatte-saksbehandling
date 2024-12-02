@@ -1,20 +1,12 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect, useState } from 'react'
-import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { formatISO } from 'date-fns'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Alert, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
-import { PlusIcon } from '@navikt/aksel-icons'
 import { AktivitetspliktType, IAktivitetPeriode, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
-import {
-  opprettAktivitet,
-  opprettAktivitetForSak,
-  opprettHendelse,
-  opprettHendelseForSak,
-} from '~shared/api/aktivitetsplikt'
+import { opprettAktivitet, opprettAktivitetForSak } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { mapAktivitetstypeProps } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
@@ -49,11 +41,6 @@ export const NyAktivitet = ({
 }) => {
   const [opprettAktivitetResponse, opprettAktivitetRequest] = useApiCall(opprettAktivitet)
   const [opprettAktivitetForSakResponse, opprettAktivitetForSakRequest] = useApiCall(opprettAktivitetForSak)
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-
-  const redigerbar = behandling
-    ? behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
-    : true
 
   const {
     getValues,
@@ -178,7 +165,6 @@ export const NyAktivitet = ({
           </HStack>
         </VStack>
       </form>
-      )
       {isFailure(opprettAktivitetResponse) && (
         <Alert variant="error">
           {opprettAktivitetResponse.error.detail || 'Det skjedde en feil ved lagring av aktivitet'}

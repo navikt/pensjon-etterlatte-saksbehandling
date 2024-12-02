@@ -62,7 +62,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
         setHendelser(aktiviteter.hendelser)
       })
     }
-  }, [])
+  }, [behandling, sakId])
 
   const oppdaterAktiviteter = (aktiviteter: IAktivitetPeriode[]) => {
     setAktivitetsTypeProps([...new Set(aktiviteter.map((a) => a.type))].map(mapAktivitetstypeProps))
@@ -93,6 +93,11 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
     }
   }
 
+  function avbrytRedigering() {
+    setRediger(undefined)
+    setRedigerHendelse(undefined)
+  }
+
   return (
     <VStack gap="8" className="min-w-[800px]">
       <Timeline startDate={doedsdato} endDate={sluttdato}>
@@ -109,7 +114,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
           <BodyShort>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</BodyShort>
         </Timeline.Pin>
         {hendelser.map((hendelse) => (
-          <Timeline.Pin date={new Date(hendelse.dato)}>
+          <Timeline.Pin key={hendelse.id} date={new Date(hendelse.dato)}>
             <BodyShort>{hendelse.beskrivelse}</BodyShort>
             <VStack>
               <BodyShort>
@@ -231,6 +236,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
           sakId={sakId}
           setHendelser={setHendelser}
           redigerHendelse={redigerHendelse}
+          avbrytRedigering={avbrytRedigering}
         />
 
         {aktiviteter.length > 0 && (
@@ -248,8 +254,12 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
       </HStack>
 
       {isFailureHandler({
-        errorMessage: 'En feil oppsto ved henting av aktiviteter',
-        apiResult: hentet || hentetForSak,
+        errorMessage: 'En feil oppsto ved henting av tidslinje',
+        apiResult: hentet,
+      })}
+      {isFailureHandler({
+        errorMessage: 'En feil oppsto ved henting av tidslinje',
+        apiResult: hentetForSak,
       })}
     </VStack>
   )

@@ -236,24 +236,35 @@ class SakServiceImpl(
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
+        leggTilGrunnlag(sak)
+
+        return sak
+    }
+
+    private fun leggTilGrunnlag(sak: Sak) {
         runBlocking {
+            val harGrunnlag = grunnlagService.grunnlagFinnes(sak.id, HardkodaSystembruker.opprettGrunnlag)
+
+            if (harGrunnlag) {
+                return@runBlocking
+            }
+
+            val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
+            val spraak = hentSpraak(sak.ident)
+            val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
+
             grunnlagService.leggInnNyttGrunnlagSak(
                 sak,
                 Persongalleri(sak.ident),
                 HardkodaSystembruker.opprettGrunnlag,
             )
-        }
-        val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
-        val spraak = hentSpraak(sak.ident)
-        val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
-        runBlocking {
+
             grunnlagService.leggTilNyeOpplysningerBareSak(
                 sakId = sak.id,
                 opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
                 HardkodaSystembruker.opprettGrunnlag,
             )
         }
-        return sak
     }
 
     override fun oppdaterIdentForSak(

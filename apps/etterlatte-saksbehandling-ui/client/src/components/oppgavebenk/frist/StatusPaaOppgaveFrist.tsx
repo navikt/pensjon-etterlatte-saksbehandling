@@ -11,7 +11,7 @@ export const StatusPaaOppgaveFrist = ({
   oppgaveStatus: Oppgavestatus | string
 }) => {
   const visAtFristHarPassert =
-    isBefore(new Date(oppgaveFrist), new Date()) && !erOppgaveRedigerbar(oppgaveStatus as Oppgavestatus)
+    isBefore(new Date(oppgaveFrist), new Date()) && erOppgaveRedigerbar(oppgaveStatus as Oppgavestatus)
 
   return visAtFristHarPassert ? (
     <ErrorMessage>{formaterDato(oppgaveFrist)}</ErrorMessage>

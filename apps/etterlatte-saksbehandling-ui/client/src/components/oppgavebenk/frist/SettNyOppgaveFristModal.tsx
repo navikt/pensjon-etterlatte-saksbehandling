@@ -1,4 +1,4 @@
-import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
+import { OppgaveDTO } from '~shared/types/oppgave'
 import { useState } from 'react'
 import { Button, DatePicker, ErrorMessage, Heading, HStack, Modal, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
@@ -35,19 +35,15 @@ export const SettNyOppgaveFristModal = ({ oppgave, oppdaterFrist }: Props) => {
 
   return (
     <>
-      {erOppgaveRedigerbar(oppgave.status) ? (
-        <Button
-          size="small"
-          variant="tertiary"
-          iconPosition="right"
-          icon={<PencilIcon aria-hidden />}
-          onClick={() => setAapen(!aapen)}
-        >
-          <StatusPaaOppgaveFrist oppgaveFrist={oppgave.frist} oppgaveStatus={oppgave.status} />
-        </Button>
-      ) : (
+      <Button
+        size="small"
+        variant="tertiary"
+        iconPosition="right"
+        icon={<PencilIcon aria-hidden />}
+        onClick={() => setAapen(!aapen)}
+      >
         <StatusPaaOppgaveFrist oppgaveFrist={oppgave.frist} oppgaveStatus={oppgave.status} />
-      )}
+      </Button>
 
       <Modal open={aapen} onClose={() => setAapen(false)} aria-labelledby="modal for å sette ny oppgave frist">
         <Modal.Body>

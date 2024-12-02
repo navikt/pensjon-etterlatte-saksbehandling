@@ -23,6 +23,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.ktor.token.simpleAttestant
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.ktor.token.systembruker
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -714,6 +715,36 @@ internal class OppgaveServiceTest(
         assertEquals(Status.UNDERKJENT, underkjentOppgave.status)
         assertEquals(saksbehandler1.ident, underkjentOppgave.saksbehandler?.ident)
         assertNull(underkjentOppgave.forrigeSaksbehandlerIdent)
+    }
+
+    @Test
+    fun `Underkjenne behandling skal ikke endre saksbehandler hvis forrige er EY`() {
+        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveService.opprettOppgave(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        val systembruker = systembruker(mapOf(Claims.azp_name to "EY"))
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, systembruker.ident)
+        oppgaveService.tilAttestering(
+            referanse,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
+        )
+
+        val saksbehandler = simpleSaksbehandler()
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler.ident)
+        val underkjentOppgave = oppgaveService.tilUnderkjent(referanse, OppgaveType.FOERSTEGANGSBEHANDLING, null)
+
+        assertEquals(Status.UNDERKJENT, underkjentOppgave.status)
+        assertEquals(saksbehandler.ident, underkjentOppgave.saksbehandler?.ident)
+        assertEquals("EY", underkjentOppgave.forrigeSaksbehandlerIdent)
     }
 
     @Test

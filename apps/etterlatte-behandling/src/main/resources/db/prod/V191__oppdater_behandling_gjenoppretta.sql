@@ -1,0 +1,1 @@
+UPDATE behandling SET kilde = 'GJENOPPRETTA' WHERE id = '850c0f57-ad28-496f-aaad-e44b74b54b23';

@@ -7,6 +7,7 @@ import no.nav.etterlatte.avkorting.AvkortingReparerAarsoppgjoeret
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.AvkortingTidligAlderspensjonService
+import no.nav.etterlatte.avkorting.MottattInntektsjusteringService
 import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
@@ -131,6 +132,7 @@ class ApplicationContext {
             avkortingRepository = avkortingRepository,
             sanksjonService = sanksjonService,
         )
+    val mottattInntektsjusteringService = MottattInntektsjusteringService(avkortingService)
     val beregningOgAvkortingBrevService =
         BeregningOgAvkortingBrevService(
             beregningRepository = beregningRepository,

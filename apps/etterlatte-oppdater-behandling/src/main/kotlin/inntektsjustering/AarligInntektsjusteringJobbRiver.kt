@@ -4,7 +4,7 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
+import no.nav.etterlatte.libs.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
@@ -21,7 +21,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class InntektsjusteringJobbRiver(
+internal class AarligInntektsjusteringJobbRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,

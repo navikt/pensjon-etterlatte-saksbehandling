@@ -9,8 +9,8 @@ import { fnrHarGyldigFormat } from '~utils/fnr'
 import { mapResult, mapSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { formaterNavn } from '~shared/types/Person'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { PersonSoekModal } from '~components/person/journalfoeringsoppgave/journalpost/modal/PersonSoekModal'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 const formaterType = (type: BrukerIdType) => {
   switch (type) {
@@ -32,7 +32,7 @@ export const EndreBruker = ({
 }) => {
   const [initieltFnr, setInitieltFnr] = useState<string>()
   const [personResult, hentPerson, resetPerson] = useApiCall(hentPersonNavnogFoedsel)
-  const kanRedigereBruker = useFeatureEnabledMedDefault('kan-redigere-journalpost-bruker', false)
+  const kanRedigereBruker = useFeaturetoggle(FeatureToggle.kan_redigere_journalpost_bruker)
 
   const {
     register,

@@ -91,6 +91,7 @@ interface TestDataFeature {
     val beskrivelse: String
     val path: String
     val routes: Route.() -> Unit
+    val kunEtterlatte: Boolean
 }
 
 val dollyService =

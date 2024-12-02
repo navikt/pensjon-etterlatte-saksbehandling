@@ -17,6 +17,8 @@ on:
     paths:
       - apps/etterlatte-gyldig-soeknad/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-oppgave-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
       - "!**/test/**"
@@ -27,6 +29,8 @@ on:
       - apps/etterlatte-gyldig-soeknad/**
       - "!apps/etterlatte-gyldig-soeknad/.nais/*"
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-oppgave-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 

@@ -1,6 +1,6 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.inntektsjustering.InntektsjusteringJobbRiver
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbRiver
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
 import no.nav.etterlatte.regulering.FinnSakerTilReguleringRiver
 import no.nav.etterlatte.regulering.OmregningBrevDistribusjonRiver
@@ -39,6 +39,6 @@ private fun settOppRivers(
     YtelseIkkeLoependeRiver(rapidsConnection, behandlingservice)
     TidshendelseRiver(rapidsConnection, tidshendelseService)
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
-    InntektsjusteringJobbRiver(rapidsConnection, behandlingservice, featureToggleService)
+    AarligInntektsjusteringJobbRiver(rapidsConnection, behandlingservice, featureToggleService)
     OmregningBrevDistribusjonRiver(rapidsConnection, behandlingservice)
 }

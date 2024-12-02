@@ -469,12 +469,15 @@ internal class ApplicationContext(
             grunnlagsService,
             krrKlient,
             pdlTjenesterKlient,
+            featureToggleService,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
 
     val inntektsjusteringSelvbetjeningService =
         InntektsjusteringSelvbetjeningService(
             oppgaveService = oppgaveService,
+            behandlingService = behandlingService,
+            vedtakKlient = vedtakKlient,
             rapid = rapid,
             featureToggleService = featureToggleService,
         )

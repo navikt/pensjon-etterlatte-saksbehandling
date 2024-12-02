@@ -211,8 +211,8 @@ internal fun Route.aktivitetspliktRoutes(
         route("revurdering") {
             post {
                 kunSystembruker {
-                    logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
                     val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
+                    logger.info("Sjekker om sak $sakId trenger en ny revurdering aktivitetsplikt ${request.jobbType.name}")
                     val opprettet =
                         inTransaction {
                             aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(
@@ -224,6 +224,7 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
         }
+
         route("oppgave-oppfoelging") {
             post {
                 kunSystembruker {

@@ -46,6 +46,7 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
           id: formdata.id,
           unntak: formdata.unntak!!,
           fom: formdata.fom!!,
+          tom: formdata.tom,
           beskrivelse: formdata.beskrivelse || '',
         },
       },

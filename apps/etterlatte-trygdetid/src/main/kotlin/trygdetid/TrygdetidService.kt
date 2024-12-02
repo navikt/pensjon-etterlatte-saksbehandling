@@ -120,12 +120,6 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 
-    suspend fun reberegnUtenFremtidigTrygdetid(
-        behandlingId: UUID,
-        trygdetidId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
     suspend fun opprettOverstyrtBeregnetTrygdetid(
         behandlingId: UUID,
         overskriv: Boolean,
@@ -695,7 +689,7 @@ class TrygdetidServiceImpl(
             throw IngenTrygdetidFunnetForAvdoede()
         }
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
+        logger.info("Oppdaterer opplysningsgrunnlag for trygdetider (behandlingId=$behandlingId)")
 
         val avdoede = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede()
         return trygdetidList
@@ -737,39 +731,6 @@ class TrygdetidServiceImpl(
                 behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
             } else {
                 false
-            }
-        }
-
-    override suspend fun reberegnUtenFremtidigTrygdetid(
-        behandlingId: UUID,
-        trygdetidId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid =
-        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
-            val gjeldendeTrygdetid: Trygdetid =
-                trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId) ?: throw GenerellIkkeFunnetException()
-
-            val trygdetidUtenFremtidigGrunnlag =
-                gjeldendeTrygdetid.copy(
-                    trygdetidGrunnlag = gjeldendeTrygdetid.trygdetidGrunnlag.filter { it.type != TrygdetidType.FREMTIDIG },
-                )
-
-            val datoer = hentDatoerForBehandling(gjeldendeTrygdetid)
-
-            val nyBeregnetTrygdetid =
-                beregnTrygdetidService.beregnTrygdetid(
-                    trygdetidGrunnlag = trygdetidUtenFremtidigGrunnlag.trygdetidGrunnlag,
-                    foedselsDato = datoer.foedselsDato,
-                    doedsDato = datoer.doedsDato,
-                    norskPoengaar = trygdetidUtenFremtidigGrunnlag.overstyrtNorskPoengaar,
-                    yrkesskade = trygdetidUtenFremtidigGrunnlag.yrkesskade,
-                )
-
-            when (nyBeregnetTrygdetid) {
-                null -> trygdetidUtenFremtidigGrunnlag.nullstillBeregnetTrygdetid()
-                else -> trygdetidUtenFremtidigGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
-            }.also { nyTrygdetid ->
-                trygdetidRepository.oppdaterTrygdetid(nyTrygdetid)
             }
         }
 

@@ -2,14 +2,14 @@ package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.omregning.OmregningDataPacket
+import no.nav.etterlatte.omregning.omregningData
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import no.nav.etterlatte.rapidsandrivers.dato
-import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext

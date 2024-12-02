@@ -4,16 +4,16 @@ import io.mockk.verify
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.inntektsjustering.InntektsjusteringJobbRiver
+import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbRiver
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakslisteDTO
+import no.nav.etterlatte.libs.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.RapidEvents.EKSKLUDERTE_SAKER
@@ -24,7 +24,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class InntektsjusteringJobbRiverTest {
+class AarligInntektsjusteringJobbRiverTest {
     private val kjoering = "inntektsjustering-jobb-2024"
     private val loependeFom = AarligInntektsjusteringRequest.utledLoependeFom()
 
@@ -39,7 +39,7 @@ class InntektsjusteringJobbRiverTest {
             }
 
         val inspector =
-            TestRapid().apply { InntektsjusteringJobbRiver(this, behandlingServiceMock, featureToggleService) }
+            TestRapid().apply { AarligInntektsjusteringJobbRiver(this, behandlingServiceMock, featureToggleService) }
         inspector.sendTestMessage(genererMelding(loependeFom))
 
         verify(exactly = 1) {
@@ -66,7 +66,7 @@ class InntektsjusteringJobbRiverTest {
             }
 
         val inspector =
-            TestRapid().apply { InntektsjusteringJobbRiver(this, behandlingServiceMock, featureToggleService) }
+            TestRapid().apply { AarligInntektsjusteringJobbRiver(this, behandlingServiceMock, featureToggleService) }
 
         inspector.sendTestMessage(genererMelding(loependeFom))
         verify(exactly = 0) {

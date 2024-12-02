@@ -42,6 +42,8 @@ data class OppgaveIntern(
 
     fun erAttestering(): Boolean = status == Status.ATTESTERING
 
+    fun erFerdigstilt(): Boolean = status == Status.FERDIGSTILT
+
     fun typeKanAttesteres() =
         type in
             listOf(

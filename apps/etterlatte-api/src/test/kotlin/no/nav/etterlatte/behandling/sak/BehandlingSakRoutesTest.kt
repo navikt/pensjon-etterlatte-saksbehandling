@@ -1,20 +1,19 @@
-package no.nav.etterlatte.samordning.sak
+package no.nav.etterlatte.behandling.sak
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -22,15 +21,18 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.ktor.runServerWithConfig
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.CLIENT_ID
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
+import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -44,7 +46,6 @@ import java.util.UUID
 class BehandlingSakRoutesTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingService = mockk<BehandlingService>()
-    private lateinit var applicationConfig: HoconApplicationConfig
 
     @BeforeAll
     fun before() {
@@ -66,17 +67,13 @@ class BehandlingSakRoutesTest {
 
     @Test
     fun `skal gi 401 naar token mangler`() {
-        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
-        applicationConfig = HoconApplicationConfig(conff)
+        val conff = configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(routeLogger) {
-                    behandlingSakRoutes(
-                        behandlingService = behandlingService,
-                        config = conff,
-                    )
-                }
+            runServerWithConfig(applicationConfig = conff) {
+                behandlingSakRoutes(
+                    behandlingService = behandlingService,
+                    config = conff,
+                )
             }
 
             val response =
@@ -91,17 +88,13 @@ class BehandlingSakRoutesTest {
 
     @Test
     fun `skal gi 401 når rolle mangler`() {
-        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
-        applicationConfig = HoconApplicationConfig(conff)
+        val conff = configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(routeLogger) {
-                    behandlingSakRoutes(
-                        behandlingService = behandlingService,
-                        config = conff,
-                    )
-                }
+            runServerWithConfig(applicationConfig = conff) {
+                behandlingSakRoutes(
+                    behandlingService = behandlingService,
+                    config = conff,
+                )
             }
 
             val response =
@@ -117,17 +110,13 @@ class BehandlingSakRoutesTest {
 
     @Test
     fun `skal gi 500 når body mangler rolle les-oms-sak-for-person(kun dev)`() {
-        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
-        applicationConfig = HoconApplicationConfig(conff)
+        val conff = configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(routeLogger) {
-                    behandlingSakRoutes(
-                        behandlingService = behandlingService,
-                        config = conff,
-                    )
-                }
+            runServerWithConfig(applicationConfig = conff) {
+                behandlingSakRoutes(
+                    behandlingService = behandlingService,
+                    config = conff,
+                )
             }
 
             val response =
@@ -146,17 +135,14 @@ class BehandlingSakRoutesTest {
     @Test
     fun `skal gi 500 når body mangler pensjonSaksbehandler`() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
-        applicationConfig = HoconApplicationConfig(conff)
+        val conff =
+            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(routeLogger) {
-                    behandlingSakRoutes(
-                        behandlingService = behandlingService,
-                        config = conff,
-                    )
-                }
+            runServerWithConfig(applicationConfig = conff) {
+                behandlingSakRoutes(
+                    behandlingService = behandlingService,
+                    config = conff,
+                )
             }
 
             val response =
@@ -175,26 +161,18 @@ class BehandlingSakRoutesTest {
     @Test
     fun `pensjonSaksbehandler kan hente saksliste for fnr`() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
-        val conff = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
-        applicationConfig = HoconApplicationConfig(conff)
+        val conff =
+            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
         val requestFnr = FoedselsnummerDTO(fnr)
         val sakIdListesvar = listOf(sakId1)
         coEvery { behandlingService.hentSakforPerson(requestFnr) } returns sakIdListesvar
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(routeLogger) {
+            val client =
+                runServerWithConfig(applicationConfig = conff) {
                     behandlingSakRoutes(
                         behandlingService = behandlingService,
                         config = conff,
                     )
-                }
-            }
-            val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                    }
                 }
 
             val response =
@@ -207,7 +185,6 @@ class BehandlingSakRoutesTest {
                     )
                 }
             response.status shouldBe HttpStatusCode.OK
-            println(response.bodyAsText())
             val sakliste: List<SakId> = response.body()
 
             sakliste shouldBe sakIdListesvar
@@ -215,9 +192,88 @@ class BehandlingSakRoutesTest {
             coVerify(exactly = 1) { behandlingService.hentSakforPerson(requestFnr) }
         }
     }
+
+    @Test
+    fun `Kan hente sak men sak er null og kaster da exception IkkeFunnetException men logges `() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val conff =
+            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
+        coEvery { behandlingService.hentSak(any()) } returns null
+        testApplication {
+            runServerWithConfig(applicationConfig = conff) {
+                behandlingSakRoutes(
+                    behandlingService = behandlingService,
+                    config = conff,
+                )
+            }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
+                }
+
+            val response =
+                client.get("/api/sak/25895819") {
+                    contentType(ContentType.Application.Json)
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf("les-oms-sak"))}",
+                    )
+                }
+            response.status shouldBe HttpStatusCode.NotFound
+            val feil: ExceptionResponse = response.body()
+            feil.code shouldBe "SAK_IKKE_FUNNET"
+            feil.status shouldBe HttpStatusCode.NotFound.value
+
+            coVerify(exactly = 1) { behandlingService.hentSak(any()) }
+        }
+    }
+
+    @Test
+    fun `Kan hente sak, verifiserer at den blir returnert`() {
+        val pensjonSaksbehandler = UUID.randomUUID().toString()
+        val conff =
+            configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName, pensjonSaksbehandler = pensjonSaksbehandler)
+        val sakId: Long = 12
+        val funnetSak =
+            Sak(
+                "ident",
+                SakType.OMSTILLINGSSTOENAD,
+                SakId(sakId),
+                Enhetsnummer(
+                    "4808",
+                ),
+            )
+        coEvery { behandlingService.hentSak(any()) } returns funnetSak
+        testApplication {
+            val client =
+                runServerWithConfig(applicationConfig = conff) {
+                    behandlingSakRoutes(
+                        behandlingService = behandlingService,
+                        config = conff,
+                    )
+                }
+
+            val response =
+                client.get("/api/sak/$sakId") {
+                    contentType(ContentType.Application.Json)
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf("les-oms-sak"))}",
+                    )
+                }
+            response.status shouldBe HttpStatusCode.OK
+            val hentetSak: Sak? = response.body()
+
+            hentetSak shouldBe funnetSak
+
+            coVerify(exactly = 1) { behandlingService.hentSak(SakId(sakId)) }
+        }
+    }
 }
 
-private fun config(
+private fun configMedRoller(
     port: Int,
     issuerId: String,
     pensjonSaksbehandler: String? = UUID.randomUUID().toString(),

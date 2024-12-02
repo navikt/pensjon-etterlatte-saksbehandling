@@ -1,11 +1,13 @@
 package no.nav.etterlatte.inntektsjustering.selvbetjening
 
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.inntektsjustering.InntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -13,65 +15,42 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjusteringHendelseType
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.omregning.OmregningData
+import no.nav.etterlatte.omregning.OmregningDataPacket
+import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.rapidsandrivers.OmregningData
-import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
-import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
+import java.util.UUID
 
 class InntektsjusteringSelvbetjeningService(
     private val oppgaveService: OppgaveService,
+    private val behandlingService: BehandlingService,
+    private val vedtakKlient: VedtakKlient,
     private val rapid: KafkaProdusent<String, String>,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun behandleInntektsjustering(request: InntektsjusteringRequest) {
-        logger.info("Starter behandling av innmeldt inntektsjustering for sak ${request.sak.sakId}")
+    suspend fun behandleInntektsjustering(mottattInntektsjustering: MottattInntektsjustering) {
+        logger.info("Starter behandling av innmeldt inntektsjustering for sak ${mottattInntektsjustering.sak.sakId}")
 
-        if (skalGjoeresAutomatisk()) {
-            startAutomatiskBehandling(
-                request,
-                SakId(request.sak.sakId),
-            )
+        if (skalGjoeresAutomatisk(mottattInntektsjustering.sak)) {
+            startAutomatiskBehandling(mottattInntektsjustering)
         } else {
-            startManuellBehandling(request)
+            startManuellBehandling(mottattInntektsjustering)
         }
+        mottattInntektsjsuteringFullfoert(mottattInntektsjustering.sak, mottattInntektsjustering.inntektsjusteringId)
     }
 
-    private fun startAutomatiskBehandling(
-        request: InntektsjusteringRequest,
-        sakId: SakId,
-    ) {
-        logger.info("Behandles automatisk: starter omregning for sak ${request.sak.sakId}")
-        publiserKlarForOmregning(
-            sakId,
-            InntektsjusteringRequest.utledLoependeFom(),
-            InntektsjusteringRequest.utledKjoering(request.inntektsjusteringId),
-        )
-    }
-
-    private fun startManuellBehandling(request: InntektsjusteringRequest) {
-        logger.info("Behandles manuelt: oppretter oppgave for mottatt inntektsjustering for sak ${request.sak.sakId}")
-        oppgaveService.opprettOppgave(
-            sakId = SakId(request.sak.sakId),
-            kilde = OppgaveKilde.BRUKERDIALOG,
-            type = OppgaveType.MOTTATT_INNTEKTSJUSTERING,
-            merknad = "Mottatt inntektsjustering",
-            referanse = request.journalpostId,
-        )
-    }
-
-    private fun publiserKlarForOmregning(
-        sakId: SakId,
-        loependeFom: YearMonth,
-        kjoering: String,
-    ) {
+    private fun startAutomatiskBehandling(mottattInntektsjustering: MottattInntektsjustering) {
+        logger.info("Behandles automatisk: starter omregning for sak ${mottattInntektsjustering.sak.sakId}")
         val correlationId = getCorrelationId()
         rapid
             .publiser(
-                "inntektsjustering-$sakId",
+                "inntektsjustering-${mottattInntektsjustering.sak}",
                 JsonMessage
                     .newMessage(
                         OmregningHendelseType.KLAR_FOR_OMREGNING.lagEventnameForType(),
@@ -80,30 +59,85 @@ class InntektsjusteringSelvbetjeningService(
                             TEKNISK_TID_KEY to Tidspunkt.now(),
                             OmregningDataPacket.KEY to
                                 OmregningData(
-                                    kjoering = kjoering,
-                                    sakId = sakId,
+                                    kjoering = MottattInntektsjustering.utledKjoering(mottattInntektsjustering.inntektsjusteringId),
+                                    sakId = mottattInntektsjustering.sak,
                                     revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING,
-                                    fradato = loependeFom.atDay(1),
+                                    fradato = MottattInntektsjustering.utledLoependeFom().atDay(1),
+                                    inntektsjustering = mottattInntektsjustering,
                                 ).toPacket(),
                         ),
                     ).toJson(),
             ).also { (partition, offset) ->
                 logger.info(
-                    "Publiserte klar for omregningshendelse for $sakId på partition " +
+                    "Publiserte klar for omregningshendelse for ${mottattInntektsjustering.sak} på partition " +
                         "$partition, offset $offset, correlationid: $correlationId",
                 )
             }
     }
 
-    private fun skalGjoeresAutomatisk(): Boolean {
-        val featureToggle =
-            featureToggleService.isEnabled(
+    private fun startManuellBehandling(mottattInntektsjustering: MottattInntektsjustering) =
+        inTransaction {
+            logger.info("Behandles manuelt: oppretter oppgave for mottatt inntektsjustering for sak ${mottattInntektsjustering.sak.sakId}")
+            oppgaveService.opprettOppgave(
+                sakId = SakId(mottattInntektsjustering.sak.sakId),
+                kilde = OppgaveKilde.BRUKERDIALOG,
+                type = OppgaveType.MOTTATT_INNTEKTSJUSTERING,
+                merknad = "Mottatt inntektsjustering",
+                referanse = mottattInntektsjustering.journalpostId,
+            )
+        }
+
+    private suspend fun skalGjoeresAutomatisk(sakId: SakId): Boolean {
+        if (!featureToggleService.isEnabled(
                 InntektsjusterinFeatureToggle.AUTOMATISK_BEHANDLE,
                 false,
             )
+        ) {
+            return false
+        }
 
-        // TODO: sjekke om riktig tilstand for automatisk behandling
-        return featureToggle
+        val aapneBehandlinger = inTransaction { behandlingService.hentAapneBehandlingerForSak(sakId) }
+        if (aapneBehandlinger.isNotEmpty()) return false
+
+        val vedtak =
+            vedtakKlient.sakHarLopendeVedtakPaaDato(
+                sakId,
+                MottattInntektsjustering.utledLoependeFom().atDay(1),
+                HardkodaSystembruker.omregning,
+            )
+
+        if (!vedtak.erLoepende || vedtak.underSamordning) return false
+
+        // TODO: flere sjekker?
+
+        return true
+    }
+
+    private fun mottattInntektsjsuteringFullfoert(
+        sakId: SakId,
+        inntektsjusteirngId: UUID,
+    ) {
+        logger.info("Mottak av inntektsjustering fullført sender melding til selvbetjening sak=$sakId")
+        val correlationId = getCorrelationId()
+        val hendelsetype = MottattInntektsjusteringHendelseType.MOTTAK_FULLFOERT.lagEventnameForType()
+        rapid
+            .publiser(
+                "mottak-inntektsjustering-fullfoert-$sakId",
+                JsonMessage
+                    .newMessage(
+                        hendelsetype,
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to Tidspunkt.now(),
+                            "inntektsjustering_id" to inntektsjusteirngId,
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Publiserte $hendelsetype for $sakId på partition " +
+                        "$partition, offset $offset, correlationid: $correlationId",
+                )
+            }
     }
 
     enum class InntektsjusterinFeatureToggle(

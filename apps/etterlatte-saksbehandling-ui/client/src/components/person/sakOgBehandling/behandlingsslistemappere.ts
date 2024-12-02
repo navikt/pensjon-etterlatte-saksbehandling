@@ -83,6 +83,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Aktivitetsplikt'
     case Revurderingaarsak.AARLIG_INNTEKTSJUSTERING:
       return 'Årlig inntektsjustering'
+    case Revurderingaarsak.INNTEKTSENDRING:
+      return 'Inntektsendring'
   }
 }
 

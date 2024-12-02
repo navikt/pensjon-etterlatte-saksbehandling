@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -46,7 +47,7 @@ internal class InntektsjusteringRiverTest {
     private fun testRapid() = TestRapid().apply { InntektsjusteringRiver(this, behandlingKlientMock, journalfoerInntektsjusteringService) }
 
     @Test
-    fun `Skal journalføre inntektsjustering og opprette oppgave i Gjenny`() {
+    fun `Skal journalføre inntektsjustering og starte behandling med summert inntekt`() {
         val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)
         val inntektsjustering =
             Inntektsjustering(
@@ -70,14 +71,14 @@ internal class InntektsjusteringRiverTest {
                 "JournalId123",
                 true,
             )
-        coEvery { behandlingKlientMock.behandleInntektsjustering(any(), any(), any()) } just Runs
+        coEvery { behandlingKlientMock.behandleInntektsjustering(any()) } just Runs
 
         val melding =
             JsonMessage
                 .newMessage(
                     mapOf(
                         "@event_name" to InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT.eventname,
-                        InntektsjusteringInnsendt.inntektsjusteringInnhold to inntektsjustering.toJson(),
+                        InntektsjusteringInnsendt.inntektsjusteringInnhold to inntektsjustering,
                     ),
                 ).toJson()
 
@@ -92,7 +93,17 @@ internal class InntektsjusteringRiverTest {
             dokarkivKlientMock.opprettJournalpost(capture(journalRequest))
             pdfgenKlient.genererPdf(capture(pdfDataSlot), "inntektsjustering_nytt_aar_v1")
 
-            behandlingKlientMock.behandleInntektsjustering(sak.id, any(), any())
+            behandlingKlientMock.behandleInntektsjustering(
+                withArg {
+                    it.sak shouldBe sak.id
+                    it.inntektsjusteringId shouldBe inntektsjustering.id
+                    it.arbeidsinntekt shouldBe 100
+                    it.naeringsinntekt shouldBe 200
+                    it.afpInntekt shouldBe 400
+                    it.inntektFraUtland shouldBe 300
+                    it.datoForAaGaaAvMedAlderspensjon shouldBe YearMonth.of(2025, 6)
+                },
+            )
         }
         with(journalRequest.captured) {
             tittel shouldBe "Inntektsjustering 2025"

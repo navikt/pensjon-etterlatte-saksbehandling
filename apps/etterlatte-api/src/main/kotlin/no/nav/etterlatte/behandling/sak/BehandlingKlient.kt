@@ -1,4 +1,4 @@
-package no.nav.etterlatte.samordning.sak
+package no.nav.etterlatte.behandling.sak
 
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient

@@ -13,13 +13,13 @@ import OverstyrBeregningGrunnlag from './overstyrGrunnlagsBeregning/OverstyrBere
 import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 
 import { isSuccess } from '~shared/api/apiUtils'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { statusErRedigerbar } from '~components/behandling/felles/utils'
 import { SkruPaaOverstyrtBeregning } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/SkruPaaOverstyrtBeregning'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { formaterNavn } from '~shared/types/Person'
 import { Personopplysninger } from '~shared/types/grunnlag'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -30,7 +30,8 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const [overstyrtBeregning, setOverstyrtBeregning] = useState<OverstyrBeregning | undefined>(undefined)
 
   const vedtaksresultat = useVedtaksResultat()
-  const visOverstyrKnapp = useFeatureEnabledMedDefault('overstyr-beregning-knapp', false)
+
+  const visOverstyrKnapp = useFeaturetoggle(FeatureToggle.overstyr_beregning_knapp)
 
   const [visOverstyrtBeregningGrunnlag, setVisOverstyrtBeregningGrunnlag] = useState<boolean>(false)
   const [erBehandlingFerdigstilt] = useState<boolean>(!statusErRedigerbar(behandling.status))

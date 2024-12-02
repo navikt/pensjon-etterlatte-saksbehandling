@@ -28,7 +28,7 @@ import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 interface Props {
   redigerbar: boolean
@@ -54,7 +54,7 @@ const manglerTrygdetid = (
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
 
-  const kopierTrygdetidsgrunnlagEnabled = useFeatureEnabledMedDefault('kopier-trygdetidsgrunnlag', false)
+  const kopierTrygdetidsgrunnlagEnabled = useFeaturetoggle(FeatureToggle.kopier_trygdetidsgrunnlag)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)

@@ -7,14 +7,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
-import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.UkjentVergemaal
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.Vergemaal
@@ -53,9 +51,7 @@ class GrunnlagmapperTest {
                 opplysningsmapSakOverrides = emptyMap(),
             ).hentOpplysningsgrunnlag()
 
-        coEvery {
-            adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
-        } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
+        coEvery { adresseService.hentNavn(any(), pdlVergeOekonomiskFnr) } returns "Vera Verge"
         val grunnlagService = GrunnlagService(mockk(), adresseService)
         val verge = runBlocking { grunnlagService.hentVergeForSak(SakType.BARNEPENSJON, null, opplysningsgrunnlag)!! }
 
@@ -81,9 +77,7 @@ class GrunnlagmapperTest {
                 opplysningsmapSakOverrides = emptyMap(),
             ).hentOpplysningsgrunnlag()
 
-        coEvery {
-            adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
-        } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
+        coEvery { adresseService.hentNavn(any(), pdlVergeOekonomiskFnr) } returns "Vera Verge"
 
         val grunnlagService = GrunnlagService(mockk(), adresseService)
         val verge =
@@ -113,17 +107,6 @@ class GrunnlagmapperTest {
             omfang,
             false,
         ),
-    )
-
-    private fun lagretVergeAdresse(
-        navn: String,
-        fnr: String,
-    ) = Mottaker(
-        UUID.randomUUID(),
-        navn,
-        MottakerFoedselsnummer(fnr),
-        "orgnr",
-        mockk(),
     )
 
     private fun opprettOpplysning(jsonNode: JsonNode) =

@@ -13,12 +13,12 @@ import { mapResult } from '~shared/api/apiUtils'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { IAvkorting } from '~shared/types/IAvkorting'
 import { aarFraDatoString } from '~utils/formatering/dato'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const Avkorting = ({
   behandling,
@@ -33,9 +33,9 @@ export const Avkorting = ({
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting) as IAvkorting
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
 
-  const inntektNesteAarBryter = useFeatureEnabledMedDefault('validere_aarsintnekt_neste_aar', false)
+  const visSanksjon = useFeaturetoggle(FeatureToggle.sanksjon)
+  const inntektNesteAarBryter = useFeaturetoggle(FeatureToggle.validere_aarsintnekt_neste_aar)
 
   const klarForBrevutfall = () => {
     if (avkorting == undefined) {

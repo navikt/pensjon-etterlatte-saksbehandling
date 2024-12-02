@@ -15,6 +15,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { ArkiverHendelseModal } from '~components/person/hendelser/ArkiverHendelseModal'
 import { useSearchParams } from 'react-router-dom'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
+import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
 
 interface Props {
   hendelse: Grunnlagsendringshendelse
@@ -64,6 +65,10 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
               revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
                 <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} hendelseId={hendelse.id} />
               )}
+
+            {hendelse.samsvarMellomKildeOgGrunnlag.type === 'FOLKEREGISTERIDENTIFIKATOR' && (
+              <OppdaterIdentModal sak={sak} hendelse={hendelse} />
+            )}
           </HStack>
         </VStack>
       }

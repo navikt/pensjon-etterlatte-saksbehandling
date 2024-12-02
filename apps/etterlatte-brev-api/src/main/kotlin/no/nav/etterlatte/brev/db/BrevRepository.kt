@@ -170,27 +170,7 @@ class BrevRepository(
         id: BrevID,
         mottaker: Mottaker,
     ) = using(sessionOf(ds)) {
-        it.run(
-            queryOf(
-                OPPRETT_MOTTAKER_QUERY,
-                mapOf(
-                    "id" to mottaker.id,
-                    "brev_id" to id,
-                    "foedselsnummer" to mottaker.foedselsnummer?.value,
-                    "orgnummer" to mottaker.orgnummer,
-                    "navn" to mottaker.navn,
-                    "adressetype" to mottaker.adresse.adresseType,
-                    "adresselinje1" to mottaker.adresse.adresselinje1,
-                    "adresselinje2" to mottaker.adresse.adresselinje2,
-                    "adresselinje3" to mottaker.adresse.adresselinje3,
-                    "postnummer" to mottaker.adresse.postnummer,
-                    "poststed" to mottaker.adresse.poststed,
-                    "landkode" to mottaker.adresse.landkode,
-                    "land" to mottaker.adresse.land,
-                    "type" to mottaker.type.name,
-                ),
-            ).asExecute,
-        )
+        it.opprettMottaker(id, mottaker)
     }
 
     fun oppdaterMottaker(
@@ -388,28 +368,13 @@ class BrevRepository(
 
             requireNotNull(brevId) { "Brev ikke opprettet!" }
 
-            tx
-                .run(
-                    queryOf(
-                        OPPRETT_MOTTAKER_QUERY,
-                        mapOf(
-                            "id" to ulagretBrev.mottaker.id,
-                            "brev_id" to brevId,
-                            "foedselsnummer" to ulagretBrev.mottaker.foedselsnummer?.value,
-                            "orgnummer" to ulagretBrev.mottaker.orgnummer,
-                            "navn" to ulagretBrev.mottaker.navn,
-                            "adressetype" to ulagretBrev.mottaker.adresse.adresseType,
-                            "adresselinje1" to ulagretBrev.mottaker.adresse.adresselinje1,
-                            "adresselinje2" to ulagretBrev.mottaker.adresse.adresselinje2,
-                            "adresselinje3" to ulagretBrev.mottaker.adresse.adresselinje3,
-                            "postnummer" to ulagretBrev.mottaker.adresse.postnummer,
-                            "poststed" to ulagretBrev.mottaker.adresse.poststed,
-                            "landkode" to ulagretBrev.mottaker.adresse.landkode,
-                            "land" to ulagretBrev.mottaker.adresse.land,
-                            "type" to ulagretBrev.mottaker.type.name,
-                        ),
-                    ).asUpdate,
-                ).also { opprettet -> checkInternFeil(opprettet == 1) { "Mottaker ble ikke opprettet for id $brevId" } }
+            ulagretBrev.mottakere
+                .sumOf { tx.opprettMottaker(brevId, it) }
+                .also { opprettet ->
+                    checkInternFeil(opprettet == ulagretBrev.mottakere.size) {
+                        "Mottaker ble ikke opprettet for id $brevId"
+                    }
+                }
 
             tx
                 .run(
@@ -484,6 +449,31 @@ class BrevRepository(
         ds.transaction { tx ->
             tx.lagreHendelse(brevId, Status.SLETTET, bruker.ident(), bruker) > 0
         }
+
+    private fun Session.opprettMottaker(
+        brevId: BrevID,
+        mottaker: Mottaker,
+    ) = run(
+        queryOf(
+            OPPRETT_MOTTAKER_QUERY,
+            mapOf(
+                "id" to mottaker.id,
+                "brev_id" to brevId,
+                "foedselsnummer" to mottaker.foedselsnummer?.value,
+                "orgnummer" to mottaker.orgnummer,
+                "navn" to mottaker.navn,
+                "adressetype" to mottaker.adresse.adresseType,
+                "adresselinje1" to mottaker.adresse.adresselinje1,
+                "adresselinje2" to mottaker.adresse.adresselinje2,
+                "adresselinje3" to mottaker.adresse.adresselinje3,
+                "postnummer" to mottaker.adresse.postnummer,
+                "poststed" to mottaker.adresse.poststed,
+                "landkode" to mottaker.adresse.landkode,
+                "land" to mottaker.adresse.land,
+                "type" to mottaker.type.name,
+            ),
+        ).asUpdate,
+    )
 
     private fun Session.lagreHendelse(
         brevId: BrevID,

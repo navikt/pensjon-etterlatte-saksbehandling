@@ -10,7 +10,7 @@ import { lastDayOfMonth } from 'date-fns'
 import { useAppSelector } from '~store/Store'
 import { tekstSanksjon } from '~shared/types/sanksjon'
 import { TableBox } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 const sorterNyligsteFoerstOgBakover = (a: IAvkortetYtelse, b: IAvkortetYtelse) =>
   new Date(b.fom).getTime() - new Date(a.fom).getTime()
@@ -25,7 +25,8 @@ const restanseOgSanksjon = (ytelse: IAvkortetYtelse): string => {
 }
 
 export const YtelseEtterAvkorting = () => {
-  const sanksjonTilgjengelig = useFeatureEnabledMedDefault('sanksjon', false)
+  const sanksjonTilgjengelig = useFeaturetoggle(FeatureToggle.sanksjon)
+
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
   const ytelser = [...(avkorting?.avkortetYtelse ?? [])].sort(sorterNyligsteFoerstOgBakover)
   const tidligereYtelser = [...(avkorting?.tidligereAvkortetYtelse ?? [])].sort(sorterNyligsteFoerstOgBakover)

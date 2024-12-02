@@ -33,7 +33,6 @@ import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -49,13 +48,14 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.omregning.OmregningData
+import no.nav.etterlatte.omregning.OmregningDataPacket
+import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.rapidsandrivers.OmregningData
-import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
-import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
@@ -373,7 +373,7 @@ class AarligInntektsjusteringJobbService(
                                 OmregningData(
                                     kjoering = kjoering,
                                     sakId = sakId,
-                                    revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING,
+                                    revurderingaarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                                     fradato = loependeFom.atDay(1),
                                 ).toPacket(),
                         ),

@@ -10,7 +10,7 @@ import { Result } from '~shared/api/apiUtils'
 
 import { ILand } from '~utils/kodeverk'
 import { AnnenForelderSkjema } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/AnnenForelderSkjema'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export interface PropsFamilieforhold {
   personopplysninger: Personopplysninger | null
@@ -23,7 +23,7 @@ export const FamilieforholdBarnepensjon = ({
   landListeResult,
   behandlingId,
 }: PropsFamilieforhold) => {
-  const enJuridiskForelderEnabled = useFeatureEnabledMedDefault('kun-en-registrert-juridisk-forelder', false)
+  const enJuridiskForelderEnabled = useFeaturetoggle(FeatureToggle.kun_en_registrert_juridisk_forelder)
   if (personopplysninger == null || personopplysninger.soeker == null) {
     return <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>
   }

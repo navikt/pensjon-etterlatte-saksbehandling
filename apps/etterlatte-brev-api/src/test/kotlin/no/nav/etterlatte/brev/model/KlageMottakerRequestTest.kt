@@ -32,7 +32,7 @@ internal class KlageMottakerRequestTest {
                         ),
                 )
 
-            val mottaker = mottakerFraAdresse(SOEKER_FOEDSELSNUMMER, regoppslagResponseDTO)
+            val mottaker = mottakerFraAdresse(SOEKER_FOEDSELSNUMMER, regoppslagResponseDTO, MottakerType.HOVED)
 
             mottaker.navn shouldBe regoppslagResponseDTO.navn
             mottaker.adresse.adresselinje1 shouldBe "Testveien 13A"
@@ -63,7 +63,7 @@ internal class KlageMottakerRequestTest {
                         ),
                 )
 
-            val mottaker = mottakerFraAdresse(SOEKER_FOEDSELSNUMMER, regoppslagResponseDTO)
+            val mottaker = mottakerFraAdresse(SOEKER_FOEDSELSNUMMER, regoppslagResponseDTO, MottakerType.HOVED)
 
             mottaker.navn shouldBe regoppslagResponseDTO.navn
             mottaker.adresse.adresselinje1 shouldBe "c/o STOR SNERK"

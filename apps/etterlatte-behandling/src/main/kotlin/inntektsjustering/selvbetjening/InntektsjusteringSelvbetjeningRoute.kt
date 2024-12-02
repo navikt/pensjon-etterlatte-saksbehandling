@@ -7,12 +7,12 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.inntektsjustering.InntektsjusteringRequest
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 
 internal fun Route.inntektsjusteringSelvbetjeningRoute(service: InntektsjusteringSelvbetjeningService) {
     route("/inntektsjustering") {
         post("behandle") {
-            val request = call.receive<InntektsjusteringRequest>()
+            val request = call.receive<MottattInntektsjustering>()
             service.behandleInntektsjustering(request)
             call.respond(HttpStatusCode.OK)
         }

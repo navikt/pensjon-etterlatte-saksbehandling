@@ -18,10 +18,10 @@ import { addKlage } from '~store/reducers/KlageReducer'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { KlageOmgjoering } from '~components/klage/vurdering/components/KlageOmgjoering'
 import { KlageInnstilling } from '~components/klage/vurdering/components/KlageInnstilling'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -90,7 +90,7 @@ export function EndeligVurdering(props: { klage: Klage }) {
   const navigate = useNavigate()
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
-  const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
+  const stoetterDelvisOmgjoering = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering)
 
   const {
     control,

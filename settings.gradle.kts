@@ -53,4 +53,6 @@ include(
     "libs:etterlatte-vilkaarsvurdering-model",
     "libs:etterlatte-tilbakekreving-model",
     "libs:etterlatte-tidshendelser-model",
+    "libs:etterlatte-omregning-model",
+    "libs:etterlatte-inntektsjustering-model",
 )

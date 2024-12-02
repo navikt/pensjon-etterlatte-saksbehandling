@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 class DokarkivKlient(
@@ -102,7 +103,8 @@ class DokarkivKlient(
                     if (it is ResponseException) {
                         val error = it.response.body<DokarkivErrorResponse>()
 
-                        logger.error("Feil oppsto på oppdater journalpost: $error")
+                        logger.error("Feil oppsto ved oppdatering av journalpost. Se sikkerlogg for detaljer: ", it)
+                        sikkerLogg.error("Feil oppsto ved oppdatering av journalpost. Request: $request")
 
                         throw ForespoerselException(
                             status = it.response.status.value,

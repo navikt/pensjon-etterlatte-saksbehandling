@@ -3,6 +3,7 @@ package no.nav.etterlatte.tidshendelser
 import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
 import no.nav.etterlatte.libs.tidshendelser.JobbType
+import no.nav.etterlatte.tidshendelser.OpprettJobb.FasteJobber
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,6 +21,7 @@ class OpprettJobberIntegrationTest(
         private val dbExtension = DatabaseExtension()
     }
 
+    private val nesteMaaned = YearMonth.now().plusMonths(1)
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val opprettJobb = OpprettJobb(hendelseDao)
@@ -38,30 +40,30 @@ class OpprettJobberIntegrationTest(
     @Test
     fun `skal lage jobber om de ikke er laget fra før`() {
         opprettJobb.poll()
-        hendelseDao.finnJobberMedKjoeringForMaaned(YearMonth.now().plusMonths(1)) shouldHaveSize 3
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize FasteJobber.entries.size
     }
 
     @Test
     fun `skal ikke lage jobber om de er laget fra før`() {
         jobbTestdata.opprettJobb(
             JobbType.OMS_DOED_4MND,
-            YearMonth.now().plusMonths(1),
-            YearMonth.now().plusMonths(1).atDay(5),
+            nesteMaaned,
+            nesteMaaned.atDay(5),
         )
         opprettJobb.poll()
 
-        hendelseDao.finnJobberMedKjoeringForMaaned(YearMonth.now().plusMonths(1)) shouldHaveSize 3
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize FasteJobber.entries.size
     }
 
     @Test
     fun `skal lage jobber om selv om det fins andre ikke faste jobber`() {
         jobbTestdata.opprettJobb(
             JobbType.AO_BP20,
-            YearMonth.now().plusMonths(1),
-            YearMonth.now().plusMonths(1).atDay(5),
+            nesteMaaned,
+            nesteMaaned.atDay(5),
         )
         opprettJobb.poll()
 
-        hendelseDao.finnJobberMedKjoeringForMaaned(YearMonth.now().plusMonths(1)) shouldHaveSize 4
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize FasteJobber.entries.size + 1
     }
 }

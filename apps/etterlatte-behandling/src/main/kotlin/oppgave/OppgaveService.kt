@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -293,8 +294,10 @@ class OppgaveService(
 
         val saksbehandlerIdent = saksbehandlerSomFattetVedtak(oppgave)
         if (saksbehandlerIdent != null) {
-            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandlerIdent)
-            oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
+            if (saksbehandlerIdent != Fagsaksystem.EY.navn) {
+                oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandlerIdent)
+                oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
+            }
         } else {
             logger.error("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
             oppgaveDao.fjernSaksbehandler(oppgaveId)
@@ -443,6 +446,17 @@ class OppgaveService(
         } else if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler?.ident)) {
             throw OppgaveTilhoererAnnenSaksbehandler(oppgaveUnderBehandling.id)
         }
+    }
+
+    fun oppdaterIdentForOppgaver(sak: Sak) {
+        logger.info("Oppdaterer ident på oppgaver som ikke er avsluttet på sak ${sak.id}")
+
+        oppgaveDao
+            .hentOppgaverForSakMedType(sak.id, OppgaveType.entries)
+            .filterNot(OppgaveIntern::erAvsluttet)
+            .forEach {
+                oppgaveDao.oppdaterIdent(it.id, sak.ident)
+            }
     }
 
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {

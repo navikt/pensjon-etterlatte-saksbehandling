@@ -113,7 +113,6 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
     <>
       <FilterRad
         hentAlleOppgaver={hentOppgavelistaOppgaver}
-        hentOppgaverStatus={hentOppgavelistaOppgaver}
         filter={filter}
         setFilter={setFilter}
         saksbehandlereIEnhet={saksbehandlereIEnhet}

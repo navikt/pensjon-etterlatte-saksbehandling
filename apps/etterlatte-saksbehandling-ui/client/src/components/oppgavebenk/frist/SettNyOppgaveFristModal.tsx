@@ -7,7 +7,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFristApi } from '~shared/api/oppgaver'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { isPending } from '~shared/api/apiUtils'
-import { datoIMorgen, datoToAarFramITid } from '~components/oppgavebenk/frist/utils'
+import { datoIMorgen, datoToAarFramITid } from '~utils/formatering/dato'
 
 interface Props {
   oppgave: OppgaveDTO

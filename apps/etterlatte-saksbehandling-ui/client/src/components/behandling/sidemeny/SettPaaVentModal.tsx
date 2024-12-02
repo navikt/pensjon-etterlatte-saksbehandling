@@ -5,12 +5,12 @@ import { ClockDashedIcon, ClockIcon } from '@navikt/aksel-icons'
 import { useForm } from 'react-hook-form'
 import { EndrePaaVentRequest, redigerFristApi, settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { datoIMorgen, datoToAarFramITid } from '~components/oppgavebenk/frist/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useAppDispatch } from '~store/Store'
 import { settOppgave } from '~store/reducers/OppgaveReducer'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { datoIMorgen, datoToAarFramITid } from '~utils/formatering/dato'
 
 enum AarsakForAaSettePaaVent {
   OPPLYSNING_FRA_BRUKER = 'Opplysning fra bruker',

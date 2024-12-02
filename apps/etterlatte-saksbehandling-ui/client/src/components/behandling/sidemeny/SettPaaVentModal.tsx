@@ -10,6 +10,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { useAppDispatch } from '~store/Store'
 import { settOppgave } from '~store/reducers/OppgaveReducer'
 import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 enum AarsakForAaSettePaaVent {
   OPPLYSNING_FRA_BRUKER = 'Opplysning fra bruker',
@@ -42,22 +43,26 @@ export const SettPaaVentModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   if (!erOppgaveRedigerbar(oppgave.status)) return null
 
   const settPaaEllerAvVent = (data: SettPaaVentSkjema) => {
-    redigerFristFunc({ oppgaveId: oppgave.id, redigerFristRequest: { frist: data.nyFrist, versjon: null } }, () => {
-      settOppgavePaaVentFunc(
-        {
-          oppgaveId: oppgave.id,
-          settPaaVentRequest: {
-            aarsak: data.aarsak,
-            merknad: data.merknad,
-            paaVent: oppgave.status !== Oppgavestatus.PAA_VENT,
+    // Må wrappe "nyFrist" inn i en ny dato, for å kunne legge på tid til datoen
+    redigerFristFunc(
+      { oppgaveId: oppgave.id, redigerFristRequest: { frist: new Date(data.nyFrist), versjon: null } },
+      () => {
+        settOppgavePaaVentFunc(
+          {
+            oppgaveId: oppgave.id,
+            settPaaVentRequest: {
+              aarsak: data.aarsak,
+              merknad: data.merknad,
+              paaVent: oppgave.status !== Oppgavestatus.PAA_VENT,
+            },
           },
-        },
-        (oppgave) => {
-          dispatch(settOppgave(oppgave))
-          setAapen(false)
-        }
-      )
-    })
+          (oppgave) => {
+            dispatch(settOppgave(oppgave))
+            setAapen(false)
+          }
+        )
+      }
+    )
   }
 
   return (
@@ -114,6 +119,14 @@ export const SettPaaVentModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
                   />
                 )}
 
+                {isFailureHandler({
+                  apiResult: redigerFristResult,
+                  errorMessage: 'Feil under oppdatering av frist',
+                })}
+                {isFailureHandler({
+                  apiResult: settOppgavePaaVentResult,
+                  errorMessage: 'Feil under endring av vent på oppgave',
+                })}
                 <HStack gap="2" justify="end">
                   <Button
                     type="button"

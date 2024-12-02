@@ -19,7 +19,7 @@ export enum SortKey {
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
-  oppdaterFrist?: (id: string, nyfrist: string) => void
+  oppdaterFrist: (id: string, nyfrist: string) => void
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   setSortering: (nySortering: OppgaveSortering) => void

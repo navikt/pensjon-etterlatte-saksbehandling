@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.MottakerType
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.tomMottaker
@@ -75,7 +76,7 @@ class PDFService(
                     behandlingId = null,
                     soekerFnr = sak.ident,
                     prosessType = BrevProsessType.OPPLASTET_PDF,
-                    mottaker = tomMottaker(Folkeregisteridentifikator.of(sak.ident)),
+                    mottakere = listOf(tomMottaker(Folkeregisteridentifikator.of(sak.ident), MottakerType.HOVED)),
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = null,

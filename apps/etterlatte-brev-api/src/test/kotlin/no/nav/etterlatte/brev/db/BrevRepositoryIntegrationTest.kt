@@ -97,7 +97,7 @@ internal class BrevRepositoryIntegrationTest(
         val hentetBrev = db.hentBrev(nyttBrev.id)
         assertEquals(nyttBrev.id, hentetBrev.id)
         assertEquals(behandlingId, hentetBrev.behandlingId)
-        assertEquals(hentetBrev.mottakere.single(), ulagretBrev.mottaker)
+        assertEquals(hentetBrev.mottakere, ulagretBrev.mottakere)
     }
 
     @Test
@@ -509,7 +509,7 @@ internal class BrevRepositoryIntegrationTest(
         behandlingId = behandlingId,
         prosessType = BrevProsessType.AUTOMATISK,
         soekerFnr = "00000012345",
-        mottaker = opprettMottaker(),
+        mottakere = listOf(opprettMottaker()),
         opprettet = Tidspunkt.now(),
         innhold = innhold ?: BrevInnhold("tittel", Spraak.NB),
         innholdVedlegg = innhold_vedlegg,

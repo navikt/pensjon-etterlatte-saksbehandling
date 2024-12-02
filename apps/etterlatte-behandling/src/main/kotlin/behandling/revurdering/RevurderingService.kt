@@ -205,7 +205,6 @@ class RevurderingService(
                             Revurderingaarsak.OMREGNING,
                             -> false
 
-                            Revurderingaarsak.INNTEKTSENDRING,
                             Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                             -> it.prosesstype != Prosesstype.AUTOMATISK
 

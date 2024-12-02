@@ -9,9 +9,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
@@ -33,12 +35,14 @@ class InntektsjusteringSelvbetjeningServiceTest {
     private val rapid: KafkaProdusent<String, String> = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val behandlingService: BehandlingService = mockk()
+    private val beregningKlient: BeregningKlient = mockk()
     private val vedtakKlient: VedtakKlient = mockk()
 
     val service =
         InntektsjusteringSelvbetjeningService(
             oppgaveService,
             behandlingService,
+            beregningKlient,
             vedtakKlient,
             rapid,
             featureToggleService,
@@ -84,6 +88,40 @@ class InntektsjusteringSelvbetjeningServiceTest {
 
         coVerify(exactly = 0) {
             vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any())
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(any(), any(), any(), any())
+        }
+
+        verifyManuellBehandling()
+    }
+
+    @Test
+    fun `skal behandle inntektsjustering manuelt hvis sanksjon`() {
+        every { featureToggleService.isEnabled(any(), any()) } returns true
+        every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
+
+        val loependeYtelseMock = mockk<LoependeYtelseDTO>(relaxed = true)
+        coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
+        every { loependeYtelseMock.erLoepende } returns true
+        every { loependeYtelseMock.underSamordning } returns false
+
+        val inntektsjusteringAvkortingInfo = mockk<InntektsjusteringAvkortingInfoResponse>(relaxed = true)
+        coEvery { beregningKlient.inntektsjusteringAvkortingInfoSjekk(any(), any(), any(), any()) } returns inntektsjusteringAvkortingInfo
+        every { inntektsjusteringAvkortingInfo.harSanksjon } returns true
+
+        val mottattInntektsjustering =
+            MottattInntektsjustering(
+                SakId(123L),
+                UUID.randomUUID(),
+                "123",
+                2025,
+                100,
+                100,
+                100,
+                100,
+                YearMonth.of(2025, 1),
+            )
+        runBlocking {
+            service.behandleInntektsjustering(mottattInntektsjustering)
         }
 
         verifyManuellBehandling()
@@ -158,7 +196,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
     }
 
     @Test
-    fun `skal behandle inntektsjustering automatisk hvis featureToggle = true, vedtak er loepende og ikke under samordning`() {
+    fun `skal behandle inntektsjustering automatisk hvis featureToggle = true`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { behandlingService.hentAapneBehandlingerForSak(any()) } returns emptyList()
 
@@ -166,6 +204,10 @@ class InntektsjusteringSelvbetjeningServiceTest {
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtelseMock
         every { loependeYtelseMock.erLoepende } returns true
         every { loependeYtelseMock.underSamordning } returns false
+
+        val inntektsjusteringAvkortingInfo = mockk<InntektsjusteringAvkortingInfoResponse>(relaxed = true)
+        coEvery { beregningKlient.inntektsjusteringAvkortingInfoSjekk(any(), any(), any(), any()) } returns inntektsjusteringAvkortingInfo
+        every { inntektsjusteringAvkortingInfo.harSanksjon } returns false
 
         val mottattInntektsjustering =
             MottattInntektsjustering(
@@ -241,6 +283,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
             )
             behandlingService.hentAapneBehandlingerForSak(any())
             vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any())
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(any(), any(), any(), any())
             rapid.publiser("mottak-inntektsjustering-fullfoert-123", any())
         }
     }

@@ -15,6 +15,6 @@ export const OppgaveFrist = ({ oppgave, oppdaterFrist }: Props) => {
     erOppgaveTildeltInnloggetSaksbehandler(oppgave, innloggetSaksbehandler) ? (
     <SettNyOppgaveFristModal oppgave={oppgave} oppdaterFrist={oppdaterFrist} />
   ) : (
-    <StatusPaaOppgaveFrist oppgave={oppgave} />
+    <StatusPaaOppgaveFrist oppgaveFrist={oppgave.frist} oppgaveStatus={oppgave.status} />
   )
 }

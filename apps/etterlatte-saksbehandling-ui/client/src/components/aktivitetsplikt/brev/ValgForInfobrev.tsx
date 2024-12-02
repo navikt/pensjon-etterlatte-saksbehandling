@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { JaNei, JaNeiRec, mapBooleanToJaNei } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
@@ -25,6 +25,7 @@ import { handlinger } from '~components/behandling/handlinger/typer'
 import { Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formatering/formatering'
 import { LoependeUnntakInfo } from '~components/aktivitetsplikt/brev/LoependeUnntakInfo'
+import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
@@ -205,6 +206,9 @@ export const ValgForInfobrev = () => {
                     <Info label="Målform" tekst={brevdata.spraak ? formaterSpraak(brevdata.spraak) : '-'} />
                   </>
                 )}
+                <BodyShort>
+                  Sist endret {formaterDatoMedTidspunkt(new Date(brevdata.kilde.tidspunkt))} av {brevdata.kilde.ident}
+                </BodyShort>
               </HStack>
             )}
             {erOppgaveRedigerbar(oppgave.status) && (

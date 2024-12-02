@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import java.time.LocalDateTime
 import java.util.UUID
@@ -51,6 +52,16 @@ class BehandlingClient(
             }
             UUID.fromString(response.body())
         }
+
+    fun behandleInntektsjustering(request: MottattInntektsjustering) {
+        runBlocking {
+            sakOgBehandlingApp
+                .post("$url/inntektsjustering/behandle") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }
+        }
+    }
 
     fun finnEllerOpprettSak(
         fnr: String,

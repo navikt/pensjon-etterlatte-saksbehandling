@@ -2,8 +2,10 @@ package no.nav.etterlatte.inntektsjustering
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.behandling.randomSakId
@@ -22,9 +24,6 @@ import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -47,7 +47,7 @@ internal class InntektsjusteringRiverTest {
     private fun testRapid() = TestRapid().apply { InntektsjusteringRiver(this, behandlingKlientMock, journalfoerInntektsjusteringService) }
 
     @Test
-    fun `Skal journalføre inntektsjustering og opprette oppgave i Gjenny`() {
+    fun `Skal journalføre inntektsjustering og starte behandling med summert inntekt`() {
         val sak = Sak("123", SakType.OMSTILLINGSSTOENAD, randomSakId(), Enheter.PORSGRUNN.enhetNr)
         val inntektsjustering =
             Inntektsjustering(
@@ -71,15 +71,14 @@ internal class InntektsjusteringRiverTest {
                 "JournalId123",
                 true,
             )
-        coEvery { behandlingKlientMock.opprettOppgave(any(), any()) } returns UUID.randomUUID()
+        coEvery { behandlingKlientMock.behandleInntektsjustering(any()) } just Runs
 
         val melding =
             JsonMessage
                 .newMessage(
                     mapOf(
                         "@event_name" to InntektsjusteringInnsendtHendelseType.EVENT_NAME_INNSENDT.eventname,
-                        InntektsjusteringInnsendt.fnrBruker to "123",
-                        InntektsjusteringInnsendt.inntektsjusteringInnhold to inntektsjustering.toJson(),
+                        InntektsjusteringInnsendt.inntektsjusteringInnhold to inntektsjustering,
                     ),
                 ).toJson()
 
@@ -94,14 +93,16 @@ internal class InntektsjusteringRiverTest {
             dokarkivKlientMock.opprettJournalpost(capture(journalRequest))
             pdfgenKlient.genererPdf(capture(pdfDataSlot), "inntektsjustering_nytt_aar_v1")
 
-            behandlingKlientMock.opprettOppgave(
-                sak.id,
-                NyOppgaveDto(
-                    OppgaveKilde.BRUKERDIALOG,
-                    OppgaveType.GENERELL_OPPGAVE,
-                    merknad = "Mottatt inntektsjustering",
-                    referanse = "JournalId123",
-                ),
+            behandlingKlientMock.behandleInntektsjustering(
+                withArg {
+                    it.sak shouldBe sak.id
+                    it.inntektsjusteringId shouldBe inntektsjustering.id
+                    it.arbeidsinntekt shouldBe 100
+                    it.naeringsinntekt shouldBe 200
+                    it.afpInntekt shouldBe 400
+                    it.inntektFraUtland shouldBe 300
+                    it.datoForAaGaaAvMedAlderspensjon shouldBe YearMonth.of(2025, 6)
+                },
             )
         }
         with(journalRequest.captured) {

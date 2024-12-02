@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
-import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -141,7 +140,7 @@ class BehandlingDao(
             }
         }
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): List<BehandlingOgSak> =
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(sakIder: List<SakId>): List<BehandlingOgSak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
@@ -158,13 +157,13 @@ class BehandlingDao(
                     1,
                     createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()),
                 )
-                stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
+                stmt.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
 
                 stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), SakId(getLong("sak_id"))) }
             }
         }
 
-    fun hentAapneBehandlinger(saker: Saker): List<BehandlingOgSak> =
+    fun hentAapneBehandlinger(sakIder: List<SakId>): List<BehandlingOgSak> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
@@ -176,7 +175,7 @@ class BehandlingDao(
                         """.trimIndent(),
                     )
                 stmt.setArray(1, createArrayOf("text", BehandlingStatus.underBehandling().toTypedArray()))
-                stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
+                stmt.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
 
                 stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), SakId(getLong("sak_id"))) }
             }
@@ -236,9 +235,9 @@ class BehandlingDao(
                         """
                         INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                         soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
-                        revurdering_aarsak, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
+                        revurdering_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
                         sende_brev, opphoer_fom, tidligere_familiepleier)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -254,14 +253,13 @@ class BehandlingDao(
                     stmt.setJsonb(9, utlandstilknytning)
                     stmt.setString(10, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
                     stmt.setString(11, revurderingsAarsak?.name)
-                    stmt.setString(12, fritekstAarsak)
-                    stmt.setString(13, prosesstype.toString())
-                    stmt.setString(14, kilde.toString())
-                    stmt.setString(15, begrunnelse)
-                    stmt.setString(16, relatertBehandlingId)
-                    stmt.setBoolean(17, sendeBrev)
-                    stmt.setString(18, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
-                    stmt.setJsonb(19, tidligereFamiliepleier)
+                    stmt.setString(12, prosesstype.toString())
+                    stmt.setString(13, kilde.toString())
+                    stmt.setString(14, begrunnelse)
+                    stmt.setString(15, relatertBehandlingId)
+                    stmt.setBoolean(16, sendeBrev)
+                    stmt.setString(17, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
+                    stmt.setJsonb(18, tidligereFamiliepleier)
                 }
                 checkInternFeil(stmt.executeUpdate() == 1) {
                     "Kunne ikke opprette behandling for ${behandling.id}"

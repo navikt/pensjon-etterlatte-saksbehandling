@@ -1,6 +1,6 @@
 package no.nav.etterlatte.regulering
 
-import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import org.slf4j.Logger
 import java.time.Duration
 import kotlin.math.max
@@ -10,9 +10,9 @@ const val MAKS_BATCHSTOERRELSE = 100
 
 fun kjoerIBatch(
     logger: Logger,
-    finnSaker: (Int) -> Saker,
+    finnSaker: (Int) -> SakslisteDTO,
     antall: Int,
-    haandterSaker: (Saker) -> Unit,
+    haandterSaker: (SakslisteDTO) -> Unit,
     venteperiode: Duration = Duration.ofSeconds(5),
 ) {
     val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
@@ -24,18 +24,18 @@ fun kjoerIBatch(
 
         val sakerTilOmregning = finnSaker(antallIDenneRunden)
 
-        logger.info("Henta ${sakerTilOmregning.saker.size} saker")
+        logger.info("Henta ${sakerTilOmregning.sakIdListe.size} saker")
 
-        if (sakerTilOmregning.saker.isEmpty()) {
+        if (sakerTilOmregning.sakIdListe.isEmpty()) {
             logger.debug("Ingen saker i denne runden. Returnerer")
             return
         }
 
         haandterSaker(sakerTilOmregning)
 
-        tatt += sakerTilOmregning.saker.size
+        tatt += sakerTilOmregning.sakIdListe.size
         logger.info("Ferdig med $tatt av totalt $antall saker")
-        if (sakerTilOmregning.saker.size < maksBatchstoerrelse) {
+        if (sakerTilOmregning.sakIdListe.size < maksBatchstoerrelse) {
             return
         }
         logger.info("Venter $venteperiode før neste runde.")

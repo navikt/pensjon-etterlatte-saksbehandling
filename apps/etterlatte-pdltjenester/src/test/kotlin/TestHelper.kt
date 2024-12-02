@@ -16,6 +16,14 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.pdl.PdlFoedested
+import no.nav.etterlatte.pdl.PdlFoedselsdato
+import no.nav.etterlatte.pdl.PdlFolkeregisteridentifikator
+import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.PdlMetadata
+import no.nav.etterlatte.pdl.PdlNavn
+import no.nav.etterlatte.pdl.PdlSivilstand
+import no.nav.etterlatte.pdl.PdlStatsborgerskap
 import java.time.LocalDate
 import java.util.UUID
 
@@ -79,3 +87,67 @@ fun mockPerson(
 fun mockFolkeregisterident(fnr: String) = PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(fnr))
 
 fun mockGeografiskTilknytning() = GeografiskTilknytning(kommune = "0301", ukjent = false)
+
+fun pdlHentPerson(
+    folkeregisteridentifikator: List<PdlFolkeregisteridentifikator> =
+        listOf(
+            pdlFolkeregisteridentifikator(
+                SOEKER_FOEDSELSNUMMER.value,
+            ),
+        ),
+    navn: List<PdlNavn> = listOf(pdlNavn()),
+    foedsel: List<PdlFoedselsdato> =
+        listOf(
+            PdlFoedselsdato(
+                foedselsdato = LocalDate.of(1990, 1, 1),
+                foedselsaar = 1990,
+                metadata = pdlMetadata(),
+            ),
+        ),
+    foedested: List<PdlFoedested> = emptyList(),
+    statsborgerskap: List<PdlStatsborgerskap>? = null,
+    sivilstand: List<PdlSivilstand>? = null,
+): PdlHentPerson =
+    PdlHentPerson(
+        folkeregisteridentifikator = folkeregisteridentifikator,
+        adressebeskyttelse = listOf(),
+        navn = navn,
+        foedselsdato = foedsel,
+        foedested = foedested,
+        sivilstand = sivilstand,
+        doedsfall = listOf(),
+        bostedsadresse = null,
+        deltBostedsadresse = null,
+        kontaktadresse = null,
+        oppholdsadresse = null,
+        innflyttingTilNorge = null,
+        statsborgerskap = statsborgerskap,
+        utflyttingFraNorge = null,
+        foreldreansvar = null,
+        forelderBarnRelasjon = null,
+        vergemaalEllerFremtidsfullmakt = null,
+    )
+
+fun pdlFolkeregisteridentifikator(
+    ident: String,
+    historisk: Boolean = false,
+) = PdlFolkeregisteridentifikator(
+    identifikasjonsnummer = ident,
+    status = "status",
+    type = "type",
+    folkeregistermetadata = null,
+    metadata = pdlMetadata(historisk),
+)
+
+fun pdlNavn(
+    fornavn: String = "fornavn",
+    etternavn: String = "etternavn",
+) = PdlNavn(fornavn, null, etternavn, metadata = pdlMetadata())
+
+fun pdlMetadata(historisk: Boolean = false): PdlMetadata =
+    PdlMetadata(
+        endringer = emptyList(),
+        historisk = historisk,
+        master = "FREG",
+        opplysningsId = UUID.randomUUID().toString(),
+    )

@@ -5,7 +5,7 @@ import React from 'react'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
 import { VisAktivitetsgrad } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VisAktivitetsgrad'
 
-export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
+export function AktivitetsgradIOppgave() {
   const { vurdering } = useAktivitetspliktOppgaveVurdering()
   const aktiviteter = vurdering.aktivitet
 
@@ -25,10 +25,7 @@ export function AktivitetsgradIOppgave(props: { doedsdato?: Date }) {
           {!!aktiviteter?.length ? (
             <>
               {aktiviteter.map((aktivitet) => (
-                <Table.ExpandableRow
-                  key={aktivitet.id}
-                  content={<VisAktivitetsgrad aktivitet={aktivitet} doedsdato={props.doedsdato} />}
-                >
+                <Table.ExpandableRow key={aktivitet.id} content={<VisAktivitetsgrad aktivitet={aktivitet} />}>
                   <Table.DataCell>{tekstAktivitetspliktVurderingType[aktivitet.aktivitetsgrad]}</Table.DataCell>
                   <Table.DataCell>{formaterDatoMedFallback(aktivitet.fom, '-')}</Table.DataCell>
                   <Table.DataCell>{formaterDatoMedFallback(aktivitet.tom, '-')}</Table.DataCell>

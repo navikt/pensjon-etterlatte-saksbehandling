@@ -1,6 +1,35 @@
 {
   "data": {
     "hentPerson": {
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "25478323363",
+          "status": "I_BRUK",
+          "type": "FNR",
+          "folkeregistermetadata": {
+            "aarsak": null,
+            "ajourholdstidspunkt": "2021-06-24T09:33:26",
+            "gyldighetstidspunkt": "2021-06-24T09:33:26",
+            "kilde": "srvdolly",
+            "opphoerstidspunkt": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "srvdolly",
+                "registrert": "2021-06-24T09:33:27",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "f73504f7-9c0b-436c-8e25-9f29532daf73",
+            "historisk": false
+          }
+        }
+      ],
       "adressebeskyttelse": [],
       "navn": [
         {

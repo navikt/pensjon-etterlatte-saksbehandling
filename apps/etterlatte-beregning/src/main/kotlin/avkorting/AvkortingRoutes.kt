@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
+import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
@@ -28,6 +29,7 @@ fun Route.avkorting(
     behandlingKlient: BehandlingKlient,
     tidligAlderspensjonService: AvkortingTidligAlderspensjonService,
     aarligInntektsjusteringService: AarligInntektsjusteringService,
+    mottattInntektsjusteringService: MottattInntektsjusteringService,
 ) {
     val logger = LoggerFactory.getLogger("AvkortingRoute")
 
@@ -35,7 +37,7 @@ fun Route.avkorting(
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter avkorting med behandlingId=$it")
-                when (val avkorting = avkortingService.hentAvkorting(it, brukerTokenInfo)) {
+                when (val avkorting = avkortingService.hentOpprettEllerReberegnAvkorting(it, brukerTokenInfo)) {
                     null -> call.response.status(HttpStatusCode.NoContent)
                     else -> call.respond(avkorting)
                 }
@@ -106,6 +108,14 @@ fun Route.avkorting(
                     forrigeBehandlingId = request.forrigeBehandling,
                     brukerTokenInfo = brukerTokenInfo,
                 )
+            call.respond(respons.toDto())
+        }
+
+        post("mottatt-inntektsjustering") {
+            val request = call.receive<MottattInntektsjusteringAvkortigRequest>()
+            logger.info("Oppretter avkorting etter mottatt inntektsjustering fra bruker behandling=${request.behandlingId}")
+            val respons =
+                mottattInntektsjusteringService.opprettAvkortingMedBrukeroppgittInntekt(request, brukerTokenInfo)
             call.respond(respons.toDto())
         }
     }

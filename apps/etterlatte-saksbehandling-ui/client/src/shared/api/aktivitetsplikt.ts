@@ -14,6 +14,7 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { OppgaveDTO } from '~shared/types/oppgave'
+import { Spraak } from '~shared/types/Brev'
 
 export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string
@@ -105,6 +106,20 @@ export const opprettAktivitetspliktAktivitetsgrad = async (args: {
     ...args.request,
   })
 
+export interface AktvitetspliktAktivitetsgradOgUnntak {
+  aktivitetsgrad: IOpprettAktivitetspliktAktivitetsgrad
+  unntak?: IOpprettAktivitetspliktUnntak
+}
+
+export const opprettAktivitetspliktAktivitetsgradOgUnntak = async (args: {
+  sakId: number
+  oppgaveId: string
+  request: AktvitetspliktAktivitetsgradOgUnntak
+}): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
+  apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/aktivitetsgrad-og-unntak`, {
+    ...args.request,
+  })
+
 export const slettAktivitetspliktVurdering = async (args: {
   sakId: number
   oppgaveId: string
@@ -160,6 +175,7 @@ export interface IBrevAktivitetspliktRequest {
   skalSendeBrev: boolean
   utbetaling?: boolean
   redusertEtterInntekt?: boolean
+  spraak?: Spraak
 }
 
 export const lagreAktivitetspliktBrevdata = async (args: {
@@ -185,5 +201,6 @@ export interface IBrevAktivitetspliktDto {
   skalSendeBrev: boolean
   utbetaling?: boolean
   redusertEtterInntekt?: boolean
+  spraak?: Spraak
   kilde: KildeSaksbehandler
 }

@@ -39,7 +39,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
-import no.nav.etterlatte.behandling.jobs.OmregningKlassifikasjonskodeJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
@@ -67,7 +66,6 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningDao
-import no.nav.etterlatte.behandling.omregning.OmregningKlassifikasjonskodeJobService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.ManuellRevurderingService
@@ -102,6 +100,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbService
+import no.nav.etterlatte.inntektsjustering.selvbetjening.InntektsjusteringSelvbetjeningService
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
@@ -470,8 +469,18 @@ internal class ApplicationContext(
             grunnlagsService,
             krrKlient,
             pdlTjenesterKlient,
+            featureToggleService,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient)
+
+    val inntektsjusteringSelvbetjeningService =
+        InntektsjusteringSelvbetjeningService(
+            oppgaveService = oppgaveService,
+            behandlingService = behandlingService,
+            vedtakKlient = vedtakKlient,
+            rapid = rapid,
+            featureToggleService = featureToggleService,
+        )
 
     val aarligInntektsjusteringJobbService =
         AarligInntektsjusteringJobbService(
@@ -524,9 +533,6 @@ internal class ApplicationContext(
             pdlTjenesterKlient = pdlTjenesterKlient,
             krrKlient = krrKlient,
         )
-
-    private val omregningKlassifikasjonskodeJobService =
-        OmregningKlassifikasjonskodeJobService(behandlingService, omregningService, rapid)
 
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(
@@ -647,19 +653,6 @@ internal class ApplicationContext(
             initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
-        )
-    }
-
-    val omregningKlassifikasjonskodeJob: OmregningKlassifikasjonskodeJob by lazy {
-        OmregningKlassifikasjonskodeJob(
-            erLeader = { leaderElectionKlient.isLeader() },
-            Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(20, ChronoUnit.MINUTES),
-            omregningKlassifikasjonskodeJobService = omregningKlassifikasjonskodeJobService,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
-            // Simulering har åpningstid - kan ikke kjøre saker som krever simulering utenfor denne tiden
-            openingHours = OpeningHours(start = 7, slutt = 19),
         )
     }
 

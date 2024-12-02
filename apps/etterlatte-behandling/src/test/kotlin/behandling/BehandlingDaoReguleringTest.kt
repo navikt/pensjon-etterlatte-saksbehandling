@@ -12,7 +12,6 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
@@ -67,7 +66,7 @@ internal class BehandlingDaoReguleringTest(
         behandlingRepo.opprettBehandling(opprettBehandling)
 
         val trengerNyBeregning =
-            behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(Saker(listOf(sak)))
+            behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(listOf(sak.id))
 
         with(behandlingRepo.hentBehandling(opprettBehandling.id)) {
             val expected = BehandlingStatus.TRYGDETID_OPPDATERT
@@ -95,7 +94,7 @@ internal class BehandlingDaoReguleringTest(
             }
 
         val trengerNyBeregning =
-            behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(Saker(listOf(relevantSak)))
+            behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(listOf(relevantSak.id))
 
         trengerNyBeregning.map { it.sakId } shouldContainExactly listOf(relevantSak.id)
         with(behandlingRepo.hentBehandling(sakOgBehandling.find { it.sakId == relevantSak.id }!!.id)) {
@@ -122,7 +121,7 @@ internal class BehandlingDaoReguleringTest(
             opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id, status = status)
         behandlingRepo.opprettBehandling(opprettBehandling)
 
-        behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(Saker(listOf(sak)))
+        behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(listOf(sak.id))
 
         with(behandlingRepo.hentBehandling(opprettBehandling.id)) {
             val expected = status

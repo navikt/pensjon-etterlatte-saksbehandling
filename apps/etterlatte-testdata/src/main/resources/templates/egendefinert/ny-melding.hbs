@@ -25,6 +25,7 @@
                   <option value="udefinert" selcted >Udefinert</option>
                   <option value="omregning">Omregning</option>
                   <option value="inntektsjusteringjobb">Inntektsjusteringjobb</option>
+                  <option value="inntektsjustering">Inntektsjustering fra selvbetjening</option>
                 </select>
             </div>
 
@@ -55,6 +56,9 @@
             prettify()
         } else if( hendelseType == 'inntektsjusteringjobb') {
             document.getElementById('json').value = '{"@event_name": "INNTEKTSJUSTERING:START_INNTEKTSJUSTERING_JOBB","kjoering": "asdf","antall": 1, "spesifikke_saker": "","ekskluderte_saker": ""}'
+            prettify()
+        } else if( hendelseType == 'inntektsjustering') {
+            document.getElementById('json').value = '{"@event_name":"inntektsjustering_innsendt","@inntektsjustering_innhold":{"id":"accdcbb1-be49-4ab5-b7d3-a3852d19cf42","fnr":"123","inntektsaar":2025,"arbeidsinntekt":100,"naeringsinntekt":200,"inntektFraUtland":300,"afpInntekt":400,"afpTjenesteordning":"tjenesteordning","skalGaaAvMedAlderspensjon":"JA","datoForAaGaaAvMedAlderspensjon":"2025-06-10","tidspunkt":"2024-08-01T05:06:07Z"}}'
             prettify()
         } else {
         document.getElementById('json').value = ''

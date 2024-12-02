@@ -1,0 +1,2 @@
+-- Denne kjøringen ble ferdigstilt ved andre forsøk på at den hadde inntekt for neste år, men den ble ikke kjørt ferdig riktig
+update omregningskjoering set status = 'FEILA' where id = '95f4c831-435f-4b79-8565-6475f9d2dfb4' and status = 'FERDIGSTILT';

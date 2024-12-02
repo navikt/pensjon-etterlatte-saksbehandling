@@ -6,7 +6,7 @@ import { slettAktivitetspliktUnntak } from '~shared/api/aktivitetsplikt'
 import { useDispatch } from 'react-redux'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { setAktivitetspliktVurdering } from '~store/reducers/Aktivitetsplikt12mnd'
-import { UnntakAktivitetspliktOppgaveForm } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgaveForm'
+import { UnntakAktivitetspliktOppgaveMedForm } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
 import { BodyShort, Button, HStack, Label, VStack } from '@navikt/ds-react'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -42,7 +42,7 @@ export function VisUnntak(props: { unntak: IAktivitetspliktUnntak }) {
 
   if (redigerer) {
     return (
-      <UnntakAktivitetspliktOppgaveForm
+      <UnntakAktivitetspliktOppgaveMedForm
         onSuccess={oppdaterStateEtterRedigertUnntak}
         onAvbryt={() => setRedigerer(false)}
         unntak={unntak}

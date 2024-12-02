@@ -12,6 +12,7 @@ import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { AktivitetspliktVurdering12MndOversikt } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering12MndOversikt'
+import { AktivitetspliktOppgaveType } from '~shared/types/Aktivitetsplikt'
 
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
@@ -52,7 +53,10 @@ function NesteKnapp() {
   const gaaTilNeste = () => {
     setFeilmeldingAktiviteter('')
     if (aktiviteter?.length) {
-      if (vurderingType === 'TOLV_MAANEDER' && aktiviteter.every((aktivitet) => !aktivitet.vurdertFra12Mnd)) {
+      if (
+        vurderingType === AktivitetspliktOppgaveType.TOLV_MAANEDER &&
+        aktiviteter.every((aktivitet) => !aktivitet.vurdertFra12Mnd)
+      ) {
         setFeilmeldingAktiviteter('Du må gjøre en ny vurdering fra 12 måneder for å gå videre')
       } else {
         navigate(`../${AktivitetspliktSteg.BREVVALG}`)

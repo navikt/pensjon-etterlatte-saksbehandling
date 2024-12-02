@@ -5,15 +5,13 @@ import React from 'react'
 import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
-import { AktivitetspliktRevurderingModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktRevurderingModal'
+import { AktivitetspliktRevurderingModal } from '~components/oppgavebenk/oppgaveModal/aktivitetsplikt/AktivitetspliktRevurderingModal'
 import { GeneriskOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GeneriskOppgaveModal'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
-import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfo6MndVarigUnntakModal'
+import { AktivitetspliktInfo6MndVarigUnntakModal } from '~components/oppgavebenk/oppgaveModal/aktivitetsplikt/AktivitetspliktInfo6MndVarigUnntakModal'
 import { BrevOppgaveModal } from '~components/oppgavebenk/oppgaveModal/BrevOppgaveModal'
 import { TilleggsinformasjonOppgaveModal } from '~components/oppgavebenk/oppgaveModal/TilleggsinformasjonOppgaveModal'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/AktivitetspliktInfoModal'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -21,8 +19,8 @@ import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi }
 import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-
-export const FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT = 'aktivitetsplikt.ny-vurdering'
+import { MottattInntektsjusteringModal } from '~components/oppgavebenk/oppgaveModal/MottattInntektsjusteringModal'
+import { AktivitetspliktOppgaveHandling } from '~components/oppgavebenk/oppgaveModal/aktivitetsplikt/AktivitetspliktOppgaveHandling'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -40,10 +38,6 @@ export const HandlingerForOppgave = ({
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
-  const brukNyVurderingssideAktivitetsplikt = useFeatureEnabledMedDefault(
-    FEATURE_NY_SIDE_VURDERING_AKTIVITETSPLIKT,
-    false
-  )
 
   const opprettInntektsjusteringRevurdering = () => {
     opprettManuellInntektsjustering(
@@ -164,14 +158,9 @@ export const HandlingerForOppgave = ({
       )
     case Oppgavetype.AKTIVITETSPLIKT:
       return (
-        erInnloggetSaksbehandlerOppgave &&
-        (brukNyVurderingssideAktivitetsplikt ? (
-          <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/${AktivitetspliktSteg.VURDERING}`}>
-            Gå til vurdering
-          </Button>
-        ) : (
-          <AktivitetspliktInfoModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
-        ))
+        erInnloggetSaksbehandlerOppgave && (
+          <AktivitetspliktOppgaveHandling oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+        )
       )
     case Oppgavetype.AKTIVITETSPLIKT_12MND:
       return (
@@ -197,6 +186,8 @@ export const HandlingerForOppgave = ({
           <AktivitetspliktInfo6MndVarigUnntakModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
+    case Oppgavetype.MOTTATT_INNTEKTSJUSTERING:
+      return <MottattInntektsjusteringModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
       return mapResult(opprettManuellRevurderingStatus, {
         initial: (

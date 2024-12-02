@@ -9,18 +9,16 @@ import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
-import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.ktor.runServerWithConfig
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.APP
 import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.etterlatte.libs.ktor.token.Issuer
@@ -41,7 +39,6 @@ class SamordningVedtakRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private val samordningVedtakService = mockk<SamordningVedtakService>()
     private lateinit var config: Config
-    private lateinit var applicationConfig: HoconApplicationConfig
 
     @BeforeAll
     fun before() {
@@ -53,15 +50,12 @@ class SamordningVedtakRouteTest {
         @BeforeEach
         fun before() {
             config = config(mockOAuth2Server.config.httpServer.port(), Issuer.MASKINPORTEN.issuerName)
-            applicationConfig = HoconApplicationConfig(config)
         }
 
         @Test
         fun `skal gi 401 når token mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -75,9 +69,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 401 med token hvor scope mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -92,9 +84,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 400 dersom tpnr-header mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -119,9 +109,7 @@ class SamordningVedtakRouteTest {
                 opprettSamordningVedtakDto()
 
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak/123") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -156,9 +144,7 @@ class SamordningVedtakRouteTest {
                 listOf(opprettSamordningVedtakDto())
 
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/vedtak") {
                         parameter("fomDato", virkFom)
@@ -203,15 +189,12 @@ class SamordningVedtakRouteTest {
         @BeforeEach
         fun before() {
             config = config(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
-            applicationConfig = HoconApplicationConfig(config)
         }
 
         @Test
         fun `skal gi 401 når token mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -226,9 +209,7 @@ class SamordningVedtakRouteTest {
         @Test
         fun `skal gi 401 med token hvor rolle mangler`() {
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -253,9 +234,7 @@ class SamordningVedtakRouteTest {
                 listOf(opprettSamordningVedtakDto())
 
             testApplication {
-                environment { config = applicationConfig }
-                application { samordningVedtakApi() }
-
+                samordningVedtakApi()
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         parameter("fomDato", virkFom)
@@ -293,8 +272,8 @@ class SamordningVedtakRouteTest {
         }
     }
 
-    private fun Application.samordningVedtakApi() {
-        restModule(routeLogger) {
+    private fun ApplicationTestBuilder.samordningVedtakApi() {
+        runServerWithConfig(applicationConfig = config) {
             samordningVedtakRoute(
                 samordningVedtakService = samordningVedtakService,
                 config = config,

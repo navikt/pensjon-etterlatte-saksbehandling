@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -69,9 +68,8 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                         persongalleri(),
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
-                        prosessType = Prosesstype.MANUELL,
                         request = applicationContext.behandlingFactory.hentDataForOpprettBehandling(sak.id),
-                    )?.behandling
+                    ).behandling
             Pair(sak, behandling as Foerstegangsbehandling)
         }
 

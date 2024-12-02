@@ -19,7 +19,7 @@ export function Vurderinger(props: { doedsdato: Date }) {
           <Heading size="medium">Vurdering av aktivitetsplikt</Heading>
           <BodyShort>Følgende vurderinger av aktiviteten er registrert.</BodyShort>
         </VStack>
-        <AktivitetsgradIOppgave doedsdato={doedsdato} />
+        <AktivitetsgradIOppgave />
         <UnntakIOppgave />
 
         {oppgaveErRedigerbar && <LeggTilNyVurdering doedsdato={doedsdato} />}

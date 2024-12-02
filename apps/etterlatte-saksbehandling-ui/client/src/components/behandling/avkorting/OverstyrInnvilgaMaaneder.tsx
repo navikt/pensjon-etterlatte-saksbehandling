@@ -4,12 +4,14 @@ import { useFormContext } from 'react-hook-form'
 import {
   hentLesbarTekstForInnvilgaMaanederType,
   IAvkortingGrunnlagLagre,
-  OverstyrtInnvilaMaanederAarsak,
+  OverstyrtInnvilgaMaanederAarsak,
+  SystemOverstyrtInnvilgaMaanederAarsak,
 } from '~shared/types/IAvkorting'
 
 export default function OverstyrInnvilgaMaander() {
   const {
     register,
+    watch,
     formState: { errors },
   } = useFormContext<IAvkortingGrunnlagLagre>()
 
@@ -41,9 +43,15 @@ export default function OverstyrInnvilgaMaander() {
               error={errors?.overstyrtInnvilgaMaaneder?.aarsak?.message}
             >
               <option value="">Velg årsak</option>
-              {Object.values(OverstyrtInnvilaMaanederAarsak).map((type) => (
+              {watch('overstyrtInnvilgaMaaneder.aarsak') === SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67 && (
+                <option value={SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67} disabled={true}>
+                  {hentLesbarTekstForInnvilgaMaanederType(SystemOverstyrtInnvilgaMaanederAarsak.BLIR_67)} (satt av
+                  Gjenny)
+                </option>
+              )}
+              {Object.values(OverstyrtInnvilgaMaanederAarsak).map((type) => (
                 <option key={type} value={type}>
-                  {hentLesbarTekstForInnvilgaMaanederType(type as OverstyrtInnvilaMaanederAarsak)}
+                  {hentLesbarTekstForInnvilgaMaanederType(type as OverstyrtInnvilgaMaanederAarsak)}
                 </option>
               ))}
             </Select>

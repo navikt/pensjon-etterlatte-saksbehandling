@@ -22,12 +22,11 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
-import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.ForeldreansvarHistorikkMapper
 import no.nav.etterlatte.pdl.mapper.GeografiskTilknytningMapper
-import no.nav.etterlatte.pdl.mapper.PersonMapper
+import no.nav.etterlatte.pdl.mapper.ParallelleSannheterService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
@@ -37,7 +36,7 @@ class PdlForesporselFeilet(
 
 class PersonService(
     private val pdlKlient: PdlKlient,
-    private val ppsKlient: ParallelleSannheterKlient,
+    private val parallelleSannheterService: ParallelleSannheterService,
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
@@ -57,9 +56,7 @@ class PersonService(
                     )
                 }
             } else {
-                PersonMapper.mapOpplysningsperson(
-                    ppsKlient = ppsKlient,
-                    pdlKlient = pdlKlient,
+                parallelleSannheterService.mapOpplysningsperson(
                     request = request,
                     hentPerson = it.data.hentPerson,
                 )
@@ -84,10 +81,8 @@ class PersonService(
                 }
             } else {
                 // TODO: bruke mapOpplysningsperson også PersonDTO toPerson?
-                PersonMapper.mapPerson(
-                    ppsKlient = ppsKlient,
-                    pdlKlient = pdlKlient,
-                    fnr = request.foedselsnummer,
+                parallelleSannheterService.mapPerson(
+                    oppslagFnr = request.foedselsnummer,
                     personRolle = request.rolle,
                     hentPerson = it.data.hentPerson,
                     saktyper = request.saktyper,
@@ -97,7 +92,7 @@ class PersonService(
     }
 
     suspend fun hentAdressebeskyttelseGradering(request: HentAdressebeskyttelseRequest): AdressebeskyttelseGradering {
-        logger.info("Henter person med fnr=${request.ident} fra PDL")
+        logger.info("Henter adressebeskyttelse for person med fnr=${request.ident} fra PDL")
 
         return pdlKlient.hentAdressebeskyttelse(request).let {
             if (it.data?.hentPerson == null) {
@@ -211,7 +206,7 @@ class PersonService(
             }
         } else {
             response.data.hentIdenter.identer
-                .filterNot { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
+                .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
                 .map {
                     PdlIdentifikator.FolkeregisterIdent(
                         Folkeregisteridentifikator.of(it.ident),
@@ -278,7 +273,7 @@ class PersonService(
                 )?.plus(gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() })
 
         return Persongalleri(
-            soeker = mottakerAvYtelsen.value,
+            soeker = mottaker.foedselsnummer.value,
             innsender = innsender?.value,
             soesken = soesken.map { it.foedselsnummer.value },
             avdoed = avdoede.map { it.foedselsnummer.value },
@@ -335,11 +330,11 @@ class PersonService(
             )
 
         return Persongalleri(
-            soeker = mottakerAvYtelsen.value,
+            soeker = mottaker.foedselsnummer.value,
             innsender = innsender?.value,
             soesken = listOf(),
             avdoed = avdoede.map { it.foedselsnummer.value },
-            gjenlevende = listOf(mottakerAvYtelsen.value) + levende.map { it.foedselsnummer.value },
+            gjenlevende = listOf(mottaker.foedselsnummer.value) + levende.map { it.foedselsnummer.value },
             personerUtenIdent = personerUtenIdent.ifEmpty { null },
         )
     }

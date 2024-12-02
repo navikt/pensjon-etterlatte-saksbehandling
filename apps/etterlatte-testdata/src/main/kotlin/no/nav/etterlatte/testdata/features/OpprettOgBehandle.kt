@@ -31,6 +31,8 @@ class OpprettOgBehandle(
         get() = "Opprett og behandle søknad(er)"
     override val path: String
         get() = "opprett-og-behandle"
+    override val kunEtterlatte: Boolean
+        get() = true
 
     override val routes: Route.() -> Unit
         get() = {

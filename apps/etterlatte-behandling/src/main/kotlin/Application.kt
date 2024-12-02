@@ -34,6 +34,7 @@ import no.nav.etterlatte.egenansatt.egenAnsattRoute
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.inntektsjustering.aarligInntektsjusteringRoute
+import no.nav.etterlatte.inntektsjustering.selvbetjening.inntektsjusteringSelvbetjeningRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.kodeverk.kodeverk
@@ -93,7 +94,6 @@ private fun timerJobs(context: ApplicationContext): List<TimerJob> =
         context.doedsmeldingerJob,
         context.doedsmeldingerReminderJob,
         context.saksbehandlerJob,
-        context.omregningKlassifikasjonskodeJob,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
@@ -190,6 +190,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     )
     omregningRoutes(omregningService = applicationContext.omregningService)
     aarligInntektsjusteringRoute(service = applicationContext.aarligInntektsjusteringJobbService)
+    inntektsjusteringSelvbetjeningRoute(service = applicationContext.inntektsjusteringSelvbetjeningService)
     migreringRoutes(migreringService = applicationContext.migreringService)
     bosattUtlandRoutes(bosattUtlandService = applicationContext.bosattUtlandService)
     behandlingsstatusRoutes(behandlingsstatusService = applicationContext.behandlingsStatusService)

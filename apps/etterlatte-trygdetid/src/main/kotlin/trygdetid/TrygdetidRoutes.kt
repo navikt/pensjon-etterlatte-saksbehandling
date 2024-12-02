@@ -325,38 +325,6 @@ fun Route.trygdetid(
                             )
                         }
                     }
-
-                    post("/uten_fremtidig") {
-                        withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                            logger.info("Beregn trygdetid uten fremtidig trygdetid for behandling $behandlingId")
-
-                            val trygdetid =
-                                trygdetidService.hentTrygdetidIBehandlingMedId(
-                                    behandlingId,
-                                    trygdetidId,
-                                    brukerTokenInfo,
-                                )
-
-                            if (trygdetid != null) {
-                                trygdetidService.reberegnUtenFremtidigTrygdetid(
-                                    behandlingId,
-                                    trygdetidId,
-                                    brukerTokenInfo,
-                                )
-                                call.respond(
-                                    trygdetidService
-                                        .hentTrygdetidIBehandlingMedId(
-                                            behandlingId,
-                                            trygdetidId,
-                                            brukerTokenInfo,
-                                        )!!
-                                        .toDto(),
-                                )
-                            } else {
-                                call.respond(HttpStatusCode.NoContent)
-                            }
-                        }
-                    }
                 }
             }
         }

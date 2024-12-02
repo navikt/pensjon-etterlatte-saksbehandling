@@ -11,6 +11,8 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Enhetsnummer
@@ -18,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -40,14 +43,14 @@ import org.slf4j.LoggerFactory
 import java.time.YearMonth
 
 interface SakService {
-    fun hentSaker(
+    fun hentSakIdListeForKjoering(
         kjoering: String,
         antall: Int,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
         sakType: SakType? = null,
         loependeFom: YearMonth? = null,
-    ): List<Sak>
+    ): List<SakId>
 
     fun finnSaker(ident: String): List<Sak>
 
@@ -97,6 +100,8 @@ interface SakService {
         sakId: SakId,
         bruker: Systembruker,
     ): SakMedGraderingOgSkjermet
+
+    fun oppdaterIdentForSak(sak: Sak): Sak
 }
 
 class ManglerTilgangTilEnhet(
@@ -114,6 +119,7 @@ class SakServiceImpl(
     private val grunnlagService: GrunnlagService,
     private val krrKlient: KrrKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
+    private val featureToggle: FeatureToggleService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -139,19 +145,29 @@ class SakServiceImpl(
         return saker.associateBy { it.id }
     }
 
-    override fun hentSaker(
+    override fun hentSakIdListeForKjoering(
         kjoering: String,
         antall: Int,
         spesifikkeSaker: List<SakId>,
         ekskluderteSaker: List<SakId>,
         sakType: SakType?,
         loependeFom: YearMonth?,
-    ): List<Sak> =
+    ): List<SakId> =
         lesDao
-            .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType, loependeFom)
-            .also { logger.info("Henta ${it.size} saker før filtrering") }
+            .hentSaker(
+                kjoering,
+                antall,
+                spesifikkeSaker,
+                ekskluderteSaker,
+                sakType,
+                featureToggle.isEnabled(
+                    ReguleringFeatureToggle.OMREGING_REKJOERE_MANUELL_UTEN_OPPGAVE,
+                    false,
+                ),
+            ).also { logger.info("Henta ${it.size} saker før filtrering") }
             .filterForEnheter()
             .also { logger.info("Henta ${it.size} saker etter filtrering") }
+            .map(Sak::id)
 
     private fun finnSakForPerson(
         ident: String,
@@ -159,8 +175,15 @@ class SakServiceImpl(
     ) = finnSakerForPerson(ident, sakType).let {
         if (it.isEmpty()) {
             null
-        } else {
+        } else if (it.size == 1) {
             it.single()
+        } else {
+            sikkerLogg.error("Fant ${it.size} saker av type $sakType på person: ${it.joinToString()}}")
+
+            throw InternfeilException(
+                "Personen har ${it.size} saker av type $sakType. " +
+                    "Dette må meldes i Porten for manuell kontroll og opprydding.",
+            )
         }
     }
 
@@ -187,7 +210,13 @@ class SakServiceImpl(
     private fun finnSakerForPerson(
         ident: String,
         sakType: SakType? = null,
-    ) = lesDao.finnSaker(ident, sakType)
+    ): List<Sak> =
+        runBlocking {
+            pdltjenesterKlient
+                .hentPdlFolkeregisterIdenter(ident)
+                .identifikatorer
+                .flatMap { lesDao.finnSaker(it.folkeregisterident.value, sakType) }
+        }
 
     override fun markerSakerMedSkjerming(
         sakIder: List<SakId>,
@@ -203,7 +232,13 @@ class SakServiceImpl(
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
-        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident), HardkodaSystembruker.opprettGrunnlag) }
+        runBlocking {
+            grunnlagService.leggInnNyttGrunnlagSak(
+                sak,
+                Persongalleri(sak.ident),
+                HardkodaSystembruker.opprettGrunnlag,
+            )
+        }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
         val spraak = hentSpraak(sak.ident)
         val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
@@ -215,6 +250,33 @@ class SakServiceImpl(
             )
         }
         return sak
+    }
+
+    override fun oppdaterIdentForSak(sak: Sak): Sak {
+        val identListe = runBlocking { pdltjenesterKlient.hentPdlFolkeregisterIdenter(sak.ident) }
+
+        val alleIdenter = identListe.identifikatorer.map { it.folkeregisterident.value }
+        if (sak.ident !in alleIdenter) {
+            sikkerLogg.error("Ident ${sak.ident} fra sak ${sak.id} matcher ingen av identene fra PDL: $alleIdenter")
+            throw InternfeilException(
+                "Ident i sak ${sak.id} stemmer ikke overens med identer vi fikk fra PDL",
+            )
+        }
+
+        val gjeldendeIdent =
+            identListe.identifikatorer.singleOrNull { !it.historisk }?.folkeregisterident
+                ?: throw InternfeilException("Sak ${sak.id} har flere eller ingen gyldige identer samtidig. Kan ikke oppdatere ident.")
+
+        dao.oppdaterIdent(sak.id, gjeldendeIdent)
+
+        logger.info("Oppdaterte sak ${sak.id} med bruker sin nyeste ident. Se sikkerlogg for detailjer")
+        sikkerLogg.info(
+            "Oppdaterte sak ${sak.id}: Endret ident fra ${sak.ident} til ${gjeldendeIdent.value}. " +
+                "Alle identer fra PDL: ${identListe.identifikatorer.joinToString()}",
+        )
+
+        return lesDao.hentSak(sak.id)
+            ?: throw InternfeilException("Kunne ikke hente ut sak ${sak.id} som nettopp ble endret")
     }
 
     private fun hentSpraak(fnr: String): Spraak {
@@ -425,4 +487,13 @@ class SakServiceImpl(
         enheterSomSkalFiltreres: List<Enhetsnummer>,
         saker: List<Sak>,
     ): List<Sak> = saker.filter { it.enhet !in enheterSomSkalFiltreres }
+}
+
+enum class ReguleringFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
+    OMREGING_REKJOERE_MANUELL_UTEN_OPPGAVE("aarlig-inntektsjustering-la-manuell-behandling"),
+    ;
+
+    override fun key() = key
 }

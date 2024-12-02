@@ -9,6 +9,7 @@ import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ISak } from '~shared/types/sak'
 import { round } from 'lodash'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 /**
  * Husk å endre [proxy_body_size] i nais-filene hvis du skal øke maks filstørrelse.
@@ -68,6 +69,8 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
         },
       })
     )
+
+    trackClick(ClickEvent.LAST_OPP_BREV)
 
     lastOppBrev({ sakId: sak.id, formData }, (brev) => {
       navigate(`/person/sak/${brev.sakId}/brev/${brev.id}`)

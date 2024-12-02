@@ -491,19 +491,7 @@ class BrevDataMapperFerdigstillingVedtak(
                     bruker,
                 )
             }
-        val forrigeAvkortingsinfo =
-            async {
-                val forrigeIverksatteBehandlingId = behandlingService.hentSisteIverksatteBehandling(sakId, bruker).id
-                beregningService.finnAvkortingsinfoNullable(
-                    forrigeIverksatteBehandlingId,
-                    sakType,
-                    virkningstidspunkt,
-                    vedtakType,
-                    bruker,
-                )
-            }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
-        val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
@@ -519,8 +507,6 @@ class BrevDataMapperFerdigstillingVedtak(
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
             avkortingsinfo.await(),
-            forrigeAvkortingsinfo.await(),
-            etterbetaling.await(),
             requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
             revurderingaarsak,
@@ -530,7 +516,7 @@ class BrevDataMapperFerdigstillingVedtak(
             requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
             datoVedtakOmgjoering,
             utlandstilknytningType,
-            behandling.opphoerFraOgMed,
+            behandling,
         )
     }
 

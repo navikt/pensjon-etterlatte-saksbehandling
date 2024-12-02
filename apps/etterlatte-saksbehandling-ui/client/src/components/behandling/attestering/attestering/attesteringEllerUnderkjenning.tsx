@@ -1,8 +1,7 @@
-import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
 import { Alert, BodyShort, VStack } from '@navikt/ds-react'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
@@ -14,10 +13,16 @@ type Props = {
   beslutning: IBeslutning | undefined
   vedtak?: VedtakSammendrag
   erFattet: boolean
+  gyldigStegForBeslutning: boolean
 }
 
-export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedtak, erFattet }: Props) => {
-  const { lastPage } = useContext(BehandlingRouteContext)
+export const AttesteringEllerUnderkjenning = ({
+  setBeslutning,
+  beslutning,
+  vedtak,
+  erFattet,
+  gyldigStegForBeslutning,
+}: Props) => {
   const oppgave = useSelectorOppgaveUnderBehandling()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -42,7 +47,7 @@ export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedta
             </Alert>
           )}
 
-          {lastPage ? (
+          {gyldigStegForBeslutning ? (
             <Beslutningsvalg
               beslutning={beslutning}
               setBeslutning={setBeslutning}

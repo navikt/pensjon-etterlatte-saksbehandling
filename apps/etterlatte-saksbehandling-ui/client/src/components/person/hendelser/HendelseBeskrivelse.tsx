@@ -6,6 +6,7 @@ import {
   formaterRolle,
   grunnlagsendringsBeskrivelse,
   grunnlagsendringsKilde,
+  ufoeretrygdVedtakstypeBeskrivelse,
 } from '~components/person/hendelser/utils'
 import {
   AdresseSamsvar,
@@ -17,11 +18,12 @@ import {
   InstitusjonsoppholdSamsvar,
   Sivilstand,
   SivilstandSamsvar,
+  UfoereHendelse,
   UtlandSamsvar,
   VergemaalEllerFremtidsfullmakt,
   VergemaalEllerFremtidsfullmaktForholdSamsvar,
 } from '~components/person/typer'
-import { formaterKanskjeStringDatoMedFallback, formaterDato } from '~utils/formatering/dato'
+import { formaterDato, formaterKanskjeStringDatoMedFallback } from '~utils/formatering/dato'
 import styled from 'styled-components'
 import { BodyShort, Label, VStack } from '@navikt/ds-react'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
@@ -54,7 +56,12 @@ const FolkeregisterSamsvarVisning = ({ samsvar }: { samsvar: Folkeregisteridenti
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Label>{samsvar.samsvar ? 'Er samsvar' : 'Er ikke samsvar'}</Label>
+        <Label>Ny folkeregisteridentifikator (PDL)</Label>
+        <KortTekst size="small">{samsvar.fraPdl}</KortTekst>
+      </div>
+      <div>
+        <Label>Eksisterende folkeregisteridentifikator (grunnlag)</Label>
+        <KortTekst size="small">{samsvar.fraGrunnlag}</KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
   )
@@ -185,6 +192,22 @@ const VisSivilstand = ({ samsvar }: { samsvar: SivilstandSamsvar }) => {
         </ListeWrapper>
       </div>
     </GrunnlagSammenligningWrapper>
+  )
+}
+
+const Ufoeretrygd = (props: { hendelse: UfoereHendelse }) => {
+  const hendelse = props.hendelse
+  return (
+    <>
+      <div>
+        <Label>Vedtakstype</Label>
+        <KortTekst>{ufoeretrygdVedtakstypeBeskrivelse[hendelse.vedtaksType]}</KortTekst>
+      </div>
+      <div>
+        <Label>Virkningstidspunkt</Label>
+        <KortTekst>{formaterDato(hendelse.virkningsdato)}</KortTekst>
+      </div>
+    </>
   )
 }
 
@@ -336,6 +359,14 @@ export const HendelseBeskrivelse = ({
         <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Institusjonsopphold samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
+      )
+    case 'UFOERETRYGD':
+      return (
+        <VStack gap="4">
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
+          <Ufoeretrygd hendelse={hendelse.samsvarMellomKildeOgGrunnlag.hendelse} />
           <HendelseKommentar kommentar={hendelse.kommentar} />
         </VStack>
       )

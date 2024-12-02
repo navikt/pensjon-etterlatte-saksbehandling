@@ -10,6 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -21,6 +22,7 @@ import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import javax.sql.DataSource
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SakSkrivDaoTest(
@@ -212,6 +215,15 @@ internal class SakSkrivDaoTest(
             val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
+            listOf(sak1, sak2, sak3).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
+
             val saker = sakLesDao.hentSaker("", 2, listOf(sak2.id, sak3.id), emptyList())
 
             saker.size shouldBe 2
@@ -225,6 +237,15 @@ internal class SakSkrivDaoTest(
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak4 = sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
+            listOf(sak1, sak2, sak3, sak4).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
+
             val saker = sakLesDao.hentSaker("", 4, emptyList(), ekskluderteSaker = listOf(sak1.id, sak2.id))
 
             saker.size shouldBe 2
@@ -237,6 +258,15 @@ internal class SakSkrivDaoTest(
             val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            listOf(sak1, sak2, sak3).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
 
             val saker =
                 sakLesDao.hentSaker(
@@ -252,9 +282,18 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Skal hente alle saker dersom ingen spesifikke er angitt`() {
-            sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            listOf(sak1, sak2, sak3).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
 
             val saker = sakLesDao.hentSaker("", 3, emptyList(), emptyList())
 
@@ -264,6 +303,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er starta, skal vi ikke hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
 
@@ -275,6 +320,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er starta, og saa feila det, skal vi hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
@@ -287,6 +338,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er starta, og saa ferdigstilt, skal vi ikke hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
@@ -299,6 +356,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er starta, og saa feila, og saa ferdigstilt, skal vi ikke hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
@@ -313,6 +376,12 @@ internal class SakSkrivDaoTest(
         @Test
         fun `Hvis kjoering er ferdigstilt, skal vi ikke hente ut`() {
             val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    sakId = sakid,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                ),
+            )
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
 
@@ -323,11 +392,18 @@ internal class SakSkrivDaoTest(
 
         @Test
         fun `Skal hente saker for gitt sakstype hvis sakstype er angitt`() {
-            sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-            sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
-
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak4 = sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+            listOf(sak1, sak2, sak3, sak4).forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
             sakLesDao
                 .hentSaker("", 100, emptyList(), emptyList(), SakType.BARNEPENSJON)
                 .map { it.ident } shouldContainExactlyInAnyOrder listOf("fnr1", "fnr2", "fnr3")
@@ -339,6 +415,74 @@ internal class SakSkrivDaoTest(
             val saker = sakLesDao.hentSaker("", 2, emptyList(), emptyList(), SakType.BARNEPENSJON)
             saker.map { it.ident } shouldContainAnyOf listOf("fnr1", "fnr2", "fnr3")
             saker.size shouldBe 2
+        }
+
+        @Test
+        fun `skal ikke hente saker som ikke har behandlinger`() {
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            val sakerMedBehandlinger = listOf(sak1, sak2)
+            sakerMedBehandlinger.forEach {
+                behandlingRepo.opprettBehandling(
+                    opprettBehandling(
+                        sakId = it.id,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    ),
+                )
+            }
+            val saker = sakLesDao.hentSaker("", 100, emptyList(), emptyList())
+            saker.map { it.ident } shouldContainExactlyInAnyOrder sakerMedBehandlinger.map { it.ident }
+            saker.size shouldBe 2
+        }
+    }
+
+    @Test
+    fun `oppdater ident på sak`() {
+        val opprinneligIdent = Random.nextLong().toString()
+        val sak = sakRepo.opprettSak(opprinneligIdent, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        val nyIdent = KONTANT_FOT
+
+        sakRepo.oppdaterIdent(sak.id, nyIdent)
+
+        val oppdatertSak = sakLesDao.hentSak(sak.id)!!
+
+        oppdatertSak.id shouldBe sak.id
+        oppdatertSak.enhet shouldBe sak.enhet
+        oppdatertSak.sakType shouldBe sak.sakType
+
+        oppdatertSak.ident shouldNotBe sak.ident
+        oppdatertSak.ident shouldBe nyIdent.value
+
+        val endringer: List<Pair<Sak, Sak>> =
+            dataSource.connection.use {
+                it
+                    .prepareStatement(
+                        """
+                        SELECT foer, etter
+                        FROM endringer
+                        WHERE tabell = 'sak'
+                        AND foer ->> 'id' = '${sak.id}' 
+                        """.trimIndent(),
+                    ).executeQuery()
+                    .toList {
+                        deserialize<Sak>(getString("foer")) to deserialize<Sak>(getString("etter"))
+                    }
+            }
+
+        endringer.size shouldBe 1
+
+        endringer.single().let { (foer, etter) ->
+            foer.id shouldBe etter.id
+            foer.enhet shouldBe etter.enhet
+            foer.sakType shouldBe etter.sakType
+
+            foer.ident shouldBe opprinneligIdent
+            etter.ident shouldBe nyIdent.value
         }
     }
 }

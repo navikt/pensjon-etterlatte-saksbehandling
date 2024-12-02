@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
@@ -59,6 +60,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.person.PdlFolkeregisterIdentListe
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -79,6 +81,7 @@ import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
@@ -365,6 +368,15 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
+    override suspend fun oppdaterSpesifiktBrev(
+        sakId: SakId,
+        brevId: BrevID,
+        brevParametre: BrevParametre,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Brev {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun ferdigstillBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
@@ -641,6 +653,11 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
     override suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
         TODO("Not yet implemented")
     }
+
+    override suspend fun hentPdlFolkeregisterIdenter(ident: String): PdlFolkeregisterIdentListe =
+        PdlFolkeregisterIdentListe(
+            listOf(PdlIdentifikator.FolkeregisterIdent(SOEKER_FOEDSELSNUMMER)),
+        )
 
     override suspend fun hentAdressebeskyttelseForPerson(
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,

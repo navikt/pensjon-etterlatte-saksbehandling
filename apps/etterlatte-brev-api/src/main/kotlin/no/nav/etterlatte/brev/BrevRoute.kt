@@ -259,30 +259,52 @@ fun Route.brevRoute(
             }
         }
 
-        post("spesifikk") {
-            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
-                logger.info("Oppretter nytt brev på sak=$sakId)")
-                val brevParametre = call.receive<BrevParametre>()
+        route("spesifikk") {
+            post {
+                withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
+                    logger.info("Oppretter nytt brev på sak=$sakId)")
+                    val brevParametre = call.receive<BrevParametre>()
 
-                if (!grunnlagService.finnesGrunnlagForSak(sakId, brukerTokenInfo)) {
-                    throw UgyldigForespoerselException(
-                        "MANGLER_GRUNNLAG",
-                        "Kan ikke opprette brev siden saken mangler grunnlag.",
-                    )
+                    if (!grunnlagService.finnesGrunnlagForSak(sakId, brukerTokenInfo)) {
+                        throw UgyldigForespoerselException(
+                            "MANGLER_GRUNNLAG",
+                            "Kan ikke opprette brev siden saken mangler grunnlag.",
+                        )
+                    }
+
+                    val sak = behandlingService.hentSak(sakId, brukerTokenInfo)
+                    grunnlagService.oppdaterGrunnlagForSak(sak, brukerTokenInfo)
+                    measureTimedValue {
+                        service.opprettNyttManueltBrev(
+                            sakId,
+                            brukerTokenInfo,
+                            brevParametre.brevkode,
+                            brevParametre.brevDataMapping(),
+                            brevParametre.spraak,
+                        )
+                    }.let { (brev, varighet) ->
+                        logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                        call.respond(HttpStatusCode.Created, brev)
+                    }
                 }
+            }
 
-                val sak = behandlingService.hentSak(sakId, brukerTokenInfo)
-                grunnlagService.oppdaterGrunnlagForSak(sak, brukerTokenInfo)
-                measureTimedValue {
-                    service.opprettNyttManueltBrev(
-                        sakId,
-                        brukerTokenInfo,
-                        brevParametre.brevkode,
-                        brevParametre.brevDataMapping(),
-                    )
-                }.let { (brev, varighet) ->
-                    logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
-                    call.respond(HttpStatusCode.Created, brev)
+            post("{$BREV_ID_CALL_PARAMETER}") {
+                withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
+                    val brevParametre = call.receive<BrevParametre>()
+                    val sak = behandlingService.hentSak(sakId, brukerTokenInfo)
+                    grunnlagService.oppdaterGrunnlagForSak(sak, brukerTokenInfo)
+                    measureTimedValue {
+                        service.oppdaterManueltBrev(
+                            sakId = sakId,
+                            brevId = brevId,
+                            bruker = brukerTokenInfo,
+                            parametre = brevParametre,
+                        )
+                    }.let { (brev, varighet) ->
+                        logger.info("Oppdatering av innhold i manuelt brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                        call.respond(HttpStatusCode.OK, brev)
+                    }
                 }
             }
         }

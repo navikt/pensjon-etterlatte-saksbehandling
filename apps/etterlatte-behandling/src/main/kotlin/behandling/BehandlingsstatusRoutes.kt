@@ -9,9 +9,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.sak.SakslisteDTO
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
@@ -25,7 +26,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         get("/opprett") {
             // TODO: kan slettes
             // Kalles kun av vilkårsvurdering når total-vurdering slettes
-            haandterStatusEndring(call) {
+            haandterStatusEndring {
                 inTransaction {
                     behandlingsstatusService.settOpprettet(behandlingId, brukerTokenInfo)
                 }
@@ -35,7 +36,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             // TODO: kan slettes
             // Kalles kun av vilkårsvurdering når total-vurdering slettes
             kunSkrivetilgang {
-                haandterStatusEndring(call) {
+                haandterStatusEndring {
                     inTransaction {
                         behandlingsstatusService.settOpprettet(behandlingId, brukerTokenInfo, false)
                     }
@@ -44,7 +45,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
 
         get("/vilkaarsvurder") {
-            haandterStatusEndring(call) {
+            haandterStatusEndring {
                 inTransaction {
                     behandlingsstatusService.settVilkaarsvurdert(behandlingId, brukerTokenInfo)
                 }
@@ -52,7 +53,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
         post("/vilkaarsvurder") {
             kunSkrivetilgang {
-                haandterStatusEndring(call) {
+                haandterStatusEndring {
                     inTransaction {
                         behandlingsstatusService.settVilkaarsvurdert(behandlingId, brukerTokenInfo, false)
                     }
@@ -61,7 +62,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
 
         get("/oppdaterTrygdetid") {
-            haandterStatusEndring(call) {
+            haandterStatusEndring {
                 inTransaction {
                     behandlingsstatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo)
                 }
@@ -69,7 +70,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
         post("/oppdaterTrygdetid") {
             kunSkrivetilgang {
-                haandterStatusEndring(call) {
+                haandterStatusEndring {
                     inTransaction {
                         behandlingsstatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, false)
                     }
@@ -78,7 +79,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
 
         get("/beregn") {
-            haandterStatusEndring(call) {
+            haandterStatusEndring {
                 inTransaction {
                     behandlingsstatusService.settBeregnet(behandlingId, brukerTokenInfo)
                 }
@@ -87,7 +88,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
 
         post("/beregn") {
             kunSkrivetilgang {
-                haandterStatusEndring(call) {
+                haandterStatusEndring {
                     inTransaction {
                         behandlingsstatusService.settBeregnet(behandlingId, brukerTokenInfo, false)
                     }
@@ -96,7 +97,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
 
         get("/avkort") {
-            haandterStatusEndring(call) {
+            haandterStatusEndring {
                 inTransaction {
                     behandlingsstatusService.settAvkortet(behandlingId, brukerTokenInfo)
                 }
@@ -105,7 +106,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
 
         post("/avkort") {
             kunSkrivetilgang {
-                haandterStatusEndring(call) {
+                haandterStatusEndring {
                     inTransaction {
                         behandlingsstatusService.settAvkortet(behandlingId, brukerTokenInfo, false)
                     }
@@ -114,14 +115,14 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
 
         get("/fatteVedtak") {
-            haandterStatusEndring(call) {
+            haandterStatusEndring {
                 inTransaction {
                     behandlingsstatusService.sjekkOmKanFatteVedtak(behandlingId)
                 }
             }
         }
         get("/returner") {
-            haandterStatusEndring(call) {
+            haandterStatusEndring {
                 inTransaction {
                     behandlingsstatusService.sjekkOmKanReturnereVedtak(behandlingId)
                 }
@@ -130,7 +131,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
 
         get("/attester") {
             kunAttestant {
-                haandterStatusEndring(call) {
+                haandterStatusEndring {
                     inTransaction {
                         behandlingsstatusService.sjekkOmKanAttestere(behandlingId)
                     }
@@ -141,7 +142,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         post("/tilsamordning") {
             kunSkrivetilgang {
                 val vedtakHendelse = call.receive<VedtakHendelse>()
-                haandterStatusEndring(call) {
+                haandterStatusEndring {
                     inTransaction {
                         behandlingsstatusService.settTilSamordnetVedtak(behandlingId, vedtakHendelse)
                     }
@@ -152,7 +153,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         post("/samordnet") {
             kunSkrivetilgang {
                 val vedtakHendelse = call.receive<VedtakHendelse>()
-                haandterStatusEndring(call) {
+                haandterStatusEndring {
                     inTransaction {
                         behandlingsstatusService.settSamordnetVedtak(behandlingId, vedtakHendelse)
                     }
@@ -163,7 +164,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         post("/iverksett") {
             kunSkrivetilgang {
                 val vedtakHendelse = call.receive<VedtakHendelse>()
-                haandterStatusEndring(call) {
+                haandterStatusEndring {
                     inTransaction {
                         behandlingsstatusService.settIverksattVedtak(behandlingId, vedtakHendelse)
                     }
@@ -175,9 +176,9 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
     route("/behandlinger") {
         post("/settTilbakeTilTrygdetidOppdatert") {
             kunSystembruker {
-                val saker = call.receive<Saker>()
+                val sakslisteDTO = call.receive<SakslisteDTO>()
                 val tilbakestilteBehandlinger =
-                    behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker)
+                    behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(sakslisteDTO)
                 call.respond(tilbakestilteBehandlinger)
             }
         }
@@ -188,10 +189,7 @@ data class OperasjonGyldig(
     val gyldig: Boolean,
 )
 
-private suspend fun haandterStatusEndring(
-    call: ApplicationCall,
-    proevStatusEndring: () -> Unit,
-) {
+private suspend fun PipelineContext<Unit, ApplicationCall>.haandterStatusEndring(proevStatusEndring: () -> Unit) {
     runCatching(proevStatusEndring)
         .fold(
             onSuccess = { call.respond(HttpStatusCode.OK, OperasjonGyldig(true)) },

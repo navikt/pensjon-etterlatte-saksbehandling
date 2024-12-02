@@ -164,6 +164,7 @@ data class PdlHentPersonNavnFoedselsdato(
 )
 
 data class PdlHentPerson(
+    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>?,
     val adressebeskyttelse: List<PdlAdressebeskyttelse>,
     val navn: List<PdlNavn>,
     val foedselsdato: List<PdlFoedselsdato>,

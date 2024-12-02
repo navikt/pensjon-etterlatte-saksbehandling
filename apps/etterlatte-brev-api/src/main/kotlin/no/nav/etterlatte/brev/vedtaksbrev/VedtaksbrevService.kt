@@ -183,8 +183,16 @@ class VedtaksbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         brevtype: Brevtype,
-    ): BrevService.BrevPayload =
-        brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, {
+    ): BrevService.BrevPayload {
+        val brev = db.hentBrev(brevId)
+        if (!brev.kanEndres()) {
+            throw UgyldigForespoerselException(
+                "BREVET_KAN_IKKE_ENDRES",
+                "Kan ikke oppdatere brevet med id=$brevId i sak=$sakId, fordi brevet har status (${brev.status})",
+            )
+        }
+
+        return brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, {
             when (brevtype) {
                 Brevtype.VARSEL ->
                     if (it.sakType === SakType.BARNEPENSJON) {
@@ -211,6 +219,7 @@ class VedtaksbrevService(
                 brevDataMapperRedigerbartUtfallVedtak.brevData(it)
             }
         }
+    }
 
     private fun lagrePdfHvisVedtakFattet(
         brevId: BrevID,

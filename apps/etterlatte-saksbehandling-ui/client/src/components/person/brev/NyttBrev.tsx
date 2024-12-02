@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { Column, GridContainer } from '~shared/styled'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
+import { BrevProsessType, BrevStatus, Spraak } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import styled from 'styled-components'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
@@ -16,10 +16,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
-import { Box, Heading, VStack } from '@navikt/ds-react'
-import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
+import { BodyShort, Box, Detail, Heading, VStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
+import { formaterSpraak } from '~utils/formatering/formatering'
 
 export default function NyttBrev() {
   useSidetittel('Nytt brev')
@@ -61,9 +61,23 @@ export default function NyttBrev() {
           <GridContainer>
             <Column>
               <VStack gap="4" margin="4">
-                <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
+                <BrevTittel
+                  brevId={brev.id}
+                  sakId={brev.sakId}
+                  tittel={brev.tittel}
+                  kanRedigeres={kanRedigeres}
+                  manueltBrev={brev.spraak !== Spraak.NB}
+                />
 
-                <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
+                <Box padding="4" borderWidth="1" borderRadius="small">
+                  <VStack gap="2" justify="space-between">
+                    <Heading level="2" size="medium">
+                      Språk / målform
+                    </Heading>
+                    <BodyShort spacing>{formaterSpraak(brev.spraak)}</BodyShort>
+                    <Detail>For å endre språk må du opprette et nytt manuelt brev.</Detail>
+                  </VStack>
+                </Box>
 
                 <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
               </VStack>

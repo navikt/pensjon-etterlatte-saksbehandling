@@ -60,6 +60,8 @@ export enum GrunnlagsendringsType {
 export interface Folkeregisteridentifikatorsamsvar {
   type: 'FOLKEREGISTERIDENTIFIKATOR'
   samsvar: boolean
+  fraPdl?: string
+  fraGrunnlag?: string
 }
 
 export interface DoedsdatoSamsvar {
@@ -152,6 +154,14 @@ export interface UfoeretrygdSamsvar {
 
 export interface UfoereHendelse {
   personIdent: string
+  virkningsdato: string
+  vedtaksType: UfoeretrygdVedtakstype
+}
+
+export enum UfoeretrygdVedtakstype {
+  INNV = 'INNV',
+  OPPH = 'OPPH',
+  ENDR = 'ENDR',
 }
 
 interface InstitusjonsoppholdHendelseBeriket {

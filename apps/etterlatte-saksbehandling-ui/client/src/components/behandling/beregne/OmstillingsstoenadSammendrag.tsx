@@ -1,10 +1,9 @@
-import { Box, Heading, Table } from '@navikt/ds-react'
+import { Box, Heading, HelpText, HStack, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { compareDesc, lastDayOfMonth } from 'date-fns'
 import { formaterDato } from '~utils/formatering/dato'
 import { NOK } from '~utils/formatering/formatering'
 import { Beregning } from '~shared/types/Beregning'
-import { ToolTip } from '~components/behandling/felles/ToolTip'
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
 
 interface Props {
@@ -51,13 +50,15 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
               <Table.DataCell>{NOK(beregningsperiode.grunnbelop)}</Table.DataCell>
               <Table.DataCell>{beregningsperiode.institusjonsopphold && 'Institusjonsopphold'}</Table.DataCell>
               <Table.DataCell>
-                {NOK(beregningsperiode.utbetaltBeloep)}{' '}
-                <ToolTip title="Få mer informasjon om beregningsgrunnlaget">
-                  <strong>Folketrygdloven § 17-6</strong> Full årlig omstillingsstønad utgjør 2,25 ganger grunnbeløpet
-                  (G), forutsatt at den avdøde hadde 40 års (full) trygdetid (folketrygdloven §§ 3-5 og 3-7). Dersom
-                  trygdetiden er kortere, reduseres omstillingsstønaden forholdsmessig. Eks. på månedlig utbetaling ved
-                  30 års trygdetid: 2,25 G * 30/40 /12 mnd.
-                </ToolTip>
+                <HStack gap="2" align="center" wrap={false}>
+                  {NOK(beregningsperiode.utbetaltBeloep)}{' '}
+                  <HelpText title="Få mer informasjon om beregningsgrunnlaget">
+                    <strong>Folketrygdloven § 17-6</strong> Full årlig omstillingsstønad utgjør 2,25 ganger grunnbeløpet
+                    (G), forutsatt at den avdøde hadde 40 års (full) trygdetid (folketrygdloven §§ 3-5 og 3-7). Dersom
+                    trygdetiden er kortere, reduseres omstillingsstønaden forholdsmessig. Eks. på månedlig utbetaling
+                    ved 30 års trygdetid: 2,25 G * 30/40 /12 mnd.
+                  </HelpText>
+                </HStack>
               </Table.DataCell>
             </Table.Row>
           ))}

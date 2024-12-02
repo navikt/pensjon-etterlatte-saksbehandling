@@ -221,22 +221,24 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysn
   if (!behandling) return []
 
   const lagVarselbrev = behandlingHarVarselbrev(behandling)
+  const ukjentAvdoed = personopplysninger?.avdoede.length === 0
+  const boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet ?? false
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      return foerstegangsbehandlingRoutes(behandling, personopplysninger, lagVarselbrev)
+      return foerstegangsbehandlingRoutes(behandling, lagVarselbrev, ukjentAvdoed, boddEllerArbeidetUtlandet)
     case IBehandlingsType.REVURDERING:
-      return revurderingRoutes(behandling, lagVarselbrev)
+      return revurderingRoutes(behandling, lagVarselbrev, ukjentAvdoed, boddEllerArbeidetUtlandet)
   }
 }
 
 function foerstegangsbehandlingRoutes(
   behandling: IBehandlingReducer,
-  personopplysninger: Personopplysninger | null,
-  lagVarselbrev: boolean
+  lagVarselbrev: boolean,
+  ukjentAvdoed: boolean,
+  boddEllerArbeidetUtlandet: boolean
 ): Array<BehandlingRouteType> {
   const avslag = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
-  const ukjentAvdoed = personopplysninger?.avdoede.length === 0
 
   const defaultRoutes: Array<BehandlingRouteType> = avslag
     ? [behandlingroutes.soeknadsoversikt, behandlingroutes.vilkaarsvurdering]
@@ -248,8 +250,6 @@ function foerstegangsbehandlingRoutes(
         behandlingroutes.beregningsgrunnlag,
         behandlingroutes.beregning,
       ]
-
-  const boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet ?? false
 
   if (avslag && boddEllerArbeidetUtlandet && !ukjentAvdoed) {
     defaultRoutes.push(behandlingroutes.trygdetid)
@@ -264,12 +264,20 @@ function foerstegangsbehandlingRoutes(
   )
 }
 
-function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteType> {
+function revurderingRoutes(
+  behandling: IBehandlingReducer,
+  lagVarselbrev: boolean,
+  ukjentAvdoed: boolean,
+  boddEllerArbeidetUtlandet: boolean
+): Array<BehandlingRouteType> {
   const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
-  const nySoeknad = behandling.revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
+  const avslag = opphoer && behandling.revurderingsaarsak === Revurderingaarsak.NY_SOEKNAD
 
   const routesOpphoer = [behandlingroutes.revurderingsoversikt, behandlingroutes.vilkaarsvurdering]
-  if (opphoer && !nySoeknad) {
+  if (avslag && boddEllerArbeidetUtlandet && !ukjentAvdoed) {
+    routesOpphoer.push(behandlingroutes.trygdetid)
+  }
+  if (opphoer && !avslag) {
     routesOpphoer.push(behandlingroutes.beregning)
   }
 

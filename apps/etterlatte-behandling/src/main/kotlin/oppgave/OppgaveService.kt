@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.sak.SakLesDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -198,17 +199,23 @@ class OppgaveService(
                 OppgaveType.TILBAKEKREVING,
                 OppgaveType.KLAGE,
                 -> {
-                    if (nyStatus == Status.PAA_VENT) {
-                        hendelser.sendMeldingForHendelsePaaVent(
-                            UUID.fromString(oppgave.referanse),
-                            BehandlingHendelseType.PAA_VENT,
-                            aarsak!!,
-                        )
-                    } else {
-                        hendelser.sendMeldingForHendelseAvVent(
-                            UUID.fromString(oppgave.referanse),
-                            BehandlingHendelseType.AV_VENT,
-                        )
+                    // Oppgaver for tilbakekreving har referanse som er sakId og ikke behandlingId (uuid) inntil
+                    // kravgrunnlag mottas og tilbakekrevingsbehandlingen opprettes. Disse er derfor ikke relevante her
+                    // før dette inntreffer og vi kan få en gyldig uuid fra behandlingen.
+                    val behandlingId = safeUUIDFromString(oppgave.referanse)
+                    if (behandlingId != null) {
+                        if (nyStatus == Status.PAA_VENT) {
+                            hendelser.sendMeldingForHendelsePaaVent(
+                                UUID.fromString(oppgave.referanse),
+                                BehandlingHendelseType.PAA_VENT,
+                                aarsak!!,
+                            )
+                        } else {
+                            hendelser.sendMeldingForHendelseAvVent(
+                                UUID.fromString(oppgave.referanse),
+                                BehandlingHendelseType.AV_VENT,
+                            )
+                        }
                     }
                 }
 
@@ -287,8 +294,10 @@ class OppgaveService(
 
         val saksbehandlerIdent = saksbehandlerSomFattetVedtak(oppgave)
         if (saksbehandlerIdent != null) {
-            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandlerIdent)
-            oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
+            if (saksbehandlerIdent != Fagsaksystem.EY.navn) {
+                oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandlerIdent)
+                oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
+            }
         } else {
             logger.error("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
             oppgaveDao.fjernSaksbehandler(oppgaveId)
@@ -437,6 +446,17 @@ class OppgaveService(
         } else if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler?.ident)) {
             throw OppgaveTilhoererAnnenSaksbehandler(oppgaveUnderBehandling.id)
         }
+    }
+
+    fun oppdaterIdentForOppgaver(sak: Sak) {
+        logger.info("Oppdaterer ident på oppgaver som ikke er avsluttet på sak ${sak.id}")
+
+        oppgaveDao
+            .hentOppgaverForSakMedType(sak.id, OppgaveType.entries)
+            .filterNot(OppgaveIntern::erAvsluttet)
+            .forEach {
+                oppgaveDao.oppdaterIdent(it.id, sak.ident)
+            }
     }
 
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
@@ -675,6 +695,7 @@ class OppgaveService(
                         OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
                         OppgaveType.AARLIG_INNTEKTSJUSTERING,
+                        OppgaveType.MOTTATT_INNTEKTSJUSTERING,
                         OppgaveType.MANUELL_UTSENDING_BREV,
                         -> {
                             logger.info(
@@ -692,6 +713,13 @@ class OppgaveService(
             }
         }
     }
+
+    private fun safeUUIDFromString(value: String): UUID? =
+        try {
+            UUID.fromString(value)
+        } catch (e: Exception) {
+            null
+        }
 }
 
 class BrukerManglerAttestantRolleException(

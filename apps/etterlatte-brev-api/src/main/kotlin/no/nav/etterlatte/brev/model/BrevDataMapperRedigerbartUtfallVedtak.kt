@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbart
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoerRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall
+import no.nav.etterlatte.brev.model.oms.utledBeregningsperioderOpphoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -187,6 +188,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                                 virkningstidspunkt!!,
                                 sakType,
                                 vedtakType,
+                                revurderingaarsak,
                             )
                         }
                     }
@@ -341,6 +343,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         virkningstidspunkt: YearMonth,
         sakType: SakType,
         vedtakType: VedtakType,
+        revurderingaarsak: Revurderingaarsak?,
     ) = coroutineScope {
         val avkortingsinfo =
             async {
@@ -354,11 +357,14 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
+        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
-            etterbetaling.await(),
+            behandling,
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
+            etterbetaling.await(),
+            revurderingaarsak,
         )
     }
 
@@ -381,9 +387,13 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             }
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
+        val beregningsperioder =
+            avkortingsinfo.await().beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
+        val opphoerDato = utledBeregningsperioderOpphoer(behandling, beregningsperioder).forventetOpphoerDato
+
         OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall.fra(
             avkortingsinfo = avkortingsinfo.await(),
-            opphoerDato = behandling.opphoerFraOgMed?.atDay(1),
+            opphoerDato = opphoerDato,
         )
     }
 

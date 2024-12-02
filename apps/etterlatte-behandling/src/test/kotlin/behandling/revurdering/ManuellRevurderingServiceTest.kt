@@ -872,6 +872,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                                 every { it.id } returns UUID.randomUUID()
                                 every { it.utlandstilknytning } returns null
                                 every { it.boddEllerArbeidetUtlandet } returns null
+                                every { it.revurderingsaarsak() } returns Revurderingaarsak.REVURDERE_ETTER_OPPHOER
                             }
                     },
                 grunnlagService = mockk<GrunnlagService>().also { coEvery { it.hentPersongalleri(any()) } returns mockk() },
@@ -888,7 +889,6 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
 
         verify {
             revurderingService.opprettRevurdering(
-                any(),
                 any(),
                 any(),
                 any(),

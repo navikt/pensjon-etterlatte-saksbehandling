@@ -165,6 +165,15 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
+    override fun oppdaterIdent(
+        oppgaveId: UUID,
+        nyttFnr: String,
+    ) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.oppdaterIdent(oppgaveId, nyttFnr)
+        }
+    }
+
     override fun fjernSaksbehandler(oppgaveId: UUID) {
         lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.fjernSaksbehandler(oppgaveId)

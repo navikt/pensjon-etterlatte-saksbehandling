@@ -40,5 +40,9 @@ export const hentSakForPerson = async (args: {
 }
 
 export const byttEnhetPaaSak = async (args: { sakId: number; enhet: string }): Promise<ApiResponse<void>> => {
-  return apiClient.post(`sak/${args.sakId}/endre_enhet`, { enhet: args.enhet })
+  return apiClient.post(`sak/${args.sakId}/endre-enhet`, { enhet: args.enhet })
+}
+
+export const oppdaterIdentPaaSak = async (args: { sakId: number; hendelseId: string }): Promise<ApiResponse<ISak>> => {
+  return apiClient.post(`sak/${args.sakId}/oppdater-ident?hendelseId=${args.hendelseId}`, {})
 }

@@ -1,13 +1,15 @@
 import { isBefore } from 'date-fns'
 import { formaterDato } from '~utils/formatering/dato'
-import styled from 'styled-components'
-
-const FristSpan = styled.span<{ fristHarPassert: boolean }>`
-  color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
-`
+import { BodyShort, ErrorMessage } from '@navikt/ds-react'
 
 export const FristWrapper = ({ dato }: { dato?: string }) => {
   const fristHarPassert = !!dato && isBefore(new Date(dato), new Date())
 
-  return <FristSpan fristHarPassert={fristHarPassert}>{dato ? formaterDato(dato) : 'Ingen frist'}</FristSpan>
+  const frist = dato ? formaterDato(dato) : 'Ingen frist'
+
+  if (fristHarPassert) {
+    return <ErrorMessage>{frist}</ErrorMessage>
+  } else {
+    return <BodyShort>{frist}</BodyShort>
+  }
 }

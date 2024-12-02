@@ -63,12 +63,32 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         block: River.() -> Unit = {},
     ) {
         logger.info("Initialiserer river for ${this.javaClass.simpleName}")
-        checkInternFeil(kontekst() in setOf(Kontekst.MIGRERING, Kontekst.REGULERING, Kontekst.OMREGNING, Kontekst.TEST)) {
+        checkInternFeil(
+            kontekst() in
+                setOf(
+                    Kontekst.MIGRERING,
+                    Kontekst.REGULERING,
+                    Kontekst.OMREGNING,
+                    Kontekst.TEST,
+                ),
+        ) {
             "Bruk heller ${ListenerMedLogging::class.simpleName}, denne her svelger feilmeldinger"
         }
         River(rapidsConnection)
             .apply {
                 eventName(hendelsestype.lagEventnameForType())
+                correlationId()
+                block()
+            }.register(this)
+    }
+
+    protected fun initialiserRiverUtenEventName(
+        rapidsConnection: RapidsConnection,
+        block: River.() -> Unit = {},
+    ) {
+        logger.info("Initialiserer river for ${this.javaClass.simpleName}")
+        River(rapidsConnection)
+            .apply {
                 correlationId()
                 block()
             }.register(this)

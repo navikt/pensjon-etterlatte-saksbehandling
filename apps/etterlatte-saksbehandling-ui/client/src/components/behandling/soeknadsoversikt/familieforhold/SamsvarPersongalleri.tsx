@@ -66,6 +66,8 @@ const PersonUtenIdentWrapper = styled.div`
 
 const erAvvikRelevantForSaktype = (avvik: MismatchPersongalleri, sakType: SakType) => {
   switch (avvik) {
+    case 'ENDRET_SOEKER_FNR':
+      return true
     case 'EKSTRA_AVDOED':
     case 'MANGLER_AVDOED':
       return true
@@ -89,11 +91,49 @@ function VisSamsvarPersongalleri(props: {
   const personerUtenIdenterSak = samsvar.persongalleri?.personerUtenIdent ?? []
   const personerUtenIdenterPdl = samsvar.persongalleriPdl?.personerUtenIdent ?? []
 
+  const endretSoeker = samsvar.problemer.includes('ENDRET_SOEKER_FNR')
   const harPersonerUtenIdenter = samsvar.problemer.includes('HAR_PERSONER_UTEN_IDENTER')
   const harAvvikMotPdl = samsvar.problemer.filter((avvik) => erAvvikRelevantForSaktype(avvik, saktype)).length > 0
 
   if (samsvar.problemer.length === 0) {
     return null
+  }
+
+  if (endretSoeker) {
+    return (
+      <BredAlert variant="error">
+        <BodyShort spacing>
+          Søkers identifikator er forskjellig i behandling og PDL. Dette kan f.eks. komme av at bruker har gått fra
+          D-nummer til fødselsnummer.
+        </BodyShort>
+
+        <HStack gap="4">
+          <VStack gap="2">
+            <Heading level="4" size="xsmall">
+              Ident i behandlingen
+            </Heading>
+
+            <Info label="Søker" tekst={samsvar.persongalleri.soeker} />
+            <Info
+              label="Kilde"
+              tekst={`${samsvar.kilde?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kilde?.tidspunkt)})`}
+            />
+          </VStack>
+
+          <VStack gap="2">
+            <Heading level="4" size="xsmall">
+              Ident i PDL
+            </Heading>
+
+            <Info label="Søker" tekst={samsvar.persongalleriPdl?.soeker || 'mangler'} />
+            <Info
+              label="Kilde"
+              tekst={`${samsvar.kildePdl?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kildePdl?.tidspunkt)})`}
+            />
+          </VStack>
+        </HStack>
+      </BredAlert>
+    )
   }
 
   return (
@@ -146,6 +186,7 @@ function VisSamsvarPersongalleri(props: {
           </VStack>
         </BredAlert>
       )}
+
       {harPersonerUtenIdenter && (
         <div>
           <BredAlert variant="warning">

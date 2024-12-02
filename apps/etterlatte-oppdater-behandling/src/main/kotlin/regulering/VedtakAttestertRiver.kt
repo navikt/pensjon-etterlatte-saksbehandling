@@ -1,12 +1,16 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.omregning.OmregningDataPacket
+import no.nav.etterlatte.omregning.omregningData
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BELOEP_ETTER
@@ -15,7 +19,6 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_BRUKT_OMREGN
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGNING_G_FOER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VEDTAK_BELOEP
-import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -25,12 +28,21 @@ import java.math.BigDecimal
 internal class VedtakAttestertRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
-            // TODO lytt på noe annet? eksplisitt klar for ferdigstil elns?
+        initialiserRiverUtenEventName(rapidsConnection) {
+            validate {
+                it.demandAny(
+                    EVENT_NAME_KEY,
+                    listOf(
+                        VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType(),
+                        VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
+                    ),
+                )
+            }
             validate { it.requireKey(OmregningDataPacket.KEY) }
             validate { it.requireKey(OmregningDataPacket.SAK_ID) }
             validate { it.requireKey(OmregningDataPacket.KJOERING) }
@@ -52,13 +64,27 @@ internal class VedtakAttestertRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        val erFattetVedtak = packet.eventName == VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType()
+        if (erFattetVedtak &&
+            !featureToggleService.isEnabled(
+                ReguleringFeatureToggle.SKAL_STOPPE_ETTER_FATTET_VEDTAK,
+                false,
+            )
+        ) {
+            return
+        }
+
         val sakId = packet.omregningData.sakId
         val kjoering = packet.omregningData.kjoering
         logger.info("Sak $sakId er ferdig omregnet, oppdaterer status")
         val request =
             LagreKjoeringRequest(
                 kjoering = kjoering,
-                status = KjoeringStatus.FERDIGSTILT,
+                status =
+                    when (erFattetVedtak) {
+                        true -> KjoeringStatus.FERDIGSTILT_FATTET
+                        false -> KjoeringStatus.FERDIGSTILT
+                    },
                 sakId = sakId,
                 beregningBeloepFoer = bigDecimal(packet, BEREGNING_BELOEP_FOER),
                 beregningBeloepEtter = bigDecimal(packet, BEREGNING_BELOEP_ETTER),
@@ -69,8 +95,6 @@ internal class VedtakAttestertRiver(
                 avkortingEtter = bigDecimal(packet, AVKORTING_ETTER),
                 vedtakBeloep = bigDecimal(packet, VEDTAK_BELOEP),
             )
-
-        // TODO Burde ikke ferdigstille kun basert på attestert men også om brev er ordentlig distribuert osv. Bør gjøre en sanity check er først?
 
         behandlingService.lagreFullfoertKjoering(request)
         logger.info("Sak $sakId er ferdig omregnet, status oppdatert til: ${request.status}")

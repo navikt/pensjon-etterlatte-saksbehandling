@@ -12,9 +12,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradOgUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
-import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
@@ -75,20 +75,15 @@ internal fun Route.aktivitetspliktRoutes(
         post {
             kunSkrivetilgang {
                 val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
-
-                try {
-                    val result =
-                        inTransaction {
-                            aktivitetspliktService.lagreAktivitetspliktOppfolging(
-                                behandlingId,
-                                oppfolging,
-                                brukerTokenInfo.ident(),
-                            )
-                        }
-                    call.respond(result)
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
-                }
+                val result =
+                    inTransaction {
+                        aktivitetspliktService.lagreAktivitetspliktOppfolging(
+                            behandlingId,
+                            oppfolging,
+                            brukerTokenInfo.ident(),
+                        )
+                    }
+                call.respond(result)
             }
         }
 
@@ -279,8 +274,8 @@ internal fun Route.aktivitetspliktRoutes(
         route("revurdering") {
             post {
                 kunSystembruker {
-                    logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
                     val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
+                    logger.info("Sjekker om sak $sakId trenger en ny revurdering aktivitetsplikt ${request.jobbType.name}")
                     val opprettet =
                         inTransaction {
                             aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(
@@ -292,6 +287,7 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
         }
+
         route("oppgave-oppfoelging") {
             post {
                 kunSystembruker {
@@ -395,6 +391,23 @@ internal fun Route.aktivitetspliktRoutes(
             }
         }
 
+        post("/aktivitetsgrad-og-unntak") {
+            kunSkrivetilgang {
+                logger.info("Oppretter aktivitetsgrad og unntak for sakId=$sakId og oppgaveId=$oppgaveId")
+                val aktivitetsgradOgUnntak = call.receive<AktivitetspliktAktivitetsgradOgUnntak>()
+                val oppgave =
+                    inTransaction {
+                        aktivitetspliktService.upsertAktivtetsgradOgUnntakForOppgave(
+                            aktivitetsgradOgUnntak = aktivitetsgradOgUnntak,
+                            oppgaveId = oppgaveId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(oppgave)
+            }
+        }
+
         route("/unntak") {
             post {
                 kunSkrivetilgang {
@@ -452,15 +465,16 @@ internal fun Route.aktivitetspliktRoutes(
             kunSkrivetilgang {
                 logger.info("Oppretter aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
                 val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>()
-                inTransaction {
-                    aktivitetspliktService.upsertAktivitetsgradForBehandling(
-                        aktivitetsgrad = aktivitetsgrad,
-                        behandlingId = behandlingId,
-                        sakId = sakId,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
-                }
-                call.respond(HttpStatusCode.Created)
+                val vurderingGammel =
+                    inTransaction {
+                        aktivitetspliktService.upsertAktivitetsgradForBehandling(
+                            aktivitetsgrad = aktivitetsgrad,
+                            behandlingId = behandlingId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(vurderingGammel)
             }
         }
 

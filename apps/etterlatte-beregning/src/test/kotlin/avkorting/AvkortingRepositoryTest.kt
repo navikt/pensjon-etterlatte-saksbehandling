@@ -50,7 +50,7 @@ internal class AvkortingRepositoryTest(
             AarligInntektsjusteringAvkortingSjekkRequest(
                 sakId,
                 aarsoppgjoer.aar,
-                sisteBehandling = UUID.randomUUID(),
+                sisteBehandling = behandlingId,
             ),
         ) shouldBe true
     }
@@ -149,6 +149,24 @@ internal class AvkortingRepositoryTest(
                 it shouldBe nyttArsoppgjoer.avkortetYtelseAar
             }
         }
+    }
+
+    @Test
+    fun `hent alle aarsoppgjoer`() {
+        val sakId = randomSakId()
+        avkortingRepository.lagreAvkorting(
+            UUID.randomUUID(),
+            sakId,
+            Avkorting(
+                aarsoppgjoer = listOf(nyAvkorting(2024), nyAvkorting(2025)),
+            ),
+        )
+
+        val alle = avkortingRepository.hentAlleAarsoppgjoer(sakId)
+
+        alle.size shouldBe 2
+        alle[0].aar shouldBe 2024
+        alle[1].aar shouldBe 2025
     }
 
     private fun nyAvkorting(

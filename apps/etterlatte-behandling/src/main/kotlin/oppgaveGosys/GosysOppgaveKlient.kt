@@ -131,7 +131,7 @@ class GosysOppgaveKlientImpl(
             val filters =
                 "statuskategori=AAPEN"
                     .plus(temaFilter)
-                    .plus("&limit=1000")
+                    .plus("&limit=500")
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
                     .plus(saksbehandler?.let { "&tilordnetRessurs=$it" } ?: "")
                     .plus(harTildeling?.let { "&tildeltRessurs=$it" } ?: "")

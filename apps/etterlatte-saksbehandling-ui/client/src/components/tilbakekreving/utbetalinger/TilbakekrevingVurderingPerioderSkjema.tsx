@@ -187,7 +187,13 @@ export function TilbakekrevingVurderingPerioderSkjema({
                       />
                     </Table.DataCell>
                     <Table.DataCell key="skyld">
-                      <Select {...register(`values.${index}.ytelse.skyld`)} label="Skyld" hideLabel={true}>
+                      <Select
+                        {...register(`values.${index}.ytelse.skyld`, {
+                          setValueAs: (value) => (!!value ? value : null),
+                        })}
+                        label="Skyld"
+                        hideLabel={true}
+                      >
                         <option value="">Velg..</option>
                         {Object.values(TilbakekrevingSkyld).map((skyld) => (
                           <option key={skyld} value={skyld}>
@@ -199,15 +205,10 @@ export function TilbakekrevingVurderingPerioderSkjema({
                     <Table.DataCell key="resultat">
                       <Select
                         {...register(`values.${index}.ytelse.resultat`, {
-                          validate: (value) => {
-                            return value
-                              ? Object.values(TilbakekrevingResultat).includes(value) || `Feil type: ${value}`
-                              : 'Må velge verdi'
-                          },
+                          setValueAs: (value) => (!!value ? value : null),
                         })}
                         label="Resultat"
                         hideLabel={true}
-                        error={errors.values && errors.values[index]?.ytelse?.resultat?.message}
                       >
                         <option value="">Velg..</option>
                         {Object.values(TilbakekrevingResultat).map((resultat) => (

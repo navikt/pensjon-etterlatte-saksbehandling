@@ -19,6 +19,8 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-omregning-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-ktor/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
@@ -32,6 +34,8 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
+      - libs/etterlatte-omregning-model/**
+      - libs/etterlatte-inntektsjustering-model/**
       - libs/etterlatte-ktor/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml

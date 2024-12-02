@@ -10,19 +10,20 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.omregning.OmregningData
+import no.nav.etterlatte.omregning.OmregningDataPacket
+import no.nav.etterlatte.omregning.OmregningHendelseType
+import no.nav.etterlatte.omregning.omregningData
 import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.OmregningData
-import no.nav.etterlatte.rapidsandrivers.OmregningDataPacket
-import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_ETTER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AVKORTING_FOER
-import no.nav.etterlatte.rapidsandrivers.omregningData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -32,6 +33,7 @@ import tidspunkt.erFoerEllerPaa
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import kotlin.math.abs
 
@@ -49,6 +51,7 @@ internal class OmregningHendelserBeregningRiver(
             validate { it.requireKey(OmregningDataPacket.FORRIGE_BEHANDLING_ID) }
             validate { it.requireKey(OmregningDataPacket.SAK_TYPE) }
             validate { it.requireKey(OmregningDataPacket.FRA_DATO) }
+            validate { it.interestedIn(OmregningDataPacket.INNTEKTSJUSTERING) }
         }
     }
 
@@ -64,8 +67,11 @@ internal class OmregningHendelserBeregningRiver(
             val beregning = beregn(omregningData)
             packet[BEREGNING_KEY] = beregning.beregning
 
-            // TODO bør vi ha slike ting her?
-            if (omregningData.revurderingaarsak == Revurderingaarsak.REGULERING) {
+            if (
+                omregningData.revurderingaarsak == Revurderingaarsak.REGULERING ||
+                omregningData.revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING ||
+                omregningData.revurderingaarsak == Revurderingaarsak.INNTEKTSENDRING
+            ) {
                 sendMedInformasjonTilKontrollsjekking(beregning, packet)
             }
         }
@@ -100,6 +106,17 @@ internal class OmregningHendelserBeregningRiver(
                                 aar = fraDato.year,
                                 behandlingId = behandlingId,
                                 forrigeBehandlingId = behandlingViOmregnerFra,
+                            ).body<AvkortingDto>()
+                    }
+
+                    Revurderingaarsak.INNTEKTSENDRING -> {
+                        beregningService
+                            .omregnMottattInntektsjustering(
+                                MottattInntektsjusteringAvkortigRequest(
+                                    behandlingId = behandlingId,
+                                    virkningstidspunkt = YearMonth.from(omregningData.hentFraDato()),
+                                    mottattInntektsjustering = omregningData.hentInntektsjustering(),
+                                ),
                             ).body<AvkortingDto>()
                     }
 

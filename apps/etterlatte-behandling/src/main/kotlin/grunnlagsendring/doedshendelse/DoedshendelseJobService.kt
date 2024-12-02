@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import io.ktor.network.sockets.SocketTimeoutException
 import io.ktor.util.toLowerCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
@@ -38,6 +39,7 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
+import java.net.SocketException
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -96,8 +98,16 @@ class DoedshendelseJobService(
                 )
             } catch (e: Exception) {
                 val sak = doedshendelse.sakId?.toString() ?: "mangler"
-                logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak", e)
-                throw e
+                when (e) {
+                    is SocketException, is SocketTimeoutException -> {
+                        logger.error("Kontrollerpunkter feilet på nettverksproblemer, Burde løses på neste retry sak: $sak.", e)
+                        throw e
+                    }
+                    else -> {
+                        logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak. Ukjent feil: msg: ${e.message}", e)
+                        throw e
+                    }
+                }
             }
 
         when (kontrollpunkter.any { it.avbryt }) {

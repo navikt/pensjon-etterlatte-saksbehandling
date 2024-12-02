@@ -81,20 +81,19 @@ class GrunnlagsendringshendelseService(
     }
 
     fun arkiverHendelseMedKommentar(
-        hendelse: Grunnlagsendringshendelse,
+        hendelseId: UUID,
+        kommentar: String?,
         saksbehandler: Saksbehandler,
     ) {
-        logger.info("Arkiverer hendelse med id ${hendelse.id}")
+        logger.info("Arkiverer hendelse med id $hendelseId")
 
-        inTransaction {
-            grunnlagsendringshendelseDao.arkiverGrunnlagsendringStatus(hendelse = hendelse)
+        grunnlagsendringshendelseDao.arkiverGrunnlagsendringStatus(hendelseId, kommentar)
 
-            oppgaveService.ferdigStillOppgaveUnderBehandling(
-                referanse = hendelse.id.toString(),
-                type = OppgaveType.VURDER_KONSEKVENS,
-                saksbehandler = saksbehandler,
-            )
-        }
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            referanse = hendelseId.toString(),
+            type = OppgaveType.VURDER_KONSEKVENS,
+            saksbehandler = saksbehandler,
+        )
     }
 
     fun settHendelseTilHistorisk(behandlingId: UUID) {
@@ -146,10 +145,7 @@ class GrunnlagsendringshendelseService(
 
     fun opprettFolkeregisteridentifikatorhendelse(hendelse: Folkeregisteridentifikatorhendelse): List<Grunnlagsendringshendelse> =
         inTransaction {
-            opprettHendelseAvTypeForPerson(
-                hendelse.fnr,
-                GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR,
-            )
+            opprettHendelseForEndretFolkeregisterident(hendelse)
         }
 
     fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> =
@@ -210,7 +206,11 @@ class GrunnlagsendringshendelseService(
         }
 
         if (sakIder.isNotEmpty() &&
-            gradering in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)
+            gradering in
+            listOf(
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+            )
         ) {
             logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
         }
@@ -360,6 +360,31 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
+    private fun opprettHendelseForEndretFolkeregisterident(hendelse: Folkeregisteridentifikatorhendelse): List<Grunnlagsendringshendelse> {
+        val tidspunktForMottakAvHendelse = now().toLocalDatetimeUTC()
+
+        return runBlocking { sakService.finnSaker(hendelse.fnr) }
+            .filter {
+                grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(
+                    it.id,
+                    GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR,
+                )
+            }.map { sak ->
+                Grunnlagsendringshendelse(
+                    id = UUID.randomUUID(),
+                    sakId = sak.id,
+                    type = GrunnlagsendringsType.FOLKEREGISTERIDENTIFIKATOR,
+                    opprettet = tidspunktForMottakAvHendelse,
+                    hendelseGjelderRolle = Saksrolle.SOEKER,
+                    gjelderPerson = sak.ident,
+                ).also {
+                    logger.info("Oppretter hendelse for endret folkeregisteridentifikator (id=${it.id}, type=${it.type})")
+
+                    verifiserOgHaandterHendelse(it, sak)
+                }
+            }
+    }
+
     private fun opprettHendelseAvTypeForSak(
         sakId: SakId,
         grunnlagendringType: GrunnlagsendringsType,
@@ -401,14 +426,15 @@ class GrunnlagsendringshendelseService(
         try {
             val samsvarMellomPdlOgGrunnlag =
                 finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
-            val erDuplikat =
-                erDuplikatHendelse(
-                    sak.id,
-                    grunnlagsendringshendelse,
-                    samsvarMellomPdlOgGrunnlag,
-                )
 
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
+                val erDuplikat =
+                    erDuplikatHendelse(
+                        sak.id,
+                        grunnlagsendringshendelse,
+                        samsvarMellomPdlOgGrunnlag,
+                    )
+
                 if (erDuplikat) {
                     forkastHendelse(grunnlagsendringshendelse, samsvarMellomPdlOgGrunnlag)
                 } else {
@@ -418,6 +444,8 @@ class GrunnlagsendringshendelseService(
                 forkastHendelse(grunnlagsendringshendelse, samsvarMellomPdlOgGrunnlag)
             }
         } catch (e: GrunnlagRolleException) {
+            logger.warn("GrunnlagRolleException ble kastet – forkaster hendelsen")
+
             forkastHendelse(
                 grunnlagsendringshendelse,
                 SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false),
@@ -432,6 +460,7 @@ class GrunnlagsendringshendelseService(
         val harKunAvbrutteBehandlinger =
             hendelseHarKunAvbrytteBehandlinger(hendelse)
         if (harKunAvbrutteBehandlinger) {
+            logger.info("Ingen eller kun avbrutte behandlinger – forkaster hendelsen")
             forkastHendelse(hendelse, samsvarMellomKildeOgGrunnlag)
         } else {
             logger.info(
@@ -440,7 +469,10 @@ class GrunnlagsendringshendelseService(
                     "Hendelsen vises derfor til saksbehandler.",
             )
             grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                hendelse.copy(
+                    samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+                    status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                ),
             )
             opprettOppgave(hendelse)
         }
@@ -464,7 +496,10 @@ class GrunnlagsendringshendelseService(
     ) {
         logger.info("Forkaster grunnlagsendringshendelse med id ${hendelse.id}.")
         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-            hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.FORKASTET),
+            hendelse.copy(
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+                status = GrunnlagsendringStatus.FORKASTET,
+            ),
         )
     }
 

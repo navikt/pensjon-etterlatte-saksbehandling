@@ -2,11 +2,14 @@ package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.sak.DisttribuertEllerIverksatt
+import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
+import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 
 class OmregningDao(
@@ -110,4 +113,65 @@ class OmregningDao(
             }
         }
     }
+
+    fun lagreDistribuertBrevEllerIverksattBehandlinga(
+        request: KjoeringDistEllerIverksattRequest,
+        status: KjoeringStatus,
+    ) {
+        connection.hentConnection { connection ->
+            with(connection) {
+                val statement =
+                    prepareStatement(
+                        """
+                        INSERT INTO omregningskjoering (
+                        kjoering, sak_id, status,
+                        ${
+                            when (request.distEllerIverksatt) {
+                                DisttribuertEllerIverksatt.IVERKSATT -> "iverkksatt_behandling"
+                                DisttribuertEllerIverksatt.DISTRIBUERT -> "distribuert_brev"
+                            }
+                        }
+                        )
+                        VALUES (?, ?, ?, ?)
+                        """.trimIndent(),
+                    )
+                statement.setString(1, request.kjoering)
+                statement.setSakId(2, request.sakId)
+                statement.setString(3, status.name)
+                statement.setBoolean(4, true)
+                statement.executeUpdate().also {
+                    checkInternFeil(it > 0) {
+                        "Kunne ikke lagreKjoering for id sakid ${request.sakId}"
+                    }
+                }
+            }
+        }
+    }
+
+    fun hentNyligsteLinjeForKjoering(
+        kjoering: String,
+        sakId: SakId,
+    ): Pair<Long, KjoeringStatus>? =
+        connection.hentConnection { connection ->
+            with(connection) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT kjoering, status, sak_id  
+                        FROM omregningskjoering 
+                        WHERE kjoering = ? AND sak_id = ?
+                        ORDER by tidspunkt DESC 
+                        LIMIT 1
+                        """.trimIndent(),
+                    )
+                statement.setString(1, kjoering)
+                statement.setLong(2, sakId.sakId)
+                statement.executeQuery().singleOrNull {
+                    Pair(
+                        getLong("sak_id"),
+                        KjoeringStatus.valueOf(getString("status")),
+                    )
+                }
+            }
+        }
 }

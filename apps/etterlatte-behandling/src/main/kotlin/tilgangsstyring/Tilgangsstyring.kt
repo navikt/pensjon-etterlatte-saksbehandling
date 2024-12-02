@@ -243,10 +243,12 @@ inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
         false -> {
             application.log.debug("Mangler skrivetilgang, avviser forespørselen")
 
+            val enhetString = if (enhetNr == null) "enheten" else "enhet $enhetNr"
+
             throw ForespoerselException(
                 status = HttpStatusCode.Forbidden.value,
                 code = "MANGLER_SKRIVETILGANG",
-                detail = "Mangler skrivetilgang til enhet $enhetNr",
+                detail = "Mangler skrivetilgang til $enhetString",
             )
         }
     }

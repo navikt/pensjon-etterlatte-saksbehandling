@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model
 
+import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.HarVedlegg
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
@@ -74,6 +75,15 @@ data class OmstillingsstoenadBeregning(
     val oppphoersdato: LocalDate?,
     val opphoerNesteAar: Boolean,
 ) : HarVedlegg
+
+data class OmstillingsstoenadBeregningRedigerbartUtfall(
+    val virkningsdato: LocalDate,
+    val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
+    val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
+    val sisteBeregningsperiodeNesteAar: OmstillingsstoenadBeregningsperiode?,
+    val oppphoersdato: LocalDate?,
+    val opphoerNesteAar: Boolean,
+) : BrevData
 
 data class OmstillingsstoenadBeregningsperiode(
     val datoFOM: LocalDate,

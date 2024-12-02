@@ -257,12 +257,12 @@ class RealGrunnlagService(
     ) {
         val grunnlag = grunnlagHenter.hentGrunnlagsdata(opplysningsbehov)
 
-        grunnlag.personopplysninger.forEach { fnrToOpplysning ->
+        grunnlag.personopplysninger.forEach { (fnr, opplysninger) ->
             lagreNyePersonopplysninger(
                 opplysningsbehov.sakId,
                 behandlingId,
-                fnrToOpplysning.first,
-                fnrToOpplysning.second,
+                fnr,
+                opplysninger,
             )
         }
 
@@ -387,6 +387,11 @@ class RealGrunnlagService(
         persongalleriISak: Persongalleri,
         persongalleriPdl: Persongalleri,
     ): List<MismatchPersongalleri> {
+        val forskjellerSoeker =
+            forskjellerMellomPersonerPdlOgSak(
+                personerPdl = listOf(persongalleriPdl.soeker),
+                personerSak = listOf(persongalleriISak.soeker),
+            )
         val forskjellerAvdoede =
             forskjellerMellomPersonerPdlOgSak(
                 personerPdl = persongalleriPdl.avdoed,
@@ -403,6 +408,7 @@ class RealGrunnlagService(
                 personerSak = persongalleriISak.soesken,
             )
         return listOfNotNull(
+            MismatchPersongalleri.ENDRET_SOEKER_FNR.takeIf { forskjellerSoeker.kunPdl.isNotEmpty() },
             MismatchPersongalleri.MANGLER_GJENLEVENDE.takeIf { forskjellerGjenlevende.kunPdl.isNotEmpty() },
             MismatchPersongalleri.MANGLER_AVDOED.takeIf { forskjellerAvdoede.kunPdl.isNotEmpty() },
             MismatchPersongalleri.MANGLER_SOESKEN.takeIf { forskjellerSoesken.kunPdl.isNotEmpty() },

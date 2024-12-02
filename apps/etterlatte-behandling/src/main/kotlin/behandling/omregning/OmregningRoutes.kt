@@ -9,6 +9,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
@@ -23,6 +24,16 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
             logger.info("Motter hendelse om at regulering har status ${request.status.name} i sak ${request.sakId}")
             inTransaction {
                 omregningService.oppdaterKjoering(request, brukerTokenInfo)
+            }
+            call.respond(HttpStatusCode.OK)
+        }
+        put("dist-eller-iverksatt") {
+            val request = call.receive<KjoeringDistEllerIverksattRequest>()
+            logger.info(
+                "Motter oppdatering på distribuert brev eller iverksatt behandling (${request.distEllerIverksatt.name}) i sak ${request.sakId}",
+            )
+            inTransaction {
+                omregningService.lagreDistribuertBrevEllerIverksattBehandlinga(request)
             }
             call.respond(HttpStatusCode.OK)
         }

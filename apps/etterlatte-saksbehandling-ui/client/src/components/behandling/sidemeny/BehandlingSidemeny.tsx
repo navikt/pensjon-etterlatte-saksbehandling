@@ -1,7 +1,7 @@
 import { Behandlingsoppsummering } from '~components/behandling/attestering/oppsummering/oppsummering'
 import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import {
@@ -38,7 +38,7 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { OppgaveEndring } from './OppgaveEndring'
 import { NotatPanel } from '~components/behandling/sidemeny/NotatPanel'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -67,6 +67,7 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSamm
 })
 
 export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingReducer }) => {
+  const { lastPage } = useContext(BehandlingRouteContext)
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const vedtak = useVedtak()
   const dispatch = useAppDispatch()
@@ -75,7 +76,6 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useSelectorBehandlingSidemenyFane()
 
-  const skalViseNotater = useFeatureEnabledMedDefault('notater', false)
   const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: behandling.id })
 
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
@@ -141,6 +141,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
                     beslutning={beslutning}
                     vedtak={vedtak}
                     erFattet={behandling.status === IBehandlingStatus.FATTET_VEDTAK}
+                    gyldigStegForBeslutning={lastPage}
                   />
                 )
               )}
@@ -177,9 +178,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
           {soeker?.foedselsnummer && (
             <>
-              {skalViseNotater && (
-                <NotatPanel sakId={behandling.sakId} behandlingId={behandling.id} fnr={soeker?.foedselsnummer} />
-              )}
+              <NotatPanel sakId={behandling.sakId} behandlingId={behandling.id} fnr={soeker?.foedselsnummer} />
               <DokumentlisteLiten fnr={soeker.foedselsnummer} />
             </>
           )}

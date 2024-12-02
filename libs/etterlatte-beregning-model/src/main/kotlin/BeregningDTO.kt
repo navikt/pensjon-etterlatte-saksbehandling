@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import java.time.YearMonth
 import java.util.UUID
 
@@ -164,4 +165,10 @@ data class AarligInntektsjusteringAvkortingRequest(
     val aar: Int,
     val forrigeBehandling: UUID,
     val nyBehandling: UUID,
+)
+
+data class MottattInntektsjusteringAvkortigRequest(
+    val behandlingId: UUID,
+    val virkningstidspunkt: YearMonth,
+    val mottattInntektsjustering: MottattInntektsjustering,
 )

@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -59,7 +59,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal kunne sette på skjerming og få satt ny enhet`() {
-        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val fnr = SOEKER_FOEDSELSNUMMER.value
 
         testApplication {
             val client =
@@ -161,7 +161,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal ikke sette skjerming hvis adressebeskyttet, og da beholde 2103 som enhet`() {
-        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val fnr = SOEKER_FOEDSELSNUMMER.value
 
         testApplication {
             val client =

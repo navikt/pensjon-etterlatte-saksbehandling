@@ -13,11 +13,11 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.no.nav.etterlatte.klienter.BrevKlient
 import no.nav.etterlatte.no.nav.etterlatte.klienter.UtbetalingKlient
 import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
+import no.nav.etterlatte.omregning.OmregningData
+import no.nav.etterlatte.omregning.OmregningHendelseType
+import no.nav.etterlatte.omregning.UtbetalingVerifikasjon
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.OmregningData
-import no.nav.etterlatte.rapidsandrivers.OmregningHendelseType
-import no.nav.etterlatte.rapidsandrivers.UtbetalingVerifikasjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -290,5 +290,37 @@ internal class OpprettVedtakforespoerselRiverTest {
         verify { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
         verify { brevKlientMock.opprettBrev(behandlingId, sakId) }
         verify { brevKlientMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, any()) }
+    }
+
+    @Test
+    fun `Mottatt inntektsjustering skal stoppe ved fattet med brev`() {
+        val behandlingId = UUID.randomUUID()
+        val melding =
+            genererOpprettVedtakforespoersel(
+                behandlingId,
+                revurderingaarsak = Revurderingaarsak.INNTEKTSENDRING,
+            )
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        val utbetalingKlientMock = mockk<UtbetalingKlient>(relaxed = true)
+        val brevKlientMock = mockk<BrevKlient>(relaxed = true)
+
+        val inspector =
+            TestRapid().apply {
+                OpprettVedtakforespoerselRiver(
+                    this,
+                    vedtakServiceMock,
+                    utbetalingKlientMock,
+                    brevKlientMock,
+                    DummyFeatureToggleService(),
+                )
+            }
+
+        inspector.sendTestMessage(melding.toJson())
+
+        verify { vedtakServiceMock.opprettVedtakOgFatt(sakId, behandlingId) }
+        verify { brevKlientMock.opprettBrev(behandlingId, sakId) }
+
+        verify(exactly = 0) { vedtakServiceMock.attesterVedtak(sakId, behandlingId) }
+        verify(exactly = 0) { brevKlientMock.genererPdfOgFerdigstillVedtaksbrev(behandlingId, any()) }
     }
 }

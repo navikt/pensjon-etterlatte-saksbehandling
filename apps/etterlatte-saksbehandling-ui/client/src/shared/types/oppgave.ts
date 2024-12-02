@@ -1,4 +1,5 @@
 import { SakType } from '~shared/types/sak'
+import { InnloggetSaksbehandler } from '~shared/types/saksbehandler'
 
 export interface OppgaveDTO {
   id: string
@@ -97,6 +98,13 @@ export const oppgavestatuserForRedigerbarOppgave: Array<Oppgavestatus> = [
   Oppgavestatus.UNDERKJENT,
   Oppgavestatus.PAA_VENT,
 ]
+
+export const erOppgaveTildeltInnloggetSaksbehandler = (
+  oppgave: OppgaveDTO,
+  innloggetSaksbehandler: InnloggetSaksbehandler
+): boolean => {
+  return oppgave.saksbehandler?.ident === innloggetSaksbehandler.ident
+}
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => {
   return oppgavestatuserForRedigerbarOppgave.includes(status)

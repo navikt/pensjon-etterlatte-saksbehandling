@@ -17,7 +17,6 @@ export enum ClickEvent {
   OPPHEV_FEILREGISTRERING_JOURNALPOST = 'opphev feilregistrering journalpost',
   FLYTT_JOURNALPOST = 'flytt journalpost',
   KNYTT_JOURNALPOST_TIL_ANNEN_SAK = 'knytt journalpost til annen sak',
-  OPPRETT_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave',
 
   // Brev
   OPPRETT_NYTT_BREV = 'opprett nytt brev',
@@ -28,6 +27,10 @@ export enum ClickEvent {
   OPPRETT_NYTT_NOTAT = 'opprett nytt notat',
   SLETT_NOTAT = 'slett notat',
   JOURNALFOER_NOTAT = 'journalfoer notat',
+
+  // Oppgave
+  OPPRETT_GENERELL_OPPGAVE = 'opprett generell oppgave',
+  OPPRETT_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave',
 
   // Avkorting
   AVKORTING_FORVENTET_INNTEKT_HJELPETEKST = 'avkorting forventet inntekt hjelpetekst',

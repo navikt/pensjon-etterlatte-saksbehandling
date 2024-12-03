@@ -236,6 +236,7 @@ data class PdlFoedested(
 
 data class PdlFolkeregistermetadata(
     val gyldighetstidspunkt: LocalDateTime? = null,
+    val ajourholdstidspunkt: LocalDateTime? = null,
     val opphoerstidspunkt: LocalDateTime? = null,
 )
 
@@ -305,6 +306,7 @@ data class PdlUtflyttingFraNorge(
 )
 
 data class PdlBostedsadresse(
+    val angittFlyttedato: LocalDateTime? = null,
     val coAdressenavn: String?,
     val gyldigFraOgMed: LocalDateTime? = null,
     val gyldigTilOgMed: LocalDateTime? = null,

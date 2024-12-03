@@ -46,10 +46,18 @@ internal class UtlandMapperTest {
                             every { folkeregistermetadata } returns
                                 mockk {
                                     every { gyldighetstidspunkt } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                                    every { ajourholdstidspunkt } returns LocalDateTime.parse("2021-07-01T00:00:00")
                                 }
                         },
                     )
                 every { utflyttingFraNorge } returns null
+                every { bostedsadresse } returns
+                    listOf(
+                        mockk {
+                            every { angittFlyttedato } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                            every { gyldigFraOgMed } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                        },
+                    )
             }
 
         val utland = UtlandMapper.mapUtland(hentPerson)
@@ -60,6 +68,20 @@ internal class UtlandMapperTest {
             utland.innflyttingTilNorge
                 ?.first()
                 ?.dato
+                .toString(),
+        )
+        assertEquals(
+            "2021-07-01",
+            utland.innflyttingTilNorge
+                ?.first()
+                ?.gyldighetstidspunkt
+                .toString(),
+        )
+        assertEquals(
+            "2021-07-01",
+            utland.innflyttingTilNorge
+                ?.first()
+                ?.ajourholdstidspunkt
                 .toString(),
         )
     }

@@ -5,7 +5,6 @@ import Spinner from '~shared/Spinner'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
 import { KlageAvvisning } from '~components/klage/vurdering/KlageAvvisning'
-import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
 import { Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { EndeligVurdering } from '~components/klage/vurdering/EndeligVurdering'
 import { EndeligVurderingVisning } from '~components/klage/vurdering/EndeligVurderingVisning'
@@ -28,12 +27,10 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading level="1" size="large">
-            Vurder klagen
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="12 4">
+        <Heading level="1" size="large">
+          Vurder klagen
+        </Heading>
       </Box>
       <Box paddingBlock="8" paddingInline="16 8">
         <VStack gap="4">

@@ -1,0 +1,2 @@
+insert into jobb (type, kjoeredato, behandlingsmaaned) values ('OMS_DOED_10MND', '2024-12-03', '2024-11');
+insert into jobb (type, kjoeredato, behandlingsmaaned) values ('OMS_DOED_12MND',  '2024-12-03', '2024-11');

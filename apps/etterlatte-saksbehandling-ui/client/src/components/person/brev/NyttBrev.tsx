@@ -3,7 +3,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
 import React, { useEffect, useState } from 'react'
-import { Column } from '~shared/styled'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BrevProsessType, BrevStatus, Spraak } from '~shared/types/Brev'
@@ -59,30 +58,28 @@ export default function NyttBrev() {
         ),
         (brev) => (
           <HStack height="100%" minHeight="100vh" wrap={false}>
-            <Column>
-              <VStack gap="4" margin="4">
-                <BrevTittel
-                  brevId={brev.id}
-                  sakId={brev.sakId}
-                  tittel={brev.tittel}
-                  kanRedigeres={kanRedigeres}
-                  manueltBrev={brev.spraak !== Spraak.NB}
-                />
+            <VStack gap="4" margin="4" minWidth="30rem">
+              <BrevTittel
+                brevId={brev.id}
+                sakId={brev.sakId}
+                tittel={brev.tittel}
+                kanRedigeres={kanRedigeres}
+                manueltBrev={brev.spraak !== Spraak.NB}
+              />
 
-                <Box padding="4" borderWidth="1" borderRadius="small">
-                  <VStack gap="2" justify="space-between">
-                    <Heading level="2" size="medium">
-                      Språk / målform
-                    </Heading>
-                    <BodyShort spacing>{formaterSpraak(brev.spraak)}</BodyShort>
-                    <Detail>For å endre språk må du opprette et nytt manuelt brev.</Detail>
-                  </VStack>
-                </Box>
+              <Box padding="4" borderWidth="1" borderRadius="small">
+                <VStack gap="2" justify="space-between">
+                  <Heading level="2" size="medium">
+                    Språk / målform
+                  </Heading>
+                  <BodyShort spacing>{formaterSpraak(brev.spraak)}</BodyShort>
+                  <Detail>For å endre språk må du opprette et nytt manuelt brev.</Detail>
+                </VStack>
+              </Box>
 
-                <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
-              </VStack>
-            </Column>
-            <Column>
+              <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
+            </VStack>
+            <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-subtle">
               {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (
                 <PanelWrapper>
                   <ForhaandsvisningBrev brev={brev} />
@@ -94,8 +91,8 @@ export default function NyttBrev() {
                   tilbakestillingsaction={() => setTilbakestilt(true)}
                 />
               )}
-            </Column>
-            <Column>
+            </Box>
+            <Box minWidth="30rem">
               <BrevStatusPanel brev={brev} />
               <Box padding="4" borderRadius="small">
                 <Heading spacing level="2" size="medium">
@@ -103,7 +100,7 @@ export default function NyttBrev() {
                 </Heading>
                 <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} />
               </Box>
-            </Column>
+            </Box>
           </HStack>
         )
       )}

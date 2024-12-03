@@ -4,7 +4,6 @@ import { Route, Routes, useParams } from 'react-router-dom'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
-import { Column } from '~shared/styled'
 import styled from 'styled-components'
 import {
   settBruker,
@@ -95,38 +94,36 @@ export default function BehandleJournalfoeringOppgave() {
       </StickyToppMeny>
 
       <HStack height="100%" minHeight="100vh" wrap={false}>
-        <Column>
-          <Box padding="8">
-            {!sakMedBehandlinger || isPendingOrInitial(journalpostStatus) ? (
-              <Spinner label="Laster journalpost" />
-            ) : isSuccess(journalpostStatus) && kanEndreJournalpost(journalpostStatus.data) ? (
-              <OppdaterJournalpost
-                initialJournalpost={journalpostStatus.data}
-                sak={sakMedBehandlinger.sak}
-                oppgaveId={oppgaveId!!}
-              />
-            ) : (
-              <Routes>
-                <Route index element={<StartOppgavebehandling />} />
+        <Box padding="8" minWidth="40rem">
+          {!sakMedBehandlinger || isPendingOrInitial(journalpostStatus) ? (
+            <Spinner label="Laster journalpost" />
+          ) : isSuccess(journalpostStatus) && kanEndreJournalpost(journalpostStatus.data) ? (
+            <OppdaterJournalpost
+              initialJournalpost={journalpostStatus.data}
+              sak={sakMedBehandlinger.sak}
+              oppgaveId={oppgaveId!!}
+            />
+          ) : (
+            <Routes>
+              <Route index element={<StartOppgavebehandling />} />
 
-                <Route path="nybehandling">
-                  <Route index element={<OpprettNyBehandling />} />
-                  <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
-                </Route>
-                <Route path="oppretteklage">
-                  <Route index element={<OpprettKlagebehandling />} />
-                  <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
-                </Route>
+              <Route path="nybehandling">
+                <Route index element={<OpprettNyBehandling />} />
+                <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
+              </Route>
+              <Route path="oppretteklage">
+                <Route index element={<OpprettKlagebehandling />} />
+                <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
+              </Route>
 
-                <Route path="ferdigstill" element={<FerdigstillOppgave />} />
-              </Routes>
-            )}
-          </Box>
-        </Column>
+              <Route path="ferdigstill" element={<FerdigstillOppgave />} />
+            </Routes>
+          )}
+        </Box>
 
-        <Column>
+        <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-subtle">
           <VelgJournalpost journalpostStatus={journalpostStatus} />
-        </Column>
+        </Box>
 
         <Sidebar>
           {oppgave && <OppgaveDetaljer oppgave={oppgave} />}

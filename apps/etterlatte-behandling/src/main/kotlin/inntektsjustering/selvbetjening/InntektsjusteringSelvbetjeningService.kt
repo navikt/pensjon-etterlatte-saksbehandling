@@ -1,6 +1,8 @@
 package no.nav.etterlatte.inntektsjustering.selvbetjening
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -8,6 +10,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -23,11 +26,13 @@ import no.nav.etterlatte.omregning.OmregningDataPacket
 import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 class InntektsjusteringSelvbetjeningService(
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,
+    private val beregningKlient: BeregningKlient,
     private val vedtakKlient: VedtakKlient,
     private val rapid: KafkaProdusent<String, String>,
     private val featureToggleService: FeatureToggleService,
@@ -95,20 +100,24 @@ class InntektsjusteringSelvbetjeningService(
         ) {
             return false
         }
+        val loependeFom = MottattInntektsjustering.utledLoependeFom().atDay(1)
 
+        // har åpne behandlinger
         val aapneBehandlinger = inTransaction { behandlingService.hentAapneBehandlingerForSak(sakId) }
         if (aapneBehandlinger.isNotEmpty()) return false
 
+        // ikke loepende || er under samordning
         val vedtak =
             vedtakKlient.sakHarLopendeVedtakPaaDato(
                 sakId,
-                MottattInntektsjustering.utledLoependeFom().atDay(1),
+                loependeFom,
                 HardkodaSystembruker.omregning,
             )
-
         if (!vedtak.erLoepende || vedtak.underSamordning) return false
 
-        // TODO: flere sjekker?
+        // har sanksjon
+        val avkortingSjekk = hentAvkortingSjekk(sakId, YearMonth.from(loependeFom), vedtak.behandlingId!!)
+        if (avkortingSjekk.harSanksjon) return false
 
         return true
     }
@@ -148,4 +157,18 @@ class InntektsjusteringSelvbetjeningService(
 
         override fun key() = key
     }
+
+    private fun hentAvkortingSjekk(
+        sakId: SakId,
+        loependeFom: YearMonth,
+        forrigeBehandlingId: UUID,
+    ): InntektsjusteringAvkortingInfoResponse =
+        runBlocking {
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
+                sakId,
+                loependeFom.year,
+                forrigeBehandlingId,
+                HardkodaSystembruker.omregning,
+            )
+        }
 }

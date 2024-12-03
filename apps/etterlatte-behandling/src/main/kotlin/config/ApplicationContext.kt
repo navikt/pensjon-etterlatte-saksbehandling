@@ -480,6 +480,7 @@ internal class ApplicationContext(
             vedtakKlient = vedtakKlient,
             rapid = rapid,
             featureToggleService = featureToggleService,
+            beregningKlient = beregningsKlient,
         )
 
     val aarligInntektsjusteringJobbService =

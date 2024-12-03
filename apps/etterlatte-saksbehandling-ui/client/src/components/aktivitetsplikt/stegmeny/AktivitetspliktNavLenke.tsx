@@ -14,7 +14,7 @@ interface Props {
 
 export function AktivitetNavLenke({ path, description, enabled, erSisteRoute }: Props) {
   const match = useMatch('/aktivitet-vurdering/:oppgaveId/:steg')
-  const currentPath = match?.params?.steg
+  const { oppgaveId, steg } = match?.params || {}
 
   return (
     <>
@@ -22,11 +22,11 @@ export function AktivitetNavLenke({ path, description, enabled, erSisteRoute }: 
         <DisabledLabel>{description}</DisabledLabel>
       ) : (
         <>
-          {currentPath === path ? (
+          {steg === path ? (
             <Label>{description}</Label>
           ) : (
             <Label>
-              <NavLink to={path} style={{ textDecoration: 'none' }}>
+              <NavLink to={`/aktivitet-vurdering/${oppgaveId}/${path}`} style={{ textDecoration: 'none' }}>
                 {description}
               </NavLink>
             </Label>

@@ -7,13 +7,11 @@ import { StatusBar } from '~shared/statusbar/Statusbar'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BrevProsessType, BrevStatus, Spraak } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
-import styled from 'styled-components'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import BrevStatusPanel from '~components/person/brev/BrevStatusPanel'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
-
 import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import { BodyShort, Box, Detail, Heading, HStack, VStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
@@ -81,9 +79,7 @@ export default function NyttBrev() {
             </VStack>
             <Box minWidth="50rem" width="100%" borderWidth="0 1" borderColor="border-subtle">
               {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (
-                <PanelWrapper>
-                  <ForhaandsvisningBrev brev={brev} />
-                </PanelWrapper>
+                <ForhaandsvisningBrev brev={brev} />
               ) : (
                 <RedigerbartBrev
                   brev={brev}
@@ -107,9 +103,3 @@ export default function NyttBrev() {
     </>
   )
 }
-
-const PanelWrapper = styled.div`
-  height: 100%;
-  width: 100%;
-  max-height: 955px;
-`

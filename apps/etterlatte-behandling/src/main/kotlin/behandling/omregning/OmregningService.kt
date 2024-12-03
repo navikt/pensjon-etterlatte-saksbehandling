@@ -9,10 +9,12 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
+import no.nav.etterlatte.oppgave.OppgaveService
 
 class OmregningService(
     private val behandlingService: BehandlingService,
     private val omregningDao: OmregningDao,
+    private val oppgaveService: OppgaveService,
 ) {
     fun hentSakerTilOmregning(
         kjoering: String,
@@ -48,6 +50,12 @@ class OmregningService(
     fun kjoeringFullfoert(request: LagreKjoeringRequest) {
         if (!listOf(KjoeringStatus.FERDIGSTILT, KjoeringStatus.FERDIGSTILT_FATTET).contains(request.status)) {
             throw IllegalStateException("Prøver å lagre at kjøring er fullført, men status er ikke ferdigstilt.")
+        }
+        if (request.status == KjoeringStatus.FERDIGSTILT_FATTET) {
+            request.behandling?.let {
+                val oppgave = oppgaveService.hentOppgaverForReferanse(it.toString()).single()
+                oppgaveService.fjernSaksbehandler(oppgave.id)
+            }
         }
         omregningDao.lagreKjoering(request)
     }

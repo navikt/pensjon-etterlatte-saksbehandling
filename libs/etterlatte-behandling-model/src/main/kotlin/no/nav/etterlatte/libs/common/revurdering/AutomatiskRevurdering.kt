@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class AutomatiskRevurderingRequest(
@@ -11,6 +12,7 @@ data class AutomatiskRevurderingRequest(
     val fraDato: LocalDate,
     val revurderingAarsak: Revurderingaarsak,
     val oppgavefrist: LocalDate? = null,
+    val mottattDato: LocalDateTime? = null,
 )
 
 data class AutomatiskRevurderingResponse(

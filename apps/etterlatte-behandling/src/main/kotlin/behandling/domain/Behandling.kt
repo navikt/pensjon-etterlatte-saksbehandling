@@ -62,6 +62,7 @@ sealed class Behandling {
     abstract val virkningstidspunkt: Virkningstidspunkt?
     abstract val utlandstilknytning: Utlandstilknytning?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
+    abstract val soeknadMottattDato: LocalDateTime?
     abstract val kilde: Vedtaksloesning
     abstract val sendeBrev: Boolean
     abstract val opphoerFraOgMed: YearMonth?
@@ -80,7 +81,12 @@ sealed class Behandling {
     fun mottattDato(): LocalDateTime? =
         when (this) {
             is Foerstegangsbehandling -> this.soeknadMottattDato
-            else -> this.behandlingOpprettet
+            else -> {
+                when (revurderingsaarsak()) {
+                    Revurderingaarsak.INNTEKTSENDRING -> this.soeknadMottattDato
+                    else -> this.behandlingOpprettet
+                }
+            }
         }
 
     fun gyldighetsproeving(): GyldighetsResultat? =
@@ -250,6 +256,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         relatertBehandlingId = relatertBehandlingId,
         tidligereFamiliepleier = tidligereFamiliepleier,
         erSluttbehandling = erSluttbehandling(),
+        mottattDato = mottattDato(),
     )
 
 fun Behandling.toBehandlingSammendrag() =

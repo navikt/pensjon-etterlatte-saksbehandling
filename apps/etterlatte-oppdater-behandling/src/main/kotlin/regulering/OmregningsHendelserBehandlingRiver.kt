@@ -56,6 +56,7 @@ internal class OmregningsHendelserBehandlingRiver(
                     sakId = omregningData.sakId,
                     fraDato = omregningData.hentFraDato(),
                     revurderingAarsak = omregningData.revurderingaarsak,
+                    mottattDato = omregningData.hentInntektsjustering().mottatt,
                 ),
             )
 

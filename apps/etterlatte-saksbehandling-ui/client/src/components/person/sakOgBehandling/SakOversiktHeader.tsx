@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
-import { Alert, BodyShort, Heading, HStack, Loader, ReadMore, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, HStack, Loader, ReadMore, VStack } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { Buildings3Icon, LocationPinIcon } from '@navikt/aksel-icons'
 import { EndreEnhet } from '~components/person/sakOgBehandling/EndreEnhet'
@@ -13,7 +13,6 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { hentMigrertYrkesskadeFordel } from '~shared/api/vilkaarsvurdering'
 import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
-import styled from 'styled-components'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTypeTag'
 import { OpprettSaksgrunnlag } from '~components/person/sakOgBehandling/OpprettSaksgrunnlag'
@@ -92,27 +91,24 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
         success: (data) =>
           !!data?.erFlyktning && (
             <>
-              <HorisontaltSkille />
-              <div>
+              <Box paddingBlock="3" borderWidth="1 0 0 0" borderColor="border-subtle">
                 <Alert variant="info" size="small" inline>
                   Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
                   {formaterDato(data.virkningstidspunkt)}
                 </Alert>
-              </div>
+              </Box>
             </>
           ),
       })}
-
       {mapResult(yrkesskadefordelResult, {
         success: (data) =>
           data.migrertYrkesskadefordel && (
             <>
-              <HorisontaltSkille />
-              <div>
+              <Box paddingBlock="3" borderWidth="1 0 0 0" borderColor="border-subtle">
                 <Alert variant="info" size="small" inline>
                   Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
                 </Alert>
-              </div>
+              </Box>
             </>
           ),
       })}
@@ -121,8 +117,3 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
     </VStack>
   )
 }
-
-const HorisontaltSkille = styled.hr`
-  border-color: var(--a-surface-active);
-  width: 100%;
-`

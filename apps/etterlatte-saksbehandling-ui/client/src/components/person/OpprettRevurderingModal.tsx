@@ -33,6 +33,7 @@ function sorterRevurderingerKronologisk(revurderinger: Revurderingaarsak[]): Rev
     return -1
   })
 }
+
 export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseId, oppgaveId }: Props) => {
   const navigate = useNavigate()
 

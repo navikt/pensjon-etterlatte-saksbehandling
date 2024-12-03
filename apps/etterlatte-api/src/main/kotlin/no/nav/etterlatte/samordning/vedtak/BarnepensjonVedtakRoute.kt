@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.install
+import io.ktor.server.request.receiveNullable
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
@@ -34,6 +35,29 @@ fun Route.barnepensjonVedtakRoute(
                     samordningVedtakService.harLoependeYtelsePaaDato(
                         dato = paaDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
+                        sakType = SakType.BARNEPENSJON,
+                        context = PensjonContext,
+                    )
+                } catch (e: IllegalArgumentException) {
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
+
+            call.respond(
+                mapOf(
+                    "barnepensjon" to harLoependeBarnepensjonYtelsePaaDato,
+                ),
+            )
+        }
+
+        get {
+            val paaDato = call.dato("paaDato") ?: throw ManglerFomDatoException()
+            val fnr = call.receiveNullable<FoedselsnummerDto>() ?: throw ManglerFoedselsnummerException()
+
+            val harLoependeBarnepensjonYtelsePaaDato =
+                try {
+                    samordningVedtakService.harLoependeYtelsePaaDato(
+                        dato = paaDato,
+                        fnr = Folkeregisteridentifikator.of(fnr.value),
                         sakType = SakType.BARNEPENSJON,
                         context = PensjonContext,
                     )

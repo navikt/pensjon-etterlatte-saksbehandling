@@ -5,6 +5,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
+import io.ktor.server.request.receiveNullable
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
@@ -79,6 +80,34 @@ fun Route.samordningVedtakRoute(
 
             call.respond(samordningVedtakDtos)
         }
+
+        get {
+            val fomDato =
+                call.dato("fomDato")
+                    ?: call.dato("virkFom")
+                    ?: throw ManglerFomDatoException()
+            val fnr = call.receiveNullable<FoedselsnummerDto>() ?: throw ManglerFoedselsnummerException()
+            val tpnummer =
+                call.request.headers["tpnr"]
+                    ?: throw ManglerTpNrException()
+
+            val samordningVedtakDtos =
+                try {
+                    samordningVedtakService.hentVedtaksliste(
+                        fomDato = fomDato,
+                        fnr = Folkeregisteridentifikator.of(fnr.value),
+                        context =
+                            MaskinportenTpContext(
+                                tpnr = Tjenestepensjonnummer(tpnummer),
+                                organisasjonsnr = call.orgNummer,
+                            ),
+                    )
+                } catch (e: IllegalArgumentException) {
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
+
+            call.respond(samordningVedtakDtos)
+        }
     }
 
     route("api/pensjon/vedtak") {
@@ -113,6 +142,28 @@ fun Route.samordningVedtakRoute(
             call.respond(samordningVedtakDtos)
         }
 
+        get {
+            val fomDato =
+                call.dato("fomDato")
+                    ?: call.dato("virkFom")
+                    ?: throw ManglerFomDatoException()
+
+            val fnr = call.receiveNullable<FoedselsnummerDto>() ?: throw ManglerFoedselsnummerException()
+
+            val samordningVedtakDtos =
+                try {
+                    samordningVedtakService.hentVedtaksliste(
+                        fomDato = fomDato,
+                        fnr = Folkeregisteridentifikator.of(fnr.value),
+                        context = PensjonContext,
+                    )
+                } catch (e: IllegalArgumentException) {
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
+
+            call.respond(samordningVedtakDtos)
+        }
+
         get("/har-loepende-oms") {
             val paaDato = call.dato("paaDato") ?: throw ManglerPaaDatoException()
             val fnr = call.fnr
@@ -122,6 +173,29 @@ fun Route.samordningVedtakRoute(
                     samordningVedtakService.harLoependeYtelsePaaDato(
                         dato = paaDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
+                        sakType = SakType.OMSTILLINGSSTOENAD,
+                        context = PensjonContext,
+                    )
+                } catch (e: IllegalArgumentException) {
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
+
+            call.respond(
+                mapOf(
+                    "omstillingsstoenad" to harLoependeOmsPaaDato,
+                ),
+            )
+        }
+
+        get("/har-loepende-oms") {
+            val paaDato = call.dato("paaDato") ?: throw ManglerPaaDatoException()
+            val fnr = call.receiveNullable<FoedselsnummerDto>() ?: throw ManglerFoedselsnummerException()
+
+            val harLoependeOmsPaaDato =
+                try {
+                    samordningVedtakService.harLoependeYtelsePaaDato(
+                        dato = paaDato,
+                        fnr = Folkeregisteridentifikator.of(fnr.value),
                         sakType = SakType.OMSTILLINGSSTOENAD,
                         context = PensjonContext,
                     )

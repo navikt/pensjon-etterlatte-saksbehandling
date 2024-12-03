@@ -444,6 +444,7 @@ internal class ApplicationContext(
         OmregningService(
             behandlingService = behandlingService,
             omregningDao = omregningDao,
+            oppgaveService = oppgaveService,
         )
 
     val tilgangService = TilgangServiceImpl(sakTilgangDao)

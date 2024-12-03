@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.sak
 
 import java.math.BigDecimal
+import java.util.UUID
 
 data class KjoeringRequest(
     val kjoering: String,
@@ -21,6 +22,7 @@ data class LagreKjoeringRequest(
     val kjoering: String,
     val status: KjoeringStatus,
     val sakId: SakId,
+    val behandling: UUID? = null,
     val beregningBeloepFoer: BigDecimal?,
     val beregningBeloepEtter: BigDecimal?,
     val beregningGFoer: BigDecimal?,

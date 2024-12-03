@@ -53,7 +53,7 @@ export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
         aria-labelledby="modal-heading"
         width="medium"
         onClose={() => setOpen(false)}
-        header={{ heading: 'Mottatt inntektsjustering' }}
+        header={{ heading: 'Ny inntektsopplysning' }}
       >
         <Modal.Body>
           <VStack gap="4">

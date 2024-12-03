@@ -87,7 +87,7 @@ class InntektsjusteringSelvbetjeningService(
                 sakId = SakId(mottattInntektsjustering.sak.sakId),
                 kilde = OppgaveKilde.BRUKERDIALOG,
                 type = OppgaveType.INNTEKTSOPPLYSNING,
-                merknad = "Mottatt inntektsjustering",
+                merknad = "Ny inntektsopplysning",
                 referanse = mottattInntektsjustering.journalpostId,
             )
         }

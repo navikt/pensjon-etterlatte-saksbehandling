@@ -262,7 +262,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 sakId = SakId(123L),
                 kilde = OppgaveKilde.BRUKERDIALOG,
                 type = OppgaveType.INNTEKTSOPPLYSNING,
-                merknad = "Mottatt inntektsjustering",
+                merknad = "Ny inntektsopplysning",
                 referanse = "123",
                 frist = null,
                 saksbehandler = null,

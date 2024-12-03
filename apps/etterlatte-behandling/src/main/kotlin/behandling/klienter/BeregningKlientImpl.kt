@@ -4,8 +4,8 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -27,12 +27,12 @@ interface BeregningKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 
-    suspend fun aarligInntektsjusteringSjekk(
+    suspend fun inntektsjusteringAvkortingInfoSjekk(
         sakId: SakId,
         aar: Int,
         sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AarligInntektsjusteringAvkortingSjekkResponse
+    ): InntektsjusteringAvkortingInfoResponse
 }
 
 class BeregningKlientImpl(
@@ -75,12 +75,12 @@ class BeregningKlientImpl(
             )
     }
 
-    override suspend fun aarligInntektsjusteringSjekk(
+    override suspend fun inntektsjusteringAvkortingInfoSjekk(
         sakId: SakId,
         aar: Int,
         sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AarligInntektsjusteringAvkortingSjekkResponse {
+    ): InntektsjusteringAvkortingInfoResponse {
         logger.info("Sjekker om sakId=$sakId har inntekt for aar=$aar")
         val response =
             downstreamResourceClient.post(
@@ -91,7 +91,7 @@ class BeregningKlientImpl(
                     ),
                 brukerTokenInfo = brukerTokenInfo,
                 postBody =
-                    AarligInntektsjusteringAvkortingSjekkRequest(
+                    InntektsjusteringAvkortingInfoRequest(
                         sakId = sakId,
                         aar = aar,
                         sisteBehandling = sisteBehandling,

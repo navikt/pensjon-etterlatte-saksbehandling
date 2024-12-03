@@ -9,7 +9,7 @@ import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -32,7 +32,7 @@ internal class AvkortingRepositoryTest(
         val sakId = randomSakId()
 
         avkortingRepository.harSakInntektForAar(
-            AarligInntektsjusteringAvkortingSjekkRequest(
+            InntektsjusteringAvkortingInfoRequest(
                 sakId,
                 aarsoppgjoer.aar,
                 sisteBehandling = UUID.randomUUID(),
@@ -47,7 +47,7 @@ internal class AvkortingRepositoryTest(
         )
 
         avkortingRepository.harSakInntektForAar(
-            AarligInntektsjusteringAvkortingSjekkRequest(
+            InntektsjusteringAvkortingInfoRequest(
                 sakId,
                 aarsoppgjoer.aar,
                 sisteBehandling = behandlingId,

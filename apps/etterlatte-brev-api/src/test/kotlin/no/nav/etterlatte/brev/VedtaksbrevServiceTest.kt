@@ -64,6 +64,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -257,6 +258,7 @@ internal class VedtaksbrevServiceTest {
                 coEvery { behandlingService.hentBehandling(any(), any()) } returns
                     mockk {
                         every { opphoerFraOgMed } returns null
+                        every { prosesstype } returns Prosesstype.MANUELL
                     }
 
                 coEvery { beregningService.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns

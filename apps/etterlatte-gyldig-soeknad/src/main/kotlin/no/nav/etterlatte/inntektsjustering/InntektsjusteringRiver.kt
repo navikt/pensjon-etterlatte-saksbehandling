@@ -16,7 +16,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.time.YearMonth
 
 internal class InntektsjusteringRiver(
@@ -72,7 +71,7 @@ internal class InntektsjusteringRiver(
                 sak = sak.id,
                 inntektsjusteringId = inntektsjustering.id,
                 journalpostId = journalpostResponse.journalpostId,
-                mottatt = LocalDateTime.now(), // TODO Legg ti i Inntektsjustering i felles lib
+                mottatt = inntektsjustering.mottattDato,
                 inntektsaar = inntektsjustering.inntektsaar,
                 arbeidsinntekt = inntektsjustering.arbeidsinntekt,
                 naeringsinntekt = inntektsjustering.naeringsinntekt,

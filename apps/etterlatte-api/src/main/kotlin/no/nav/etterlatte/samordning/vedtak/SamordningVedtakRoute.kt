@@ -10,6 +10,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.MaskinportenScopeAuthorizationPlugin
@@ -81,7 +82,7 @@ fun Route.samordningVedtakRoute(
             call.respond(samordningVedtakDtos)
         }
 
-        get {
+        post {
             val fomDato =
                 call.dato("fomDato")
                     ?: call.dato("virkFom")
@@ -103,7 +104,7 @@ fun Route.samordningVedtakRoute(
                             ),
                     )
                 } catch (e: IllegalArgumentException) {
-                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@post call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(samordningVedtakDtos)
@@ -187,7 +188,7 @@ fun Route.samordningVedtakRoute(
             )
         }
 
-        get("/har-loepende-oms") {
+        post("/har-loepende-oms") {
             val paaDato = call.dato("paaDato") ?: throw ManglerPaaDatoException()
             val fnr = call.receiveNullable<FoedselsnummerDto>() ?: throw ManglerFoedselsnummerException()
 
@@ -200,7 +201,7 @@ fun Route.samordningVedtakRoute(
                         context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
-                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@post call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(

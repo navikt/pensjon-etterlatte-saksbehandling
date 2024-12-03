@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
@@ -41,8 +42,12 @@ class OmregningService(
 
             behandlingService.hentAapenOmregning(request.sakId)?.let {
                 val oppgave = oppgaveService.hentOppgaverForReferanse(it.id.toString()).single()
-                if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
-                    oppgaveService.fjernSaksbehandler(oppgave.id)
+
+                if (oppgave.type.name == OppgaveType.MOTTATT_INNTEKTSJUSTERING.name) {
+                    if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
+                        oppgaveService.fjernSaksbehandler(oppgave.id)
+                        return
+                    }
                 }
 
                 if (it.status.kanAvbrytes()) {

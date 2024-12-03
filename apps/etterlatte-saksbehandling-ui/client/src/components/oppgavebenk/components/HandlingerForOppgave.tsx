@@ -19,7 +19,7 @@ import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi }
 import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { MottattInntektsjusteringModal } from '~components/oppgavebenk/oppgaveModal/MottattInntektsjusteringModal'
+import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
 import { AktivitetspliktOppgaveHandling } from '~components/oppgavebenk/oppgaveModal/aktivitetsplikt/AktivitetspliktOppgaveHandling'
 
 export const HandlingerForOppgave = ({
@@ -187,7 +187,7 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.INNTEKTSOPPLYSNING:
-      return <MottattInntektsjusteringModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+      return <InntektsopplysningModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
       return mapResult(opprettManuellRevurderingStatus, {
         initial: (

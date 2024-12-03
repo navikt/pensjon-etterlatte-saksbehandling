@@ -16,7 +16,7 @@ interface Props {
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }
 
-export const MottattInntektsjusteringModal = ({ oppgave, oppdaterStatus }: Props) => {
+export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [open, setOpen] = useState<boolean>(false)

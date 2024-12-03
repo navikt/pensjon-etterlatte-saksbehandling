@@ -79,7 +79,7 @@ data class BarnepensjonInnvilgelse(
 
 data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val virkningsdato: LocalDate,
-    val avdoed: Avdoed,
+    val avdoed: Avdoed?,
     val senereAvdoed: Avdoed?,
     val sisteBeregningsperiodeDatoFom: LocalDate,
     val sisteBeregningsperiodeBeloep: Kroner,
@@ -102,11 +102,8 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
 
             val foersteAvdoed =
                 avdoede.minByOrNull { it.doedsdato }
-                    ?: throw UgyldigForespoerselException(
-                        code = "AVDOED_MED_DOEDSDATO_MANGLER",
-                        detail = "Ingen avdød med dødsdato",
-                    )
-            val senereAvdoed = avdoede.find { it.fnr != foersteAvdoed.fnr }
+
+            val senereAvdoed = foersteAvdoed?.let { avdoede.find { it.fnr != foersteAvdoed.fnr } }
 
             return BarnepensjonInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,

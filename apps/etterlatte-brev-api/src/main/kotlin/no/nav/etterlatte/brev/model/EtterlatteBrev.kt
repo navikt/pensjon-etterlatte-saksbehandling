@@ -105,7 +105,7 @@ data class OmstillingsstoenadBeregningsperiode(
 )
 
 data class TrygdetidMedBeregningsmetode(
-    val navnAvdoed: String,
+    val navnAvdoed: String?,
     val trygdetidsperioder: List<Trygdetidsperiode>,
     val beregnetTrygdetidAar: Int,
     val prorataBroek: IntBroek?,
@@ -140,7 +140,7 @@ data class Trygdetidsperiode(
 fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt: BeregningsMetode,
     beregningsMetodeFraGrunnlag: BeregningsMetode,
-    navnAvdoed: String,
+    navnAvdoed: String?,
 ) = TrygdetidMedBeregningsmetode(
     navnAvdoed = navnAvdoed,
     trygdetidsperioder =

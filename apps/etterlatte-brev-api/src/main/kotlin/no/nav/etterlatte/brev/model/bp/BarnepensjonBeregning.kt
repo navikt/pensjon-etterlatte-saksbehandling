@@ -8,7 +8,6 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.FantIkkeIdentTilTrygdetidBlantAvdoede
 import no.nav.etterlatte.brev.model.ForskjelligTrygdetid
-import no.nav.etterlatte.brev.model.IngenStoetteForUkjentAvdoed
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManglerAvdoedBruktTilTrygdetid
 import no.nav.etterlatte.brev.model.OverstyrtTrygdetidManglerAvdoed
@@ -168,12 +167,9 @@ internal fun trygdetidMedBeregningsmetode(
 private fun hentAvdoedNavn(
     trygdetidDto: TrygdetidDto,
     avdoede: List<Avdoed>,
-): String {
-    if (avdoede.isEmpty()) {
-        return when (trygdetidDto.ident) {
-            UKJENT_AVDOED -> "ukjent avdød"
-            else -> throw IngenStoetteForUkjentAvdoed()
-        }
+): String? {
+    if (avdoede.isEmpty() && trygdetidDto.ident == UKJENT_AVDOED) {
+        return null
     }
 
     return avdoede.find { it.fnr.value == trygdetidDto.ident }?.navn ?: run {

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -39,11 +40,17 @@ class OmregningService(
             }
 
             behandlingService.hentAapenOmregning(request.sakId)?.let {
+                val oppgave = oppgaveService.hentOppgaverForReferanse(it.id.toString()).single()
+                if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
+                    oppgaveService.fjernSaksbehandler(oppgave.id)
+                }
+
                 if (it.status.kanAvbrytes()) {
                     behandlingService.avbrytBehandling(it.id, bruker)
                 }
             }
         }
+
         omregningDao.oppdaterKjoering(request)
     }
 

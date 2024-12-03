@@ -33,7 +33,7 @@ class ArbeidstabellDao(
                 statement.setTidspunkt(7, jobb.sistEndret)
                 statement.setString(8, jobb.type.name)
                 statement.executeUpdate()
-                logger.info("Opprettet en jobb for sak ${jobb.sakId} med status ${jobb.status}")
+                logger.info("Opprettet en jobb av type ${jobb.type.name} for sak ${jobb.sakId} med status ${jobb.status}")
             }
         }
     }

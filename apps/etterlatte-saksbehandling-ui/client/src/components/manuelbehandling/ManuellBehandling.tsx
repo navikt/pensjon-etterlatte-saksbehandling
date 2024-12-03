@@ -1,13 +1,10 @@
-import { Alert, Button, Checkbox, Heading, ReadMore, Select, TextField } from '@navikt/ds-react'
+import { Alert, Box, Button, Checkbox, Heading, ReadMore, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
-import {
-  InputRow,
-  NyBehandlingSkjema,
-} from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import { NyBehandlingSkjema } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 import { isPending, isSuccess, mapResult } from '~shared/api/apiUtils'
@@ -125,7 +122,7 @@ export default function ManuellBehandling() {
           <option value="GJENNY">Nei</option>
         </Select>
 
-        <InputRow>
+        <Box width="20rem">
           <TextField
             {...register('pesysId', {
               required: {
@@ -139,7 +136,7 @@ export default function ManuellBehandling() {
             pattern="[0-9]{11}"
             maxLength={11}
           />
-        </InputRow>
+        </Box>
 
         <Select {...register('enhet')} label="Overstyre enhet (valgfritt)">
           {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (

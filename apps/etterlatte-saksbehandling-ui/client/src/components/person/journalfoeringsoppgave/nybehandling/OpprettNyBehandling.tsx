@@ -3,11 +3,10 @@ import { SakType } from '~shared/types/sak'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import PersongalleriOmstillingsstoenad from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriOmstillingsstoenad'
 import { formaterSakstype, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formatering/formatering'
-import { Alert, Button, Heading, HStack, Select, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, HStack, Select, VStack } from '@navikt/ds-react'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
-import styled from 'styled-components'
 import React, { useEffect } from 'react'
 import { Spraak } from '~shared/types/Brev'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -158,10 +157,11 @@ export default function OpprettNyBehandling() {
             control={control}
             errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
           />
-
-          <PersongalleriHeading size="medium" spacing>
-            Persongalleri
-          </PersongalleriHeading>
+          <Box marginBlock="12 0">
+            <Heading size="medium" spacing>
+              Persongalleri
+            </Heading>
+          </Box>
 
           {!valgtSakType && <Alert variant="warning">Du må velge saktype!</Alert>}
           {valgtSakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
@@ -186,27 +186,3 @@ export default function OpprettNyBehandling() {
     </FormWrapper>
   )
 }
-
-export const InputList = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 1rem;
-`
-
-export const InputRow = styled.div`
-  display: flex;
-  align-items: flex-start;
-
-  input {
-    width: 20rem;
-  }
-
-  button {
-    align-self: flex-end;
-  }
-`
-
-const PersongalleriHeading = styled(Heading)`
-  margin-top: 1.5rem;
-`

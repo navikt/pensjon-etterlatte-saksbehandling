@@ -123,7 +123,7 @@ export const TrygdetidManueltOverstyrt = ({
               </VStack>
             </Box>
           )}
-          <VStack gap="4" maxWidth="22rem">
+          <VStack gap="4">
             <TextField
               label="Anvendt trygdetid"
               placeholder="Anvendt trygdetid"
@@ -139,22 +139,26 @@ export const TrygdetidManueltOverstyrt = ({
             </Checkbox>
             {skalHaProrata && (
               <HStack gap="4">
-                <TextField
-                  label="Prorata teller"
-                  placeholder="Prorata teller"
-                  value={prorataTeller || ''}
-                  pattern="[0-9]{11}"
-                  maxLength={11}
-                  onChange={(e) => setTeller(Number(e.target.value))}
-                />
-                <TextField
-                  label="Prorata nevner"
-                  placeholder="Prorata nevner"
-                  value={prorataNevner || ''}
-                  pattern="[0-9]{11}"
-                  maxLength={11}
-                  onChange={(e) => setNevner(Number(e.target.value))}
-                />
+                <Box width="20rem">
+                  <TextField
+                    label="Prorata teller"
+                    placeholder="Prorata teller"
+                    value={prorataTeller || ''}
+                    pattern="[0-9]{11}"
+                    maxLength={11}
+                    onChange={(e) => setTeller(Number(e.target.value))}
+                  />
+                </Box>
+                <Box width="20rem">
+                  <TextField
+                    label="Prorata nevner"
+                    placeholder="Prorata nevner"
+                    value={prorataNevner || ''}
+                    pattern="[0-9]{11}"
+                    maxLength={11}
+                    onChange={(e) => setNevner(Number(e.target.value))}
+                  />
+                </Box>
               </HStack>
             )}
 

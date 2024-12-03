@@ -186,7 +186,7 @@ export const HandlingerForOppgave = ({
           <AktivitetspliktInfo6MndVarigUnntakModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
-    case Oppgavetype.MOTTATT_INNTEKTSJUSTERING:
+    case Oppgavetype.INNTEKTSOPPLYSNING:
       return <MottattInntektsjusteringModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
       return mapResult(opprettManuellRevurderingStatus, {

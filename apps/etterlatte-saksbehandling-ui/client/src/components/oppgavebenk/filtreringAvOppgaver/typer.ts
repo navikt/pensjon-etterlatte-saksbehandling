@@ -69,7 +69,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   GENERELL_OPPGAVE: 'Generell oppgave',
   MANUELL_UTSENDING_BREV: 'Manuell brevutsending',
   AARLIG_INNTEKTSJUSTERING: 'Årlig inntektsjustering',
-  MOTTATT_INNTEKTSJUSTERING: 'Mottatt inntektsjustering',
+  INNTEKTSOPPLYSNING: 'Inntektsopplysning',
 } as const
 
 export const FRISTFILTER = {

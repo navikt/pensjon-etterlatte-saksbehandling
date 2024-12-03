@@ -29,7 +29,7 @@ data class Foerstegangsbehandling(
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utlandstilknytning: Utlandstilknytning?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    val soeknadMottattDato: LocalDateTime?,
+    override val soeknadMottattDato: LocalDateTime?,
     val gyldighetsproeving: GyldighetsResultat?,
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
     override val kilde: Vedtaksloesning,

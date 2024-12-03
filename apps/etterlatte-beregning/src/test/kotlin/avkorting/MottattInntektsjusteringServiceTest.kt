@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -44,6 +45,7 @@ class MottattInntektsjusteringServiceTest {
                         SakId(123L),
                         UUID.randomUUID(),
                         "123",
+                        LocalDateTime.now(),
                         2025,
                         100,
                         100,
@@ -107,6 +109,7 @@ class MottattInntektsjusteringServiceTest {
                         SakId(123L),
                         UUID.randomUUID(),
                         "123",
+                        LocalDateTime.now(),
                         2025,
                         100,
                         100,

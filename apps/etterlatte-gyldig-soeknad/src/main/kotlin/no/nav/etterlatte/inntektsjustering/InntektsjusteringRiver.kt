@@ -71,6 +71,7 @@ internal class InntektsjusteringRiver(
                 sak = sak.id,
                 inntektsjusteringId = inntektsjustering.id,
                 journalpostId = journalpostResponse.journalpostId,
+                mottatt = inntektsjustering.mottattDato,
                 inntektsaar = inntektsjustering.inntektsaar,
                 arbeidsinntekt = inntektsjustering.arbeidsinntekt,
                 naeringsinntekt = inntektsjustering.naeringsinntekt,

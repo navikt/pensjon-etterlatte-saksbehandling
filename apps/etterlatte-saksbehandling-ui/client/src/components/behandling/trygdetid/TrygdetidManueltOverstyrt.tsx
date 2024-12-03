@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Alert, BodyShort, Box, Button, Checkbox, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
-import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   IDetaljertBeregnetTrygdetid,
@@ -8,8 +7,6 @@ import {
   oppdaterTrygdetidOverstyrtMigrering,
   opprettTrygdetidOverstyrtMigrering,
 } from '~shared/api/trygdetid'
-import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
-
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
@@ -126,7 +123,7 @@ export const TrygdetidManueltOverstyrt = ({
               </VStack>
             </Box>
           )}
-          <FormWrapper>
+          <VStack gap="4">
             <TextField
               label="Anvendt trygdetid"
               placeholder="Anvendt trygdetid"
@@ -141,39 +138,39 @@ export const TrygdetidManueltOverstyrt = ({
               Prorata brøk
             </Checkbox>
             {skalHaProrata && (
-              <InputRow>
-                <TextField
-                  label="Prorata teller"
-                  placeholder="Prorata teller"
-                  value={prorataTeller || ''}
-                  pattern="[0-9]{11}"
-                  maxLength={11}
-                  onChange={(e) => setTeller(Number(e.target.value))}
-                />
-                <TextField
-                  label="Prorata nevner"
-                  placeholder="Prorata nevner"
-                  value={prorataNevner || ''}
-                  pattern="[0-9]{11}"
-                  maxLength={11}
-                  onChange={(e) => setNevner(Number(e.target.value))}
-                />
-              </InputRow>
+              <HStack gap="4">
+                <Box width="20rem">
+                  <TextField
+                    label="Prorata teller"
+                    placeholder="Prorata teller"
+                    value={prorataTeller || ''}
+                    pattern="[0-9]{11}"
+                    maxLength={11}
+                    onChange={(e) => setTeller(Number(e.target.value))}
+                  />
+                </Box>
+                <Box width="20rem">
+                  <TextField
+                    label="Prorata nevner"
+                    placeholder="Prorata nevner"
+                    value={prorataNevner || ''}
+                    pattern="[0-9]{11}"
+                    maxLength={11}
+                    onChange={(e) => setNevner(Number(e.target.value))}
+                  />
+                </Box>
+              </HStack>
             )}
 
-            <Knapp>
-              <Button
-                variant="secondary"
-                onClick={lagre}
-                loading={isPending(oppdaterStatus)}
-                disabled={
-                  anvendtTrygdetid == null || (skalHaProrata && (prorataNevner == null || prorataTeller == null))
-                }
-              >
-                Send inn
-              </Button>
-            </Knapp>
-          </FormWrapper>
+            <Button
+              variant="secondary"
+              onClick={lagre}
+              loading={isPending(oppdaterStatus)}
+              disabled={anvendtTrygdetid == null || (skalHaProrata && (prorataNevner == null || prorataTeller == null))}
+            >
+              Send inn
+            </Button>
+          </VStack>
           {mapResult(oppdaterStatus, {
             pending: <Spinner label="Lagrer trygdetid" />,
             error: () => <ApiErrorAlert>En feil har oppstått ved lagring av trygdetid</ApiErrorAlert>,
@@ -222,11 +219,3 @@ export const TrygdetidManueltOverstyrt = ({
     </>
   )
 }
-
-const FormWrapper = styled.div`
-  display: grid;
-  gap: var(--a-spacing-4);
-`
-const Knapp = styled.div`
-  margin-top: 1em;
-`

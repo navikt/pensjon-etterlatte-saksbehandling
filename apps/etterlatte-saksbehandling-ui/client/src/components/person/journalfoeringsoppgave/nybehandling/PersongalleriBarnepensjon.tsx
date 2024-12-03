@@ -1,6 +1,6 @@
 import React from 'react'
-import { BodyShort, Box, Button, Heading, TextField, VStack } from '@navikt/ds-react'
-import { InputList, InputRow, NyBehandlingSkjema } from './OpprettNyBehandling'
+import { BodyShort, Box, Button, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
+import { NyBehandlingSkjema } from './OpprettNyBehandling'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import {
   validateFnrObligatorisk,
@@ -32,14 +32,14 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
         readOnly={!erManuellMigrering}
       />
 
-      <InputRow>
+      <Box width="20rem">
         <TextField
           {...register('persongalleri.innsender', { validate: validerFnrValgfri })}
           label="Innsender"
           description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
           error={errors.persongalleri?.innsender?.message}
         />
-      </InputRow>
+      </Box>
 
       <Box padding="4" borderWidth="1" borderRadius="small">
         <Heading size="small" spacing>
@@ -47,22 +47,26 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
         </Heading>
 
-        <InputList>
+        <VStack gap="4" align="start">
           {gjenlevendeFormArray.fields.map((field, index) => (
-            <InputRow key={index}>
-              <TextField
-                {...register(`persongalleri.gjenlevende.${index}.value`, { validate: validateFnrObligatorisk })}
-                key={field.id}
-                label="Gjenlevende forelder"
-                description="Oppgi fødselsnummer"
-                error={errors?.persongalleri?.gjenlevende?.[index]?.value?.message}
-              />
-              <Button
-                icon={<XMarkIcon aria-hidden />}
-                variant="tertiary"
-                onClick={() => gjenlevendeFormArray.remove(index)}
-              />
-            </InputRow>
+            <HStack gap="2" key={index} align="end">
+              <Box width="20rem">
+                <TextField
+                  {...register(`persongalleri.gjenlevende.${index}.value`, { validate: validateFnrObligatorisk })}
+                  key={field.id}
+                  label="Gjenlevende forelder"
+                  description="Oppgi fødselsnummer"
+                  error={errors?.persongalleri?.gjenlevende?.[index]?.value?.message}
+                />
+              </Box>
+              <div>
+                <Button
+                  icon={<XMarkIcon aria-hidden />}
+                  variant="tertiary"
+                  onClick={() => gjenlevendeFormArray.remove(index)}
+                />
+              </div>
+            </HStack>
           ))}
           <Button
             icon={<PlusIcon aria-hidden />}
@@ -72,7 +76,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           >
             Legg til gjenlevende
           </Button>
-        </InputList>
+        </VStack>
       </Box>
 
       <Box padding="4" borderWidth="1" borderRadius="small">
@@ -81,22 +85,26 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           <BodyShort textColor="subtle">Legg til avdød hvis tilgjengelig</BodyShort>
         </Heading>
 
-        <InputList>
+        <VStack gap="4" align="start">
           {avdoedFormArray.fields.map((field, index) => (
-            <InputRow key={index}>
-              <TextField
-                {...register(`persongalleri.avdoed.${index}.value`, { validate: validateFnrObligatorisk })}
-                key={field.id}
-                label="Avdød forelder"
-                description="Oppgi fødselsnummer"
-                error={errors?.persongalleri?.avdoed?.[index]?.value?.message}
-              />
-              <Button
-                icon={<XMarkIcon aria-hidden />}
-                variant="tertiary"
-                onClick={() => avdoedFormArray.remove(index)}
-              />
-            </InputRow>
+            <HStack gap="2" key={index} align="end">
+              <Box width="20rem">
+                <TextField
+                  {...register(`persongalleri.avdoed.${index}.value`, { validate: validateFnrObligatorisk })}
+                  key={field.id}
+                  label="Avdød forelder"
+                  description="Oppgi fødselsnummer"
+                  error={errors?.persongalleri?.avdoed?.[index]?.value?.message}
+                />
+              </Box>
+              <div>
+                <Button
+                  icon={<XMarkIcon aria-hidden />}
+                  variant="tertiary"
+                  onClick={() => avdoedFormArray.remove(index)}
+                />
+              </div>
+            </HStack>
           ))}
           <Button
             icon={<PlusIcon aria-hidden />}
@@ -106,7 +114,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           >
             Legg til avdød
           </Button>
-        </InputList>
+        </VStack>
       </Box>
 
       <Box padding="4" borderWidth="1" borderRadius="small">
@@ -114,27 +122,31 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           Søsken
           <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
         </Heading>
-        <InputList>
+        <VStack gap="4" align="start">
           {soeskenFormArray.fields.map((field, index) => (
-            <InputRow key={index}>
-              <TextField
-                {...register(`persongalleri.soesken.${index}.value`, { validate: validateFnrObligatorisk })}
-                key={field.id}
-                label="Søsken"
-                description="Oppgi fødselsnummer"
-                error={errors?.persongalleri?.soesken?.[index]?.value?.message}
-              />
-              <Button
-                icon={<XMarkIcon aria-hidden />}
-                variant="tertiary"
-                onClick={() => soeskenFormArray.remove(index)}
-              />
-            </InputRow>
+            <HStack gap="2" key={index} align="end">
+              <Box width="20rem">
+                <TextField
+                  {...register(`persongalleri.soesken.${index}.value`, { validate: validateFnrObligatorisk })}
+                  key={field.id}
+                  label="Søsken"
+                  description="Oppgi fødselsnummer"
+                  error={errors?.persongalleri?.soesken?.[index]?.value?.message}
+                />
+              </Box>
+              <div>
+                <Button
+                  icon={<XMarkIcon aria-hidden />}
+                  variant="tertiary"
+                  onClick={() => soeskenFormArray.remove(index)}
+                />
+              </div>
+            </HStack>
           ))}
           <Button icon={<PlusIcon aria-hidden />} onClick={() => soeskenFormArray.append({ value: '' })} type="button">
             Legg til søsken
           </Button>
-        </InputList>
+        </VStack>
       </Box>
     </VStack>
   )

@@ -5,7 +5,6 @@ import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
 import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
 import {
   BP_FORELDRELOES_BESKRIVELSE,
   BP_FORELDRELOES_HJEMLER,
@@ -111,12 +110,10 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading spacing size="large" level="1">
-            Revurdering
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="12 4">
+        <Heading spacing size="large" level="1">
+          Revurdering
+        </Heading>
         {[Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(revurderingsaarsak) ? (
           <BodyShort spacing>Revurdering på grunn av annen årsak (spesifiseres nedenfor).</BodyShort>
         ) : (

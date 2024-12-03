@@ -1,5 +1,4 @@
-import { Alert, Box, Button, Heading, HStack, Modal, TextField } from '@navikt/ds-react'
-import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import { Alert, Box, Button, Heading, HStack, Modal, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -93,21 +92,25 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
         <Modal.Body>
           <FormWrapper $column={true}>
             <Box padding="4" borderWidth="1" borderRadius="small">
-              <InputList>
+              <VStack gap="4" align="start">
                 {avdoedListe.fields?.map((field, index) => (
-                  <InputRow key={field.id}>
-                    <TextField
-                      {...register(`avdoede.${index}.fnr`, {
-                        validate: {
-                          fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
-                        },
-                      })}
-                      label={behandling.sakType === SakType.BARNEPENSJON ? 'Avdød forelder' : 'Avdød'}
-                      description="Oppgi fødselsnummer"
-                      error={errors?.avdoede?.[index]?.fnr?.message}
-                    />
-                    <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => avdoedListe.remove(index)} />
-                  </InputRow>
+                  <HStack gap="2" key={field.id} align="end">
+                    <Box width="20rem">
+                      <TextField
+                        {...register(`avdoede.${index}.fnr`, {
+                          validate: {
+                            fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
+                          },
+                        })}
+                        label={behandling.sakType === SakType.BARNEPENSJON ? 'Avdød forelder' : 'Avdød'}
+                        description="Oppgi fødselsnummer"
+                        error={errors?.avdoede?.[index]?.fnr?.message}
+                      />
+                    </Box>
+                    <div>
+                      <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => avdoedListe.remove(index)} />
+                    </div>
+                  </HStack>
                 ))}
                 <Button
                   icon={<PlusIcon />}
@@ -116,25 +119,29 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                 >
                   Legg til avdøde
                 </Button>
-              </InputList>
+              </VStack>
             </Box>
 
             <Box padding="4" borderWidth="1" borderRadius="small">
-              <InputList>
+              <VStack gap="4" align="start">
                 {gjenlevendeListe.fields?.map((field, index) => (
-                  <InputRow key={field.id}>
-                    <TextField
-                      {...register(`gjenlevende.${index}.fnr`, {
-                        validate: {
-                          fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
-                        },
-                      })}
-                      label="Gjenlevende forelder"
-                      description="Oppgi fødselsnummer"
-                      error={errors?.gjenlevende?.[index]?.fnr?.message}
-                    />
-                    <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => gjenlevendeListe.remove(index)} />
-                  </InputRow>
+                  <HStack gap="2" key={field.id} align="end">
+                    <Box width="20rem">
+                      <TextField
+                        {...register(`gjenlevende.${index}.fnr`, {
+                          validate: {
+                            fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
+                          },
+                        })}
+                        label="Gjenlevende forelder"
+                        description="Oppgi fødselsnummer"
+                        error={errors?.gjenlevende?.[index]?.fnr?.message}
+                      />
+                    </Box>
+                    <div>
+                      <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => gjenlevendeListe.remove(index)} />
+                    </div>
+                  </HStack>
                 ))}
 
                 <Button
@@ -144,7 +151,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                 >
                   Legg til gjenlevende
                 </Button>
-              </InputList>
+              </VStack>
             </Box>
           </FormWrapper>
 

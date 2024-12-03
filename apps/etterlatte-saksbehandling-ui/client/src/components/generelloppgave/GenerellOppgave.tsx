@@ -9,6 +9,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 interface GenerellOppgaveForm extends Omit<GenerellOppgaveDto, 'sakIds'> {
   sakIds: string
@@ -40,6 +41,8 @@ export default function GenerellOppgave() {
   }, [opprettGenerellOppgaveResult, reset])
 
   const opprett = (data: GenerellOppgaveForm) => {
+    trackClick(ClickEvent.OPPRETT_GENERELL_OPPGAVE)
+
     opprettGenerelOppgaveRequest({
       sakIds: data.sakIds
         .split(',')

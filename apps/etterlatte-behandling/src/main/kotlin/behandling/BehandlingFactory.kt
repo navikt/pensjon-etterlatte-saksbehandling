@@ -230,7 +230,7 @@ class BehandlingFactory(
                 )
             }
             val oppgave =
-                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                opprettOppgaveForFoerstegangsbehandling(
                     referanse = behandling.id.toString(),
                     sakId = request.sak.id,
                     oppgaveKilde =
@@ -320,7 +320,7 @@ class BehandlingFactory(
                 }
 
                 val oppgave =
-                    oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                    opprettOppgaveForFoerstegangsbehandling(
                         referanse = nyFoerstegangsbehandling.id.toString(),
                         sakId = nyFoerstegangsbehandling.sak.id,
                         oppgaveKilde = OppgaveKilde.BEHANDLING,
@@ -357,6 +357,23 @@ class BehandlingFactory(
             BehandlingHendelseType.OPPRETTET,
         )
         return behandlingerForOmgjoering.nyFoerstegangsbehandling
+    }
+
+    private fun opprettOppgaveForFoerstegangsbehandling(
+        referanse: String,
+        sakId: SakId,
+        oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
+        merknad: String? = null,
+    ): OppgaveIntern {
+        oppgaveService.avbrytAapneOppgaverMedReferanse(referanse)
+
+        return oppgaveService.opprettOppgave(
+            referanse = referanse,
+            sakId = sakId,
+            kilde = oppgaveKilde,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
+            merknad = merknad,
+        )
     }
 
     private fun kopierFoerstegangsbehandlingOversikt(

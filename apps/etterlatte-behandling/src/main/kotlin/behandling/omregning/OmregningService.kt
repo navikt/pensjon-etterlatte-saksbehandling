@@ -43,7 +43,7 @@ class OmregningService(
             behandlingService.hentAapenOmregning(request.sakId)?.let {
                 val oppgave = oppgaveService.hentOppgaverForReferanse(it.id.toString()).single()
 
-                if (oppgave.type.name == OppgaveType.MOTTATT_INNTEKTSJUSTERING.name) {
+                if (oppgave.type.name == OppgaveType.INNTEKTSOPPLYSNING.name) {
                     if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
                         oppgaveService.fjernSaksbehandler(oppgave.id)
                         return

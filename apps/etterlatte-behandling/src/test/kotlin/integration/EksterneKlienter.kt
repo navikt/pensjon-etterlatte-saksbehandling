@@ -46,7 +46,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -238,12 +238,12 @@ class BeregningKlientTest :
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
 
-    override suspend fun aarligInntektsjusteringSjekk(
+    override suspend fun inntektsjusteringAvkortingInfoSjekk(
         sakId: SakId,
         aar: Int,
         sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AarligInntektsjusteringAvkortingSjekkResponse = mockk()
+    ): InntektsjusteringAvkortingInfoResponse = mockk()
 
     override suspend fun harTilgangTilSak(
         sakId: SakId,

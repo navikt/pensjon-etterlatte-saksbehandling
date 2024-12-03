@@ -41,6 +41,7 @@ class OmregningServiceTest(
             OmregningService(
                 behandlingService = mockk(),
                 omregningDao = OmregningDao(connection),
+                oppgaveService = mockk(),
             )
 
         val request =

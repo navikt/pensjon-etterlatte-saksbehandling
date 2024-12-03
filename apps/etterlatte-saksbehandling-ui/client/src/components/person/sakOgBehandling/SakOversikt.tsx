@@ -1,4 +1,3 @@
-import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
 import { Box, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlinger } from '~components/person/typer'
@@ -47,9 +46,9 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger }) => (
           <HStack gap="4" wrap={false}>
-            <SakHeaderWrapper>
+            <Box padding="8" minWidth="25rem" borderWidth="0 1 0 0" borderColor="border-subtle">
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
-            </SakHeaderWrapper>
+            </Box>
             <VStack gap="8">
               <VStack gap="4">
                 <Box paddingBlock="8 0">
@@ -119,14 +118,3 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
     </>
   )
 }
-
-export const HeadingWrapper = styled.div`
-  display: inline-flex;
-  margin-top: 3em;
-`
-
-const SakHeaderWrapper = styled.div`
-  padding: var(--a-spacing-8);
-  border-right: 1px solid var(--a-surface-active);
-  min-width: 25rem;
-`

@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
-import { GridContainer, MainContent } from '~shared/styled'
 import { IBehandlingReducer, resetBehandling, setBehandling } from '~store/reducers/BehandlingReducer'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { BehandlingRouteContext, useBehandlingRoutes } from './BehandlingRoutes'
@@ -18,6 +17,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { Box, HStack } from '@navikt/ds-react'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -68,17 +68,17 @@ export const Behandling = () => {
               <StatusBar ident={soeker?.foedselsnummer} />
               <StegMeny behandling={behandling} />
             </StickyToppMeny>
-            <GridContainer>
-              <MainContent>
+            <HStack height="100%" minHeight="100vh" wrap={false}>
+              <Box width="100%">
                 <Routes>
                   {routedata.behandlingRoutes.map((route) => (
                     <Route key={route.path} path={route.path} element={route.element(behandling)} />
                   ))}
                   <Route path="*" element={<Navigate to={routedata.behandlingRoutes[0].path} replace />} />
                 </Routes>
-              </MainContent>
+              </Box>
               <BehandlingSidemeny behandling={behandling} />
-            </GridContainer>
+            </HStack>
           </BehandlingRouteContext.Provider>
         )
       }

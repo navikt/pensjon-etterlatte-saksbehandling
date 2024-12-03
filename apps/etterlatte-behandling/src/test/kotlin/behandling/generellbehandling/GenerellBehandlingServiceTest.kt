@@ -254,7 +254,13 @@ internal class GenerellBehandlingServiceTest(
         assertNull(opprettBehandling.innhold)
 
         val oppgaveForFoerstegangsBehandling =
-            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(behandlingId.toString(), sak.id)
+            oppgaveService.opprettOppgave(
+                behandlingId.toString(),
+                sak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
         val saksbehandler = "saksbehandler"
         oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsBehandling.id, saksbehandler)
 

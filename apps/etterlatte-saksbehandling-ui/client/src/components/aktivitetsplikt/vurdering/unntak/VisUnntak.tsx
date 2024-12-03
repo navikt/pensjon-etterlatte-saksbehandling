@@ -1,5 +1,5 @@
 import { IAktivitetspliktUnntak, IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { slettAktivitetspliktUnntak } from '~shared/api/aktivitetsplikt'

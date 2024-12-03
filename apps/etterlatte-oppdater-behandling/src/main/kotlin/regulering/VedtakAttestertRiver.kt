@@ -45,6 +45,7 @@ internal class VedtakAttestertRiver(
             }
             validate { it.requireKey(OmregningDataPacket.KEY) }
             validate { it.requireKey(OmregningDataPacket.SAK_ID) }
+            validate { it.requireKey(OmregningDataPacket.BEHANDLING_ID) }
             validate { it.requireKey(OmregningDataPacket.KJOERING) }
             validate { it.requireKey(OmregningDataPacket.REV_AARSAK) }
             validate { it.interestedIn(BEREGNING_BELOEP_FOER) }
@@ -86,6 +87,7 @@ internal class VedtakAttestertRiver(
                         false -> KjoeringStatus.FERDIGSTILT
                     },
                 sakId = sakId,
+                behandling = packet.omregningData.hentBehandlingId(),
                 beregningBeloepFoer = bigDecimal(packet, BEREGNING_BELOEP_FOER),
                 beregningBeloepEtter = bigDecimal(packet, BEREGNING_BELOEP_ETTER),
                 beregningGFoer = bigDecimal(packet, BEREGNING_G_FOER),

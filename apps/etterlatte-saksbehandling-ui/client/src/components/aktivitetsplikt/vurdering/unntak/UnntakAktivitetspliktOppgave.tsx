@@ -11,7 +11,7 @@ import { FloppydiskIcon } from '@navikt/aksel-icons'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettAktivitetspliktUnntak } from '~shared/api/aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { startOfMonth } from 'date-fns'
@@ -99,7 +99,7 @@ export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?:
               message: 'Du må velge type unntak.',
             },
           })}
-          label="Type unntak"
+          label="Hvilket unntak er det?"
         >
           <option value={AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM}>
             {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM]}
@@ -118,7 +118,7 @@ export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?:
           </option>
         </Select>
 
-        <Textarea {...register(`${formPrefix}beskrivelse`)} label="Beskrivelse" />
+        <Textarea {...register(`${formPrefix}beskrivelse`)} label="Vurdering av unntak" />
       </VStack>
     </Box>
   )

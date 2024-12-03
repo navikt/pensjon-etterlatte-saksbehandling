@@ -557,27 +557,6 @@ class OppgaveService(
                 }
             }
 
-    fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-        referanse: String,
-        sakId: SakId,
-        oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
-        merknad: String? = null,
-    ): OppgaveIntern {
-        val oppgaverForBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
-        val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
-        oppgaverSomKanLukkes.forEach {
-            oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
-        }
-
-        return opprettOppgave(
-            referanse = referanse,
-            sakId = sakId,
-            kilde = oppgaveKilde,
-            type = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = merknad,
-        )
-    }
-
     fun opprettOppgaveBulk(
         referanse: String,
         sakIds: List<SakId>,
@@ -700,7 +679,7 @@ class OppgaveService(
                         OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
                         OppgaveType.AARLIG_INNTEKTSJUSTERING,
-                        OppgaveType.MOTTATT_INNTEKTSJUSTERING,
+                        OppgaveType.INNTEKTSOPPLYSNING,
                         OppgaveType.MANUELL_UTSENDING_BREV,
                         -> {
                             logger.info(

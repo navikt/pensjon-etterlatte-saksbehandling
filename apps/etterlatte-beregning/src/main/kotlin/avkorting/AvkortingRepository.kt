@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -20,7 +20,7 @@ import javax.sql.DataSource
 class AvkortingRepository(
     private val dataSource: DataSource,
 ) {
-    fun harSakInntektForAar(harInntektForAarDto: AarligInntektsjusteringAvkortingSjekkRequest): Boolean =
+    fun harSakInntektForAar(harInntektForAarDto: InntektsjusteringAvkortingInfoRequest): Boolean =
         dataSource.transaction { tx ->
             val alleAarsoppgjoer =
                 queryOf(

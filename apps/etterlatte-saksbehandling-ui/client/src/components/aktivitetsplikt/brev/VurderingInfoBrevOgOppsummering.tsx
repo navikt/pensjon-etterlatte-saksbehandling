@@ -1,6 +1,6 @@
 import { Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import React from 'react'
 import { Aktivitetspliktbrev } from '~components/aktivitetsplikt/brev/AktivitetspliktBrev'
 import { UtenBrevVisning } from '~components/aktivitetsplikt/brev/UtenBrevVisning'

@@ -148,13 +148,13 @@ enum class OverstyrtBeregningKategori {
     UKJENT_KATEGORI, // for å kunne håndtere tidligere overstyringer som ikke har kategori
 }
 
-data class AarligInntektsjusteringAvkortingSjekkRequest(
+data class InntektsjusteringAvkortingInfoRequest(
     val sakId: SakId,
     val aar: Int,
     val sisteBehandling: UUID,
 )
 
-data class AarligInntektsjusteringAvkortingSjekkResponse(
+data class InntektsjusteringAvkortingInfoResponse(
     val sakId: SakId,
     val aar: Int,
     val harInntektForAar: Boolean,

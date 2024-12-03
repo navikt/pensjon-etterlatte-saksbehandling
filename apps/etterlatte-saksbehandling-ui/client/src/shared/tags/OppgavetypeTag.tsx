@@ -36,25 +36,19 @@ export const OppgavetypeTag = ({ oppgavetype }: { oppgavetype: Oppgavetype }) =>
 
     case Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG:
       return <Tag variant="alt3-moderate">Gjenoppretting</Tag>
-
     case Oppgavetype.AKTIVITETSPLIKT:
     case Oppgavetype.AKTIVITETSPLIKT_12MND:
     case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:
     case Oppgavetype.AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK:
       return <Tag variant="alt3-filled">Aktivitetsplikt</Tag>
-
     case Oppgavetype.GENERELL_OPPGAVE:
       return <Tag variant="info">Generell oppgave</Tag>
-
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
       return <Tag variant="info">Årlig inntektsjustering</Tag>
-
-    case Oppgavetype.MOTTATT_INNTEKTSJUSTERING:
-      return <Tag variant="alt3">Mottatt inntektsjustering</Tag>
-
+    case Oppgavetype.INNTEKTSOPPLYSNING:
+      return <Tag variant="alt3">Inntektsopplysning</Tag>
     case Oppgavetype.MANUELL_UTSENDING_BREV:
       return <Tag variant="info">Manuell brevutsending</Tag>
-
     default:
       return <Tag variant="error-filled">Ukjent oppgave</Tag>
   }

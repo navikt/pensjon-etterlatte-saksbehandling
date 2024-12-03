@@ -54,7 +54,7 @@ export default function PersongalleriOmstillingsstoenad() {
 
         <VStack gap="4" align="start">
           {soeskenFormArray.fields.map((field, index) => (
-            <HStack gap="2" key={index}>
+            <HStack gap="2" key={index} align="end">
               <Box width="20rem">
                 <TextField
                   {...register(`persongalleri.soesken.${index}.value`, { validate: validateFnrObligatorisk })}
@@ -63,11 +63,13 @@ export default function PersongalleriOmstillingsstoenad() {
                   error={errors?.persongalleri?.soesken?.[index]?.value?.message}
                 />
               </Box>
-              <Button
-                icon={<XMarkIcon aria-hidden />}
-                variant="tertiary"
-                onClick={() => soeskenFormArray.remove(index)}
-              />
+              <div>
+                <Button
+                  icon={<XMarkIcon aria-hidden />}
+                  variant="tertiary"
+                  onClick={() => soeskenFormArray.remove(index)}
+                />
+              </div>
             </HStack>
           ))}
           <Button icon={<PlusIcon aria-hidden />} onClick={() => soeskenFormArray.append({ value: '' })} type="button">

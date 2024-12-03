@@ -49,7 +49,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
 
         <VStack gap="4" align="start">
           {gjenlevendeFormArray.fields.map((field, index) => (
-            <HStack gap="2" key={index}>
+            <HStack gap="2" key={index} align="end">
               <Box width="20rem">
                 <TextField
                   {...register(`persongalleri.gjenlevende.${index}.value`, { validate: validateFnrObligatorisk })}
@@ -59,11 +59,13 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
                   error={errors?.persongalleri?.gjenlevende?.[index]?.value?.message}
                 />
               </Box>
-              <Button
-                icon={<XMarkIcon aria-hidden />}
-                variant="tertiary"
-                onClick={() => gjenlevendeFormArray.remove(index)}
-              />
+              <div>
+                <Button
+                  icon={<XMarkIcon aria-hidden />}
+                  variant="tertiary"
+                  onClick={() => gjenlevendeFormArray.remove(index)}
+                />
+              </div>
             </HStack>
           ))}
           <Button
@@ -85,7 +87,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
 
         <VStack gap="4" align="start">
           {avdoedFormArray.fields.map((field, index) => (
-            <HStack gap="2" key={index}>
+            <HStack gap="2" key={index} align="end">
               <Box width="20rem">
                 <TextField
                   {...register(`persongalleri.avdoed.${index}.value`, { validate: validateFnrObligatorisk })}
@@ -95,11 +97,13 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
                   error={errors?.persongalleri?.avdoed?.[index]?.value?.message}
                 />
               </Box>
-              <Button
-                icon={<XMarkIcon aria-hidden />}
-                variant="tertiary"
-                onClick={() => avdoedFormArray.remove(index)}
-              />
+              <div>
+                <Button
+                  icon={<XMarkIcon aria-hidden />}
+                  variant="tertiary"
+                  onClick={() => avdoedFormArray.remove(index)}
+                />
+              </div>
             </HStack>
           ))}
           <Button
@@ -120,7 +124,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
         </Heading>
         <VStack gap="4" align="start">
           {soeskenFormArray.fields.map((field, index) => (
-            <HStack gap="2" key={index}>
+            <HStack gap="2" key={index} align="end">
               <Box width="20rem">
                 <TextField
                   {...register(`persongalleri.soesken.${index}.value`, { validate: validateFnrObligatorisk })}
@@ -130,11 +134,13 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
                   error={errors?.persongalleri?.soesken?.[index]?.value?.message}
                 />
               </Box>
-              <Button
-                icon={<XMarkIcon aria-hidden />}
-                variant="tertiary"
-                onClick={() => soeskenFormArray.remove(index)}
-              />
+              <div>
+                <Button
+                  icon={<XMarkIcon aria-hidden />}
+                  variant="tertiary"
+                  onClick={() => soeskenFormArray.remove(index)}
+                />
+              </div>
             </HStack>
           ))}
           <Button icon={<PlusIcon aria-hidden />} onClick={() => soeskenFormArray.append({ value: '' })} type="button">

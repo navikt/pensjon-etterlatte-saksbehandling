@@ -94,7 +94,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
             <Box padding="4" borderWidth="1" borderRadius="small">
               <VStack gap="4" align="start">
                 {avdoedListe.fields?.map((field, index) => (
-                  <HStack gap="2" key={field.id}>
+                  <HStack gap="2" key={field.id} align="end">
                     <Box width="20rem">
                       <TextField
                         {...register(`avdoede.${index}.fnr`, {
@@ -107,7 +107,9 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                         error={errors?.avdoede?.[index]?.fnr?.message}
                       />
                     </Box>
-                    <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => avdoedListe.remove(index)} />
+                    <div>
+                      <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => avdoedListe.remove(index)} />
+                    </div>
                   </HStack>
                 ))}
                 <Button
@@ -123,7 +125,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
             <Box padding="4" borderWidth="1" borderRadius="small">
               <VStack gap="4" align="start">
                 {gjenlevendeListe.fields?.map((field, index) => (
-                  <HStack gap="2" key={field.id}>
+                  <HStack gap="2" key={field.id} align="end">
                     <Box width="20rem">
                       <TextField
                         {...register(`gjenlevende.${index}.fnr`, {
@@ -136,7 +138,9 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                         error={errors?.gjenlevende?.[index]?.fnr?.message}
                       />
                     </Box>
-                    <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => gjenlevendeListe.remove(index)} />
+                    <div>
+                      <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => gjenlevendeListe.remove(index)} />
+                    </div>
                   </HStack>
                 ))}
 

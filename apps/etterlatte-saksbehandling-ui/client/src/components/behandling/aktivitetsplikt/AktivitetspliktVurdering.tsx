@@ -1,6 +1,7 @@
 import {
   Alert,
   BodyLong,
+  Box,
   Button,
   Heading,
   HStack,
@@ -35,7 +36,6 @@ import Spinner from '~shared/Spinner'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import styled from 'styled-components'
 import { Toast } from '~shared/alerts/Toast'
 import { AktivitetspliktVurderingVisning } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
@@ -183,7 +183,7 @@ export const AktivitetspliktVurdering = ({
   const harUnntak = watch('unntak')
 
   return (
-    <AktivitetspliktVurderingWrapper>
+    <Box maxWidth="32rem">
       <Heading size="small" spacing>
         Vurdering av aktivitetsplikt
       </Heading>
@@ -342,10 +342,6 @@ export const AktivitetspliktVurdering = ({
       {isFailure(hentet) && hentet.error.status !== 404 && (
         <ApiErrorAlert>{hentet.error.detail || 'Det oppsto en feil ved henting av vurdering'}</ApiErrorAlert>
       )}
-    </AktivitetspliktVurderingWrapper>
+    </Box>
   )
 }
-
-const AktivitetspliktVurderingWrapper = styled.div`
-  max-width: 500px;
-`

@@ -7,7 +7,7 @@ import {
   tekstAktivitetspliktVurderingType,
   teksterAktivitetspliktSkjoennsmessigVurdering,
 } from '~shared/types/Aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { addMonths, startOfMonth } from 'date-fns'
 import { maanederForVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradForm'
 import { useApiCall } from '~shared/hooks/useApiCall'

@@ -6,13 +6,12 @@ import { BrevProsessType, BrevStatus, IBrev } from '~shared/types/Brev'
 import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Column, GridContainer } from '~shared/styled'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { BrevMottakerWrapper } from '~components/person/brev/mottaker/BrevMottakerWrapper'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { InfobrevKnapperad } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { FerdigstillAktivitetspliktBrevModal } from '~components/aktivitetsplikt/brev/FerdigstillBrevModal'
 import { LoependeUnntakInfo } from '~components/aktivitetsplikt/brev/LoependeUnntakInfo'
@@ -52,52 +51,53 @@ export function Aktivitetspliktbrev({ brevId }: { brevId: number }) {
       const brevErFerdigstilt =
         brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT
       return (
-        <GridContainer>
-          <Column>
+        <HStack height="100%" minHeight="100vh" wrap={false}>
+          <VStack gap="4" margin="4" minWidth="30rem">
             {endringerHarKommetEtterBrevOpprettelse(brev) && (
               <Alert variant="warning">
                 Vurdering av aktivitet eller valgene for infobrevet er oppdatert etter at brevet ble opprettet. Se nøye
                 over brevet for å se om innholdet stemmer med nåværende verdier.
               </Alert>
             )}
-            <VStack gap="4" margin="4">
-              <Box marginInline="0 8">
-                <Heading size="large">Infobrev aktivitetsplikt</Heading>
-              </Box>
+            <Box marginInline="0 8">
+              <Heading size="large">Infobrev aktivitetsplikt</Heading>
+            </Box>
 
-              <LoependeUnntakInfo />
-              <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
-              <BrevSpraak brev={brev} kanRedigeres={false} />
-              {kanRedigeres && (
-                <Alert size="small" variant="info">
-                  For å endre målform i brevet må det endres på forrige steg. Endring i brevvalg vil nullstille
-                  innholdet i brevet.
-                </Alert>
-              )}
-
-              <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
-            </VStack>
-          </Column>
-          <Column>
-            {brevErFerdigstilt ? (
-              <>
-                <Box maxHeight="955px" width="100%" height="100%" marginBlock="0 16">
-                  <ForhaandsvisningBrev brev={brev} />
-                </Box>
-                <InfobrevKnapperad />
-              </>
-            ) : (
-              <>
-                <HStack wrap={false}>
-                  <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} tilbakestillingsaction={() => undefined} />
-                </HStack>
-                <InfobrevKnapperad>
-                  <FerdigstillAktivitetspliktBrevModal />
-                </InfobrevKnapperad>
-              </>
+            <LoependeUnntakInfo />
+            <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
+            <BrevSpraak brev={brev} kanRedigeres={false} />
+            {kanRedigeres && (
+              <Alert size="small" variant="info">
+                For å endre målform i brevet må det endres på forrige steg. Endring i brevvalg vil nullstille innholdet
+                i brevet.
+              </Alert>
             )}
-          </Column>
-        </GridContainer>
+
+            <BrevMottakerWrapper brev={brev} kanRedigeres={kanRedigeres} />
+          </VStack>
+
+          <Box borderWidth="0 1" borderColor="border-subtle">
+            <VStack gap="4" width="50rem">
+              {brevErFerdigstilt ? (
+                <>
+                  <Box maxHeight="955px" width="100%" height="100%" marginBlock="0 16">
+                    <ForhaandsvisningBrev brev={brev} />
+                  </Box>
+                  <InfobrevKnapperad />
+                </>
+              ) : (
+                <>
+                  <HStack wrap={false}>
+                    <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} tilbakestillingsaction={() => undefined} />
+                  </HStack>
+                  <InfobrevKnapperad>
+                    <FerdigstillAktivitetspliktBrevModal />
+                  </InfobrevKnapperad>
+                </>
+              )}
+            </VStack>
+          </Box>
+        </HStack>
       )
     },
   })

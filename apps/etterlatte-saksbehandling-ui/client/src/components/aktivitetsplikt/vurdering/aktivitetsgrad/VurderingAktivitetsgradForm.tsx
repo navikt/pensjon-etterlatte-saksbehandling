@@ -8,7 +8,7 @@ import {
   tekstAktivitetspliktVurderingType,
   teksterAktivitetspliktSkjoennsmessigVurdering,
 } from '~shared/types/Aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettAktivitetspliktAktivitetsgrad } from '~shared/api/aktivitetsplikt'
 import { useForm } from 'react-hook-form'

@@ -2,7 +2,7 @@ import { StegMenyBox } from '~components/behandling/StegMeny/stegmeny'
 import { HStack } from '@navikt/ds-react'
 import React from 'react'
 import { AktivitetNavLenke } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktNavLenke'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 
 export enum AktivitetspliktSteg {
   VURDERING = 'vurdering',

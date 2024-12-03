@@ -8,7 +8,7 @@ import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { velgDoedsdato } from '~components/person/aktivitet/Aktivitet'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { AktivitetspliktVurdering12MndOversikt } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering12MndOversikt'

@@ -3,7 +3,7 @@ import {
   IAktivitetspliktVurderingNyDto,
   teksterAktivitetspliktSkjoennsmessigVurdering,
 } from '~shared/types/Aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { slettAktivitetspliktVurdering } from '~shared/api/aktivitetsplikt'
 import React, { useState } from 'react'

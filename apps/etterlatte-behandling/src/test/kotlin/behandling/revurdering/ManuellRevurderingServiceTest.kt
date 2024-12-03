@@ -109,7 +109,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
                     )
-            }?.also { it.sendMeldingForHendelse() }?.behandling
+            }.also { it.sendMeldingForHendelse() }.behandling
 
         return Pair(sak, behandling as Foerstegangsbehandling)
     }
@@ -385,22 +385,17 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             }
             verify {
                 oppgaveService.hentOppgaverForSak(sak.id)
+                oppgaveService.avbrytAapneOppgaverMedReferanse(behandling!!.id.toString())
                 oppgaveService.hentOppgave(any())
                 hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET)
                 oppgaveService.opprettOppgave(
-                    behandling!!.id.toString(),
+                    behandling.id.toString(),
                     sak.id,
                     OppgaveKilde.BEHANDLING,
                     OppgaveType.FOERSTEGANGSBEHANDLING,
                     "2 søsken",
                     null,
                     null,
-                )
-                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                    behandling!!.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    "2 søsken",
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
                 oppgaveService.opprettOppgave(

@@ -95,7 +95,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
               const sorterteMuligeRevurderingAarsaker = sorterRevurderingerKronologisk(muligeRevurderingAarsaker)
               return (
                 <>
-                  {!!sorterteMuligeRevurderingAarsaker?.length ? (
+                  {sorterteMuligeRevurderingAarsaker.length ? (
                     <VStack gap="4">
                       <Select
                         {...register('aarsak', {

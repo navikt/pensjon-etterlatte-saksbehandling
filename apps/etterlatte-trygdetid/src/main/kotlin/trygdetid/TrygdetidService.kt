@@ -124,7 +124,7 @@ interface TrygdetidService {
         behandlingId: UUID,
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Trygdetid
 
     suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
         fnr: String,
@@ -238,12 +238,19 @@ class TrygdetidServiceImpl(
 
         when (behandling.behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                if (avdoede.isEmpty()) {
-                    logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$behandlingId)")
-                    throw GrunnlagManglerAvdoede()
+                val ukjentAvdoed = avdoede.isEmpty()
+                val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
+
+                if (ukjentAvdoed || tidligereFamiliepleier) {
+                    logger.info(
+                        "Oppretter overstyrt trygdetid for behandling $behandlingId " +
+                            "(ukjentAvdoed=$ukjentAvdoed, tidligereFamiliepleier=$tidligereFamiliepleier)",
+                    )
+                    listOf(opprettOverstyrtBeregnetTrygdetid(behandlingId, true, brukerTokenInfo))
+                } else {
+                    logger.info("Oppretter trygdetid for behandling $behandlingId")
+                    opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
                 }
-                logger.info("Oppretter trygdetid for behandling $behandlingId")
-                opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
             }
 
             BehandlingType.REVURDERING -> {
@@ -537,7 +544,7 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): Trygdetid {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
         // Merk: vi kan ikke bruke den vanlige sjekken på kanOppdatereTrygdetid, siden dette kallet skjer typisk
@@ -637,8 +644,7 @@ class TrygdetidServiceImpl(
                     ),
                 yrkesskade = false,
             )
-        val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
-        trygdetidRepository.oppdaterTrygdetid(opprettet)
+        return trygdetidRepository.opprettTrygdetid(trygdetid)
     }
 
     override suspend fun setYrkesskade(

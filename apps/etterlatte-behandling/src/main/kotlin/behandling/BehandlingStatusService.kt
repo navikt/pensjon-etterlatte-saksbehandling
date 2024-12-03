@@ -188,7 +188,13 @@ class BehandlingStatusServiceImpl(
         val merknadBehandling =
             when (brukerTokenInfo) {
                 is Saksbehandler -> "Behandlet av ${brukerTokenInfo.ident}"
-                is Systembruker -> "Behandlet av systemet"
+                is Systembruker -> {
+                    if (behandling.revurderingsaarsak() == Revurderingaarsak.INNTEKTSENDRING) {
+                        "Inntektsendring - automatisk behandlet"
+                    } else {
+                        "Behandlet av systemet"
+                    }
+                }
             }
 
         oppgaveService.tilAttestering(

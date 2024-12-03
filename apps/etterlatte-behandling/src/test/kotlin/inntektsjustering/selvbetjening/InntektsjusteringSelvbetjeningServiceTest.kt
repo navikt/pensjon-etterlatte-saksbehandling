@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -71,6 +72,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 SakId(123L),
                 UUID.randomUUID(),
                 "123",
+                LocalDateTime.now(),
                 2025,
                 100,
                 100,
@@ -105,7 +107,14 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { loependeYtelseMock.underSamordning } returns false
 
         val inntektsjusteringAvkortingInfo = mockk<InntektsjusteringAvkortingInfoResponse>(relaxed = true)
-        coEvery { beregningKlient.inntektsjusteringAvkortingInfoSjekk(any(), any(), any(), any()) } returns inntektsjusteringAvkortingInfo
+        coEvery {
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns inntektsjusteringAvkortingInfo
         every { inntektsjusteringAvkortingInfo.harSanksjon } returns true
 
         val mottattInntektsjustering =
@@ -113,6 +122,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 SakId(123L),
                 UUID.randomUUID(),
                 "123",
+                LocalDateTime.now(),
                 2025,
                 100,
                 100,
@@ -142,6 +152,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 SakId(123L),
                 UUID.randomUUID(),
                 "123",
+                LocalDateTime.now(),
                 2025,
                 100,
                 100,
@@ -176,6 +187,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 SakId(123L),
                 UUID.randomUUID(),
                 "123",
+                LocalDateTime.now(),
                 2025,
                 100,
                 100,
@@ -206,7 +218,14 @@ class InntektsjusteringSelvbetjeningServiceTest {
         every { loependeYtelseMock.underSamordning } returns false
 
         val inntektsjusteringAvkortingInfo = mockk<InntektsjusteringAvkortingInfoResponse>(relaxed = true)
-        coEvery { beregningKlient.inntektsjusteringAvkortingInfoSjekk(any(), any(), any(), any()) } returns inntektsjusteringAvkortingInfo
+        coEvery {
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns inntektsjusteringAvkortingInfo
         every { inntektsjusteringAvkortingInfo.harSanksjon } returns false
 
         val mottattInntektsjustering =
@@ -214,6 +233,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 SakId(123L),
                 UUID.randomUUID(),
                 "123",
+                LocalDateTime.now(),
                 2025,
                 100,
                 100,
@@ -237,6 +257,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 SakId(123L),
                 UUID.randomUUID(),
                 "123",
+                LocalDateTime.now(),
                 2025,
                 100,
                 100,
@@ -261,8 +282,8 @@ class InntektsjusteringSelvbetjeningServiceTest {
             oppgaveService.opprettOppgave(
                 sakId = SakId(123L),
                 kilde = OppgaveKilde.BRUKERDIALOG,
-                type = OppgaveType.MOTTATT_INNTEKTSJUSTERING,
-                merknad = "Mottatt inntektsjustering",
+                type = OppgaveType.INNTEKTSOPPLYSNING,
+                merknad = "Ny inntektsopplysning",
                 referanse = "123",
                 frist = null,
                 saksbehandler = null,

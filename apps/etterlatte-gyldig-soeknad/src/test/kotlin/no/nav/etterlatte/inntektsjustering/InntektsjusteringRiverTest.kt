@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -53,6 +54,7 @@ internal class InntektsjusteringRiverTest {
             Inntektsjustering(
                 id = UUID.randomUUID(),
                 fnr = "123",
+                mottattDato = LocalDateTime.now(),
                 inntektsaar = 2025,
                 arbeidsinntekt = 100,
                 naeringsinntekt = 200,

@@ -172,11 +172,8 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
                     if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
                         behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING
                     ) {
-                        behandling
-                            .virkningstidspunkt()
-                            .dato
-                            .minusMonths(1)
-                            .atDay(1) // TODO fikser i egen PR
+                        behandling.mottattDato?.toLocalDate()
+                            ?: throw InternfeilException("Automatisk inntektsendring må ha mottatt dato")
                     } else {
                         null
                     },

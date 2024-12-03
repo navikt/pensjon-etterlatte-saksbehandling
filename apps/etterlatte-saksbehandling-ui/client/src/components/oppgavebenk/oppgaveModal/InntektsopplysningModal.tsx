@@ -16,7 +16,7 @@ interface Props {
   oppdaterStatus: (oppgaveId: string, status: Oppgavestatus) => void
 }
 
-export const MottattInntektsjusteringModal = ({ oppgave, oppdaterStatus }: Props) => {
+export const InntektsopplysningModal = ({ oppgave, oppdaterStatus }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [open, setOpen] = useState<boolean>(false)
@@ -53,7 +53,7 @@ export const MottattInntektsjusteringModal = ({ oppgave, oppdaterStatus }: Props
         aria-labelledby="modal-heading"
         width="medium"
         onClose={() => setOpen(false)}
-        header={{ heading: 'Mottatt inntektsjustering' }}
+        header={{ heading: 'Ny inntektsopplysning' }}
       >
         <Modal.Body>
           <VStack gap="4">

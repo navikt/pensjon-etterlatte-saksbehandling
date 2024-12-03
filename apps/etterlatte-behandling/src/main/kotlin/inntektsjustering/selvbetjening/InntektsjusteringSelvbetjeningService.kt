@@ -116,7 +116,7 @@ class InntektsjusteringSelvbetjeningService(
         if (!vedtak.erLoepende || vedtak.underSamordning) return false
 
         // har sanksjon
-        val avkortingSjekk = hentAvkortingSjekk(sakId, YearMonth.of(loependeFom.year, loependeFom.month), vedtak.behandlingId!!)
+        val avkortingSjekk = hentAvkortingSjekk(sakId, YearMonth.from(loependeFom), vedtak.behandlingId!!)
         if (avkortingSjekk.harSanksjon) return false
 
         return true

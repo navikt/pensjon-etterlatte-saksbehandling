@@ -20,8 +20,8 @@ class ArbeidstabellDao(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO arbeidstabell(id, sak_id, status, merknad, resultat, opprettet, endret)
-                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO arbeidstabell(id, sak_id, status, merknad, resultat, opprettet, endret, jobbtype)
+                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setObject(1, jobb.id)
@@ -31,6 +31,7 @@ class ArbeidstabellDao(
                 statement.setObject(5, jobb.resultat)
                 statement.setTidspunkt(6, jobb.opprettet)
                 statement.setTidspunkt(7, jobb.sistEndret)
+                statement.setString(8, jobb.type.name)
                 statement.executeUpdate()
                 logger.info("Opprettet en jobb for sak ${jobb.sakId} med status ${jobb.status}")
             }
@@ -57,6 +58,7 @@ class ArbeidstabellDao(
         Arbeidsjobb(
             id = getObject("id") as UUID,
             sakId = SakId(getLong("sak_id")),
+            type = JobbType.valueOf(getString("jobbtype")),
             status = ArbeidStatus.valueOf(getString("status")),
             resultat = getString("resultat"),
             merknad = getString("merknad"),

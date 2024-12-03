@@ -7,6 +7,7 @@ import java.util.UUID
 data class Arbeidsjobb(
     val id: UUID,
     val sakId: SakId,
+    val type: JobbType,
     val status: ArbeidStatus,
     val resultat: String? = null,
     val merknad: String? = null,
@@ -16,11 +17,13 @@ data class Arbeidsjobb(
 
 fun lagNyArbeidsJobb(
     sakId: SakId,
+    type: JobbType,
     merknad: String?,
 ): Arbeidsjobb =
     Arbeidsjobb(
         id = UUID.randomUUID(),
         sakId = sakId,
+        type = type,
         status = ArbeidStatus.NY,
         merknad = merknad,
         opprettet = Tidspunkt.now(),

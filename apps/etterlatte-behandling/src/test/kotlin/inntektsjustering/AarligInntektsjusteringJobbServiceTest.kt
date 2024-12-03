@@ -658,11 +658,6 @@ class AarligInntektsjusteringJobbServiceTest {
         }
     }
 
-    @Test
-    fun `et eller annet feilhaandtering`() {
-        // TODO
-    }
-
     companion object {
         val fnrGyldigSak = "10418305857"
         val gyldigSak =

@@ -5,11 +5,7 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbRiver
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakslisteDTO
@@ -22,7 +18,6 @@ import no.nav.etterlatte.rapidsandrivers.RapidEvents.SPESIFIKKE_SAKER
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 
 class AarligInntektsjusteringJobbRiverTest {
     private val kjoering = "inntektsjustering-jobb-2024"
@@ -40,7 +35,7 @@ class AarligInntektsjusteringJobbRiverTest {
 
         val inspector =
             TestRapid().apply { AarligInntektsjusteringJobbRiver(this, behandlingServiceMock, featureToggleService) }
-        inspector.sendTestMessage(genererMelding(loependeFom))
+        inspector.sendTestMessage(genererMelding())
 
         verify(exactly = 1) {
             behandlingServiceMock.hentAlleSaker(
@@ -68,7 +63,7 @@ class AarligInntektsjusteringJobbRiverTest {
         val inspector =
             TestRapid().apply { AarligInntektsjusteringJobbRiver(this, behandlingServiceMock, featureToggleService) }
 
-        inspector.sendTestMessage(genererMelding(loependeFom))
+        inspector.sendTestMessage(genererMelding())
         verify(exactly = 0) {
             behandlingServiceMock.hentAlleSaker(
                 kjoering,
@@ -81,7 +76,7 @@ class AarligInntektsjusteringJobbRiverTest {
         }
     }
 
-    private fun genererMelding(loependeFom: YearMonth) =
+    private fun genererMelding() =
         JsonMessage
             .newMessage(
                 mapOf(
@@ -92,18 +87,4 @@ class AarligInntektsjusteringJobbRiverTest {
                     EKSKLUDERTE_SAKER to listOf<SakId>(),
                 ),
             ).toJson()
-
-    private fun genererBehandlingSammendrag(
-        status: BehandlingStatus,
-        aarsak: Revurderingaarsak,
-        virkningstidspunkt: YearMonth,
-    ): BehandlingSammendrag {
-        val virkningstidspunktMock = mockk<Virkningstidspunkt>()
-        every { virkningstidspunktMock.dato } returns virkningstidspunkt
-        val behandlingSammendragMock = mockk<BehandlingSammendrag>()
-        every { behandlingSammendragMock.status } returns status
-        every { behandlingSammendragMock.aarsak } returns aarsak.name
-        every { behandlingSammendragMock.virkningstidspunkt } returns virkningstidspunktMock
-        return behandlingSammendragMock
-    }
 }

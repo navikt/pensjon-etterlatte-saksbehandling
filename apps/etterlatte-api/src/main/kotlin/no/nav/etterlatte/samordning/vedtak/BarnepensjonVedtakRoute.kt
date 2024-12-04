@@ -14,6 +14,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
 
@@ -52,13 +53,13 @@ fun Route.barnepensjonVedtakRoute(
 
         post {
             val paaDato = call.dato("paaDato") ?: throw ManglerFomDatoException()
-            val fnr = call.receiveNullable<FoedselsnummerDto>() ?: throw ManglerFoedselsnummerException()
+            val fnr = call.receiveNullable<FoedselsnummerDTO>() ?: throw ManglerFoedselsnummerException()
 
             val harLoependeBarnepensjonYtelsePaaDato =
                 try {
                     samordningVedtakService.harLoependeYtelsePaaDato(
                         dato = paaDato,
-                        fnr = Folkeregisteridentifikator.of(fnr.value),
+                        fnr = Folkeregisteridentifikator.of(fnr.foedselsnummer),
                         sakType = SakType.BARNEPENSJON,
                         context = PensjonContext,
                     )

@@ -16,6 +16,7 @@ import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
@@ -87,7 +88,7 @@ fun Route.samordningVedtakRoute(
                 call.dato("fomDato")
                     ?: call.dato("virkFom")
                     ?: throw ManglerFomDatoException()
-            val fnr = call.receiveNullable<FoedselsnummerDto>() ?: throw ManglerFoedselsnummerException()
+            val fnr = call.receiveNullable<FoedselsnummerDTO>() ?: throw ManglerFoedselsnummerException()
             val tpnummer =
                 call.request.headers["tpnr"]
                     ?: throw ManglerTpNrException()
@@ -96,7 +97,7 @@ fun Route.samordningVedtakRoute(
                 try {
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
-                        fnr = Folkeregisteridentifikator.of(fnr.value),
+                        fnr = Folkeregisteridentifikator.of(fnr.foedselsnummer),
                         context =
                             MaskinportenTpContext(
                                 tpnr = Tjenestepensjonnummer(tpnummer),
@@ -149,13 +150,13 @@ fun Route.samordningVedtakRoute(
                     ?: call.dato("virkFom")
                     ?: throw ManglerFomDatoException()
 
-            val fnr = call.receiveNullable<FoedselsnummerDto>() ?: throw ManglerFoedselsnummerException()
+            val fnr = call.receiveNullable<FoedselsnummerDTO>() ?: throw ManglerFoedselsnummerException()
 
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
-                        fnr = Folkeregisteridentifikator.of(fnr.value),
+                        fnr = Folkeregisteridentifikator.of(fnr.foedselsnummer),
                         context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
@@ -190,13 +191,13 @@ fun Route.samordningVedtakRoute(
 
         post("/har-loepende-oms") {
             val paaDato = call.dato("paaDato") ?: throw ManglerPaaDatoException()
-            val fnr = call.receiveNullable<FoedselsnummerDto>() ?: throw ManglerFoedselsnummerException()
+            val fnr = call.receiveNullable<FoedselsnummerDTO>() ?: throw ManglerFoedselsnummerException()
 
             val harLoependeOmsPaaDato =
                 try {
                     samordningVedtakService.harLoependeYtelsePaaDato(
                         dato = paaDato,
-                        fnr = Folkeregisteridentifikator.of(fnr.value),
+                        fnr = Folkeregisteridentifikator.of(fnr.foedselsnummer),
                         sakType = SakType.OMSTILLINGSSTOENAD,
                         context = PensjonContext,
                     )

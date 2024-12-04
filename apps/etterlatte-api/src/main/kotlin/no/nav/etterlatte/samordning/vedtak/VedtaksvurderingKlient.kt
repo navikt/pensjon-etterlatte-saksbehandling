@@ -10,7 +10,9 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -69,6 +71,7 @@ class VedtaksvurderingKlient(
                     if (callerContext is MaskinportenTpContext) {
                         header("orgnr", callerContext.organisasjonsnr)
                     }
+                    contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr))
                 }.body()
         } catch (e: ClientRequestException) {

@@ -21,7 +21,7 @@ class AktivitetspliktBrevDao(
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT oppgave_id, sak_id, utbetaling, redusert_etter_inntekt, skal_sende_brev, brev_id, kilde, spraak from aktivitetsplikt_brevdata
+                        SELECT oppgave_id, sak_id, utbetaling, redusert_etter_inntekt, skal_sende_brev, brev_id, kilde, spraak, begrunnelse from aktivitetsplikt_brevdata
                         WHERE oppgave_id = ?
                         """.trimIndent(),
                     )
@@ -43,6 +43,7 @@ class AktivitetspliktBrevDao(
                         skalSendeBrev = getBoolean("skal_sende_brev"),
                         kilde = getString("kilde").let { objectMapper.readValue(it) },
                         spraak = getString("spraak")?.let { Spraak.valueOf(it) },
+                        begrunnelse = getString("begrunnelse"),
                     )
                 }
             }
@@ -54,13 +55,14 @@ class AktivitetspliktBrevDao(
                 val stmt =
                     prepareStatement(
                         """
-                        INSERT INTO aktivitetsplikt_brevdata(sak_id, oppgave_id, utbetaling, redusert_etter_inntekt, skal_sende_brev, kilde, spraak)
-                        VALUES(?, ?, ?, ?, ?, ?, ?) 
+                        INSERT INTO aktivitetsplikt_brevdata(sak_id, oppgave_id, utbetaling, redusert_etter_inntekt, skal_sende_brev, kilde, spraak, begrunnelse)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?) 
                         ON CONFLICT (oppgave_id) 
                         DO UPDATE SET utbetaling = excluded.utbetaling, 
                         redusert_etter_inntekt = excluded.redusert_etter_inntekt, 
                         skal_sende_brev = excluded.skal_sende_brev, kilde = excluded.kilde,
-                        spraak = excluded.spraak
+                        spraak = excluded.spraak,
+                        begrunnelse = excluded.begrunnelse
                         """.trimIndent(),
                     )
                 stmt.setLong(1, data.sakid.sakId)
@@ -70,6 +72,7 @@ class AktivitetspliktBrevDao(
                 stmt.setBoolean(5, data.skalSendeBrev)
                 stmt.setJsonb(6, data.kilde)
                 stmt.setString(7, data.spraak?.name)
+                stmt.setString(8, data.begrunnelse)
                 stmt.executeUpdate()
             }
         }

@@ -144,7 +144,7 @@ fun Route.samordningVedtakRoute(
             call.respond(samordningVedtakDtos)
         }
 
-        get {
+        post {
             val fomDato =
                 call.dato("fomDato")
                     ?: call.dato("virkFom")
@@ -160,7 +160,7 @@ fun Route.samordningVedtakRoute(
                         context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
-                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@post call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(samordningVedtakDtos)

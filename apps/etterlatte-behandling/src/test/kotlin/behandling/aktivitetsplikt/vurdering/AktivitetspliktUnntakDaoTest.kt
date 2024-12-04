@@ -177,6 +177,7 @@ class AktivitetspliktUnntakDaoTest(
                 saksbehandler = null,
                 forrigeSaksbehandlerIdent = null,
                 referanse = "",
+                gruppeId = null,
                 merknad = null,
                 opprettet = Tidspunkt.now(),
                 sakType = SakType.OMSTILLINGSSTOENAD,

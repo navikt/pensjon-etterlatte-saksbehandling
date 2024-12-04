@@ -252,6 +252,7 @@ class RevurderingService(
                                 type = OppgaveType.REVURDERING,
                                 merknad = begrunnelse,
                                 frist = frist,
+                                gruppeId = persongalleri.avdoed.firstOrNull(),
                             )
                         if (saksbehandlerIdent != null &&
                             (prosessType == Prosesstype.MANUELL && saksbehandlerIdent != Fagsaksystem.EY.navn) ||

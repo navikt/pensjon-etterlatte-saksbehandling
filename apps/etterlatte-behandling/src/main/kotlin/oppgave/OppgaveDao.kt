@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -37,6 +38,8 @@ interface OppgaveDao {
     fun hentOppgave(oppgaveId: UUID): OppgaveIntern?
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
+
+    fun hentOppgaverForGruppeId(gruppeId: String): List<OppgaveIntern>
 
     fun oppgaveMedTypeFinnes(
         sakId: SakId,
@@ -138,8 +141,8 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde)
-                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, gruppe_id, merknad, opprettet, saktype, fnr, frist, kilde)
+                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setObject(1, oppgaveIntern.id)
@@ -149,12 +152,13 @@ class OppgaveDaoImpl(
                 statement.setString(5, oppgaveIntern.type.name)
                 statement.setString(6, oppgaveIntern.saksbehandler?.ident)
                 statement.setString(7, oppgaveIntern.referanse)
-                statement.setString(8, oppgaveIntern.merknad)
-                statement.setTidspunkt(9, oppgaveIntern.opprettet)
-                statement.setString(10, oppgaveIntern.sakType.name)
-                statement.setString(11, oppgaveIntern.fnr)
-                statement.setTidspunkt(12, oppgaveIntern.frist)
-                statement.setString(13, oppgaveIntern.kilde?.name)
+                statement.setString(8, oppgaveIntern.gruppeId)
+                statement.setString(9, oppgaveIntern.merknad)
+                statement.setTidspunkt(10, oppgaveIntern.opprettet)
+                statement.setString(11, oppgaveIntern.sakType.name)
+                statement.setString(12, oppgaveIntern.fnr)
+                statement.setTidspunkt(13, oppgaveIntern.frist)
+                statement.setString(14, oppgaveIntern.kilde?.name)
                 statement.executeUpdate()
                 logger.info("lagret oppgave for ${oppgaveIntern.id} for sakid ${oppgaveIntern.sakId}")
             }
@@ -167,7 +171,7 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde)
+                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, gruppe_id, merknad, opprettet, saktype, fnr, frist, kilde)
                         VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
@@ -180,12 +184,13 @@ class OppgaveDaoImpl(
                     statement.setString(5, oppgaveIntern.type.name)
                     statement.setString(6, oppgaveIntern.saksbehandler?.ident)
                     statement.setString(7, oppgaveIntern.referanse)
-                    statement.setString(8, oppgaveIntern.merknad)
-                    statement.setTidspunkt(9, oppgaveIntern.opprettet)
-                    statement.setString(10, oppgaveIntern.sakType.name)
-                    statement.setString(11, oppgaveIntern.fnr)
-                    statement.setTidspunkt(12, oppgaveIntern.frist)
-                    statement.setString(13, oppgaveIntern.kilde?.name)
+                    statement.setString(8, oppgaveIntern.gruppeId)
+                    statement.setString(9, oppgaveIntern.merknad)
+                    statement.setTidspunkt(10, oppgaveIntern.opprettet)
+                    statement.setString(11, oppgaveIntern.sakType.name)
+                    statement.setString(12, oppgaveIntern.fnr)
+                    statement.setTidspunkt(13, oppgaveIntern.frist)
+                    statement.setString(14, oppgaveIntern.kilde?.name)
 
                     statement.addBatch()
                 }
@@ -201,8 +206,10 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
-                        FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id,
+                            o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
+                        FROM oppgave o 
+                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.id = ?::UUID
                         """.trimIndent(),
                     )
@@ -219,8 +226,10 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
-                        FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                            o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
+                        FROM oppgave o 
+                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.referanse = ?
                         """.trimIndent(),
                     )
@@ -231,6 +240,33 @@ class OppgaveDaoImpl(
                         asOppgave()
                     }.also { oppgaver ->
                         logger.info("Hentet ${oppgaver.size} oppgave(r) for referanse: $referanse")
+                    }
+            }
+        }
+
+    override fun hentOppgaverForGruppeId(gruppeId: String): List<OppgaveIntern> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                            o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
+                        FROM oppgave o 
+                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                        WHERE o.gruppe_id = ?
+                        AND o.status = ANY(?)
+                        """.trimIndent(),
+                    )
+                statement.setString(1, gruppeId)
+                statement.setArray(2, createArrayOf("text", Status.entries.map(Status::name).toTypedArray()))
+                statement
+                    .executeQuery()
+                    .toList {
+                        asOppgave()
+                    }.also { oppgaver ->
+                        // Bruker [String.maskerFnr] i tilfelle det grupperes på et fnr.
+                        logger.info("Hentet ${oppgaver.size} oppgave(r) for gruppeId: ${gruppeId.maskerFnr()}")
                     }
             }
         }
@@ -270,8 +306,10 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
-                        FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                            o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
+                        FROM oppgave o 
+                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.sak_id = ? and o.type = ANY(?)
                         """.trimIndent(),
                     )
@@ -297,8 +335,11 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
-                        FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                            o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
+                        FROM oppgave o 
+                            INNER JOIN sak s ON o.sak_id = s.id 
+                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE (? OR o.status = ANY(?))
                         AND o.enhet = ANY(?)
                         AND (
@@ -336,8 +377,11 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
-                        FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                            o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
+                        FROM oppgave o 
+                            INNER JOIN sak s ON o.sak_id = s.id 
+                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE (? OR o.status = ANY(?))
                         AND o.sak_id = ANY(?)
                         """.trimIndent(),
@@ -375,7 +419,10 @@ class OppgaveDaoImpl(
                 statement
                     .executeQuery()
                     .singleOrNull {
-                        OppgavebenkStats(getLong("antallOppgavelistaOppgaver"), getLong("antallMinOppgavelisteOppgaver"))
+                        OppgavebenkStats(
+                            getLong("antallOppgavelistaOppgaver"),
+                            getLong("antallMinOppgavelisteOppgaver"),
+                        )
                     }!!
                     .also {
                         logger.info("Henter antall oppgaver")
@@ -389,8 +436,11 @@ class OppgaveDaoImpl(
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
-                        FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
+                            o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
+                        FROM oppgave o 
+                            INNER JOIN sak s ON o.sak_id = s.id 
+                            LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE ((s.adressebeskyttelse = ?) OR (s.adressebeskyttelse = ?))
                         """.trimIndent(),
                     )
@@ -719,6 +769,7 @@ class OppgaveDaoImpl(
             kilde = getString("kilde")?.let { OppgaveKilde.valueOf(it) },
             type = OppgaveType.valueOf(getString("type")),
             referanse = getString("referanse"),
+            gruppeId = getString("gruppe_id"),
             merknad = getString("merknad"),
             opprettet = getTidspunkt("opprettet"),
             sakType = SakType.valueOf(getString("saktype")),

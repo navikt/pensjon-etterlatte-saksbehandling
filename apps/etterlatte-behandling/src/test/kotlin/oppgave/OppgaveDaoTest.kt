@@ -329,12 +329,34 @@ internal class OppgaveDaoTest(
         val oppgaveFinnesIkke = oppgaveDao.oppgaveMedTypeFinnes(sakAalesund.id, OppgaveType.MANGLER_SOEKNAD)
         assertEquals(true, oppgaveFinnesIkke)
     }
+
+    @Test
+    fun `GruppeId fungerer som forventet`() {
+        val sak = sakSkrivDao.opprettSak("ident", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+
+        repeat(10) {
+            oppgaveDao.opprettOppgave(lagNyOppgave(sak, gruppeId = null))
+        }
+
+        val gruppeId = UUID.randomUUID().toString()
+
+        repeat(3) {
+            oppgaveDao.opprettOppgave(lagNyOppgave(sak, gruppeId = gruppeId))
+        }
+
+        val oppgaver = oppgaveDao.hentOppgaverForSakMedType(sak.id, OppgaveType.entries)
+        assertEquals(13, oppgaver.size)
+
+        val oppgaverGruppert = oppgaveDao.hentOppgaverForGruppeId(gruppeId)
+        assertEquals(3, oppgaverGruppert.size)
+    }
 }
 
 fun lagNyOppgave(
     sak: Sak,
     oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
     oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+    gruppeId: String? = null,
 ) = OppgaveIntern(
     id = UUID.randomUUID(),
     status = Status.NY,
@@ -342,6 +364,7 @@ fun lagNyOppgave(
     sakId = sak.id,
     kilde = oppgaveKilde,
     referanse = "referanse",
+    gruppeId = gruppeId,
     merknad = "merknad",
     opprettet = Tidspunkt.now(),
     sakType = sak.sakType,

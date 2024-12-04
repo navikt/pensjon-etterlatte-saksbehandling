@@ -244,6 +244,7 @@ class BehandlingFactory(
                             Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
                             else -> opprettMerknad(request.sak, persongalleri)
                         },
+                    gruppeId = persongalleri.avdoed.firstOrNull(),
                 )
             return BehandlingOgOppgave(behandling, oppgave) {
                 behandlingHendelser.sendMeldingForHendelseStatisitkk(
@@ -325,6 +326,7 @@ class BehandlingFactory(
                         sakId = nyFoerstegangsbehandling.sak.id,
                         oppgaveKilde = OppgaveKilde.BEHANDLING,
                         merknad = "Omgjøring av førstegangsbehandling",
+                        gruppeId = null,
                     )
                 oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
 
@@ -363,7 +365,8 @@ class BehandlingFactory(
         referanse: String,
         sakId: SakId,
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
-        merknad: String? = null,
+        merknad: String?,
+        gruppeId: String?,
     ): OppgaveIntern {
         oppgaveService.avbrytAapneOppgaverMedReferanse(referanse)
 
@@ -373,6 +376,7 @@ class BehandlingFactory(
             kilde = oppgaveKilde,
             type = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = merknad,
+            gruppeId = gruppeId,
         )
     }
 

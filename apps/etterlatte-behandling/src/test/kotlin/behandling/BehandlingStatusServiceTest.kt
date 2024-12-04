@@ -424,6 +424,7 @@ internal class BehandlingStatusServiceTest {
         type = OppgaveType.TILBAKEKREVING,
         saksbehandler = null,
         referanse = sakId.toString(),
+        gruppeId = null,
         merknad = "merknad",
         opprettet = Tidspunkt.now(),
         sakType = SakType.BARNEPENSJON,

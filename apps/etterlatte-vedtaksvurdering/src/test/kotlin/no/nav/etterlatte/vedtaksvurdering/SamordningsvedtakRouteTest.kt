@@ -67,9 +67,10 @@ class SamordningsvedtakRouteTest {
             samordningVedtak()
 
         testApplication {
-            runServer(mockOAuth2Server) {
-                samordningSystembrukerVedtakRoute(vedtakSamordningService)
-            }
+            val client =
+                runServer(mockOAuth2Server) {
+                    samordningSystembrukerVedtakRoute(vedtakSamordningService)
+                }
 
             val response =
                 client.get("/api/samordning/vedtak/1234") {

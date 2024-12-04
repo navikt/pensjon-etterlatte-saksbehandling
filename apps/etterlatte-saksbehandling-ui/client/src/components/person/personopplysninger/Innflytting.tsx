@@ -22,7 +22,7 @@ export const Innflytting = ({
           skjedde.
           <br />
           <br />
-          Dersom man skal finne ut om sen preson regnes som innflyttet i hendhold til folkeregisterlover, så kan man se
+          Dersom man skal finne ut om en person regnes som innflyttet i henhold til folkeregisterlover, så kan man se
           på om personen har en norsk bostedsadresse med angitt flyttedato.
         </ReadMore>
         <ReadMore header="Ajourholdsdato">

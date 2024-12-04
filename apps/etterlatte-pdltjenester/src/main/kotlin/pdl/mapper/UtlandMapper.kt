@@ -26,25 +26,25 @@ object UtlandMapper {
         innflytting: PdlInnflyttingTilNorge?,
         bostedsadresse: List<PdlBostedsadresse>?,
     ): InnflyttingTilNorge {
-        val gyldighetstidspunkt: LocalDate? = innflytting?.folkeregistermetadata?.gyldighetstidspunkt?.toLocalDate()
-        val ajourholdstidspunkt: LocalDate? = innflytting?.folkeregistermetadata?.ajourholdstidspunkt?.toLocalDate()
+        val gyldighetsdato: LocalDate? = innflytting?.folkeregistermetadata?.gyldighetstidspunkt?.toLocalDate()
+        val ajourholdsdato: LocalDate? = innflytting?.folkeregistermetadata?.ajourholdstidspunkt?.toLocalDate()
 
         val innvandretDato =
-            if (gyldighetstidspunkt != null) {
+            if (gyldighetsdato != null) {
                 val angittFlyttedato =
                     bostedsadresse
                         ?.filter {
                             it.gyldigFraOgMed != null
-                        }?.find { it.gyldigFraOgMed?.toLocalDate() == gyldighetstidspunkt }
+                        }?.find { it.gyldigFraOgMed?.toLocalDate() == gyldighetsdato }
                         ?.angittFlyttedato
 
                 if (angittFlyttedato != null) {
                     angittFlyttedato
                 } else {
-                    finnForsteDatoEtterInnflytting(gyldighetstidspunkt, bostedsadresse)
+                    finnForsteDatoEtterInnflytting(gyldighetsdato, bostedsadresse)
                 }
-            } else if (ajourholdstidspunkt != null) {
-                finnForsteDatoEtterInnflytting(ajourholdstidspunkt, bostedsadresse)
+            } else if (ajourholdsdato != null) {
+                finnForsteDatoEtterInnflytting(ajourholdsdato, bostedsadresse)
             } else {
                 null
             }
@@ -52,8 +52,8 @@ object UtlandMapper {
         return InnflyttingTilNorge(
             fraflyttingsland = innflytting?.fraflyttingsland,
             dato = innvandretDato,
-            gyldighetstidspunkt = gyldighetstidspunkt,
-            ajourholdstidspunkt = ajourholdstidspunkt,
+            gyldighetsdato = gyldighetsdato,
+            ajourholdsdato = ajourholdsdato,
         )
     }
 

@@ -185,14 +185,14 @@ class BehandlingStatusServiceImpl(
 
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.FATTET)
 
-        val merknadBehandling =
+        val merknad =
             when (brukerTokenInfo) {
-                is Saksbehandler -> "Behandlet av ${brukerTokenInfo.ident}"
+                is Saksbehandler -> genererMerknad(vedtak, "Behandlet av ${brukerTokenInfo.ident}")
                 is Systembruker -> {
                     if (behandling.revurderingsaarsak() == Revurderingaarsak.INNTEKTSENDRING) {
                         "Inntektsendring - automatisk behandlet"
                     } else {
-                        "Behandlet av systemet"
+                        genererMerknad(vedtak, "Behandlet av systemet")
                     }
                 }
             }
@@ -200,9 +200,7 @@ class BehandlingStatusServiceImpl(
         oppgaveService.tilAttestering(
             referanse = vedtak.sakIdOgReferanse.referanse,
             type = OppgaveType.fra(behandling.type),
-            merknad =
-                listOfNotNull(vedtak.vedtakType.tilLesbarString(), merknadBehandling, vedtak.vedtakHendelse.kommentar)
-                    .joinToString(separator = ": "),
+            merknad = merknad,
         )
     }
 
@@ -388,4 +386,11 @@ class BehandlingStatusServiceImpl(
     private fun hentBehandling(behandlingId: UUID): Behandling =
         behandlingService.hentBehandling(behandlingId)
             ?: throw NotFoundException("Fant ikke behandling med id=$behandlingId")
+
+    private fun genererMerknad(
+        vedtak: VedtakEndringDTO,
+        merknad: String,
+    ): String =
+        listOfNotNull(vedtak.vedtakType.tilLesbarString(), merknad, vedtak.vedtakHendelse.kommentar)
+            .joinToString(separator = ": ")
 }

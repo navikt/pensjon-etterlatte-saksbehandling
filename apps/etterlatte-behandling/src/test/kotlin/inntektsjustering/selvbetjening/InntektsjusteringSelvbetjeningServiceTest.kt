@@ -58,7 +58,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
     fun beforeEach() {
         clearAllMocks()
         every { rapid.publiser(any(), any()) } returns Pair(1, 1L)
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns mockk()
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any()) } returns mockk()
     }
 
     @Test
@@ -285,7 +285,7 @@ class InntektsjusteringSelvbetjeningServiceTest {
                 type = OppgaveType.INNTEKTSOPPLYSNING,
                 merknad = "Ny inntektsopplysning",
                 referanse = "123",
-                frist = null,
+                frist = any(),
                 saksbehandler = null,
             )
         }

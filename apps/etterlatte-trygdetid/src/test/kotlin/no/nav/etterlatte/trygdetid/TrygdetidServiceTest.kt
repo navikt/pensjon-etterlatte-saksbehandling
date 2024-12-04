@@ -48,6 +48,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.eldreAvdoedTestopplysningerMap
+import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
@@ -68,6 +69,8 @@ internal class TrygdetidServiceTest {
     private val behandlingKlient: BehandlingKlient = mockk()
     private val grunnlagKlient: GrunnlagKlient = mockk()
     private val beregningService: TrygdetidBeregningService = spyk(TrygdetidBeregningService)
+    private val avtaleService = mockk<AvtaleService>()
+
     private val service: TrygdetidService =
         TrygdetidServiceImpl(
             repository,
@@ -75,6 +78,7 @@ internal class TrygdetidServiceTest {
             grunnlagKlient,
             beregningService,
             mockk<PesysKlient>(),
+            avtaleService,
         )
 
     @BeforeEach
@@ -1142,6 +1146,8 @@ internal class TrygdetidServiceTest {
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
         every { repository.hentTrygdetiderForBehandling(forrigeBehandlingId) } returns listOf(forrigeTrygdetid)
         every { repository.opprettTrygdetid(any()) } answers { firstArg() }
+        every { avtaleService.hentAvtaleForBehandling(any()) } returns null
+
         coEvery {
             grunnlagKlient.hentGrunnlag(
                 forrigeBehandlingId,
@@ -1172,6 +1178,8 @@ internal class TrygdetidServiceTest {
         verify {
             regulering.id
             regulering.sak
+
+            avtaleService.hentAvtaleForBehandling(forrigeBehandlingId)
         }
     }
 
@@ -1221,6 +1229,8 @@ internal class TrygdetidServiceTest {
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(eksisterendeTrygdetid)
         every { repository.hentTrygdetiderForBehandling(forrigeBehandlingId) } returns listOf(forrigeTrygdetid)
         every { repository.opprettTrygdetid(any()) } answers { firstArg() }
+        every { avtaleService.hentAvtaleForBehandling(any()) } returns null
+
         coEvery {
             grunnlagKlient.hentGrunnlag(
                 behandlingId,
@@ -1251,6 +1261,8 @@ internal class TrygdetidServiceTest {
         verify {
             revurdering.id
             revurdering.sak
+
+            avtaleService.hentAvtaleForBehandling(forrigeBehandlingId)
         }
     }
 

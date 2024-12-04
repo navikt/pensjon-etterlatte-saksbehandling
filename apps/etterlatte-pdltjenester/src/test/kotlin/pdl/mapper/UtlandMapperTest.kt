@@ -74,14 +74,14 @@ internal class UtlandMapperTest {
             "2021-07-01",
             utland.innflyttingTilNorge
                 ?.first()
-                ?.gyldighetstidspunkt
+                ?.gyldighetsdato
                 .toString(),
         )
         assertEquals(
             "2021-07-01",
             utland.innflyttingTilNorge
                 ?.first()
-                ?.ajourholdstidspunkt
+                ?.ajourholdsdato
                 .toString(),
         )
     }

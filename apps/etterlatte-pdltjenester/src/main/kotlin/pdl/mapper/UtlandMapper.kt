@@ -23,11 +23,11 @@ object UtlandMapper {
         )
 
     private fun mapInnflytting(
-        innflytting: PdlInnflyttingTilNorge?,
+        innflytting: PdlInnflyttingTilNorge,
         bostedsadresse: List<PdlBostedsadresse>?,
     ): InnflyttingTilNorge {
-        val gyldighetsdato: LocalDate? = innflytting?.folkeregistermetadata?.gyldighetstidspunkt?.toLocalDate()
-        val ajourholdsdato: LocalDate? = innflytting?.folkeregistermetadata?.ajourholdstidspunkt?.toLocalDate()
+        val gyldighetsdato: LocalDate? = innflytting.folkeregistermetadata?.gyldighetstidspunkt?.toLocalDate()
+        val ajourholdsdato: LocalDate? = innflytting.folkeregistermetadata?.ajourholdstidspunkt?.toLocalDate()
 
         val innvandretDato =
             if (gyldighetsdato != null) {
@@ -50,7 +50,7 @@ object UtlandMapper {
             }
 
         return InnflyttingTilNorge(
-            fraflyttingsland = innflytting?.fraflyttingsland,
+            fraflyttingsland = innflytting.fraflyttingsland,
             dato = innvandretDato,
             gyldighetsdato = gyldighetsdato,
             ajourholdsdato = ajourholdsdato,

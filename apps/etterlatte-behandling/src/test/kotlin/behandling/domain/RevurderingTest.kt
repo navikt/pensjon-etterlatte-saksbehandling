@@ -54,6 +54,8 @@ internal class RevurderingTest {
                 begrunnelse = null,
                 relatertBehandlingId = null,
                 sendeBrev = true,
+                opphoerFraOgMed = null,
+                tidligereFamiliepleier = null,
             ).tilVilkaarsvurdert()
             .tilTrygdetidOppdatert()
             .tilBeregnet()
@@ -242,5 +244,7 @@ private fun opprettetRevurdering(
         begrunnelse = null,
         relatertBehandlingId = null,
         sendeBrev = true,
+        opphoerFraOgMed = null,
+        tidligereFamiliepleier = null,
     )
 }

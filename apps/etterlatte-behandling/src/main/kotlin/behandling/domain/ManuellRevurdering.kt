@@ -36,8 +36,8 @@ data class ManuellRevurdering(
     override val begrunnelse: String?,
     override val relatertBehandlingId: String?,
     override val sendeBrev: Boolean,
-    override val opphoerFraOgMed: YearMonth? = null,
-    override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
+    override val opphoerFraOgMed: YearMonth?,
+    override val tidligereFamiliepleier: TidligereFamiliepleier?,
 ) : Revurdering(
         id = id,
         sak = sak,

@@ -42,7 +42,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
   const skalViseDetaljer = visDetaljer ?? !harRedigertTrygdetidGrunnlag()
 
   const kopierTrygdetid = (kildeBehandlingId: string) => {
-    trackClick(ClickEvent.KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE)
+    trackClick(ClickEvent.KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE, 'Ja')
     kopierTrygdetidReq(
       {
         behandlingId: behandlingId,
@@ -56,7 +56,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
   }
 
   const ikkeKopierTrygdetid = () => {
-    trackClick(ClickEvent.IKKE_KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE)
+    trackClick(ClickEvent.KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE, 'Nei')
     setVisDetaljer(false)
   }
 

@@ -35,7 +35,6 @@ export enum ClickEvent {
 
   // Trygdetid
   KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
-  IKKE_KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'ikke kopier trygdetidsgrunnlag fra behandling med samme avdoede',
 }
 
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined
@@ -76,7 +75,7 @@ export const initAmplitude = () => {
   return amplitudeInstance
 }
 
-export const trackClick = (name: ClickEvent) => {
+export const trackClick = (name: ClickEvent, svar?: any) => {
   if (!amplitudeInstance) {
     console.warn('Amplitude is not initialized. Ignoring')
     return
@@ -85,6 +84,7 @@ export const trackClick = (name: ClickEvent) => {
     event_type: LogEvents.CLICK,
     event_properties: {
       tekst: name,
+      svar: svar,
     },
   })
 }

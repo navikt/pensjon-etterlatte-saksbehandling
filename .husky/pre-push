@@ -2,7 +2,7 @@ cd ./apps/etterlatte-saksbehandling-ui
 yarn lint-staged --cwd ./client
 yarn lint-staged --cwd ./server
 
-changedKotlinFiles=$(git diff --name-only --cached | grep '\.kt[s"]\?$' || true)
+changedKotlinFiles=$(git diff --name-only --cached main | grep '\.kt[s"]\?$' || true)
 
 if [ -n "${changedKotlinFiles-unset}" ]; then
     kotlinversion=$(ktlint -v)
@@ -20,7 +20,7 @@ if [ -n "${changedKotlinFiles-unset}" ]; then
     files=$(echo $committedFiles | tr ";" "\\n")
 
     # https://github.com/pinterest/ktlint pre-commit hook
-    git diff --name-only --cached | grep '\.kt[s"]\?$' | xargs ktlint -F
+    git diff --name-only --cached main | grep '\.kt[s"]\?$' | xargs ktlint -F
     echo "✍️ Formatted kotlin files"
 
     #replay items in the commits array and add only those files

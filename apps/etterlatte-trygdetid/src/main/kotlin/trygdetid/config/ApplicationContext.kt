@@ -25,7 +25,11 @@ class ApplicationContext {
             password = properties.dbPassword,
         )
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
+    private val avtaleRepository = AvtaleRepository(dataSource)
+
     val behandlingKlient = BehandlingKlient(config, httpClient())
+    val avtaleService = AvtaleService(avtaleRepository)
+
     val trygdetidService =
         TrygdetidServiceImpl(
             TrygdetidRepository(dataSource),
@@ -33,7 +37,6 @@ class ApplicationContext {
             grunnlagKlient = grunnlagKlient,
             beregnTrygdetidService = TrygdetidBeregningService,
             pesysKlient = PesysKlientImpl(config, httpClient()),
+            avtaleService = avtaleService,
         )
-    private val avtaleRepository = AvtaleRepository(dataSource)
-    val avtaleService = AvtaleService(avtaleRepository)
 }

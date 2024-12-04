@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
@@ -124,7 +125,7 @@ interface TrygdetidService {
         behandlingId: UUID,
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Trygdetid
 
     suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
         fnr: String,
@@ -191,6 +192,7 @@ class TrygdetidServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService,
     private val pesysKlient: PesysKlient,
+    private val avtaleService: AvtaleService,
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -238,12 +240,19 @@ class TrygdetidServiceImpl(
 
         when (behandling.behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                if (avdoede.isEmpty()) {
-                    logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$behandlingId)")
-                    throw GrunnlagManglerAvdoede()
+                val ukjentAvdoed = avdoede.isEmpty()
+                val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
+
+                if (ukjentAvdoed || tidligereFamiliepleier) {
+                    logger.info(
+                        "Oppretter overstyrt trygdetid for behandling $behandlingId " +
+                            "(ukjentAvdoed=$ukjentAvdoed, tidligereFamiliepleier=$tidligereFamiliepleier)",
+                    )
+                    listOf(opprettOverstyrtBeregnetTrygdetid(behandlingId, true, brukerTokenInfo))
+                } else {
+                    logger.info("Oppretter trygdetid for behandling $behandlingId")
+                    opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
                 }
-                logger.info("Oppretter trygdetid for behandling $behandlingId")
-                opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
             }
 
             BehandlingType.REVURDERING -> {
@@ -433,10 +442,30 @@ class TrygdetidServiceImpl(
 
         logger.info("Kopierer trygdetid for behandling ${behandling.id} fra behandling $forrigeBehandlingId")
 
+        kopierAvtale(behandlingId, forrigeBehandlingId)
+
         val forrigeTrygdetid = hentTrygdetiderIBehandling(forrigeBehandlingId, brukerTokenInfo)
         val eksisterendeTrygdetider = hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
 
         return kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid, eksisterendeTrygdetider)
+    }
+
+    private fun kopierAvtale(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+    ) {
+        val avtale =
+            avtaleService
+                .hentAvtaleForBehandling(forrigeBehandlingId)
+                ?.copy(id = UUID.randomUUID(), behandlingId)
+
+        if (avtale == null) {
+            logger.info("Fant ingen avtale på forrigeBehandling – hopper over kopiering av avtale")
+        } else {
+            logger.info("Kopierer avtale fra forrigeBehandling=$forrigeBehandlingId til nyBehandling=$behandlingId")
+
+            avtaleService.opprettAvtale(avtale)
+        }
     }
 
     private fun kopierSisteTrygdetidberegninger(
@@ -537,7 +566,7 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): Trygdetid {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
         // Merk: vi kan ikke bruke den vanlige sjekken på kanOppdatereTrygdetid, siden dette kallet skjer typisk
@@ -637,8 +666,7 @@ class TrygdetidServiceImpl(
                     ),
                 yrkesskade = false,
             )
-        val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
-        trygdetidRepository.oppdaterTrygdetid(opprettet)
+        return trygdetidRepository.opprettTrygdetid(trygdetid)
     }
 
     override suspend fun setYrkesskade(
@@ -880,6 +908,9 @@ class TrygdetidServiceImpl(
                         brukerTokenInfo,
                     )
                 }
+
+            kopierAvtale(behandlingId, kildeBehandlingId)
+
             hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                 .map { it.toDto() }
         }

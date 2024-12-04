@@ -3,7 +3,10 @@ package no.nav.etterlatte.trygdetid
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
@@ -19,8 +22,10 @@ import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
+import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
+import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
@@ -53,6 +58,7 @@ internal class TrygdetidServiceIntegrationTest(
     private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
 
     private val behandlingKlient = mockk<BehandlingKlient>()
+    private val avtaleService = mockk<AvtaleService>()
 
     @BeforeAll
     fun beforeAll() {
@@ -65,6 +71,7 @@ internal class TrygdetidServiceIntegrationTest(
                 grunnlagKlient,
                 TrygdetidBeregningService,
                 mockk<PesysKlient>(),
+                avtaleService,
             )
     }
 
@@ -229,6 +236,8 @@ internal class TrygdetidServiceIntegrationTest(
 
         coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+        every { avtaleService.hentAvtaleForBehandling(any()) } returns opprettTrygdeavtale(kildeBehandlingId)
+        justRun { avtaleService.opprettAvtale(any()) }
 
         repository.opprettTrygdetid(
             trygdetid(
@@ -266,7 +275,28 @@ internal class TrygdetidServiceIntegrationTest(
             this[0].periode.fra shouldBe LocalDate.of(2020, 5, 1)
             this[0].periode.til shouldBe LocalDate.of(2020, 7, 1)
         }
+
+        verify(exactly = 1) {
+            avtaleService.hentAvtaleForBehandling(kildeBehandlingId)
+            avtaleService.opprettAvtale(any())
+        }
     }
+
+    private fun opprettTrygdeavtale(behandlingId: UUID) =
+        Trygdeavtale(
+            behandlingId = behandlingId,
+            avtaleKode = "avtaleKode",
+            avtaleDatoKode = "avtaleDatoKode",
+            avtaleKriteriaKode = "avtaleKriteriaKode",
+            personKrets = null,
+            arbInntekt1G = null,
+            arbInntekt1GKommentar = "arbInntekt1GKommentar",
+            beregArt50 = null,
+            beregArt50Kommentar = "beregArt50Kommentar",
+            nordiskTrygdeAvtale = null,
+            nordiskTrygdeAvtaleKommentar = "nordiskTrygdeAvtaleKommentar",
+            kilde = Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
+        )
 
     private fun opplysningsgrunnlag(grunnlagTestData: GrunnlagTestData): List<Opplysningsgrunnlag> {
         val foedselsdato = grunnlagTestData.avdoede.first().foedselsdato!!

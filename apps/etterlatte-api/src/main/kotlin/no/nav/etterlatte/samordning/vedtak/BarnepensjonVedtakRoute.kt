@@ -4,14 +4,17 @@ import com.typesafe.config.Config
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.install
+import io.ktor.server.request.receiveNullable
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.dato
 import no.nav.etterlatte.libs.ktor.token.Issuer
 
@@ -39,6 +42,29 @@ fun Route.barnepensjonVedtakRoute(
                     )
                 } catch (e: IllegalArgumentException) {
                     return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
+
+            call.respond(
+                mapOf(
+                    "barnepensjon" to harLoependeBarnepensjonYtelsePaaDato,
+                ),
+            )
+        }
+
+        post {
+            val paaDato = call.dato("paaDato") ?: throw ManglerFomDatoException()
+            val fnr = call.receiveNullable<FoedselsnummerDTO>() ?: throw ManglerFoedselsnummerException()
+
+            val harLoependeBarnepensjonYtelsePaaDato =
+                try {
+                    samordningVedtakService.harLoependeYtelsePaaDato(
+                        dato = paaDato,
+                        fnr = Folkeregisteridentifikator.of(fnr.foedselsnummer),
+                        sakType = SakType.BARNEPENSJON,
+                        context = PensjonContext,
+                    )
+                } catch (e: IllegalArgumentException) {
+                    return@post call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(

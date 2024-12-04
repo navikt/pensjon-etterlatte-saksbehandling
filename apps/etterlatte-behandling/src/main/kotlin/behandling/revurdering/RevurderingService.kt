@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -16,13 +17,10 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -37,7 +35,6 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 class MaksEnAktivOppgavePaaBehandling(
@@ -146,22 +143,18 @@ class RevurderingService(
 
     internal fun opprettRevurdering(
         sakId: SakId,
+        forrigeBehandling: Behandling,
         persongalleri: Persongalleri,
-        forrigeBehandling: UUID?,
         mottattDato: String?,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
         revurderingAarsak: Revurderingaarsak,
         virkningstidspunkt: Virkningstidspunkt?,
-        utlandstilknytning: Utlandstilknytning?,
-        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
         begrunnelse: String?,
         saksbehandlerIdent: String?,
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
-        opphoerFraOgMed: YearMonth? = null,
-        tidligereFamiliepleier: TidligereFamiliepleier? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -170,19 +163,19 @@ class RevurderingService(
             soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
             revurderingsAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt,
-            utlandstilknytning = utlandstilknytning,
-            boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+            utlandstilknytning = forrigeBehandling.utlandstilknytning,
+            boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
             kilde = kilde,
             prosesstype = prosessType,
             begrunnelse = begrunnelse,
             relatertBehandlingId = relatertBehandlingId,
             sendeBrev = revurderingAarsak.skalSendeBrev,
-            opphoerFraOgMed = opphoerFraOgMed,
-            tidligereFamiliepleier = tidligereFamiliepleier,
+            opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
+            tidligereFamiliepleier = forrigeBehandling.tidligereFamiliepleier,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 
-            forrigeBehandling?.let { behandlingId ->
+            forrigeBehandling.id.let { behandlingId ->
                 kommerBarnetTilGodeService
                     .hentKommerBarnetTilGode(behandlingId)
                     ?.copy(behandlingId = opprettBehandling.id)
@@ -220,7 +213,7 @@ class RevurderingService(
                         } else {
                             grunnlagService.laasTilGrunnlagIBehandling(
                                 it,
-                                checkNotNull(forrigeBehandling) {
+                                checkNotNull(forrigeBehandling.id) {
                                     "Har en automatisk behandling som ikke sender med behandlingId for sist iverksatt. " +
                                         "Da kan vi ikke legge inn riktig grunnlag. Automatisk behandling id=${it.id}"
                                 },

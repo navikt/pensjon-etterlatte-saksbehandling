@@ -92,6 +92,10 @@ class RevurderingDao(
                 rs.getString("bodd_eller_arbeidet_utlandet")?.let {
                     objectMapper.readValue(it)
                 },
+            tidligereFamiliepleier =
+                rs.getString("tidligere_familiepleier")?.let {
+                    objectMapper.readValue(it)
+                },
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
             revurderingInfo = revurderingInfo,

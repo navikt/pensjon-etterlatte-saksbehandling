@@ -27,6 +27,7 @@ import no.nav.etterlatte.omregning.OmregningHendelseType
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class InntektsjusteringSelvbetjeningService(
@@ -88,6 +89,7 @@ class InntektsjusteringSelvbetjeningService(
                 kilde = OppgaveKilde.BRUKERDIALOG,
                 type = OppgaveType.INNTEKTSOPPLYSNING,
                 merknad = "Ny inntektsopplysning",
+                frist = Tidspunkt.now().plus(7L, ChronoUnit.DAYS),
                 referanse = mottattInntektsjustering.journalpostId,
             )
         }

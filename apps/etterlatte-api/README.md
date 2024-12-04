@@ -22,16 +22,16 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 
 ## API
 
-| Endepunkt                      | Headers        | Responstype         | Beskrivelse                                                                                                                         |
-|:-------------------------------|----------------|---------------------|:------------------------------------------------------------------------------------------------------------------------------------|
-| /api/vedtak?fomDato=YYYY-MM-DD | fnr <br/> tpnr | Samordningsvedtak[] | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
-| /api/vedtak?virkFom=YYYY-MM-DD | fnr <br/> tpnr | Samordningsvedtak[] | **DEPRECATED** Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                   |
-| /api/vedtak/{nav-vedtak-id}    | tpnr           | Samordningsvedtak   | Henter ut informasjon om et spesifikt vedtak. VedtaksIDen kommer fra samordningskøen hvor det varsles løpende om vedtak som gjøres. |
+| Endepunkt                      | Headers                           | Body                             | Responstype           | Beskrivelse                                                                                                                         |
+|:-------------------------------|-----------------------------------|----------------------------------|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| /api/vedtak?fomDato=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }``` | Samordningsvedtak[]   | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
+| /api/vedtak?virkFom=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }``` | Samordningsvedtak[]   | **DEPRECATED** Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                   |
+| /api/vedtak/{nav-vedtak-id}    | tpnr                              |                                  | Samordningsvedtak     | Henter ut informasjon om et spesifikt vedtak. VedtaksIDen kommer fra samordningskøen hvor det varsles løpende om vedtak som gjøres. |
 
-| Header | Beskrivelse                      |
-|--------|----------------------------------|
-| tpnr   | kallende tjenestepensjonsordning |
-| fnr    | fødselsnummer til aktuell person |
+| Header                                 | Beskrivelse                      |
+|----------------------------------------|----------------------------------|
+| tpnr                                   | kallende tjenestepensjonsordning |
+| **DEPRECATED(skal sendes i body)** fnr | fødselsnummer til aktuell person |
 
 
 #### Informasjonsmodell
@@ -105,7 +105,9 @@ Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, m
 ### Løpende omstillingsstønad
 Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før angitt dato, eller starter måneden etterpå så vil svaret være _nei_. **NB!** Merk at denne tjenesten _ikke gjør noe tolkning av faktisk utbetaling_ for å gi svaret, kun om ytelsen er innvilget. Så for eksempel om ytelsen er fullstendig avkortet, så vil svaret likevel være ja. 
 - `GET /api/pensjon/vedtak/har-loepende-oms?paaDato=YYYY-MM-DD` 
-  - fnr i header
+  - fnr i body:
+  
+    ```{ foedselsnummer: String }```
   - svarformat: 
      ```
      {
@@ -115,8 +117,10 @@ Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk d
     
 ### Løpende barnepensjon
 Som for omstillingsstønad.
-- `GET /api/barnepensjon/har-loepende-bp?paaDato=YYYY-MM-DD`
-  - fnr i header
+- `POST /api/barnepensjon/har-loepende-bp?paaDato=YYYY-MM-DD`
+  - fnr i body:
+  
+    ```{ foedselsnummer: String }```
   - svarformat:
      ```
      {

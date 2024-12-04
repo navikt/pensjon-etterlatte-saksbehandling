@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { JaNei, JaNeiRec, mapBooleanToJaNei } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
@@ -25,10 +25,12 @@ import { handlinger } from '~components/behandling/handlinger/typer'
 import { Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formatering/formatering'
 import { LoependeUnntakInfo } from '~components/aktivitetsplikt/brev/LoependeUnntakInfo'
+import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
   utbetaling: JaNei
+  begrunnelse?: string
   redusertEtterInntekt: JaNei
   spraak?: Spraak
 }
@@ -48,12 +50,21 @@ function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
     utbetaling: brevdata.utbetaling ? brevdata.utbetaling === JaNei.JA : undefined,
     redusertEtterInntekt: brevdata.redusertEtterInntekt ? brevdata.redusertEtterInntekt === JaNei.JA : undefined,
     spraak: brevdata.spraak,
+    begrunnelse: brevdata.skalSendeBrev === JaNei.NEI ? brevdata.begrunnelse : undefined,
   }
 }
 
 export const ValgForInfobrev = () => {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
-  const { handleSubmit, watch, control, resetField, reset } = useForm<IBrevAktivitetsplikt>({})
+  const {
+    handleSubmit,
+    watch,
+    control,
+    resetField,
+    reset,
+    register,
+    formState: { errors },
+  } = useForm<IBrevAktivitetsplikt>({})
 
   const dispatch = useDispatch()
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
@@ -110,7 +121,18 @@ export const ValgForInfobrev = () => {
                   </>
                 }
               />
-
+              {skalsendebrev === JaNei.NEI && (
+                <Textarea
+                  label="Begrunnelse"
+                  {...register('begrunnelse', {
+                    required: {
+                      value: true,
+                      message: 'Du må si hvorfor brev ikke skal sendes',
+                    },
+                  })}
+                  error={errors?.begrunnelse?.message}
+                />
+              )}
               {skalsendebrev === JaNei.JA && (
                 <>
                   <ControlledRadioGruppe
@@ -171,6 +193,9 @@ export const ValgForInfobrev = () => {
             {!!brevdata && (
               <HStack gap="4">
                 <Info label="Skal sende brev" tekst={brevdata.skalSendeBrev ? JaNeiRec.JA : JaNeiRec.NEI} />
+                {!brevdata.skalSendeBrev && brevdata.begrunnelse && (
+                  <Info label="Begrunnelse" tekst={brevdata.begrunnelse} />
+                )}
                 {brevdata.skalSendeBrev && (
                   <>
                     <Info label="Utbetaling" tekst={brevdata.utbetaling ? JaNeiRec.JA : JaNeiRec.NEI} />
@@ -181,6 +206,9 @@ export const ValgForInfobrev = () => {
                     <Info label="Målform" tekst={brevdata.spraak ? formaterSpraak(brevdata.spraak) : '-'} />
                   </>
                 )}
+                <BodyShort>
+                  Sist endret {formaterDatoMedTidspunkt(new Date(brevdata.kilde.tidspunkt))} av {brevdata.kilde.ident}
+                </BodyShort>
               </HStack>
             )}
             {erOppgaveRedigerbar(oppgave.status) && (

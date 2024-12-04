@@ -66,6 +66,8 @@ spec:
               orgno: "940380014"
             - name: Elverum kommunale pensjonskasse
               orgno: "940360293"
+            - name: DRAMMEN KOMMUNALE PENSJONSKASSE
+              orgno: "980650383"
             - name: Maritim pensjonskasse
               orgno: "940415683"
             - name: Garantikassen for fiskere
@@ -117,9 +119,6 @@ spec:
         - application: arbeid-og-inntekt
           namespace: team-inntekt
           cluster: prod-fss
-          permissions:
-            roles:
-              - les-oms-sak-for-person
         - application: pensjon-pen
           namespace: pensjondeployer
           cluster: prod-fss

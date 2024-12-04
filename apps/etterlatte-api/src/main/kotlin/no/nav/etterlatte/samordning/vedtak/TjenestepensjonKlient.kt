@@ -39,7 +39,7 @@ class TjenestepensjonKlient(
                 httpClient
                     .get {
                         url("$tjenestepensjonUrl/tpNrWithYtelse?fomDate=$fomDato")
-                        header("fnr", fnr)
+                        header("fnr", fnr) // TODO: må også fjernes på sikt, men er en jobb som må gjøres i samhandlingsteamet
                     }.let { deserialize<TpNumre>(it.body()) }
             }
 

@@ -45,6 +45,7 @@ class SamordningVedtakRouteTest {
         mockOAuth2Server.startRandomPort()
     }
 
+    // TODO: alle tester her skal oppdateres med fnr i body 1.mars 2025
     @Nested
     inner class MaskinportenApi {
         @BeforeEach

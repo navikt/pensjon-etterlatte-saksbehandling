@@ -63,7 +63,7 @@ class VedtaksvurderingKlient(
                 .get(vedtaksvurderingUrl) {
                     parameter("sakstype", sakType)
                     parameter("fomDato", fomDato)
-                    header("fnr", fnr)
+                    header("fnr", fnr) // TODO: må fjernes
                     if (callerContext is MaskinportenTpContext) {
                         header("orgnr", callerContext.organisasjonsnr)
                     }

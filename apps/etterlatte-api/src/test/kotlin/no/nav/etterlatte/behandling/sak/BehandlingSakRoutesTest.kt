@@ -109,30 +109,6 @@ class BehandlingSakRoutesTest {
     }
 
     @Test
-    fun `skal gi 500 når body mangler rolle les-oms-sak-for-person(kun dev)`() {
-        val conff = configMedRoller(mockOAuth2Server.config.httpServer.port(), Issuer.AZURE.issuerName)
-        testApplication {
-            runServerWithConfig(applicationConfig = conff) {
-                behandlingSakRoutes(
-                    behandlingService = behandlingService,
-                    config = conff,
-                )
-            }
-
-            val response =
-                client.post("api/oms/person/sak") {
-                    contentType(ContentType.Application.Json)
-                    header(
-                        HttpHeaders.Authorization,
-                        "Bearer ${mockOAuth2Server.issueSaksbehandlerToken(groups = listOf("les-oms-sak-for-person"))}",
-                    )
-                }
-            response.status shouldBe HttpStatusCode.InternalServerError
-            coVerify(exactly = 0) { behandlingService.hentSakforPerson(any()) }
-        }
-    }
-
-    @Test
     fun `skal gi 500 når body mangler pensjonSaksbehandler`() {
         val pensjonSaksbehandler = UUID.randomUUID().toString()
         val conff =

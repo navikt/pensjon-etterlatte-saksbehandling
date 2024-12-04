@@ -6,8 +6,6 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -241,18 +239,6 @@ fun ApplicationCall.dato(param: String) =
         runCatching { LocalDate.parse(it) }
             .getOrElse { throw UgyldigDatoFormatException() }
     }
-
-suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
-    featureToggleService: FeatureToggleService,
-    toggle: FeatureToggle,
-    block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit,
-) {
-    if (featureToggleService.isEnabled(toggle, false)) {
-        block()
-    } else {
-        throw FeatureIkkeStoettetException()
-    }
-}
 
 class FeatureIkkeStoettetException :
     ForespoerselException(

@@ -51,7 +51,6 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.collections.filter
 
 class AktivitetspliktService(
     private val aktivitetspliktDao: AktivitetspliktDao,

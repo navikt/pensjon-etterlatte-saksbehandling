@@ -114,8 +114,8 @@ data class Utland(
 data class InnflyttingTilNorge(
     val fraflyttingsland: String?,
     val dato: LocalDate?,
-    val gyldighetstidspunkt: LocalDate?,
-    val ajourholdstidspunkt: LocalDate?,
+    val gyldighetsdato: LocalDate?,
+    val ajourholdsdato: LocalDate?,
 )
 
 data class UtflyttingFraNorge(

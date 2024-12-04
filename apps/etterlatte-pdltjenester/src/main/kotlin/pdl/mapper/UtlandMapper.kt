@@ -59,25 +59,25 @@ object UtlandMapper {
 
     private fun finnForsteDatoEtterInnflytting(
         systemoppgitt: LocalDate,
-        bostedstidspunkt: List<PdlBostedsadresse>?,
+        bostedsadresse: List<PdlBostedsadresse>?,
     ): LocalDate {
-        if (bostedstidspunkt.isNullOrEmpty()) {
+        if (bostedsadresse.isNullOrEmpty()) {
             return systemoppgitt
         }
 
-        return bostedstidspunkt
+        return bostedsadresse
             .sortedBy { it.angittFlyttedato }
             .mapNotNull { hentDatoForBostedadresse(it) }
             .firstOrNull { it.isAfter(systemoppgitt) || it.isEqual(systemoppgitt) } ?: systemoppgitt
     }
 
-    private fun hentDatoForBostedadresse(bostedstidspunkt: PdlBostedsadresse): LocalDate? {
-        if (bostedstidspunkt.angittFlyttedato != null) {
-            return bostedstidspunkt.angittFlyttedato
+    private fun hentDatoForBostedadresse(bostedsadresse: PdlBostedsadresse): LocalDate? {
+        if (bostedsadresse.angittFlyttedato != null) {
+            return bostedsadresse.angittFlyttedato
         }
 
-        if (bostedstidspunkt.gyldigFraOgMed != null) {
-            return bostedstidspunkt.gyldigFraOgMed.toLocalDate()
+        if (bostedsadresse.gyldigFraOgMed != null) {
+            return bostedsadresse.gyldigFraOgMed.toLocalDate()
         }
 
         return null

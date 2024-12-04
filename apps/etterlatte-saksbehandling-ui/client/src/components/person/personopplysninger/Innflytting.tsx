@@ -22,8 +22,8 @@ export const Innflytting = ({
           skjedde.
           <br />
           <br />
-          Dersom man skal finne ut om en person regnes som innflyttet i henhold til folkeregisterlover, så kan man se
-          på om personen har en norsk bostedsadresse med angitt flyttedato.
+          Dersom man skal finne ut om en person regnes som innflyttet i henhold til folkeregisterlover, så kan man se på
+          om personen har en norsk bostedsadresse med angitt flyttedato.
         </ReadMore>
         <ReadMore header="Ajourholdsdato">
           Datoen opplysningen ble opprettet i Folkeregisteret. Feltet mangler på en del opplysninger migrert fra gammelt
@@ -48,8 +48,8 @@ export const Innflytting = ({
                     {!!flytting.fraflyttingsland && finnLandSomTekst(flytting.fraflyttingsland, landListe)}
                   </Table.DataCell>
                   <Table.DataCell>{formaterDatoMedFallback(flytting.dato)}</Table.DataCell>
-                  <Table.DataCell>{formaterDatoMedFallback(flytting.gyldighetstidspunkt)}</Table.DataCell>
-                  <Table.DataCell>{formaterDatoMedFallback(flytting.ajourholdstidspunkt)}</Table.DataCell>
+                  <Table.DataCell>{formaterDatoMedFallback(flytting.gyldighetsdato)}</Table.DataCell>
+                  <Table.DataCell>{formaterDatoMedFallback(flytting.ajourholdsdato)}</Table.DataCell>
                 </Table.Row>
               ))}
             </>

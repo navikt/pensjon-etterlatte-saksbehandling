@@ -80,8 +80,8 @@ export interface Utland {
 export interface InnflyttingDTO {
   fraflyttingsland?: string
   dato?: string
-  gyldighetstidspunkt?: string
-  ajourholdstidspunkt?: string
+  gyldighetsdato?: string
+  ajourholdsdato?: string
 }
 
 export interface Statsborgerskap {

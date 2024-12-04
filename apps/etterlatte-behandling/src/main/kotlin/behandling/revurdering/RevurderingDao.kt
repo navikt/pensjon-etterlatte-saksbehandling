@@ -13,6 +13,8 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.PreparedStatement
@@ -97,6 +99,7 @@ class RevurderingDao(
             relatertBehandlingId = rs.getString("relatert_behandling"),
             sendeBrev = rs.getBoolean("sende_brev"),
             opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
+            soeknadMottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")?.toLocalDatetimeUTC(),
         )
     }
 }

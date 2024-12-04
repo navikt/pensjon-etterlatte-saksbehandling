@@ -1,4 +1,5 @@
 import * as amplitude from '@amplitude/analytics-browser'
+import { JaNei } from '~shared/types/ISvar'
 
 export enum LogEvents {
   CLICK = 'klikk',
@@ -75,7 +76,20 @@ export const initAmplitude = () => {
   return amplitudeInstance
 }
 
-export const trackClick = (name: ClickEvent, svar?: any) => {
+export const trackClick = (name: ClickEvent) => {
+  if (!amplitudeInstance) {
+    console.warn('Amplitude is not initialized. Ignoring')
+    return
+  }
+  amplitudeInstance.track({
+    event_type: LogEvents.CLICK,
+    event_properties: {
+      tekst: name,
+    },
+  })
+}
+
+export const trackClickJaNei = (name: ClickEvent, svar: JaNei) => {
   if (!amplitudeInstance) {
     console.warn('Amplitude is not initialized. Ignoring')
     return

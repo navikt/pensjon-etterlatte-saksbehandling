@@ -10,7 +10,8 @@ import { Alert, BodyShort, Box, Button, Heading, HStack, Link, Spacer, VStack } 
 import { ExternalLinkIcon, PlusCircleIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { ClickEvent, trackClick } from '~utils/amplitude'
+import { ClickEvent, trackClickJaNei } from '~utils/amplitude'
+import { JaNei } from '~shared/types/ISvar'
 
 export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
   behandlingId,
@@ -42,7 +43,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
   const skalViseDetaljer = visDetaljer ?? !harRedigertTrygdetidGrunnlag()
 
   const kopierTrygdetid = (kildeBehandlingId: string) => {
-    trackClick(ClickEvent.KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE, 'Ja')
+    trackClickJaNei(ClickEvent.KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE, JaNei.JA)
     kopierTrygdetidReq(
       {
         behandlingId: behandlingId,
@@ -56,7 +57,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
   }
 
   const ikkeKopierTrygdetid = () => {
-    trackClick(ClickEvent.KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE, 'Nei')
+    trackClickJaNei(ClickEvent.KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE, JaNei.NEI)
     setVisDetaljer(false)
   }
 

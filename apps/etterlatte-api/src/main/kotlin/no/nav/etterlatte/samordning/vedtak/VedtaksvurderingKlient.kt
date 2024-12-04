@@ -7,6 +7,8 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -14,6 +16,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -60,13 +63,13 @@ class VedtaksvurderingKlient(
 
         return try {
             httpClient
-                .get(vedtaksvurderingUrl) {
+                .post(vedtaksvurderingUrl) {
                     parameter("sakstype", sakType)
                     parameter("fomDato", fomDato)
-                    header("fnr", fnr) // TODO: må fjernes
                     if (callerContext is MaskinportenTpContext) {
                         header("orgnr", callerContext.organisasjonsnr)
                     }
+                    setBody(FoedselsnummerDTO(fnr))
                 }.body()
         } catch (e: ClientRequestException) {
             logger.error("Det oppstod feil i kall til vedtaksliste API", e)

@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
@@ -270,16 +271,14 @@ fun Route.vedtaksvurderingRoute(
 
 fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamordningService) {
     route("/api/samordning/vedtak") {
-        get {
+        post {
             val sakstype =
                 call.parameters["sakstype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "sakstype ikke angitt")
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, "sakstype ikke angitt")
             val fomDato =
                 call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
-            val fnr =
-                call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
+            val fnr = call.receive<FoedselsnummerDTO>().foedselsnummer.let { Folkeregisteridentifikator.of(it) }
 
             val vedtaksliste =
                 vedtakSamordningService.hentVedtaksliste(

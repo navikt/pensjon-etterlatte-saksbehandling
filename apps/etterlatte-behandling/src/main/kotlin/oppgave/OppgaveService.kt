@@ -597,6 +597,7 @@ class OppgaveService(
         merknad: String?,
         frist: Tidspunkt? = null,
         saksbehandler: String? = null,
+        gruppeId: String? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
 
@@ -608,6 +609,7 @@ class OppgaveService(
                 type = type,
                 merknad = merknad,
                 frist = frist,
+                gruppeId = gruppeId,
             )
         oppgaveDao.opprettOppgave(oppgave)
 

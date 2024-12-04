@@ -148,6 +148,7 @@ internal class BehandlingMetricsOppgaveTest(
         sakId = sak.id,
         kilde = OppgaveKilde.BEHANDLING,
         referanse = "referanse",
+        gruppeId = null,
         merknad = "merknad",
         opprettet = Tidspunkt.now(),
         sakType = sak.sakType,

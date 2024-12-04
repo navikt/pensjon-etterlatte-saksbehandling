@@ -503,6 +503,11 @@ class OppgaveService(
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
+    fun hentOppgaverForGruppeId(
+        gruppeId: String,
+        type: OppgaveType,
+    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForGruppeId(gruppeId, type)
+
     fun hentForrigeStatus(oppgaveId: UUID): Status {
         val oppgave = hentOppgave(oppgaveId)
 

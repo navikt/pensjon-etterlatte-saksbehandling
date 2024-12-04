@@ -39,7 +39,10 @@ interface OppgaveDao {
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
 
-    fun hentOppgaverForGruppeId(gruppeId: String): List<OppgaveIntern>
+    fun hentOppgaverForGruppeId(
+        gruppeId: String,
+        type: OppgaveType,
+    ): List<OppgaveIntern>
 
     fun oppgaveMedTypeFinnes(
         sakId: SakId,
@@ -244,22 +247,54 @@ class OppgaveDaoImpl(
             }
         }
 
-    override fun hentOppgaverForGruppeId(gruppeId: String): List<OppgaveIntern> =
+    override fun hentOppgaverForGruppeId(
+        gruppeId: String,
+        type: OppgaveType,
+    ): List<OppgaveIntern> =
         connectionAutoclosing.hentConnection {
             with(it) {
+
+
+
+                println(
+
+
+
+
+
+                    "heiiiiii"
+                )
+
+
                 val statement =
+
+
+
+
+
+
+
+
                     prepareStatement(
+
+
+
+
+
+
                         """
                         SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.gruppe_id, 
                             o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.forrige_saksbehandler, si.navn
                         FROM oppgave o 
                             LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.gruppe_id = ?
-                        AND o.status = ANY(?)
+                            AND o.type = ?
+                            AND o.status != ANY(?)
                         """.trimIndent(),
                     )
                 statement.setString(1, gruppeId)
-                statement.setArray(2, createArrayOf("text", Status.entries.map(Status::name).toTypedArray()))
+                statement.setString(2, type.name)
+                statement.setArray( 3, createArrayOf("text",listOf(Status.FERDIGSTILT, Status.FEILREGISTRERT, Status.AVBRUTT).toTypedArray()))
                 statement
                     .executeQuery()
                     .toList {

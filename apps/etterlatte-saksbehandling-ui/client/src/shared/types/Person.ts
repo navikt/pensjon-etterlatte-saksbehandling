@@ -74,10 +74,14 @@ export interface Utland {
     tilflyttingsland?: string
     dato?: string
   }[]
-  innflyttingTilNorge?: {
-    fraflyttingsland?: string
-    dato?: string
-  }[]
+  innflyttingTilNorge?: InnflyttingDTO[]
+}
+
+export interface InnflyttingDTO {
+  fraflyttingsland?: string
+  dato?: string
+  gyldighetstidspunkt?: string
+  ajourholdstidspunkt?: string
 }
 
 export interface Statsborgerskap {

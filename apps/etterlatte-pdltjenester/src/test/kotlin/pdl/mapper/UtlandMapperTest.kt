@@ -54,7 +54,7 @@ internal class UtlandMapperTest {
                 every { bostedsadresse } returns
                     listOf(
                         mockk {
-                            every { angittFlyttedato } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                            every { angittFlyttedato } returns LocalDate.parse("2021-07-01")
                             every { gyldigFraOgMed } returns LocalDateTime.parse("2021-07-01T00:00:00")
                         },
                     )

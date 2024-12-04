@@ -39,7 +39,7 @@ object UtlandMapper {
                         ?.angittFlyttedato
 
                 if (angittFlyttedato != null) {
-                    angittFlyttedato.toLocalDate()
+                    angittFlyttedato
                 } else {
                     finnForsteDatoEtterInnflytting(gyldighetstidspunkt, bostedsadresse)
                 }
@@ -73,7 +73,7 @@ object UtlandMapper {
 
     private fun hentDatoForBostedadresse(bostedstidspunkt: PdlBostedsadresse): LocalDate? {
         if (bostedstidspunkt.angittFlyttedato != null) {
-            return bostedstidspunkt.angittFlyttedato.toLocalDate()
+            return bostedstidspunkt.angittFlyttedato
         }
 
         if (bostedstidspunkt.gyldigFraOgMed != null) {

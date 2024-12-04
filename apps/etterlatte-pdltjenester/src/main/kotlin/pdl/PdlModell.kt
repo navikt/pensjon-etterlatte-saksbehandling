@@ -306,7 +306,7 @@ data class PdlUtflyttingFraNorge(
 )
 
 data class PdlBostedsadresse(
-    val angittFlyttedato: LocalDateTime? = null,
+    val angittFlyttedato: LocalDate? = null,
     val coAdressenavn: String?,
     val gyldigFraOgMed: LocalDateTime? = null,
     val gyldigTilOgMed: LocalDateTime? = null,

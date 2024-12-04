@@ -62,7 +62,6 @@ class VedtaksvurderingKlient(
         callerContext: CallerContext,
     ): List<VedtakSamordningDto> {
         logger.info("Henter vedtaksliste, fomDato=$fomDato")
-
         return try {
             httpClient
                 .post(vedtaksvurderingUrl) {

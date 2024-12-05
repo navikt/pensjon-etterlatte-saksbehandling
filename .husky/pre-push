@@ -1,8 +1,8 @@
 cd ./apps/etterlatte-saksbehandling-ui
-yarn lint-staged --cwd ./client
-yarn lint-staged --cwd ./server
+yarn lint-staged --diff origin/main --cwd ./client
+yarn lint-staged --diff origin/main --cwd ./server
 
-changedKotlinFiles=$(git diff --name-only --cached | grep '\.kt[s"]\?$' || true)
+changedKotlinFiles=$(git diff --name-only --cached main | grep '\.kt[s"]\?$' || true)
 
 if [ -n "${changedKotlinFiles-unset}" ]; then
     kotlinversion=$(ktlint -v)
@@ -16,11 +16,11 @@ if [ -n "${changedKotlinFiles-unset}" ]; then
 
     #store the result of the commit in a variable and split into array items with newline
     cd ../../
-    committedFiles=$(git diff --name-only --cached --diff-filter=d)
+    committedFiles=$(git diff --name-only --cached main --diff-filter=d)
     files=$(echo $committedFiles | tr ";" "\\n")
 
     # https://github.com/pinterest/ktlint pre-commit hook
-    git diff --name-only --cached | grep '\.kt[s"]\?$' | xargs ktlint -F
+    git diff --name-only --cached main | grep '\.kt[s"]\?$' | xargs ktlint -F
     echo "✍️ Formatted kotlin files"
 
     #replay items in the commits array and add only those files
@@ -30,6 +30,6 @@ if [ -n "${changedKotlinFiles-unset}" ]; then
     done
 fi
 
-echo "🏆 Files staged"
+echo "🏆 Files linted"
 
 exit 0

@@ -1,6 +1,6 @@
 cd ./apps/etterlatte-saksbehandling-ui
-yarn lint-staged --cwd ./client
-yarn lint-staged --cwd ./server
+yarn lint-staged --diff origin/main --cwd ./client
+yarn lint-staged --diff origin/main --cwd ./server
 
 changedKotlinFiles=$(git diff --name-only --cached main | grep '\.kt[s"]\?$' || true)
 
@@ -16,7 +16,7 @@ if [ -n "${changedKotlinFiles-unset}" ]; then
 
     #store the result of the commit in a variable and split into array items with newline
     cd ../../
-    committedFiles=$(git diff --name-only --cached --diff-filter=d)
+    committedFiles=$(git diff --name-only --cached main --diff-filter=d)
     files=$(echo $committedFiles | tr ";" "\\n")
 
     # https://github.com/pinterest/ktlint pre-commit hook
@@ -30,6 +30,6 @@ if [ -n "${changedKotlinFiles-unset}" ]; then
     done
 fi
 
-echo "🏆 Files staged"
+echo "🏆 Files linted"
 
 exit 0

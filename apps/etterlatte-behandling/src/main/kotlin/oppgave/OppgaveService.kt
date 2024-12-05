@@ -741,6 +741,13 @@ class ManglerOppgaveUnderBehandling(
         detail = msg,
     )
 
+class ManglerOppgaveTilAttestering(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "MANGLER_OPPGAVE_TIL_ATTESTERING",
+        detail = msg,
+    )
+
 class ForMangeOppgaverUnderBehandling(
     msg: String,
 ) : UgyldigForespoerselException(

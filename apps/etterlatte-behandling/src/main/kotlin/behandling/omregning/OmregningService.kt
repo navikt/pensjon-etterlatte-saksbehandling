@@ -40,18 +40,21 @@ class OmregningService(
                 }
             }
 
-            behandlingService.hentAapenOmregning(request.sakId)?.let {
-                val oppgave = oppgaveService.hentOppgaverForReferanse(it.id.toString()).single()
+            behandlingService.hentAapenOmregning(request.sakId)?.let { omregning ->
+                val oppgave =
+                    oppgaveService
+                        .hentOppgaverForReferanse(omregning.id.toString())
+                        .singleOrNull { it.type === OppgaveType.INNTEKTSOPPLYSNING && it.erAttestering() }
 
-                if (oppgave.type.name == OppgaveType.INNTEKTSOPPLYSNING.name) {
+                if (oppgave != null) {
                     if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
                         oppgaveService.fjernSaksbehandler(oppgave.id)
                         return
                     }
-                }
-
-                if (it.status.kanAvbrytes()) {
-                    behandlingService.avbrytBehandling(it.id, bruker)
+                } else {
+                    if (omregning.status.kanAvbrytes()) {
+                        behandlingService.avbrytBehandling(omregning.id, bruker)
+                    }
                 }
             }
         }

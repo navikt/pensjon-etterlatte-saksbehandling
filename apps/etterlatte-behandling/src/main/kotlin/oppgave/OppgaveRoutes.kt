@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveBulkDto
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -33,17 +34,18 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
-class ManglerReferanseException(
-    msg: String,
-) : UgyldigForespoerselException(
-        code = "MÅ_HA_REFERANSE",
-        detail = msg,
-    )
-
 inline val PipelineContext<*, ApplicationCall>.referanse: String
     get() =
-        call.parameters["referanse"] ?: throw ManglerReferanseException(
-            "Mangler referanse i requestem",
+        call.parameters["referanse"] ?: throw UgyldigForespoerselException(
+            code = "REFERANSE_MANGLER",
+            detail = "Mangler referanse i forespørselen",
+        )
+
+inline val PipelineContext<*, ApplicationCall>.gruppeId: String
+    get() =
+        call.parameters["gruppeId"] ?: throw UgyldigForespoerselException(
+            code = "GRUPPEID_MANGLER",
+            detail = "Mangler gruppeId i forespørselen",
         )
 
 const val VISALLE = "VISALLE"
@@ -89,6 +91,19 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                         service.hentOppgaverForReferanse(referanse)
                     },
                 )
+            }
+        }
+
+        get("/gruppe/{gruppeId}") {
+            kunSaksbehandler {
+                val type = OppgaveType.valueOf(call.request.queryParameters["type"]!!)
+
+                val oppgaver =
+                    inTransaction {
+                        service.hentOppgaverForGruppeId(gruppeId, type)
+                    }
+
+                call.respond(oppgaver)
             }
         }
 
@@ -222,6 +237,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     call.respond(HttpStatusCode.OK)
                 }
             }
+
             put("frist") {
                 kunSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()

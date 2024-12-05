@@ -1,6 +1,6 @@
 import { Search } from './Search'
 import { ReleaseAlerts } from './ReleaseAlerts'
-import { InternalHeader, Spacer } from '@navikt/ds-react'
+import { HStack, InternalHeader, Spacer } from '@navikt/ds-react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AppSwitcher } from '~shared/header/AppSwitcher'
 
@@ -12,15 +12,22 @@ export const HeaderBanner = () => {
   return (
     <InternalHeader data-theme="light">
       <InternalHeader.Title href="/">
-        Gjenny
-        {erDesember && (
-          <img
-            style={{ position: 'absolute', left: '15px', top: '15px' }}
-            src="/nisselue.png"
-            alt="nisselue"
-            height={20}
-          />
-        )}
+        <HStack gap="4">
+          <div>
+            {erDesember && (
+              <img src="/Christmas_tree_02.png" alt="juletre" style={{ height: '1.5rem', width: '1.5rem' }} />
+            )}
+          </div>
+          Gjenny
+          {erDesember && (
+            <img
+              style={{ position: 'absolute', top: '13px', left: '55px' }}
+              src="/nisselue.png"
+              alt="nisselue"
+              height={20}
+            />
+          )}
+        </HStack>
       </InternalHeader.Title>
       <Spacer />
       <Search />

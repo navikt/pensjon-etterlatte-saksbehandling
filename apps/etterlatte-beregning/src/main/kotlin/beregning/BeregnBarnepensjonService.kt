@@ -397,7 +397,9 @@ class BPBeregningsgrunnlagKunEnJuridiskForelderFinnesIkkeIPersongalleri(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(
         code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_MANGLER_I_PERSONGALLERI",
-        detail = "Beregningsgrunnlag kun en juridisk forelder angitt, men det mangler i persongalleriet",
+        detail =
+            "Kun én juridisk forelder er registrert i beregningsgrunnlaget, men ikke i familieforhold. " +
+                "Du må lagre trygdetid i beregningen for å få med endringen.",
         meta = mapOf("behandlingId" to behandlingId),
     )
 
@@ -405,7 +407,9 @@ class BPKunEnJuridiskForelderManglerIBeregningsgrunnlag(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(
         code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_MANGLER_I_BEREGNINGSGRUNNLAG",
-        detail = "Persongalleriet har kun en juridisk forelder angitt, men det mangler i beregningsgrunnlag",
+        detail =
+            "Kun én juridisk forelder er registrert i familieforhold, " +
+                "men beregningsgrunnlaget er ikke oppdatert. Du må lagre trygdetid i beregningen.",
         meta = mapOf("behandlingId" to behandlingId),
     )
 
@@ -413,6 +417,6 @@ class BPKunEnJuridiskForelderMaaGjeldeFraVirkningstidspunkt(
     behandlingId: UUID,
 ) : UgyldigForespoerselException(
         code = "BP_BEREGNING_KUN_EN_JURIDISK_FORELDER_MAA_GJELDE_FRA_VIRKNINGSTIDSPUNKT",
-        detail = "Dato fom på kun en juridisk forelder i beregningsgrunnlaget må være lik virkningstispunkt",
+        detail = "Dato fom på kun en juridisk forelder i beregningsgrunnlaget må være lik virkningstidspunkt",
         meta = mapOf("behandlingId" to behandlingId),
     )

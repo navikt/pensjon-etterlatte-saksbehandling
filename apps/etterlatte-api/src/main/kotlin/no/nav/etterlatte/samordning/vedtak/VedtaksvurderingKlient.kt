@@ -41,7 +41,7 @@ class VedtaksvurderingKlient(
                 .get {
                     url("$vedtaksvurderingUrl/$vedtakId")
                     if (callerContext is MaskinportenTpContext) {
-                        header("orgnr", callerContext.organisasjonsnr)
+                        header("orgnr", callerContext.organisasjonsnr).also { logger.info("Henter vedtak med orgnr $it") }
                     }
                 }.body()
         } catch (e: ClientRequestException) {
@@ -69,7 +69,7 @@ class VedtaksvurderingKlient(
                     parameter("sakstype", sakType)
                     parameter("fomDato", fomDato)
                     if (callerContext is MaskinportenTpContext) {
-                        header("orgnr", callerContext.organisasjonsnr)
+                        header("orgnr", callerContext.organisasjonsnr).also { logger.info("Henter vedtaksliste med orgnr $it") }
                     }
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr))

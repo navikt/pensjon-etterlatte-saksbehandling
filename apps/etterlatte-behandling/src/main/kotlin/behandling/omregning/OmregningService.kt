@@ -53,7 +53,7 @@ class OmregningService(
                         oppgaveService
                             .hentOppgaverForReferanse(omregning.id.toString())
                             .singleOrNull { it.type === OppgaveType.INNTEKTSOPPLYSNING && it.erAttestering() }
-                            ?: throw InternfeilException("Kan ikke eksistere en INNTEKTSOPPLYSNING uten oppgave")
+                            ?: throw InternfeilException("Kan ikke eksistere en INNTEKTSENDRING uten oppgave")
 
                     if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
                         oppgaveService.fjernSaksbehandler(oppgave.id)

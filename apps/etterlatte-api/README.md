@@ -60,12 +60,12 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 
 ## Integrasjon
 
-| Miljø         | Ingress                                  |
-|:--------------|:-----------------------------------------|
-| dev-eksterne  | etterlatte-api.ekstern.dev.nav.no        |
-| dev-nav       | https://etterlatte-api.intern.dev.nav.no | 
-| prod-eksterne | etterlatte-api.nav.no                    |
-| prod-nav      | https://etterlatte-api.intern.nav.no     |
+| Miljø         | Ingress                           |
+|:--------------|:----------------------------------|
+| dev-eksterne  | etterlatte-api.ekstern.dev.nav.no |
+| dev-nav       | etterlatte-api.intern.dev.nav.no  | 
+| prod-eksterne | etterlatte-api.nav.no             |
+| prod-nav      | etterlatte-api.intern.nav.no      |
 
 **deprecated** (fjernes 1 mars 2025)
 | Miljø | Ingress                                         |

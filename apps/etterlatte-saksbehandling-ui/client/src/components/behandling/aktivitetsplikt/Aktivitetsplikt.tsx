@@ -96,7 +96,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         </TekstWrapper>
 
         {isValidDateOfDeath(avdoedesDoedsdato!!) && (
-          <AktivitetspliktTidslinje behandling={behandling} doedsdato={avdoedesDoedsdato!!} />
+          <AktivitetspliktTidslinje behandling={behandling} doedsdato={avdoedesDoedsdato!!} sakId={behandling.sakId} />
         )}
         <AktivitetspliktVurdering
           behandling={behandling}

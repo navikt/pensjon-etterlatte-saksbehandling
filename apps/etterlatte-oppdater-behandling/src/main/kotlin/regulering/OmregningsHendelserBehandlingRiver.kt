@@ -58,7 +58,7 @@ internal class OmregningsHendelserBehandlingRiver(
                     revurderingAarsak = omregningData.revurderingaarsak,
                     mottattDato =
                         when (omregningData.revurderingaarsak) {
-                            Revurderingaarsak.INNTEKTSENDRING -> omregningData.hentInntektsjustering().mottatt
+                            Revurderingaarsak.INNTEKTSENDRING -> omregningData.hentInntektsjustering().mottattDato
                             else -> null
                         },
                 ),

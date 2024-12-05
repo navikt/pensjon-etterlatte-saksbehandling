@@ -72,7 +72,7 @@ internal object BarnepensjonUthenter {
                                 opplysning =
                                     UtenlandsoppholdOpplysninger(
                                         utenlandsopphold.svar.verdi,
-                                        it.land.svar.innhold,
+                                        it.land.svar.innhold!!,
                                         it.oppholdsType.svar.map { utlandsopphold -> utlandsopphold.verdi },
                                         it.medlemFolketrygd.svar.verdi,
                                         it.pensjonsutbetaling?.svar?.innhold,
@@ -239,7 +239,7 @@ internal object BarnepensjonUthenter {
                     forelder.foedselsnummer.svar.toFolkeregisteridentifikator(),
                     forelder.adresse.svar,
                     forelder.statsborgerskap.svar,
-                    forelder.kontaktinfo.telefonnummer.svar.innhold,
+                    forelder.kontaktinfo.telefonnummer.svar.innhold!!,
                 ),
             )
         }

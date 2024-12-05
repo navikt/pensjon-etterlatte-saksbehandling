@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -246,13 +247,23 @@ class StatistikkService(
         ) {
             return null
         }
-        return when (
-            (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.any {
-                it.type == UtbetalingsperiodeType.OPPHOER
+        return when (vedtak.type) {
+            VedtakType.INNVILGELSE -> BehandlingResultat.INNVILGELSE
+            VedtakType.OPPHOER -> BehandlingResultat.OPPHOER
+            VedtakType.AVSLAG -> BehandlingResultat.AVSLAG
+            VedtakType.ENDRING -> {
+                when (
+                    (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.any {
+                        it.type == UtbetalingsperiodeType.OPPHOER
+                    }
+                ) {
+                    true -> BehandlingResultat.OPPHOER
+                    false -> BehandlingResultat.ENDRING
+                }
             }
-        ) {
-            true -> BehandlingResultat.OPPHOER
-            false -> BehandlingResultat.INNVILGELSE
+            VedtakType.TILBAKEKREVING,
+            VedtakType.AVVIST_KLAGE,
+            -> throw InternfeilException("Skal ikke mappe vedtak")
         }
     }
 

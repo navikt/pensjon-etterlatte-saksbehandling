@@ -43,21 +43,19 @@ class OmregningService(
             }
 
             behandlingService.hentAapenOmregning(request.sakId)?.let { omregning ->
-
-                if (omregning.status.kanAvbrytes()) {
-                    behandlingService.avbrytBehandling(omregning.id, bruker)
-                }
-
                 if (omregning.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING) {
                     val oppgave =
                         oppgaveService
                             .hentOppgaverForReferanse(omregning.id.toString())
-                            .singleOrNull { it.type === OppgaveType.INNTEKTSOPPLYSNING && it.erAttestering() }
+                            .singleOrNull { it.type === OppgaveType.INNTEKTSOPPLYSNING }
                             ?: throw InternfeilException("Kan ikke eksistere en INNTEKTSENDRING uten oppgave")
 
                     if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
                         oppgaveService.fjernSaksbehandler(oppgave.id)
-                        return
+                    }
+                } else {
+                    if (omregning.status.kanAvbrytes()) {
+                        behandlingService.avbrytBehandling(omregning.id, bruker)
                     }
                 }
             }

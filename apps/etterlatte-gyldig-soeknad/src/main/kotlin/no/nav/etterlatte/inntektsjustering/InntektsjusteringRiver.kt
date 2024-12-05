@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.event.InntektsjusteringInnsendtHendelseType
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.inntektsjustering.MottattInntektsjustering
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -72,7 +73,7 @@ internal class InntektsjusteringRiver(
                 sak = sak.id,
                 inntektsjusteringId = inntektsjustering.id,
                 journalpostId = journalpostResponse.journalpostId,
-                mottattDato = LocalDateTime.from(inntektsjustering.tidspunkt),
+                mottattDato = LocalDateTime.ofInstant(inntektsjustering.tidspunkt, norskTidssone),
                 inntektsaar = inntektsjustering.inntektsaar,
                 arbeidsinntekt = inntektsjustering.arbeidsinntekt,
                 naeringsinntekt = inntektsjustering.naeringsinntekt,

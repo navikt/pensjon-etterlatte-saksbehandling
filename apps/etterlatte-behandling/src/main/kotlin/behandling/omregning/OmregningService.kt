@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
@@ -41,19 +43,21 @@ class OmregningService(
             }
 
             behandlingService.hentAapenOmregning(request.sakId)?.let { omregning ->
-                val oppgave =
-                    oppgaveService
-                        .hentOppgaverForReferanse(omregning.id.toString())
-                        .singleOrNull { it.type === OppgaveType.INNTEKTSOPPLYSNING && it.erAttestering() }
 
-                if (oppgave != null) {
+                if (omregning.status.kanAvbrytes()) {
+                    behandlingService.avbrytBehandling(omregning.id, bruker)
+                }
+
+                if (omregning.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING) {
+                    val oppgave =
+                        oppgaveService
+                            .hentOppgaverForReferanse(omregning.id.toString())
+                            .singleOrNull { it.type === OppgaveType.INNTEKTSOPPLYSNING && it.erAttestering() }
+                            ?: throw InternfeilException("Kan ikke eksistere en INNTEKTSOPPLYSNING uten oppgave")
+
                     if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
                         oppgaveService.fjernSaksbehandler(oppgave.id)
                         return
-                    }
-                } else {
-                    if (omregning.status.kanAvbrytes()) {
-                        behandlingService.avbrytBehandling(omregning.id, bruker)
                     }
                 }
             }

@@ -147,7 +147,10 @@ internal class GrunnlagHelperKtTest {
     fun `skal hente utland`() {
         val utland =
             Utland(
-                innflyttingTilNorge = listOf(InnflyttingTilNorge("Danmark", LocalDate.of(2007, 4, 1))),
+                innflyttingTilNorge =
+                    listOf(
+                        InnflyttingTilNorge("Danmark", LocalDate.of(2007, 4, 1), LocalDate.of(2013, 7, 9), LocalDate.of(2013, 7, 9)),
+                    ),
                 utflyttingFraNorge =
                     listOf(
                         UtflyttingFraNorge("Sverige", LocalDate.of(2005, 7, 8)),

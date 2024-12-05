@@ -7,9 +7,21 @@ import { AppSwitcher } from '~shared/header/AppSwitcher'
 export const HeaderBanner = () => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
+  const erDesember = new Date().getMonth() === 11
+
   return (
     <InternalHeader data-theme="light">
-      <InternalHeader.Title href="/">Gjenny</InternalHeader.Title>
+      <InternalHeader.Title href="/">
+        Gjenny
+        {erDesember && (
+          <img
+            style={{ position: 'absolute', left: '15px', top: '15px' }}
+            src="/nisselue.png"
+            alt="nisselue"
+            height={20}
+          />
+        )}
+      </InternalHeader.Title>
       <Spacer />
       <Search />
       <AppSwitcher />

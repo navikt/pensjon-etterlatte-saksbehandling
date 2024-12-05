@@ -149,18 +149,15 @@ class AutomatiskRevurderingService(
         revurderingService.opprettRevurdering(
             sakId = sakId,
             persongalleri = persongalleri,
-            forrigeBehandling = forrigeBehandling.id,
+            forrigeBehandling = forrigeBehandling,
             mottattDato = mottattDato,
             prosessType = Prosesstype.AUTOMATISK,
             kilde = kilde,
             revurderingAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt.tilVirkningstidspunkt("Opprettet automatisk"),
-            utlandstilknytning = forrigeBehandling.utlandstilknytning,
-            boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
             begrunnelse = "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
             saksbehandlerIdent = Fagsaksystem.EY.navn,
             frist = frist,
-            opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
         )
     }
 }

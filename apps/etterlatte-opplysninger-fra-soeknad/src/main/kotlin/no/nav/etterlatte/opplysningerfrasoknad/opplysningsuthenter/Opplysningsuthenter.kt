@@ -36,13 +36,13 @@ internal fun avdoedOpplysning(avdoed: Avdoed): AvdoedSoeknad =
         foedselsnummer = avdoed.foedselsnummer?.svar?.toFolkeregisteridentifikator(),
         foedselsdato = avdoed.foedselsdato?.svar,
         doedsdato = avdoed.datoForDoedsfallet.svar.innhold,
-        statsborgerskap = avdoed.statsborgerskap.svar.innhold,
+        statsborgerskap = avdoed.statsborgerskap.svar.innhold!!,
         utenlandsopphold =
             UtenlandsoppholdOpplysningstype(
                 avdoed.utenlandsopphold.svar.verdi,
                 avdoed.utenlandsopphold.opplysning?.map { opphold ->
                     UtenlandsoppholdOpplysningerOld(
-                        opphold.land.svar.innhold,
+                        opphold.land.svar.innhold!!,
                         opphold.fraDato?.svar?.innhold,
                         opphold.tilDato?.svar?.innhold,
                         opphold.oppholdsType.svar.map { it.verdi },

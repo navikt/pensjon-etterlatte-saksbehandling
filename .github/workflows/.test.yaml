@@ -1,11 +1,30 @@
-name: .build-backend.yaml
+name: .test.yaml
 
 on:
   workflow_call:
 
 jobs:
-  test:
+  determine-project-type:
+    name: Determine project type
+    runs-on: ubuntu-latest-8-cores
+    outputs:
+      type: ${{ steps.determine.outputs.type }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - id: determine
+        working-directory: apps/${{ github.workflow }}
+        run: |
+          if [ -f "package.json" ]; then
+            echo "type=frontend" >> "$GITHUB_OUTPUT"
+          else
+            echo "type=backend" >> "$GITHUB_OUTPUT"
+          fi
+
+  verify-backend:
     name: Verify pull request
+    if: needs.determine-project-type.outputs.type == 'backend'
+    needs: [determine-project-type]
     runs-on: ubuntu-latest-8-cores
     timeout-minutes: 10
     steps:
@@ -22,3 +41,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :apps:${{ github.workflow }}:test --stacktrace --configuration-cache
+
+  verify-frontend:
+    name: Verify pull request
+    if: needs.determine-project-type.outputs.type == 'frontend'
+    needs: [determine-project-type]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+          cache-dependency-path: apps/${{ github.workflow }}/client/yarn.lock
+      - name: Install client
+        working-directory: apps/${{ github.workflow }}
+        run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
+      - name: Install server
+        working-directory: apps/${{ github.workflow }}
+        run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
+      - name: Run tests
+        working-directory: apps/${{ github.workflow }}/client
+        run: CI=true yarn test

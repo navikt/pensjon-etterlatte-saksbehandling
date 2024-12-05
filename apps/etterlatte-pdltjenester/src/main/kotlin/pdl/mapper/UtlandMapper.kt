@@ -29,6 +29,7 @@ object UtlandMapper {
         val gyldighetsdato: LocalDate? = innflytting.folkeregistermetadata?.gyldighetstidspunkt?.toLocalDate()
         val ajourholdsdato: LocalDate? = innflytting.folkeregistermetadata?.ajourholdstidspunkt?.toLocalDate()
 
+        // Logikk for å finne innvandretDato er hentet fra Pesys
         val innvandretDato =
             if (gyldighetsdato != null) {
                 val angittFlyttedato =

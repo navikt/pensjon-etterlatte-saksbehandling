@@ -118,7 +118,7 @@ fun Route.samordningVedtakRoute(
             issuers = setOf(Issuer.AZURE.issuerName)
         }
         install(SelvbetjeningAuthorizationPlugin) {
-            validator = { call, borger -> borger.value == call.fnr }
+            validator = { fnr, borger -> borger.value == fnr.value }
             issuer = Issuer.TOKENX.issuerName
         }
 

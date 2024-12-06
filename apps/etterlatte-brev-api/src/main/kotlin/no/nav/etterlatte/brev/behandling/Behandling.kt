@@ -17,7 +17,7 @@ data class GenerellBrevData(
     val systemkilde: Vedtaksloesning,
     val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
-    val prosesstype: Prosesstype? = null
+    val prosesstype: Prosesstype? = null,
 )
 
 // KAN IKKE FJERNES FØR VI HAR EKSPLISITT AVKLART AT ALLE MANUELLE BEHANDLINGER ER FERDIGE

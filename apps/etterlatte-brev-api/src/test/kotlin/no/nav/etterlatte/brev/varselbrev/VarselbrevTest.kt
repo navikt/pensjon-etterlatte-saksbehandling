@@ -133,7 +133,7 @@ class VarselbrevTest(
                         any(),
                         any(),
                         any(),
-                        any()
+                        any(),
                     )
                 } returns listOf()
             }

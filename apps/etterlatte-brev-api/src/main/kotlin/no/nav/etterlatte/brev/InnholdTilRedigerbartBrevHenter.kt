@@ -137,7 +137,7 @@ class InnholdTilRedigerbartBrevHenter(
                         generellBrevData.forenkletVedtak,
                         generellBrevData.sak.enhet,
                         generellBrevData.spraak,
-                        generellBrevData.prosesstype
+                        generellBrevData.prosesstype,
                     )
                 }
 

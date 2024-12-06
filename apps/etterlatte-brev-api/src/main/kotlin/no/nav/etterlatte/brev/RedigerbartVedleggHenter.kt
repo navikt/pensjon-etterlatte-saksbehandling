@@ -39,7 +39,7 @@ class RedigerbartVedleggHenter(
         forenkletVedtak: ForenkletVedtak?,
         enhet: Enhetsnummer,
         spraak: Spraak,
-        prosesstype: Prosesstype?
+        prosesstype: Prosesstype?,
     ): List<BrevInnholdVedlegg> {
         val vedlegg =
             finnVedlegg(
@@ -49,7 +49,7 @@ class RedigerbartVedleggHenter(
                 vedtakType,
                 behandlingId,
                 revurderingaarsak,
-                prosesstype
+                prosesstype,
             )
         return vedlegg
             .map {
@@ -83,7 +83,7 @@ class RedigerbartVedleggHenter(
         vedtakType: VedtakType?,
         behandlingId: UUID?,
         revurderingaarsak: Revurderingaarsak?,
-        prosesstype: Prosesstype?
+        prosesstype: Prosesstype?,
     ) = when (sakType) {
         SakType.OMSTILLINGSSTOENAD -> {
             when (vedtakType) {

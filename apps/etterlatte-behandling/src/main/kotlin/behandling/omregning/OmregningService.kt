@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
@@ -51,6 +52,7 @@ class OmregningService(
                             ?: throw InternfeilException("Kan ikke eksistere en INNTEKTSENDRING uten oppgave")
 
                     if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
+                        oppgaveService.oppdaterStatusOgMerknad(oppgave.id, "Automatisk behandling feilet - må behandles manuelt", Status.UNDER_BEHANDLING)
                         oppgaveService.fjernSaksbehandler(oppgave.id)
                     }
                 } else {

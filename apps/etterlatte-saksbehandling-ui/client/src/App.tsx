@@ -47,15 +47,17 @@ function App() {
   const unleashUpdater = useUnleash()
 
   return mapResult(hentConfigStatus, {
-    error: () => (<ApiErrorAlert>
-      Kunne ikke hente konfigurasjonsverdier
-    </ApiErrorAlert>),
+    error: () => <ApiErrorAlert>
+      Kunne ikke hente konfigurasjonsverdierene eller nor
+    </ApiErrorAlert>,
     success: (config) =>
       innloggetbrukerHentet && (
         <div className="app">
           <Unleashcontext.Provider value={unleashUpdater}>
             <Versioncheck />
-            <BrowserRouter basename="/">
+            <BrowserRouter
+                basename="/1234"
+            >
               <ScrollToTop />
               <ConfigContext.Provider value={config}>
                 <HeaderBanner />

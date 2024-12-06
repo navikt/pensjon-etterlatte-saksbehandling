@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVilkaar
@@ -501,14 +500,7 @@ class TilbakekrevingService(
             tilbakekreving.tilbakekreving.kravgrunnlag.kravgrunnlagId.value
                 .toString(),
         kontrollfelt = tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value,
-        perioder =
-            tilbakekreving.tilbakekreving.perioder.map {
-                TilbakekrevingPeriodeVedtak(
-                    maaned = it.maaned,
-                    ytelse = it.ytelse.toYtelseVedtak(),
-                    feilkonto = it.feilkonto.toFeilkontoVedtak(),
-                )
-            },
+        perioder = tilbakekreving.tilbakekreving.perioder,
     )
 
     private fun hjemmelFraVurdering(vurdering: TilbakekrevingVurdering): TilbakekrevingHjemmel =

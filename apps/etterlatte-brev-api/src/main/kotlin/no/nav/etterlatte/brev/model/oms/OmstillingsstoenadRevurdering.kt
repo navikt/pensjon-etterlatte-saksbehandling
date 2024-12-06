@@ -92,7 +92,7 @@ data class OmstillingsstoenadRevurdering(
                 datoVedtakOmgjoering = datoVedtakOmgjoering,
                 beregning =
                     OmstillingsstoenadBeregning(
-                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
+                        innhold = innholdMedVedlegg(innholdMedVedlegg, behandling),
                         virkningsdato = avkortingsinfo.virkningsdato,
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
@@ -111,6 +111,16 @@ data class OmstillingsstoenadRevurdering(
                 feilutbetaling = feilutbetaling,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
             )
+        }
+
+        private fun innholdMedVedlegg(
+            innholdMedVedlegg: InnholdMedVedlegg,
+            behandling: DetaljertBehandling,
+        ): List<Slate.Element> {
+            if (behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING && behandling.prosesstype == Prosesstype.AUTOMATISK) {
+                return emptyList()
+            }
+            return innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING)
         }
     }
 }

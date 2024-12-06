@@ -368,14 +368,7 @@ class BehandlingKlientImpl(
                 vedtakId = vedtakId,
                 inntruffet = Tidspunkt.now(),
             ),
-        ).mapBoth(success = { true },
-            failure = {
-                logger.info(
-                    "Kan ikke iverksette behandling med behandlingId=$behandlingId",
-                    it.cause,
-                )
-                false
-            },)
+        ).mapBoth({ true }, { false })
 
     override suspend fun harTilgangTilBehandling(
         behandlingId: UUID,

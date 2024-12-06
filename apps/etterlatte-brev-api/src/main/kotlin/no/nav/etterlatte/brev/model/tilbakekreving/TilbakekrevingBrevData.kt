@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
+import no.nav.etterlatte.libs.common.tilbakekreving.kunYtelse
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -53,12 +54,16 @@ data class TilbakekrevingBrevDTO(
                         tilOgMed = perioderSortert.last().maaned.atEndOfMonth(),
                         skalTilbakekreve =
                             tilbakekreving.perioder.any {
-                                it.ytelse.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV ||
-                                    it.ytelse.resultat == TilbakekrevingResultat.DELVIS_TILBAKEKREV
+                                it.tilbakekrevingsbeloep.kunYtelse().any { beloep ->
+                                    beloep.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV ||
+                                        beloep.resultat == TilbakekrevingResultat.DELVIS_TILBAKEKREV
+                                }
                             },
                         helTilbakekreving =
-                            tilbakekreving.perioder.all {
-                                it.ytelse.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV
+                            tilbakekreving.perioder.any {
+                                it.tilbakekrevingsbeloep.kunYtelse().any { beloep ->
+                                    beloep.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV
+                                }
                             },
                         perioder = tilbakekrevingsPerioder(tilbakekreving),
                         harRenteTillegg = sjekkOmHarRenter(tilbakekreving),
@@ -69,34 +74,45 @@ data class TilbakekrevingBrevDTO(
 
         private fun tilbakekrevingsPerioder(tilbakekreving: Tilbakekreving) =
             tilbakekreving.perioder.map { periode ->
+                val beloepMedKunYtelse = periode.tilbakekrevingsbeloep.kunYtelse()
+
                 TilbakekrevingPeriodeData(
                     maaned = periode.maaned.atDay(1),
                     beloeper =
-                        periode.ytelse.let { beloeper ->
-                            val netto = periode.ytelse.nettoTilbakekreving ?: 0
-                            val renteTillegg = periode.ytelse.rentetillegg ?: 0
+                        periode.let { beloeper ->
+                            val beregnetFeilutbetaling = beloepMedKunYtelse.sumOf { beloep -> beloep.beregnetFeilutbetaling ?: 0 }
+                            val bruttoTilbakekreving = beloepMedKunYtelse.sumOf { beloep -> beloep.bruttoTilbakekreving ?: 0 }
+                            val skatt = beloepMedKunYtelse.sumOf { beloep -> beloep.skatt ?: 0 }
+                            val netto = beloepMedKunYtelse.sumOf { beloep -> beloep.nettoTilbakekreving ?: 0 }
+                            val renteTillegg = beloepMedKunYtelse.sumOf { beloep -> beloep.rentetillegg ?: 0 }
+
                             TilbakekrevingBeloeperData(
-                                feilutbetaling = Kroner(beloeper.beregnetFeilutbetaling ?: 0),
-                                bruttoTilbakekreving = Kroner(beloeper.bruttoTilbakekreving ?: 0),
-                                fradragSkatt = Kroner(beloeper.skatt ?: 0),
+                                feilutbetaling = Kroner(beregnetFeilutbetaling),
+                                bruttoTilbakekreving = Kroner(bruttoTilbakekreving),
+                                fradragSkatt = Kroner(skatt),
                                 nettoTilbakekreving = Kroner(netto),
                                 renteTillegg = Kroner(renteTillegg),
                                 sumNettoRenter = Kroner(netto + renteTillegg),
                             )
                         },
                     resultat =
-                        periode.ytelse.resultat
-                            ?: throw BrevDataTilbakerevingHarManglerException("Alle perioder må ha resultat"),
+                        periode.tilbakekrevingsbeloep
+                            .map { it.resultat ?: throw TilbakekrevingManglerResultatException("Alle perioder må ha resultat") }
+                            .let {
+                                TilbakekrevingResultat.hoyesteGradAvTilbakekreving(it)
+                            } ?: throw TilbakekrevingManglerResultatException("Fant ingen resultat"),
                 )
             }
 
         private fun perioderSummert(tilbakekreving: Tilbakekreving): TilbakekrevingBeloeperData {
-            val netto = tilbakekreving.perioder.sumOf { it.ytelse.nettoTilbakekreving ?: 0 }
-            val renteTillegg = tilbakekreving.perioder.sumOf { it.ytelse.rentetillegg ?: 0 }
+            val perioder = tilbakekrevingsPerioder(tilbakekreving)
+
+            val netto = perioder.sumOf { it.beloeper.nettoTilbakekreving.value }
+            val renteTillegg = perioder.sumOf { it.beloeper.renteTillegg.value }
             return TilbakekrevingBeloeperData(
-                feilutbetaling = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.beregnetFeilutbetaling ?: 0 }),
-                bruttoTilbakekreving = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.bruttoTilbakekreving ?: 0 }),
-                fradragSkatt = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.skatt ?: 0 }),
+                feilutbetaling = Kroner(perioder.sumOf { it.beloeper.feilutbetaling.value }),
+                bruttoTilbakekreving = Kroner(perioder.sumOf { it.beloeper.bruttoTilbakekreving.value }),
+                fradragSkatt = Kroner(perioder.sumOf { it.beloeper.fradragSkatt.value }),
                 nettoTilbakekreving = Kroner(netto),
                 renteTillegg = Kroner(renteTillegg),
                 sumNettoRenter = Kroner(netto + renteTillegg),
@@ -105,7 +121,10 @@ data class TilbakekrevingBrevDTO(
 
         private fun sjekkOmHarRenter(tilbakekreving: Tilbakekreving) =
             tilbakekreving.perioder.any { periode ->
-                periode.ytelse.rentetillegg.let { it != null && it > 0 }
+                periode.tilbakekrevingsbeloep.any {
+                    it.rentetillegg?.let { rentetillegg -> rentetillegg > 0 }
+                        ?: false
+                }
             }
     }
 }
@@ -138,6 +157,13 @@ data class TilbakekrevingBeloeperData(
 class BrevDataTilbakerevingHarManglerException(
     message: String,
 ) : RuntimeException(message)
+
+class TilbakekrevingManglerResultatException(
+    message: String,
+) : UgyldigForespoerselException(
+        code = "TILBAKEKREVING_MANGLER_RESULTAT",
+        detail = message,
+    )
 
 class TilbakeKrevingManglerForhaandsvarselDatoException :
     UgyldigForespoerselException(

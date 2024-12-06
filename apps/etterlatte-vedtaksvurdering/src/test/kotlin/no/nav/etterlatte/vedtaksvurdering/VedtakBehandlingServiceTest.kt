@@ -1097,26 +1097,26 @@ internal class VedtakBehandlingServiceTest(
         val attestant = attestant
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
-                Sak(
-                    SAKSBEHANDLER_1,
-                    SakType.BARNEPENSJON,
-                    sakId1,
-                    ENHET_1,
-                )
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                sakId1,
+                ENHET_1,
+            )
         coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
         coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
-                mockBehandling(
-                    virkningstidspunkt,
-                    behandlingId,
-                )
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+            )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-                BeregningOgAvkorting(
-                    beregning = mockBeregning(virkningstidspunkt, behandlingId),
-                    avkorting = null,
-                )
+            BeregningOgAvkorting(
+                beregning = mockBeregning(virkningstidspunkt, behandlingId),
+                avkorting = null,
+            )
 
         coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } returns false
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()

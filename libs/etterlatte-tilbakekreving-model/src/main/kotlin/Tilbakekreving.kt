@@ -73,6 +73,8 @@ data class TilbakekrevingPeriode(
     val tilbakekrevingsbeloep: List<Tilbakekrevingsbelop>,
 )
 
+fun List<Tilbakekrevingsbelop>.kunYtelse() = filter { it.klasseType == KlasseType.YTEL.name }
+
 data class Tilbakekrevingsbelop(
     val id: UUID,
     val klasseKode: String,

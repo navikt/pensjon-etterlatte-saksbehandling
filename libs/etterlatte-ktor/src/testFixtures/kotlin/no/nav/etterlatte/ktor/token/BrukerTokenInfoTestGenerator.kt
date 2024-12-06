@@ -20,6 +20,8 @@ fun simpleSaksbehandler(
 
 fun simpleAttestant(ident: String = "attestant") = BrukerTokenInfo.of("token", ident, null, null) as Saksbehandler
 
+fun systembruker(brukernavn: String): Systembruker = systembruker(mapOf(Claims.azp_name to brukernavn))
+
 fun systembruker(claims: Map<Claims, Any?> = mapOf(Claims.azp_name to "systembruker1")): Systembruker =
     BrukerTokenInfo.of(
         accessToken = "token",

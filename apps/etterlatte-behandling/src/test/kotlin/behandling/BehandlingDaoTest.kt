@@ -212,18 +212,18 @@ internal class BehandlingDaoTest(
         val gyldighetsproevingBehandling =
             lagretPersongalleriBehandling.copy(
                 gyldighetsproeving =
-                    GyldighetsResultat(
-                        resultat = VurderingsResultat.OPPFYLT,
-                        vurderinger =
-                            listOf(
-                                VurdertGyldighet(
-                                    navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
-                                    resultat = VurderingsResultat.OPPFYLT,
-                                    basertPaaOpplysninger = "innsenderfnr",
-                                ),
-                            ),
-                        vurdertDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                GyldighetsResultat(
+                    resultat = VurderingsResultat.OPPFYLT,
+                    vurderinger =
+                    listOf(
+                        VurdertGyldighet(
+                            navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
+                            resultat = VurderingsResultat.OPPFYLT,
+                            basertPaaOpplysninger = "innsenderfnr",
+                        ),
                     ),
+                    vurdertDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                ),
                 status = BehandlingStatus.OPPRETTET,
             )
 
@@ -638,5 +638,26 @@ internal class BehandlingDaoTest(
         val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
 
         behandling?.opphoerFraOgMed shouldBe YearMonth.of(2024, 6)
+    }
+
+    @Test
+    fun `endreProsesstype skal oppdatere behandling med ny prosesstype`() {
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
+                sakId = sak,
+                status = BehandlingStatus.OPPRETTET,
+                prosesstype = Prosesstype.AUTOMATISK
+            )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        behandlingRepo.endreProsesstype(opprettBehandling.id, Prosesstype.MANUELL)
+
+        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
+
+        behandling?.prosesstype shouldBe Prosesstype.MANUELL
     }
 }

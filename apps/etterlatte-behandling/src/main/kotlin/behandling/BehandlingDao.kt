@@ -193,22 +193,22 @@ class BehandlingDao(
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
             utlandstilknytning =
-                rs
-                    .getString("utlandstilknytning")
-                    ?.let { objectMapper.readValue(it) },
+            rs
+                .getString("utlandstilknytning")
+                ?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet =
-                rs
-                    .getString("bodd_eller_arbeidet_utlandet")
-                    ?.let { objectMapper.readValue(it) },
+            rs
+                .getString("bodd_eller_arbeidet_utlandet")
+                ?.let { objectMapper.readValue(it) },
             kommerBarnetTilgode = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(id),
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
             sendeBrev = rs.getBoolean("sende_brev"),
             opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
             tidligereFamiliepleier =
-                rs
-                    .getString("tidligere_familiepleier")
-                    ?.let { objectMapper.readValue(it) },
+            rs
+                .getString("tidligere_familiepleier")
+                ?.let { objectMapper.readValue(it) },
             erSluttbehandling = rs.getBoolean("omgjoering_sluttbehandling_utland"),
         )
     }
@@ -316,7 +316,8 @@ class BehandlingDao(
         kommentar: String,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
-            val stmt = prepareStatement("UPDATE behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
+            val stmt =
+                prepareStatement("UPDATE behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
 
             stmt.setString(1, aarsakTilAvbrytelse.name)
             stmt.setString(2, kommentar)
@@ -481,7 +482,8 @@ class BehandlingDao(
         }
     }
 
-    private fun ResultSet.behandlingsListe(): List<Behandling> = toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()
+    private fun ResultSet.behandlingsListe(): List<Behandling> =
+        toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()
 
     private fun ResultSet.tilBehandling(key: String?) =
         when (key) {
@@ -531,6 +533,16 @@ class BehandlingDao(
             statement.executeUpdate()
         }
     }
+
+    fun endreProsesstype(behandlingId: UUID, ny: Prosesstype) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling SET prosesstype = ? WHERE id = ?")
+            statement.setString(1, ny.name)
+            statement.setObject(2, behandlingId)
+            statement.executeUpdate()
+        }
+    }
+
 }
 
 fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLocalDatetimeUTC()

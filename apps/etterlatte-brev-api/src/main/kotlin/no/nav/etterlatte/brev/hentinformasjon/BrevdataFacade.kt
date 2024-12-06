@@ -108,6 +108,7 @@ class BrevdataFacade(
                 revurderingsaarsak = revurderingaarsak,
                 systemkilde = systemkilde,
                 utlandstilknytning = behandling?.utlandstilknytning,
+                prosesstype = behandling?.prosesstype,
             )
         }
 

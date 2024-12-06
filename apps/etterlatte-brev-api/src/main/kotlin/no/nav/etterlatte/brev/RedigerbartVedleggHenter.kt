@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -38,6 +39,7 @@ class RedigerbartVedleggHenter(
         forenkletVedtak: ForenkletVedtak?,
         enhet: Enhetsnummer,
         spraak: Spraak,
+        prosesstype: Prosesstype?
     ): List<BrevInnholdVedlegg> {
         val vedlegg =
             finnVedlegg(
@@ -47,6 +49,7 @@ class RedigerbartVedleggHenter(
                 vedtakType,
                 behandlingId,
                 revurderingaarsak,
+                prosesstype
             )
         return vedlegg
             .map {
@@ -80,6 +83,7 @@ class RedigerbartVedleggHenter(
         vedtakType: VedtakType?,
         behandlingId: UUID?,
         revurderingaarsak: Revurderingaarsak?,
+        prosesstype: Prosesstype?
     ) = when (sakType) {
         SakType.OMSTILLINGSSTOENAD -> {
             when (vedtakType) {
@@ -107,6 +111,8 @@ class RedigerbartVedleggHenter(
                     if (brevtype == Brevtype.VARSEL && revurderingaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
                         emptyList()
                     } else if (revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING) {
+                        emptyList()
+                    } else if (revurderingaarsak == Revurderingaarsak.INNTEKTSENDRING && prosesstype == Prosesstype.AUTOMATISK) {
                         emptyList()
                     } else {
                         if (harFeilutbetalingMedVarsel(bruker, behandlingId)) {

@@ -108,6 +108,7 @@ class VarselbrevTest(
                         every { it.revurderingsaarsak } returns null
                         every { it.systemkilde } returns Vedtaksloesning.GJENNY
                         every { it.behandlingId } returns null
+                        every { it.prosesstype } returns null
                     }
             }
         val brevbaker =
@@ -132,6 +133,7 @@ class VarselbrevTest(
                         any(),
                         any(),
                         any(),
+                        any()
                     )
                 } returns listOf()
             }

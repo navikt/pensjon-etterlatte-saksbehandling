@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
-import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
@@ -139,17 +138,15 @@ class TilbakekrevingDao(
                 )
             statement.setObject(1, tilbakekrevingId)
             val allePerioderOgTyper = statement.executeQuery().toList { toTilbakekrevingsperiode() }
-            val ytelseperioder = allePerioderOgTyper.filter { it.second.klasseType == KlasseType.YTEL.name }
-            val feilkonto = allePerioderOgTyper.filter { it.second.klasseType == KlasseType.FEIL.name }
-            return ytelseperioder.map { (maaned, ytelse) ->
-                TilbakekrevingPeriode(
-                    maaned = maaned,
-                    ytelse = ytelse,
-                    feilkonto =
-                        feilkonto.find { it.first == maaned }?.second
-                            ?: throw TilbakekrevingHarMangelException("Mangler feilkonto for tilbakekrevingsperiode"),
-                )
-            }
+            return allePerioderOgTyper
+                .groupBy({ it.first }, { it.second })
+                .mapValues { (_, value) -> value }
+                .map { (maaned, perioder) ->
+                    TilbakekrevingPeriode(
+                        maaned = maaned,
+                        tilbakekrevingsbeloep = perioder,
+                    )
+                }
         }
 
     fun lagreTilbakekreving(tilbakekrevingBehandling: TilbakekrevingBehandling): TilbakekrevingBehandling =
@@ -284,9 +281,10 @@ class TilbakekrevingDao(
             statement.setObject(16, tilbakekrevingBehandling.id)
             statement.addBatch()
         }
-        tilbakekrevingBehandling.tilbakekreving.perioder.forEach {
-            addArgumentsAndBatch(it.maaned, it.ytelse)
-            addArgumentsAndBatch(it.maaned, it.feilkonto)
+        tilbakekrevingBehandling.tilbakekreving.perioder.forEach { periode ->
+            periode.tilbakekrevingsbeloep.forEach { belop ->
+                addArgumentsAndBatch(periode.maaned, belop)
+            }
         }
         statement.executeBatch()
     }

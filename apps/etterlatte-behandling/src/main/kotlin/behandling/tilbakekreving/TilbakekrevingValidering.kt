@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.tilbakekreving
 
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBeloepBeholdSvar
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
@@ -107,15 +108,17 @@ private fun TilbakekrevingVurdering.validerTilsvar(manglendeFelter: MutableList<
 
 private fun TilbakekrevingPeriode.valider(): List<String> {
     val manglendeFelter: MutableList<String> = mutableListOf()
-    with(ytelse) {
-        if (beregnetFeilutbetaling == null) manglendeFelter.add("Beregnet feilutbetaling")
-        if (bruttoTilbakekreving == null) manglendeFelter.add("Brutto tilbakekreving")
-        if (nettoTilbakekreving == null) manglendeFelter.add("Netto tilbakekreving")
-        if (skatt == null) manglendeFelter.add("Skatt")
-        if (skyld == null) manglendeFelter.add("Skyld")
-        if (resultat == null) manglendeFelter.add("Resultat")
-        if (tilbakekrevingsprosent == null) manglendeFelter.add("Tilbakekrevingsprosent")
-        if (rentetillegg == null) manglendeFelter.add("Rentetillegg")
+    tilbakekrevingsbeloep.filter { it.klasseType == KlasseType.YTEL.name }.forEach { ytelse ->
+        with(ytelse) {
+            if (beregnetFeilutbetaling == null) manglendeFelter.add("Beregnet feilutbetaling")
+            if (bruttoTilbakekreving == null) manglendeFelter.add("Brutto tilbakekreving")
+            if (nettoTilbakekreving == null) manglendeFelter.add("Netto tilbakekreving")
+            if (skatt == null) manglendeFelter.add("Skatt")
+            if (skyld == null) manglendeFelter.add("Skyld")
+            if (resultat == null) manglendeFelter.add("Resultat")
+            if (tilbakekrevingsprosent == null) manglendeFelter.add("Tilbakekrevingsprosent")
+            if (rentetillegg == null) manglendeFelter.add("Rentetillegg")
+        }
     }
 
     return manglendeFelter.map { "$it (${maaned.format(DateTimeFormatter.ofPattern("MMMM yyyy"))})" }

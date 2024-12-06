@@ -16,11 +16,11 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseType
@@ -154,13 +154,24 @@ class TilbakekrevingskomponentenKlient(
 
                                 // Saksbehandler beregner renter, derfor settes denne til NEI
                                 renterBeregnes = RenterBeregnes.NEI.kode
-                                belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.medToDesimaler()
+                                belopRenter =
+                                    tilbakekrevingPeriode.tilbakekrevingsbeloep
+                                        .filter { it.klasseType == KlasseType.YTEL.name }
+                                        .sumOf { it.rentetillegg ?: 0 }
+                                        .medToDesimaler()
 
                                 tilbakekrevingsbelop.apply {
-                                    add(tilbakekrevingPeriode.ytelse.toTilbakekreivngsbelopYtelse(vedtak.aarsak))
+                                    // Mapper YTEL (det saksbehandler har svart ut)
+                                    tilbakekrevingPeriode.tilbakekrevingsbeloep
+                                        .filter {
+                                            it.klasseType == KlasseType.YTEL.name
+                                        }.forEach { add(it.toTilbakekreivngsbelopYtelse(vedtak.aarsak)) }
 
-                                    // Feilkonto skal i praksis være tilsvarende det vi mottar
-                                    add(tilbakekrevingPeriode.feilkonto.toTilbakekreivngsbelopFeilkonto())
+                                    // Andre klassetyper, blant annet FEIL
+                                    tilbakekrevingPeriode.tilbakekrevingsbeloep
+                                        .filter {
+                                            it.klasseType != KlasseType.YTEL.name
+                                        }.forEach { add(it.toTilbakekreivngsbelopAndreKlassetyper()) }
                                 }
                             }
                         },
@@ -168,16 +179,16 @@ class TilbakekrevingskomponentenKlient(
                 }
         }
 
-    private fun TilbakekrevingsbelopYtelseVedtak.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
+    private fun Tilbakekrevingsbelop.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
         TilbakekrevingsbelopDto().apply {
             kodeKlasse = klasseKode
             belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
             belopNy = nyBruttoUtbetaling.medToDesimaler()
-            belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
-            belopSkatt = skatt.medToDesimaler()
-            kodeResultat = resultat.name
+            belopTilbakekreves = requireNotNull(bruttoTilbakekreving).medToDesimaler()
+            belopSkatt = requireNotNull(skatt).medToDesimaler()
+            kodeResultat = requireNotNull(resultat).name
             kodeAarsak = mapFraTilbakekrevingAarsak(aarsak)
-            kodeSkyld = skyld.name
+            kodeSkyld = requireNotNull(skyld).name
         }
 
     private fun mapFraTilbakekrevingAarsak(aarsak: TilbakekrevingAarsak): String =
@@ -186,13 +197,13 @@ class TilbakekrevingskomponentenKlient(
             else -> TilbakekrevingAarsak.ANNET.name
         }
 
-    private fun TilbakekrevingsbelopFeilkontoVedtak.toTilbakekreivngsbelopFeilkonto() =
+    private fun Tilbakekrevingsbelop.toTilbakekreivngsbelopAndreKlassetyper() =
         TilbakekrevingsbelopDto().apply {
             // Kun obligatoriske felter sendes her
             kodeKlasse = klasseKode
             belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
             belopNy = nyBruttoUtbetaling.medToDesimaler()
-            belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
+            belopTilbakekreves = requireNotNull(bruttoTilbakekreving).medToDesimaler()
         }
 
     private fun toKravgrunnlagHentDetaljRequest(kravgrunnlagId: Long): KravgrunnlagHentDetaljRequest =

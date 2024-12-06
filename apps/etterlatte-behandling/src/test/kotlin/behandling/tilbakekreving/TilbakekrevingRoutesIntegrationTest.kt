@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
@@ -105,7 +106,17 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
             val oppdatertPeriode =
                 tilbakekreving.tilbakekreving.perioder.first().let {
-                    it.copy(ytelse = it.ytelse.copy(nettoTilbakekreving = 100))
+                    it.copy(
+                        tilbakekrevingsbeloep =
+                            it.tilbakekrevingsbeloep
+                                .filter { beloep ->
+                                    beloep.klasseType == KlasseType.YTEL.name
+                                }.map { beloep ->
+                                    beloep.copy(
+                                        nettoTilbakekreving = 100,
+                                    )
+                                },
+                    )
                 }
 
             client.putAndAssertOk(
@@ -123,7 +134,9 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
             oppdatertTilbakekreving.tilbakekreving.perioder
                 .first()
-                .ytelse.nettoTilbakekreving shouldBe 100
+                .tilbakekrevingsbeloep
+                .find { it.klasseType == KlasseType.YTEL.name }
+                ?.nettoTilbakekreving shouldBe 100
         }
     }
 
@@ -165,17 +178,22 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             val oppdatertPeriode =
                 tilbakekreving.tilbakekreving.perioder.first().let {
                     it.copy(
-                        ytelse =
-                            it.ytelse.copy(
-                                beregnetFeilutbetaling = 100,
-                                bruttoTilbakekreving = 100,
-                                nettoTilbakekreving = 100,
-                                skatt = 10,
-                                skyld = TilbakekrevingSkyld.BRUKER,
-                                resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
-                                tilbakekrevingsprosent = 100,
-                                rentetillegg = 10,
-                            ),
+                        tilbakekrevingsbeloep =
+                            it.tilbakekrevingsbeloep
+                                .filter { beloep ->
+                                    beloep.klasseType == KlasseType.YTEL.name
+                                }.map { beloep ->
+                                    beloep.copy(
+                                        beregnetFeilutbetaling = 100,
+                                        bruttoTilbakekreving = 100,
+                                        nettoTilbakekreving = 100,
+                                        skatt = 10,
+                                        skyld = TilbakekrevingSkyld.BRUKER,
+                                        resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
+                                        tilbakekrevingsprosent = 100,
+                                        rentetillegg = 10,
+                                    )
+                                },
                     )
                 }
 

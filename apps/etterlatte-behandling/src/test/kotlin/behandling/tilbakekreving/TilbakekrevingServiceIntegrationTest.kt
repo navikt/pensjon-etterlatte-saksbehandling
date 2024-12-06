@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
 import no.nav.etterlatte.libs.common.tilbakekreving.TILBAKEKREVING_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
@@ -316,16 +317,17 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         // Nye perioder skal ha resatt verdiene som skal vurderes
         with(tilbakekrevingMedNyePerioder.tilbakekreving) {
             perioder.size shouldBe tilbakekreving.tilbakekreving.perioder.size
-            perioder.forEach {
-                with(it.ytelse) {
-                    bruttoTilbakekreving shouldBe null
-                    skatt shouldBe null
-                    resultat shouldBe null
-                    rentetillegg shouldBe null
-                    skyld shouldBe null
-                    tilbakekrevingsprosent shouldBe null
-                    beregnetFeilutbetaling shouldBe null
-                    nettoTilbakekreving shouldBe null
+            perioder.forEach { perioder ->
+                perioder.tilbakekrevingsbeloep.filter { it.klasseType == KlasseType.YTEL.name }.forEach {
+                    with(it) {
+                        skatt shouldBe null
+                        resultat shouldBe null
+                        rentetillegg shouldBe null
+                        skyld shouldBe null
+                        tilbakekrevingsprosent shouldBe null
+                        beregnetFeilutbetaling shouldBe null
+                        nettoTilbakekreving shouldBe null
+                    }
                 }
             }
         }
@@ -544,17 +546,22 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     private fun oppdatertPeriode(tilbakekreving: TilbakekrevingBehandling): TilbakekrevingPeriode =
         tilbakekreving.tilbakekreving.perioder.first().let {
             it.copy(
-                ytelse =
-                    it.ytelse.copy(
-                        beregnetFeilutbetaling = 100,
-                        bruttoTilbakekreving = 100,
-                        nettoTilbakekreving = 100,
-                        skatt = 10,
-                        skyld = TilbakekrevingSkyld.BRUKER,
-                        resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
-                        tilbakekrevingsprosent = 100,
-                        rentetillegg = 10,
-                    ),
+                tilbakekrevingsbeloep =
+                    it.tilbakekrevingsbeloep
+                        .filter { beloep ->
+                            beloep.klasseType == KlasseType.YTEL.name
+                        }.map { beloep ->
+                            beloep.copy(
+                                beregnetFeilutbetaling = 100,
+                                bruttoTilbakekreving = 100,
+                                nettoTilbakekreving = 100,
+                                skatt = 10,
+                                skyld = TilbakekrevingSkyld.BRUKER,
+                                resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
+                                tilbakekrevingsprosent = 100,
+                                rentetillegg = 10,
+                            )
+                        },
             )
         }
 

@@ -45,10 +45,12 @@ export interface TilbakekrevingTilsvar {
 
 export interface TilbakekrevingPeriode {
   maaned: Date
-  ytelse: TilbakekrevingBeloep
+  tilbakekrevingsbeloep: TilbakekrevingBeloep[]
 }
 
 export interface TilbakekrevingBeloep {
+  klasseType: string
+  klasseKode: string
   bruttoUtbetaling: number
   nyBruttoUtbetaling: number
   skatteprosent: number

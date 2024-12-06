@@ -20,12 +20,11 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.libs.common.toUUID30
 import java.io.FileNotFoundException
@@ -50,29 +49,42 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
             ),
         perioder =
             listOf(
-                TilbakekrevingPeriodeVedtak(
+                TilbakekrevingPeriode(
                     maaned = YearMonth.of(2023, 1),
-                    ytelse =
-                        TilbakekrevingsbelopYtelseVedtak(
-                            klasseKode = "YTEL",
-                            bruttoUtbetaling = 1000,
-                            nyBruttoUtbetaling = 500,
-                            skatteprosent = BigDecimal.valueOf(10),
-                            beregnetFeilutbetaling = 500,
-                            bruttoTilbakekreving = 500,
-                            nettoTilbakekreving = 550,
-                            skatt = 50,
-                            skyld = TilbakekrevingSkyld.BRUKER,
-                            resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
-                            tilbakekrevingsprosent = 100,
-                            rentetillegg = 50,
-                        ),
-                    feilkonto =
-                        TilbakekrevingsbelopFeilkontoVedtak(
-                            klasseKode = "FEIL",
-                            bruttoUtbetaling = 0,
-                            nyBruttoUtbetaling = 500,
-                            bruttoTilbakekreving = 0,
+                    tilbakekrevingsbeloep =
+                        listOf(
+                            Tilbakekrevingsbelop(
+                                id = UUID.randomUUID(),
+                                klasseKode = "",
+                                klasseType = "YTEL",
+                                bruttoUtbetaling = 1000,
+                                nyBruttoUtbetaling = 500,
+                                skatteprosent = BigDecimal.valueOf(10),
+                                beregnetFeilutbetaling = 500,
+                                bruttoTilbakekreving = 500,
+                                nettoTilbakekreving = 550,
+                                skatt = 50,
+                                skyld = TilbakekrevingSkyld.BRUKER,
+                                resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
+                                tilbakekrevingsprosent = 100,
+                                rentetillegg = 50,
+                            ),
+                            Tilbakekrevingsbelop(
+                                id = UUID.randomUUID(),
+                                klasseKode = "",
+                                klasseType = "Feil",
+                                bruttoUtbetaling = 0,
+                                nyBruttoUtbetaling = 500,
+                                skatteprosent = BigDecimal.valueOf(0),
+                                beregnetFeilutbetaling = null,
+                                bruttoTilbakekreving = 0,
+                                nettoTilbakekreving = null,
+                                skatt = null,
+                                skyld = null,
+                                resultat = null,
+                                tilbakekrevingsprosent = null,
+                                rentetillegg = null,
+                            ),
                         ),
                 ),
             ),

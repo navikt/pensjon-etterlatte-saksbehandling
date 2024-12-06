@@ -47,7 +47,9 @@ function App() {
   const unleashUpdater = useUnleash()
 
   return mapResult(hentConfigStatus, {
-    error: () => <ApiErrorAlert>Kunne ikke hente konfigurasjonsverdier</ApiErrorAlert>,
+    error: () => <ApiErrorAlert>
+      Kunne ikke hente konfigurasjonsverdier
+    </ApiErrorAlert>,
     success: (config) =>
       innloggetbrukerHentet && (
         <div className="app">

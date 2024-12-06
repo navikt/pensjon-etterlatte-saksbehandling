@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
@@ -264,6 +265,11 @@ interface BehandlingService {
     )
 
     fun hentAapenOmregning(sakId: SakId): Revurdering?
+
+    fun endreProsesstype(
+        behandlingId: UUID,
+        ny: Prosesstype,
+    )
 
     fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,
@@ -843,7 +849,10 @@ internal class BehandlingServiceImpl(
         }
 
         if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
-            throw VirkningstidspunktKanIkkeVaereEtterOpphoer(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer(
+                behandling.virkningstidspunkt?.dato,
+                viderefoertOpphoer.dato,
+            )
         }
 
         behandling
@@ -889,6 +898,13 @@ internal class BehandlingServiceImpl(
             ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
             }
+
+    override fun endreProsesstype(
+        behandlingId: UUID,
+        ny: Prosesstype,
+    ) {
+        behandlingDao.endreProsesstype(behandlingId, ny)
+    }
 
     override fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,

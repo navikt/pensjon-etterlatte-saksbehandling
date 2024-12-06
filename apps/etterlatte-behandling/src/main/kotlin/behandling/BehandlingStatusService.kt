@@ -11,6 +11,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -248,6 +249,13 @@ class BehandlingStatusServiceImpl(
                     listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
                 },
         )
+        // Automatisk inntektsendring skal gjøres manuelt hvis returnert fra attestering
+        if (
+            behandling.revurderingsaarsak() == Revurderingaarsak.INNTEKTSENDRING &&
+            behandling.prosesstype == Prosesstype.AUTOMATISK
+        ) {
+            behandlingService.endreProsesstype(behandling.id, Prosesstype.MANUELL)
+        }
     }
 
     override fun settTilSamordnetVedtak(

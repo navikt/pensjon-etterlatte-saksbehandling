@@ -23,7 +23,7 @@ export const SettNyOppgaveFristModal = ({ oppgave, oppdaterFrist }: Props) => {
 
   const settNyFristForOppgave = () => {
     if (nyFrist) {
-      redigerFristFunc({ oppgaveId: oppgave.id, redigerFristRequest: { frist: nyFrist, versjon: null } }, () => {
+      redigerFristFunc({ oppgaveId: oppgave.id, frist: nyFrist }, () => {
         oppdaterFrist(oppgave.id, nyFrist.toISOString())
         setFristFeilmelding('')
         setAapen(false)

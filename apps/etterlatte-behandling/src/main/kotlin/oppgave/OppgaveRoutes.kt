@@ -287,7 +287,3 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
         }
     }
 }
-
-internal data class GosysOppgaveversjon(
-    val versjon: Long,
-)

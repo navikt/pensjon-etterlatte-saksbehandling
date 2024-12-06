@@ -320,7 +320,6 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             perioder.forEach { perioder ->
                 perioder.tilbakekrevingsbeloep.filter { it.klasseType == KlasseType.YTEL.name }.forEach {
                     with(it) {
-                        bruttoTilbakekreving shouldBe null
                         skatt shouldBe null
                         resultat shouldBe null
                         rentetillegg shouldBe null

@@ -1,12 +1,16 @@
 package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -38,12 +42,25 @@ class OmregningService(
                 }
             }
 
-            behandlingService.hentAapenOmregning(request.sakId)?.let {
-                if (it.status.kanAvbrytes()) {
-                    behandlingService.avbrytBehandling(it.id, bruker)
+            behandlingService.hentAapenOmregning(request.sakId)?.let { omregning ->
+                if (omregning.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING) {
+                    val oppgave =
+                        oppgaveService
+                            .hentOppgaverForReferanse(omregning.id.toString())
+                            .singleOrNull { it.type === OppgaveType.INNTEKTSOPPLYSNING }
+                            ?: throw InternfeilException("Kan ikke eksistere en INNTEKTSENDRING uten oppgave")
+
+                    if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
+                        oppgaveService.fjernSaksbehandler(oppgave.id)
+                    }
+                } else {
+                    if (omregning.status.kanAvbrytes()) {
+                        behandlingService.avbrytBehandling(omregning.id, bruker)
+                    }
                 }
             }
         }
+
         omregningDao.oppdaterKjoering(request)
     }
 

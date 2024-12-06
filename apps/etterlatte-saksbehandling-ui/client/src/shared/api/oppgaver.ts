@@ -57,15 +57,6 @@ export const ferdigstillOppgaveMedMerknad = async (args: {
   merknad?: string | null
 }): Promise<ApiResponse<OppgaveDTO>> => apiClient.put(`/oppgaver/${args.id}/ferdigstill`, { merknad: args.merknad })
 
-export interface OppdatertOppgaveversjonResponseDto {
-  versjon: number | null
-}
-
-export interface SaksbehandlerEndringDto {
-  saksbehandler: string
-  versjon: number | null
-}
-
 export const saksbehandlereIEnhetApi = async (args: {
   enheter: string[]
 }): Promise<ApiResponse<Array<Saksbehandler>>> => {
@@ -74,28 +65,17 @@ export const saksbehandlereIEnhetApi = async (args: {
 
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
-  nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+  saksbehandler: string
+}): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { saksbehandler: args.saksbehandler })
 }
 
-export const fjernSaksbehandlerApi = async (args: {
-  oppgaveId: string
-  sakId: number
-}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
+export const fjernSaksbehandlerApi = async (args: { oppgaveId: string; sakId: number }): Promise<ApiResponse<void>> => {
   return apiClient.delete(`/oppgaver/${args.oppgaveId}/saksbehandler`)
 }
 
-export interface RedigerFristRequest {
-  frist: Date
-  versjon: number | null
-}
-
-export const redigerFristApi = async (args: {
-  oppgaveId: string
-  redigerFristRequest: RedigerFristRequest
-}): Promise<ApiResponse<void>> => {
-  return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
+export const redigerFristApi = async (args: { oppgaveId: string; frist: Date }): Promise<ApiResponse<void>> => {
+  return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { frist: args.frist })
 }
 
 export interface EndrePaaVentRequest {

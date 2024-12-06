@@ -25,7 +25,6 @@ const mapSaksbehandler = (oppgave: OppgaveDTO): Saksbehandler | undefined =>
     : undefined
 
 export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, oppgave }: Props): ReactNode => {
-  const versjon = null
   const { sakId, id: oppgaveId, status } = oppgave
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar =
@@ -39,6 +38,19 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
   const [fjernSaksbehandlerResult, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerResult, byttSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
+  const tildel = (saksbehandler: Saksbehandler) =>
+    byttSaksbehandler(
+      { oppgaveId, saksbehandler: saksbehandler.ident },
+      () => {
+        oppdaterTildeling(oppgave, saksbehandler)
+        setValgtSaksbehandler(saksbehandler)
+        setOpenDropdown(false)
+      },
+      (error) => {
+        console.log(error)
+      }
+    )
+
   const onSaksbehandlerSelect = (saksbehandlerNavn: string, erValgt: boolean) => {
     if (erValgt) {
       const selectedSaksbehandler: Saksbehandler | undefined = saksbehandlereIEnhet.find(
@@ -46,35 +58,12 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
       )
 
       if (selectedSaksbehandler) {
-        byttSaksbehandler(
-          { oppgaveId, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident!, versjon } },
-          () => {
-            oppdaterTildeling(oppgave, selectedSaksbehandler)
-            setValgtSaksbehandler(selectedSaksbehandler)
-            setOpenDropdown(false)
-          },
-          (error) => console.log(error)
-        )
+        tildel(selectedSaksbehandler)
       }
     }
   }
 
-  const onTildelTilMeg = () => {
-    byttSaksbehandler(
-      { oppgaveId, nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon } },
-      () => {
-        oppdaterTildeling(oppgave, innloggetSaksbehandler)
-        setValgtSaksbehandler({
-          ident: innloggetSaksbehandler.ident,
-          navn: innloggetSaksbehandler.navn,
-        })
-        setOpenDropdown(false)
-      },
-      (error) => {
-        console.log(error)
-      }
-    )
-  }
+  const onTildelTilMeg = () => tildel(innloggetSaksbehandler)
 
   const onFjernTildeling = () => {
     fjernSaksbehandler(

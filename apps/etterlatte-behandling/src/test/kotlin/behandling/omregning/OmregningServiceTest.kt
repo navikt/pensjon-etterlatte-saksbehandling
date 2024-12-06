@@ -24,6 +24,8 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakSkrivDao
@@ -41,7 +43,6 @@ import javax.sql.DataSource
 class OmregningServiceTest(
     val dataSource: DataSource,
 ) {
-
     val behandlingService = mockk<BehandlingService>()
     val oppgaveService = mockk<OppgaveService>()
 
@@ -123,7 +124,7 @@ class OmregningServiceTest(
             OmregningService(
                 behandlingService = behandlingService,
                 omregningDao = OmregningDao(connection),
-                oppgaveService = oppgaveService
+                oppgaveService = oppgaveService,
             )
 
         val bruker = systembruker("EY")
@@ -136,20 +137,22 @@ class OmregningServiceTest(
             ).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
 
         val behandlingId = UUID.randomUUID()
-        val behandling = mockk<Revurdering>() {
-            every { id } returns behandlingId
-            every { revurderingsaarsak } returns Revurderingaarsak.OMREGNING
-            every { status } returns BehandlingStatus.BEREGNET
-        }
+        val behandling =
+            mockk<Revurdering> {
+                every { id } returns behandlingId
+                every { revurderingsaarsak } returns Revurderingaarsak.OMREGNING
+                every { status } returns BehandlingStatus.BEREGNET
+            }
 
         every { behandlingService.hentAapenOmregning(sak.id) } returns behandling
         every { behandlingService.avbrytBehandling(behandlingId, bruker) } just runs
 
-        val request = KjoeringRequest(
-            kjoering = "yolo",
-            status = KjoeringStatus.STARTA,
-            sakId = sak.id,
-        )
+        val request =
+            KjoeringRequest(
+                kjoering = "yolo",
+                status = KjoeringStatus.STARTA,
+                sakId = sak.id,
+            )
         service.oppdaterKjoering(request, bruker)
 
         request.copy(status = KjoeringStatus.FEILA).let {
@@ -169,7 +172,7 @@ class OmregningServiceTest(
             OmregningService(
                 behandlingService = behandlingService,
                 omregningDao = OmregningDao(connection),
-                oppgaveService = oppgaveService
+                oppgaveService = oppgaveService,
             )
 
         val bruker = systembruker("EY")
@@ -182,31 +185,33 @@ class OmregningServiceTest(
             ).opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)
 
         val behandlingId = UUID.randomUUID()
-        val behandling = mockk<Revurdering>() {
-            every { id } returns behandlingId
-            every { revurderingsaarsak } returns Revurderingaarsak.INNTEKTSENDRING
-            every { status } returns BehandlingStatus.BEREGNET
-        }
+        val behandling =
+            mockk<Revurdering> {
+                every { id } returns behandlingId
+                every { revurderingsaarsak } returns Revurderingaarsak.INNTEKTSENDRING
+                every { status } returns BehandlingStatus.BEREGNET
+            }
 
         every { behandlingService.hentAapenOmregning(sak.id) } returns behandling
         every { behandlingService.endreProsesstype(any(), any()) } just runs
 
         val oppgaveId = UUID.randomUUID()
-        every { oppgaveService.hentOppgaverForReferanse(behandlingId.toString()) } returns listOf(
-            mockk {
-                every { id } returns oppgaveId
-                every { type } returns OppgaveType.REVURDERING
-                every { saksbehandler } returns OppgaveSaksbehandler("", "EY")
-            }
-        )
+        every { oppgaveService.hentOppgaverForReferanse(behandlingId.toString()) } returns
+            listOf(
+                mockk {
+                    every { id } returns oppgaveId
+                    every { type } returns OppgaveType.REVURDERING
+                    every { saksbehandler } returns OppgaveSaksbehandler("", "EY")
+                },
+            )
         every { oppgaveService.fjernSaksbehandler(any()) } just runs
 
-
-        val request = KjoeringRequest(
-            kjoering = "yolo",
-            status = KjoeringStatus.STARTA,
-            sakId = sak.id,
-        )
+        val request =
+            KjoeringRequest(
+                kjoering = "yolo",
+                status = KjoeringStatus.STARTA,
+                sakId = sak.id,
+            )
         service.oppdaterKjoering(request, bruker)
 
         request.copy(status = KjoeringStatus.FEILA).let {
@@ -219,4 +224,7 @@ class OmregningServiceTest(
         }
     }
 
+    private fun systembruker(brukernavn: String): Systembruker = systembruker(mapOf(Claims.azp_name to brukernavn))
 }
+
+

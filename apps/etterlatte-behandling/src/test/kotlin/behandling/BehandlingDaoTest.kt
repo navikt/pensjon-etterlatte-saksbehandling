@@ -212,18 +212,18 @@ internal class BehandlingDaoTest(
         val gyldighetsproevingBehandling =
             lagretPersongalleriBehandling.copy(
                 gyldighetsproeving =
-                GyldighetsResultat(
-                    resultat = VurderingsResultat.OPPFYLT,
-                    vurderinger =
-                    listOf(
-                        VurdertGyldighet(
-                            navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
-                            resultat = VurderingsResultat.OPPFYLT,
-                            basertPaaOpplysninger = "innsenderfnr",
-                        ),
+                    GyldighetsResultat(
+                        resultat = VurderingsResultat.OPPFYLT,
+                        vurderinger =
+                            listOf(
+                                VurdertGyldighet(
+                                    navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
+                                    resultat = VurderingsResultat.OPPFYLT,
+                                    basertPaaOpplysninger = "innsenderfnr",
+                                ),
+                            ),
+                        vurdertDato = Tidspunkt.now().toLocalDatetimeUTC(),
                     ),
-                    vurdertDato = Tidspunkt.now().toLocalDatetimeUTC(),
-                ),
                 status = BehandlingStatus.OPPRETTET,
             )
 
@@ -649,7 +649,7 @@ internal class BehandlingDaoTest(
                 revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
                 sakId = sak,
                 status = BehandlingStatus.OPPRETTET,
-                prosesstype = Prosesstype.AUTOMATISK
+                prosesstype = Prosesstype.AUTOMATISK,
             )
 
         behandlingRepo.opprettBehandling(opprettBehandling)

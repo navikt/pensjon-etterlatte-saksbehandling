@@ -72,84 +72,84 @@ import java.util.UUID
 
 class BehandlingFinnesIkkeException(
     message: String,
-): Exception(message)
+) : Exception(message)
 
 class KravdatoMaaFinnesHvisBosattutland(
     message: String,
-): UgyldigForespoerselException(code = "BOSATTUTLAND_MAA_HA_KRAVDATO", detail = message)
+) : UgyldigForespoerselException(code = "BOSATTUTLAND_MAA_HA_KRAVDATO", detail = message)
 
 class VirkningstidspunktMaaHaUtenlandstilknytning(
     message: String,
-): UgyldigForespoerselException(code = "VIRK_MAA_HA_UTENLANDSTILKNYTNING", detail = message)
+) : UgyldigForespoerselException(code = "VIRK_MAA_HA_UTENLANDSTILKNYTNING", detail = message)
 
 class VirkningstidspunktKanIkkeVaereEtterOpphoer(
     virk: YearMonth?,
     opphoerVirk: YearMonth?,
-): UgyldigForespoerselException(
-    code = "VIRK_KAN_IKKE_VAERE_ETTER_OPPHOER",
-    detail = "Virkningstidspunkt ($virk) kan ikke være etter opphør ($opphoerVirk)",
-)
+) : UgyldigForespoerselException(
+        code = "VIRK_KAN_IKKE_VAERE_ETTER_OPPHOER",
+        detail = "Virkningstidspunkt ($virk) kan ikke være etter opphør ($opphoerVirk)",
+    )
 
 class VirkFoerIverksattVirk(
     virk: YearMonth,
     foersteVirk: YearMonth,
-): UgyldigForespoerselException(
-    code = "VIRK_FOER_FOERSTE_IVERKSATT_VIRK",
-    detail = "Virkningstidspunktet du har satt ($virk) er før det første iverksatte virkningstidspunktet ($foersteVirk)",
-)
+) : UgyldigForespoerselException(
+        code = "VIRK_FOER_FOERSTE_IVERKSATT_VIRK",
+        detail = "Virkningstidspunktet du har satt ($virk) er før det første iverksatte virkningstidspunktet ($foersteVirk)",
+    )
 
-class VirkFoerOmsKildePesys:
+class VirkFoerOmsKildePesys :
     UgyldigForespoerselException(
         code = "VIRK_FOER_REFORM_MED_OPPRINNELSE_PESYS",
         detail =
-        "Denne saken er overført fra Pesys. Ved revurdering før 01.01.2024 må det gjøres revurdering i Pesys for perioden før og i Gjenny for perioden etter.",
+            "Denne saken er overført fra Pesys. Ved revurdering før 01.01.2024 må det gjøres revurdering i Pesys for perioden før og i Gjenny for perioden etter.",
     )
 
 class BehandlingNotFoundException(
     behandlingId: UUID,
-): IkkeFunnetException(
-    code = "FANT_IKKE_BEHANDLING",
-    detail = "Kunne ikke finne ønsket behandling, id: $behandlingId",
-)
+) : IkkeFunnetException(
+        code = "FANT_IKKE_BEHANDLING",
+        detail = "Kunne ikke finne ønsket behandling, id: $behandlingId",
+    )
 
 class BehandlingKanIkkeAvbrytesException(
     behandlingStatus: BehandlingStatus,
-): UgyldigForespoerselException(
-    code = "BEHANDLING_KAN_IKKE_AVBRYTES",
-    detail = "Behandlingen kan ikke avbrytes, status: $behandlingStatus",
-)
+) : UgyldigForespoerselException(
+        code = "BEHANDLING_KAN_IKKE_AVBRYTES",
+        detail = "Behandlingen kan ikke avbrytes, status: $behandlingStatus",
+    )
 
-class PersongalleriFinnesIkkeException:
+class PersongalleriFinnesIkkeException :
     IkkeFunnetException(
         code = "FANT_IKKE_PERSONGALLERI",
         detail = "Kunne ikke finne persongalleri",
     )
 
-class KanIkkeEndreSendeBrevForFoerstegangsbehandling:
+class KanIkkeEndreSendeBrevForFoerstegangsbehandling :
     UgyldigForespoerselException(
         "KAN_IKKE_ENDRE_SEND_BREV",
         "Kan ikke endre send brev for førstegangsbehandling, skal alltid sendes",
     )
 
-class KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling:
+class KanIkkeOppretteRevurderingUtenIverksattFoerstegangsbehandling :
     UgyldigForespoerselException(
         "KAN_IKKE_OPPRETTE_REVURDERING_MANGLER_FOERSTEGANGSBEHANDLING_IVERKSATT",
         "Kan ikke opprette revurdering når man mangler føstegangsbehandling med virkningstidspunkt",
     )
 
-class VilkaarMaaFinnesHvisViderefoertOpphoer:
+class VilkaarMaaFinnesHvisViderefoertOpphoer :
     UgyldigForespoerselException(
         "VIDEREFOERT_OPPHOER_MAA_HA_VILKAAR",
         "Vilkår må angis hvis opphør skal videreføres",
     )
 
-class PleieforholdMaaStarteFoerDetOpphoerer:
+class PleieforholdMaaStarteFoerDetOpphoerer :
     UgyldigForespoerselException(
         code = "PLEIEFORHOLD_MAA_STARTE_FOER_DET_OPPHOERER",
         detail = "Pleieforholdet må ha startdato som er før opphørsdato",
     )
 
-class PleieforholdMaaHaStartOgOpphoer:
+class PleieforholdMaaHaStartOgOpphoer :
     UgyldigForespoerselException(
         code = "PLEIEFORHOLD_MAA_HA_START_OG_OPPHOER",
         detail = "Pleieforholdet må ha både startdato og opphørsdato",
@@ -266,7 +266,10 @@ interface BehandlingService {
 
     fun hentAapenOmregning(sakId: SakId): Revurdering?
 
-    fun endreProsesstype(behandlingId: UUID, ny: Prosesstype)
+    fun endreProsesstype(
+        behandlingId: UUID,
+        ny: Prosesstype,
+    )
 
     fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,
@@ -288,7 +291,7 @@ internal class BehandlingServiceImpl(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagServiceImpl,
     private val beregningKlient: BeregningKlient,
-): BehandlingService {
+) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private fun hentBehandlingForId(id: UUID) =
@@ -646,8 +649,7 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun hentUtlandstilknytningForSak(sakId: SakId): Utlandstilknytning? =
-        hentBehandlingerForSakId(sakId).hentUtlandstilknytning()
+    override fun hentUtlandstilknytningForSak(sakId: SakId): Utlandstilknytning? = hentBehandlingerForSakId(sakId).hentUtlandstilknytning()
 
     override fun lagreOpphoerFom(
         behandlingId: UUID,
@@ -849,7 +851,7 @@ internal class BehandlingServiceImpl(
         if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
             throw VirkningstidspunktKanIkkeVaereEtterOpphoer(
                 behandling.virkningstidspunkt?.dato,
-                viderefoertOpphoer.dato
+                viderefoertOpphoer.dato,
             )
         }
 
@@ -897,10 +899,12 @@ internal class BehandlingServiceImpl(
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
             }
 
-    override fun endreProsesstype(behandlingId: UUID, ny: Prosesstype) {
+    override fun endreProsesstype(
+        behandlingId: UUID,
+        ny: Prosesstype,
+    ) {
         behandlingDao.endreProsesstype(behandlingId, ny)
     }
-
 
     override fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,
@@ -927,8 +931,7 @@ internal class BehandlingServiceImpl(
     override fun hentTidligereFamiliepleier(behandlingId: UUID): TidligereFamiliepleier? =
         behandlingDao.hentTidligereFamiliepleier(behandlingId)
 
-    override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> =
-        behandlingDao.hentAapneBehandlinger(listOf(sakId))
+    override fun hentAapneBehandlingerForSak(sakId: SakId): List<BehandlingOgSak> = behandlingDao.hentAapneBehandlinger(listOf(sakId))
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)
@@ -980,7 +983,7 @@ internal class BehandlingServiceImpl(
                                 opplysningsType = Opplysningstype.PERSONGALLERI_V1,
                                 kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                                 opplysning =
-                                transform(forrigePersonGalleri).toJsonNode(),
+                                    transform(forrigePersonGalleri).toJsonNode(),
                                 periode = null,
                             ),
                         )

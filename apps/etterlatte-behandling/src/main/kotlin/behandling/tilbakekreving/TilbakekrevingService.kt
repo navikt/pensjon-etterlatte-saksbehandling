@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
@@ -72,6 +73,8 @@ class TilbakekrevingService(
                 tilbakekrevingDao.lagreTilbakekreving(
                     TilbakekrevingBehandling.ny(kravgrunnlag, sak),
                 )
+
+            varsleOmUkjenteKlasseTyper(kravgrunnlag, tilbakekreving.id)
 
             val oppgaveFraBehandlingMedFeilutbetaling =
                 oppgaveService
@@ -295,12 +298,38 @@ class TilbakekrevingService(
                             oppdatertKravgrunnlag,
                         ).copy(status = TilbakekrevingStatus.UNDER_ARBEID)
 
+                varsleOmUkjenteKlasseTyper(oppdatertKravgrunnlag, tilbakekrevingId)
+
                 tilbakekrevingDao.lagreTilbakekrevingMedNyePerioder(oppdatertTilbakekreving)
             } else {
                 logger.info("Kravgrunnlag tilknyttet tilbakekreving $tilbakekrevingId er ikke endret - beholder vurderinger")
                 tilbakekreving
             }
         }
+
+    /**
+     * Vi har ikke fått noen tydelig avklaring på hvordan vi skal forholde oss til andre klassetyper enn YTEL og FEIL inntil
+     * videre. Logger derfor ut en feil for å varsle dersom det dukker opp noen nye.
+     */
+    private fun varsleOmUkjenteKlasseTyper(
+        oppdatertKravgrunnlag: Kravgrunnlag,
+        tilbakekrevingId: UUID,
+    ) {
+        val kjenteKlasseTyper = listOf(KlasseType.YTEL, KlasseType.FEIL)
+        oppdatertKravgrunnlag.perioder.forEach { periode ->
+            periode.grunnlagsbeloep.forEach { grunnlagsbeloep ->
+                if (grunnlagsbeloep.klasseType !in (kjenteKlasseTyper)) {
+                    logger.error(
+                        "Fikk en klasseType som ikke var forventet (${grunnlagsbeloep.klasseType}) i tilbakekreving " +
+                            "$tilbakekrevingId. I utgangspunktet vil ikke dette påvirke saksbehandlingen sånn " +
+                            "det er satt opp nå siden dette bare sendes uendret til vedtak tilsvarende klassetypen FEIL, " +
+                            "men følg opp saken for å se at dette blir riktig også i dette tilfellet. Oppdater i så fall " +
+                            "kjenteKlasseTyper for å unngå å logge dette på nytt.",
+                    )
+                }
+            }
+        }
+    }
 
     suspend fun fattVedtak(
         tilbakekrevingId: UUID,

@@ -28,7 +28,10 @@ if [ -n "${changedKotlinFiles-unset}" ]; then
     do
         git add $file
     done
+    git commit -m 'Files linted'
 fi
+
+#git add -A && git commit -m 'Files linted'
 
 echo "🏆 Files linted"
 

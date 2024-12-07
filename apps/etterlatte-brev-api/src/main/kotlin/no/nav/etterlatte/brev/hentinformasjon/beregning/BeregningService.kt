@@ -177,7 +177,8 @@ class BeregningService(
         return Avkortingsinfo(
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder = beregningsperioder,
-            beregningOgAvkorting.endringIUtbetalingVedVirk,
+            endringIUtbetalingVedVirk = beregningOgAvkorting.endringIUtbetalingVedVirk,
+            erInnvilgelsesaar = beregningOgAvkorting.erInnvilgelsesaar,
         )
     }
 }

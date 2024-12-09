@@ -759,7 +759,7 @@ class BehandlingstilstandException(
 
 class BehandlingIverksettelseException(
     behandlingId: UUID,
-) : IllegalStateException("Iverksettelse av behandling $behandlingId feilet")
+) : InternfeilException("Iverksettelse av behandling $behandlingId feilet")
 
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(

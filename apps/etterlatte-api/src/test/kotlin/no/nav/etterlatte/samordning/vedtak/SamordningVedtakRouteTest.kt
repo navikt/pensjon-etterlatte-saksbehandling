@@ -387,7 +387,6 @@ class SamordningVedtakRouteTest {
                 tokenMedClaims(
                     mapOf(
                         Claims.sub to fnr,
-                        Claims.azp_name to "cluster:appname:dev",
                     ),
                 )
 

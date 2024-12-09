@@ -39,6 +39,7 @@ data class OmstillingsstoenadRevurdering(
     val omsRettUtenTidsbegrensning: Boolean,
     val feilutbetaling: FeilutbetalingType,
     val bosattUtland: Boolean,
+    val erInnvilgelsesaar: Boolean,
 ) : BrevDataFerdigstilling {
     init {
         if (erOmgjoering && datoVedtakOmgjoering == null) {
@@ -110,6 +111,7 @@ data class OmstillingsstoenadRevurdering(
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 feilutbetaling = feilutbetaling,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                erInnvilgelsesaar = avkortingsinfo.erInnvilgelsesaar,
             )
         }
 

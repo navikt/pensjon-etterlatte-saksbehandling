@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.ktor.token.hentTokenClaimsForIssuerName
 fun Route.samordningVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
     config: Config,
+    appname: String,
 ) {
     route("api/vedtak") {
         install(MaskinportenScopeAuthorizationPlugin) {
@@ -117,7 +118,7 @@ fun Route.samordningVedtakRoute(
             accessPolicyRolesEllerAdGrupper = setOf("les-oms-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf(Issuer.AZURE.issuerName)
         }
-        install(SelvbetjeningAuthorizationPlugin) {
+        install(selvbetjeningAuthorizationPlugin(appname)) {
             validator = { fnr, borger -> borger.value == fnr.value }
             issuer = Issuer.TOKENX.issuerName
         }

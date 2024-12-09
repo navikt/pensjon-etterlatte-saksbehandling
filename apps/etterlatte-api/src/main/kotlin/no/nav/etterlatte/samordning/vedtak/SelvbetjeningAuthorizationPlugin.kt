@@ -5,7 +5,6 @@ import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
-import no.nav.etterlatte.libs.common.appName
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -17,7 +16,7 @@ import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 /**
  * Sjekk av at bruker kun spør etter egne data
  */
-val SelvbetjeningAuthorizationPlugin =
+fun selvbetjeningAuthorizationPlugin(appname: String) =
     createRouteScopedPlugin(
         name = "SelvbetjeningAuthorizationPlugin",
         createConfiguration = ::PluginConfiguration,
@@ -30,7 +29,7 @@ val SelvbetjeningAuthorizationPlugin =
                 if (principal.context.issuers.contains(issuer)) {
                     val subject = principal.context.getClaims(pluginConfig.issuer).subject
                     val fnr =
-                        when (appName()?.lowercase()) {
+                        when (appname.lowercase()) {
                             "etterlatte-samordning-vedtak" -> call.fnr
                             "etterlatte-api" -> {
                                 try {

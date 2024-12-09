@@ -226,5 +226,3 @@ class OmregningServiceTest(
 
     private fun systembruker(brukernavn: String): Systembruker = systembruker(mapOf(Claims.azp_name to brukernavn))
 }
-
-

@@ -1,12 +1,10 @@
 package no.nav.etterlatte.samordning.vedtak
 
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
-import io.ktor.server.request.receiveNullable
 import no.nav.etterlatte.libs.common.appName
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
@@ -31,17 +29,18 @@ val SelvbetjeningAuthorizationPlugin =
 
                 if (principal.context.issuers.contains(issuer)) {
                     val subject = principal.context.getClaims(pluginConfig.issuer).subject
-                    val fnr = when(appName()?.lowercase()) {
-                        "etterlatte-samordning-vedtak" -> call.fnr
-                        "etterlatte-api" ->  {
-                            try {
-                                call.receive<FoedselsnummerDTO>().foedselsnummer
-                            } catch (e: Exception) {
-                                throw ManglerFoedselsnummerException()
+                    val fnr =
+                        when (appName()?.lowercase()) {
+                            "etterlatte-samordning-vedtak" -> call.fnr
+                            "etterlatte-api" -> {
+                                try {
+                                    call.receive<FoedselsnummerDTO>().foedselsnummer
+                                } catch (e: Exception) {
+                                    throw ManglerFoedselsnummerException()
+                                }
                             }
+                            else -> throw ManglerFoedselsnummerException()
                         }
-                        else -> throw ManglerFoedselsnummerException()
-                    }
 
                     if (!validator.invoke(Folkeregisteridentifikator.of(fnr), Folkeregisteridentifikator.of(subject))) {
                         application.log.info("Request avslått pga mismatch mellom subject og etterspurt fnr")

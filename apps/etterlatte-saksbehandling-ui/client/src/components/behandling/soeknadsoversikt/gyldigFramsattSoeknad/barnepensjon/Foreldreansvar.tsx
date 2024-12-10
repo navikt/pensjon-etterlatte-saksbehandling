@@ -19,7 +19,7 @@ export const Foreldreansvar = ({ gjenlevendeGrunnlag, soekerGrunnlag, harKildePe
 
   const gjenlevende = gjenlevendeGrunnlag?.opplysning
   const ansvarligeForeldre = soekerGrunnlag?.opplysning?.familieRelasjon?.ansvarligeForeldre || []
-  const oppfylt = innsender != undefined && ansvarligeForeldre.includes(innsender)
+  const oppfylt = !!innsender && ansvarligeForeldre.includes(innsender)
   const tekst = settTekst(oppfylt)
 
   const levendeMedAnsvar = ansvarligeForeldre.filter((it) => !avdoed?.includes(it))

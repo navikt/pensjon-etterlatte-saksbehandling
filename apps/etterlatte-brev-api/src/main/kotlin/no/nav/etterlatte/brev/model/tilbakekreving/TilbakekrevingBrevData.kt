@@ -96,7 +96,7 @@ data class TilbakekrevingBrevDTO(
                             )
                         },
                     resultat =
-                        periode.tilbakekrevingsbeloep
+                        beloepMedKunYtelse
                             .map { it.resultat ?: throw TilbakekrevingManglerResultatException("Alle perioder må ha resultat") }
                             .let {
                                 TilbakekrevingResultat.hoyesteGradAvTilbakekreving(it)

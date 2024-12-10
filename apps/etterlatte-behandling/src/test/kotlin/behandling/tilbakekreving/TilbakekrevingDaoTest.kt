@@ -12,7 +12,6 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -76,9 +75,7 @@ class TilbakekrevingDaoTest(
                                 it.copy(
                                     tilbakekrevingsbeloep =
                                         it.tilbakekrevingsbeloep
-                                            .filter { beloep ->
-                                                beloep.klasseType == KlasseType.YTEL.name
-                                            }.map { beloep ->
+                                            .map { beloep ->
                                                 beloep.copy(
                                                     beregnetFeilutbetaling = 123,
                                                 )

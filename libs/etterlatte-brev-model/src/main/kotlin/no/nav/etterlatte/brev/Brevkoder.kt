@@ -151,7 +151,18 @@ enum class Brevkoder(
         "Vedtak om avvist klage",
         Brevtype.VEDTAK,
     ),
-
+    KLAGE_SAKSBEHANDLINGSTID(
+        EtterlatteBrevKode.KLAGE_SAKSBEHANDLINGS_INFO,
+        EtterlatteBrevKode.KLAGE_SAKSBEHANDLINGS_INFO,
+        "Klage – orientering om saksbehandlingstid",
+        Brevtype.INFORMASJON,
+        titlerPaaSpraak =
+            mapOf(
+                Spraak.NB to "Klage – orientering om saksbehandlingstid",
+                Spraak.NN to "Klage – orientering om saksbehandlingstid",
+                Spraak.EN to "Appeals - Information about processing time",
+            ),
+    ),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,

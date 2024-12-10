@@ -87,43 +87,46 @@ class VedtakTilbakekrevingService(
         verifiserGyldigVedtakStatus(tilbakekrevingId, listOf(VedtakStatus.FATTET_VEDTAK))
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
-        val attestertVedtak =
-            repository.attesterVedtak(
-                tilbakekrevingId,
-                Attestasjon(
-                    attestant = brukerTokenInfo.ident(),
-                    attesterendeEnhet = tilbakekrevingVedtakData.enhet,
-                    // Blir ikke brukt for egen now() brukes i db.
-                    tidspunkt = Tidspunkt.now(),
+        return repository.inTransaction { tx ->
+            val attestertVedtak =
+                repository.attesterVedtak(
+                    tilbakekrevingId,
+                    Attestasjon(
+                        attestant = brukerTokenInfo.ident(),
+                        attesterendeEnhet = tilbakekrevingVedtakData.enhet,
+                        // Blir ikke brukt for egen now() brukes i db.
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+                    tx,
+                )
+
+            val skalSendeBrev =
+                runBlocking {
+                    behandlingKlient.hentTilbakekrevingBehandling(tilbakekrevingId, brukerTokenInfo).sendeBrev
+                }
+
+            rapidService.sendToRapid(
+                VedtakOgRapid(
+                    attestertVedtak.toDto(),
+                    RapidInfo(
+                        vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
+                        vedtak = attestertVedtak.toDto(),
+                        tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
+                        behandlingId = attestertVedtak.behandlingId,
+                        extraParams =
+                            mapOf(SKAL_SENDE_BREV to skalSendeBrev),
+                    ),
                 ),
             )
 
-        val skalSendeBrev =
-            runBlocking {
-                behandlingKlient.hentTilbakekrevingBehandling(tilbakekrevingId, brukerTokenInfo).sendeBrev
+            requireNotNull(attestertVedtak.vedtakFattet).let {
+                TilbakekrevingVedtakLagretDto(
+                    id = attestertVedtak.id,
+                    fattetAv = it.ansvarligSaksbehandler,
+                    enhet = it.ansvarligEnhet,
+                    dato = it.tidspunkt.toLocalDate(),
+                )
             }
-
-        rapidService.sendToRapid(
-            VedtakOgRapid(
-                attestertVedtak.toDto(),
-                RapidInfo(
-                    vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
-                    vedtak = attestertVedtak.toDto(),
-                    tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
-                    behandlingId = attestertVedtak.behandlingId,
-                    extraParams =
-                        mapOf(SKAL_SENDE_BREV to skalSendeBrev),
-                ),
-            ),
-        )
-
-        return requireNotNull(attestertVedtak.vedtakFattet).let {
-            TilbakekrevingVedtakLagretDto(
-                id = attestertVedtak.id,
-                fattetAv = it.ansvarligSaksbehandler,
-                enhet = it.ansvarligEnhet,
-                dato = it.tidspunkt.toLocalDate(),
-            )
         }
     }
 

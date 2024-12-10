@@ -1,6 +1,9 @@
 import {
+  klasseTypeYtelse,
+  leggPaaOrginalIndex,
   teksterTilbakekrevingResultat,
   teksterTilbakekrevingSkyld,
+  tekstKlasseKode,
   TilbakekrevingBehandling,
   TilbakekrevingPeriode,
   TilbakekrevingResultat,
@@ -20,7 +23,6 @@ import { FixedAlert } from '~shared/alerts/FixedAlert'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { formaterMaanedDato } from '~utils/formatering/dato'
-import { klasseTypeYtelse, leggPaaOrginalIndex } from '~components/tilbakekreving/tilbakekreving'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
@@ -143,7 +145,9 @@ export function TilbakekrevingVurderingPerioderSkjema({
                     return (
                       <Table.Row key={`beloeperRad-${indexPeriode}-${indexBeloep}`} style={{ alignItems: 'start' }}>
                         <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
-                        <Table.DataCell key="klasseKode">{beloeper.klasseKode}</Table.DataCell>
+                        <Table.DataCell key="klasseKode">
+                          {tekstKlasseKode[beloeper.klasseKode] ?? beloeper.klasseKode}
+                        </Table.DataCell>
                         <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
                         <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                         <Table.DataCell key="beregnetFeilutbetaling">

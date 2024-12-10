@@ -1,8 +1,7 @@
-import { TilbakekrevingBehandling, TilbakekrevingBeloep } from '~shared/types/Tilbakekreving'
+import { klasseTypeYtelse, TilbakekrevingBehandling, TilbakekrevingBeloep } from '~shared/types/Tilbakekreving'
 import React from 'react'
 import { Table } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
-import { klasseTypeYtelse } from '~components/tilbakekreving/tilbakekreving'
 
 export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling: TilbakekrevingBehandling }) {
   function sumKlasseTypeYtelse(callback: (beloep: TilbakekrevingBeloep) => number | null) {

@@ -1,6 +1,9 @@
 import {
+  klasseTypeYtelse,
+  leggPaaOrginalIndex,
   teksterTilbakekrevingResultat,
   teksterTilbakekrevingSkyld,
+  tekstKlasseKode,
   TilbakekrevingBehandling,
   TilbakekrevingPeriode,
 } from '~shared/types/Tilbakekreving'
@@ -8,7 +11,6 @@ import React, { useState } from 'react'
 import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { formaterMaanedDato } from '~utils/formatering/dato'
-import { klasseTypeYtelse, leggPaaOrginalIndex } from '~components/tilbakekreving/tilbakekreving'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const navigate = useNavigate()
@@ -20,6 +22,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell style={{ minWidth: '6em' }}>Måned</Table.HeaderCell>
+            <Table.HeaderCell>Klasse</Table.HeaderCell>
             <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>
@@ -42,6 +45,9 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
                 return (
                   <Table.Row key={`beloeperRad-${indexPeriode}-${beloeper.originalIndex}`}>
                     <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
+                    <Table.DataCell key="klasse">
+                      {tekstKlasseKode[beloeper.klasseKode] ?? beloeper.klasseKode}
+                    </Table.DataCell>
                     <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
                     <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                     <Table.DataCell key="beregnetFeilutbetaling">{beloeper.beregnetFeilutbetaling} kr</Table.DataCell>

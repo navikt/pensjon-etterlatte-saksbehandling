@@ -12,6 +12,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import java.util.UUID
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -143,6 +144,21 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                             oppgaveBulkDto.merknad,
                         )
                     }
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            post("/tildel") {
+                kunSaksbehandler {
+                    val request = call.receive<TildelingBulkRequest>()
+
+                    inTransaction {
+                        request.saksbehandlerOgOppgave
+                            .forEach { (saksbehandlerIdent, oppgaveId) ->
+                                service.tildelSaksbehandler(oppgaveId, saksbehandlerIdent)
+                            }
+                    }
+
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -303,3 +319,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
         }
     }
 }
+
+internal data class TildelingBulkRequest(
+    val saksbehandlerOgOppgave: Map<String, UUID>,
+)

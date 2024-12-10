@@ -1,23 +1,25 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import {
   Alert,
+  BodyShort,
+  Box,
   Button,
   Checkbox,
   Dropdown,
-  Heading,
   HStack,
   Label,
+  Modal,
   Table,
   UNSAFE_Combobox,
   VStack,
 } from '@navikt/ds-react'
 import { PersonCrossIcon, PersonIcon, PersonPencilIcon, PersonPlusIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { tildelSaksbehandlerApi, fjernSaksbehandlerApi, hentOppgaverMedGruppeId } from '~shared/api/oppgaver'
+import { fjernSaksbehandlerApi, hentOppgaverMedGruppeId, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { formaterDato } from '~utils/formatering/dato'
@@ -47,26 +49,51 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
   const saksbehandler = mapSaksbehandler(oppgave)
 
   const [openDropdown, setOpenDropdown] = useState<boolean>(false)
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [valgteOppgaver, setValgteOppgaver] = useState<OppgaveDTO[]>([])
 
   const [valgtSaksbehandler, setValgtSaksbehandler] = useState<Saksbehandler | undefined>(saksbehandler)
 
   const [oppgaverResult, apiHentOppgaver] = useApiCall(hentOppgaverMedGruppeId)
   const [fjernSaksbehandlerResult, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
-  const [byttSaksbehandlerResult, byttSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
+  const [byttSaksbehandlerResult, byttSaksbehandler, resetByttSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
-  const tildel = (saksbehandler: Saksbehandler) =>
-    [...valgteOppgaver, oppgave].forEach((valgtOppgave) =>
+  const tildel = (saksbehandler: Saksbehandler) => {
+    const oppgaverSomSkalTildeles = [...valgteOppgaver, oppgave]
+
+    oppgaverSomSkalTildeles.forEach((valgtOppgave) =>
       byttSaksbehandler(
         { oppgaveId: valgtOppgave.id, saksbehandlerIdent: saksbehandler.ident },
         () => {
           oppdaterTildeling(valgtOppgave, saksbehandler)
           setValgtSaksbehandler(saksbehandler)
           setOpenDropdown(false)
+          resetByttSaksbehandler()
         },
         (error) => console.log(error)
       )
     )
+
+    console.log('ferdig')
+  }
+
+  const startTildeling = (saksbehandler: Saksbehandler, tildelOverstyr?: boolean) => {
+    if (valgteOppgaver.length && !tildelOverstyr) {
+      setIsModalOpen(true)
+      setOpenDropdown(false)
+      setValgtSaksbehandler(saksbehandler)
+
+      /*apiHentOppgaver({ gruppeId: oppgave.gruppeId, type: oppgave.type }, (oppgaver) => {
+        if (oppgaver) {
+        } else {
+          tildel(saksbehandler)
+        }
+      })*/
+    } else {
+      tildel(saksbehandler)
+    }
+  }
 
   const onSaksbehandlerSelect = (saksbehandlerNavn: string, erValgt: boolean) => {
     if (erValgt) {
@@ -75,35 +102,145 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
       )
 
       if (selectedSaksbehandler) {
-        tildel(selectedSaksbehandler)
+        startTildeling(selectedSaksbehandler)
       }
     }
   }
 
-  const onTildelTilMeg = () => tildel(innloggetSaksbehandler)
+  const onTildelTilMeg = () => startTildeling(innloggetSaksbehandler)
 
-  const onFjernTildeling = () =>
-    [...valgteOppgaver, oppgave].forEach((valgtOppgave) =>
-      fjernSaksbehandler(
-        { oppgaveId },
-        () => {
-          oppdaterTildeling(valgtOppgave, null)
-          setValgtSaksbehandler(undefined)
-          setOpenDropdown(false)
-        },
-        (error) => console.log(error)
-      )
+  const onFjernTildeling = () => {
+    fjernSaksbehandler(
+      { oppgaveId },
+      () => {
+        oppdaterTildeling(oppgave, null)
+        setValgtSaksbehandler(undefined)
+        setOpenDropdown(false)
+      },
+      (error) => console.log(error)
     )
+  }
+
+  const lukkGrupperteOppgaver = () => {
+    setIsModalOpen(false)
+    setValgtSaksbehandler(undefined)
+    setOpenDropdown(false)
+  }
 
   useEffect(() => {
     if (openDropdown && oppgave.gruppeId) {
       apiHentOppgaver({ gruppeId: oppgave.gruppeId, type: oppgave.type }, (oppgaver) => {
-        const tilknyttedeOppgaveIder = oppgaver.filter((o) => o.id !== oppgaveId)
-
-        setValgteOppgaver(tilknyttedeOppgaveIder)
+        if (oppgaver.length > 1) {
+          setValgteOppgaver(oppgaver)
+          // setIsModalOpen(true)
+          // setOpenDropdown(false)
+          // setValgtSaksbehandler(saksbehandler)
+        }
       })
     }
   }, [openDropdown])
+
+  if (isModalOpen) {
+    return (
+      <Modal
+        open={isModalOpen}
+        aria-labelledby="modal-heading"
+        onClose={lukkGrupperteOppgaver}
+        style={{ minWidth: '60rem' }}
+        header={{ heading: 'Tildel oppgaver' }}
+      >
+        <Modal.Body>
+          {mapResult(oppgaverResult, {
+            success: (oppgaver) =>
+              oppgaver.length > 1 && (
+                <Box width="">
+                  <VStack gap="4">
+                    <Alert variant="info" inline>
+                      <BodyShort spacing>Det finnes andre oppgaver tilknyttet samme avdød.</BodyShort>
+
+                      <BodyShort>
+                        Ønsker du å tildele{' '}
+                        {!!valgtSaksbehandler && valgtSaksbehandler?.ident !== innloggetSaksbehandler.ident
+                          ? valgtSaksbehandler.navn
+                          : 'deg'}{' '}
+                        alle oppgavene?
+                      </BodyShort>
+                    </Alert>
+
+                    <Table size="small">
+                      <Table.Header>
+                        <Table.Row>
+                          <Table.HeaderCell />
+                          <Table.HeaderCell>SaksID</Table.HeaderCell>
+                          <Table.HeaderCell>Reg.dato</Table.HeaderCell>
+                          <Table.HeaderCell>Frist</Table.HeaderCell>
+                          <Table.HeaderCell>Fnr.</Table.HeaderCell>
+                          <Table.HeaderCell>Ytelse</Table.HeaderCell>
+                          <Table.HeaderCell>Oppgavetype</Table.HeaderCell>
+                          <Table.HeaderCell>Tildelt</Table.HeaderCell>
+                        </Table.Row>
+                      </Table.Header>
+                      <Table.Body>
+                        {oppgaver.map((oppgave: OppgaveDTO) => (
+                          <Table.Row key={`${oppgave.id}-${oppgave.gruppeId}`}>
+                            <Table.DataCell>
+                              <Checkbox
+                                checked={valgteOppgaver.map((o) => o.id).includes(oppgave.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setValgteOppgaver([...valgteOppgaver, oppgave])
+                                  } else {
+                                    setValgteOppgaver([...valgteOppgaver.filter((o) => o.id !== oppgave.id)])
+                                  }
+                                }}
+                              >
+                                {undefined} {/* Checkbox-komponenten krever innhold */}
+                              </Checkbox>
+                            </Table.DataCell>
+                            <Table.DataCell>{oppgave.sakId}</Table.DataCell>
+                            <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
+                            <Table.DataCell>{formaterDato(oppgave.frist)}</Table.DataCell>
+                            <Table.DataCell>
+                              {oppgave.fnr ? <PersonLink fnr={oppgave.fnr}>{oppgave.fnr}</PersonLink> : 'Mangler'}
+                            </Table.DataCell>
+                            <Table.DataCell>
+                              <SakTypeTag sakType={oppgave.sakType} kort />
+                            </Table.DataCell>
+                            <Table.DataCell>
+                              <OppgavetypeTag oppgavetype={oppgave.type} />
+                            </Table.DataCell>
+                            <Table.DataCell>
+                              {oppgave.saksbehandler ? oppgave.saksbehandler.navn : 'Ikke tildelt'}
+                            </Table.DataCell>
+                          </Table.Row>
+                        ))}
+                      </Table.Body>
+                    </Table>
+
+                    <HStack gap="4" justify="end">
+                      <Button
+                        variant="secondary"
+                        onClick={lukkGrupperteOppgaver}
+                        disabled={isPending(byttSaksbehandlerResult)}
+                      >
+                        Avbryt
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={() => tildel(valgtSaksbehandler!!)}
+                        loading={isPending(byttSaksbehandlerResult)}
+                      >
+                        {oppgaver.length === valgteOppgaver.length ? 'Ja, tildel alle' : 'Tildel valgte'}
+                      </Button>
+                    </HStack>
+                  </VStack>
+                </Box>
+              ),
+          })}
+        </Modal.Body>
+      </Modal>
+    )
+  }
 
   return (
     <div>
@@ -125,72 +262,6 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
           <DropdownMeny onClose={() => setOpenDropdown(false)}>
             <VStack gap="3">
               <>
-                <Heading size="small">Tildel oppgave</Heading>
-
-                {mapResult(oppgaverResult, {
-                  success: (oppgaver) =>
-                    oppgaver.length > 1 && (
-                      <>
-                        <Alert variant="info" inline>
-                          Det finnes andre førstegangsbehandlinger tilknyttet samme avdød. Ønsker du å tildele deg alle
-                          sakene, slik at de havner i din oppgaveliste?
-                        </Alert>
-
-                        <Table size="small">
-                          <Table.Header>
-                            <Table.Row>
-                              <Table.HeaderCell />
-                              <Table.HeaderCell>SaksID</Table.HeaderCell>
-                              <Table.HeaderCell>Reg.dato</Table.HeaderCell>
-                              <Table.HeaderCell>Frist</Table.HeaderCell>
-                              <Table.HeaderCell>Fnr.</Table.HeaderCell>
-                              <Table.HeaderCell>Ytelse</Table.HeaderCell>
-                              <Table.HeaderCell>Oppgavetype</Table.HeaderCell>
-                              <Table.HeaderCell>Tildelt</Table.HeaderCell>
-                            </Table.Row>
-                          </Table.Header>
-                          <Table.Body>
-                            {oppgaver
-                              .filter((o) => o.id !== oppgave.id)
-                              .map((oppgave: OppgaveDTO) => (
-                                <Table.Row key={`${oppgave.id}-${oppgave.gruppeId}`}>
-                                  <Table.DataCell>
-                                    <Checkbox
-                                      checked={valgteOppgaver.map((o) => o.id).includes(oppgave.id)}
-                                      onChange={(e) => {
-                                        if (e.target.checked) {
-                                          setValgteOppgaver([...valgteOppgaver, oppgave])
-                                        } else {
-                                          setValgteOppgaver([...valgteOppgaver.filter((o) => o.id !== oppgave.id)])
-                                        }
-                                      }}
-                                    >
-                                      {undefined} {/* Checkbox-komponenten krever innhold */}
-                                    </Checkbox>
-                                  </Table.DataCell>
-                                  <Table.DataCell>{oppgave.sakId}</Table.DataCell>
-                                  <Table.DataCell>{formaterDato(oppgave.opprettet)}</Table.DataCell>
-                                  <Table.DataCell>{formaterDato(oppgave.frist)}</Table.DataCell>
-                                  <Table.DataCell>
-                                    {oppgave.fnr ? <PersonLink fnr={oppgave.fnr}>{oppgave.fnr}</PersonLink> : 'Mangler'}
-                                  </Table.DataCell>
-                                  <Table.DataCell>
-                                    <SakTypeTag sakType={oppgave.sakType} kort />
-                                  </Table.DataCell>
-                                  <Table.DataCell>
-                                    <OppgavetypeTag oppgavetype={oppgave.type} />
-                                  </Table.DataCell>
-                                  <Table.DataCell>
-                                    {oppgave.saksbehandler ? oppgave.saksbehandler.navn : 'Ikke tildelt'}
-                                  </Table.DataCell>
-                                </Table.Row>
-                              ))}
-                          </Table.Body>
-                        </Table>
-                      </>
-                    ),
-                })}
-
                 <VelgSaksbehandlerCombobox
                   label="Velg saksbehandler"
                   options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
@@ -206,7 +277,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                       onClick={onTildelTilMeg}
                       loading={isPending(byttSaksbehandlerResult)}
                     >
-                      Tildel til meg
+                      Tildel meg
                     </Button>
                   </div>
                 )}
@@ -224,6 +295,16 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                     Fjern tildeling
                   </Button>
                 </div>
+              )}
+
+              {mapSuccess(
+                oppgaverResult,
+                (oppgaver) =>
+                  oppgaver.length > 1 && (
+                    <Alert variant="info" inline>
+                      {oppgaver.length} oppgaver på samme avdød
+                    </Alert>
+                  )
               )}
             </VStack>
           </DropdownMeny>

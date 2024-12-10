@@ -153,7 +153,7 @@ enum class Brevkoder(
     ),
     KLAGE_SAKSBEHANDLINGSTID(
         EtterlatteBrevKode.KLAGE_SAKSBEHANDLINGS_INFO,
-        EtterlatteBrevKode.KLAGE_SAKSBEHANDLINGS_INFO_FERDIG,
+        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Klage – orientering om saksbehandlingstid",
         Brevtype.INFORMASJON,
         titlerPaaSpraak =

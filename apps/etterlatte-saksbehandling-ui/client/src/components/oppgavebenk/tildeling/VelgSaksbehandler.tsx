@@ -15,7 +15,12 @@ import {
 } from '@navikt/ds-react'
 import { PersonCrossIcon, PersonIcon, PersonPencilIcon, PersonPlusIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { fjernSaksbehandlerApi, hentOppgaverMedGruppeId, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
+import {
+  fjernSaksbehandlerApi,
+  hentOppgaverMedGruppeId,
+  tildelBulkApi,
+  tildelSaksbehandlerApi,
+} from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
@@ -26,6 +31,8 @@ import { formaterDato } from '~utils/formatering/dato'
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
+import { ClickEvent, trackClickJaNei } from '~utils/amplitude'
+import { JaNei } from '~shared/types/ISvar'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -57,25 +64,30 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
 
   const [oppgaverResult, apiHentOppgaver] = useApiCall(hentOppgaverMedGruppeId)
   const [fjernSaksbehandlerResult, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
-  const [byttSaksbehandlerResult, byttSaksbehandler, resetByttSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
+  const [byttSaksbehandlerResult, byttSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
+  const [tildelBulkResult, tildelBulk] = useApiCall(tildelBulkApi)
 
   const tildel = (saksbehandler: Saksbehandler) => {
-    const oppgaverSomSkalTildeles = [...valgteOppgaver, oppgave]
+    if (!!valgteOppgaver.length) {
+      const oppgaverSomSkalTildeles = [...valgteOppgaver, oppgave]
 
-    oppgaverSomSkalTildeles.forEach((valgtOppgave) =>
+      tildelBulk({ saksbehandler: saksbehandler.ident, oppgaver: oppgaverSomSkalTildeles.map((o) => o.id) }, () => {
+        oppgaverSomSkalTildeles.forEach((o) => oppdaterTildeling(o, saksbehandler))
+        setValgtSaksbehandler(saksbehandler)
+        setOpenDropdown(false)
+        setIsModalOpen(false)
+      })
+    } else {
       byttSaksbehandler(
-        { oppgaveId: valgtOppgave.id, saksbehandlerIdent: saksbehandler.ident },
+        { oppgaveId, saksbehandlerIdent: saksbehandler.ident },
         () => {
-          oppdaterTildeling(valgtOppgave, saksbehandler)
+          oppdaterTildeling(oppgave, saksbehandler)
           setValgtSaksbehandler(saksbehandler)
           setOpenDropdown(false)
-          resetByttSaksbehandler()
         },
         (error) => console.log(error)
       )
-    )
-
-    console.log('ferdig')
+    }
   }
 
   const startTildeling = (saksbehandler: Saksbehandler, tildelOverstyr?: boolean) => {
@@ -83,13 +95,6 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
       setIsModalOpen(true)
       setOpenDropdown(false)
       setValgtSaksbehandler(saksbehandler)
-
-      /*apiHentOppgaver({ gruppeId: oppgave.gruppeId, type: oppgave.type }, (oppgaver) => {
-        if (oppgaver) {
-        } else {
-          tildel(saksbehandler)
-        }
-      })*/
     } else {
       tildel(saksbehandler)
     }
@@ -132,9 +137,6 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
       apiHentOppgaver({ gruppeId: oppgave.gruppeId, type: oppgave.type }, (oppgaver) => {
         if (oppgaver.length > 1) {
           setValgteOppgaver(oppgaver)
-          // setIsModalOpen(true)
-          // setOpenDropdown(false)
-          // setValgtSaksbehandler(saksbehandler)
         }
       })
     }
@@ -182,9 +184,17 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                       </Table.Header>
                       <Table.Body>
                         {oppgaver.map((oppgave: OppgaveDTO) => (
-                          <Table.Row key={`${oppgave.id}-${oppgave.gruppeId}`}>
+                          <Table.Row
+                            key={`${oppgave.id}-${oppgave.gruppeId}`}
+                            style={
+                              oppgave.id === oppgaveId
+                                ? { backgroundColor: 'var(--a-surface-success-subtle)' }
+                                : undefined
+                            }
+                          >
                             <Table.DataCell>
                               <Checkbox
+                                disabled={oppgave.id === oppgaveId}
                                 checked={valgteOppgaver.map((o) => o.id).includes(oppgave.id)}
                                 onChange={(e) => {
                                   if (e.target.checked) {
@@ -193,8 +203,9 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                                     setValgteOppgaver([...valgteOppgaver.filter((o) => o.id !== oppgave.id)])
                                   }
                                 }}
+                                hideLabel
                               >
-                                {undefined} {/* Checkbox-komponenten krever innhold */}
+                                Velg oppgave
                               </Checkbox>
                             </Table.DataCell>
                             <Table.DataCell>{oppgave.sakId}</Table.DataCell>
@@ -221,17 +232,34 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                       <Button
                         variant="secondary"
                         onClick={lukkGrupperteOppgaver}
-                        disabled={isPending(byttSaksbehandlerResult)}
+                        disabled={isPending(tildelBulkResult)}
                       >
                         Avbryt
                       </Button>
-                      <Button
-                        variant="primary"
-                        onClick={() => tildel(valgtSaksbehandler!!)}
-                        loading={isPending(byttSaksbehandlerResult)}
-                      >
-                        {oppgaver.length === valgteOppgaver.length ? 'Ja, tildel alle' : 'Tildel valgte'}
-                      </Button>
+
+                      {oppgaver.length === valgteOppgaver.length ? (
+                        <Button
+                          variant="primary"
+                          onClick={() => {
+                            trackClickJaNei(ClickEvent.TILDEL_ALLE_TILKNYTTEDE_OPPGAVER, JaNei.JA)
+                            tildel(valgtSaksbehandler!!)
+                          }}
+                          loading={isPending(tildelBulkResult)}
+                        >
+                          Ja, tildel alle
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          onClick={() => {
+                            trackClickJaNei(ClickEvent.TILDEL_ALLE_TILKNYTTEDE_OPPGAVER, JaNei.NEI)
+                            tildel(valgtSaksbehandler!!)
+                          }}
+                          loading={isPending(tildelBulkResult)}
+                        >
+                          Tildel valgte
+                        </Button>
+                      )}
                     </HStack>
                   </VStack>
                 </Box>

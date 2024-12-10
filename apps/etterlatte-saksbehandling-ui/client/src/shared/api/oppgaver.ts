@@ -81,6 +81,10 @@ export const tildelSaksbehandlerApi = async (args: {
   return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { saksbehandler: args.saksbehandlerIdent })
 }
 
+export const tildelBulkApi = async (request: TildelingBulkRequest): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/oppgaver/bulk/tildel`, { ...request })
+}
+
 export const fjernSaksbehandlerApi = async (args: { oppgaveId: string }): Promise<ApiResponse<void>> => {
   return apiClient.delete(`/oppgaver/${args.oppgaveId}/saksbehandler`)
 }
@@ -100,4 +104,9 @@ export const settOppgavePaaVentApi = async (args: {
   settPaaVentRequest: EndrePaaVentRequest
 }): Promise<ApiResponse<OppgaveDTO>> => {
   return apiClient.post(`/oppgaver/${args.oppgaveId}/sett-paa-vent`, { ...args.settPaaVentRequest })
+}
+
+export interface TildelingBulkRequest {
+  saksbehandler: string
+  oppgaver: string[]
 }

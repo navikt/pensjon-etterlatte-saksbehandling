@@ -12,7 +12,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import java.util.UUID
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -34,6 +33,7 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import java.util.UUID
 
 inline val PipelineContext<*, ApplicationCall>.referanse: String
     get() =
@@ -153,9 +153,9 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     val request = call.receive<TildelingBulkRequest>()
 
                     inTransaction {
-                        request.saksbehandlerOgOppgave
-                            .forEach { (saksbehandlerIdent, oppgaveId) ->
-                                service.tildelSaksbehandler(oppgaveId, saksbehandlerIdent)
+                        request.oppgaver
+                            .forEach { oppgaveId ->
+                                service.tildelSaksbehandler(oppgaveId, request.saksbehandler)
                             }
                     }
 
@@ -321,5 +321,6 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
 }
 
 internal data class TildelingBulkRequest(
-    val saksbehandlerOgOppgave: Map<String, UUID>,
+    val saksbehandler: String,
+    val oppgaver: List<UUID>,
 )

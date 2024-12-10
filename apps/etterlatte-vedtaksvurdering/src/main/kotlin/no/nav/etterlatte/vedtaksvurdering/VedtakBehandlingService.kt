@@ -294,7 +294,10 @@ class VedtakBehandlingService(
                     .tilSamordningVedtak(behandlingId, tx = tx)
                     .also {
                         runBlocking {
-                            behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
+                            val tilSamordning = behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
+                            if (!tilSamordning) {
+                                throw VedtakTilSamordningException(behandlingId)
+                            }
                         }
                     }
             }
@@ -347,7 +350,10 @@ class VedtakBehandlingService(
                             .samordnetVedtak(behandlingId, tx = tx)
                             .also {
                                 runBlocking {
-                                    behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                                    val samordnetVedtak = behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                                    if (!samordnetVedtak) {
+                                        throw VedtakSamordnetException(behandlingId)
+                                    }
                                 }
                             }
                     }
@@ -760,6 +766,14 @@ class BehandlingstilstandException(
 class BehandlingIverksettelseException(
     behandlingId: UUID,
 ) : InternfeilException("Iverksettelse av behandling $behandlingId feilet")
+
+class VedtakTilSamordningException(
+    behandlingId: UUID,
+) : InternfeilException("Sette vedtak til 'til samordning' for behandling $behandlingId feilet")
+
+class VedtakSamordnetException(
+    behandlingId: UUID,
+) : InternfeilException("Sette vedtak til 'samordnet' for behandling $behandlingId feilet")
 
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(

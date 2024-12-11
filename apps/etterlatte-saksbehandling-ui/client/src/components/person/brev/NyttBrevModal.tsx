@@ -96,7 +96,7 @@ const VedtakDato = ({ control }: { control: Control<FilledFormData, any> }) => (
 
 const KlageMotattDato = ({ control }: { control: Control<FilledFormData, any> }) => (
   <ControlledDatoVelger
-    name="mottattDato"
+    name="datoMottatKlage"
     label="Når ble søknaden mottatt?"
     control={control}
     errorVedTomInput="Du må velge når søknaden ble mottatt"

@@ -44,8 +44,10 @@ spec:
     scopes:
       exposes:
         - name: "vedtaksinformasjon.read"
+          delegationSource: "altinn"
           enabled: true
           product: "etterlatteytelser"
+          separator: "/"
           allowedIntegrations:
             - maskinporten
           atMaxAge: 60

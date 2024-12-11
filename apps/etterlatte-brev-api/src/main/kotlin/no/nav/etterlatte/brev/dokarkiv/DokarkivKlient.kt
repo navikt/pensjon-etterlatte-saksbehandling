@@ -103,8 +103,12 @@ class DokarkivKlient(
                     if (it is ResponseException) {
                         val error = it.response.body<DokarkivErrorResponse>()
 
-                        logger.error("Feil oppsto ved oppdatering av journalpost. Se sikkerlogg for detaljer: ", it)
-                        sikkerLogg.error("Feil oppsto ved oppdatering av journalpost. Request: $request")
+                        if (it.response.status == HttpStatusCode.BadRequest) {
+                            logger.warn("Feil oppsto ved oppdatering av journalpost. ", it)
+                        } else {
+                            logger.error("Feil oppsto ved oppdatering av journalpost. Se sikkerlogg for detaljer: ", it)
+                            sikkerLogg.error("Feil oppsto ved oppdatering av journalpost. Request: $request")
+                        }
 
                         throw ForespoerselException(
                             status = it.response.status.value,
@@ -176,7 +180,9 @@ class DokarkivKlient(
                         throw ForespoerselException(
                             status = it.response.status.value,
                             code = "OPPHEV_FEILREGISTRERT_SAKSTILKNYTNING_ERROR",
-                            detail = error.message ?: "En ukjent feil oppsto ved oppheving av feilregistrert sakstilknytning",
+                            detail =
+                                error.message
+                                    ?: "En ukjent feil oppsto ved oppheving av feilregistrert sakstilknytning",
                         )
                     } else {
                         throw it
@@ -245,7 +251,9 @@ class DokarkivKlient(
                         throw ForespoerselException(
                             status = it.response.status.value,
                             code = "KNYTT_TIL_ANNEN_SAK_ERROR",
-                            detail = error.message ?: "En ukjent feil har oppstått. Kunne ikke knytte journalpost til annen sak",
+                            detail =
+                                error.message
+                                    ?: "En ukjent feil har oppstått. Kunne ikke knytte journalpost til annen sak",
                         )
                     } else {
                         throw it

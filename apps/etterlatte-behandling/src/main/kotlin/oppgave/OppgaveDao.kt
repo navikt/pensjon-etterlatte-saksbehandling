@@ -262,7 +262,7 @@ class OppgaveDaoImpl(
                             LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.gruppe_id = ?
                             AND o.type = ?
-                            AND o.status != ANY(?)
+                            AND NOT (o.status = ANY(?))
                         """.trimIndent(),
                     )
                 statement.setString(1, gruppeId)

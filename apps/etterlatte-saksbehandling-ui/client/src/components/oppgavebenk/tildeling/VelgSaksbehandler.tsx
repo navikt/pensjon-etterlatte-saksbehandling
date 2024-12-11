@@ -155,7 +155,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
           {mapResult(oppgaverResult, {
             success: (oppgaver) =>
               oppgaver.length > 1 && (
-                <Box width="">
+                <Box>
                   <VStack gap="4">
                     <Alert variant="info" inline>
                       <BodyShort spacing>Det finnes andre oppgaver tilknyttet samme avdød.</BodyShort>
@@ -187,9 +187,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                           <Table.Row
                             key={`${oppgave.id}-${oppgave.gruppeId}`}
                             style={
-                              oppgave.id === oppgaveId
-                                ? { backgroundColor: 'var(--a-surface-success-subtle)' }
-                                : undefined
+                              oppgave.id === oppgaveId ? { backgroundColor: 'var(--a-surface-selected)' } : undefined
                             }
                           >
                             <Table.DataCell>
@@ -236,30 +234,19 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                       >
                         Avbryt
                       </Button>
-
-                      {oppgaver.length === valgteOppgaver.length ? (
-                        <Button
-                          variant="primary"
-                          onClick={() => {
+                      <Button
+                        onClick={() => {
+                          if (oppgaver.length === valgteOppgaver.length) {
                             trackClickJaNei(ClickEvent.TILDEL_ALLE_TILKNYTTEDE_OPPGAVER, JaNei.JA)
-                            tildel(valgtSaksbehandler!!)
-                          }}
-                          loading={isPending(tildelBulkResult)}
-                        >
-                          Ja, tildel alle
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="primary"
-                          onClick={() => {
+                          } else {
                             trackClickJaNei(ClickEvent.TILDEL_ALLE_TILKNYTTEDE_OPPGAVER, JaNei.NEI)
-                            tildel(valgtSaksbehandler!!)
-                          }}
-                          loading={isPending(tildelBulkResult)}
-                        >
-                          Tildel valgte
-                        </Button>
-                      )}
+                          }
+                          tildel(valgtSaksbehandler!!)
+                        }}
+                        loading={isPending(tildelBulkResult)}
+                      >
+                        {oppgaver.length === valgteOppgaver.length ? 'Ja, tildel alle' : 'Tildel valgte'}
+                      </Button>{' '}
                     </HStack>
                   </VStack>
                 </Box>

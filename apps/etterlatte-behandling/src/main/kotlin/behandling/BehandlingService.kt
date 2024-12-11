@@ -362,7 +362,8 @@ internal class BehandlingServiceImpl(
         behandlingDao.avbrytBehandling(behandlingId, aarsak, kommentar).also {
             val hendelserKnyttetTilBehandling =
                 grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
-            oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
+
+            oppgaveService.avbrytAapneOppgaverMedReferanse(behandlingId.toString(), "Behandlingen avbrytes manuelt")
 
             hendelserKnyttetTilBehandling.forEach { hendelse ->
                 oppgaveService.opprettOppgave(

@@ -46,6 +46,8 @@ spec:
         - name: "vedtaksinformasjon.read"
           enabled: true
           product: "etterlatteytelser"
+          separator: "/"
+          delegationSource: "altinn"
           allowedIntegrations:
             - maskinporten
           atMaxAge: 120

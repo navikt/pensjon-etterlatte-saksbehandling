@@ -28,7 +28,7 @@ fun Route.samordningVedtakRoute(
 ) {
     route("api/vedtak") {
         install(MaskinportenScopeAuthorizationPlugin) {
-            scopes = setOf("nav:etterlatteytelser:vedtaksinformasjon.read")
+            scopes = setOf("nav:etterlatteytelser:vedtaksinformasjon.read", "nav:etterlatteytelser/vedtaksinformasjon.read")
         }
 
         get("{vedtakId}") {

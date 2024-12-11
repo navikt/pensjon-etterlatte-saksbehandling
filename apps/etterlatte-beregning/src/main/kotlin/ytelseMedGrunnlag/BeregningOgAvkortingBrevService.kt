@@ -74,7 +74,7 @@ class BeregningOgAvkortingBrevService(
                     else -> {
                         val forrigeAvkorting =
                             avkortingService.hentAvkortingForrigeBehandling(
-                                behandling.sak,
+                                behandling,
                                 brukerTokenInfo,
                                 behandling.virkningstidspunkt().dato,
                             )

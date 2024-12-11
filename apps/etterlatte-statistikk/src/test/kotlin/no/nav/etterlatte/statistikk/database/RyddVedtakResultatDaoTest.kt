@@ -3,6 +3,7 @@ package no.nav.etterlatte.statistikk.database
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.statistikk.StatistikkDatabaseExtension
 import no.nav.etterlatte.statistikk.domain.BehandlingResultat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -15,6 +16,15 @@ class RyddVedtakResultatDaoTest(
 ) {
     private val repo = RyddVedtakResultatDao(dataSource)
     private val sakRepo = SakRepository.using(dataSource)
+
+    @AfterEach
+    fun afterEach() {
+        dataSource.connection.use { connection ->
+            connection
+                .prepareStatement("truncate table sak_rader_med_potensielt_feil_resultat")
+                .executeUpdate()
+        }
+    }
 
     @Test
     fun `kan hente rader med potensielt feil resultat`() {

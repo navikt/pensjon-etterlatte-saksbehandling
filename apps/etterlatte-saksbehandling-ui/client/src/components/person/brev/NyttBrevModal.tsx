@@ -87,10 +87,10 @@ const SoeknadMottattDato = ({ control }: { control: Control<FilledFormData, any>
 
 const VedtakDato = ({ control }: { control: Control<FilledFormData, any> }) => (
   <ControlledDatoVelger
-    name="mottattDato"
-    label="Når ble søknaden mottatt?"
+    name="datoForVedtak"
+    label="Når ble vedtaken gjort"
     control={control}
-    errorVedTomInput="Du må velge når søknaden ble mottatt"
+    errorVedTomInput="Du må velge når vedtaksdatoen er"
   />
 )
 

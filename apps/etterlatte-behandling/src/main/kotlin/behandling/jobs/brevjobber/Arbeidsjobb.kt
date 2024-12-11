@@ -13,7 +13,9 @@ data class Arbeidsjobb(
     val merknad: String? = null,
     val opprettet: Tidspunkt,
     val sistEndret: Tidspunkt,
-)
+) {
+    fun oppdaterStatus(status: ArbeidStatus): Arbeidsjobb = this.copy(status = status)
+}
 
 fun lagNyArbeidsJobb(
     sakId: SakId,

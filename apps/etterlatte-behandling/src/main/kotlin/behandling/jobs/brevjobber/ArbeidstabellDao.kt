@@ -4,6 +4,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
@@ -14,7 +15,7 @@ class ArbeidstabellDao(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun opprettJobb(jobb: Arbeidsjobb) {
+    fun opprettJobb(jobb: Arbeidsjobb): Arbeidsjobb {
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -36,7 +37,42 @@ class ArbeidstabellDao(
                 logger.info("Opprettet en jobb av type ${jobb.type.name} for sak ${jobb.sakId} med status ${jobb.status}")
             }
         }
+
+        return hentJobb(jobb.id) ?: throw IllegalStateException("Fant ikke jobb $jobb")
     }
+
+    fun oppdaterJobb(jobb: Arbeidsjobb): Arbeidsjobb {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        UPDATE arbeidstabell SET status = ? WHERE id = ?
+                        """.trimIndent(),
+                    )
+                statement.setString(1, jobb.status.name)
+                statement.setObject(2, jobb.id)
+                statement.executeUpdate()
+            }
+        }
+        return hentJobb(jobb.id) ?: throw IllegalStateException("Fant ikke jobb $jobb")
+    }
+
+    fun hentJobb(id: UUID): Arbeidsjobb? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT * from arbeidstabell where id = ?
+                        """.trimIndent(),
+                    )
+                statement.setObject(1, id)
+                statement.executeQuery().singleOrNull {
+                    asJobb()
+                }
+            }
+        }
 
     fun hentKlareJobber(): List<Arbeidsjobb> =
         connectionAutoclosing.hentConnection {

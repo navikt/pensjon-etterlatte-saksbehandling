@@ -67,6 +67,7 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering # TODO tilgangen er midlertidig for å rydde i resultat for vedtak
+      external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:

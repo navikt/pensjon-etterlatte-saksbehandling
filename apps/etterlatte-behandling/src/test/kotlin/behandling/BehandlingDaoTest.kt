@@ -330,7 +330,7 @@ internal class BehandlingDaoTest(
         assertEquals(false, behandling.first().status == BehandlingStatus.AVBRUTT)
 
         val avbruttbehandling = (behandling.first() as Foerstegangsbehandling).copy(status = BehandlingStatus.AVBRUTT)
-        behandlingRepo.lagreStatus(avbruttbehandling)
+        behandlingRepo.avbrytBehandling(avbruttbehandling.id, null, null)
         behandling = behandlingRepo.hentBehandlingerForSak(sak1)
         assertEquals(1, behandling.size)
         assertEquals(true, behandling.first().status == BehandlingStatus.AVBRUTT)

@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -423,7 +424,7 @@ internal class BehandlingFactoryTest {
             behandlingDaoMock.hentBehandlingerForSak(any())
         } returns listOf(underArbeidBehandling)
 
-        val nyfoerstegangsbehandling =
+        assertThrows<UgyldigForespoerselException> {
             behandlingFactory
                 .opprettBehandling(
                     sakId1,
@@ -431,16 +432,16 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
-                )?.also { it.sendMeldingForHendelse() }
-                ?.behandling
-        Assertions.assertTrue(nyfoerstegangsbehandling is Foerstegangsbehandling)
-
+                )
+        }
         verify(exactly = 2) {
             sakServiceMock.finnSak(any())
-            behandlingDaoMock.hentBehandling(any())
-            behandlingDaoMock.opprettBehandling(any())
-            hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.hentBehandlingerForSak(any())
+        }
+        verify(exactly = 1) {
+            behandlingDaoMock.opprettBehandling(any())
+            behandlingDaoMock.hentBehandling(any())
+            hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
@@ -453,16 +454,6 @@ internal class BehandlingFactoryTest {
                 merknad = null,
                 gruppeId = persongalleri.avdoed.single(),
             )
-            oppgaveService.opprettOppgave(
-                referanse = nyfoerstegangsbehandling!!.id.toString(),
-                sakId = sakId1,
-                kilde = OppgaveKilde.BEHANDLING,
-                type = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null,
-                gruppeId = persongalleri.avdoed.single(),
-            )
-            behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
-            oppgaveService.avbrytAapneOppgaverMedReferanse(nyfoerstegangsbehandling!!.id.toString())
         }
     }
 

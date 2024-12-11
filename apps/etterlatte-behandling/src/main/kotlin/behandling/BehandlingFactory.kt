@@ -214,6 +214,13 @@ class BehandlingFactory(
                 request.alleBehandlingerISak.filter { behandling ->
                     BehandlingStatus.underBehandling().find { it == behandling.status } != null
                 }
+            if (harBehandlingUnderbehandling.isNotEmpty()) {
+                throw UgyldigForespoerselException(
+                    "HAR_AAPEN_BEHANDLING",
+                    "Sak $sakId har allerede en åpen " +
+                        "behandling. Denne må avbrytes eller ferdigbehandles før ny behandling kan opprettes.",
+                )
+            }
             val behandling =
                 opprettFoerstegangsbehandling(
                     harBehandlingUnderbehandling,
@@ -452,9 +459,11 @@ class BehandlingFactory(
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
     ): Behandling {
-        behandlingerUnderBehandling.forEach {
-            behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
-            oppgaveService.avbrytAapneOppgaverMedReferanse(it.id.toString())
+        if (behandlingerUnderBehandling.isNotEmpty()) {
+            behandlingerUnderBehandling.forEach {
+                behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
+                oppgaveService.avbrytAapneOppgaverMedReferanse(it.id.toString())
+            }
         }
 
         return OpprettBehandling(

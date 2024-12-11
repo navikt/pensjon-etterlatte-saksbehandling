@@ -341,14 +341,32 @@ internal class OppgaveDaoTest(
         val gruppeId = UUID.randomUUID().toString()
 
         repeat(3) {
-            oppgaveDao.opprettOppgave(lagNyOppgave(sak, gruppeId = gruppeId))
+            oppgaveDao.opprettOppgave(
+                lagNyOppgave(
+                    sak,
+                    oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+                    gruppeId = gruppeId,
+                ),
+            )
         }
 
-        val oppgaver = oppgaveDao.hentOppgaverForSakMedType(sak.id, OppgaveType.entries)
-        assertEquals(13, oppgaver.size)
+        oppgaveDao.opprettOppgave(
+            lagNyOppgave(
+                sak,
+                oppgaveType = OppgaveType.REVURDERING,
+                gruppeId = gruppeId,
+            ),
+        )
 
-        val oppgaverGruppert = oppgaveDao.hentOppgaverForGruppeId(gruppeId)
-        assertEquals(3, oppgaverGruppert.size)
+        val oppgaver = oppgaveDao.hentOppgaverForSakMedType(sak.id, OppgaveType.entries)
+        assertEquals(14, oppgaver.size)
+
+        val foerstegangsbehandlingGruppert =
+            oppgaveDao.hentOppgaverForGruppeId(gruppeId, OppgaveType.FOERSTEGANGSBEHANDLING)
+        assertEquals(3, foerstegangsbehandlingGruppert.size)
+
+        val revurderingGruppert = oppgaveDao.hentOppgaverForGruppeId(gruppeId, OppgaveType.REVURDERING)
+        assertEquals(1, revurderingGruppert.size)
     }
 }
 

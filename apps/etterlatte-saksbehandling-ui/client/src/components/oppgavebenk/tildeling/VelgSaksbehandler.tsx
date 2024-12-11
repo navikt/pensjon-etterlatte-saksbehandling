@@ -31,8 +31,7 @@ import { formaterDato } from '~utils/formatering/dato'
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { OppgavetypeTag } from '~shared/tags/OppgavetypeTag'
-import { ClickEvent, trackClickJaNei } from '~utils/amplitude'
-import { JaNei } from '~shared/types/ISvar'
+import { ClickEvent, trackClickMedSvar } from '~utils/amplitude'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -130,6 +129,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
     setIsModalOpen(false)
     setValgtSaksbehandler(undefined)
     setOpenDropdown(false)
+    trackClickMedSvar(ClickEvent.TILDEL_TILKNYTTEDE_OPPGAVER, 'avbryt')
   }
 
   useEffect(() => {
@@ -237,9 +237,11 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                       <Button
                         onClick={() => {
                           if (oppgaver.length === valgteOppgaver.length) {
-                            trackClickJaNei(ClickEvent.TILDEL_ALLE_TILKNYTTEDE_OPPGAVER, JaNei.JA)
+                            trackClickMedSvar(ClickEvent.TILDEL_TILKNYTTEDE_OPPGAVER, 'alle')
+                          } else if (valgteOppgaver.length === 1) {
+                            trackClickMedSvar(ClickEvent.TILDEL_TILKNYTTEDE_OPPGAVER, 'en')
                           } else {
-                            trackClickJaNei(ClickEvent.TILDEL_ALLE_TILKNYTTEDE_OPPGAVER, JaNei.NEI)
+                            trackClickMedSvar(ClickEvent.TILDEL_TILKNYTTEDE_OPPGAVER, 'valgte')
                           }
                           tildel(valgtSaksbehandler!!)
                         }}

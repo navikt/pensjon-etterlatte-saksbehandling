@@ -32,7 +32,7 @@ export enum ClickEvent {
   // Oppgave
   OPPRETT_GENERELL_OPPGAVE = 'opprett generell oppgave',
   OPPRETT_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave',
-  TILDEL_ALLE_TILKNYTTEDE_OPPGAVER = 'tildel alle tilknyttede oppgaver',
+  TILDEL_TILKNYTTEDE_OPPGAVER = 'tildel tilknyttede oppgaver',
 
   // Avkorting
   AVKORTING_FORVENTET_INNTEKT_HJELPETEKST = 'avkorting forventet inntekt hjelpetekst',
@@ -93,7 +93,9 @@ export const trackClick = (name: ClickEvent) => {
   })
 }
 
-export const trackClickJaNei = (name: ClickEvent, svar: JaNei) => {
+export const trackClickJaNei = (name: ClickEvent, svar: JaNei) => trackClickMedSvar(name, svar)
+
+export const trackClickMedSvar = (name: ClickEvent, svar: string) => {
   if (!amplitudeInstance) {
     console.warn('Amplitude is not initialized. Ignoring')
     return
@@ -102,7 +104,7 @@ export const trackClickJaNei = (name: ClickEvent, svar: JaNei) => {
     event_type: LogEvents.CLICK,
     event_properties: {
       tekst: name,
-      svar: svar,
+      svar,
     },
   })
 }

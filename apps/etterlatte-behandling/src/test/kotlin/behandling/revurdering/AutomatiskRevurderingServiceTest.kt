@@ -48,12 +48,9 @@ class AutomatiskRevurderingServiceTest {
                             kilde = any(),
                             revurderingAarsak = any(),
                             virkningstidspunkt = any(),
-                            utlandstilknytning = any(),
-                            boddEllerArbeidetUtlandet = any(),
                             begrunnelse = any(),
                             saksbehandlerIdent = any(),
                             frist = any(),
-                            opphoerFraOgMed = any(),
                         )
                     } returns
                         mockk {

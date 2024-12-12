@@ -611,18 +611,15 @@ class AktivitetspliktService(
             .opprettRevurdering(
                 sakId = request.sakId,
                 persongalleri = persongalleri,
-                forrigeBehandling = forrigeBehandling.id,
+                forrigeBehandling = forrigeBehandling,
                 mottattDato = null,
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
                 revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
                 virkningstidspunkt = aktivitetspliktDato?.tilVirkningstidspunkt("Aktivitetsplikt"),
-                utlandstilknytning = forrigeBehandling.utlandstilknytning,
-                boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                 begrunnelse = request.jobbType.beskrivelse,
                 saksbehandlerIdent = Fagsaksystem.EY.navn,
                 frist = request.frist,
-                opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
             ).oppdater()
             .let { revurdering ->
                 revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(revurdering)

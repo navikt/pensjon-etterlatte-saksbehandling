@@ -37,7 +37,7 @@ export const Avkorting = ({
   const visSanksjon = useFeaturetoggle(FeatureToggle.sanksjon)
   const inntektNesteAarBryter = useFeaturetoggle(FeatureToggle.validere_aarsintnekt_neste_aar)
 
-  const virkAar = () => new Date(virkningstidspunkt(behandling).dato).getFullYear()
+  const virkAar = new Date(virkningstidspunkt(behandling).dato).getFullYear()
 
   const klarForBrevutfall = () => {
     if (avkorting == undefined) {

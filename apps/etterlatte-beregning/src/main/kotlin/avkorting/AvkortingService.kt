@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
@@ -72,7 +71,7 @@ class AvkortingService(
         }
 
         val forrigeAvkorting =
-            hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo, behandling.virkningstidspunkt().dato)
+            hentAvkortingForrigeBehandling(behandling, brukerTokenInfo, behandling.virkningstidspunkt().dato)
         return if (eksisterendeAvkorting == null) {
             val nyAvkorting =
                 kopierOgReberegnAvkorting(behandling, forrigeAvkorting, brukerTokenInfo)
@@ -153,7 +152,7 @@ class AvkortingService(
             } else {
                 val forrigeAvkorting =
                     hentAvkortingForrigeBehandling(
-                        behandling.sak,
+                        behandling,
                         brukerTokenInfo,
                         behandling.virkningstidspunkt().dato,
                     )
@@ -246,11 +245,11 @@ class AvkortingService(
     ): AvkortingFrontend = avkorting.toFrontend(behandling.virkningstidspunkt().dato, forrigeAvkorting, behandling.status)
 
     suspend fun hentAvkortingForrigeBehandling(
-        sakId: SakId,
+        behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         virkningstidspunkt: YearMonth,
     ): Avkorting {
-        val alleVedtak = vedtakKlient.hentIverksatteVedtak(sakId, brukerTokenInfo)
+        val alleVedtak = vedtakKlient.hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
         val forrigeBehandlingId =
             alleVedtak
                 .filter {
@@ -259,10 +258,14 @@ class AvkortingService(
                     it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
                 }.behandlingId
         val forrigeAvkorting = hentForrigeAvkorting(forrigeBehandlingId)
+
+        if (behandling.status == BehandlingStatus.IVERKSATT) {
+            return forrigeAvkorting
+        }
         return avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
             forrigeAvkorting,
             virkningstidspunkt,
-            sakId,
+            behandling.sak,
             alleVedtak,
         )
     }

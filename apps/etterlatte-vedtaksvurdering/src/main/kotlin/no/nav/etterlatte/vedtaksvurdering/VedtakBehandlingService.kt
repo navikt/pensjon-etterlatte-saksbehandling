@@ -431,7 +431,10 @@ class VedtakBehandlingService(
                 val iverksattVedtakLocal =
                     repository.iverksattVedtak(behandlingId, tx = tx).also {
                         runBlocking {
-                            behandlingKlient.iverksett(behandlingId, brukerTokenInfo, it.id)
+                            val iverksattBehandling = behandlingKlient.iverksett(behandlingId, brukerTokenInfo, it.id)
+                            if (!iverksattBehandling) {
+                                throw BehandlingIverksettelseException(behandlingId)
+                            }
                         }
                     }
                 iverksattVedtakLocal
@@ -753,6 +756,10 @@ class VedtakTilstandException(
 class BehandlingstilstandException(
     vedtak: Vedtak,
 ) : IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
+
+class BehandlingIverksettelseException(
+    behandlingId: UUID,
+) : InternfeilException("Iverksettelse av behandling $behandlingId feilet")
 
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(

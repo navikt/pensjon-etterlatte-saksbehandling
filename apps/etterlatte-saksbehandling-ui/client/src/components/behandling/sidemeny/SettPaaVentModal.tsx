@@ -56,7 +56,7 @@ export const SettPaaVentModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
         if (oppgave.status === Oppgavestatus.PAA_VENT) {
           redigerFristFunc({
             oppgaveId: oppgave.id,
-            redigerFristRequest: { frist: new Date(data.nyFrist), versjon: null },
+            frist: new Date(data.nyFrist),
           })
         }
         dispatch(settOppgave(oppgave))

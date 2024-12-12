@@ -285,6 +285,7 @@ internal class VedtaksbrevServiceTest {
                             ),
                         ),
                         false,
+                        true,
                     )
             }
 

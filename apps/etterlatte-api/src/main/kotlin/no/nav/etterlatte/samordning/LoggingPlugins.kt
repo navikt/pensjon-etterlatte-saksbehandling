@@ -54,6 +54,7 @@ private object UserIdMdcHook : Hook<suspend (ApplicationCall) -> Unit> {
     }
 }
 
+private val X_NAV_CALL_ID = "x_Nav-Call-Id"
 val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
     createRouteScopedPlugin(
         name = "UserIdMdcPlugin",
@@ -81,6 +82,10 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                     "Ukjent"
                 }
 
+            val callIdOptional = call.request.headers[X_NAV_CALL_ID]
+            if (callIdOptional != null) {
+                MDC.put(X_NAV_CALL_ID, callIdOptional)
+            }
             MDC.put(X_USER, user)
             call.attributes.put(userAttribute, user)
 

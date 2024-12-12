@@ -316,7 +316,8 @@ class BehandlingDao(
         kommentar: String,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
-            val stmt = prepareStatement("UPDATE behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
+            val stmt =
+                prepareStatement("UPDATE behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
 
             stmt.setString(1, aarsakTilAvbrytelse.name)
             stmt.setString(2, kommentar)
@@ -527,6 +528,18 @@ class BehandlingDao(
         with(it) {
             val statement = prepareStatement("UPDATE behandling SET opphoer_fom = ? where id = ?")
             statement.setString(1, objectMapper.writeValueAsString(opphoerFraOgMed))
+            statement.setObject(2, behandlingId)
+            statement.executeUpdate()
+        }
+    }
+
+    fun endreProsesstype(
+        behandlingId: UUID,
+        ny: Prosesstype,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling SET prosesstype = ? WHERE id = ?")
+            statement.setString(1, ny.name)
             statement.setObject(2, behandlingId)
             statement.executeUpdate()
         }

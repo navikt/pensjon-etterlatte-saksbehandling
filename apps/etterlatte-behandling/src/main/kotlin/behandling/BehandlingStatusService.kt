@@ -19,8 +19,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.SakslisteDTO
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -28,7 +26,6 @@ import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.UUID
 
 interface BehandlingStatusService {
@@ -121,7 +118,7 @@ class BehandlingStatusServiceImpl(
         val behandling = hentBehandling(behandlingId).tilOpprettet()
 
         if (!dryRun) {
-            behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+            behandlingDao.lagreStatus(behandling)
             behandlingService.registrerBehandlingHendelse(behandling, brukerTokenInfo.ident())
         }
     }
@@ -134,7 +131,7 @@ class BehandlingStatusServiceImpl(
         val behandling = hentBehandling(behandlingId).tilVilkaarsvurdert()
 
         if (!dryRun) {
-            behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+            behandlingDao.lagreStatus(behandling)
             behandlingService.registrerBehandlingHendelse(behandling, brukerTokenInfo.ident())
         }
     }
@@ -263,7 +260,7 @@ class BehandlingStatusServiceImpl(
         vedtakHendelse: VedtakHendelse,
     ) {
         val behandling = hentBehandling(behandlingId)
-        lagreNyBehandlingStatus(behandling.tilTilSamordning(), Tidspunkt.now().toLocalDatetimeUTC())
+        lagreNyBehandlingStatus(behandling.tilTilSamordning())
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.TIL_SAMORDNING)
     }
 
@@ -272,7 +269,7 @@ class BehandlingStatusServiceImpl(
         vedtakHendelse: VedtakHendelse,
     ) {
         val behandling = hentBehandling(behandlingId)
-        lagreNyBehandlingStatus(behandling.tilSamordnet(), Tidspunkt.now().toLocalDatetimeUTC())
+        lagreNyBehandlingStatus(behandling.tilSamordnet())
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.SAMORDNET)
     }
 
@@ -281,7 +278,7 @@ class BehandlingStatusServiceImpl(
         vedtakHendelse: VedtakHendelse,
     ) {
         val behandling = hentBehandling(behandlingId)
-        lagreNyBehandlingStatus(behandling.tilIverksatt(), Tidspunkt.now().toLocalDatetimeUTC())
+        lagreNyBehandlingStatus(behandling.tilIverksatt())
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
         haandterUtland(behandling)
         haandterFeilutbetaling(behandling)
@@ -383,13 +380,7 @@ class BehandlingStatusServiceImpl(
         behandlingService.registrerBehandlingHendelse(this, saksbehandler)
     }
 
-    private fun lagreNyBehandlingStatus(
-        behandling: Behandling,
-        sistEndret: LocalDateTime,
-    ) = behandlingDao.lagreStatus(behandling.id, behandling.status, sistEndret)
-
-    private fun lagreNyBehandlingStatus(behandling: Behandling) =
-        behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+    private fun lagreNyBehandlingStatus(behandling: Behandling) = behandlingDao.lagreStatus(behandling)
 
     private fun hentBehandling(behandlingId: UUID): Behandling =
         behandlingService.hentBehandling(behandlingId)

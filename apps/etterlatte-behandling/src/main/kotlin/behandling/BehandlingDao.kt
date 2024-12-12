@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -290,10 +291,16 @@ class BehandlingDao(
     }
 
     fun lagreStatus(lagretBehandling: Behandling) {
+        if (lagretBehandling.status == BehandlingStatus.AVBRUTT) {
+            throw InternfeilException(
+                "Behandlinger skal ikke avbrytes med status direkte, siden vi da mangler " +
+                    "utsending av statistikkmelding og lagring av behandlingshendelse.",
+            )
+        }
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }
 
-    fun lagreStatus(
+    private fun lagreStatus(
         behandlingId: UUID,
         status: BehandlingStatus,
         sistEndret: LocalDateTime,

@@ -141,7 +141,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.FATTET_VEDTAK, any())
+            behandlingdao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.FATTET)
             oppgaveService.tilAttestering(
                 behandlingId.toString(),
@@ -166,7 +166,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
+            behandlingdao.lagreStatus(any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
@@ -190,7 +190,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.RETURNERT, any())
+            behandlingdao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.UNDERKJENT)
             oppgaveService.tilUnderkjent(behandlingId.toString(), OppgaveType.FOERSTEGANGSBEHANDLING, any())
         }
@@ -231,7 +231,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
+            behandlingdao.lagreStatus(any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksattVedtak, HendelseType.IVERKSATT)
             generellBehandlingService.opprettBehandling(any(), any())
@@ -276,7 +276,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.AVSLAG, any())
+            behandlingdao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.ATTESTERT)
             generellBehandlingService.opprettBehandling(any(), any())
             oppgaveService.ferdigStillOppgaveUnderBehandling(
@@ -318,7 +318,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.ATTESTERT, any())
+            behandlingdao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.ATTESTERT)
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 behandlingId.toString(),
@@ -358,7 +358,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
+            behandlingdao.lagreStatus(any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
@@ -401,7 +401,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
+            behandlingdao.lagreStatus(any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)

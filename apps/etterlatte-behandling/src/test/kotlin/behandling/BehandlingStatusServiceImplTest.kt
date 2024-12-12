@@ -75,7 +75,7 @@ class BehandlingStatusServiceImplTest {
                 vedtakType = VedtakType.ENDRING,
             )
 
-        every { behandlingDao.lagreStatus(any(), any(), any()) } just runs
+        every { behandlingDao.lagreStatus(any()) } just runs
         every { behandlingService.registrerVedtakHendelse(any(), any(), any()) } just runs
         every { oppgaveService.tilUnderkjent(any(), any(), any()) } returns mockk()
         every { behandlingService.endreProsesstype(any(), any()) } just runs

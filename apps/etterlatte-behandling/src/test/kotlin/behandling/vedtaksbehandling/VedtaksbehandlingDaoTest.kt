@@ -13,7 +13,6 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.UUID30
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -82,7 +81,7 @@ internal class VedtaksbehandlingDaoTest(
 
         vedtaksbehandlingDao.erBehandlingRedigerbar(behandling.id) shouldBe true
 
-        behandlingDao.lagreStatus(behandling.copy(status = BehandlingStatus.AVBRUTT))
+        behandlingDao.avbrytBehandling(behandling.id, null, null)
 
         vedtaksbehandlingDao.erBehandlingRedigerbar(behandling.id) shouldBe false
     }

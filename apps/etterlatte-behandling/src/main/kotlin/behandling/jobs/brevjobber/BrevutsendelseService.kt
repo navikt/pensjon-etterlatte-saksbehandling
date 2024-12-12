@@ -18,7 +18,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 
-class BrevMasseutsendelseService(
+class BrevutsendelseService(
     private val sakService: SakService,
     private val oppgaveService: OppgaveService,
     private val sjekkBrevMottakerService: SjekkBrevMottakerService,

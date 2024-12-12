@@ -26,19 +26,19 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BrevMasseutsendelseJobTest(
+internal class BrevutsendelseJobTest(
     val dataSource: DataSource,
 ) {
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(mockk()), mockk(), null)
 
     private val arbeidstabellDao: ArbeidstabellDao = ArbeidstabellDao(ConnectionAutoclosingTest(dataSource))
     private val sakDao: SakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
-    private val brevMasseutsendelseService: BrevMasseutsendelseService = mockk()
+    private val brevutsendelseService: BrevutsendelseService = mockk()
 
-    private val brevMasseutsendelseJob: BrevMasseutsendelseJob =
-        BrevMasseutsendelseJob(
+    private val brevutsendelseJob: BrevutsendelseJob =
+        BrevutsendelseJob(
             arbeidstabellDao = arbeidstabellDao,
-            brevMasseutsendelseService = brevMasseutsendelseService,
+            brevutsendelseService = brevutsendelseService,
         )
 
     @BeforeEach
@@ -57,15 +57,15 @@ internal class BrevMasseutsendelseJobTest(
         val sak = sakDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enhetsnummer("1234"))
         val brevutsendelse = arbeidstabellDao.opprettJobb(nyArbeidsjobb(sak.id))
 
-        every { brevMasseutsendelseService.prosesserBrevutsendelse(any(), any()) } just runs
+        every { brevutsendelseService.prosesserBrevutsendelse(any(), any()) } just runs
 
-        brevMasseutsendelseJob.setupKontekstAndRun(kontekst)
+        brevutsendelseJob.setupKontekstAndRun(kontekst)
 
         val oppdatertBrevutsendelse = arbeidstabellDao.hentJobb(brevutsendelse.id)
         oppdatertBrevutsendelse?.status shouldBe ArbeidStatus.FERDIG
 
         verify {
-            brevMasseutsendelseService.prosesserBrevutsendelse(match { it.status == ArbeidStatus.PAAGAAENDE }, any())
+            brevutsendelseService.prosesserBrevutsendelse(match { it.status == ArbeidStatus.PAAGAAENDE }, any())
         }
     }
 
@@ -74,9 +74,9 @@ internal class BrevMasseutsendelseJobTest(
         val sak = sakDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enhetsnummer("1234"))
         val brevutsendelse = arbeidstabellDao.opprettJobb(nyArbeidsjobb(sak.id))
 
-        every { brevMasseutsendelseService.prosesserBrevutsendelse(any(), any()) } throws Exception("Brevutsendelse feilet")
+        every { brevutsendelseService.prosesserBrevutsendelse(any(), any()) } throws Exception("Brevutsendelse feilet")
 
-        brevMasseutsendelseJob.setupKontekstAndRun(kontekst)
+        brevutsendelseJob.setupKontekstAndRun(kontekst)
 
         val oppdatertBrevutsendelse = arbeidstabellDao.hentJobb(brevutsendelse.id)
         oppdatertBrevutsendelse?.status shouldBe ArbeidStatus.FEILET

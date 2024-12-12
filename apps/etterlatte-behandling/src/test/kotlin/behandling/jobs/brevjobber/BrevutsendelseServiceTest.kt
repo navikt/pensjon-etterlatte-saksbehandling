@@ -21,14 +21,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID.randomUUID
 
-internal class BrevMasseutsendelseServiceTest {
+internal class BrevutsendelseServiceTest {
     private val sakService: SakService = mockk()
     private val sjekkBrevMottakerService: SjekkBrevMottakerService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val brevKlient: BrevApiKlient = mockk()
 
-    private val brevMasseutsendelseService: BrevMasseutsendelseService =
-        BrevMasseutsendelseService(
+    private val brevutsendelseService: BrevutsendelseService =
+        BrevutsendelseService(
             sakService = sakService,
             sjekkBrevMottakerService = sjekkBrevMottakerService,
             oppgaveService = oppgaveService,
@@ -60,7 +60,7 @@ internal class BrevMasseutsendelseServiceTest {
         coEvery { brevKlient.journalfoerBrev(any(), any(), any()) } returns mockk { every { journalpostId } returns listOf("1") }
         coEvery { brevKlient.distribuerBrev(any(), any(), any()) } returns mockk { every { bestillingsId } returns listOf("1") }
 
-        brevMasseutsendelseService.prosesserBrevutsendelse(brevutsendelse, mockk { every { ident() } returns "ident" })
+        brevutsendelseService.prosesserBrevutsendelse(brevutsendelse, mockk { every { ident() } returns "ident" })
 
         verifyOrder {
             sakService.finnSak(any())
@@ -89,7 +89,7 @@ internal class BrevMasseutsendelseServiceTest {
         every { oppgaveService.opprettOppgave(brevutsendelse.id.toString(), sak.id, any(), any(), any(), any(), any(), any()) } returns
             mockk { every { id } returns oppgaveId }
 
-        brevMasseutsendelseService.prosesserBrevutsendelse(brevutsendelse, mockk { every { ident() } returns "ident" })
+        brevutsendelseService.prosesserBrevutsendelse(brevutsendelse, mockk { every { ident() } returns "ident" })
 
         verifyOrder {
             sakService.finnSak(any())

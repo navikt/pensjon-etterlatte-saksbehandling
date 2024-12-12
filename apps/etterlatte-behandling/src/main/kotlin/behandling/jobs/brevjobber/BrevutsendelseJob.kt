@@ -10,9 +10,9 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 
-class BrevMasseutsendelseJob(
+class BrevutsendelseJob(
     private val arbeidstabellDao: ArbeidstabellDao,
-    private val brevMasseutsendelseService: BrevMasseutsendelseService,
+    private val brevutsendelseService: BrevutsendelseService,
 ) {
     private val saksbehandler: BrukerTokenInfo = HardkodaSystembruker.oppgave
 
@@ -23,7 +23,7 @@ class BrevMasseutsendelseJob(
         run()
     }
 
-    // TODO er jobber egentlig riktig begrep her - blir kanskje litt for generelt i denne sammenheng? Burde tabellen heller hete masseutsendelse_brev?
+    // TODO er jobber egentlig riktig begrep her - blir kanskje litt for generelt i denne sammenheng? Burde tabellen heller hete brevutsendelse?
     // TODO mer logging må på plass
     private fun run() {
         logger.info("Starter jobb for masseutsendelse av brev")
@@ -35,7 +35,7 @@ class BrevMasseutsendelseJob(
             try {
                 inTransaction {
                     val paagaaendeBrevutsendelse = oppdaterStatus(brevutsendelse, PAAGAAENDE)
-                    brevMasseutsendelseService.prosesserBrevutsendelse(paagaaendeBrevutsendelse, saksbehandler)
+                    brevutsendelseService.prosesserBrevutsendelse(paagaaendeBrevutsendelse, saksbehandler)
                     oppdaterStatus(paagaaendeBrevutsendelse, FERDIG)
                 }
             } catch (e: Exception) {

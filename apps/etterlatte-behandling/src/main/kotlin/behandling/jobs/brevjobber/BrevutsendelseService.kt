@@ -5,6 +5,8 @@ import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResul
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -12,6 +14,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -71,29 +74,36 @@ class BrevutsendelseService(
 
         val tomtBrev = BrevParametre.TomtBrev(Spraak.NB) // TODO placeholder inntil vi har en brevmal
 
+        val opprettetBrev =
+            runBlocking {
+                brevKlient.opprettSpesifiktBrev(brevutsendelse.sakId, tomtBrev, saksbehandler)
+            }
         runBlocking {
-            val opprettetBrev = brevKlient.opprettSpesifiktBrev(brevutsendelse.sakId, tomtBrev, saksbehandler)
-            val ferdigstiltBrev =
-                brevKlient.ferdigstillBrev(
-                    FerdigstillJournalFoerOgDistribuerOpprettetBrev(
-                        opprettetBrev.id,
-                        brevutsendelse.sakId,
-                        sak.enhet,
-                        SaksbehandlerOgAttestant(saksbehandler.ident(), saksbehandler.ident()),
-                    ),
-                    saksbehandler,
-                )
-            logger.info("Brev med id ${ferdigstiltBrev.brevId} er ferdigstilt")
-
-            val journalfoertBrev = brevKlient.journalfoerBrev(brevutsendelse.sakId, ferdigstiltBrev.brevId, saksbehandler)
-            logger.info("Brev med id ${ferdigstiltBrev.brevId} er journaltført (journalpostId: ${journalfoertBrev.journalpostId})")
-
-            val distribuertBrev = brevKlient.distribuerBrev(brevutsendelse.sakId, ferdigstiltBrev.brevId, saksbehandler)
-            logger.info("Brev med id ${ferdigstiltBrev.brevId} er distribuert (bestillingsId: ${distribuertBrev.bestillingsId})")
+            retry(3) {
+                ferdigStillJournalFoerOgDistribuerOpprettetBrev(opprettetBrev, brevutsendelse, sak, saksbehandler)
+            }
         }
 
         return true
     }
+
+    private fun ferdigStillJournalFoerOgDistribuerOpprettetBrev(
+        opprettetBrev: Brev,
+        brevutsendelse: Arbeidsjobb,
+        sak: Sak,
+        saksbehandler: BrukerTokenInfo,
+    ): BrevStatusResponse =
+        runBlocking {
+            brevKlient.ferdigstillJournalFoerOgDistribuerBrev(
+                FerdigstillJournalFoerOgDistribuerOpprettetBrev(
+                    opprettetBrev.id,
+                    brevutsendelse.sakId,
+                    sak.enhet,
+                    SaksbehandlerOgAttestant(saksbehandler.ident(), saksbehandler.ident()),
+                ),
+                saksbehandler,
+            )
+        }
 
     private fun opprettManuellOppgave(brevutsendelse: Arbeidsjobb): OppgaveIntern =
         oppgaveService.opprettOppgave(

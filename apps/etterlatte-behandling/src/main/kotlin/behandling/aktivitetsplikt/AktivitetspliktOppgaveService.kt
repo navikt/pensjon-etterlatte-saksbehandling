@@ -273,7 +273,7 @@ class AktivitetspliktOppgaveService(
                 enhetsnummer = sak.enhet,
                 avsenderRequest = SaksbehandlerOgAttestant(saksbehandlerIdent = brukerTokenInfo.ident()),
             )
-        val brevrespons: BrevStatusResponse = runBlocking { brevApiKlient.ferdigstillBrev(req, brukerTokenInfo) }
+        val brevrespons: BrevStatusResponse = runBlocking { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(req, brukerTokenInfo) }
         if (brevrespons.status.erDistribuert()) {
             return oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
         } else {

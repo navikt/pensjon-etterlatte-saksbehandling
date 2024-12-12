@@ -52,7 +52,7 @@ internal class BrevutsendelseServiceTest {
             mockk { every { id } returns oppgaveId }
 
         coEvery { brevKlient.opprettSpesifiktBrev(any(), any(), any()) } returns mockk { every { id } returns 1 }
-        coEvery { brevKlient.ferdigstillBrev(any(), any()) } returns
+        coEvery { brevKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) } returns
             mockk {
                 every { brevId } returns 1
                 every { status } returns Status.FERDIGSTILT
@@ -69,7 +69,7 @@ internal class BrevutsendelseServiceTest {
 
         coVerifyOrder {
             brevKlient.opprettSpesifiktBrev(sak.id, any(), any())
-            brevKlient.ferdigstillBrev(any(), any())
+            brevKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any())
             brevKlient.journalfoerBrev(sak.id, any(), any())
             brevKlient.distribuerBrev(sak.id, any(), any())
         }

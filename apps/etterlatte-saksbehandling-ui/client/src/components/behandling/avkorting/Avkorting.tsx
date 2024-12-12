@@ -44,7 +44,7 @@ export const Avkorting = ({
       return false
     }
     if (behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && inntektNesteAarBryter) {
-      if (behandling.viderefoertOpphoer && new Date(behandling.viderefoertOpphoer.dato).getFullYear() === virkAar()) {
+      if (behandling.viderefoertOpphoer && new Date(behandling.viderefoertOpphoer.dato).getFullYear() === virkAar) {
         // Trenger ikke to inntekter hvis det er opphør i samme året
         return true
       }
@@ -113,7 +113,7 @@ export const Avkorting = ({
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
               {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-                virkAar() === 2024 && // Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
+                virkAar === 2024 && // Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
                 !!avkorting?.avkortingGrunnlag?.length && (
                   <AvkortingInntekt
                     behandling={behandling}

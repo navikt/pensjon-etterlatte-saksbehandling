@@ -12,12 +12,20 @@ import { DoedsdatoTag } from '~shared/tags/DoedsdatoTag'
 import { PersonLink } from '~components/person/lenker/PersonLink'
 import { VergemaalTag } from '~shared/tags/VergemaalTag'
 import { Navbar } from '~shared/header/Navbar'
+import { useAppDispatch } from '~store/Store'
+import { settPerson } from '~store/reducers/PersonReducer'
 
 export const StatusBar = ({ ident }: { ident: string | null | undefined }) => {
+  const dispatch = useAppDispatch()
+
   const [result, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
 
   useEffect(() => {
-    if (ident) hentPerson(ident)
+    if (ident) {
+      hentPerson(ident, (person) => {
+        dispatch(settPerson(person))
+      })
+    }
   }, [ident])
 
   const gender = (fnr: string): GenderList => {

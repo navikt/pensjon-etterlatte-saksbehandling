@@ -52,13 +52,11 @@ internal class BrevutsendelseServiceTest {
             mockk { every { id } returns oppgaveId }
 
         coEvery { brevKlient.opprettSpesifiktBrev(any(), any(), any()) } returns mockk { every { id } returns 1 }
-        coEvery { brevKlient.ferdigstillBrev(any(), any()) } returns
+        coEvery { brevKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) } returns
             mockk {
                 every { brevId } returns 1
                 every { status } returns Status.FERDIGSTILT
             }
-        coEvery { brevKlient.journalfoerBrev(any(), any(), any()) } returns mockk { every { journalpostId } returns listOf("1") }
-        coEvery { brevKlient.distribuerBrev(any(), any(), any()) } returns mockk { every { bestillingsId } returns listOf("1") }
 
         brevutsendelseService.prosesserBrevutsendelse(brevutsendelse, mockk { every { ident() } returns "ident" })
 
@@ -69,9 +67,7 @@ internal class BrevutsendelseServiceTest {
 
         coVerifyOrder {
             brevKlient.opprettSpesifiktBrev(sak.id, any(), any())
-            brevKlient.ferdigstillBrev(any(), any())
-            brevKlient.journalfoerBrev(sak.id, any(), any())
-            brevKlient.distribuerBrev(sak.id, any(), any())
+            brevKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any())
         }
 
         confirmVerified(sjekkBrevMottakerService, sakService, brevKlient)

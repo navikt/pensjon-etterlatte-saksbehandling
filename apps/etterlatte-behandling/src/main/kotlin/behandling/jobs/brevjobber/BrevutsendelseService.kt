@@ -5,6 +5,8 @@ import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResul
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevStatusResponse
 import no.nav.etterlatte.brev.model.FerdigstillJournalFoerOgDistribuerOpprettetBrev
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -12,6 +14,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -37,7 +40,9 @@ class BrevutsendelseService(
             val gyldigBrevMottakerResultat = sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak, brukerTokenInfo)
 
             if (gyldigBrevMottakerResultat == GYLDIG_MOTTAKER) {
-                sendBrev(sak, brevutsendelse, brukerTokenInfo)
+                // TODO: lagre ned status på brev?
+                val brevStatusResponse = sendBrev(sak, brevutsendelse, brukerTokenInfo)
+
                 // TODO hvis noe feiler her, må manuell oppgave opprettes
             } else {
                 logger.info("Manuell oppgave opprettes i sak ${sak.id} fordi mottaker ikke var gyldig: ${gyldigBrevMottakerResultat.name}")
@@ -66,34 +71,42 @@ class BrevutsendelseService(
         sak: Sak,
         brevutsendelse: Arbeidsjobb,
         saksbehandler: BrukerTokenInfo,
-    ): Boolean {
+    ): BrevStatusResponse {
         logger.info("Sender brev til ${sak.ident.maskerFnr()} i sak ${sak.id}")
 
         val tomtBrev = BrevParametre.TomtBrev(Spraak.NB) // TODO placeholder inntil vi har en brevmal
 
-        runBlocking {
-            val opprettetBrev = brevKlient.opprettSpesifiktBrev(brevutsendelse.sakId, tomtBrev, saksbehandler)
-            val ferdigstiltBrev =
-                brevKlient.ferdigstillBrev(
-                    FerdigstillJournalFoerOgDistribuerOpprettetBrev(
-                        opprettetBrev.id,
-                        brevutsendelse.sakId,
-                        sak.enhet,
-                        SaksbehandlerOgAttestant(saksbehandler.ident(), saksbehandler.ident()),
-                    ),
-                    saksbehandler,
-                )
-            logger.info("Brev med id ${ferdigstiltBrev.brevId} er ferdigstilt")
+        val opprettetBrev =
+            runBlocking {
+                brevKlient.opprettSpesifiktBrev(brevutsendelse.sakId, tomtBrev, saksbehandler)
+            }
+        val brevResponse =
+            runBlocking {
+                return@runBlocking retryOgPakkUt(3) {
+                    ferdigStillJournalFoerOgDistribuerOpprettetBrev(opprettetBrev, brevutsendelse, sak, saksbehandler)
+                }
+            }
 
-            val journalfoertBrev = brevKlient.journalfoerBrev(brevutsendelse.sakId, ferdigstiltBrev.brevId, saksbehandler)
-            logger.info("Brev med id ${ferdigstiltBrev.brevId} er journaltført (journalpostId: ${journalfoertBrev.journalpostId})")
-
-            val distribuertBrev = brevKlient.distribuerBrev(brevutsendelse.sakId, ferdigstiltBrev.brevId, saksbehandler)
-            logger.info("Brev med id ${ferdigstiltBrev.brevId} er distribuert (bestillingsId: ${distribuertBrev.bestillingsId})")
-        }
-
-        return true
+        return brevResponse
     }
+
+    private fun ferdigStillJournalFoerOgDistribuerOpprettetBrev(
+        opprettetBrev: Brev,
+        brevutsendelse: Arbeidsjobb,
+        sak: Sak,
+        saksbehandler: BrukerTokenInfo,
+    ): BrevStatusResponse =
+        runBlocking {
+            brevKlient.ferdigstillJournalFoerOgDistribuerBrev(
+                FerdigstillJournalFoerOgDistribuerOpprettetBrev(
+                    opprettetBrev.id,
+                    brevutsendelse.sakId,
+                    sak.enhet,
+                    SaksbehandlerOgAttestant(saksbehandler.ident(), saksbehandler.ident()),
+                ),
+                saksbehandler,
+            )
+        }
 
     private fun opprettManuellOppgave(brevutsendelse: Arbeidsjobb): OppgaveIntern =
         oppgaveService.opprettOppgave(

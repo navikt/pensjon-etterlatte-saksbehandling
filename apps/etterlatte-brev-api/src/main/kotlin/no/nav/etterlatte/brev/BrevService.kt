@@ -105,6 +105,7 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ): BrevStatusResponse {
         val brevId = req.brevId
+
         val hentBrev = db.hentBrev(brevId)
         try {
             val brevStatus = hentBrev.status

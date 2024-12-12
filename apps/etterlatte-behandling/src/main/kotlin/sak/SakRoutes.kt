@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -212,9 +213,11 @@ internal fun Route.sakWebRoutes(
 
             post("/oppdater-ident") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                    val hendelseId =
-                        call.request.queryParameters["hendelseId"]?.let(UUID::fromString)
-                            ?: throw UgyldigForespoerselException("HENDELSE_ID_MANGLER", "HendelseID mangler")
+                    val request = call.receive<OppdaterIdentRequest>()
+
+                    if (request.hendelseId == null && !request.utenHendelse) {
+                        throw InternfeilException("HendelseID mangler – kan ikke oppdatere ident på sak $sakId")
+                    }
 
                     val oppdatertSak =
                         inTransaction {
@@ -238,11 +241,13 @@ internal fun Route.sakWebRoutes(
                                 )
                             }
 
-                            grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
-                                hendelseId = hendelseId,
-                                kommentar = "Sak er oppdatert med ny ident på bruker (fra=${sak.ident}, til=${oppdatertSak.ident})",
-                                saksbehandler = saksbehandler,
-                            )
+                            if (request.hendelseId != null) {
+                                grunnlagsendringshendelseService.arkiverHendelseMedKommentar(
+                                    hendelseId = request.hendelseId,
+                                    kommentar = "Sak er oppdatert med ny ident på bruker (fra=${sak.ident}, til=${oppdatertSak.ident})",
+                                    saksbehandler = saksbehandler,
+                                )
+                            }
 
                             oppdatertSak
                         }
@@ -384,6 +389,11 @@ internal fun Route.sakWebRoutes(
 
 data class EnhetRequest(
     val enhet: Enhetsnummer,
+)
+
+data class OppdaterIdentRequest(
+    val hendelseId: UUID?,
+    val utenHendelse: Boolean = false,
 )
 
 data class SakerDto(

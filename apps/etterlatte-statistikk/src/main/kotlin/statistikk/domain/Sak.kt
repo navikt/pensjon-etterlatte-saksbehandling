@@ -49,6 +49,8 @@ enum class BehandlingResultat {
     INNVILGELSE,
     AVBRUTT,
     OPPHOER,
+    ENDRING,
+    AVSLAG,
 }
 
 enum class SakYtelsesgruppe {

@@ -48,7 +48,7 @@ internal class BrevutsendelseJobbTest(
     @AfterEach
     fun afterEach() {
         dataSource.connection.use {
-            it.prepareStatement("TRUNCATE arbeidstabell CASCADE;").execute()
+            it.prepareStatement("TRUNCATE brevutsendelse CASCADE;").execute()
         }
     }
 

@@ -895,6 +895,7 @@ internal class BehandlingServiceImpl(
                     Revurderingaarsak.REGULERING,
                     Revurderingaarsak.OMREGNING,
                     Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+                    Revurderingaarsak.INNTEKTSENDRING,
                 ),
             ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT

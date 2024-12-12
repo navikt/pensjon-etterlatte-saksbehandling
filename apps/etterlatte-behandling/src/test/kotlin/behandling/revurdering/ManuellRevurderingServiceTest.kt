@@ -170,7 +170,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
-            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseStatistikk(any(), BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
     }
@@ -264,7 +264,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo?.revurderingInfo)
             verify {
-                hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET)
+                hendelser.sendMeldingForHendelseStatistikk(any(), BehandlingHendelseType.OPPRETTET)
                 oppgaveService.hentOppgaverForSak(sak.id)
                 oppgaveService.hentOppgave(any())
                 oppgaveService.opprettOppgave(
@@ -389,7 +389,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 oppgaveService.hentOppgaverForSak(sak.id)
                 oppgaveService.avbrytAapneOppgaverMedReferanse(behandling!!.id.toString())
                 oppgaveService.hentOppgave(any())
-                hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET)
+                hendelser.sendMeldingForHendelseStatistikk(any(), BehandlingHendelseType.OPPRETTET)
                 oppgaveService.opprettOppgave(
                     referanse = behandling.id.toString(),
                     sakId = sak.id,
@@ -416,7 +416,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     gruppeId = "avdoed",
                 )
                 oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any())
-                hendelser.sendMeldingForHendelseStatisitkk(
+                hendelser.sendMeldingForHendelseStatistikk(
                     behandling.toStatistikkBehandling(
                         persongalleri(),
                     ),
@@ -495,7 +495,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
-            verify { hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseStatistikk(any(), BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
     }

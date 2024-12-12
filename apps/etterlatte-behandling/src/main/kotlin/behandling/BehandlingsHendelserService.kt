@@ -20,9 +20,10 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface BehandlingHendelserKafkaProducer {
-    fun sendMeldingForHendelseStatisitkk(
+    fun sendMeldingForHendelseStatistikk(
         statistikkBehandling: StatistikkBehandling,
         hendelseType: BehandlingHendelseType,
+        overstyrtTekniskTid: Tidspunkt?,
     )
 
     fun sendMeldingForHendelsePaaVent(
@@ -44,9 +45,10 @@ class BehandlingsHendelserKafkaProducerImpl(
 ) : BehandlingHendelserKafkaProducer {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun sendMeldingForHendelseStatisitkk(
+    override fun sendMeldingForHendelseStatistikk(
         statistikkBehandling: StatistikkBehandling,
         hendelseType: BehandlingHendelseType,
+        overstyrtTekniskTid: Tidspunkt?,
     ) {
         val correlationId = getCorrelationId()
 
@@ -58,7 +60,7 @@ class BehandlingsHendelserKafkaProducerImpl(
                         hendelseType.lagEventnameForType(),
                         mapOf(
                             CORRELATION_ID_KEY to correlationId,
-                            TEKNISK_TID_KEY to Tidspunkt.now(),
+                            TEKNISK_TID_KEY to (overstyrtTekniskTid ?: Tidspunkt.now()),
                             STATISTIKKBEHANDLING_RIVER_KEY to statistikkBehandling,
                         ),
                     ).toJson(),

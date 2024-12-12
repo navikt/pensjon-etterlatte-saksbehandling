@@ -7,7 +7,7 @@ enum class JobbType(
     val kategori: JobbKategori,
     val sakType: SakType?,
 ) {
-    TREKKPLIKT_2025("Trekkplikt 2025, du taper penger på dette", JobbKategori.TREKKPLIKT, SakType.OMSTILLINGSSTOENAD),
+    TREKKPLIKT_2025("Trekkplikt 2025, du taper penger på dette", JobbKategori.TREKKPLIKT, SakType.BARNEPENSJON),
 }
 
 enum class JobbKategori {

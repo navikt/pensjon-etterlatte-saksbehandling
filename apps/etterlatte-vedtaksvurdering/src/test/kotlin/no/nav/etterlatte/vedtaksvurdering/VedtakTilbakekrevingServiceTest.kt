@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotliquery.TransactionalSession
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
@@ -17,6 +18,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -191,7 +193,12 @@ class VedtakTilbakekrevingServiceTest {
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
-        every { repo.attesterVedtak(any(), any()) } returns attestertVedtak
+        every { repo.inTransaction<TilbakekrevingVedtakLagretDto>(any()) } answers
+            {
+                val block = firstArg<VedtaksvurderingRepository.(TransactionalSession) -> TilbakekrevingVedtakLagretDto>()
+                repo.block(mockk())
+            }
+        every { repo.attesterVedtak(any(), any(), any()) } returns attestertVedtak
         every { rapid.sendToRapid(any()) } returns Unit
 
         val vedtakDto = service.attesterVedtak(attesterDto, saksbehandler)
@@ -210,6 +217,7 @@ class VedtakTilbakekrevingServiceTest {
                     it.attestant shouldBe saksbehandler.ident
                     it.attesterendeEnhet shouldBe attesterDto.enhet
                 },
+                any(),
             )
         }
         verify {

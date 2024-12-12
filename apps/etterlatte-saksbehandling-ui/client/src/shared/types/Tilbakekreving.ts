@@ -45,10 +45,12 @@ export interface TilbakekrevingTilsvar {
 
 export interface TilbakekrevingPeriode {
   maaned: Date
-  ytelse: TilbakekrevingBeloep
+  tilbakekrevingsbeloep: TilbakekrevingBeloep[]
 }
 
 export interface TilbakekrevingBeloep {
+  klasseType: string
+  klasseKode: string
   bruttoUtbetaling: number
   nyBruttoUtbetaling: number
   skatteprosent: number
@@ -185,4 +187,18 @@ export const teksterTilbakekrevingHjemmel: Record<TilbakekrevingHjemmel, string>
   TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM:
     'Kombinasjon folketrygdloven § 22-15 første ledd, første og andre punktum',
   TJUETO_FEMTEN_FEMTE_LEDD: 'Folketrygdloven § 22-15 femte ledd',
+} as const
+
+// Det er kun ønskelig å vise linjer med klassetype YTEL per nå
+export const klasseTypeYtelse = (beloep: TilbakekrevingBeloep) => beloep.klasseType === 'YTEL'
+
+// Legger til orginal index som er nyttig dersom listen filtreres, men senere skal oppdatere verdier
+export const leggPaaOrginalIndex = (beloep: TilbakekrevingBeloep, index: number) => ({
+  ...beloep,
+  originalIndex: index,
+})
+
+export const tekstKlasseKode: Record<string, string> = {
+  'BARNEPENSJON-OPTP': 'Barnepensjon',
+  'BARNEPEFØR2024-OPTP': 'Barnepensjon før 2024',
 } as const

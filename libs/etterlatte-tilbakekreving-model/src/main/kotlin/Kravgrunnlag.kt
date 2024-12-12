@@ -35,7 +35,7 @@ data class Periode(
 
 enum class KravgrunnlagStatus { ANNU, ANOM, AVSL, BEHA, ENDR, FEIL, MANU, NY, SPER }
 
-enum class KlasseType { YTEL, SKAT, FEIL, JUST }
+enum class KlasseType { YTEL, SKAT, FEIL, JUST, RENT, TREK }
 
 data class Kravgrunnlag(
     val kravgrunnlagId: KravgrunnlagId,

@@ -74,7 +74,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-class BehandlingFactoryTest {
+internal class BehandlingFactoryTest {
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val behandlingDaoMock = mockk<BehandlingDao>(relaxUnitFun = true)
     private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
@@ -211,9 +211,7 @@ class BehandlingFactoryTest {
             )
         } returns Unit
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
-        every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-        } returns mockOppgave
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
 
         val resultat =
             behandlingFactory
@@ -243,8 +241,14 @@ class BehandlingFactoryTest {
                 any(),
                 BehandlingHendelseType.OPPRETTET,
             )
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(
+                referanse = resultat.id.toString(),
+                sakId = sakId1,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = any(),
+                gruppeId = "Avdoed",
+            )
         }
         coVerify(exactly = 1) { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
     }
@@ -304,9 +308,7 @@ class BehandlingFactoryTest {
             )
         } returns Unit
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
-        every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-        } returns mockOppgave
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
 
         val foerstegangsbehandling =
             behandlingFactory
@@ -328,8 +330,14 @@ class BehandlingFactoryTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.hentBehandlingerForSak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(
+                referanse = foerstegangsbehandling.id.toString(),
+                sakId = sakId1,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = any(),
+                gruppeId = persongalleri.avdoed.single(),
+            )
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
     }
@@ -392,9 +400,7 @@ class BehandlingFactoryTest {
             )
         } returns Unit
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
-        every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-        } returns mockOppgave
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
         every {
             oppgaveService.avbrytAapneOppgaverMedReferanse(any())
         } just runs
@@ -436,11 +442,25 @@ class BehandlingFactoryTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.hentBehandlingerForSak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(any(), any())
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
         verify {
+            oppgaveService.opprettOppgave(
+                referanse = foerstegangsbehandling.id.toString(),
+                sakId = sakId1,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = null,
+                gruppeId = persongalleri.avdoed.single(),
+            )
+            oppgaveService.opprettOppgave(
+                referanse = nyfoerstegangsbehandling!!.id.toString(),
+                sakId = sakId1,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = null,
+                gruppeId = persongalleri.avdoed.single(),
+            )
             behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
             oppgaveService.avbrytAapneOppgaverMedReferanse(nyfoerstegangsbehandling!!.id.toString())
         }
@@ -591,6 +611,7 @@ class BehandlingFactoryTest {
                 saksbehandler = null,
                 forrigeSaksbehandlerIdent = null,
                 referanse = "",
+                gruppeId = null,
                 merknad = null,
                 opprettet = Tidspunkt.now(),
                 sakType = SakType.OMSTILLINGSSTOENAD,
@@ -670,6 +691,7 @@ class BehandlingFactoryTest {
                 saksbehandler = null,
                 forrigeSaksbehandlerIdent = null,
                 referanse = "",
+                gruppeId = null,
                 merknad = null,
                 opprettet = Tidspunkt.now(),
                 sakType = SakType.OMSTILLINGSSTOENAD,
@@ -765,7 +787,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
         every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any())
         } returns mockOppgave
         every {
             oppgaveService.tildelSaksbehandler(any(), any())
@@ -840,16 +862,26 @@ class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
-                )?.also { it.sendMeldingForHendelse() }
-                ?.behandling
+                ).also { it.sendMeldingForHendelse() }
+                .behandling
+
         Assertions.assertTrue(revurderingsBehandling is Revurdering)
         verify {
             oppgaveService.opprettOppgave(
-                revurderingsBehandling!!.id.toString(),
-                sakId1,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                any(),
+                referanse = foerstegangsbehandling.id.toString(),
+                sakId = sakId1,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = any(),
+                gruppeId = persongalleri.avdoed.single(),
+            )
+            oppgaveService.opprettOppgave(
+                referanse = revurderingsBehandling.id.toString(),
+                sakId = sakId1,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = any(),
+                gruppeId = persongalleri.avdoed.single(),
             )
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
@@ -922,10 +954,10 @@ class BehandlingFactoryTest {
         } returns Unit
         coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
         every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any())
         } returns mockOppgave
         every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any())
         } returns mockOppgave
         every {
             oppgaveService.oppdaterStatusOgMerknad(any(), any(), any())
@@ -1004,8 +1036,22 @@ class BehandlingFactoryTest {
                 .behandling
         Assertions.assertTrue(revurderingsBehandling is Revurdering)
         verify {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(
+                referanse = any(),
+                sakId = any(),
+                kilde = any(),
+                type = any(),
+                merknad = any(),
+                gruppeId = persongalleri.avdoed.single(),
+            )
+            oppgaveService.opprettOppgave(
+                referanse = any(),
+                sakId = any(),
+                kilde = any(),
+                type = any(),
+                merknad = any(),
+                gruppeId = persongalleri.avdoed.single(),
+            )
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
         verify(exactly = 2) {
@@ -1068,9 +1114,7 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } just Runs
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns emptyList()
-        every {
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-        } returns mockOppgave
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
 
         coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
 
@@ -1108,8 +1152,14 @@ class BehandlingFactoryTest {
                 any(),
                 BehandlingHendelseType.OPPRETTET,
             )
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
-            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(
+                referanse = opprettetBehandling.id.toString(),
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = any(),
+                gruppeId = persongalleri.avdoed.single(),
+            )
         }
         coVerify {
             grunnlagService.leggInnNyttGrunnlag(any(), any(), any())

@@ -1,0 +1,1 @@
+update oppgave set status = 'AVBRUTT' where id IN('e204d8d5-cd84-47a7-8da3-6e78ba794a21', '341a1d8b-a509-4c16-89d0-7551a8055021', '0bb86028-9df7-4c61-9457-622752c6dd76', '189242f7-9160-4a17-9cce-017b32288863', 'aa06235d-c036-47ee-94d7-e9a939148b4c')

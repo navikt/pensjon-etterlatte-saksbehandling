@@ -9,6 +9,7 @@ export interface OppgaveDTO {
   type: Oppgavetype
   kilde: OppgaveKilde
   referanse: string | null
+  gruppeId: string | null
   merknad?: string
   opprettet: string
   sakType: SakType

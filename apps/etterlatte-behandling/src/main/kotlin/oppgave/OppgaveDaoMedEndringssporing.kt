@@ -112,6 +112,11 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
+    override fun hentOppgaverForGruppeId(
+        gruppeId: String,
+        type: OppgaveType,
+    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForGruppeId(gruppeId, type)
+
     override fun oppgaveMedTypeFinnes(
         sakId: SakId,
         type: OppgaveType,

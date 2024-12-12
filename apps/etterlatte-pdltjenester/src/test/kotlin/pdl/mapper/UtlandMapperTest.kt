@@ -46,10 +46,18 @@ internal class UtlandMapperTest {
                             every { folkeregistermetadata } returns
                                 mockk {
                                     every { gyldighetstidspunkt } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                                    every { ajourholdstidspunkt } returns LocalDateTime.parse("2021-07-01T00:00:00")
                                 }
                         },
                     )
                 every { utflyttingFraNorge } returns null
+                every { bostedsadresse } returns
+                    listOf(
+                        mockk {
+                            every { angittFlyttedato } returns LocalDate.parse("2021-07-01")
+                            every { gyldigFraOgMed } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                        },
+                    )
             }
 
         val utland = UtlandMapper.mapUtland(hentPerson)
@@ -57,6 +65,131 @@ internal class UtlandMapperTest {
         assertEquals("FRA", utland.innflyttingTilNorge?.first()?.fraflyttingsland)
         assertEquals(
             "2021-07-01",
+            utland.innflyttingTilNorge
+                ?.first()
+                ?.dato
+                .toString(),
+        )
+        assertEquals(
+            "2021-07-01",
+            utland.innflyttingTilNorge
+                ?.first()
+                ?.gyldighetsdato
+                .toString(),
+        )
+        assertEquals(
+            "2021-07-01",
+            utland.innflyttingTilNorge
+                ?.first()
+                ?.ajourholdsdato
+                .toString(),
+        )
+    }
+
+    @Test
+    fun `skal mappe dato til angittFlyttedato hvis angittFlyttedato er etter gyldighetstidspunkt`() {
+        val hentPerson =
+            mockk<PdlHentPerson> {
+                every { innflyttingTilNorge } returns
+                    listOf(
+                        mockk {
+                            every { fraflyttingsland } returns "FRA"
+                            every { folkeregistermetadata } returns
+                                mockk {
+                                    every { gyldighetstidspunkt } returns LocalDateTime.parse("2021-06-01T00:00:00")
+                                    every { ajourholdstidspunkt } returns LocalDateTime.parse("2021-08-01T00:00:00")
+                                }
+                        },
+                    )
+                every { utflyttingFraNorge } returns null
+                every { bostedsadresse } returns
+                    listOf(
+                        mockk {
+                            every { angittFlyttedato } returns LocalDate.parse("2021-07-01")
+                            every { gyldigFraOgMed } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                        },
+                    )
+            }
+
+        val utland = UtlandMapper.mapUtland(hentPerson)
+
+        assertEquals("FRA", utland.innflyttingTilNorge?.first()?.fraflyttingsland)
+        assertEquals(
+            "2021-07-01",
+            utland.innflyttingTilNorge
+                ?.first()
+                ?.dato
+                .toString(),
+        )
+    }
+
+    @Test
+    fun `skal mappe dato til gyldighetstidspunkt hvis angittFlyttedato er før gyldighetstidspunkt`() {
+        val hentPerson =
+            mockk<PdlHentPerson> {
+                every { innflyttingTilNorge } returns
+                    listOf(
+                        mockk {
+                            every { fraflyttingsland } returns "FRA"
+                            every { folkeregistermetadata } returns
+                                mockk {
+                                    every { gyldighetstidspunkt } returns LocalDateTime.parse("2021-08-01T00:00:00")
+                                    every { ajourholdstidspunkt } returns LocalDateTime.parse("2021-09-01T00:00:00")
+                                }
+                        },
+                    )
+                every { utflyttingFraNorge } returns null
+                every { bostedsadresse } returns
+                    listOf(
+                        mockk {
+                            every { angittFlyttedato } returns LocalDate.parse("2021-07-01")
+                            every { gyldigFraOgMed } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                        },
+                    )
+            }
+
+        val utland = UtlandMapper.mapUtland(hentPerson)
+
+        assertEquals("FRA", utland.innflyttingTilNorge?.first()?.fraflyttingsland)
+        assertEquals(
+            "2021-08-01",
+            utland.innflyttingTilNorge
+                ?.first()
+                ?.dato
+                .toString(),
+        )
+    }
+
+    @Test
+    fun `skal mappe dato til ajourholdstidspunkt hvis gyldighetstidspunkt er null`() {
+        val hentPerson =
+            mockk<PdlHentPerson> {
+                every { innflyttingTilNorge } returns
+                    listOf(
+                        mockk {
+                            every { fraflyttingsland } returns "FRA"
+                            every { folkeregistermetadata } returns
+                                mockk {
+                                    every { gyldighetstidspunkt } returns null
+                                    every { ajourholdstidspunkt } returns LocalDateTime.parse("2021-09-01T00:00:00")
+                                }
+                        },
+                    )
+                every { utflyttingFraNorge } returns null
+                every { bostedsadresse } returns
+                    listOf(
+                        mockk {
+                            every { angittFlyttedato } returns null
+                            every { gyldigFraOgMed } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                        },
+                    )
+            }
+
+        val utland = UtlandMapper.mapUtland(hentPerson)
+
+        assertEquals("FRA", utland.innflyttingTilNorge?.first()?.fraflyttingsland)
+        assertEquals(
+            "2021-09-01",
             utland.innflyttingTilNorge
                 ?.first()
                 ?.dato

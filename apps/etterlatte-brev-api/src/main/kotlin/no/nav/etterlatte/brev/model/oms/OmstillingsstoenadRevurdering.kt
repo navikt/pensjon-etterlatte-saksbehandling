@@ -39,6 +39,7 @@ data class OmstillingsstoenadRevurdering(
     val omsRettUtenTidsbegrensning: Boolean,
     val feilutbetaling: FeilutbetalingType,
     val bosattUtland: Boolean,
+    val erInnvilgelsesaar: Boolean,
 ) : BrevDataFerdigstilling {
     init {
         if (erOmgjoering && datoVedtakOmgjoering == null) {
@@ -92,7 +93,7 @@ data class OmstillingsstoenadRevurdering(
                 datoVedtakOmgjoering = datoVedtakOmgjoering,
                 beregning =
                     OmstillingsstoenadBeregning(
-                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
+                        innhold = innholdMedVedlegg(innholdMedVedlegg, behandling),
                         virkningsdato = avkortingsinfo.virkningsdato,
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
@@ -110,7 +111,18 @@ data class OmstillingsstoenadRevurdering(
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 feilutbetaling = feilutbetaling,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                erInnvilgelsesaar = avkortingsinfo.erInnvilgelsesaar,
             )
+        }
+
+        private fun innholdMedVedlegg(
+            innholdMedVedlegg: InnholdMedVedlegg,
+            behandling: DetaljertBehandling,
+        ): List<Slate.Element> {
+            if (behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING && behandling.prosesstype == Prosesstype.AUTOMATISK) {
+                return emptyList()
+            }
+            return innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING)
         }
     }
 }

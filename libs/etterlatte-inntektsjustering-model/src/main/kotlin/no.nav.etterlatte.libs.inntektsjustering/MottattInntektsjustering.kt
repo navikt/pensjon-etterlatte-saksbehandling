@@ -10,7 +10,7 @@ data class MottattInntektsjustering(
     val sak: SakId,
     val inntektsjusteringId: UUID,
     val journalpostId: String,
-    val mottatt: LocalDateTime,
+    val mottattDato: LocalDateTime,
     val inntektsaar: Int,
     val arbeidsinntekt: Int,
     val naeringsinntekt: Int,

@@ -503,6 +503,11 @@ class OppgaveService(
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
+    fun hentOppgaverForGruppeId(
+        gruppeId: String,
+        type: OppgaveType,
+    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForGruppeId(gruppeId, type)
+
     fun hentForrigeStatus(oppgaveId: UUID): Status {
         val oppgave = hentOppgave(oppgaveId)
 
@@ -597,6 +602,7 @@ class OppgaveService(
         merknad: String?,
         frist: Tidspunkt? = null,
         saksbehandler: String? = null,
+        gruppeId: String? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
 
@@ -608,6 +614,7 @@ class OppgaveService(
                 type = type,
                 merknad = merknad,
                 frist = frist,
+                gruppeId = gruppeId,
             )
         oppgaveDao.opprettOppgave(oppgave)
 

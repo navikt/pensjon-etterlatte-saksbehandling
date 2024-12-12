@@ -196,6 +196,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
                 saksbehandler = null,
                 forrigeSaksbehandlerIdent = null,
                 referanse = behandling.id.toString(),
+                gruppeId = null,
                 merknad = null,
                 opprettet = Tidspunkt.now(),
                 sakType = SakType.OMSTILLINGSSTOENAD,

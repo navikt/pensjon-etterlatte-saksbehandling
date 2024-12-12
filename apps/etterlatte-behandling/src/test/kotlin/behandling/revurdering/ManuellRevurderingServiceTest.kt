@@ -156,11 +156,12 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         verify {
             oppgaveService.opprettOppgave(
-                revurdering.id.toString(),
-                sak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING,
-                null,
+                referanse = revurdering.id.toString(),
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.REVURDERING,
+                merknad = null,
+                gruppeId = "avdoed",
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
@@ -267,11 +268,12 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 oppgaveService.hentOppgaverForSak(sak.id)
                 oppgaveService.hentOppgave(any())
                 oppgaveService.opprettOppgave(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
+                    merknad = null,
+                    gruppeId = "avdoed",
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             }
@@ -389,28 +391,29 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 oppgaveService.hentOppgave(any())
                 hendelser.sendMeldingForHendelseStatisitkk(any(), BehandlingHendelseType.OPPRETTET)
                 oppgaveService.opprettOppgave(
-                    behandling.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.FOERSTEGANGSBEHANDLING,
-                    "2 søsken",
-                    null,
-                    null,
+                    referanse = behandling.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                    merknad = "2 søsken",
+                    gruppeId = "Avdoed",
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
                 oppgaveService.opprettOppgave(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
+                    merknad = null,
+                    gruppeId = "avdoed",
                 )
                 oppgaveService.opprettOppgave(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
+                    merknad = null,
+                    gruppeId = "avdoed",
                 )
                 oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any())
                 hendelser.sendMeldingForHendelseStatisitkk(
@@ -479,11 +482,12 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
         verify {
             oppgaveService.opprettOppgave(
-                revurdering.id.toString(),
-                sak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING,
-                null,
+                referanse = revurdering.id.toString(),
+                sakId = sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.REVURDERING,
+                merknad = null,
+                gruppeId = "avdoed",
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)

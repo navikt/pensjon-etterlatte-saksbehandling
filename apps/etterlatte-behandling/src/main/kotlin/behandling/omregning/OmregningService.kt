@@ -1,15 +1,22 @@
 package no.nav.etterlatte.behandling.omregning
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.KjoeringDistEllerIverksattRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.oppgave.OppgaveService
+import java.util.UUID
 
 class OmregningService(
     private val behandlingService: BehandlingService,
@@ -38,13 +45,38 @@ class OmregningService(
                 }
             }
 
-            behandlingService.hentAapenOmregning(request.sakId)?.let {
-                if (it.status.kanAvbrytes()) {
-                    behandlingService.avbrytBehandling(it.id, bruker)
+            behandlingService.hentAapenOmregning(request.sakId)?.let { omregning ->
+                when (omregning.revurderingsaarsak) {
+                    Revurderingaarsak.INNTEKTSENDRING -> endreTilManuell(omregning.id)
+
+                    else -> {
+                        if (omregning.status.kanAvbrytes()) {
+                            behandlingService.avbrytBehandling(omregning.id, bruker)
+                        }
+                    }
                 }
             }
         }
+
         omregningDao.oppdaterKjoering(request)
+    }
+
+    private fun endreTilManuell(behandlingId: UUID) {
+        val oppgave =
+            oppgaveService
+                .hentOppgaverForReferanse(behandlingId.toString())
+                .singleOrNull { it.type === OppgaveType.REVURDERING }
+                ?: throw InternfeilException("Kan ikke eksistere en INNTEKTSENDRING uten oppgave")
+
+        if (oppgave.saksbehandler?.navn == Fagsaksystem.EY.navn) {
+            oppgaveService.oppdaterStatusOgMerknad(
+                oppgave.id,
+                "Automatisk behandling feilet - må behandles manuelt",
+                Status.UNDER_BEHANDLING,
+            )
+            oppgaveService.fjernSaksbehandler(oppgave.id)
+        }
+        behandlingService.endreProsesstype(behandlingId, Prosesstype.MANUELL)
     }
 
     fun kjoeringFullfoert(request: LagreKjoeringRequest) {

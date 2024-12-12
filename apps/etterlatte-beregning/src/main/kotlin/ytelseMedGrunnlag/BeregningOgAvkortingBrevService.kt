@@ -67,13 +67,14 @@ class BeregningOgAvkortingBrevService(
 
         return BeregningOgAvkortingDto(
             perioder = avkortinger,
+            erInnvilgelsesaar = avkortingUtenLoependeYtelse.aarsoppgjoer.minBy { it.aar }.aar == behandling.virkningstidspunkt().dato.year,
             endringIUtbetalingVedVirk =
                 when (behandling.behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING -> false
                     else -> {
                         val forrigeAvkorting =
                             avkortingService.hentAvkortingForrigeBehandling(
-                                behandling.sak,
+                                behandling,
                                 brukerTokenInfo,
                                 behandling.virkningstidspunkt().dato,
                             )

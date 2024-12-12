@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.gosysOppgaveId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.oppgave.GosysOppgaveversjon
 
 internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
     route("/api/oppgaver/gosys") {
@@ -116,5 +115,9 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 
 data class FeilregistrerOppgaveRequest(
     val beskrivelse: String,
+    val versjon: Long,
+)
+
+internal data class GosysOppgaveversjon(
     val versjon: Long,
 )

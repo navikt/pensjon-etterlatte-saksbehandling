@@ -75,7 +75,8 @@ export const GyldigFramsattBarnepensjon = ({
               <Foreldreansvar
                 harKildePesys={harKildePesys}
                 soekerGrunnlag={familieforhold?.soeker}
-                persongalleriGrunnlag={personGalleriSoeknad.data}
+                innsender={personGalleriSoeknad.data.opplysning.innsender}
+                avdoed={personGalleriSoeknad.data.opplysning.avdoed}
                 gjenlevendeGrunnlag={familieforhold?.gjenlevende?.find((po) => po)}
               />
               <Verger behandlingId={behandling.id} sakId={behandling.sakId} />

@@ -1,34 +1,28 @@
 import { Info } from '../../Info'
-import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
-import { IPdlPerson, Persongalleri } from '~shared/types/Person'
-import { KildePdl } from '~shared/types/kilde'
+import { Personopplysning } from '~shared/types/grunnlag'
+import { IPdlPerson } from '~shared/types/Person'
 import { KopierbarVerdi } from '~shared/statusbar/KopierbarVerdi'
 
 interface Props {
-  persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
   gjenlevendeGrunnlag: Personopplysning | undefined
   soekerGrunnlag: Personopplysning | undefined
   harKildePesys: boolean
+  innsender?: string | null
+  avdoed?: string[]
 }
 
-export const Foreldreansvar = ({
-  persongalleriGrunnlag,
-  gjenlevendeGrunnlag,
-  soekerGrunnlag,
-  harKildePesys,
-}: Props) => {
+export const Foreldreansvar = ({ gjenlevendeGrunnlag, soekerGrunnlag, harKildePesys, innsender, avdoed }: Props) => {
   const label = 'Foreldreansvar'
   if (harKildePesys) {
     return <Info tekst="Ukjent" undertekst="Mangler info" label={label} />
   }
 
-  const persongalleri = persongalleriGrunnlag.opplysning
   const gjenlevende = gjenlevendeGrunnlag?.opplysning
   const ansvarligeForeldre = soekerGrunnlag?.opplysning?.familieRelasjon?.ansvarligeForeldre || []
-  const oppfylt = persongalleri.innsender != undefined && ansvarligeForeldre.includes(persongalleri.innsender)
+  const oppfylt = !!innsender && ansvarligeForeldre.includes(innsender)
   const tekst = settTekst(oppfylt)
 
-  const levendeMedAnsvar = ansvarligeForeldre.filter((it) => !persongalleri.avdoed?.includes(it))
+  const levendeMedAnsvar = ansvarligeForeldre.filter((it) => !avdoed?.includes(it))
 
   const foreldreansvar = (
     <>

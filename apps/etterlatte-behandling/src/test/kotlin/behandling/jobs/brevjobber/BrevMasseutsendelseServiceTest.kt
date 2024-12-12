@@ -50,7 +50,6 @@ internal class BrevMasseutsendelseServiceTest {
 
         every { oppgaveService.opprettOppgave(brevutsendelse.id.toString(), sak.id, any(), any(), any(), any(), any(), any()) } returns
             mockk { every { id } returns oppgaveId }
-        every { oppgaveService.ferdigstillOppgave(any(), any()) } returns mockk()
 
         coEvery { brevKlient.opprettSpesifiktBrev(any(), any(), any()) } returns mockk { every { id } returns 1 }
         coEvery { brevKlient.ferdigstillBrev(any(), any()) } returns
@@ -66,8 +65,6 @@ internal class BrevMasseutsendelseServiceTest {
         verifyOrder {
             sakService.finnSak(any())
             sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak, any())
-            oppgaveService.opprettOppgave(any(), sak.id, any(), any(), any(), any(), any(), any())
-            oppgaveService.ferdigstillOppgave(oppgaveId, any())
         }
 
         coVerifyOrder {
@@ -77,7 +74,7 @@ internal class BrevMasseutsendelseServiceTest {
             brevKlient.distribuerBrev(sak.id, any(), any())
         }
 
-        confirmVerified(sjekkBrevMottakerService, sakService, oppgaveService, brevKlient)
+        confirmVerified(sjekkBrevMottakerService, sakService, brevKlient)
     }
 
     @Test

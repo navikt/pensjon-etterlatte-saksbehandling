@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 class BrevMasseutsendelseService(
     private val sakService: SakService,
@@ -39,7 +38,7 @@ class BrevMasseutsendelseService(
 
             if (gyldigBrevMottakerResultat == GYLDIG_MOTTAKER) {
                 sendBrev(sak, brevutsendelse, brukerTokenInfo)
-                // TODO hvis noe feiler her, må oppgaven endres til manuell
+                // TODO hvis noe feiler her, må manuell oppgave opprettes
             } else {
                 logger.info("Manuell oppgave opprettes i sak ${sak.id} fordi mottaker ikke var gyldig: ${gyldigBrevMottakerResultat.name}")
                 opprettManuellOppgave(brevutsendelse)
@@ -70,7 +69,6 @@ class BrevMasseutsendelseService(
     ): Boolean {
         logger.info("Sender brev til ${sak.ident.maskerFnr()} i sak ${sak.id}")
 
-        val oppgave = opprettOppgave(brevutsendelse, saksbehandler)
         val tomtBrev = BrevParametre.TomtBrev(Spraak.NB) // TODO placeholder inntil vi har en brevmal
 
         runBlocking {
@@ -94,9 +92,6 @@ class BrevMasseutsendelseService(
             logger.info("Brev med id ${ferdigstiltBrev.brevId} er distribuert (bestillingsId: ${distribuertBrev.bestillingsId})")
         }
 
-        logger.info("Ferdigstiller oppgave ${oppgave.id} for brevutsending")
-        ferdigstillOppgave(oppgave.id, saksbehandler)
-
         return true
     }
 
@@ -108,22 +103,4 @@ class BrevMasseutsendelseService(
             type = OppgaveType.GENERELL_OPPGAVE, // TODO er dette riktig
             merknad = "Her må det komme tekst om hva saksbehandler må gjøre", // TODO hva skal stå her?
         )
-
-    private fun opprettOppgave(
-        brevutsendelse: Arbeidsjobb,
-        saksbehandler: BrukerTokenInfo,
-    ): OppgaveIntern =
-        oppgaveService.opprettOppgave(
-            referanse = brevutsendelse.id.toString(),
-            sakId = brevutsendelse.sakId,
-            kilde = null, // TODO legge inn kilde
-            type = OppgaveType.GENERELL_OPPGAVE, // TODO er dette riktig
-            merknad = "Her må det komme tekst om hva saksbehandler må gjøre", // TODO hva skal stå her?
-            saksbehandler = saksbehandler.ident(),
-        )
-
-    private fun ferdigstillOppgave(
-        oppgaveId: UUID,
-        saksbehandler: BrukerTokenInfo,
-    ): OppgaveIntern = oppgaveService.ferdigstillOppgave(oppgaveId, saksbehandler)
 }

@@ -44,7 +44,7 @@ export const Avkorting = ({
       return false
     }
     if (behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && inntektNesteAarBryter) {
-      if (behandling.viderefoertOpphoer && new Date(behandling.viderefoertOpphoer.dato).getFullYear() == virkAar()) {
+      if (behandling.viderefoertOpphoer && new Date(behandling.viderefoertOpphoer.dato).getFullYear() === virkAar()) {
         // Trenger ikke to inntekter hvis det er opphør i samme året
         return true
       }

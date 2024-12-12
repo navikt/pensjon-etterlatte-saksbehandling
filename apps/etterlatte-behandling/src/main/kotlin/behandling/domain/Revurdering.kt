@@ -62,8 +62,8 @@ sealed class Revurdering(
             relatertBehandlingId: String?,
             begrunnelse: String?,
             sendeBrev: Boolean,
-            opphoerFraOgMed: YearMonth? = null,
-            tidligereFamiliepleier: TidligereFamiliepleier? = null,
+            opphoerFraOgMed: YearMonth?,
+            tidligereFamiliepleier: TidligereFamiliepleier?,
         ) = when (prosesstype) {
             Prosesstype.MANUELL ->
                 ManuellRevurdering(

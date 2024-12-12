@@ -69,7 +69,7 @@ class OmgjoeringKlageRevurderingService(
             .opprettRevurdering(
                 sakId = sakId,
                 persongalleri = persongalleri,
-                forrigeBehandling = behandlingSomOmgjoeresId,
+                forrigeBehandling = behandlingSomOmgjoeres,
                 mottattDato =
                     klagenViOmgjoerPaaGrunnAv.innkommendeDokument
                         ?.mottattDato
@@ -79,8 +79,6 @@ class OmgjoeringKlageRevurderingService(
                 kilde = Vedtaksloesning.GJENNY,
                 revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 virkningstidspunkt = behandlingSomOmgjoeres.virkningstidspunkt,
-                utlandstilknytning = behandlingSomOmgjoeres.utlandstilknytning,
-                boddEllerArbeidetUtlandet = behandlingSomOmgjoeres.boddEllerArbeidetUtlandet,
                 begrunnelse = "Omgjøring på grunn av klage",
                 saksbehandlerIdent = saksbehandler.ident,
                 relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id.toString(),

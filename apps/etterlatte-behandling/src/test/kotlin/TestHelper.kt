@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -293,6 +294,7 @@ fun revurdering(
     begrunnelse: String? = null,
     relatertBehandlingId: String? = null,
     opphoerFraOgMed: YearMonth? = null,
+    tidligereFamiliepleier: TidligereFamiliepleier? = null,
 ) = Revurdering.opprett(
     id = id,
     sak =
@@ -317,6 +319,7 @@ fun revurdering(
     relatertBehandlingId = relatertBehandlingId,
     sendeBrev = true,
     opphoerFraOgMed = opphoerFraOgMed,
+    tidligereFamiliepleier = tidligereFamiliepleier,
 )
 
 fun persongalleri(

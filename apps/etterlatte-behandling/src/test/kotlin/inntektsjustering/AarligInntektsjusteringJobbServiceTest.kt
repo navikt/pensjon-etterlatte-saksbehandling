@@ -151,9 +151,6 @@ class AarligInntektsjusteringJobbServiceTest {
                 any(),
                 any(),
                 any(),
-                any(),
-                any(),
-                any(),
             )
         } returns
             mockk {
@@ -209,15 +206,11 @@ class AarligInntektsjusteringJobbServiceTest {
                 kilde = any(),
                 revurderingAarsak = any(),
                 virkningstidspunkt = any(),
-                utlandstilknytning = any(),
-                boddEllerArbeidetUtlandet = any(),
                 begrunnelse = any(),
                 saksbehandlerIdent = any(),
                 relatertBehandlingId = any(),
                 frist = any(),
                 paaGrunnAvOppgave = any(),
-                opphoerFraOgMed = any(),
-                tidligereFamiliepleier = any(),
             )
 
             oppgaveService.ferdigstillOppgave(oppgaveId, any())

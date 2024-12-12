@@ -6,12 +6,13 @@ import no.nav.etterlatte.behandling.jobs.brevjobber.ArbeidStatus.FEILET
 import no.nav.etterlatte.behandling.jobs.brevjobber.ArbeidStatus.FERDIG
 import no.nav.etterlatte.behandling.jobs.brevjobber.ArbeidStatus.PAAGAAENDE
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 
-class BrevutsendelseJob(
-    private val arbeidstabellDao: ArbeidstabellDao,
+class BrevutsendelseJobb(
+    private val brevutsendelseDao: BrevutsendelseDao,
     private val brevutsendelseService: BrevutsendelseService,
 ) {
     private val saksbehandler: BrukerTokenInfo = HardkodaSystembruker.oppgave
@@ -28,7 +29,7 @@ class BrevutsendelseJob(
     private fun run() {
         logger.info("Starter jobb for masseutsendelse av brev")
 
-        val brevutsendelser = inTransaction { arbeidstabellDao.hentKlareJobber(ANTALL_SAKER, EKSKLUDERTE_SAKER) }
+        val brevutsendelser = inTransaction { brevutsendelseDao.hentNyeJobber(ANTALL_SAKER, SPESIFIKKE_SAKER, EKSKLUDERTE_SAKER) }
         logger.info("Hentet ${brevutsendelser.size} brevutsendelser som er klare for prosessering")
 
         brevutsendelser.forEach { brevutsendelse ->
@@ -48,13 +49,14 @@ class BrevutsendelseJob(
 
     // TODO oppdater status eller opprett ny rad for hver status?
     private fun oppdaterStatus(
-        jobb: Arbeidsjobb,
+        jobb: Brevutsendelse,
         status: ArbeidStatus,
-    ) = arbeidstabellDao.oppdaterJobb(jobb.oppdaterStatus(status))
+    ) = brevutsendelseDao.oppdaterJobb(jobb.oppdaterStatus(status))
 
     // TODO burde dette heller håndteres fra en tabell slik at det kan oppdateres uten å endre koden?
     companion object {
-        val ANTALL_SAKER: Long = 1
-        val EKSKLUDERTE_SAKER: List<Long> = emptyList()
+        val ANTALL_SAKER: Int = 1
+        val EKSKLUDERTE_SAKER: List<SakId> = emptyList()
+        val SPESIFIKKE_SAKER: List<SakId> = emptyList()
     }
 }

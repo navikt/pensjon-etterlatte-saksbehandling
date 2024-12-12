@@ -98,8 +98,8 @@ internal class BrevutsendelseServiceTest {
 
     private fun sak() = Sak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, SakId(1), Enhetsnummer("1234"))
 
-    private fun brevutsendelse(sakId: SakId): Arbeidsjobb =
-        lagNyArbeidsJobb(
+    private fun brevutsendelse(sakId: SakId): Brevutsendelse =
+        opprettNyBrevutsendelse(
             sakId = sakId,
             type = JobbType.TREKKPLIKT_2025,
             merknad = null,

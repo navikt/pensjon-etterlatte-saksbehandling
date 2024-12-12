@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.maskerFnr
-import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -40,7 +40,9 @@ class BrevutsendelseService(
             val gyldigBrevMottakerResultat = sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak, brukerTokenInfo)
 
             if (gyldigBrevMottakerResultat == GYLDIG_MOTTAKER) {
-                sendBrev(sak, brevutsendelse, brukerTokenInfo)
+                // TODO: lagre ned status på brev?
+                val brevStatusResponse = sendBrev(sak, brevutsendelse, brukerTokenInfo)
+
                 // TODO hvis noe feiler her, må manuell oppgave opprettes
             } else {
                 logger.info("Manuell oppgave opprettes i sak ${sak.id} fordi mottaker ikke var gyldig: ${gyldigBrevMottakerResultat.name}")
@@ -69,7 +71,7 @@ class BrevutsendelseService(
         sak: Sak,
         brevutsendelse: Arbeidsjobb,
         saksbehandler: BrukerTokenInfo,
-    ): Boolean {
+    ): BrevStatusResponse {
         logger.info("Sender brev til ${sak.ident.maskerFnr()} i sak ${sak.id}")
 
         val tomtBrev = BrevParametre.TomtBrev(Spraak.NB) // TODO placeholder inntil vi har en brevmal
@@ -78,13 +80,14 @@ class BrevutsendelseService(
             runBlocking {
                 brevKlient.opprettSpesifiktBrev(brevutsendelse.sakId, tomtBrev, saksbehandler)
             }
-        runBlocking {
-            retry(3) {
-                ferdigStillJournalFoerOgDistribuerOpprettetBrev(opprettetBrev, brevutsendelse, sak, saksbehandler)
+        val brevResponse =
+            runBlocking {
+                return@runBlocking retryOgPakkUt(3) {
+                    ferdigStillJournalFoerOgDistribuerOpprettetBrev(opprettetBrev, brevutsendelse, sak, saksbehandler)
+                }
             }
-        }
 
-        return true
+        return brevResponse
     }
 
     private fun ferdigStillJournalFoerOgDistribuerOpprettetBrev(

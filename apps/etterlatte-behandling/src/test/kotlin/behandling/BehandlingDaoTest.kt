@@ -608,7 +608,7 @@ internal class BehandlingDaoTest(
                 behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
                 behandlingRepo.lagreGyldighetsproeving(it.id, it.gyldighetsproeving())
                 kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(it.kommerBarnetTilgode!!)
-                behandlingRepo.lagreStatus(it.id, it.status, it.sistEndret)
+                behandlingRepo.lagreStatus(it)
             }
 
         with(behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling) {

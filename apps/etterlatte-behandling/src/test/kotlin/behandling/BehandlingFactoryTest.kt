@@ -204,7 +204,7 @@ internal class BehandlingFactoryTest {
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every { behandlingDaoMock.lagreGyldighetsproeving(any(), any()) } returns Unit
         every { behandlingDaoMock.hentBehandlingerForSak(any()) } returns emptyList()
-        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
+        every { behandlingDaoMock.lagreStatus(any()) } returns Unit
         every {
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(
                 any(),
@@ -392,7 +392,7 @@ internal class BehandlingFactoryTest {
         every {
             behandlingDaoMock.hentBehandlingerForSak(any())
         } returns emptyList()
-        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
+        every { behandlingDaoMock.lagreStatus(any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every {
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(
@@ -765,7 +765,7 @@ internal class BehandlingFactoryTest {
         every {
             behandlingDaoMock.hentBehandlingerForSak(any())
         } returns emptyList()
-        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
+        every { behandlingDaoMock.lagreStatus(any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every {
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(
@@ -935,7 +935,7 @@ internal class BehandlingFactoryTest {
         every {
             behandlingDaoMock.hentBehandlingerForSak(any())
         } returns emptyList()
-        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
+        every { behandlingDaoMock.lagreStatus(any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
         every {
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatisitkk(

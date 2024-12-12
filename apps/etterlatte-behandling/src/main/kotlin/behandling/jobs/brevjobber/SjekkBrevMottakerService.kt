@@ -40,6 +40,8 @@ class SjekkBrevMottakerService(
         logger.info("Sjekker om person ${sak.ident.maskerFnr()} er en gyldig brev mottaker")
         sikkerlogger().info("Sjekker om person ${sak.ident} er en gyldig brev mottaker")
 
+        // TODO Må vel ha en iverksatt sak for at dette skal sendes?
+
         // Sjekker ident
         hentPdlPersonident(sak).let { sisteIdentifikatorPdl ->
             val sisteIdent =

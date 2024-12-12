@@ -113,7 +113,7 @@ export const Avkorting = ({
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
               {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-                virkAar() == 2024 && // Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
+                virkAar() === 2024 && // Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
                 !!avkorting?.avkortingGrunnlag?.length && (
                   <AvkortingInntekt
                     behandling={behandling}

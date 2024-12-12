@@ -140,16 +140,16 @@ export function TilbakekrevingVurderingPerioderSkjema({
                 return periode.tilbakekrevingsbeloep
                   .map(leggPaaOrginalIndex)
                   .filter(klasseTypeYtelse)
-                  .map((beloeper) => {
-                    const indexBeloep = beloeper.originalIndex
+                  .map((beloep) => {
+                    const indexBeloep = beloep.originalIndex
                     return (
-                      <Table.Row key={`beloeperRad-${indexPeriode}-${indexBeloep}`} style={{ alignItems: 'start' }}>
+                      <Table.Row key={`beloepRad-${indexPeriode}-${indexBeloep}`} style={{ alignItems: 'start' }}>
                         <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
                         <Table.DataCell key="klasseKode">
-                          {tekstKlasseKode[beloeper.klasseKode] ?? beloeper.klasseKode}
+                          {tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}
                         </Table.DataCell>
-                        <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
-                        <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
+                        <Table.DataCell key="bruttoUtbetaling">{beloep.bruttoUtbetaling} kr</Table.DataCell>
+                        <Table.DataCell key="nyBruttoUtbetaling">{beloep.nyBruttoUtbetaling} kr</Table.DataCell>
                         <Table.DataCell key="beregnetFeilutbetaling">
                           <TextField
                             {...register(
@@ -169,7 +169,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
                             hideLabel={true}
                           />
                         </Table.DataCell>
-                        <Table.DataCell key="skatteprosent">{beloeper.skatteprosent} %</Table.DataCell>
+                        <Table.DataCell key="skatteprosent">{beloep.skatteprosent} %</Table.DataCell>
                         <Table.DataCell key="bruttoTilbakekreving">
                           <TextField
                             {...register(

@@ -261,23 +261,23 @@ class TilbakekrevingDao(
 
         fun addArgumentsAndBatch(
             maaned: YearMonth,
-            beloeper: Tilbakekrevingsbelop,
+            beloep: Tilbakekrevingsbelop,
         ) {
-            statement.setObject(1, beloeper.id)
+            statement.setObject(1, beloep.id)
             statement.setString(2, maaned.toString())
-            statement.setString(3, beloeper.klasseKode)
-            statement.setString(4, beloeper.klasseType)
-            statement.setInt(5, beloeper.bruttoUtbetaling)
-            statement.setInt(6, beloeper.nyBruttoUtbetaling)
-            statement.setBigDecimal(7, beloeper.skatteprosent)
-            statement.setInt(8, beloeper.beregnetFeilutbetaling)
-            statement.setInt(9, beloeper.bruttoTilbakekreving)
-            statement.setInt(10, beloeper.nettoTilbakekreving)
-            statement.setInt(11, beloeper.skatt)
-            statement.setString(12, beloeper.skyld?.name)
-            statement.setString(13, beloeper.resultat?.name)
-            statement.setInt(14, beloeper.tilbakekrevingsprosent)
-            statement.setInt(15, beloeper.rentetillegg)
+            statement.setString(3, beloep.klasseKode)
+            statement.setString(4, beloep.klasseType)
+            statement.setInt(5, beloep.bruttoUtbetaling)
+            statement.setInt(6, beloep.nyBruttoUtbetaling)
+            statement.setBigDecimal(7, beloep.skatteprosent)
+            statement.setInt(8, beloep.beregnetFeilutbetaling)
+            statement.setInt(9, beloep.bruttoTilbakekreving)
+            statement.setInt(10, beloep.nettoTilbakekreving)
+            statement.setInt(11, beloep.skatt)
+            statement.setString(12, beloep.skyld?.name)
+            statement.setString(13, beloep.resultat?.name)
+            statement.setInt(14, beloep.tilbakekrevingsprosent)
+            statement.setInt(15, beloep.rentetillegg)
             statement.setObject(16, tilbakekrevingBehandling.id)
             statement.addBatch()
         }

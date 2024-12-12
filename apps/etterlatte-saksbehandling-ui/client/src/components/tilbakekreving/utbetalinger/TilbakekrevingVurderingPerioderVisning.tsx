@@ -41,24 +41,24 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
             return periode.tilbakekrevingsbeloep
               .map(leggPaaOrginalIndex)
               .filter(klasseTypeYtelse)
-              .map((beloeper) => {
+              .map((beloep) => {
                 return (
-                  <Table.Row key={`beloeperRad-${indexPeriode}-${beloeper.originalIndex}`}>
+                  <Table.Row key={`beloepRad-${indexPeriode}-${beloep.originalIndex}`}>
                     <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
                     <Table.DataCell key="klasse">
-                      {tekstKlasseKode[beloeper.klasseKode] ?? beloeper.klasseKode}
+                      {tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}
                     </Table.DataCell>
-                    <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
-                    <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
-                    <Table.DataCell key="beregnetFeilutbetaling">{beloeper.beregnetFeilutbetaling} kr</Table.DataCell>
-                    <Table.DataCell key="skatteprosent">{beloeper.skatteprosent} %</Table.DataCell>
-                    <Table.DataCell key="bruttoTilbakekreving">{beloeper.bruttoTilbakekreving} kr</Table.DataCell>
-                    <Table.DataCell key="nettoTilbakekreving">{beloeper.nettoTilbakekreving} kr</Table.DataCell>
-                    <Table.DataCell key="skatt">{beloeper.skatt} kr</Table.DataCell>
-                    <Table.DataCell key="skyld">{teksterTilbakekrevingSkyld[beloeper.skyld!!]}</Table.DataCell>
-                    <Table.DataCell key="resultat">{teksterTilbakekrevingResultat[beloeper.resultat!!]}</Table.DataCell>
-                    <Table.DataCell key="tilbakekrevingsprosent">{beloeper.tilbakekrevingsprosent} %</Table.DataCell>
-                    <Table.DataCell key="rentetillegg">{beloeper.rentetillegg} kr</Table.DataCell>
+                    <Table.DataCell key="bruttoUtbetaling">{beloep.bruttoUtbetaling} kr</Table.DataCell>
+                    <Table.DataCell key="nyBruttoUtbetaling">{beloep.nyBruttoUtbetaling} kr</Table.DataCell>
+                    <Table.DataCell key="beregnetFeilutbetaling">{beloep.beregnetFeilutbetaling} kr</Table.DataCell>
+                    <Table.DataCell key="skatteprosent">{beloep.skatteprosent} %</Table.DataCell>
+                    <Table.DataCell key="bruttoTilbakekreving">{beloep.bruttoTilbakekreving} kr</Table.DataCell>
+                    <Table.DataCell key="nettoTilbakekreving">{beloep.nettoTilbakekreving} kr</Table.DataCell>
+                    <Table.DataCell key="skatt">{beloep.skatt} kr</Table.DataCell>
+                    <Table.DataCell key="skyld">{teksterTilbakekrevingSkyld[beloep.skyld!!]}</Table.DataCell>
+                    <Table.DataCell key="resultat">{teksterTilbakekrevingResultat[beloep.resultat!!]}</Table.DataCell>
+                    <Table.DataCell key="tilbakekrevingsprosent">{beloep.tilbakekrevingsprosent} %</Table.DataCell>
+                    <Table.DataCell key="rentetillegg">{beloep.rentetillegg} kr</Table.DataCell>
                   </Table.Row>
                 )
               })

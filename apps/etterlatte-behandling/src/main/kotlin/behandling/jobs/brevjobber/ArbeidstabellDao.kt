@@ -74,7 +74,11 @@ class ArbeidstabellDao(
             }
         }
 
-    fun hentKlareJobber(): List<Arbeidsjobb> =
+    fun hentKlareJobber(
+        antallSaker: Long,
+        ekskluderteSaker: List<Long> = emptyList(),
+    ): List<Arbeidsjobb> =
+        // TODO håndter antall saker og ekskluderte saker
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

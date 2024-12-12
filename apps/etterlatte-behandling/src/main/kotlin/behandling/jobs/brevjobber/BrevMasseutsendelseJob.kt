@@ -24,12 +24,11 @@ class BrevMasseutsendelseJob(
     }
 
     // TODO er jobber egentlig riktig begrep her - blir kanskje litt for generelt i denne sammenheng? Burde tabellen heller hete masseutsendelse_brev?
-    // TODO vi ønsker kun å hente ut et visst antall for kjøring - hva blir riktig måte å gjøre dette på?
     // TODO mer logging må på plass
     private fun run() {
         logger.info("Starter jobb for masseutsendelse av brev")
 
-        val brevutsendelser = inTransaction { arbeidstabellDao.hentKlareJobber() }
+        val brevutsendelser = inTransaction { arbeidstabellDao.hentKlareJobber(ANTALL_SAKER, EKSKLUDERTE_SAKER) }
         logger.info("Hentet ${brevutsendelser.size} brevutsendelser som er klare for prosessering")
 
         brevutsendelser.forEach { brevutsendelse ->
@@ -40,14 +39,22 @@ class BrevMasseutsendelseJob(
                     oppdaterStatus(paagaaendeBrevutsendelse, FERDIG)
                 }
             } catch (e: Exception) {
+                // TODO ønsker nok å lagre ned exception her
                 oppdaterStatus(brevutsendelse, FEILET)
                 logger.error("Feilet under brevutsendelse av type ${brevutsendelse.type.name} for sak ${brevutsendelse.sakId}", e)
             }
         }
     }
 
+    // TODO oppdater status eller opprett ny rad for hver status?
     private fun oppdaterStatus(
         jobb: Arbeidsjobb,
         status: ArbeidStatus,
     ) = arbeidstabellDao.oppdaterJobb(jobb.oppdaterStatus(status))
+
+    // TODO burde dette heller håndteres fra en tabell slik at det kan oppdateres uten å endre koden?
+    companion object {
+        val ANTALL_SAKER: Long = 1
+        val EKSKLUDERTE_SAKER: List<Long> = emptyList()
+    }
 }

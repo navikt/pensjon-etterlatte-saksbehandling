@@ -44,7 +44,7 @@ internal class ArbeidstabellDaoTest(
         val testjobb = lagNyArbeidsJobb(sakId, merknad = "testmerknad", type = JobbType.TREKKPLIKT_2025)
         arbeidstabellDao.opprettJobb(testjobb)
 
-        val nyeJobber = arbeidstabellDao.hentKlareJobber()
+        val nyeJobber = arbeidstabellDao.hentKlareJobber(1)
 
         nyeJobber.size shouldBe 1
         nyeJobber.first() shouldBe testjobb
@@ -52,7 +52,7 @@ internal class ArbeidstabellDaoTest(
         val enSakMedFlerejobber = lagNyArbeidsJobb(sakId, merknad = "jobbtoforsak", type = JobbType.TREKKPLIKT_2025)
         arbeidstabellDao.opprettJobb(enSakMedFlerejobber)
 
-        val sakMedToJobber = arbeidstabellDao.hentKlareJobber()
+        val sakMedToJobber = arbeidstabellDao.hentKlareJobber(1)
         sakMedToJobber.size shouldBe 2
     }
 }

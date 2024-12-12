@@ -26,18 +26,18 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BrevutsendelseJobTest(
+internal class BrevutsendelseJobbTest(
     val dataSource: DataSource,
 ) {
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(mockk()), mockk(), null)
 
-    private val arbeidstabellDao: ArbeidstabellDao = ArbeidstabellDao(ConnectionAutoclosingTest(dataSource))
+    private val brevutsendelseDao: BrevutsendelseDao = BrevutsendelseDao(ConnectionAutoclosingTest(dataSource))
     private val sakDao: SakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
     private val brevutsendelseService: BrevutsendelseService = mockk()
 
-    private val brevutsendelseJob: BrevutsendelseJob =
-        BrevutsendelseJob(
-            arbeidstabellDao = arbeidstabellDao,
+    private val brevutsendelseJobb: BrevutsendelseJobb =
+        BrevutsendelseJobb(
+            brevutsendelseDao = brevutsendelseDao,
             brevutsendelseService = brevutsendelseService,
         )
 
@@ -48,20 +48,20 @@ internal class BrevutsendelseJobTest(
     @AfterEach
     fun afterEach() {
         dataSource.connection.use {
-            it.prepareStatement("TRUNCATE arbeidstabell CASCADE;").execute()
+            it.prepareStatement("TRUNCATE brevutsendelse CASCADE;").execute()
         }
     }
 
     @Test
     fun `skal prosessere brevutsendelse og oppdatere status til ferdig`() {
         val sak = sakDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enhetsnummer("1234"))
-        val brevutsendelse = arbeidstabellDao.opprettJobb(nyArbeidsjobb(sak.id))
+        val brevutsendelse = brevutsendelseDao.opprettJobb(nyArbeidsjobb(sak.id))
 
         every { brevutsendelseService.prosesserBrevutsendelse(any(), any()) } just runs
 
-        brevutsendelseJob.setupKontekstAndRun(kontekst)
+        brevutsendelseJobb.setupKontekstAndRun(kontekst)
 
-        val oppdatertBrevutsendelse = arbeidstabellDao.hentJobb(brevutsendelse.id)
+        val oppdatertBrevutsendelse = brevutsendelseDao.hentJobb(brevutsendelse.id)
         oppdatertBrevutsendelse?.status shouldBe ArbeidStatus.FERDIG
 
         verify {
@@ -72,20 +72,20 @@ internal class BrevutsendelseJobTest(
     @Test
     fun `skal prosessere brevutsendelse og oppdatere status til feilet ved feil`() {
         val sak = sakDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enhetsnummer("1234"))
-        val brevutsendelse = arbeidstabellDao.opprettJobb(nyArbeidsjobb(sak.id))
+        val brevutsendelse = brevutsendelseDao.opprettJobb(nyArbeidsjobb(sak.id))
 
         every { brevutsendelseService.prosesserBrevutsendelse(any(), any()) } throws Exception("Brevutsendelse feilet")
 
-        brevutsendelseJob.setupKontekstAndRun(kontekst)
+        brevutsendelseJobb.setupKontekstAndRun(kontekst)
 
-        val oppdatertBrevutsendelse = arbeidstabellDao.hentJobb(brevutsendelse.id)
+        val oppdatertBrevutsendelse = brevutsendelseDao.hentJobb(brevutsendelse.id)
         oppdatertBrevutsendelse?.status shouldBe ArbeidStatus.FEILET
     }
 
     // TODO flere tester for ulike scenarioer
 
-    private fun nyArbeidsjobb(sakId: SakId): Arbeidsjobb =
-        lagNyArbeidsJobb(
+    private fun nyArbeidsjobb(sakId: SakId): Brevutsendelse =
+        opprettNyBrevutsendelse(
             sakId = sakId,
             type = JobbType.TREKKPLIKT_2025,
             merknad = null,

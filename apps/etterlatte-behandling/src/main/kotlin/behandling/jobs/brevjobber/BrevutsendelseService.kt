@@ -30,7 +30,7 @@ class BrevutsendelseService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun prosesserBrevutsendelse(
-        brevutsendelse: Arbeidsjobb,
+        brevutsendelse: Brevutsendelse,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         withLogContext(kv = mdcVerdier(brevutsendelse)) {
@@ -55,13 +55,13 @@ class BrevutsendelseService(
         }
     }
 
-    private fun mdcVerdier(brevutsendelse: Arbeidsjobb) =
+    private fun mdcVerdier(brevutsendelse: Brevutsendelse) =
         mapOf(
             "sakId" to brevutsendelse.sakId.toString(),
             "jobbType" to brevutsendelse.type.name,
         )
 
-    private fun hentSak(brevutsendelse: Arbeidsjobb) =
+    private fun hentSak(brevutsendelse: Brevutsendelse) =
         (
             sakService.finnSak(brevutsendelse.sakId)
                 ?: throw InternfeilException("Fant ikke sak med id ${brevutsendelse.sakId} for brevutsendelse")
@@ -69,7 +69,7 @@ class BrevutsendelseService(
 
     private fun sendBrev(
         sak: Sak,
-        brevutsendelse: Arbeidsjobb,
+        brevutsendelse: Brevutsendelse,
         saksbehandler: BrukerTokenInfo,
     ): BrevStatusResponse {
         logger.info("Sender brev til ${sak.ident.maskerFnr()} i sak ${sak.id}")
@@ -92,7 +92,7 @@ class BrevutsendelseService(
 
     private fun ferdigStillJournalFoerOgDistribuerOpprettetBrev(
         opprettetBrev: Brev,
-        brevutsendelse: Arbeidsjobb,
+        brevutsendelse: Brevutsendelse,
         sak: Sak,
         saksbehandler: BrukerTokenInfo,
     ): BrevStatusResponse =
@@ -108,7 +108,7 @@ class BrevutsendelseService(
             )
         }
 
-    private fun opprettManuellOppgave(brevutsendelse: Arbeidsjobb): OppgaveIntern =
+    private fun opprettManuellOppgave(brevutsendelse: Brevutsendelse): OppgaveIntern =
         oppgaveService.opprettOppgave(
             referanse = brevutsendelse.id.toString(),
             sakId = brevutsendelse.sakId,

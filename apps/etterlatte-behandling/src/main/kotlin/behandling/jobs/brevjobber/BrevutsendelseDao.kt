@@ -10,18 +10,18 @@ import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.util.UUID
 
-class ArbeidstabellDao(
+class BrevutsendelseDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun opprettJobb(jobb: Arbeidsjobb): Arbeidsjobb {
+    fun opprettJobb(jobb: Brevutsendelse): Brevutsendelse {
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO arbeidstabell(id, sak_id, status, merknad, resultat, opprettet, endret, jobbtype)
+                        INSERT INTO brevutsendelse(id, sak_id, status, merknad, resultat, opprettet, endret, jobbtype)
                         VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
@@ -34,20 +34,20 @@ class ArbeidstabellDao(
                 statement.setTidspunkt(7, jobb.sistEndret)
                 statement.setString(8, jobb.type.name)
                 statement.executeUpdate()
-                logger.info("Opprettet en jobb av type ${jobb.type.name} for sak ${jobb.sakId} med status ${jobb.status}")
+                logger.info("Opprettet jobb av type ${jobb.type.name} for sak ${jobb.sakId} med status ${jobb.status}")
             }
         }
 
         return hentJobb(jobb.id) ?: throw IllegalStateException("Fant ikke jobb $jobb")
     }
 
-    fun oppdaterJobb(jobb: Arbeidsjobb): Arbeidsjobb {
+    fun oppdaterJobb(jobb: Brevutsendelse): Brevutsendelse {
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
-                        UPDATE arbeidstabell SET status = ? WHERE id = ?
+                        UPDATE brevutsendelse SET status = ? WHERE id = ?
                         """.trimIndent(),
                     )
                 statement.setString(1, jobb.status.name)
@@ -58,13 +58,13 @@ class ArbeidstabellDao(
         return hentJobb(jobb.id) ?: throw IllegalStateException("Fant ikke jobb $jobb")
     }
 
-    fun hentJobb(id: UUID): Arbeidsjobb? =
+    fun hentJobb(id: UUID): Brevutsendelse? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
-                        SELECT * from arbeidstabell where id = ?
+                        SELECT * from brevutsendelse where id = ?
                         """.trimIndent(),
                     )
                 statement.setObject(1, id)
@@ -74,20 +74,38 @@ class ArbeidstabellDao(
             }
         }
 
-    fun hentKlareJobber(
-        antallSaker: Long,
-        ekskluderteSaker: List<Long> = emptyList(),
-    ): List<Arbeidsjobb> =
-        // TODO håndter antall saker og ekskluderte saker
+    fun hentNyeJobber(
+        antall: Int,
+        spesifikkeSaker: List<SakId> = emptyList(),
+        ekskluderteSaker: List<SakId> = emptyList(),
+    ): List<Brevutsendelse> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
-                        SELECT * from arbeidstabell where status = ?
+                        SELECT * FROM brevutsendelse 
+                        WHERE status = ?
+                        ${if (spesifikkeSaker.isEmpty()) "" else " AND sak_id = ANY(?)"}
+                        ${if (ekskluderteSaker.isEmpty()) "" else " AND NOT(sak_id = ANY(?))"}
+                        ORDER BY sak_id ASC
+                        LIMIT $antall
                         """.trimIndent(),
                     )
-                statement.setString(1, ArbeidStatus.NY.name)
+
+                var paramIndex = 1
+                statement.setString(paramIndex, ArbeidStatus.NY.name)
+                paramIndex += 1
+
+                if (spesifikkeSaker.isNotEmpty()) {
+                    statement.setArray(paramIndex, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                    paramIndex += 1
+                }
+                if (ekskluderteSaker.isNotEmpty()) {
+                    statement.setArray(paramIndex, createArrayOf("bigint", ekskluderteSaker.toTypedArray()))
+                    paramIndex += 1
+                }
+
                 statement.executeQuery().toList {
                     asJobb()
                 }
@@ -95,7 +113,7 @@ class ArbeidstabellDao(
         }
 
     private fun ResultSet.asJobb() =
-        Arbeidsjobb(
+        Brevutsendelse(
             id = getObject("id") as UUID,
             sakId = SakId(getLong("sak_id")),
             type = JobbType.valueOf(getString("jobbtype")),

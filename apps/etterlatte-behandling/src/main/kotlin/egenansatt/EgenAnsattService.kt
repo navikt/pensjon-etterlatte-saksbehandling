@@ -24,9 +24,10 @@ class EgenAnsattService(
         val sakerMedGradering = sakService.sjekkOmSakerErGradert(saker.map(Sak::id))
         val sakerSomHarGradering = sakerMedGradering.filter { it.adressebeskyttelseGradering?.erGradert() ?: false }
         if (sakerSomHarGradering.isNotEmpty()) return
+        val maskerFnr = skjermetHendelse.fnr.maskerFnr()
         if (saker.isEmpty()) {
             logger.debug(
-                "Fant ingen saker for skjermethendelse fnr: ${skjermetHendelse.fnr.maskerFnr()} " +
+                "Fant ingen saker for skjermethendelse fnr: $maskerFnr " +
                     "se sikkerlogg og/eller skjekk korrelasjonsid. Selvom dette var forventet," +
                     " ellers hadde ikke vi fått denne hendelsen",
             )
@@ -52,6 +53,10 @@ class EgenAnsattService(
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
         sakService.markerSakerMedSkjerming(saker.map { it.id }, skjermetHendelse.skjermet)
-        logger.info("Oppdaterte ${sakerMedNyEnhet.size} antall saker med ny enhet(skjerming)")
+        logger.info(
+            "Oppdaterte sakider: ${saker.joinToString(
+                separator = ",",
+            ) { it.id.toString() }} antall saker med ny enhet(skjerming) for fnr: $maskerFnr , skjermet: ${skjermetHendelse.skjermet}",
+        )
     }
 }

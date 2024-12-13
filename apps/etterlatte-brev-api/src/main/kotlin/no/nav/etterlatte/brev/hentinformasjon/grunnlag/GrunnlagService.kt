@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.erOver18
 import no.nav.etterlatte.brev.behandling.hentForelderVerge
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
@@ -58,11 +59,16 @@ class GrunnlagService(
         brevutfallDto: BrevutfallDto?,
         grunnlag: Grunnlag,
     ): Verge? {
+        val soekerPdl =
+            grunnlag.soeker.hentSoekerPdlV1()
+                ?: throw InternfeilException(
+                    "Finner ikke søker i grunnlaget. Dette kan komme av flere ting, bl.a. endret ident på bruker. " +
+                        "Hvis dette ikke er tilfellet må feilen meldes i Porten.",
+                )
+
         val verger =
             hentVerger(
-                grunnlag.soeker
-                    .hentSoekerPdlV1()!!
-                    .verdi.vergemaalEllerFremtidsfullmakt ?: emptyList(),
+                soekerPdl.verdi.vergemaalEllerFremtidsfullmakt ?: emptyList(),
                 grunnlag.soeker.hentFoedselsnummer()?.verdi,
             )
         return if (verger.size == 1) {

@@ -271,7 +271,7 @@ class HendelseDao(
 
                 stmt.executeUpdate()
 
-                logger.info("lagret hendelse: $hendelse")
+                logger.info("lagret hendelse for sak: ${hendelse.sakId} behandlingid: ${hendelse.behandlingId}")
             }
         }
 }

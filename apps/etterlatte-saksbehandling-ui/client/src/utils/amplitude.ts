@@ -6,6 +6,9 @@ export enum LogEvents {
 }
 
 export enum ClickEvent {
+  //AKtivitetsplikt
+  SJEKKER_SISTE_BEREGNING = 'sjekker siste beregning',
+
   // Vilkaarsvurdering
   SLETT_VILKAARSVURDERING = 'slett vilkaarsvurdering',
 

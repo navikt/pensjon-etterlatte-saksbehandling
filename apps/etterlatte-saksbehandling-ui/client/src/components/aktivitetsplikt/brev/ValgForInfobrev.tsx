@@ -27,6 +27,7 @@ import { formaterSpraak } from '~utils/formatering/formatering'
 import { LoependeUnntakInfo } from '~components/aktivitetsplikt/brev/LoependeUnntakInfo'
 import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { hentSisteIverksatteBehandlingId } from '~shared/api/sak'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
@@ -116,7 +117,12 @@ export const ValgForInfobrev = () => {
           </Heading>
         </HStack>
         {isSuccess(hentSisteIverksatteBehandlingStatus) && (
-          <Link href={`/behandling/${hentSisteIverksatteBehandlingStatus.data.id}/beregne`} as="a" target="_blank">
+          <Link
+            onClick={() => trackClick(ClickEvent.SJEKKER_SISTE_BEREGNING)}
+            href={`/behandling/${hentSisteIverksatteBehandlingStatus.data.id}/beregne`}
+            as="a"
+            target="_blank"
+          >
             Vis siste Beregning
             <ExternalLinkIcon />
           </Link>

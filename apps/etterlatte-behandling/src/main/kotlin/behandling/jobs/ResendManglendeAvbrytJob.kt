@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -93,7 +94,7 @@ class ResendManglendeAvbrytJob(
                             if (it.manglerHendelse) {
                                 hendelseDao.behandlingAvbrutt(
                                     behandling = behandling,
-                                    saksbehandler = "EY",
+                                    saksbehandler = Fagsaksystem.EY.navn,
                                     kommentar =
                                         "Behandling ble avbrutt igjennom flyt som ikke lagret hendelse. " +
                                             "Hendelse ble lagt til ${LocalDate.now()}",

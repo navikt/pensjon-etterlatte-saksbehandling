@@ -23,7 +23,7 @@ interface BehandlingHendelserKafkaProducer {
     fun sendMeldingForHendelseStatistikk(
         statistikkBehandling: StatistikkBehandling,
         hendelseType: BehandlingHendelseType,
-        overstyrtTekniskTid: Tidspunkt?,
+        overstyrtTekniskTid: Tidspunkt? = null,
     )
 
     fun sendMeldingForHendelsePaaVent(

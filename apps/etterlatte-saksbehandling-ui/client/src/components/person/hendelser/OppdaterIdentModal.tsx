@@ -9,6 +9,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { usePerson } from '~shared/statusbar/usePerson'
+import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
 export const OppdaterIdentModal = ({
   sak,
@@ -44,7 +45,9 @@ export const OppdaterIdentModal = ({
 
   return (
     <div>
-      <Button onClick={() => setIsOpen(true)}>Oppdater ident</Button>
+      <Button onClick={() => setIsOpen(true)} icon={<ArrowsCirclepathIcon />}>
+        Oppdater ident
+      </Button>
 
       <Modal
         open={isOpen}

@@ -40,6 +40,7 @@ data class OmstillingsstoenadRevurdering(
     val feilutbetaling: FeilutbetalingType,
     val bosattUtland: Boolean,
     val erInnvilgelsesaar: Boolean,
+    val tidligereFamiliepleier: Boolean,
 ) : BrevDataFerdigstilling {
     init {
         if (erOmgjoering && datoVedtakOmgjoering == null) {
@@ -57,7 +58,6 @@ data class OmstillingsstoenadRevurdering(
             trygdetid: TrygdetidDto,
             brevutfall: BrevutfallDto,
             revurderingaarsak: Revurderingaarsak?,
-            navnAvdoed: String,
             vilkaarsVurdering: VilkaarsvurderingDto,
             datoVedtakOmgjoering: LocalDate?,
             utlandstilknytning: UtlandstilknytningType?,
@@ -102,7 +102,7 @@ data class OmstillingsstoenadRevurdering(
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = navnAvdoed,
+                                navnAvdoed = null,
                             ),
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =
@@ -112,6 +112,7 @@ data class OmstillingsstoenadRevurdering(
                 feilutbetaling = feilutbetaling,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 erInnvilgelsesaar = avkortingsinfo.erInnvilgelsesaar,
+                tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
             )
         }
 

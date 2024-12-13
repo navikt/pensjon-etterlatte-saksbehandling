@@ -156,7 +156,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -164,7 +164,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -172,7 +172,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -180,7 +180,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -188,7 +188,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun leggInnNyttGrunnlagSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }

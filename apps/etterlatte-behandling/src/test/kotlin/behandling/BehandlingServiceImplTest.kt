@@ -1006,7 +1006,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(behandling.id) } returns behandling
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, TOKEN) } returns mockPersongalleri()
         coEvery { grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, any(), any()) } just runs
-        coEvery { grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any()) } just runs
+        coEvery { grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any(), any()) } just runs
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } just runs
         every { behandlingDaoMock.lagreStatus(any()) } just runs
 
@@ -1025,7 +1025,7 @@ internal class BehandlingServiceImplTest {
         val slot = slot<NyeSaksopplysninger>()
         coVerify {
             grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, capture(slot), any())
-            grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any())
+            grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any(), TOKEN)
         }
         assertEquals(behandling.sak.id, slot.captured.sakId)
 

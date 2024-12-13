@@ -210,7 +210,7 @@ internal class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
 
         val resultat =

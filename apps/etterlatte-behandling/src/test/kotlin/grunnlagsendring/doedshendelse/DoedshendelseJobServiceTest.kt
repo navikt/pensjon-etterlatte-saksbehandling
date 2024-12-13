@@ -15,7 +15,6 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarDNummer
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarUtvandret
@@ -41,10 +40,6 @@ import javax.sql.DataSource
 class DoedshendelseJobServiceTest {
     private val dao = mockk<DoedshendelseDao>()
     private val kontrollpunktService = mockk<DoedshendelseKontrollpunktService>()
-    private val toggle =
-        mockk<FeatureToggleService> {
-            every { isEnabled(any(), any()) } returns true
-        }
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val dataSource = mockk<DataSource>()
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk(), null)
@@ -67,8 +62,8 @@ class DoedshendelseJobServiceTest {
 
     private val grunnlagService =
         mockk<GrunnlagService> {
-            coEvery { leggInnNyttGrunnlagSak(any(), any()) } just runs
-            coEvery { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
+            coEvery { leggInnNyttGrunnlagSak(any(), any(), any()) } just runs
+            coEvery { leggTilNyeOpplysningerBareSak(any(), any(), any()) } just runs
         }
 
     private val pdlTjenesterKlient =

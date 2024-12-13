@@ -82,7 +82,7 @@ class BrevutsendelseService(
             }
         val brevResponse =
             runBlocking {
-                return@runBlocking retryOgPakkUt(3) {
+                retryOgPakkUt(3) {
                     ferdigStillJournalFoerOgDistribuerOpprettetBrev(opprettetBrev, brevutsendelse, sak, saksbehandler)
                 }
             }

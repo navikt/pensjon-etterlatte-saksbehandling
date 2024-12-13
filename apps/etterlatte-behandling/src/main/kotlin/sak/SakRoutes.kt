@@ -210,6 +210,19 @@ internal fun Route.sakWebRoutes(
                 )
             }
 
+            get("/behandlinger/sisteIverksatte") {
+                logger.info("Henter siste iverksatte behandling for $sakId")
+
+                val sisteIverksatteBehandling =
+                    inTransaction {
+                        behandlingService
+                            .hentSisteIverksatte(sakId)
+                            ?.let { SisteIverksatteBehandling(it.id) }
+                    } ?: throw GenerellIkkeFunnetException()
+
+                call.respond(sisteIverksatteBehandling)
+            }
+
             post("/oppdater-ident") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     val hendelseId =

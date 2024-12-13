@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, HStack, Link, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { JaNei, JaNeiRec, mapBooleanToJaNei } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
@@ -11,7 +11,7 @@ import {
 } from '~shared/api/aktivitetsplikt'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { PencilIcon } from '@navikt/aksel-icons'
+import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
@@ -19,13 +19,14 @@ import { useDispatch } from 'react-redux'
 import { setAktivtetspliktbrevdata, setBrevid } from '~store/reducers/Aktivitetsplikt12mnd'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
-import { isPending, mapFailure } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formatering/formatering'
 import { LoependeUnntakInfo } from '~components/aktivitetsplikt/brev/LoependeUnntakInfo'
 import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
+import { hentSisteIverksatteBehandlingId } from '~shared/api/sak'
 
 interface IBrevAktivitetsplikt {
   skalSendeBrev: JaNei
@@ -55,7 +56,7 @@ function mapToDto(brevdata: IBrevAktivitetsplikt): IBrevAktivitetspliktRequest {
 }
 
 export const ValgForInfobrev = () => {
-  const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
+  const { oppgave, aktivtetspliktbrevdata, sak } = useAktivitetspliktOppgaveVurdering()
   const {
     handleSubmit,
     watch,
@@ -68,8 +69,12 @@ export const ValgForInfobrev = () => {
 
   const dispatch = useDispatch()
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
+  const [hentSisteIverksatteBehandlingStatus, hentSisteIverkSatteBehandling] = useApiCall(
+    hentSisteIverksatteBehandlingId
+  )
   const [redigeres, setRedigeres] = useState<boolean>(!aktivtetspliktbrevdata)
   const brevdata = aktivtetspliktbrevdata
+
   const lagreBrevutfall = (data: IBrevAktivitetsplikt) => {
     const brevdatamappedToDo = mapToDto(data)
     lagrebrevdata(
@@ -81,6 +86,10 @@ export const ValgForInfobrev = () => {
       () => {}
     )
   }
+
+  useEffect(() => {
+    hentSisteIverkSatteBehandling(sak.id)
+  }, [sak.id])
 
   useEffect(() => {
     if (redigeres && !!aktivtetspliktbrevdata) {
@@ -106,6 +115,12 @@ export const ValgForInfobrev = () => {
             Valg for infobrev
           </Heading>
         </HStack>
+        {isSuccess(hentSisteIverksatteBehandlingStatus) && (
+          <Link href={`/behandling/${hentSisteIverksatteBehandlingStatus.data.id}/beregne`} as="a" target="_blank">
+            Vis siste Beregning
+            <ExternalLinkIcon />
+          </Link>
+        )}
         {redigeres ? (
           <form onSubmit={handleSubmit(lagreBrevutfall)}>
             <VStack gap="4">

@@ -19,6 +19,16 @@ export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<Sa
   return apiClient.post(`/personer/behandlingerforsak`, { foedselsnummer: fnr })
 }
 
+interface SisteIverksatteBehandling {
+  id: string
+}
+
+export const hentSisteIverksatteBehandlingId = async (
+  sakId: number
+): Promise<ApiResponse<SisteIverksatteBehandling>> => {
+  return apiClient.get(`/sak/${sakId}behandlinger/sisteIverksatte`)
+}
+
 export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {
   return apiClient.get(`sak/${sakId}`)
 }

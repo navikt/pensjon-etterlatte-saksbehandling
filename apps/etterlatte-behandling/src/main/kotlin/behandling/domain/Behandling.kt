@@ -133,7 +133,7 @@ sealed class Behandling {
                 "Denne behandlingstypen støtter ikke oppdatering av videreført opphør.",
         )
 
-    open fun oppdaterTidligereFamiliepleier(tidligereFamililiepleier: TidligereFamiliepleier): Behandling =
+    open fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere tidligere famililiepleier på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av tidligere famililiepleier.",

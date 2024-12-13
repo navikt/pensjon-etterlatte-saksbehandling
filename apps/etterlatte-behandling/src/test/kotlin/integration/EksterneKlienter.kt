@@ -375,7 +375,7 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun ferdigstillJournalFoerOgDistribuerBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevStatusResponse {

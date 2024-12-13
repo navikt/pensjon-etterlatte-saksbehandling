@@ -16,6 +16,8 @@ import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { UtenlandstilknytningTypeTag } from '~shared/tags/UtenlandstilknytningTypeTag'
 import { OpprettSaksgrunnlag } from '~components/person/sakOgBehandling/OpprettSaksgrunnlag'
+import { OppdaterIdentModal } from '~components/person/hendelser/OppdaterIdentModal'
+import { usePerson } from '~shared/statusbar/usePerson'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -27,6 +29,7 @@ interface Props {
 
 export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const person = usePerson()
 
   const [navkontorResult, hentNavkontor] = useApiCall(hentNavkontorForPerson)
   const [yrkesskadefordelResult, hentYrkesskadefordel] = useApiCall(hentMigrertYrkesskadeFordel)
@@ -114,6 +117,8 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
       })}
 
       {!behandlinger.length && <OpprettSaksgrunnlag sak={sak} />}
+
+      {!!person && person.foedselsnummer !== sak.ident && <OppdaterIdentModal sak={sak} hendelse={null} />}
     </VStack>
   )
 }

@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 
-data class Arbeidsjobb(
+data class Brevutsendelse(
     val id: UUID,
     val sakId: SakId,
     val type: JobbType,
@@ -13,14 +13,16 @@ data class Arbeidsjobb(
     val merknad: String? = null,
     val opprettet: Tidspunkt,
     val sistEndret: Tidspunkt,
-)
+) {
+    fun oppdaterStatus(status: ArbeidStatus): Brevutsendelse = this.copy(status = status)
+}
 
-fun lagNyArbeidsJobb(
+fun opprettNyBrevutsendelse(
     sakId: SakId,
     type: JobbType,
     merknad: String?,
-): Arbeidsjobb =
-    Arbeidsjobb(
+): Brevutsendelse =
+    Brevutsendelse(
         id = UUID.randomUUID(),
         sakId = sakId,
         type = type,

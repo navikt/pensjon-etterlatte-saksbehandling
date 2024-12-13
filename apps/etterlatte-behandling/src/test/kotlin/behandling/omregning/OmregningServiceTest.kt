@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.LagreKjoeringRequest
@@ -205,6 +206,7 @@ class OmregningServiceTest(
                 },
             )
         every { oppgaveService.fjernSaksbehandler(any()) } just runs
+        every { oppgaveService.oppdaterStatusOgMerknad(any(), any(), any()) } just runs
 
         val request =
             KjoeringRequest(
@@ -220,6 +222,11 @@ class OmregningServiceTest(
 
         verify {
             oppgaveService.fjernSaksbehandler(oppgaveId)
+            oppgaveService.oppdaterStatusOgMerknad(
+                oppgaveId,
+                "Automatisk behandling feilet - må behandles manuelt",
+                Status.UNDER_BEHANDLING,
+            )
             behandlingService.endreProsesstype(behandlingId, Prosesstype.MANUELL)
         }
     }

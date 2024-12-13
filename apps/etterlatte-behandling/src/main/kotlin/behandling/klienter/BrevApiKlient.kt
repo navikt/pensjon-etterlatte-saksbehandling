@@ -46,7 +46,7 @@ interface BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
 
-    suspend fun ferdigstillBrev(
+    suspend fun ferdigstillJournalFoerOgDistribuerBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevStatusResponse
@@ -153,7 +153,7 @@ class BrevApiKlientObo(
             )
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun ferdigstillJournalFoerOgDistribuerBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevStatusResponse =

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.jobs.brevjobber
+package no.nav.etterlatte.behandling.brevutsendelse
 
 import io.kotest.matchers.shouldBe
 import io.mockk.every

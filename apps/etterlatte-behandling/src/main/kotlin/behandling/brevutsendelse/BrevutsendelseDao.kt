@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.jobs.brevjobber
+package no.nav.etterlatte.behandling.brevutsendelse
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.sak.SakId

@@ -1,8 +1,7 @@
-package no.nav.etterlatte.behandling.jobs
+package no.nav.etterlatte.behandling.brevutsendelse
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Self
-import no.nav.etterlatte.behandling.jobs.brevjobber.BrevutsendelseJobService
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer

@@ -1,10 +1,10 @@
-package no.nav.etterlatte.behandling.jobs.brevjobber
+package no.nav.etterlatte.behandling.brevutsendelse
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.jobs.brevjobber.BrevutsendelseStatus.FEILET
-import no.nav.etterlatte.behandling.jobs.brevjobber.BrevutsendelseStatus.FERDIG
-import no.nav.etterlatte.behandling.jobs.brevjobber.BrevutsendelseStatus.PAAGAAENDE
+import no.nav.etterlatte.behandling.brevutsendelse.BrevutsendelseStatus.FEILET
+import no.nav.etterlatte.behandling.brevutsendelse.BrevutsendelseStatus.FERDIG
+import no.nav.etterlatte.behandling.brevutsendelse.BrevutsendelseStatus.PAAGAAENDE
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo

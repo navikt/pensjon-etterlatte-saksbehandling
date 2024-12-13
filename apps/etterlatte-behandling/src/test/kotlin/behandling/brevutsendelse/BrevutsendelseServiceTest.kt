@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.jobs.brevjobber
+package no.nav.etterlatte.behandling.brevutsendelse
 
 import io.mockk.coEvery
 import io.mockk.coVerifyOrder
@@ -6,8 +6,8 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verifyOrder
-import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.GYLDIG_MOTTAKER
-import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERT_IDENT
+import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.GYLDIG_MOTTAKER
+import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERT_IDENT
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Enhetsnummer

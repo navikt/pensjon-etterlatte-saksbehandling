@@ -1,7 +1,7 @@
-package no.nav.etterlatte.behandling.jobs.brevjobber
+package no.nav.etterlatte.behandling.brevutsendelse
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.GYLDIG_MOTTAKER
+import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.GYLDIG_MOTTAKER
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.brev.BrevParametre
 import no.nav.etterlatte.brev.SaksbehandlerOgAttestant

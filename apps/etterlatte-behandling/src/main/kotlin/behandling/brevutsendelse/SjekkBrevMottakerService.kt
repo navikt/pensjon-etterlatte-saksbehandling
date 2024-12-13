@@ -1,13 +1,13 @@
-package no.nav.etterlatte.behandling.jobs.brevjobber
+package no.nav.etterlatte.behandling.brevutsendelse
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.GYLDIG_MOTTAKER
+import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERTE_PERSON_OPPLYSNINGER
+import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERT_IDENT
+import no.nav.etterlatte.behandling.brevutsendelse.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_VERGEMAAL
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.GYLDIG_MOTTAKER
-import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERTE_PERSON_OPPLYSNINGER
-import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERT_IDENT
-import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_VERGEMAAL
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException

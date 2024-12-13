@@ -58,7 +58,7 @@ class BrevutsendelseService(
     private fun mdcVerdier(brevutsendelse: Brevutsendelse) =
         mapOf(
             "sakId" to brevutsendelse.sakId.toString(),
-            "jobbType" to brevutsendelse.type.name,
+            "brevutsendelseType" to brevutsendelse.type.name,
         )
 
     private fun hentSak(brevutsendelse: Brevutsendelse) =
@@ -109,11 +109,12 @@ class BrevutsendelseService(
         }
 
     private fun opprettManuellOppgave(brevutsendelse: Brevutsendelse): OppgaveIntern =
+        // TODO legg inn riktig parametere for oppgave
         oppgaveService.opprettOppgave(
             referanse = brevutsendelse.id.toString(),
             sakId = brevutsendelse.sakId,
-            kilde = null, // TODO legge inn kilde
-            type = OppgaveType.GENERELL_OPPGAVE, // TODO er dette riktig
-            merknad = "Her må det komme tekst om hva saksbehandler må gjøre", // TODO hva skal stå her?
+            kilde = null,
+            type = OppgaveType.GENERELL_OPPGAVE,
+            merknad = "Her må det komme tekst om hva saksbehandler må gjøre",
         )
 }

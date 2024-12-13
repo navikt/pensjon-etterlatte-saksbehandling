@@ -117,7 +117,7 @@ export const ValgForInfobrev = () => {
           </Heading>
         </HStack>
         {isSuccess(hentSisteIverksatteBehandlingStatus) && (
-          <Link href={`/behandling/${hentSisteIverksatteBehandlingStatus.data.id}/beregning`} as="a" target="_blank">
+          <Link href={`/behandling/${hentSisteIverksatteBehandlingStatus.data.id}/beregne`} as="a" target="_blank">
             Vis siste Beregning
             <ExternalLinkIcon />
           </Link>

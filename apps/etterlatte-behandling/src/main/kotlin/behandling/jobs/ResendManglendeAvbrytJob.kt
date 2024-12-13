@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -24,7 +23,7 @@ import java.util.Timer
 import java.util.UUID
 
 class ResendManglendeAvbrytJob(
-    private val leaderElection: LeaderElection,
+    private val erLeader: () -> Boolean,
     private val kafkaProducer: BehandlingHendelserKafkaProducer,
     private val sendManglendeMeldingerDao: SendManglendeMeldingerDao,
     private val behandlingDao: BehandlingDao,
@@ -49,7 +48,7 @@ class ResendManglendeAvbrytJob(
                 ),
         ) {
             SendManglendeAvbrytMelding(
-                leaderElection,
+                erLeader,
                 sendManglendeMeldingerDao,
                 kafkaProducer,
                 behandlingDao,
@@ -60,7 +59,7 @@ class ResendManglendeAvbrytJob(
     }
 
     class SendManglendeAvbrytMelding(
-        private val leaderElection: LeaderElection,
+        private val erLeader: () -> Boolean,
         private val sendManglendeMeldingerDao: SendManglendeMeldingerDao,
         private val kafkaProducer: BehandlingHendelserKafkaProducer,
         private val behandlingDao: BehandlingDao,
@@ -70,8 +69,9 @@ class ResendManglendeAvbrytJob(
         private val logger = LoggerFactory.getLogger(SendManglendeAvbrytMelding::class.java)
 
         fun send() {
-            if (!leaderElection.isLeader()) {
+            if (!erLeader()) {
                 logger.info("Er ikke leader, kjører ikke ${SendManglendeAvbrytMelding::class.java.simpleName}-jobb")
+                return
             }
             try {
                 val behandlinger = inTransaction { sendManglendeMeldingerDao.hentManglendeAvslagBehandling() }

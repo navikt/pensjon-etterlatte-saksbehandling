@@ -55,31 +55,31 @@ internal class BrevutsendelseJobServiceTest(
     @Test
     fun `skal prosessere brevutsendelse og oppdatere status til ferdig`() {
         val sak = sakDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enhetsnummer("1234"))
-        val brevutsendelse = brevutsendelseDao.opprettJobb(nyArbeidsjobb(sak.id))
+        val brevutsendelse = brevutsendelseDao.opprettBrevutsendelse(nyArbeidsjobb(sak.id))
 
         every { brevutsendelseService.prosesserBrevutsendelse(any(), any()) } just runs
 
         brevutsendelseJobService.setupKontekstAndRun(kontekst)
 
-        val oppdatertBrevutsendelse = brevutsendelseDao.hentJobb(brevutsendelse.id)
-        oppdatertBrevutsendelse?.status shouldBe ArbeidStatus.FERDIG
+        val oppdatertBrevutsendelse = brevutsendelseDao.hentBrevutsendelse(brevutsendelse.id)
+        oppdatertBrevutsendelse?.status shouldBe BrevutsendelseStatus.FERDIG
 
         verify {
-            brevutsendelseService.prosesserBrevutsendelse(match { it.status == ArbeidStatus.PAAGAAENDE }, any())
+            brevutsendelseService.prosesserBrevutsendelse(match { it.status == BrevutsendelseStatus.PAAGAAENDE }, any())
         }
     }
 
     @Test
     fun `skal prosessere brevutsendelse og oppdatere status til feilet ved feil`() {
         val sak = sakDao.opprettSak(SOEKER_FOEDSELSNUMMER.value, SakType.BARNEPENSJON, Enhetsnummer("1234"))
-        val brevutsendelse = brevutsendelseDao.opprettJobb(nyArbeidsjobb(sak.id))
+        val brevutsendelse = brevutsendelseDao.opprettBrevutsendelse(nyArbeidsjobb(sak.id))
 
         every { brevutsendelseService.prosesserBrevutsendelse(any(), any()) } throws Exception("Brevutsendelse feilet")
 
         brevutsendelseJobService.setupKontekstAndRun(kontekst)
 
-        val oppdatertBrevutsendelse = brevutsendelseDao.hentJobb(brevutsendelse.id)
-        oppdatertBrevutsendelse?.status shouldBe ArbeidStatus.FEILET
+        val oppdatertBrevutsendelse = brevutsendelseDao.hentBrevutsendelse(brevutsendelse.id)
+        oppdatertBrevutsendelse?.status shouldBe BrevutsendelseStatus.FEILET
     }
 
     // TODO flere tester for ulike scenarioer
@@ -87,7 +87,7 @@ internal class BrevutsendelseJobServiceTest(
     private fun nyArbeidsjobb(sakId: SakId): Brevutsendelse =
         opprettNyBrevutsendelse(
             sakId = sakId,
-            type = JobbType.TREKKPLIKT_2025,
+            type = BrevutsendelseType.TREKKPLIKT_2025,
             merknad = null,
         )
 }

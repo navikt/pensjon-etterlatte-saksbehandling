@@ -2,9 +2,9 @@ package no.nav.etterlatte.behandling.jobs.brevjobber
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.jobs.brevjobber.ArbeidStatus.FEILET
-import no.nav.etterlatte.behandling.jobs.brevjobber.ArbeidStatus.FERDIG
-import no.nav.etterlatte.behandling.jobs.brevjobber.ArbeidStatus.PAAGAAENDE
+import no.nav.etterlatte.behandling.jobs.brevjobber.BrevutsendelseStatus.FEILET
+import no.nav.etterlatte.behandling.jobs.brevjobber.BrevutsendelseStatus.FERDIG
+import no.nav.etterlatte.behandling.jobs.brevjobber.BrevutsendelseStatus.PAAGAAENDE
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -25,9 +25,9 @@ class BrevutsendelseJobService(
     }
 
     private fun run() {
-        logger.info("Starter jobb for masseutsendelse av brev")
+        logger.info("Starter jobb for utsendelse av brev")
 
-        val brevutsendelser = inTransaction { brevutsendelseDao.hentNyeJobber(ANTALL_SAKER, SPESIFIKKE_SAKER, EKSKLUDERTE_SAKER) }
+        val brevutsendelser = inTransaction { brevutsendelseDao.hentBrevutsendelser(ANTALL_SAKER, SPESIFIKKE_SAKER, EKSKLUDERTE_SAKER) }
         logger.info("Hentet ${brevutsendelser.size} brevutsendelser som er klare for prosessering")
 
         brevutsendelser.forEach { brevutsendelse ->
@@ -47,8 +47,8 @@ class BrevutsendelseJobService(
 
     private fun oppdaterStatus(
         jobb: Brevutsendelse,
-        status: ArbeidStatus,
-    ) = brevutsendelseDao.oppdaterJobb(jobb.oppdaterStatus(status))
+        status: BrevutsendelseStatus,
+    ) = brevutsendelseDao.oppdaterBrevutsendelse(jobb.oppdaterStatus(status))
 
     // TODO burde dette heller håndteres fra en tabell slik at det kan oppdateres uten å endre koden? (https://jira.adeo.no/browse/EY-4870)
     companion object {

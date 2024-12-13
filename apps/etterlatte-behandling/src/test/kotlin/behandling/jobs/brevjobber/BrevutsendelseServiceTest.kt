@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID.randomUUID
 
@@ -34,10 +33,6 @@ internal class BrevutsendelseServiceTest {
             oppgaveService = oppgaveService,
             brevKlient = brevKlient,
         )
-
-    @BeforeEach
-    fun beforeEach() {
-    }
 
     @Test
     fun `skal opprette oppgave, sende brev og ferdigstille oppgave`() {
@@ -101,7 +96,7 @@ internal class BrevutsendelseServiceTest {
     private fun brevutsendelse(sakId: SakId): Brevutsendelse =
         opprettNyBrevutsendelse(
             sakId = sakId,
-            type = JobbType.TREKKPLIKT_2025,
+            type = BrevutsendelseType.TREKKPLIKT_2025,
             merknad = null,
         )
 }

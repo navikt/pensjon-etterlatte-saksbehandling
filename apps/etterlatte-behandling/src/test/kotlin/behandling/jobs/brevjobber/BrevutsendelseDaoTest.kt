@@ -46,34 +46,34 @@ internal class BrevutsendelseDaoTest(
     fun `Kan hente enkel jobb med id`() {
         val sakId = opprettSak("123").id
         val brevutsendelse = defaultBrevutsendelse(sakId)
-        brevutsendelseDao.opprettJobb(brevutsendelse)
+        brevutsendelseDao.opprettBrevutsendelse(brevutsendelse)
 
-        val nyJobb = brevutsendelseDao.hentJobb(brevutsendelse.id)
+        val nyJobb = brevutsendelseDao.hentBrevutsendelse(brevutsendelse.id)
         nyJobb shouldBe brevutsendelse
     }
 
     @Test fun `Kan ekskludere spesifikke jobber med SakId`() {
-        val jobb1 = brevutsendelseDao.opprettJobb(defaultBrevutsendelse(opprettSak("123").id))
-        val jobb2 = brevutsendelseDao.opprettJobb(defaultBrevutsendelse(opprettSak("234").id))
-        val jobb3 = brevutsendelseDao.opprettJobb(defaultBrevutsendelse(opprettSak("345").id))
+        val jobb1 = brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(opprettSak("123").id))
+        val jobb2 = brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(opprettSak("234").id))
+        val jobb3 = brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(opprettSak("345").id))
 
-        brevutsendelseDao.hentNyeJobber(3).size shouldBe 3
+        brevutsendelseDao.hentBrevutsendelser(3).size shouldBe 3
 
-        val sakerSomIkkeErEkskludert = brevutsendelseDao.hentNyeJobber(3, ekskluderteSaker = listOf(jobb1.sakId))
+        val sakerSomIkkeErEkskludert = brevutsendelseDao.hentBrevutsendelser(3, ekskluderteSaker = listOf(jobb1.sakId))
         sakerSomIkkeErEkskludert.size shouldBe 2
         sakerSomIkkeErEkskludert[0] shouldBe jobb2
         sakerSomIkkeErEkskludert[1] shouldBe jobb3
     }
 
     @Test fun `Kan hente spesifikke nye jobber med SakId`() {
-        val jobb1 = brevutsendelseDao.opprettJobb(defaultBrevutsendelse(opprettSak("123").id))
-        val jobb2 = brevutsendelseDao.opprettJobb(defaultBrevutsendelse(opprettSak("234").id))
-        brevutsendelseDao.opprettJobb(defaultBrevutsendelse(opprettSak("345").id))
+        val jobb1 = brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(opprettSak("123").id))
+        val jobb2 = brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(opprettSak("234").id))
+        brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(opprettSak("345").id))
 
-        brevutsendelseDao.hentNyeJobber(3).size shouldBe 3
-        brevutsendelseDao.hentNyeJobber(3, listOf(jobb1.sakId)).size shouldBe 1
+        brevutsendelseDao.hentBrevutsendelser(3).size shouldBe 3
+        brevutsendelseDao.hentBrevutsendelser(3, listOf(jobb1.sakId)).size shouldBe 1
 
-        val spesifikkeJobber = brevutsendelseDao.hentNyeJobber(3, listOf(jobb1.sakId, jobb2.sakId))
+        val spesifikkeJobber = brevutsendelseDao.hentBrevutsendelser(3, listOf(jobb1.sakId, jobb2.sakId))
 
         spesifikkeJobber.size shouldBe 2
         spesifikkeJobber.get(0) shouldBe jobb1
@@ -82,23 +82,23 @@ internal class BrevutsendelseDaoTest(
 
     @Test
     fun `Kan hente spesifikk antall nye jobber`() {
-        brevutsendelseDao.opprettJobb(defaultBrevutsendelse(opprettSak("123").id))
-        brevutsendelseDao.opprettJobb(defaultBrevutsendelse(opprettSak("234").id))
-        brevutsendelseDao.opprettJobb(defaultBrevutsendelse(opprettSak("345").id))
+        brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(opprettSak("123").id))
+        brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(opprettSak("234").id))
+        brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(opprettSak("345").id))
 
-        val alleJobber = brevutsendelseDao.hentNyeJobber(3)
+        val alleJobber = brevutsendelseDao.hentBrevutsendelser(3)
         alleJobber.size shouldBe 3
 
-        val spesifikkAntallJobber = brevutsendelseDao.hentNyeJobber(2, emptyList(), emptyList())
+        val spesifikkAntallJobber = brevutsendelseDao.hentBrevutsendelser(2, emptyList(), emptyList())
         spesifikkAntallJobber.size shouldBe 2
     }
 
     @Test
     fun `Kan opprette jobb og hente nye jobber`() {
         val sakId = opprettSak("123").id
-        brevutsendelseDao.opprettJobb(defaultBrevutsendelse(sakId))
+        brevutsendelseDao.opprettBrevutsendelse(defaultBrevutsendelse(sakId))
 
-        val nyeJobber = brevutsendelseDao.hentNyeJobber(1, emptyList(), emptyList())
+        val nyeJobber = brevutsendelseDao.hentBrevutsendelser(1, emptyList(), emptyList())
 
         nyeJobber.size shouldBe 1
         nyeJobber.first().sakId shouldBe sakId
@@ -108,7 +108,7 @@ internal class BrevutsendelseDaoTest(
         opprettNyBrevutsendelse(
             sakId,
             merknad = "testmerknad",
-            type = JobbType.TREKKPLIKT_2025,
+            type = BrevutsendelseType.TREKKPLIKT_2025,
         )
 
     private fun opprettSak(fnr: String): Sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)

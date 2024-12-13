@@ -15,7 +15,7 @@ class BrevutsendelseDao(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun opprettJobb(jobb: Brevutsendelse): Brevutsendelse {
+    fun opprettBrevutsendelse(brevutsendelse: Brevutsendelse): Brevutsendelse {
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -25,23 +25,25 @@ class BrevutsendelseDao(
                         VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
-                statement.setObject(1, jobb.id)
-                statement.setLong(2, jobb.sakId.sakId)
-                statement.setString(3, jobb.status.name)
-                statement.setObject(4, jobb.merknad)
-                statement.setObject(5, jobb.resultat)
-                statement.setTidspunkt(6, jobb.opprettet)
-                statement.setTidspunkt(7, jobb.sistEndret)
-                statement.setString(8, jobb.type.name)
+                statement.setObject(1, brevutsendelse.id)
+                statement.setLong(2, brevutsendelse.sakId.sakId)
+                statement.setString(3, brevutsendelse.status.name)
+                statement.setObject(4, brevutsendelse.merknad)
+                statement.setObject(5, brevutsendelse.resultat)
+                statement.setTidspunkt(6, brevutsendelse.opprettet)
+                statement.setTidspunkt(7, brevutsendelse.sistEndret)
+                statement.setString(8, brevutsendelse.type.name)
                 statement.executeUpdate()
-                logger.info("Opprettet jobb av type ${jobb.type.name} for sak ${jobb.sakId} med status ${jobb.status}")
+                logger.info(
+                    "Opprettet brevutsendelse av type ${brevutsendelse.type.name} for sak ${brevutsendelse.sakId} med status ${brevutsendelse.status}",
+                )
             }
         }
 
-        return hentJobb(jobb.id) ?: throw IllegalStateException("Fant ikke jobb $jobb")
+        return hentBrevutsendelse(brevutsendelse.id) ?: throw IllegalStateException("Fant ikke brevutsendelse $brevutsendelse")
     }
 
-    fun oppdaterJobb(jobb: Brevutsendelse): Brevutsendelse {
+    fun oppdaterBrevutsendelse(brevutsendelse: Brevutsendelse): Brevutsendelse {
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -50,15 +52,15 @@ class BrevutsendelseDao(
                         UPDATE brevutsendelse SET status = ? WHERE id = ?
                         """.trimIndent(),
                     )
-                statement.setString(1, jobb.status.name)
-                statement.setObject(2, jobb.id)
+                statement.setString(1, brevutsendelse.status.name)
+                statement.setObject(2, brevutsendelse.id)
                 statement.executeUpdate()
             }
         }
-        return hentJobb(jobb.id) ?: throw IllegalStateException("Fant ikke jobb $jobb")
+        return hentBrevutsendelse(brevutsendelse.id) ?: throw IllegalStateException("Fant ikke brevutsendelse $brevutsendelse")
     }
 
-    fun hentJobb(id: UUID): Brevutsendelse? =
+    fun hentBrevutsendelse(id: UUID): Brevutsendelse? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -69,12 +71,12 @@ class BrevutsendelseDao(
                     )
                 statement.setObject(1, id)
                 statement.executeQuery().singleOrNull {
-                    asJobb()
+                    asBrevutsendelse()
                 }
             }
         }
 
-    fun hentNyeJobber(
+    fun hentBrevutsendelser(
         antall: Int,
         spesifikkeSaker: List<SakId> = emptyList(),
         ekskluderteSaker: List<SakId> = emptyList(),
@@ -94,7 +96,7 @@ class BrevutsendelseDao(
                     )
 
                 var paramIndex = 1
-                statement.setString(paramIndex, ArbeidStatus.NY.name)
+                statement.setString(paramIndex, BrevutsendelseStatus.NY.name)
                 paramIndex += 1
 
                 if (spesifikkeSaker.isNotEmpty()) {
@@ -106,18 +108,16 @@ class BrevutsendelseDao(
                     paramIndex += 1
                 }
 
-                statement.executeQuery().toList {
-                    asJobb()
-                }
+                statement.executeQuery().toList { asBrevutsendelse() }
             }
         }
 
-    private fun ResultSet.asJobb() =
+    private fun ResultSet.asBrevutsendelse() =
         Brevutsendelse(
             id = getObject("id") as UUID,
             sakId = SakId(getLong("sak_id")),
-            type = JobbType.valueOf(getString("jobbtype")),
-            status = ArbeidStatus.valueOf(getString("status")),
+            type = BrevutsendelseType.valueOf(getString("jobbtype")),
+            status = BrevutsendelseStatus.valueOf(getString("status")),
             resultat = getString("resultat"),
             merknad = getString("merknad"),
             opprettet = getTidspunkt("opprettet"),

@@ -342,7 +342,8 @@ class SakServiceImpl(
             sak = dao.opprettSak(fnr, type, enhet)
         }
 
-        sjekkSkjerming(fnr = fnr, sakId = sak.id)
+        sjekkSkjerming(fnr = fnr, sakId = sak.id, type = type, overstyrendeEnhet = overstyrendeEnhet)
+
         val hentetGradering =
             runBlocking {
                 pdltjenesterKlient.hentAdressebeskyttelseForPerson(
@@ -468,16 +469,30 @@ class SakServiceImpl(
     private fun sjekkSkjerming(
         fnr: String,
         sakId: SakId,
+        type: SakType,
+        overstyrendeEnhet: Enhetsnummer?,
     ) {
         val erSkjermet =
             runBlocking {
                 skjermingKlient.personErSkjermet(fnr)
             }
         if (erSkjermet) {
+            logger.info("Oppdater egen ansatt for sak $sakId")
             dao.oppdaterEnheterPaaSaker(
                 listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
             )
+        } else {
+            val sakMedSkjerming = lesDao.hentSak(sakId)!!
+            if (sakMedSkjerming.enhet == Enheter.EGNE_ANSATTE.enhetNr) {
+                val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
+                if (enhet == Enheter.EGNE_ANSATTE.enhetNr) {
+                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, Enheter.defaultEnhet.enhetNr)))
+                } else {
+                    dao.oppdaterEnheterPaaSaker(listOf(SakMedEnhet(sakId, enhet)))
+                }
+            }
         }
+
         dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
     }
 

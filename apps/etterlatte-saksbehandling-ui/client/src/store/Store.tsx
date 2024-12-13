@@ -15,6 +15,7 @@ import { oppgaveReducer } from '~store/reducers/OppgaveReducer'
 import { personopplysningerReducer } from '~store/reducers/PersonopplysningerReducer'
 import { aktivitetsplikt12mndReducer } from '~store/reducers/Aktivitetsplikt12mnd'
 import { unleashReducer } from '~store/reducers/UnleashReducer'
+import { personReducer } from '~store/reducers/PersonReducer'
 
 const reducer = {
   menuReducer: menuReducer,
@@ -28,6 +29,7 @@ const reducer = {
   tilbakekrevingReducer: tilbakekrevingReducer,
   journalfoeringOppgaveReducer: journalfoeringOppgaveReducer,
   sjekklisteReducer: sjekklisteReducer,
+  personReducer: personReducer,
   personopplysningerReducer: personopplysningerReducer,
   aktivitetsplikt12mndReducer: aktivitetsplikt12mndReducer,
   unleashReducer: unleashReducer,

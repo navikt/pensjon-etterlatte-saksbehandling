@@ -47,9 +47,9 @@ export const ReleaseAlerts = () => {
 
   return (
     <Dropdown onOpenChange={(isOpen) => open(isOpen)}>
-      <InternalHeader.Button as={Dropdown.Toggle}>
+      <InternalHeader.Button as={Dropdown.Toggle} aria-label="Vis varslinger">
         <div style={{ position: 'relative' }}>
-          <BellFillIcon style={{ fontSize: '1.5rem' }} />
+          <BellFillIcon style={{ fontSize: '1.5rem' }} aria-hidden />
           {antallUlest > 0 && <UnreadCircle>{antallUlest}</UnreadCircle>}
         </div>
       </InternalHeader.Button>

@@ -123,7 +123,7 @@ export const ValgForInfobrev = () => {
             as="a"
             target="_blank"
           >
-            Vis siste Beregning
+            Vis siste beregning
             <ExternalLinkIcon />
           </Link>
         )}

@@ -1,7 +1,9 @@
 package no.nav.etterlatte.behandling.jobs.brevjobber
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.GYLDIG_MOTTAKER
 import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERTE_PERSON_OPPLYSNINGER
 import no.nav.etterlatte.behandling.jobs.brevjobber.SjekkGyldigBrevMottakerResultat.UGYLDIG_MOTTAKER_UTDATERT_IDENT
@@ -18,7 +20,6 @@ import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 enum class SjekkGyldigBrevMottakerResultat {
     UGYLDIG_MOTTAKER_UTDATERT_IDENT,
@@ -29,6 +30,7 @@ enum class SjekkGyldigBrevMottakerResultat {
 
 class SjekkBrevMottakerService(
     private val grunnlagService: GrunnlagService,
+    private val behandlingService: BehandlingService,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -40,7 +42,9 @@ class SjekkBrevMottakerService(
         logger.info("Sjekker om person ${sak.ident.maskerFnr()} er en gyldig brev mottaker")
         sikkerlogger().info("Sjekker om person ${sak.ident} er en gyldig brev mottaker")
 
-        // TODO Må vel ha en iverksatt sak for at dette skal sendes?
+        val sisteIverksatteBehandling =
+            behandlingService.hentSisteIverksatte(sak.id)
+                ?: throw InternfeilException("Fant ingen iverksatt behandling i sak ${sak.id}")
 
         // Sjekker ident
         hentPdlPersonident(sak).let { sisteIdentifikatorPdl ->
@@ -55,7 +59,7 @@ class SjekkBrevMottakerService(
         }
 
         val opplysningerPdl = hentPdlPersonopplysning(sak)
-        val opplysningerGjenny = hentOpplysningerGjenny(sak, brukerTokenInfo)
+        val opplysningerGjenny = hentOpplysningerGjenny(sak, sisteIverksatteBehandling, brukerTokenInfo)
 
         // Sjekker vergemål
         if (!opplysningerPdl.vergemaalEllerFremtidsfullmakt.isNullOrEmpty()) {
@@ -109,13 +113,13 @@ class SjekkBrevMottakerService(
 
     private fun hentOpplysningerGjenny(
         sak: Sak,
+        behandling: Behandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Person =
         runBlocking {
             grunnlagService
                 .hentPersonopplysninger(
-                    // TODO skal vi hente siste iverksatte behandling her, eller nytt endepunkt for siste grunnlag i sak?
-                    UUID.randomUUID(),
+                    behandling.id,
                     sak.sakType,
                     brukerTokenInfo,
                 ).soeker

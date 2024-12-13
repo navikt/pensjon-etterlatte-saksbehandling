@@ -117,7 +117,7 @@ class DoedshendelseJobService(
                     "Avbryter behandling av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()} med avdød " +
                         "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkter, se sikker logg for mer info",
                 )
-                sikkerlogger().error("kontrollpunkter: " + kontrollpunkter.joinToString(","))
+                sikkerlogger().info("kontrollpunkter: " + kontrollpunkter.joinToString(","))
 
                 doedshendelseDao.oppdaterDoedshendelse(
                     doedshendelse.tilAvbrutt(

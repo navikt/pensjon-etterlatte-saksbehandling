@@ -86,7 +86,6 @@ export const ValgForInfobrev = () => {
       () => {}
     )
   }
-  //TODO: kanpp for siste beregning her
 
   useEffect(() => {
     hentSisteIverkSatteBehandling(sak.id)

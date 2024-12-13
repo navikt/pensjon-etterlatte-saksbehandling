@@ -26,7 +26,7 @@ interface SisteIverksatteBehandling {
 export const hentSisteIverksatteBehandlingId = async (
   sakId: number
 ): Promise<ApiResponse<SisteIverksatteBehandling>> => {
-  return apiClient.get(`/sak/${sakId}behandlinger/sisteIverksatte`)
+  return apiClient.get(`/sak/${sakId}/behandlinger/sisteIverksatte`)
 }
 
 export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {

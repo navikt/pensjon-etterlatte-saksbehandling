@@ -26,7 +26,7 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BrevutsendelseJobbTest(
+internal class BrevutsendelseJobServiceTest(
     val dataSource: DataSource,
 ) {
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(mockk()), mockk(), null)
@@ -35,8 +35,8 @@ internal class BrevutsendelseJobbTest(
     private val sakDao: SakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
     private val brevutsendelseService: BrevutsendelseService = mockk()
 
-    private val brevutsendelseJobb: BrevutsendelseJobb =
-        BrevutsendelseJobb(
+    private val brevutsendelseJobService: BrevutsendelseJobService =
+        BrevutsendelseJobService(
             brevutsendelseDao = brevutsendelseDao,
             brevutsendelseService = brevutsendelseService,
         )
@@ -59,7 +59,7 @@ internal class BrevutsendelseJobbTest(
 
         every { brevutsendelseService.prosesserBrevutsendelse(any(), any()) } just runs
 
-        brevutsendelseJobb.setupKontekstAndRun(kontekst)
+        brevutsendelseJobService.setupKontekstAndRun(kontekst)
 
         val oppdatertBrevutsendelse = brevutsendelseDao.hentJobb(brevutsendelse.id)
         oppdatertBrevutsendelse?.status shouldBe ArbeidStatus.FERDIG
@@ -76,7 +76,7 @@ internal class BrevutsendelseJobbTest(
 
         every { brevutsendelseService.prosesserBrevutsendelse(any(), any()) } throws Exception("Brevutsendelse feilet")
 
-        brevutsendelseJobb.setupKontekstAndRun(kontekst)
+        brevutsendelseJobService.setupKontekstAndRun(kontekst)
 
         val oppdatertBrevutsendelse = brevutsendelseDao.hentJobb(brevutsendelse.id)
         oppdatertBrevutsendelse?.status shouldBe ArbeidStatus.FEILET

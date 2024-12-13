@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import org.slf4j.LoggerFactory
 
-class BrevutsendelseJobb(
+class BrevutsendelseJobService(
     private val brevutsendelseDao: BrevutsendelseDao,
     private val brevutsendelseService: BrevutsendelseService,
 ) {
@@ -24,8 +24,6 @@ class BrevutsendelseJobb(
         run()
     }
 
-    // TODO er jobber egentlig riktig begrep her - blir kanskje litt for generelt i denne sammenheng? Burde tabellen heller hete brevutsendelse?
-    // TODO mer logging må på plass
     private fun run() {
         logger.info("Starter jobb for masseutsendelse av brev")
 
@@ -47,13 +45,12 @@ class BrevutsendelseJobb(
         }
     }
 
-    // TODO oppdater status eller opprett ny rad for hver status?
     private fun oppdaterStatus(
         jobb: Brevutsendelse,
         status: ArbeidStatus,
     ) = brevutsendelseDao.oppdaterJobb(jobb.oppdaterStatus(status))
 
-    // TODO burde dette heller håndteres fra en tabell slik at det kan oppdateres uten å endre koden?
+    // TODO burde dette heller håndteres fra en tabell slik at det kan oppdateres uten å endre koden? (https://jira.adeo.no/browse/EY-4870)
     companion object {
         val ANTALL_SAKER: Int = 1
         val EKSKLUDERTE_SAKER: List<SakId> = emptyList()

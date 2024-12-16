@@ -182,7 +182,6 @@ class AktivitetspliktOppgaveService(
                     )
                 else -> throw GenerellIkkeFunnetException()
             }
-        // TODO: legg inn at brev endrer seg her basert på oppgavetype
         return brevparametere
     }
 

@@ -347,8 +347,8 @@ class StatistikkService(
 
     private fun mapTilbakekrevingResultat(tilbakekreving: Tilbakekreving): TilbakekrevingResultat? =
         TilbakekrevingResultat.hoyesteGradAvTilbakekreving(
-            tilbakekreving.perioder.mapNotNull {
-                it.ytelse.resultat
+            tilbakekreving.perioder.flatMap { periode ->
+                periode.tilbakekrevingsbeloep.mapNotNull { beloep -> beloep.resultat }
             },
         )
 

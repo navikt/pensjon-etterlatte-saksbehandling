@@ -223,7 +223,7 @@ class RevurderingService(
                     }
                 },
                 sendMeldingForHendelse = {
-                    behandlingHendelser.sendMeldingForHendelseStatisitkk(
+                    behandlingHendelser.sendMeldingForHendelseStatistikk(
                         it.toStatistikkBehandling(persongalleri),
                         BehandlingHendelseType.OPPRETTET,
                     )

@@ -251,7 +251,7 @@ class BehandlingFactory(
                     gruppeId = persongalleri.avdoed.firstOrNull(),
                 )
             return BehandlingOgOppgave(behandling, oppgave) {
-                behandlingHendelser.sendMeldingForHendelseStatisitkk(
+                behandlingHendelser.sendMeldingForHendelseStatistikk(
                     behandling.toStatistikkBehandling(persongalleri),
                     BehandlingHendelseType.OPPRETTET,
                 )
@@ -358,7 +358,7 @@ class BehandlingFactory(
             }
         }
 
-        behandlingHendelser.sendMeldingForHendelseStatisitkk(
+        behandlingHendelser.sendMeldingForHendelseStatistikk(
             behandlingerForOmgjoering.nyFoerstegangsbehandling.toStatistikkBehandling(persongalleri),
             BehandlingHendelseType.OPPRETTET,
         )

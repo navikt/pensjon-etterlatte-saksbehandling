@@ -598,6 +598,7 @@ internal class BehandlingServiceImpl(
                         behandling.id,
                         behandling.sak.id,
                         behandling.sak.sakType,
+                        brukerTokenInfo,
                     )
                 }
                 behandlingDao.lagreStatus(behandling)
@@ -1002,6 +1003,7 @@ internal class BehandlingServiceImpl(
                             behandling.id,
                             behandling.sak.id,
                             behandling.sak.sakType,
+                            brukerTokenInfo,
                         )
                     }
                     behandlingDao.lagreStatus(behandling)

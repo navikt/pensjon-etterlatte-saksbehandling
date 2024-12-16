@@ -160,7 +160,8 @@ class AktivitetspliktOppgaveService(
         }
 
         val nasjonalEllerUtland =
-            behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
+            behandlingService.hentUtlandstilknytningForSak(oppgave.sakId)
+                ?: throw ManglerUtlandstilknytning("Mangler utlandstilknytning for sakid ${oppgave.sakId} oppgaveid: ${oppgave.id}")
 
         val brevparametere =
             when (oppgave.type) {
@@ -337,6 +338,13 @@ class FeilOppgavetype(
     msg: String,
 ) : UgyldigForespoerselException(
         code = "FEIL_OPPGAVETYPE",
+        detail = msg,
+    )
+
+class ManglerUtlandstilknytning(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "MANGLER_UTLANDSTILKNTTNING",
         detail = msg,
     )
 

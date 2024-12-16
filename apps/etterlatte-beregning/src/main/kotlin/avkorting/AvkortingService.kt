@@ -221,11 +221,14 @@ class AvkortingService(
         behandlingType: BehandlingType,
         lagretAvkorting: Avkorting,
     ) {
+        val virkningsAar = behandling.virkningstidspunkt().dato.year
+        // TODO skal forenkles.. EY-4632
         if (behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING &&
+            virkningsAar == 2024 &&
             featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, defaultValue = false)
         ) {
             val opphoerSammeAar =
-                behandling.opphoerFraOgMed?.let { it.year == behandling.virkningstidspunkt().dato.year } ?: false
+                behandling.opphoerFraOgMed?.let { it.year == virkningsAar } ?: false
             if (opphoerSammeAar || lagretAvkorting.aarsoppgjoer.size == 2) {
                 behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
             }

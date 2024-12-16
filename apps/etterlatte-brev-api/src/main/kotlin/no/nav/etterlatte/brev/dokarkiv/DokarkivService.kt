@@ -128,6 +128,6 @@ internal class DokarkivServiceImpl(
         bruker: BrukerTokenInfo,
     ): KnyttTilAnnenSakResponse =
         client.knyttTilAnnenSak(journalpostId, request, bruker).also {
-            logger.info("Journalpost knyttet til annen sak (nyJournalpostId=${it.nyJournalpostId})\n$request")
+            logger.info("Journalpost knyttet til annen sak (nyJournalpostId=${it.nyJournalpostId})")
         }
 }

@@ -401,7 +401,7 @@ internal class BehandlingServiceImpl(
         val persongalleri =
             runBlocking { grunnlagKlient.hentPersongalleri(behandlingId, saksbehandler) }
 
-        behandlingHendelser.sendMeldingForHendelseStatisitkk(
+        behandlingHendelser.sendMeldingForHendelseStatistikk(
             behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
             BehandlingHendelseType.AVBRUTT,
         )

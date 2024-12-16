@@ -52,7 +52,7 @@ export const BrevOppgaveModal = ({
 
   return (
     <>
-      <Button variant="primary" size="small" icon={<EyeIcon />} onClick={() => setIsOpen(true)}>
+      <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setIsOpen(true)}>
         Se oppgave
       </Button>
 

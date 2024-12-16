@@ -186,6 +186,17 @@ class BehandlingFactory(
     ): BehandlingOgOppgave {
         logger.info("Starter behandling i sak $sakId")
         val prosessType = Prosesstype.MANUELL
+        val harBehandlingUnderbehandling =
+            request.alleBehandlingerISak.filter { behandling ->
+                BehandlingStatus.underBehandling().find { it == behandling.status } != null
+            }
+        if (harBehandlingUnderbehandling.isNotEmpty()) {
+            throw UgyldigForespoerselException(
+                "HAR_AAPEN_BEHANDLING",
+                "Sak $sakId har allerede en åpen " +
+                    "behandling. Denne må avbrytes eller ferdigbehandles før ny behandling kan opprettes.",
+            )
+        }
         return if (request.harIverksattBehandling()) {
             if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
                 throw ManuellMigreringHarEksisterendeIverksattBehandling()
@@ -207,10 +218,6 @@ class BehandlingFactory(
                 ).oppdater()
                 .let { BehandlingOgOppgave(it, null) }
         } else {
-            val harBehandlingUnderbehandling =
-                request.alleBehandlingerISak.filter { behandling ->
-                    BehandlingStatus.underBehandling().find { it == behandling.status } != null
-                }
             val behandling =
                 opprettFoerstegangsbehandling(
                     harBehandlingUnderbehandling,
@@ -244,7 +251,7 @@ class BehandlingFactory(
                     gruppeId = persongalleri.avdoed.firstOrNull(),
                 )
             return BehandlingOgOppgave(behandling, oppgave) {
-                behandlingHendelser.sendMeldingForHendelseStatisitkk(
+                behandlingHendelser.sendMeldingForHendelseStatistikk(
                     behandling.toStatistikkBehandling(persongalleri),
                     BehandlingHendelseType.OPPRETTET,
                 )
@@ -351,7 +358,7 @@ class BehandlingFactory(
             }
         }
 
-        behandlingHendelser.sendMeldingForHendelseStatisitkk(
+        behandlingHendelser.sendMeldingForHendelseStatistikk(
             behandlingerForOmgjoering.nyFoerstegangsbehandling.toStatistikkBehandling(persongalleri),
             BehandlingHendelseType.OPPRETTET,
         )
@@ -449,9 +456,11 @@ class BehandlingFactory(
         kilde: Vedtaksloesning,
         prosessType: Prosesstype,
     ): Behandling {
-        behandlingerUnderBehandling.forEach {
-            behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
-            oppgaveService.avbrytAapneOppgaverMedReferanse(it.id.toString())
+        if (behandlingerUnderBehandling.isNotEmpty()) {
+            throw InternfeilException(
+                "Det skal ikke være mulig å komme til opprettelse av førstegangsbehandling med " +
+                    "åpne behandlinger i saken.",
+            )
         }
 
         return OpprettBehandling(

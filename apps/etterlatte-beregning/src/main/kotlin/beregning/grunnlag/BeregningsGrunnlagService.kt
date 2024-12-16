@@ -329,6 +329,13 @@ class BeregningsGrunnlagService(
             beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                 behandlingId,
                 data.perioder.map {
+                    val gyldigTrygdetid = it.data.trygdetid in 0..40
+                    if (!gyldigTrygdetid) {
+                        throw OverstyrtBeregningUgyldigTrygdetid(behandlingId)
+                    }
+
+                    // TODO her burde det sikkert være mer validering av hva saksbehandler kan sende inn
+
                     OverstyrBeregningGrunnlagDao(
                         id = UUID.randomUUID(),
                         behandlingId = behandlingId,
@@ -414,6 +421,14 @@ class BeregningsGrunnlagService(
         }
     }
 }
+
+class OverstyrtBeregningUgyldigTrygdetid(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "OVERSTYRT_BEREGNING_UGYLDIG_TRYGDETID",
+        detail = "Anvendt trygdetid må være mellom 0 og 40 år",
+        meta = mapOf("behandlingId" to behandlingId),
+    )
 
 class OverstyrtBeregningFeilBehandlingStatusException(
     behandlingId: UUID,

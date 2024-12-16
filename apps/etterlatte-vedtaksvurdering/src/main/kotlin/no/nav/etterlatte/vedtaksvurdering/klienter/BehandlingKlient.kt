@@ -200,7 +200,7 @@ class BehandlingKlientImpl(
         oppgaveTilAttestering: OppgaveIntern,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
-        logger.info("Tildeler oppgave $oppgaveTilAttestering til systembruker")
+        logger.info("Tildeler oppgaveid ${oppgaveTilAttestering.id} til systembruker")
         val response: Result<Resource, Throwable> =
             downstreamResourceClient
                 .post(

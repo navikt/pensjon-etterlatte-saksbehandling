@@ -42,7 +42,7 @@ export const GeneriskOppgaveModal = ({
 
   return (
     <>
-      <Button variant="primary" size="small" icon={<EyeIcon />} onClick={() => setOpen(true)}>
+      <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
         Se oppgave
       </Button>
 

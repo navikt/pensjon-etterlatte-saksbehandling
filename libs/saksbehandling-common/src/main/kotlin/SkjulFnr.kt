@@ -3,6 +3,9 @@ package no.nav.etterlatte.libs.common.person
 import ch.qos.logback.classic.pattern.MessageConverter
 import ch.qos.logback.classic.spi.ILoggingEvent
 
+/*
+    Denne brukes i logback.xml for å anonymisere fnr som randomly havner i loggene
+ */
 private val fnrRegex = Regex("\\b\\d{11}\\b")
 
 class FnrCoverConverter : MessageConverter() {

@@ -396,15 +396,18 @@ internal class SakServiceTest {
     fun `finnEllerOpprettSak lagre enhet hvis enhet er funnet`() {
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(KONTANT_FOT.value)
         every { sakLesDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
-        every {
-            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        } returns
+        val sak1 =
             Sak(
                 id = sakId1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
+        every { sakLesDao.hentSak(sakId1) } returns sak1
+        every {
+            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        } returns
+            sak1
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
         every { sakSkrivDao.oppdaterAdresseBeskyttelse(sakId1, AdressebeskyttelseGradering.UGRADERT) } returns 1
@@ -424,12 +427,7 @@ internal class SakServiceTest {
         val sak = service.finnEllerOpprettSakMedGrunnlag(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
         sak shouldBe
-            Sak(
-                ident = KONTANT_FOT.value,
-                sakType = SakType.BARNEPENSJON,
-                id = sakId1,
-                enhet = Enheter.PORSGRUNN.enhetNr,
-            )
+            sak1
 
         coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(KONTANT_FOT.value) }
         verify(exactly = 1) { sakLesDao.finnSakMedGraderingOgSkjerming(any()) }
@@ -468,15 +466,18 @@ internal class SakServiceTest {
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         coEvery { grunnlagservice.grunnlagFinnes(any(), any()) } returns true
         every { sakSkrivDao.markerSakerMedSkjerming(any(), any()) } just runs
-        every {
-            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        } returns
+        val sak1 =
             Sak(
                 id = sakId1,
                 ident = KONTANT_FOT.value,
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
+        every {
+            sakSkrivDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        } returns
+            sak1
+        every { sakLesDao.hentSak(sakId1) } returns sak1
 
         coEvery {
             pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
@@ -505,12 +506,7 @@ internal class SakServiceTest {
             )
 
         sak shouldBe
-            Sak(
-                ident = KONTANT_FOT.value,
-                sakType = SakType.BARNEPENSJON,
-                id = sakId1,
-                enhet = Enheter.PORSGRUNN.enhetNr,
-            )
+            sak1
 
         verify(exactly = 1) {
             service.oppdaterAdressebeskyttelse(

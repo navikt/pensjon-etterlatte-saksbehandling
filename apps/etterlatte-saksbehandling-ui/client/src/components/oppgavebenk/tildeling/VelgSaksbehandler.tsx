@@ -265,7 +265,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
         <Dropdown open={openDropdown}>
           <Button
             as={Dropdown.Toggle}
-            icon={valgtSaksbehandler?.ident ? <PersonPencilIcon /> : <PersonPlusIcon />}
+            icon={valgtSaksbehandler?.ident ? <PersonPencilIcon aria-hidden /> : <PersonPlusIcon aria-hidden />}
             iconPosition="left"
             size="small"
             variant="tertiary"
@@ -328,7 +328,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
         </Dropdown>
       ) : (
         <SaksbehandlerNavnHStack gap="2" align="center">
-          <PersonIcon width="1.5rem" height="1.5rem" />
+          <PersonIcon width="1.5rem" height="1.5rem" aria-hidden />
           <Label size="small" textColor="subtle">
             {saksbehandler ? saksbehandler.navn : 'Navn mangler'}
           </Label>

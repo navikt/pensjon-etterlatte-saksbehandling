@@ -1,12 +1,16 @@
 package no.nav.etterlatte.behandling.jobs
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.SendManglendeMeldingerDao
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
@@ -17,11 +21,13 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
 import java.util.Timer
 import java.util.UUID
+import javax.sql.DataSource
 
 class ResendManglendeAvbrytJob(
     private val erLeader: () -> Boolean,
@@ -30,11 +36,21 @@ class ResendManglendeAvbrytJob(
     private val behandlingDao: BehandlingDao,
     private val grunnlagKlient: GrunnlagKlient,
     private val hendelseDao: HendelseDao,
+    sakTilgangDao: SakTilgangDao,
+    dataSource: DataSource,
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(ResendManglendeAvbrytJob::class.java)
     private val jobbNavn = ResendManglendeAvbrytJob::class.java.simpleName
     private val initialDelay = Duration.ofMinutes(3L)
     private val period = Duration.ofMinutes(3L)
+
+    private var jobContext: Context =
+        Context(
+            AppUser = Self(SendManglendeAvbrytMelding::class.java.simpleName),
+            databasecontxt = DatabaseContext(dataSource),
+            sakTilgangDao = sakTilgangDao,
+            HardkodaSystembruker.statistikk,
+        )
 
     override fun schedule(): Timer {
         logger.info("Jobb $jobbNavn startet med initialDelay $initialDelay med periode $period")
@@ -55,7 +71,7 @@ class ResendManglendeAvbrytJob(
                 behandlingDao,
                 grunnlagKlient,
                 hendelseDao,
-            ).send()
+            ).setUpKontekstAndSend(jobContext)
         }
     }
 
@@ -69,7 +85,12 @@ class ResendManglendeAvbrytJob(
     ) {
         private val logger = LoggerFactory.getLogger(SendManglendeAvbrytMelding::class.java)
 
-        fun send() {
+        fun setUpKontekstAndSend(context: Context) {
+            Kontekst.set(context)
+            send()
+        }
+
+        private fun send() {
             if (!erLeader()) {
                 logger.info("Er ikke leader, kjører ikke ${SendManglendeAvbrytMelding::class.java.simpleName}-jobb")
                 return

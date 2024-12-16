@@ -37,6 +37,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
@@ -101,11 +102,18 @@ class DoedshendelseJobService(
                 val sak = doedshendelse.sakId?.toString() ?: "mangler"
                 when (e) {
                     is SocketException, is SocketTimeoutException -> {
-                        logger.error("Kontrollerpunkter feilet på nettverksproblemer, Burde løses på neste retry sak: $sak.", e)
+                        logger.error(
+                            "Kontrollerpunkter feilet på nettverksproblemer, Burde løses på neste retry sak: $sak.",
+                            e,
+                        )
                         throw e
                     }
+
                     else -> {
-                        logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak. Ukjent feil: msg: ${e.message}", e)
+                        logger.error(
+                            "Kunne ikke identifisere kontrollpunkter for sak $sak. Ukjent feil: msg: ${e.message}",
+                            e,
+                        )
                         throw e
                     }
                 }
@@ -180,7 +188,13 @@ class DoedshendelseJobService(
                 innsender = Vedtaksloesning.GJENNY.name,
             )
 
-        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri) }
+        runBlocking {
+            grunnlagService.leggInnNyttGrunnlagSak(
+                sak = opprettetSak,
+                galleri,
+                HardkodaSystembruker.doedshendelse,
+            )
+        }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
 
         val spraak = hentSpraak(doedshendelse)
@@ -189,6 +203,7 @@ class DoedshendelseJobService(
             grunnlagService.leggTilNyeOpplysningerBareSak(
                 sakId = opprettetSak.id,
                 opplysninger = NyeSaksopplysninger(opprettetSak.id, listOf(spraakOpplysning)),
+                HardkodaSystembruker.doedshendelse,
             )
         }
         return opprettetSak
@@ -240,6 +255,7 @@ class DoedshendelseJobService(
                     val under18aar = sjekkUnder18aar(doedshendelse)
                     deodshendelserProducer.sendBrevRequestBP(sak, borIUtlandet, !under18aar)
                 }
+
                 SakType.OMSTILLINGSSTOENAD -> deodshendelserProducer.sendBrevRequestOMS(sak, borIUtlandet)
             }
             return true
@@ -267,6 +283,7 @@ class DoedshendelseJobService(
                         saktype = SakType.BARNEPENSJON,
                     )
                 }
+
                 SakType.OMSTILLINGSSTOENAD -> {
                     pdlTjenesterKlient.hentPdlModellForSaktype(
                         foedselsnummer = doedshendelse.beroertFnr,

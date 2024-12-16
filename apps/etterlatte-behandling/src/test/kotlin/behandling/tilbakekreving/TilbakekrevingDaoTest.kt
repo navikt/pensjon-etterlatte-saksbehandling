@@ -73,7 +73,13 @@ class TilbakekrevingDaoTest(
                         perioder =
                             lagret.tilbakekreving.perioder.map {
                                 it.copy(
-                                    ytelse = it.ytelse.copy(beregnetFeilutbetaling = 123),
+                                    tilbakekrevingsbeloep =
+                                        it.tilbakekrevingsbeloep
+                                            .map { beloep ->
+                                                beloep.copy(
+                                                    beregnetFeilutbetaling = 123,
+                                                )
+                                            },
                                 )
                             },
                     ),

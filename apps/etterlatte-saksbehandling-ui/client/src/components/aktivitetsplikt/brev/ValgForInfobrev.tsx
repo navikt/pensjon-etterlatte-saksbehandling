@@ -14,7 +14,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
-import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, Oppgavestatus } from '~shared/types/oppgave'
 import { useDispatch } from 'react-redux'
 import { setAktivtetspliktbrevdata, setBrevid } from '~store/reducers/Aktivitetsplikt12mnd'
 import { useNavigate } from 'react-router'
@@ -73,7 +73,9 @@ export const ValgForInfobrev = () => {
   const [hentSisteIverksatteBehandlingStatus, hentSisteIverksatteBehandling] = useApiCall(
     hentSisteIverksatteBehandlingId
   )
-  const [redigeres, setRedigeres] = useState<boolean>(!aktivtetspliktbrevdata)
+
+  const gammelFlyt = oppgave.status === Oppgavestatus.FERDIGSTILT && !aktivtetspliktbrevdata
+  const [redigeres, setRedigeres] = useState<boolean>(!gammelFlyt)
   const brevdata = aktivtetspliktbrevdata
 
   const lagreBrevutfall = (data: IBrevAktivitetsplikt) => {
@@ -253,13 +255,21 @@ export const ValgForInfobrev = () => {
             )}
           </VStack>
         )}
-        <NesteEllerOpprettBrevValg />
+        <BodyShort>
+          Denne oppgaven er fra en gammel vurdering, derfor har den ingen brevvalg eller muligheten til å lagre dette.
+          For å se på brevet må du gå til brevoversikten til brukeren.
+        </BodyShort>
+        <NesteEllerOpprettBrevValg gammelFlyt={gammelFlyt} />
       </VStack>
     </Box>
   )
 }
 
-function NesteEllerOpprettBrevValg() {
+interface NesteEllerOpprettBrevValgProps {
+  gammelFlyt: boolean
+}
+
+function NesteEllerOpprettBrevValg({ gammelFlyt }: NesteEllerOpprettBrevValgProps) {
   const { oppgave, aktivtetspliktbrevdata } = useAktivitetspliktOppgaveVurdering()
   const navigate = useNavigate()
 
@@ -294,12 +304,16 @@ function NesteEllerOpprettBrevValg() {
         {mapFailure(opprettBrevStatus, (error) => (
           <ApiErrorAlert>Kunne ikke opprette brev: {error.detail}</ApiErrorAlert>
         ))}
-        {skalOppretteBrev ? (
-          <Button onClick={opprettBrev} loading={isPending(opprettBrevStatus)}>
-            Opprett og gå til brev
-          </Button>
-        ) : (
-          <Button onClick={() => navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)}>Neste</Button>
+        {!gammelFlyt && (
+          <>
+            {skalOppretteBrev ? (
+              <Button onClick={opprettBrev} loading={isPending(opprettBrevStatus)}>
+                Opprett og gå til brev
+              </Button>
+            ) : (
+              <Button onClick={() => navigate(`../${AktivitetspliktSteg.OPPSUMMERING_OG_BREV}`)}>Neste</Button>
+            )}
+          </>
         )}
       </HStack>
     </Box>

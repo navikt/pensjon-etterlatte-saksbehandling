@@ -670,6 +670,8 @@ internal class ApplicationContext(
             behandlingDao = behandlingDao,
             grunnlagKlient = grunnlagKlientImpl,
             hendelseDao = hendelseDao,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

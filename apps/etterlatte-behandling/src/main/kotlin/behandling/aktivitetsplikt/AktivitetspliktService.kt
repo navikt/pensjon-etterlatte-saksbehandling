@@ -450,6 +450,7 @@ class AktivitetspliktService(
 
     fun hentVurderingForOppgaveGammel(oppgaveId: UUID): AktivitetspliktVurderingGammel? {
         val vurdering = hentVurderingForOppgave(oppgaveId)
+        // Denne må returnere null for at frontend skal fungerer riktig
         return if (vurdering.erTom()) {
             null
         } else {

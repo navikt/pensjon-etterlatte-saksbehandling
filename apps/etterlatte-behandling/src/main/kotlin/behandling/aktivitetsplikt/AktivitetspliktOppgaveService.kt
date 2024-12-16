@@ -161,13 +161,29 @@ class AktivitetspliktOppgaveService(
 
         val nasjonalEllerUtland =
             behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-        return BrevParametre.AktivitetspliktInformasjon10Mnd(
-            aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
-            utbetaling = brevdata.utbetaling!!,
-            redusertEtterInntekt = brevdata.redusertEtterInntekt!!,
-            nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
-            spraak = brevdata.spraak!!,
-        )
+
+        val brevparametere =
+            when (oppgave.type) {
+                OppgaveType.AKTIVITETSPLIKT ->
+                    BrevParametre.AktivitetspliktInformasjon4Mnd(
+                        aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
+                        utbetaling = brevdata.utbetaling!!,
+                        redusertEtterInntekt = brevdata.redusertEtterInntekt!!,
+                        nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
+                        spraak = brevdata.spraak!!,
+                    )
+                OppgaveType.AKTIVITETSPLIKT_12MND ->
+                    BrevParametre.AktivitetspliktInformasjon10Mnd(
+                        aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
+                        utbetaling = brevdata.utbetaling!!,
+                        redusertEtterInntekt = brevdata.redusertEtterInntekt!!,
+                        nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
+                        spraak = brevdata.spraak!!,
+                    )
+                else -> throw GenerellIkkeFunnetException()
+            }
+        // TODO: legg inn at brev endrer seg her basert på oppgavetype
+        return brevparametere
     }
 
     private fun mapAktivitetsgradstypeTilAktivtetsgrad(aktivitetsgrad: AktivitetspliktAktivitetsgradType): Aktivitetsgrad =

@@ -70,7 +70,7 @@ export const ValgForInfobrev = () => {
 
   const dispatch = useDispatch()
   const [lagrebrevdataStatus, lagrebrevdata, tilbakestillApiResult] = useApiCall(lagreAktivitetspliktBrevdata)
-  const [hentSisteIverksatteBehandlingStatus, hentSisteIverkSatteBehandling] = useApiCall(
+  const [hentSisteIverksatteBehandlingStatus, hentSisteIverksatteBehandling] = useApiCall(
     hentSisteIverksatteBehandlingId
   )
   const [redigeres, setRedigeres] = useState<boolean>(!aktivtetspliktbrevdata)
@@ -89,7 +89,7 @@ export const ValgForInfobrev = () => {
   }
 
   useEffect(() => {
-    hentSisteIverkSatteBehandling(sak.id)
+    hentSisteIverksatteBehandling(sak.id)
   }, [sak.id])
 
   useEffect(() => {

@@ -448,13 +448,20 @@ class AktivitetspliktService(
         return AktivitetspliktVurdering(aktivitetsgrad, unntak)
     }
 
-    fun hentVurderingForOppgaveGammel(oppgaveId: UUID): AktivitetspliktVurderingGammel? =
-        hentVurderingForOppgave(oppgaveId).let {
-            AktivitetspliktVurderingGammel(
-                aktivitet = it.aktivitet.firstOrNull(),
-                unntak = it.unntak.firstOrNull(),
-            )
+    fun hentVurderingForOppgaveGammel(oppgaveId: UUID): AktivitetspliktVurderingGammel? {
+        val vurdering = hentVurderingForOppgave(oppgaveId)
+        // Denne må returnere null for at frontend skal fungerer riktig
+        return if (vurdering.erTom()) {
+            null
+        } else {
+            vurdering.let {
+                AktivitetspliktVurderingGammel(
+                    aktivitet = it.aktivitet.firstOrNull(),
+                    unntak = it.unntak.firstOrNull(),
+                )
+            }
         }
+    }
 
     fun hentVurderingForBehandling(behandlingId: UUID): AktivitetspliktVurdering? {
         val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)

@@ -1194,6 +1194,7 @@ internal class BehandlingFactoryTest {
             opphoerFraOgMed = null,
             utlandstilknytning = null,
             sendeBrev = true,
+            tidligereFamiliepleier = null,
         )
 
     private fun foerstegangsbehandling(

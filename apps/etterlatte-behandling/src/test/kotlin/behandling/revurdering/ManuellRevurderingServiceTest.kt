@@ -890,9 +890,6 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 any(),
                 any(),
                 any(),
-                any(),
-                any(),
-                opphoerFraOgMed = null,
             )
         }
     }

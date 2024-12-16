@@ -206,18 +206,15 @@ class BehandlingFactory(
                 .opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleri,
-                    forrigeBehandling = forrigeBehandling.id,
+                    forrigeBehandling = forrigeBehandling,
                     mottattDato = mottattDato,
                     prosessType = Prosesstype.MANUELL,
                     kilde = kilde,
                     revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
                     virkningstidspunkt = null,
-                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
-                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                     begrunnelse = null,
                     saksbehandlerIdent = null,
                     frist = null,
-                    opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
                 ).oppdater()
                 .let { BehandlingOgOppgave(it, null) }
         } else {

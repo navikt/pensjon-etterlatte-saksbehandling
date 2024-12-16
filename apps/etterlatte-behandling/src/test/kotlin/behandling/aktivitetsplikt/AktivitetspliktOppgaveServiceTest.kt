@@ -410,7 +410,7 @@ class AktivitetspliktOppgaveServiceTest {
             )
         every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } throws OppgaveKanIkkeEndres(oppgaveId, Status.AVBRUTT)
         every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
-        coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
+        coEvery { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) } returns
             BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.DISTRIBUERT)
 
         assertThrows<FeilIOppgave> {
@@ -446,11 +446,11 @@ class AktivitetspliktOppgaveServiceTest {
             )
         every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
         every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } just Runs
-        coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
+        coEvery { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) } returns
             BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.DISTRIBUERT)
         service.ferdigstillBrevOgOppgave(oppgaveId, simpleSaksbehandler)
         verify(exactly = 1) { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) }
-        coVerify(exactly = 1) { brevApiKlient.ferdigstillBrev(any(), any()) }
+        coVerify(exactly = 1) { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) }
     }
 
     @Test
@@ -480,7 +480,7 @@ class AktivitetspliktOppgaveServiceTest {
             )
         every { oppgaveService.ferdigstillOppgave(oppgaveId, simpleSaksbehandler) } returns mockk<OppgaveIntern>()
         every { oppgaveService.sjekkOmKanFerdigstilleOppgave(any(), any()) } just Runs
-        coEvery { brevApiKlient.ferdigstillBrev(any(), any()) } returns
+        coEvery { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(any(), any()) } returns
             BrevStatusResponse(brevId, no.nav.etterlatte.brev.model.Status.JOURNALFOERT)
         assertThrows<BrevBleIkkeFerdig> {
             service.ferdigstillBrevOgOppgave(oppgaveId, simpleSaksbehandler)

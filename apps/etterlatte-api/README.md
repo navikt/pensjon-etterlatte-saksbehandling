@@ -11,9 +11,12 @@ Omstillingsstønad er en samordningspliktig ytelse. Applikasjonen tilbyr tjenest
 
 
 ## Autentisering
+#### Maskinporten
+Nytt scope for etterlatte-api med Maskinporten _nav:etterlatteytelser/vedtaksinformasjon.read_
 
-Tjenesten krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:vedtaksinformasjon.read_
+etterlatte-samordning-vedtak(gammel og skal saneres) krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:vedtaksinformasjon.read_
 
+#### Azure & Tokenx
 For interne må det legges inn i yaml filene slik som beskrevet her https://docs.nais.io/auth/entra-id/
 
 ### Autorisasjon

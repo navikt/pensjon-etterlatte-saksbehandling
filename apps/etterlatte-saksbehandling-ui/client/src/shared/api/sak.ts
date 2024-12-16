@@ -19,6 +19,16 @@ export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<Sa
   return apiClient.post(`/personer/behandlingerforsak`, { foedselsnummer: fnr })
 }
 
+interface SisteIverksatteBehandling {
+  id: string
+}
+
+export const hentSisteIverksatteBehandlingId = async (
+  sakId: number
+): Promise<ApiResponse<SisteIverksatteBehandling>> => {
+  return apiClient.get(`/sak/${sakId}/behandlinger/sisteIverksatte`)
+}
+
 export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {
   return apiClient.get(`sak/${sakId}`)
 }
@@ -43,6 +53,13 @@ export const byttEnhetPaaSak = async (args: { sakId: number; enhet: string }): P
   return apiClient.post(`sak/${args.sakId}/endre-enhet`, { enhet: args.enhet })
 }
 
-export const oppdaterIdentPaaSak = async (args: { sakId: number; hendelseId: string }): Promise<ApiResponse<ISak>> => {
-  return apiClient.post(`sak/${args.sakId}/oppdater-ident?hendelseId=${args.hendelseId}`, {})
+export const oppdaterIdentPaaSak = async (args: {
+  sakId: number
+  hendelseId?: string
+  utenHendelse: boolean
+}): Promise<ApiResponse<ISak>> => {
+  return apiClient.post(`sak/${args.sakId}/oppdater-ident`, {
+    hendelseId: args.hendelseId,
+    utenHendelse: args.utenHendelse,
+  })
 }

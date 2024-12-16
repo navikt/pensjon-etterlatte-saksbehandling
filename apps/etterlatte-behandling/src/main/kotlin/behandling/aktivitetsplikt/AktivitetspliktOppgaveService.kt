@@ -180,7 +180,7 @@ class AktivitetspliktOppgaveService(
                         nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
                         spraak = brevdata.spraak!!,
                     )
-                else -> throw GenerellIkkeFunnetException()
+                else -> throw FeilOppgavetype("Prøver å lage aktivitetsplikt med oppgavetype: ${oppgave.type} id: ${oppgave.id}")
             }
         return brevparametere
     }
@@ -330,6 +330,13 @@ class BrevFeil(
     msg: String,
 ) : UgyldigForespoerselException(
         code = "FEIL_I_BREV_FORESPØRSEL",
+        detail = msg,
+    )
+
+class FeilOppgavetype(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "FEIL_OPPGAVETYPE",
         detail = msg,
     )
 

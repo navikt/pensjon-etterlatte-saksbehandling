@@ -232,12 +232,12 @@ class AktivitetspliktOppgaveService(
         }
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
-            val brevParametreAktivitetsplikt10mnd = mapOgValiderBrevParametre(oppgave, brevData)
+            val brevparametereAktivitetspliktVurdering = mapOgValiderBrevParametre(oppgave, brevData)
             val opprettetBrev =
                 runBlocking {
                     brevApiKlient.opprettSpesifiktBrev(
                         oppgave.sakId,
-                        brevParametreAktivitetsplikt10mnd,
+                        brevparametereAktivitetspliktVurdering,
                         brukerTokenInfo = brukerTokenInfo,
                     )
                 }

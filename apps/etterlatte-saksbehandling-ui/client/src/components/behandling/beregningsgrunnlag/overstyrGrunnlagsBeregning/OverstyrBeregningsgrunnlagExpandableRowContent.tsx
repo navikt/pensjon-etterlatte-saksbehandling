@@ -11,7 +11,7 @@ export const OverstyrBeregningsgrunnlagExpandableRowContent = ({
   return (
     <HStack gap="8">
       <div>
-        <Label>Anvendt trygdetid</Label>
+        <Label>Anvendt trygdetid (år)</Label>
         <BodyShort>{overtyrBeregningsgrunnlagPeriode.data.trygdetid}</BodyShort>
       </div>
       <div>

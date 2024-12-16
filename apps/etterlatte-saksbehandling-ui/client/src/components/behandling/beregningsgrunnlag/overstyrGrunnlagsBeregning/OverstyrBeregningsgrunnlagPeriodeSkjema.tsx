@@ -149,9 +149,10 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
               valueAsNumber: true,
               required: { value: true, message: 'Må settes' },
               min: { value: 0, message: 'Kan ikke være negativ' },
+              max: { value: 40, message: 'Kan ikke være mer enn 40 år' },
               validate: validerStringNumber,
             })}
-            label="Anvendt trygdetid"
+            label="Anvendt trygdetid (år)"
             error={errors.data?.trygdetid?.message}
           />
           <TextField

@@ -36,8 +36,8 @@ data class ManuellRevurdering(
     override val begrunnelse: String?,
     override val relatertBehandlingId: String?,
     override val sendeBrev: Boolean,
-    override val opphoerFraOgMed: YearMonth? = null,
-    override val tidligereFamiliepleier: TidligereFamiliepleier? = null,
+    override val opphoerFraOgMed: YearMonth?,
+    override val tidligereFamiliepleier: TidligereFamiliepleier?,
 ) : Revurdering(
         id = id,
         sak = sak,
@@ -81,6 +81,11 @@ data class ManuellRevurdering(
     override fun oppdaterViderefoertOpphoer(viderefoertOpphoer: ViderefoertOpphoer?) =
         hvisRedigerbar {
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(opphoerFraOgMed = viderefoertOpphoer?.dato)
+        }
+
+    override fun oppdaterTidligereFamiliepleier(tidligereFamiliepleier: TidligereFamiliepleier) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(tidligereFamiliepleier = tidligereFamiliepleier)
         }
 
     override fun tilOpprettet() = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }

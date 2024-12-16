@@ -132,7 +132,12 @@ export const FilterRad = ({
       </HStack>
 
       <HStack gap="4">
-        <Button onClick={() => hentAlleOppgaver()} size="small" icon={<ArrowCirclepathIcon />} iconPosition="right">
+        <Button
+          onClick={() => hentAlleOppgaver()}
+          size="small"
+          icon={<ArrowCirclepathIcon aria-hidden />}
+          iconPosition="right"
+        >
           Hent oppgaver
         </Button>
         <Button
@@ -144,7 +149,7 @@ export const FilterRad = ({
             setFilter(filter)
           }}
           size="small"
-          icon={<ArrowUndoIcon />}
+          icon={<ArrowUndoIcon aria-hidden />}
           iconPosition="right"
         >
           Tilbakestill filtre

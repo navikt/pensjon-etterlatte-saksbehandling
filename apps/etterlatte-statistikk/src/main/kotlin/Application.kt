@@ -6,6 +6,7 @@ import no.nav.etterlatte.statistikk.config.ApplicationContext
 fun main() =
     with(ApplicationContext()) {
         maanedligStatistikkJob.schedule().also { addShutdownHook(it) }
+        ryddVedtakResultatJob.schedule().also { addShutdownHook(it) }
         initRapidsConnection()
         sikkerLoggOppstart("etterlatte-statistikk")
     }

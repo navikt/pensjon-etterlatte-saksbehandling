@@ -19,11 +19,13 @@ import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
+import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
@@ -48,7 +50,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.persongalleri
@@ -243,11 +244,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                revurdering.id,
-                BehandlingStatus.IVERKSATT,
-                LocalDateTime.now(),
-            )
+            iverksett(revurdering, "saksbehandler")
         }
 
         assertThrows<BehandlingKanIkkeEndres> {
@@ -534,11 +531,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                behandling!!.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            iverksett(behandling!!)
             ferdigstillOppgaver(behandling, saksbehandler)
         }
         val revurderingen =
@@ -738,11 +731,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
         }
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                nonNullBehandling.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            applicationContext.behandlingDao.lagreStatus(nonNullBehandling.copy(status = BehandlingStatus.IVERKSATT))
             ferdigstillOppgaver(behandling, saksbehandler)
         }
 
@@ -901,20 +890,22 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 any(),
                 any(),
                 any(),
-                any(),
-                any(),
-                opphoerFraOgMed = null,
             )
         }
     }
 
-    private fun iverksett(behandling: Behandling) {
-        applicationContext.behandlingDao.lagreStatus(
-            behandling.id,
-            BehandlingStatus.IVERKSATT,
-            Tidspunkt.now().toLocalDatetimeUTC(),
-        )
-        ferdigstillOppgaver(behandling)
+    private fun iverksett(
+        behandling: Behandling,
+        saksbehandlerId: String = "sbh",
+    ) {
+        val iverksatt =
+            when (behandling) {
+                is Foerstegangsbehandling -> behandling.copy(status = BehandlingStatus.IVERKSATT)
+                is ManuellRevurdering -> behandling.copy(status = BehandlingStatus.IVERKSATT)
+                is AutomatiskRevurdering -> behandling.copy(status = BehandlingStatus.IVERKSATT)
+            }
+        applicationContext.behandlingDao.lagreStatus(iverksatt)
+        ferdigstillOppgaver(behandling, saksbehandlerId)
     }
 
     private fun ferdigstillOppgaver(

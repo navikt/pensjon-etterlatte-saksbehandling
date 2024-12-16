@@ -8,6 +8,7 @@ import { Info } from '../Info'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
 import { HStack } from '@navikt/ds-react'
+import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 
 interface AdresseProps {
   label: string
@@ -22,10 +23,12 @@ const AdresseKort = (props: AdresseProps) => {
 
 interface Props {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
-  soeker: IPdlPerson | undefined
+  soeker: Personopplysning | undefined
   gjenlevendeForelder: Personopplysning | undefined
   redigerbar: boolean
   behandlingId: string
+  innsender: IPdlPerson | undefined
+  avdoed: string[]
 }
 
 export const OversiktKommerBarnetTilgode = ({
@@ -34,9 +37,25 @@ export const OversiktKommerBarnetTilgode = ({
   soeker,
   gjenlevendeForelder,
   behandlingId,
+  innsender,
+  avdoed,
 }: Props) => {
-  const bostedsadresse = soeker?.bostedsadresse?.find((adresse) => adresse.aktiv)
+  const soekerOpplysning = soeker?.opplysning
+  const bostedsadresse = soekerOpplysning?.bostedsadresse?.find((adresse) => adresse.aktiv)
   const foreldersadresse = gjenlevendeForelder?.opplysning?.bostedsadresse?.find((adresse) => adresse.aktiv)
+  const innsenderAdresse = innsender?.bostedsadresse?.find((adresse) => adresse.aktiv)
+  const innsenderFnr = innsender?.foedselsnummer
+  const innsenderHarForeldreAnsvar = innsenderFnr
+    ? soekerOpplysning?.familieRelasjon?.ansvarligeForeldre?.includes(innsenderFnr)
+    : false
+
+  const gjenlevendeHarForeldreAnsvar = gjenlevendeForelder?.opplysning.foedselsnummer
+    ? soekerOpplysning?.familieRelasjon?.ansvarligeForeldre?.includes(gjenlevendeForelder.opplysning.foedselsnummer)
+    : false
+  const innsenderErGjenlevende = innsenderFnr === gjenlevendeForelder?.opplysning?.foedselsnummer
+
+  const skalViseGjenlevendeForelderAdresse = gjenlevendeHarForeldreAnsvar && foreldersadresse
+  const skalViseInnsenderAdresse = !innsenderErGjenlevende && innsenderHarForeldreAnsvar && innsenderAdresse
 
   return (
     <LovtekstMedLenke
@@ -58,11 +77,25 @@ export const OversiktKommerBarnetTilgode = ({
           {bostedsadresse && (
             <AdresseKort label="Barnets adresse" adresse={bostedsadresse} kilde={bostedsadresse?.kilde} />
           )}
-          {foreldersadresse && (
+          {skalViseGjenlevendeForelderAdresse && (
             <AdresseKort
               label="Gjenlevende forelders adresse"
               adresse={foreldersadresse}
               kilde={formaterGrunnlagKilde(gjenlevendeForelder?.kilde)}
+            />
+          )}
+
+          {skalViseInnsenderAdresse && (
+            <AdresseKort label="Innsenders adresse" adresse={innsenderAdresse} kilde={innsenderAdresse?.kilde} />
+          )}
+
+          {!skalViseInnsenderAdresse && !skalViseGjenlevendeForelderAdresse && (
+            <Foreldreansvar
+              harKildePesys={false}
+              soekerGrunnlag={soeker}
+              gjenlevendeGrunnlag={gjenlevendeForelder}
+              innsender={innsenderFnr}
+              avdoed={avdoed}
             />
           )}
         </HStack>

@@ -6,6 +6,9 @@ export enum LogEvents {
 }
 
 export enum ClickEvent {
+  //Aktivitetsplikt
+  SJEKKER_SISTE_BEREGNING = 'sjekker siste beregning',
+
   // Vilkaarsvurdering
   SLETT_VILKAARSVURDERING = 'slett vilkaarsvurdering',
 
@@ -32,6 +35,7 @@ export enum ClickEvent {
   // Oppgave
   OPPRETT_GENERELL_OPPGAVE = 'opprett generell oppgave',
   OPPRETT_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave',
+  TILDEL_TILKNYTTEDE_OPPGAVER = 'tildel tilknyttede oppgaver',
 
   // Avkorting
   AVKORTING_FORVENTET_INNTEKT_HJELPETEKST = 'avkorting forventet inntekt hjelpetekst',
@@ -39,6 +43,9 @@ export enum ClickEvent {
 
   // Trygdetid
   KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
+
+  // Generelt
+  VIS_VARSLINGER = 'vis varslinger',
 }
 
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined
@@ -92,7 +99,9 @@ export const trackClick = (name: ClickEvent) => {
   })
 }
 
-export const trackClickJaNei = (name: ClickEvent, svar: JaNei) => {
+export const trackClickJaNei = (name: ClickEvent, svar: JaNei) => trackClickMedSvar(name, svar)
+
+export const trackClickMedSvar = (name: ClickEvent, svar: string) => {
   if (!amplitudeInstance) {
     console.warn('Amplitude is not initialized. Ignoring')
     return
@@ -101,7 +110,7 @@ export const trackClickJaNei = (name: ClickEvent, svar: JaNei) => {
     event_type: LogEvents.CLICK,
     event_properties: {
       tekst: name,
-      svar: svar,
+      svar,
     },
   })
 }

@@ -79,7 +79,7 @@ export const HandlingerForOppgave = ({
       return (
         <PersonButtonLink
           size="small"
-          icon={<EyeIcon />}
+          icon={<EyeIcon aria-hidden />}
           fnr={fnr || '-'}
           fane={PersonOversiktFane.HENDELSER}
           queryParams={{ referanse: referanse || '-' }}

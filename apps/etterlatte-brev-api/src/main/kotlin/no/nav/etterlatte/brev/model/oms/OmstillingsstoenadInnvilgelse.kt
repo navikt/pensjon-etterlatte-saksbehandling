@@ -89,10 +89,7 @@ data class OmstillingsstoenadInnvilgelse(
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed =
-                                    avdoed?.navn
-                                        ?: "",
-                                // TODO: navnAvdoed brukes ikke i oms så burde ikke være påkrevd
+                                navnAvdoed = null,
                             ),
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =

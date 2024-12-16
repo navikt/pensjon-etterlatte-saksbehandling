@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -114,9 +115,9 @@ class DoedshendelseJobService(
             true -> {
                 logger.info(
                     "Avbryter behandling av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()} med avdød " +
-                        "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
-                        kontrollpunkter.joinToString(","),
+                        "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkter, se sikker logg for mer info",
                 )
+                sikkerlogger().info("kontrollpunkter: " + kontrollpunkter.joinToString(","))
 
                 doedshendelseDao.oppdaterDoedshendelse(
                     doedshendelse.tilAvbrutt(

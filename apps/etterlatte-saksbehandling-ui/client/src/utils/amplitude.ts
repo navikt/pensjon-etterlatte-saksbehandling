@@ -6,7 +6,7 @@ export enum LogEvents {
 }
 
 export enum ClickEvent {
-  //AKtivitetsplikt
+  //Aktivitetsplikt
   SJEKKER_SISTE_BEREGNING = 'sjekker siste beregning',
 
   // Vilkaarsvurdering
@@ -43,6 +43,9 @@ export enum ClickEvent {
 
   // Trygdetid
   KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
+
+  // Generelt
+  VIS_VARSLINGER = 'vis varslinger',
 }
 
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined

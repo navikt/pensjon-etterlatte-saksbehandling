@@ -15,6 +15,7 @@ import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveRe
 import { useAppDispatch } from '~store/Store'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { temaFraSakstype } from '~components/person/journalfoeringsoppgave/journalpost/EndreSak'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 export interface NyBehandlingSkjema {
   sakType: SakType
@@ -30,13 +31,23 @@ export interface NyBehandlingSkjema {
 }
 
 export default function OpprettNyBehandling() {
-  const { oppgave, nyBehandlingRequest, journalpost } = useJournalfoeringOppgave()
+  const { oppgave, nyBehandlingRequest, journalpost, sakMedBehandlinger } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
   if (!oppgave || !erOppgaveRedigerbar(oppgave.status)) {
     return <Navigate to="../" relative="path" />
   }
+
+  const harAapneBehandlinger = sakMedBehandlinger?.behandlinger?.some(
+    (behandling) =>
+      ![
+        IBehandlingStatus.ATTESTERT,
+        IBehandlingStatus.IVERKSATT,
+        IBehandlingStatus.AVSLAG,
+        IBehandlingStatus.AVBRUTT,
+      ].includes(behandling.status)
+  )
 
   const neste = () => navigate('oppsummering', { relative: 'path' })
 
@@ -116,6 +127,13 @@ export default function OpprettNyBehandling() {
           <Heading size="medium" spacing>
             Opprett behandling
           </Heading>
+
+          {harAapneBehandlinger && (
+            <Alert variant="warning">
+              Saken har allerede en åpen behandling. Den må ferdigstilles eller avbrytes før en ny behandling kan
+              opprettes.
+            </Alert>
+          )}
 
           <Select
             {...register('sakType', {

@@ -288,8 +288,7 @@ internal fun Route.aktivitetspliktRoutes(
         get("/ny") {
             logger.info("Henter ny aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
             val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForOppgaveGammel(oppgaveId) }
-                    ?: throw VurderingIkkeFunnetException(sakId, oppgaveId)
+                inTransaction { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
             call.respond(vurdering)
         }
 

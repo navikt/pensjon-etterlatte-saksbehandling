@@ -9,6 +9,7 @@ import { formaterDatoMedKlokkeslett } from '~utils/formatering/dato'
 import { isToday } from 'date-fns'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 const KEY = 'release_id_list'
 const lagreLesteIder = (ider: number[]) => localStorage.setItem(KEY, JSON.stringify(ider))
@@ -42,6 +43,7 @@ export const ReleaseAlerts = () => {
       const lesteUtgivelser = utgivelser.map((u) => u.id)
       lagreLesteIder(lesteUtgivelser)
       setAntallUlest(0)
+      trackClick(ClickEvent.VIS_VARSLINGER)
     }
   }
 

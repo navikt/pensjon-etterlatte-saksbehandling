@@ -1007,7 +1007,7 @@ internal class BehandlingServiceImplTest {
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, TOKEN) } returns mockPersongalleri()
         coEvery { grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, any(), any()) } just runs
         coEvery { grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any()) } just runs
-        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
         every { behandlingDaoMock.lagreStatus(any()) } just runs
 
         val annenForelderInRequest =

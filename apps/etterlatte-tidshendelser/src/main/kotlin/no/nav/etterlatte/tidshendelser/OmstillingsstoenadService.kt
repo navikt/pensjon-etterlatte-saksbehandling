@@ -30,26 +30,26 @@ class OmstillingsstoenadService(
                 else -> throw IllegalArgumentException("Ikke-støttet jobbtype: ${jobb.type}")
             }
 
-        val doedsfallsmaaned = jobb.behandlingsmaaned.minusMonths(monthsToSubtract)
-        val saker =
+        val aktuellMaaned = jobb.behandlingsmaaned.minusMonths(monthsToSubtract)
+        val sakerMedAvdoedDoedsdatoIMaaned =
             runBlocking {
                 retryOgPakkUt {
-                    grunnlagKlient.hentSakerForDoedsfall(doedsfallsmaaned = doedsfallsmaaned)
+                    grunnlagKlient.hentSakerForDoedsfall(doedsfallsmaaned = aktuellMaaned)
                 }
             }
-        logger.info("Hentet ${saker.size} saker hvor dødsfall forekom i $doedsfallsmaaned")
+        logger.info("Hentet ${sakerMedAvdoedDoedsdatoIMaaned.size} saker hvor dødsfall forekom i $aktuellMaaned")
 
         // For de som har omstillingsstønad til tidligere familiepleier er det ikke dødsfallsmåned til avdøde som er
         // relevant for disse jobbene (det er ingen avdød koblet til saken). Det er i stedet måneden pleieforholdet
         // opphørte som er relevant, med samme "offset" som for dødsfallsmåned. Denne opplysningen ligger i behandling
-        val sakerTidligereFamiliepleier =
+        val sakerMedPleieforholdetOpphoerteIMaaned =
             runBlocking {
                 retryOgPakkUt {
-                    behandlingKlient.hentSakerForPleieforholdetOpphoerte(doedsfallsmaaned)
+                    behandlingKlient.hentSakerForPleieforholdetOpphoerte(aktuellMaaned)
                 }
             }
-        logger.info("Hentet ${sakerTidligereFamiliepleier.size} saker hvor pleieforholdet opphørte i $doedsfallsmaaned")
-        val alleSaker = saker + sakerTidligereFamiliepleier
+        logger.info("Hentet ${sakerMedPleieforholdetOpphoerteIMaaned.size} saker hvor pleieforholdet opphørte i $aktuellMaaned")
+        val alleSaker = sakerMedAvdoedDoedsdatoIMaaned + sakerMedPleieforholdetOpphoerteIMaaned
         // filtrer bort saker som ikke er aktuelle
         val sakerMap =
             runBlocking {
@@ -62,7 +62,7 @@ class OmstillingsstoenadService(
                 sakerMap[it]?.sakType == jobb.type.sakType
             }
         logger.info(
-            "Hentet ${alleSaker.size} saker hvor dødsfall/pleieforholdet opphørte forekom i $doedsfallsmaaned, med " +
+            "Hentet ${alleSaker.size} saker hvor dødsfall/pleieforholdet opphørte forekom i $aktuellMaaned, med " +
                 "${aktuelleSaker.size} saker med riktig saktype",
         )
 

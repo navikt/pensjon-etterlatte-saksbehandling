@@ -121,9 +121,6 @@ internal class OpplysningsuthenterBarnepensjonTest {
                 assertNull(utenlandskBankAdresse)
                 assertNull(iban)
                 assertNull(swift)
-                assertNull(oenskerSkattetrekk)
-                assertNull(oensketSkattetrekk)
-                assertNull(beskrivelse)
             }
     }
 

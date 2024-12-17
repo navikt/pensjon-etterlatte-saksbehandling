@@ -21,13 +21,9 @@ fun loggDelvisReturnerteData(
         val unauthorized = result.errors?.firstOrNull { it.extensions?.code == "unauthorized" }
 
         if (unauthorized != null) {
-            // TODO: Denne burde være warn, men settes til error midlertidig siden jeg er nysgjerrig på hvorfor
-            //  [result.data] IKKE er null i dette tilfellet... logger det til sikkerlogg og bruker error som påminnelse
-            logger.error(
-                "Saksbehandler forsøkte å se person de ikke har tilgang til. Se data i sikkerlogg. " +
-                    "Feilmelding fra PDL: \n${unauthorized.extensions?.details?.cause}",
+            logger.warn(
+                "Saksbehandler har ikke tilgang til å se person: ${unauthorized.extensions?.details?.cause}",
             )
-            sikkerLogg.error("Saksbehandler mangler tilgang, men fikk allikevel data i resultatsettet: ${result.data}")
             throw ManglerTilgangTilPerson()
         }
 

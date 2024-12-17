@@ -38,6 +38,10 @@ class OmstillingsstoenadService(
                 }
             }
         logger.info("Hentet ${saker.size} saker hvor dødsfall forekom i $doedsfallsmaaned")
+
+        // For de som har omstillingsstønad til tidligere familiepleier er det ikke dødsfallsmåned til avdøde som er
+        // relevant for disse jobbene (det er ingen avdød koblet til saken). Det er i stedet måneden pleieforholdet
+        // opphørte som er relevant, med samme "offset" som for dødsfallsmåned. Denne opplysningen ligger i behandling
         val sakerTidligereFamiliepleier =
             runBlocking {
                 retryOgPakkUt {

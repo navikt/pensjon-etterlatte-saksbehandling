@@ -106,7 +106,6 @@ spec:
         - application: etterlatte-api    # tar over for samordning-vedtak
         - application: etterlatte-vedtaksvurdering-kafka
         - application: etterlatte-utbetaling
-        - application: etterlatte-statistikk # TODO: Denne er midlertidig for å fikse resultat for vedtak
         - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
           namespace: aura
           cluster: dev-gcp

@@ -1,0 +1,1 @@
+# Omregning - Automatisk behandling

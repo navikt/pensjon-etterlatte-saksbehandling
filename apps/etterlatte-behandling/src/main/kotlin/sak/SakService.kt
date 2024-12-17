@@ -107,6 +107,8 @@ interface SakService {
         sak: Sak,
         bruker: BrukerTokenInfo,
     ): Sak
+
+    fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
 }
 
 class ManglerTilgangTilEnhet(
@@ -308,6 +310,15 @@ class SakServiceImpl(
 
         return lesDao.hentSak(sak.id)
             ?: throw InternfeilException("Kunne ikke hente ut sak ${sak.id} som nettopp ble endret")
+    }
+
+    override fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId> {
+        logger.info("Henter saker der dato pleieforholdet opphørte var $maanedOpphoerte")
+        return lesDao
+            .finnSakerMedPleieforholdOpphoerer(maanedOpphoerte)
+            .also {
+                logger.info("Fant ${it.size} saker der pleieforholdet opphørte i $maanedOpphoerte")
+            }
     }
 
     private fun hentSpraak(fnr: String): Spraak {

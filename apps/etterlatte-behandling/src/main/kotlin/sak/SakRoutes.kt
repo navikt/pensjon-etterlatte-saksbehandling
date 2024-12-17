@@ -41,10 +41,13 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
+import java.time.format.DateTimeParseException
 import java.util.UUID
 
 const val KJOERING = "kjoering"
 const val ANTALL = "antall"
+const val PLEIEFORHOLDET_OPPHOERTE_PARAMETER = "opphoerte"
 
 internal fun Route.sakSystemRoutes(
     tilgangService: TilgangService,
@@ -80,6 +83,27 @@ internal fun Route.sakSystemRoutes(
                         },
                     ),
                 )
+            }
+        }
+
+        get("pleieforholdet-opphoerte/{${PLEIEFORHOLDET_OPPHOERTE_PARAMETER}}") {
+            kunSystembruker {
+                val maanedOpphoerte =
+                    try {
+                        call.parameters[PLEIEFORHOLDET_OPPHOERTE_PARAMETER]?.let {
+                            YearMonth.parse(it)
+                        } ?: throw UgyldigForespoerselException(
+                            "MANGLER_PARAMETER_MAANED_OPPHOERT",
+                            "Fikk ikke med nødvendig parameter for når pleieforholdet opphørte",
+                        )
+                    } catch (e: DateTimeParseException) {
+                        throw UgyldigForespoerselException(
+                            "FEIL_FORMAT_MAANED_OPPHOERT",
+                            "Kunne ikke parse ut YearMonth fra angitt parameter " +
+                                "${call.parameters[PLEIEFORHOLDET_OPPHOERTE_PARAMETER]}",
+                        )
+                    }
+                call.respond(sakService.hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte))
             }
         }
 

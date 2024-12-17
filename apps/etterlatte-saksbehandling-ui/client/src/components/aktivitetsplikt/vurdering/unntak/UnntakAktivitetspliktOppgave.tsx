@@ -1,4 +1,5 @@
 import {
+  AktivitetspliktOppgaveType,
   AktivitetspliktUnntakType,
   IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNyDto,
@@ -79,6 +80,8 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
 }
 
 export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?: string }) {
+  const { vurderingType } = useAktivitetspliktOppgaveVurdering()
+  const er6mndVurdering = vurderingType !== AktivitetspliktOppgaveType.TOLV_MAANEDER
   const { register, control } = useFormContext()
   return (
     <Box maxWidth="40rem">
@@ -116,6 +119,11 @@ export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?:
           <option value={AktivitetspliktUnntakType.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE}>
             {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE]}
           </option>
+          {er6mndVurdering && (
+            <option value={AktivitetspliktUnntakType.GRADERT_UFOERETRYGD}>
+              {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.GRADERT_UFOERETRYGD]}
+            </option>
+          )}
         </Select>
 
         <Textarea {...register(`${formPrefix}beskrivelse`)} label="Vurdering av unntak" />

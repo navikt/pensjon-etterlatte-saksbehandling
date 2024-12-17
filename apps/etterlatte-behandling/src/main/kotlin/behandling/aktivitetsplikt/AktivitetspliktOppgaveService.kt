@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.checkNotNullorThrowInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -97,6 +98,12 @@ class AktivitetspliktOppgaveService(
         data: AktivitetspliktInformasjonBrevdataRequest,
     ): AktivitetspliktInformasjonBrevdata {
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        /*
+        Hvis oppgaven er ferdigstilt fra forrige vurdering må vi på en måte få lagt den
+        inn i brevdataen her.
+        Holder det å sjekke på oppgavetype + brev for sak av den typen?
+        Tidligere hadde man ingen referanse til denne.
+         */
         if (oppgave.status.erAvsluttet()) {
             throw OppgaveErAvsluttet("Oppgave er avsluttet, id $oppgaveId. Kan ikke fjerne brevid")
         }
@@ -160,14 +167,38 @@ class AktivitetspliktOppgaveService(
         }
 
         val nasjonalEllerUtland =
-            behandlingService.hentUtlandstilknytningForSak(oppgave.sakId) ?: throw GenerellIkkeFunnetException()
-        return BrevParametre.AktivitetspliktInformasjon10Mnd(
-            aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad),
-            utbetaling = brevdata.utbetaling!!,
-            redusertEtterInntekt = brevdata.redusertEtterInntekt!!,
-            nasjonalEllerUtland = mapNasjonalEllerUtland(nasjonalEllerUtland.type),
-            spraak = brevdata.spraak!!,
-        )
+            behandlingService.hentUtlandstilknytningForSak(oppgave.sakId)
+                ?: throw ManglerUtlandstilknytning("Mangler utlandstilknytning for sakid ${oppgave.sakId} oppgaveid: ${oppgave.id}")
+
+        val aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad)
+        val utbetaling =
+            checkNotNullorThrowInternFeil(brevdata.utbetaling) { "Mangler utbetaling for utbetaling for oppgave ${oppgave.id}" }
+        val redusertEtterInntekt =
+            checkNotNullorThrowInternFeil(brevdata.redusertEtterInntekt) { "Mangler redusert-inntekt for oppgave ${oppgave.id}" }
+        val spraak = checkNotNullorThrowInternFeil(brevdata.spraak) { "Mangler spraak for oppgave ${oppgave.id}" }
+        val nasjonalEllerUtlandMapped = mapNasjonalEllerUtland(nasjonalEllerUtland.type)
+
+        val brevparametere =
+            when (oppgave.type) {
+                OppgaveType.AKTIVITETSPLIKT ->
+                    BrevParametre.AktivitetspliktInformasjon4Mnd(
+                        aktivitetsgrad = aktivitetsgrad,
+                        utbetaling = utbetaling,
+                        redusertEtterInntekt = redusertEtterInntekt,
+                        nasjonalEllerUtland = nasjonalEllerUtlandMapped,
+                        spraak = spraak,
+                    )
+                OppgaveType.AKTIVITETSPLIKT_12MND ->
+                    BrevParametre.AktivitetspliktInformasjon10Mnd(
+                        aktivitetsgrad = aktivitetsgrad,
+                        utbetaling = utbetaling,
+                        redusertEtterInntekt = redusertEtterInntekt,
+                        nasjonalEllerUtland = nasjonalEllerUtlandMapped,
+                        spraak = spraak,
+                    )
+                else -> throw FeilOppgavetype("Prøver å lage aktivitetsplikt med oppgavetype: ${oppgave.type} id: ${oppgave.id}")
+            }
+        return brevparametere
     }
 
     private fun mapAktivitetsgradstypeTilAktivtetsgrad(aktivitetsgrad: AktivitetspliktAktivitetsgradType): Aktivitetsgrad =
@@ -216,12 +247,12 @@ class AktivitetspliktOppgaveService(
         }
         val skalOppretteBrev = skalOppretteBrev(brevData)
         if (skalOppretteBrev) {
-            val brevParametreAktivitetsplikt10mnd = mapOgValiderBrevParametre(oppgave, brevData)
+            val brevparametereAktivitetspliktVurdering = mapOgValiderBrevParametre(oppgave, brevData)
             val opprettetBrev =
                 runBlocking {
                     brevApiKlient.opprettSpesifiktBrev(
                         oppgave.sakId,
-                        brevParametreAktivitetsplikt10mnd,
+                        brevparametereAktivitetspliktVurdering,
                         brukerTokenInfo = brukerTokenInfo,
                     )
                 }
@@ -315,6 +346,20 @@ class BrevFeil(
     msg: String,
 ) : UgyldigForespoerselException(
         code = "FEIL_I_BREV_FORESPØRSEL",
+        detail = msg,
+    )
+
+class FeilOppgavetype(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "FEIL_OPPGAVETYPE",
+        detail = msg,
+    )
+
+class ManglerUtlandstilknytning(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "MANGLER_UTLANDSTILKNTTNING",
         detail = msg,
     )
 

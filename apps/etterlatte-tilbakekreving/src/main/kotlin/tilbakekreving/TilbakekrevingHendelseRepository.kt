@@ -3,7 +3,7 @@ package no.nav.etterlatte.tilbakekreving
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -71,7 +71,7 @@ class TilbakekrevingHendelseRepository(
                     ),
             ).let { query ->
                 session.update(query).also {
-                    checkInternFeil(it == 1) {
+                    krev(it == 1) {
                         "Feil under lagring av hendelse for sak $sakId"
                     }
                 }
@@ -130,7 +130,7 @@ class TilbakekrevingHendelseRepository(
                     ),
             ).let { query ->
                 session.update(query).also {
-                    checkInternFeil(it == 1) {
+                    krev(it == 1) {
                         "Feil under oppdatering av hendelse for sak $sakId"
                     }
                 }

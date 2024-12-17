@@ -1,7 +1,7 @@
 package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 
 data class SoeknadStatistikk(
     val soeknadId: Long,
@@ -15,7 +15,7 @@ data class SoeknadStatistikk(
                 true -> kriterierForIngenBehandling.isEmpty()
                 false -> kriterierForIngenBehandling.isNotEmpty()
             }
-        checkInternFeil(erKonsekvent) {
+        krev(erKonsekvent) {
             "En søknad skal enten være gyldig for behandling med ingen kriterier for ingen behandling, " +
                 "eller den er ikke gyldig for behandling på grunn av en eller flere kriterier "
         }

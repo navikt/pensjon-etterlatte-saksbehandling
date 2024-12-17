@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import java.nio.ByteBuffer
@@ -25,7 +25,7 @@ data class Avstemmingsperiode(
     val til: Tidspunkt,
 ) {
     init {
-        checkInternFeil(fraOgMed.isBefore(til)) { "fraOgMed-tidspunkt maa vaere foer til-tidspunkt" }
+        krev(fraOgMed.isBefore(til)) { "fraOgMed-tidspunkt maa vaere foer til-tidspunkt" }
     }
 }
 

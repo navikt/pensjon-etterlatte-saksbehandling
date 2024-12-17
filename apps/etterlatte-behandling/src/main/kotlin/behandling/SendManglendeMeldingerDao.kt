@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.jobs.BehandlingSomIkkeErAvbruttIStatistikk
 import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.toList
 import java.util.UUID
@@ -39,7 +39,7 @@ class SendManglendeMeldingerDao(
                     """.trimIndent(),
                 )
             statement.setObject(1, behandlingId)
-            checkInternFeil(statement.executeUpdate() == 1) {
+            krev(statement.executeUpdate() == 1) {
                 "Fikk ikke oppdatert raden for behandling har sendt melding for behandling $behandlingId"
             }
         }

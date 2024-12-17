@@ -3,7 +3,7 @@ package no.nav.etterlatte.sak
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -40,7 +40,7 @@ class SakSkrivDao(
                     logger.info(
                         "Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId, antall oppdatert er $it",
                     )
-                    checkInternFeil(it > 0) {
+                    krev(it > 0) {
                         "Kunne ikke oppdaterAdresseBeskyttelse for id sakid $sakId"
                     }
                 }

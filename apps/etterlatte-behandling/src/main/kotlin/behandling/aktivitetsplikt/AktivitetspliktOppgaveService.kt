@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkNotNullorThrowInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -172,10 +172,10 @@ class AktivitetspliktOppgaveService(
 
         val aktivitetsgrad = mapAktivitetsgradstypeTilAktivtetsgrad(sisteAktivtetsgrad.aktivitetsgrad)
         val utbetaling =
-            checkNotNullorThrowInternFeil(brevdata.utbetaling) { "Mangler utbetaling for utbetaling for oppgave ${oppgave.id}" }
+            krevIkkeNull(brevdata.utbetaling) { "Mangler utbetaling for utbetaling for oppgave ${oppgave.id}" }
         val redusertEtterInntekt =
-            checkNotNullorThrowInternFeil(brevdata.redusertEtterInntekt) { "Mangler redusert-inntekt for oppgave ${oppgave.id}" }
-        val spraak = checkNotNullorThrowInternFeil(brevdata.spraak) { "Mangler spraak for oppgave ${oppgave.id}" }
+            krevIkkeNull(brevdata.redusertEtterInntekt) { "Mangler redusert-inntekt for oppgave ${oppgave.id}" }
+        val spraak = krevIkkeNull(brevdata.spraak) { "Mangler spraak for oppgave ${oppgave.id}" }
         val nasjonalEllerUtlandMapped = mapNasjonalEllerUtland(nasjonalEllerUtland.type)
 
         val brevparametere =

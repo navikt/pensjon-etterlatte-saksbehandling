@@ -4,13 +4,13 @@ import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 
 data class Tjenestepensjonnummer(
     val value: String,
 ) {
     init {
-        checkInternFeil(value == value.replace(Regex("[^0-9]"), "")) { "Feil innhold i Tjenestepensjonnummer" }
+        krev(value == value.replace(Regex("[^0-9]"), "")) { "Feil innhold i Tjenestepensjonnummer" }
     }
 }
 

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.kafka
 
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
@@ -69,7 +69,7 @@ class TestProdusent<K, V> : KafkaProdusent<K, V> {
         verdi: V,
         headers: Map<String, ByteArray>?,
     ): Pair<Int, Long> {
-        checkInternFeil(!closed) { "Kafka produsent var lukket" }
+        krev(!closed) { "Kafka produsent var lukket" }
         return publiserteMeldinger.let {
             it.add(Record(noekkel, verdi, headers))
             Pair(0, (it.size - 1).toLong())

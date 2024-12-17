@@ -1,6 +1,6 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
 
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -42,7 +42,7 @@ object VedtakOgBeregningSammenligner {
                 ?: beregning.beregning.beregningsperioder.sortedBy { it.datoFOM }.map {
                     PeriodeMedBeloep(fom = it.datoFOM, tom = it.datoTOM, beloep = it.utbetaltBeloep)
                 }
-        checkInternFeil(perioder.size == beregningsperioder.size) {
+        krev(perioder.size == beregningsperioder.size) {
             "Forventa like mange perioder i vedtak som i beregning for vedtak ${vedtak.id} i sak ${vedtak.sakId}. " +
                 "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}. " +
                 "Alle perioder fra vedtak: ${perioder.map { "${it.periode}: ${it.beloep}" }}. " +
@@ -54,10 +54,10 @@ object VedtakOgBeregningSammenligner {
             val periode = perioder[i]
             val beregningsperiode = beregningsperioder[i]
 
-            checkInternFeil(BigDecimal(beregningsperiode.beloep) == periode.beloep) {
+            krev(BigDecimal(beregningsperiode.beloep) == periode.beloep) {
                 "Beløp for periode ${periode.periode} i vedtak ${vedtak.id} og behandling ${vedtak.behandlingId} var ${periode.beloep} i vedtak, men ${beregningsperiode.beloep} fra beregning og eventuell avkorting"
             }
-            checkInternFeil(Periode(beregningsperiode.fom, beregningsperiode.tom) == periode.periode) {
+            krev(Periode(beregningsperiode.fom, beregningsperiode.tom) == periode.periode) {
                 "FOM og TOM for periode ${periode.periode} i vedtak ${vedtak.id} " +
                     "og behandling ${vedtak.behandlingId} i vedtak, men ${Periode(
                         beregningsperiode.fom,

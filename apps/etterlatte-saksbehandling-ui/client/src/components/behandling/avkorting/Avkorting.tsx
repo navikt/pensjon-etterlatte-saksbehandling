@@ -131,7 +131,9 @@ export const Avkorting = ({
           ),
         })}
 
-        {visSanksjon && <Sanksjon behandling={behandling} />}
+        {visSanksjon && (
+          <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
+        )}
         {avkorting && <YtelseEtterAvkorting />}
         {avkorting && <SimulerUtbetaling behandling={behandling} />}
         {klarForBrevutfall() && (

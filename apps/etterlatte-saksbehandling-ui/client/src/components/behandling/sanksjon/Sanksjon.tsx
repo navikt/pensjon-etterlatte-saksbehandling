@@ -4,7 +4,7 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingReducer, oppdaterAvkorting } from '~store/reducers/BehandlingReducer'
 import { behandlingErRedigerbar, hasValue } from '~components/behandling/felles/utils'
-import { isFailure, isPending, mapApiResult, mapResult } from '~shared/api/apiUtils'
+import { isFailure, isPending, mapResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import {
   Alert,
@@ -21,7 +21,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { formaterDato, formaterMaanedDato } from '~utils/formatering/dato'
+import { aarFraDatoString, formaterDato, formaterMaanedDato } from '~utils/formatering/dato'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
 import { formatISO, isBefore, startOfDay } from 'date-fns'
@@ -31,7 +31,7 @@ import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/
 import { useAppDispatch } from '~store/Store'
 import { hentAvkorting } from '~shared/api/avkorting'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 
 interface SanksjonDefaultValue {
   datoFom?: Date
@@ -61,7 +61,13 @@ function tidligstSanksjonFom(sanksjoner?: ISanksjon[], behandling?: IBehandlingR
   return undefined
 }
 
-export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => {
+export const Sanksjon = ({
+  behandling,
+  manglerInntektVirkAar,
+}: {
+  behandling: IBehandlingReducer
+  manglerInntektVirkAar: boolean
+}) => {
   const [lagreSanksjonResponse, lagreSanksjonRequest] = useApiCall(lagreSanksjon)
   const [hentSanksjonStatus, hentSanksjonRequest] = useApiCall(hentSanksjon)
   const [slettSanksjonStatus, slettSanksjonRequest] = useApiCall(slettSanksjon)
@@ -165,17 +171,26 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
 
   return (
     <TableBox>
-      {mapApiResult(
-        hentSanksjonStatus,
-        <Spinner label="Henter sanksjoner" />,
-        () => (
-          <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
-        ),
-        () => (
+      {mapResult(hentSanksjonStatus, {
+        pending: <Spinner label="Henter sanksjoner" />,
+        error: <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>,
+        success: () => (
           <VStack gap="4">
             <Heading size="small" level="2">
               Sanksjoner
             </Heading>
+            {sanksjoner &&
+              sanksjoner.some(
+                (sanksjon) => aarFraDatoString(sanksjon.fom) === aarFraDatoString(virkningstidspunkt(behandling).dato)
+              ) &&
+              manglerInntektVirkAar && (
+                <Alert variant="warning">
+                  Det er ikke lagt inn en inntekt for året virkningstidspunkt gjelder fra. Hvis det ikke går å legge inn
+                  inntekt for inneværende år over må sanksjon som har fra og med / til og med slettes før inntekt kan
+                  legges inn, og så kan sanksjon legges inn.
+                </Alert>
+              )}
+
             <Box>
               <HjemmelLenke tittel="Folketrygdloven § 17-8" lenke="https://lovdata.no/pro/lov/1997-02-28-19/§17-8" />
               <BodyShort spacing>
@@ -386,8 +401,8 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
               </HStack>
             )}
           </VStack>
-        )
-      )}
+        ),
+      })}
     </TableBox>
   )
 }

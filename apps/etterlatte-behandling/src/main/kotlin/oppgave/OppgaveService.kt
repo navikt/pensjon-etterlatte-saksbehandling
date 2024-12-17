@@ -56,6 +56,11 @@ class OppgaveService(
                     oppgaveStatuser,
                     minOppgavelisteIdentFilter,
                 ).sortedByDescending { it.opprettet }
+                .also {
+                    it.forEach { oppgave ->
+                        logger.info("Loggertest oppgave $oppgave")
+                    }
+                }
         }
 
     fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =

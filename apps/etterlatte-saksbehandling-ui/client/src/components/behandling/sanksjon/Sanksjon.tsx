@@ -186,8 +186,8 @@ export const Sanksjon = ({
               manglerInntektVirkAar && (
                 <Alert variant="warning">
                   Det er ikke lagt inn en inntekt for året virkningstidspunkt gjelder fra. Hvis det ikke går å legge inn
-                  inntekt for inneværende år over må sanksjon som har fra og med / til og med slettes før inntekt kan
-                  legges inn, og så kan sanksjon legges inn.
+                  inntekt for inneværende år over må sanksjon som har fra og med / til og med i virk år slettes før
+                  inntekt kan legges inn, og så kan sanksjon legges inn.
                 </Alert>
               )}
 

@@ -4,7 +4,7 @@ import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktSt
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { AktivitetspliktOppgaveType } from '~shared/types/Aktivitetsplikt'
 
-export const AktivitetspliktVurdering12MndOversikt = () => {
+export const AktivitetspliktVurderingOversikt = () => {
   const { vurdering, vurderingType } = useAktivitetspliktOppgaveVurdering()
   return (
     <>

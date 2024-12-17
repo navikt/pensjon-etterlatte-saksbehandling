@@ -115,7 +115,6 @@ spec:
         - application: etterlatte-samordning-vedtak
         - application: etterlatte-api    # tar over for samordning-vedtak
         - application: etterlatte-vedtaksvurdering-kafka
-        - application: etterlatte-statistikk # TODO: Denne er midlertidig for å fikse resultat for vedtak
         - application: etterlatte-utbetaling
     outbound:
       rules:

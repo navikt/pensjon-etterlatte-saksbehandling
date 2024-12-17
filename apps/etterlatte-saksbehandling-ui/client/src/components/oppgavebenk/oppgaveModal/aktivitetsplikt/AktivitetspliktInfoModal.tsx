@@ -43,6 +43,7 @@ import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
 import { AktivitetspliktVurderingVisning } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
 
+//TODO: slette alt inni her osv + alle endepunkter i backend som blir ubrukt
 export const AktivitetspliktInfoModal = ({
   oppgave,
   oppdaterStatus,

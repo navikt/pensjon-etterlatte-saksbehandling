@@ -27,6 +27,7 @@ class OmstillingsstoenadAktivitetspliktTest {
 
         every { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns emptyList()
         every { behandlingKlient.hentSaker(emptyList()) } returns emptyMap()
+        every { behandlingKlient.hentSakerForPleieforholdetOpphoerte(any()) } returns emptyList()
 
         omstillingsstoenadService.execute(jobb)
 
@@ -49,6 +50,7 @@ class OmstillingsstoenadAktivitetspliktTest {
                 }.associateBy { it.id }
 
         every { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns sakIder
+        every { behandlingKlient.hentSakerForPleieforholdetOpphoerte(any()) } returns emptyList()
         every { behandlingKlient.hentSaker(sakIder) } returns saker
 
         every {

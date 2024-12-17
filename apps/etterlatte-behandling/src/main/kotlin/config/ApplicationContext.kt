@@ -21,7 +21,6 @@ import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
-import no.nav.etterlatte.behandling.SendManglendeMeldingerDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktBrevDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
@@ -40,7 +39,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
-import no.nav.etterlatte.behandling.jobs.ResendManglendeAvbrytJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
@@ -323,8 +321,6 @@ internal class ApplicationContext(
 
     val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper =
         VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
-
-    val sendManglendeMeldingerDao: SendManglendeMeldingerDao = SendManglendeMeldingerDao(autoClosingDatabase)
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
@@ -659,19 +655,6 @@ internal class ApplicationContext(
             initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_SAKSBEHANDLER_OPENING_HOURS).let { OpeningHours.of(it) },
-        )
-    }
-
-    val sendAvbruttMeldingJob: ResendManglendeAvbrytJob by lazy {
-        ResendManglendeAvbrytJob(
-            erLeader = { leaderElectionKlient.isLeader() },
-            kafkaProducer = behandlingsHendelser,
-            sendManglendeMeldingerDao = sendManglendeMeldingerDao,
-            behandlingDao = behandlingDao,
-            grunnlagKlient = grunnlagKlientImpl,
-            hendelseDao = hendelseDao,
-            dataSource = dataSource,
-            sakTilgangDao = sakTilgangDao,
         )
     }
 

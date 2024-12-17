@@ -21,6 +21,17 @@ fun checkInternFeil(
     }
 }
 
+fun <T : Any> checkNotNullorThrowInternFeil(
+    value: T?,
+    message: () -> String,
+): T {
+    if (value == null) {
+        throw InternfeilException(message())
+    } else {
+        return value
+    }
+}
+
 // Todo endre til if(value)
 fun checkUgyldigForespoerselException(
     value: Boolean,

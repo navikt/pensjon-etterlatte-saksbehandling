@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -101,7 +102,7 @@ class TilbakekrevingskomponentenKlient(
             type = TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_SENDT,
         )
 
-        val response =
+        val response: KravgrunnlagHentDetaljResponse =
             runBlocking {
                 val httpResponse =
                     httpClient.post("$url/tilbakekreving/kravgrunnlag") {
@@ -109,12 +110,13 @@ class TilbakekrevingskomponentenKlient(
                         setBody(requestAsJson)
                     }
 
-                httpResponse.body<KravgrunnlagHentDetaljResponse>()
+                // må bruke egen objectmapper for å fikse timestamps i xmlgregoriancalendar
+                tilbakekrevingObjectMapper.readValue(httpResponse.body<String>())
             }
 
         hendelseRepository.lagreTilbakekrevingHendelse(
             sakId = sakId,
-            payload = response.toJson(),
+            payload = tilbakekrevingObjectMapper.writeValueAsString(response),
             type = TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_KVITTERING,
         )
 

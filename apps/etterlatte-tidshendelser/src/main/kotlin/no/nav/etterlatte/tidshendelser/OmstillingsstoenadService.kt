@@ -37,22 +37,28 @@ class OmstillingsstoenadService(
                     grunnlagKlient.hentSakerForDoedsfall(doedsfallsmaaned = doedsfallsmaaned)
                 }
             }
-
         logger.info("Hentet ${saker.size} saker hvor dødsfall forekom i $doedsfallsmaaned")
-
+        val sakerTidligereFamiliepleier =
+            runBlocking {
+                retryOgPakkUt {
+                    behandlingKlient.hentSakerForPleieforholdetOpphoerte(doedsfallsmaaned)
+                }
+            }
+        logger.info("Hentet ${sakerTidligereFamiliepleier.size} saker hvor pleieforholdet opphørte i $doedsfallsmaaned")
+        val alleSaker = saker + sakerTidligereFamiliepleier
         // filtrer bort saker som ikke er aktuelle
         val sakerMap =
             runBlocking {
                 retryOgPakkUt {
-                    behandlingKlient.hentSaker(saker)
+                    behandlingKlient.hentSaker(alleSaker)
                 }
             }
         val aktuelleSaker =
-            saker.filter {
+            alleSaker.filter {
                 sakerMap[it]?.sakType == jobb.type.sakType
             }
         logger.info(
-            "Hentet ${saker.size} saker hvor dødsfall forekom i $doedsfallsmaaned, med " +
+            "Hentet ${alleSaker.size} saker hvor dødsfall/pleieforholdet opphørte forekom i $doedsfallsmaaned, med " +
                 "${aktuelleSaker.size} saker med riktig saktype",
         )
 

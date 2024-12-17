@@ -12,7 +12,8 @@ class FnrCoverConverter : MessageConverter() {
     override fun convert(event: ILoggingEvent): String {
         val message = event.formattedMessage
         if (message != null) {
-            val allWords = message.split(" ")
+            val tmpmsg = super.convert(event)
+            val allWords = tmpmsg.split(" ")
             return allWords.map { redact(it) }.joinToString(" ")
         } else {
             return event.formattedMessage
@@ -28,3 +29,7 @@ fun redact(string: String): String =
             it.value
         }
     }
+
+fun main() {
+    println(Folkeregisteridentifikator.isValid("26478321391"))
+}

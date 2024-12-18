@@ -170,7 +170,7 @@ data class TrygdetidPeriodePesys(
     val poengInnAar: Boolean?,
     val poengUtAar: Boolean?,
     val prorata: Boolean?,
-    val kilde: String?, // GrunnlagKildeCode i Pesys
+    val kilde: Grunnlagsopplysning.Pesys = Grunnlagsopplysning.Pesys.create(), // GrunnlagKildeCode i Pesys
 )
 
 fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
@@ -181,7 +181,7 @@ fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
-        kilde = grunnlagKilde,
+        kilde = Grunnlagsopplysning.Pesys.create(),
     )
 
 fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =

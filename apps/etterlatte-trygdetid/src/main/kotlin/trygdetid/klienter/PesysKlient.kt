@@ -39,7 +39,6 @@ data class Trygdetidsgrunnlag(
     val poengIInnAr: Boolean? = null,
     val poengIUtAr: Boolean? = null,
     val ikkeProRata: Boolean? = null,
-    val grunnlagKilde: String? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

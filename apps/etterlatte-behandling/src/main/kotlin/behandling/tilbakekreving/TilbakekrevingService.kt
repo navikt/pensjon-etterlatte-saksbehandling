@@ -420,6 +420,13 @@ class TilbakekrevingService(
                     tilbakekreving.copy(status = TilbakekrevingStatus.ATTESTERT),
                 )
 
+            runBlocking {
+                tilbakekrevingKlient.sendTilbakekrevingsvedtak(
+                    saksbehandler,
+                    tilbakekrevingVedtak(tilbakekreving, vedtak),
+                )
+            }
+
             tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.ATTESTERT, vedtak.id, saksbehandler, kommentar)
 
             oppgaveService.ferdigStillOppgaveUnderBehandling(
@@ -432,13 +439,6 @@ class TilbakekrevingService(
                 statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
                 type = TilbakekrevingHendelseType.ATTESTERT,
             )
-
-            runBlocking {
-                tilbakekrevingKlient.sendTilbakekrevingsvedtak(
-                    saksbehandler,
-                    tilbakekrevingVedtak(tilbakekreving, vedtak),
-                )
-            }
 
             oppdatertTilbakekreving
         }

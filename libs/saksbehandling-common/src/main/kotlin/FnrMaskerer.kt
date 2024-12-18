@@ -1,13 +1,15 @@
-package no.nav.etterlatte.libs.common.person
+package no.nav.etterlatte.libs.common.person.logg
 
 import com.fasterxml.jackson.core.JsonStreamContext
 import net.logstash.logback.mask.ValueMasker
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.maskerFnr
 
 /*
     Denne brukes i logback.xml for å anonymisere fnr som randomly havner i loggene
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" >
             <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
-                    <valueMasker class="no.nav.etterlatte.libs.common.person.FnrMasker"/>
+                    <valueMasker class="no.nav.etterlatte.libs.common.person.logg.FnrMasker"/>
             </jsonGeneratorDecorator>
         </>
  */

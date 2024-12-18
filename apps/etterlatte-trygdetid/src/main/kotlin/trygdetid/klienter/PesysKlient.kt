@@ -115,7 +115,13 @@ class PesysKlientImpl(
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = TrygdetidsgrunnlagRequest(fnr, LocalDate.now()),
             ).mapBoth(
-                success = { resource -> objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(resource.response.toString()) },
+                success = { resource ->
+                    resource.response?.let {
+                        objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(
+                            resource.response.toString(),
+                        )
+                    }
+                },
                 failure = { errorResponse -> throw errorResponse },
             )
 }

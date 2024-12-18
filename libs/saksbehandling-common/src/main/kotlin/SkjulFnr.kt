@@ -1,22 +1,27 @@
 package no.nav.etterlatte.libs.common.person
 
-import ch.qos.logback.classic.pattern.MessageConverter
-import ch.qos.logback.classic.spi.ILoggingEvent
+import com.fasterxml.jackson.core.JsonStreamContext
+import net.logstash.logback.mask.ValueMasker
 
 /*
     Denne brukes i logback.xml for å anonymisere fnr som randomly havner i loggene
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" >
+            <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+                    <valueMasker class="no.nav.etterlatte.libs.common.person.FnrMasker"/>
+            </jsonGeneratorDecorator>
+        </>
  */
 private val fnrRegex = Regex("\\b\\d{11}\\b")
 
-class FnrCoverConverter : MessageConverter() {
-    override fun convert(event: ILoggingEvent): String {
-        val message = event.formattedMessage
-        if (message != null) {
-            val allWords = message.split(" ")
-            return allWords.map { redact(it) }.joinToString(" ")
-        } else {
-            return event.formattedMessage
+class FnrMasker : ValueMasker {
+    override fun mask(
+        context: JsonStreamContext,
+        value: Any,
+    ): Any {
+        if (value is CharSequence) {
+            return redact(value.toString())
         }
+        return value
     }
 }
 

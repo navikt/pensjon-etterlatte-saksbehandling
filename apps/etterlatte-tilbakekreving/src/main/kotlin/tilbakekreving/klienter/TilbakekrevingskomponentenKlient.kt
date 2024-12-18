@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.toLocalDate
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
@@ -77,7 +78,7 @@ class TilbakekrevingskomponentenKlient(
 
         hendelseRepository.lagreTilbakekrevingHendelse(
             sakId = vedtak.sakId,
-            payload = response.toJson(),
+            payload = tilbakekrevingObjectMapper.writeValueAsString(response),
             type = TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
         )
 
@@ -114,7 +115,7 @@ class TilbakekrevingskomponentenKlient(
 
         hendelseRepository.lagreTilbakekrevingHendelse(
             sakId = sakId,
-            payload = response.toJson(),
+            payload = tilbakekrevingObjectMapper.writeValueAsString(response),
             type = TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_KVITTERING,
         )
 
@@ -288,8 +289,6 @@ private class CustomXMLGregorianCalendarModule : SimpleModule() {
                     if (value != null) {
                         gen?.writeString(
                             value
-                                .toGregorianCalendar()
-                                .toZonedDateTime()
                                 .toLocalDate()
                                 .toString(),
                         )

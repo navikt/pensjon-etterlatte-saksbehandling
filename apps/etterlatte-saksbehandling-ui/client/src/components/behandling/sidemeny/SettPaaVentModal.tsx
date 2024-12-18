@@ -106,7 +106,13 @@ export const SettPaaVentModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
                     ))}
                   </Select>
                 )}
-                <Textarea {...register('merknad')} label="Merknad" />
+                <Textarea
+                  {...register('merknad', {
+                    required: { value: true, message: 'Kommentar er påkrevd' },
+                  })}
+                  label="Kommentar"
+                  error={errors.merknad?.message}
+                />
 
                 {oppgave.status !== Oppgavestatus.PAA_VENT && (
                   <ControlledDatoVelger

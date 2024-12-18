@@ -428,7 +428,7 @@ class OppgaveService(
         val forrigeSaksbehandler = saksbehandlerSomFattetVedtak(oppgave)
 
         if (forrigeSaksbehandler.isNullOrBlank()) {
-            logger.warn("Fant ikke saksbehandleren som sendte oppgave $oppgave til attestering")
+            logger.warn("Fant ikke saksbehandleren som sendte oppgaveid ${oppgave.id} til attestering")
         } else {
             logger.info("Tildeler oppgave ${oppgave.id} til $forrigeSaksbehandler som sendte oppgaven til attestering")
             oppgaveDao.settNySaksbehandler(oppgave.id, forrigeSaksbehandler)

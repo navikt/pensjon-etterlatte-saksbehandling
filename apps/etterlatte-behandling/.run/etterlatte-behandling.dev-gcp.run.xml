@@ -35,7 +35,7 @@
       <env name="ETTERLATTE_BEREGNING_URL" value="https://etterlatte-beregning.intern.dev.nav.no" />
       <env name="GRUNNLAG_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-grunnlag/.default" />
       <env name="HTTP_PORT" value="8090" />
-      <env name="LOGBACK_APPENDER" value="STDOUT_JSON" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-behandling" />
       <env name="NAVANSATT_URL" value="https://navansatt.dev-fss-pub.nais.io" />
       <env name="NORG2_URL" value="https://norg2.dev-fss-pub.nais.io/norg2/api/v1" />

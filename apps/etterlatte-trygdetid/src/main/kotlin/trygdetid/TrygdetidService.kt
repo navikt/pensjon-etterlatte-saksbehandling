@@ -147,13 +147,13 @@ fun TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon.tilTrygdetidsperioder() =
     TrygdetidsperioderPesys(
         ufoeretrygd =
             TrygdetidsPeriodeListe(
-                trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+                trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                     it.tilTrygdetidsPeriode()
                 },
             ),
         alderspensjon =
             TrygdetidsPeriodeListe(
-                trygdetidAlderspensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+                trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                     it.tilTrygdetidsPeriode()
                 },
             ),
@@ -337,12 +337,12 @@ class TrygdetidServiceImpl(
         pesystt: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
     ): Trygdetid {
         val mappedAP =
-            pesystt.trygdetidAlderspensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+            pesystt.trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                 mapPesysTrygdetidsgrunnlag(it)
             } ?: emptyList()
 
         val mappedUfoere =
-            pesystt.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+            pesystt.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                 mapPesysTrygdetidsgrunnlag(it)
             } ?: emptyList()
 

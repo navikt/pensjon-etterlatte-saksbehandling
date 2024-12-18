@@ -41,13 +41,14 @@ data class Trygdetidsgrunnlag(
     val ikkeProRata: Boolean? = null,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class TrygdetidsgrunnlagListe(
     val trygdetidsgrunnlagListe: List<Trygdetidsgrunnlag>,
 )
 
 data class SakIdTrygdetidsgrunnlagListePairResponse(
     val sakId: SakId,
-    val trygdetidsgrunnlag: TrygdetidsgrunnlagListe,
+    val trygdetidsgrunnlagListe: TrygdetidsgrunnlagListe,
 )
 
 data class TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(

@@ -84,24 +84,6 @@ internal fun utbetalingsinformasjonOpplysning(
             ?.swift
             ?.svar
             ?.innhold,
-        betalingsinformasjon
-            ?.opplysning
-            ?.skattetrekk
-            ?.svar
-            ?.svar
-            ?.verdi,
-        betalingsinformasjon
-            ?.opplysning
-            ?.skattetrekk
-            ?.trekk
-            ?.svar
-            ?.innhold,
-        betalingsinformasjon
-            ?.opplysning
-            ?.skattetrekk
-            ?.beskrivelse
-            ?.svar
-            ?.innhold,
     )
 
 internal fun Foedselsnummer.toFolkeregisteridentifikator(): Folkeregisteridentifikator = Folkeregisteridentifikator.of(this.value)

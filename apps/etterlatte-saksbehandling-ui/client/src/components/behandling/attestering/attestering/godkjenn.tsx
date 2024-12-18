@@ -10,7 +10,7 @@ export const Godkjenn = () => {
       <Textarea
         style={{ padding: '10px' }}
         label="Tilbakemelding fra attestant"
-        placeholder="Beskriv etterarbeid som er gjort. f.eks. overført oppgave til NØP om kontonummer / skattetrekk."
+        placeholder="Beskriv etterarbeid som er gjort. f.eks. overført oppgave til NØP om kontonummer."
         value={tilbakemeldingFraAttestant}
         onChange={(e) => setTilbakemeldingFraAttestant(e.target.value)}
         minRows={3}

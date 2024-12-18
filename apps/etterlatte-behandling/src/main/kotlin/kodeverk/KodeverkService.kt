@@ -24,7 +24,7 @@ class KodeverkService(
         val landkoder =
             cache.getIfPresent(CacheKey.LANDKODER)
                 ?: klient
-                    .hent(KodeverkNavn.LANDKODER, brukerTokenInfo)
+                    .hent(KodeverkNavn.LANDKODER, false, brukerTokenInfo)
                     .also { cache.put(CacheKey.LANDKODER, it) }
 
         return mapLandkoder(landkoder)
@@ -34,7 +34,7 @@ class KodeverkService(
         val landkoder =
             cache.getIfPresent(CacheKey.LANDKODER_ISO2)
                 ?: klient
-                    .hent(KodeverkNavn.LANDKODERISO2, brukerTokenInfo)
+                    .hent(KodeverkNavn.LANDKODERISO2, false, brukerTokenInfo)
                     .also { cache.put(CacheKey.LANDKODER_ISO2, it) }
 
         return mapLandkoder(landkoder)
@@ -44,7 +44,7 @@ class KodeverkService(
         val arkivtemaer =
             cacheArkivtemaer.getIfPresent(CacheKey.ARKIVTEMAER)
                 ?: klient
-                    .hent(KodeverkNavn.ARKIVTEMAER, brukerTokenInfo)
+                    .hent(KodeverkNavn.ARKIVTEMAER, true, brukerTokenInfo)
                     .also { cacheArkivtemaer.put(CacheKey.ARKIVTEMAER, it) }
 
         return arkivtemaer.betydninger.map { (tema, betydninger) ->

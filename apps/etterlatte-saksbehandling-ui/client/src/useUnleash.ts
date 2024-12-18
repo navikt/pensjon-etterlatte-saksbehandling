@@ -12,6 +12,7 @@ export const enum FeatureToggle {
   aktivitetsplikt_ny_vurdering = 'aktivitetsplikt.ny-vurdering',
   validere_aarsintnekt_neste_aar = 'validere_aarsintnekt_neste_aar',
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',
+  overstyr_trygdetid_knapp = 'overstyr-trygdetid-knapp',
   notater = 'notater',
   kun_en_registrert_juridisk_forelder = 'kun-en-registrert-juridisk-forelder',
   kopier_trygdetidsgrunnlag = 'kopier-trygdetidsgrunnlag',
@@ -38,6 +39,10 @@ const validere_aarsintnekt_neste_aar: Toggle = {
 }
 const overstyr_beregning_knapp: Toggle = {
   togglename: FeatureToggle.overstyr_beregning_knapp,
+  enabled: false,
+}
+const overstyr_trygdetid_knapp: Toggle = {
+  togglename: FeatureToggle.overstyr_trygdetid_knapp,
   enabled: false,
 }
 const notater: Toggle = { togglename: FeatureToggle.notater, enabled: false }
@@ -83,6 +88,7 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:
     pensjon_etterlatte_kan_opprette_vedtak_avvist_klage,
   [FeatureToggle.overstyr_beregning_knapp]: overstyr_beregning_knapp,
+  [FeatureToggle.overstyr_trygdetid_knapp]: overstyr_trygdetid_knapp,
   [FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak]: pensjon_etterlatte_oppdater_ident_paa_sak,
 }
 

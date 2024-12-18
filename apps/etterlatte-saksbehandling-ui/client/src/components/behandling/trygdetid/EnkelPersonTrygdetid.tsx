@@ -17,6 +17,8 @@ import { VStack } from '@navikt/ds-react'
 import { skalViseTrygdeavtale } from '~components/behandling/trygdetid/utils'
 import { AvdoedesTrygdetidReadMore } from '~components/behandling/trygdetid/components/AvdoedesTrygdetidReadMore'
 import { ILand } from '~utils/kodeverk'
+import { OpprettManueltOverstyrtTrygdetid } from '~components/behandling/trygdetid/OpprettManueltOverstyrtTrygdetid'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 interface Props {
   redigerbar: boolean
@@ -33,6 +35,7 @@ export const EnkelPersonTrygdetid = (props: Props) => {
   const [trygdetid, setTrygdetid] = useState<ITrygdetid | undefined>()
   const [overstyrTrygdetidRequest, requestOverstyrTrygdetid] = useApiCall(overstyrTrygdetid)
   const [oppdaterYrkesskadeRequest, requestOppdaterYrkesskade] = useApiCall(setTrygdetidYrkesskade)
+  const overstyrTrygdetidFeature = useFeaturetoggle(FeatureToggle.overstyr_trygdetid_knapp)
 
   useEffect(() => {
     if (props.trygdetid) {
@@ -94,6 +97,10 @@ export const EnkelPersonTrygdetid = (props: Props) => {
     <>
       {trygdetid && (
         <VStack gap="12" maxWidth="69rem">
+          {overstyrTrygdetidFeature && (
+            <OpprettManueltOverstyrtTrygdetid behandlingId={behandling.id} redigerbar={redigerbar} />
+          )}
+
           <VStack gap="4">
             {!skalViseTrygdeavtale(behandling) && <AvdoedesTrygdetidReadMore />}
             <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />

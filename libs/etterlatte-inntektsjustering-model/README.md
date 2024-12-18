@@ -155,5 +155,6 @@ Hvis det feiler i et steg i flyten vil status settes til FEILA med begrunnelse.
 
 ### Brev og distribuering
 
-Når automatisk behandling er iverksatt og brev distribuert vil [OmregningBrevDistribusjonRiver ]()TODO fange det opp
-og oppatere omregningskjoering ved å sette feltet distribuert_brev til true.
+Når automatisk behandling er iverksatt og brev distribuert
+vil [OmregningBrevDistribusjonRiver](../../apps/etterlatte-oppdater-behandling/src/main/kotlin/regulering/OmregningBrevDistribusjonRiver.kt)
+fange det opp og oppatere omregningskjoering ved å sette feltet distribuert_brev til true.

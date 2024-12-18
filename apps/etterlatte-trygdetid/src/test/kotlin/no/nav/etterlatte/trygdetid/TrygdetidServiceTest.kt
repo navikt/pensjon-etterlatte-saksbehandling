@@ -52,6 +52,7 @@ import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
+import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -70,14 +71,14 @@ internal class TrygdetidServiceTest {
     private val grunnlagKlient: GrunnlagKlient = mockk()
     private val beregningService: TrygdetidBeregningService = spyk(TrygdetidBeregningService)
     private val avtaleService = mockk<AvtaleService>()
-
+    private val pesysklient = mockk<PesysKlient>()
     private val service: TrygdetidService =
         TrygdetidServiceImpl(
             repository,
             behandlingKlient,
             grunnlagKlient,
             beregningService,
-            mockk<PesysKlient>(),
+            pesysklient,
             avtaleService,
         )
 
@@ -85,6 +86,7 @@ internal class TrygdetidServiceTest {
     fun beforeEach() {
         clearAllMocks()
         coEvery { behandlingKlient.kanOppdatereTrygdetid(any(), any()) } returns true
+        coEvery { pesysklient.hentTrygdetidsgrunnlag(any(), any()) } returns TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(null, null)
     }
 
     @AfterEach
@@ -188,6 +190,7 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
+            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetidMedId(any(), any())
@@ -507,6 +510,7 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
+            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
@@ -634,6 +638,7 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
+            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
@@ -721,6 +726,7 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
+            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetidMedId(behandlingId, any())
@@ -1772,6 +1778,7 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
+            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)

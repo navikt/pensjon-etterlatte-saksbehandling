@@ -173,7 +173,7 @@ data class TrygdetidPeriodePesys(
     val kilde: Grunnlagsopplysning.Kilde,
 )
 
-fun Trygdetidsgrunnlag.tilTrygdetidsPeriode() =
+fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
     TrygdetidPeriodePesys(
         isoCode = land!!,
         fra = toNorskLocalDate(fomDato.toInstant()),
@@ -182,6 +182,12 @@ fun Trygdetidsgrunnlag.tilTrygdetidsPeriode() =
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
         kilde = Grunnlagsopplysning.Pesys(Tidspunkt.now()),
+    )
+
+fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
+    TrygdetidPeriode(
+        fra = fra,
+        til = til,
     )
 
 fun toNorskLocalDate(instant: Instant): LocalDate = LocalDate.ofInstant(instant, norskTidssone)
@@ -313,7 +319,10 @@ class TrygdetidServiceImpl(
                     ident = avdoedMedFnr.first,
                     yrkesskade = false,
                 )
-            val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
+            val pesystt = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr.first, brukerTokenInfo)
+            val oppdatertTrygdetidv2 = populertrygdetidFraPesys(trygdetid, pesystt)
+
+            val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(oppdatertTrygdetidv2)
 
             val oppdatertTrygdetid =
                 opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
@@ -322,6 +331,39 @@ class TrygdetidServiceImpl(
         }.also {
             logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
         }
+
+    private fun populertrygdetidFraPesys(
+        trygdetid: Trygdetid,
+        pesystt: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
+    ): Trygdetid {
+        val mappedAP =
+            pesystt.trygdetidAlderspensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+                mapPesysTrygdetidsgrunnlag(it)
+            } ?: emptyList()
+
+        val mappedUfoere =
+            pesystt.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+                mapPesysTrygdetidsgrunnlag(it)
+            } ?: emptyList()
+
+        return trygdetid.copy(trygdetidGrunnlag = mappedAP + mappedUfoere)
+    }
+
+    private fun mapPesysTrygdetidsgrunnlag(tt: Trygdetidsgrunnlag): TrygdetidGrunnlag {
+        val trygdetidsperiode = tt.tilTrygdetidsPeriode()
+        return TrygdetidGrunnlag(
+            id = UUID.randomUUID(),
+            type = TrygdetidType.FAKTISK,
+            bosted = tt.land ?: "Ukjent",
+            periode = trygdetidsperiode.fraPesystilVanlig(),
+            kilde = trygdetidsperiode.kilde,
+            beregnetTrygdetid = null,
+            poengUtAar = trygdetidsperiode.poengUtAar ?: false,
+            poengInnAar = trygdetidsperiode.poengInnAar ?: false,
+            prorata = trygdetidsperiode.prorata ?: false,
+            begrunnelse = null,
+        )
+    }
 
     private suspend fun opprettFremtidigTrygdetidForAvdoed(
         trygdetid: Trygdetid,

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.klienter
 
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -26,6 +27,8 @@ import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Month
+import java.time.YearMonth
 
 internal class TilbakekrevingskomponentenKlientTest {
     private val hendelseRepository = mockk<TilbakekrevingHendelseRepository>(relaxed = true)
@@ -105,6 +108,11 @@ internal class TilbakekrevingskomponentenKlientTest {
         val kravgrunnlagResponse = tilbakekrevingskomponentenKlient.hentKravgrunnlag(sakId, 123L)
 
         kravgrunnlagResponse shouldNotBe null
+
+        kravgrunnlagResponse.perioder.first().periode.let {
+            it.fraOgMed shouldBe YearMonth.of(2022, Month.APRIL)
+            it.tilOgMed shouldBe YearMonth.of(2022, Month.APRIL)
+        }
 
         verify {
             hendelseRepository.lagreTilbakekrevingHendelse(

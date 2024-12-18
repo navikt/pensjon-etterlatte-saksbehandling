@@ -162,6 +162,7 @@ enum class OppdragKlassifikasjonskode(
     TBTREKK("TBTREKK"), // Innbetalinger feilutbetalt stønad
     UTBETALING("UTBETALING"), // Utbetaling Akonto
     FRISSKAT("FRISSKAT"), // Frivillig skattetrekk
+    BPSKSKAT("BPSKSKAT"), // Skattetrekk barnepensjon
     ;
 
     override fun toString(): String = oppdragVerdi
@@ -185,6 +186,7 @@ enum class OppdragKlassifikasjonskode(
                 "TBTREKK" -> TBTREKK
                 "UTBETALING" -> UTBETALING
                 "FRISSKAT" -> FRISSKAT
+                "BPSKSKAT" -> BPSKSKAT
                 else -> throw IllegalArgumentException("$string er ikke en støttet OppdragKlassifikasjonskode!")
             }
     }

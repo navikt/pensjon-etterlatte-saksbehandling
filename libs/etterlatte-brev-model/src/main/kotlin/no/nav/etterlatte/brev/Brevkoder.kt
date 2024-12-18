@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 
 /*
 Breva våre er teknisk sett to brev som er satt sammen - den redigerbare delen, og delen som ligg fast.
@@ -240,7 +240,7 @@ enum class Brevkoder(
     ;
 
     init {
-        checkInternFeil(redigering != ferdigstilling) {
+        krev(redigering != ferdigstilling) {
             "Bruk forskjellige maler for redigering og ferdigstilling. $redigering og $ferdigstilling er like"
         }
     }

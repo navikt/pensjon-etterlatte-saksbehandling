@@ -2,7 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering.outbox
 
 import kotliquery.Row
 import kotliquery.queryOf
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.database.transaction
 import java.util.UUID
 import javax.sql.DataSource
@@ -31,7 +31,7 @@ class OutboxRepository(
                 """.trimIndent(),
                 id,
             ).let { query -> tx.run(query.asUpdate) }
-                .also { checkInternFeil(it == 1) { "Fant ikke hendelse med id $id og status upublisert" } }
+                .also { krev(it == 1) { "Fant ikke hendelse med id $id og status upublisert" } }
         }
     }
 

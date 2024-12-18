@@ -40,7 +40,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.opprettBrevFra
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -119,13 +119,13 @@ class BrevRepository(
                     ),
                 ).asUpdate,
             ).also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdatert payload brevid: $id" }
+                krev(it == 1) { "Brev fikk ikke oppdatert payload brevid: $id" }
             }
 
         tx
             .lagreHendelse(id, Status.OPPDATERT, payload.toJson(), bruker)
             .also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdatert hendelse brevid: $id" }
+                krev(it == 1) { "Brev fikk ikke oppdatert hendelse brevid: $id" }
             }
     }
 
@@ -145,13 +145,13 @@ class BrevRepository(
                     ),
                 ).asUpdate,
             ).also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdatert vedlegg id: $id" }
+                krev(it == 1) { "Brev fikk ikke oppdatert vedlegg id: $id" }
             }
 
         tx
             .lagreHendelse(id, Status.OPPDATERT, payload.toJson(), bruker)
             .also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdatert hendelse for vedlegg id: $id" }
+                krev(it == 1) { "Brev fikk ikke oppdatert hendelse for vedlegg id: $id" }
             }
     }
 
@@ -201,13 +201,13 @@ class BrevRepository(
                     ),
                 ).asUpdate,
             ).also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdatert mottaker id: $id" }
+                krev(it == 1) { "Brev fikk ikke oppdatert mottaker id: $id" }
             }
 
         tx
             .lagreHendelse(id, Status.OPPDATERT, mottaker.toJson(), bruker)
             .also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdater hendelse for oppdatert mottaker id: $id" }
+                krev(it == 1) { "Brev fikk ikke oppdater hendelse for oppdatert mottaker id: $id" }
             }
     }
 
@@ -219,13 +219,13 @@ class BrevRepository(
         tx
             .run(queryOf("DELETE FROM mottaker WHERE id = ? AND brev_id = ?", mottakerId, brevId).asUpdate)
             .also {
-                checkInternFeil(it == 1) { "Brev fikk ikke slettet mottaker id: $brevId" }
+                krev(it == 1) { "Brev fikk ikke slettet mottaker id: $brevId" }
             }
 
         tx
             .lagreHendelse(brevId, Status.OPPDATERT, "mottaker med id=$mottakerId fjernet fra brevet ", bruker)
             .also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdater hendelse for slettet mottaker id: $brevId" }
+                krev(it == 1) { "Brev fikk ikke oppdater hendelse for slettet mottaker id: $brevId" }
             }
     }
 
@@ -244,13 +244,13 @@ class BrevRepository(
                     ),
                 ).asUpdate,
             ).also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdatert tittel id: $brevId" }
+                krev(it == 1) { "Brev fikk ikke oppdatert tittel id: $brevId" }
             }
 
         tx
             .lagreHendelse(brevId, Status.OPPDATERT, tittel.toJson(), bruker)
             .also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdater hendelse for oppdatert tittel id: $brevId" }
+                krev(it == 1) { "Brev fikk ikke oppdater hendelse for oppdatert tittel id: $brevId" }
             }
     }
 
@@ -269,13 +269,13 @@ class BrevRepository(
                     ),
                 ).asUpdate,
             ).also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdatert språk id: $brevId" }
+                krev(it == 1) { "Brev fikk ikke oppdatert språk id: $brevId" }
             }
 
         tx
             .lagreHendelse(brevId, Status.OPPDATERT, spraak.toJson(), bruker)
             .also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdater hendelse for oppdatert språk id: $brevId" }
+                krev(it == 1) { "Brev fikk ikke oppdater hendelse for oppdatert språk id: $brevId" }
             }
     }
 
@@ -295,11 +295,11 @@ class BrevRepository(
                         ),
                     ).asUpdate,
                 ).also { oppdatert ->
-                    checkInternFeil(oppdatert == 1) { "Pdf ble ikke opprettet id: $brevId" }
+                    krev(oppdatert == 1) { "Pdf ble ikke opprettet id: $brevId" }
                 }
 
             tx.lagreHendelse(brevId, Status.FERDIGSTILT, bruker = bruker).also {
-                checkInternFeil(it == 1) { "Brev fikk ikke oppdater hendelse ferdigstilt for lagre pdf id: $brevId" }
+                krev(it == 1) { "Brev fikk ikke oppdater hendelse ferdigstilt for lagre pdf id: $brevId" }
             }
         }
     }
@@ -318,7 +318,7 @@ class BrevRepository(
                             "bytes" to pdf.bytes,
                         ),
                     ).asUpdate,
-                ).also { oppdatert -> checkInternFeil(oppdatert == 1) { "Fikk ikke lagret pdf id: $brevId" } }
+                ).also { oppdatert -> krev(oppdatert == 1) { "Fikk ikke lagret pdf id: $brevId" } }
         }
     }
 
@@ -328,7 +328,7 @@ class BrevRepository(
     ) {
         using(sessionOf(ds)) {
             it.lagreHendelse(brevId, Status.FERDIGSTILT, bruker = bruker).also {
-                checkInternFeil(it == 1) { "Hendelse ferdigstilt ble ikke gjort for id $brevId" }
+                krev(it == 1) { "Hendelse ferdigstilt ble ikke gjort for id $brevId" }
             }
         }
     }
@@ -340,7 +340,7 @@ class BrevRepository(
     ) {
         using(sessionOf(ds)) {
             it.lagreHendelse(brevId, Status.UTGAATT, "${bruker.ident()}: $kommentar".toJson(), bruker).also {
-                checkInternFeil(it == 1) { "Hendelse utgått ble ikke gjort for id $brevId" }
+                krev(it == 1) { "Hendelse utgått ble ikke gjort for id $brevId" }
             }
         }
     }
@@ -371,7 +371,7 @@ class BrevRepository(
             ulagretBrev.mottakere
                 .sumOf { tx.opprettMottaker(brevId, it) }
                 .also { opprettet ->
-                    checkInternFeil(opprettet == ulagretBrev.mottakere.size) {
+                    krev(opprettet == ulagretBrev.mottakere.size) {
                         "Mottaker ble ikke opprettet for id $brevId"
                     }
                 }
@@ -388,11 +388,11 @@ class BrevRepository(
                             "payload_vedlegg" to ulagretBrev.innholdVedlegg?.toJson(),
                         ),
                     ).asUpdate,
-                ).also { opprettet -> checkInternFeil(opprettet == 1) { "Innhold ble ikke opprettet for id $brevId" } }
+                ).also { opprettet -> krev(opprettet == 1) { "Innhold ble ikke opprettet for id $brevId" } }
 
             tx
                 .lagreHendelse(brevId, Status.OPPRETTET, ulagretBrev.opprettet, bruker = bruker)
-                .also { oppdatert -> checkInternFeil(oppdatert == 1) { "Hendelse ble ikke satt til opprettet for id $brevId" } }
+                .also { oppdatert -> krev(oppdatert == 1) { "Hendelse ble ikke satt til opprettet for id $brevId" } }
 
             opprettBrevFra(brevId, ulagretBrev)
         }
@@ -408,7 +408,7 @@ class BrevRepository(
                     journalpostResponse.journalpostId,
                     mottakerId,
                 ).asUpdate,
-            ).also { oppdatert -> checkInternFeil(oppdatert == 1) { "Journalpost ble ikke lagre med ny id for: $mottakerId" } }
+            ).also { oppdatert -> krev(oppdatert == 1) { "Journalpost ble ikke lagre med ny id for: $mottakerId" } }
     }
 
     fun settBrevJournalfoert(
@@ -431,7 +431,7 @@ class BrevRepository(
                     distResponse.bestillingsId,
                     mottakerId,
                 ).asUpdate,
-            ).also { oppdatert -> checkInternFeil(oppdatert == 1) { "feilet på oppdatering av mottaker for id $mottakerId" } }
+            ).also { oppdatert -> krev(oppdatert == 1) { "feilet på oppdatering av mottaker for id $mottakerId" } }
     }
 
     fun settBrevDistribuert(

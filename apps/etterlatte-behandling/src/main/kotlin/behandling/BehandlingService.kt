@@ -46,7 +46,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -639,7 +639,7 @@ internal class BehandlingServiceImpl(
     ) {
         inTransaction {
             val behandling = behandlingDao.hentBehandling(behandlingId)
-            checkInternFeil(behandling != null) {
+            krev(behandling != null) {
                 "Behandling finnes ikke $behandlingId"
             }
             when (behandling!!.type) {

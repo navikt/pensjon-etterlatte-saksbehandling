@@ -12,8 +12,7 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkNotNullOrThrowException
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekkIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
@@ -390,8 +389,8 @@ class RealGrunnlagService(
         )
         opplysningDao.laasGrunnlagVersjonForBehandling(skalLaasesId)
 
-        return checkNotNullOrThrowException(opplysningDao.hentBehandlingVersjon(skalLaasesId)) {
-            InternfeilException("Fant ikke låst grunnlagsversjon vi akkurat la inn :(")
+        return sjekkIkkeNull(opplysningDao.hentBehandlingVersjon(skalLaasesId)) {
+            "Fant ikke låst grunnlagsversjon vi akkurat la inn :("
         }
     }
 

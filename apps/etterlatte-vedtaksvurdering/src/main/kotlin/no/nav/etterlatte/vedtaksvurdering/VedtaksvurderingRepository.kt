@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -407,7 +407,7 @@ class VedtaksvurderingRepository(
                         "behandlingId" to behandlingId,
                     ),
                 loggtekst = "Fatter vedtak for behandling $behandlingId",
-            ).also { checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter fatting behandlingid: $behandlingId" } }
+            ).also { krev(it == 1) { "Vedtak ble ikke oppdatert etter fatting behandlingid: $behandlingId" } }
                 .let { hentVedtakNonNull(behandlingId, this) }
         }
 
@@ -433,7 +433,7 @@ class VedtaksvurderingRepository(
                     ),
                 loggtekst = "Attesterer vedtak $behandlingId",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter attestering behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter attestering behandlingid: $behandlingId" }
             }
 
             opprett(
@@ -465,7 +465,7 @@ class VedtaksvurderingRepository(
                 params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
                 loggtekst = "Underkjenner vedtak for behandling $behandlingId",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter underkjenning behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter underkjenning behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }
@@ -480,7 +480,7 @@ class VedtaksvurderingRepository(
                 params = mapOf("vedtakstatus" to VedtakStatus.TIL_SAMORDNING.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer til_samordning vedtak",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter satt til samordning behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter satt til samordning behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }
@@ -495,7 +495,7 @@ class VedtaksvurderingRepository(
                 params = mapOf("vedtakstatus" to VedtakStatus.SAMORDNET.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer samordnet vedtak",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter samordnet behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter samordnet behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }
@@ -510,7 +510,7 @@ class VedtaksvurderingRepository(
                 params = mapOf("vedtakstatus" to VedtakStatus.IVERKSATT.name, "behandlingId" to behandlingId),
                 loggtekst = "Lagrer iverksatt vedtak",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert etter iverksatt behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert etter iverksatt behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }
@@ -617,7 +617,7 @@ class VedtaksvurderingRepository(
                     ),
                 loggtekst = "Returnerer vedtak $behandlingId",
             ).also {
-                checkInternFeil(it == 1) { "Vedtak ble ikke oppdatert returnert/tilbakestilt behandlingid: $behandlingId" }
+                krev(it == 1) { "Vedtak ble ikke oppdatert returnert/tilbakestilt behandlingid: $behandlingId" }
             }
             return@session hentVedtakNonNull(behandlingId, this)
         }

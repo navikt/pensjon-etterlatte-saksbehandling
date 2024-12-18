@@ -5,7 +5,7 @@ import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -87,7 +87,7 @@ class BehandlingInfoDao(
                     setJsonb(2, brevutfall)
                 }.run { executeUpdate() }
                     .also {
-                        checkInternFeil(it == 1) {
+                        krev(it == 1) {
                             "Kunne ikke lagreBrevutfall behandling for ${brevutfall.behandlingId}"
                         }
                     }.let {
@@ -130,7 +130,7 @@ class BehandlingInfoDao(
                     setJsonb(2, etterbetaling)
                 }.run { executeUpdate() }
                     .also {
-                        checkInternFeil(it == 1) {
+                        krev(it == 1) {
                             "Kunne ikke lagreBrevutfall behandling for ${etterbetaling.behandlingId}"
                         }
                     }.let {
@@ -153,7 +153,7 @@ class BehandlingInfoDao(
                     setObject(2, behandlingId)
                 }.run { executeUpdate() }
                     .also {
-                        checkInternFeil(it == 1) {
+                        krev(it == 1) {
                             "Kunne ikke slettEtterbetaling behandling for $behandlingId"
                         }
                     }

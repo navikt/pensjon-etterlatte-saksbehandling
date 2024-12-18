@@ -1,0 +1,1 @@
+drop table behandling_mangler_avbrudd_statistikk;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -15,7 +16,9 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import java.sql.Date
 import java.sql.ResultSet
+import java.time.YearMonth
 
 class SakLesDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
@@ -191,6 +194,26 @@ class SakLesDao(
                 statement
                     .executeQuery()
                     .toList(mapTilSak)
+            }
+        }
+
+    fun finnSakerMedPleieforholdOpphoerer(maanedOpphoerte: YearMonth): List<SakId> =
+        connectionAutoclosing.hentConnection { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    SELECT DISTINCT ON (sak_id) sak_id, tidligere_familiepleier ->> 'opphoertPleieforhold' FROM behandling 
+                    WHERE tidligere_familiepleier ->> 'opphoertPleieforhold' IS NOT NULL 
+                    AND status = ?
+                    AND TO_DATE(tidligere_familiepleier ->> 'opphoertPleieforhold', 'YYYY-MM-DD') BETWEEN ? AND ?
+                    ORDER BY sak_id, behandling_opprettet DESC;
+                    """.trimIndent(),
+                )
+            statement.setString(1, BehandlingStatus.IVERKSATT.name)
+            statement.setDate(2, Date.valueOf(maanedOpphoerte.atDay(1)))
+            statement.setDate(3, Date.valueOf(maanedOpphoerte.atEndOfMonth()))
+            statement.executeQuery().toList {
+                SakId(getLong("sak_id"))
             }
         }
 }

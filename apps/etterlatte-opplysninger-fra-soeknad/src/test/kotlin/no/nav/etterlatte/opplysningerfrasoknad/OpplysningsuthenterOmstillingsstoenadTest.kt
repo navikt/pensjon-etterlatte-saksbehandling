@@ -88,9 +88,6 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                 Assertions.assertNull(utenlandskBankAdresse)
                 Assertions.assertNull(iban)
                 Assertions.assertNull(swift)
-                Assertions.assertNull(oenskerSkattetrekk)
-                Assertions.assertNull(oensketSkattetrekk)
-                Assertions.assertNull(beskrivelse)
             }
     }
 

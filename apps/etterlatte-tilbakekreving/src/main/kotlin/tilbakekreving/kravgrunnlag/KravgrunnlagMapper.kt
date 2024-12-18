@@ -1,6 +1,7 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
 import no.nav.etterlatte.libs.common.UUID30
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
@@ -47,6 +48,7 @@ object KravgrunnlagMapper {
 
     private fun toGrunnlagsperiode(periode: DetaljertKravgrunnlagPeriodeDto) =
         KravgrunnlagPeriode(
+            // toLocalDate justerer først til norsk tidssone før tidspunktet fjernes helt
             Periode(
                 fraOgMed = YearMonth.from(periode.periode.fom.toLocalDate()),
                 tilOgMed = YearMonth.from(periode.periode.tom.toLocalDate()),
@@ -73,4 +75,9 @@ object KravgrunnlagMapper {
         )
 }
 
-fun XMLGregorianCalendar.toLocalDate(): LocalDate = this.toGregorianCalendar().toZonedDateTime().toLocalDate()
+fun XMLGregorianCalendar.toLocalDate(): LocalDate =
+    this
+        .toGregorianCalendar()
+        .toZonedDateTime()
+        .withZoneSameInstant(norskTidssone)
+        .toLocalDate()

@@ -76,7 +76,6 @@ object InnsendtSoeknadTestData {
                             utenlandskBankAdresse = null,
                             iban = null,
                             swift = null,
-                            skattetrekk = null,
                         ),
                 ),
             soeker =

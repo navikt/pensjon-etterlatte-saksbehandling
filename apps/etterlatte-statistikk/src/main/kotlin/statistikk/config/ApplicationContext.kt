@@ -1,7 +1,5 @@
 package no.nav.etterlatte.statistikk.config
 
-import com.typesafe.config.Config
-import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.EnvKey.BEHANDLING_AZURE_SCOPE
 import no.nav.etterlatte.EnvKey.BEREGNING_AZURE_SCOPE
@@ -13,20 +11,16 @@ import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
-import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
-import no.nav.etterlatte.statistikk.clients.VedtakKlient
 import no.nav.etterlatte.statistikk.database.AktivitetspliktRepo
-import no.nav.etterlatte.statistikk.database.RyddVedtakResultatDao
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
-import no.nav.etterlatte.statistikk.jobs.RyddVedtakResultatJob
 import no.nav.etterlatte.statistikk.river.AktivitetspliktHendelseRiver
 import no.nav.etterlatte.statistikk.river.AvbruttOpprettetBehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.BehandlingPaaVentHendelseRiver
@@ -99,23 +93,6 @@ class ApplicationContext {
             leaderElection,
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(4, ChronoUnit.HOURS),
-        )
-    }
-
-    private val ryddVedtakResultatDao: RyddVedtakResultatDao by lazy {
-        RyddVedtakResultatDao(datasource)
-    }
-
-    val config: Config = ConfigFactory.load()
-    private val vedtakKlient: VedtakKlient by lazy {
-        VedtakKlient(config, httpClient())
-    }
-
-    val ryddVedtakResultatJob: RyddVedtakResultatJob by lazy {
-        RyddVedtakResultatJob(
-            ryddVedtakResultatDao,
-            vedtakKlient,
-            leaderElection,
         )
     }
 

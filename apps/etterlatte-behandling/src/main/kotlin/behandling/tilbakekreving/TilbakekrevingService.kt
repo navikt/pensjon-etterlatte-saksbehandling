@@ -290,10 +290,7 @@ class TilbakekrevingService(
                 }
 
             // Dersom kontrollfeltet er forskjellig betyr det at kravgrunnlaget har blitt endret hos økonomi
-            // TODO legger inn en midlertidig fix her for å få gjennom denne saken. Samme kravgrunnlag må hentes på nytt
-            if (tilbakekreving.sak.id == SakId(16481) ||
-                oppdatertKravgrunnlag.kontrollFelt.value != tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value
-            ) {
+            if (oppdatertKravgrunnlag.kontrollFelt.value != tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value) {
                 logger.info("Oppdaterer kravgrunnlag tilknyttet tilbakekreving $tilbakekrevingId")
                 val oppdatertTilbakekreving =
                     tilbakekreving

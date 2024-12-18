@@ -611,6 +611,7 @@ class AxsysKlientTest : AxsysKlient {
 class KodeverkKlientTest : KodeverkKlient {
     override suspend fun hent(
         kodeverkNavn: KodeverkNavn,
+        ekskluderUgyldige: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): KodeverkResponse {
         val betydning =

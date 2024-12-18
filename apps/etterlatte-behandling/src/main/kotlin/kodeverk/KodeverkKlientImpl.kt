@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 interface KodeverkKlient {
     suspend fun hent(
         kodeverkNavn: KodeverkNavn,
+        ekskluderUgyldige: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): KodeverkResponse
 }
@@ -34,6 +35,7 @@ class KodeverkKlientImpl(
 
     override suspend fun hent(
         kodeverkNavn: KodeverkNavn,
+        ekskluderUgyldige: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): KodeverkResponse =
         try {
@@ -43,7 +45,7 @@ class KodeverkKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$url/$kodeverkNavn/koder/betydninger?ekskluderUgyldige=false&spraak=nb",
+                            url = "$url/$kodeverkNavn/koder/betydninger?ekskluderUgyldige=$ekskluderUgyldige&spraak=nb",
                             additionalHeaders = mapOf(Headers.NAV_CONSUMER_ID to applicationName),
                         ),
                     brukerTokenInfo = brukerTokenInfo,

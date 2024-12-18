@@ -1,3 +1,4 @@
+
 plugins {
     kotlin("jvm")
     id("java-library")
@@ -11,6 +12,10 @@ dependencies {
     api(libs.bundles.jackson)
 
     implementation(libs.etterlatte.common)
+    implementation(libs.logging.logstashlogbackencoder) {
+        exclude("com.fasterxml.jackson.core")
+        exclude("com.fasterxml.jackson.dataformat")
+    }
     testFixturesImplementation(libs.etterlatte.common)
     implementation(libs.logging.logbackclassic)
     compileOnly(libs.logging.slf4japi)

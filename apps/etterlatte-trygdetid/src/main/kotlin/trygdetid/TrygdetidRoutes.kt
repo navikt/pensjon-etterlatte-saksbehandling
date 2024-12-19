@@ -30,7 +30,6 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.route.withUuidParam
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -60,16 +59,6 @@ fun Route.trygdetid(
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/trygdetid_v2") {
-        post("/pesys") {
-            withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
-                call.respond(
-                    trygdetidService.hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-                        fnr = fnr.value,
-                        brukerTokenInfo = brukerTokenInfo,
-                    ),
-                )
-            }
-        }
         route("/{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
                 withBehandlingId(behandlingKlient) {
@@ -87,6 +76,19 @@ fun Route.trygdetid(
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
                     trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
+                    call.respond(
+                        trygdetidService
+                            .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                            .map { it.toDto() },
+                    )
+                }
+            }
+
+            post("/pesys") {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                    logger.info("Oppretter trygdetid(er) fra pesys for behandling $behandlingId")
+
+                    trygdetidService.leggInnTrygdetidsgrunnlagFraPesys(behandlingId, brukerTokenInfo)
                     call.respond(
                         trygdetidService
                             .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)

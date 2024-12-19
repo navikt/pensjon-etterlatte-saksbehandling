@@ -116,6 +116,7 @@ class DownstreamResourceClient(
     private suspend fun Result<HttpResponse>.fold(resource: Resource) =
         this.fold(
             onSuccess = { response ->
+                resource.addStatusCode(response.status)
                 when {
                     response.status == HttpStatusCode.NoContent -> Ok(null)
                     response.status.isSuccess() -> {
@@ -125,7 +126,7 @@ class DownstreamResourceClient(
                             Ok(response.body<String>())
                         } else {
                             logger.info("Mottok uhåndtert content-type: ${response.contentType()}")
-                            Ok(response.status)
+                            Ok(null)
                         }
                     }
 

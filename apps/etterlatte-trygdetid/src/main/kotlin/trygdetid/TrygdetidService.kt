@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
@@ -61,6 +62,11 @@ interface TrygdetidService {
     ): Trygdetid?
 
     suspend fun opprettTrygdetiderForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Trygdetid>
+
+    suspend fun leggInnTrygdetidsgrunnlagFraPesys(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
@@ -127,11 +133,6 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
 
-    suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-        fnr: String,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): TrygdetidsperioderPesys
-
     suspend fun finnBehandlingMedTrygdetidForSammeAvdoede(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -147,13 +148,13 @@ fun TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon.tilTrygdetidsperioder() =
     TrygdetidsperioderPesys(
         ufoeretrygd =
             TrygdetidsPeriodeListe(
-                trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+                trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                     it.tilTrygdetidsPeriode()
                 },
             ),
         alderspensjon =
             TrygdetidsPeriodeListe(
-                trygdetidAlderspensjon?.trygdetidsgrunnlag?.trygdetidsgrunnlagListe?.map {
+                trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                     it.tilTrygdetidsPeriode()
                 },
             ),
@@ -170,10 +171,10 @@ data class TrygdetidPeriodePesys(
     val poengInnAar: Boolean?,
     val poengUtAar: Boolean?,
     val prorata: Boolean?,
-    val kilde: Grunnlagsopplysning.Kilde,
+    val kilde: Grunnlagsopplysning.Pesys = Grunnlagsopplysning.Pesys.create(), // GrunnlagKildeCode i Pesys
 )
 
-fun Trygdetidsgrunnlag.tilTrygdetidsPeriode() =
+fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
     TrygdetidPeriodePesys(
         isoCode = land!!,
         fra = toNorskLocalDate(fomDato.toInstant()),
@@ -181,7 +182,13 @@ fun Trygdetidsgrunnlag.tilTrygdetidsPeriode() =
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
-        kilde = Grunnlagsopplysning.Pesys(Tidspunkt.now()),
+        kilde = Grunnlagsopplysning.Pesys.create(),
+    )
+
+fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
+    TrygdetidPeriode(
+        fra = fra,
+        til = til,
     )
 
 fun toNorskLocalDate(instant: Instant): LocalDate = LocalDate.ofInstant(instant, norskTidssone)
@@ -199,11 +206,6 @@ class TrygdetidServiceImpl(
     companion object {
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
     }
-
-    override suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-        fnr: String,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = pesysKlient.hentTrygdetidsgrunnlag(fnr, brukerTokenInfo).tilTrygdetidsperioder()
 
     override suspend fun hentTrygdetiderIBehandling(
         behandlingId: UUID,
@@ -313,6 +315,7 @@ class TrygdetidServiceImpl(
                     ident = avdoedMedFnr.first,
                     yrkesskade = false,
                 )
+
             val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
 
             val oppdatertTrygdetid =
@@ -322,6 +325,87 @@ class TrygdetidServiceImpl(
         }.also {
             logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
         }
+
+    override suspend fun leggInnTrygdetidsgrunnlagFraPesys(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Trygdetid> {
+        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        if (!behandling.status.kanEndres()) {
+            throw UgyldigForespoerselException(
+                code = "UGYLDIG_TILSTAND_TRYGDETID",
+                detail = "Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand",
+            )
+        }
+        when (behandling.behandlingType) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                val ukjentAvdoed = avdoede.isEmpty()
+                val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
+
+                if (ukjentAvdoed || tidligereFamiliepleier) {
+                    throw InternfeilException("Støtter ikke pesys henting for ukjent avdød eller tidligereFamiliepleier")
+                }
+            }
+            else -> throw InternfeilException("Kan kun hente inn trygdetider for førstegangsbehandling")
+        }
+
+        return avdoede
+            .map { avdoed ->
+                val fnr =
+                    requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                        "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                            "behandlingen med id=$behandlingId"
+                    }
+
+                Pair(fnr, avdoed)
+            }.map { avdoedMedFnr ->
+                val hentTrygdetid =
+                    trygdetidRepository.hentTrygdetid(behandlingId)
+                        ?: throw InternfeilException("Trygdetid er ikke opprettet")
+                val pesystt = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr, brukerTokenInfo)
+                logger.info("Trygdetid fra pesys $pesystt")
+                val opprettetTrygdetidMedPesys = populertrygdetidFraPesys(hentTrygdetid, pesystt)
+                trygdetidRepository.oppdaterTrygdetid(opprettetTrygdetidMedPesys)
+                val oppdatertTrygdetid =
+                    opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetidMedPesys, avdoedMedFnr.second, brukerTokenInfo)
+
+                oppdatertTrygdetid ?: opprettetTrygdetidMedPesys
+            }
+    }
+
+    private fun populertrygdetidFraPesys(
+        trygdetid: Trygdetid,
+        pesystt: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
+    ): Trygdetid {
+        val mappedAP =
+            pesystt.trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
+                mapPesysTrygdetidsgrunnlag(it)
+            } ?: emptyList()
+
+        val mappedUfoere =
+            pesystt.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
+                mapPesysTrygdetidsgrunnlag(it)
+            } ?: emptyList()
+
+        return trygdetid.copy(trygdetidGrunnlag = mappedAP + mappedUfoere)
+    }
+
+    private fun mapPesysTrygdetidsgrunnlag(tt: Trygdetidsgrunnlag): TrygdetidGrunnlag {
+        val trygdetidsperiode = tt.tilTrygdetidsPeriode()
+        return TrygdetidGrunnlag(
+            id = UUID.randomUUID(),
+            type = TrygdetidType.FAKTISK,
+            bosted = tt.land ?: "Ukjent",
+            periode = trygdetidsperiode.fraPesystilVanlig(),
+            kilde = trygdetidsperiode.kilde,
+            beregnetTrygdetid = null,
+            poengUtAar = trygdetidsperiode.poengUtAar ?: false,
+            poengInnAar = trygdetidsperiode.poengInnAar ?: false,
+            prorata = trygdetidsperiode.prorata ?: false,
+            begrunnelse = null,
+        )
+    }
 
     private suspend fun opprettFremtidigTrygdetidForAvdoed(
         trygdetid: Trygdetid,
@@ -969,12 +1053,6 @@ class ManglerForrigeTrygdetidMaaReguleresManuelt :
     UgyldigForespoerselException(
         "MANGLER_TRYGDETID_FOR_REGULERING",
         "Forrige behandling mangler trygdetid, og kan dermed ikke reguleres manuelt",
-    )
-
-class GrunnlagManglerAvdoede :
-    UgyldigForespoerselException(
-        code = "GRUNNLAG_MANGLER_AVDOEDE",
-        detail = "Ingen avdød(e) funnet i grunnlag. Kan ikke opprette trygdetid.",
     )
 
 class TrygdetidAlleredeOpprettetException :

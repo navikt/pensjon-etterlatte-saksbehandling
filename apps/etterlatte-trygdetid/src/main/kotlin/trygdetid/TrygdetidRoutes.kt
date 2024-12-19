@@ -84,12 +84,6 @@ fun Route.trygdetid(
                 }
             }
 
-            get("harKryssendeytelse") {
-                withBehandlingId(behandlingKlient, skrivetilgang = false) {
-                    call.respond(trygdetidService.harYtelseIPesys(behandlingId, brukerTokenInfo))
-                }
-            }
-
             post("/pesys") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Oppretter trygdetid(er) fra pesys for behandling $behandlingId")

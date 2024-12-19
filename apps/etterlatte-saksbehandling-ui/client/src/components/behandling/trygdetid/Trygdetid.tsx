@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
-  harKrysstendeYtelse,
   hentTrygdetider,
   ITrygdetid,
   opprettTrygdetider,
@@ -13,7 +12,7 @@ import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isFailure, isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
@@ -49,8 +48,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const kopierTrygdetidsgrunnlagEnabled = useFeaturetoggle(FeatureToggle.kopier_trygdetidsgrunnlag)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
-  const [, hentPesysTT] = useApiCall(opprettTrygdetidUfoeretrygdOgAlderspensjon)
-  const [harKryssendeYtelseStatus, hentKrysstendeYtelse] = useApiCall(harKrysstendeYtelse)
+  const [hentTTPesysStatus, hentPesysTT] = useApiCall(opprettTrygdetidUfoeretrygdOgAlderspensjon)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
@@ -120,7 +118,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     fetchAlleLand(null, (landListe: ILand[]) => {
       setLandListe(sorterLand(landListe))
     })
-    hentKrysstendeYtelse(behandling.id)
   }, [])
 
   if (harPilotTrygdetid) {
@@ -154,26 +151,11 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         <>
-          {mapApiResult(
-            harKryssendeYtelseStatus,
-            <Spinner label="Sjekker om avdød har ytelse i Pesys" />,
-            () => (
-              <Alert variant="warning">Kunne ikke sjekke om avdød har kryssende ytelse i PESYS</Alert>
-            ),
-            (harKryssendeYtelse) => {
-              return (
-                <>
-                  {harKryssendeYtelse ? (
-                    <Box maxWidth="fit-content">
-                      <Button onClick={hentTrygdetidFraPesys}>
-                        Hent trygdetid fra PESYS for Uføre eller Alderspensjon
-                      </Button>
-                    </Box>
-                  ) : null}
-                </>
-              )
-            }
-          )}
+          <Box maxWidth="fit-content">
+            <Button onClick={hentTrygdetidFraPesys}>Hent trygdetid fra PESYS for Uføre eller Alderspensjon</Button>
+          </Box>
+          {isFailure(hentTTPesysStatus) && <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>}
+          {isPending(hentTTPesysStatus) && <Spinner label="Henter trygdetid i Pesys" />}
         </>
         {landListe && (
           <>

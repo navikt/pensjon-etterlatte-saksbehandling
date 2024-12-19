@@ -7,9 +7,6 @@ export const hentTrygdetider = async (behandlingId: string): Promise<ApiResponse
 export const opprettTrygdetider = async (behandlingId: string): Promise<ApiResponse<ITrygdetid[]>> =>
   apiClient.post(`/trygdetid_v2/${behandlingId}`, {})
 
-export const harKrysstendeYtelse = async (behandlingId: string): Promise<ApiResponse<boolean>> =>
-  apiClient.get(`/trygdetid_v2/${behandlingId}/harKryssendeytelse`)
-
 export const opprettTrygdetidUfoeretrygdOgAlderspensjon = async (
   behandlingId: string
 ): Promise<ApiResponse<ITrygdetid[]>> => apiClient.post(`trygdetid_v2/${behandlingId}/pesys`, {})

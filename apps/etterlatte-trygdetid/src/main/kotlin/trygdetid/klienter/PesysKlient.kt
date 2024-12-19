@@ -83,6 +83,7 @@ class PesysKlientImpl(
 
                 awaitAll(ufoereTrygd, alderspensjon)
             }
+
         return TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(trygdetidUfoerepensjon, trygdetidAlderspensjon)
     }
 
@@ -100,7 +101,11 @@ class PesysKlientImpl(
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = TrygdetidsgrunnlagRequest(avdoed.first, avdoed.second.hentDoedsdato()?.verdi!!),
             ).mapBoth(
-                success = { resource -> objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(resource.response.toString()) },
+                success = { resource ->
+                    resource.response?.let {
+                        objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(resource.response.toString())
+                    }
+                },
                 failure = { errorResponse -> throw errorResponse },
             )
 

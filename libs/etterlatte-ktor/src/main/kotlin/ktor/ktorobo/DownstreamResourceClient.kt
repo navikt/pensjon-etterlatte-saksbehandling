@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
+import io.ktor.client.call.DoubleReceiveException
+import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
@@ -116,6 +118,7 @@ class DownstreamResourceClient(
     private suspend fun Result<HttpResponse>.fold(resource: Resource) =
         this.fold(
             onSuccess = { response ->
+                resource.addStatusCode(response.status)
                 when {
                     response.status == HttpStatusCode.NoContent -> Ok(null)
                     response.status.isSuccess() -> {
@@ -124,11 +127,15 @@ class DownstreamResourceClient(
                         } else if (response.harContentType(ContentType.Text.Plain)) {
                             Ok(response.body<String>())
                         } else {
-                            if (resource.ignoreContentType) {
+                            logger.info("Mottok uhåndtert content-type: ${response.contentType()}")
+                            try {
                                 Ok(response.body<String>())
-                            } else {
-                                logger.info("Mottok uhåndtert content-type: ${response.contentType()}")
-                                Ok(response.status)
+                            } catch (e: Exception) {
+                                when (e) {
+                                    is NoTransformationFoundException -> Ok(null)
+                                    is DoubleReceiveException -> throw e
+                                    else -> throw e
+                                }
                             }
                         }
                     }

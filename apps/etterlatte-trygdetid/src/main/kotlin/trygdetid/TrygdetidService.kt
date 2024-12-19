@@ -1055,12 +1055,6 @@ class ManglerForrigeTrygdetidMaaReguleresManuelt :
         "Forrige behandling mangler trygdetid, og kan dermed ikke reguleres manuelt",
     )
 
-class GrunnlagManglerAvdoede :
-    UgyldigForespoerselException(
-        code = "GRUNNLAG_MANGLER_AVDOEDE",
-        detail = "Ingen avdød(e) funnet i grunnlag. Kan ikke opprette trygdetid.",
-    )
-
 class TrygdetidAlleredeOpprettetException :
     IkkeTillattException("TRYGDETID_FINNES_ALLEREDE", "Det er opprettet trygdetid for behandlingen allerede")
 

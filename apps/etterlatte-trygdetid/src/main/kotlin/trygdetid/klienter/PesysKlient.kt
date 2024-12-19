@@ -97,7 +97,6 @@ class PesysKlientImpl(
                     Resource(
                         clientId = clientId,
                         url = "$resourceUrl/api/uforetrygd/grunnlag/trygdetidsgrunnlagListeForLopendeUforetrygd",
-                        ignoreContentType = true,
                     ),
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = TrygdetidsgrunnlagRequest(avdoed.first, avdoed.second.hentDoedsdato()?.verdi!!),
@@ -120,7 +119,6 @@ class PesysKlientImpl(
                     Resource(
                         clientId = clientId,
                         url = "$resourceUrl/api/alderspensjon/grunnlag/trygdetidsgrunnlagListeForLopendeAlderspensjon",
-                        ignoreContentType = true,
                     ),
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = TrygdetidsgrunnlagRequest(avdoed.first, avdoed.second.hentDoedsdato()?.verdi!!),

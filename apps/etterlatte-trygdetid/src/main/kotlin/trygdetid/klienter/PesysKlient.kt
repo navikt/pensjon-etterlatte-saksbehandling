@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid.klienter
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
@@ -24,6 +25,11 @@ interface PesysKlient {
         fnr: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
+
+    suspend fun hentSaker(
+        fnr: String,
+        bruker: BrukerTokenInfo,
+    ): List<SakSammendragResponse>
 }
 
 data class TrygdetidsgrunnlagRequest(
@@ -66,6 +72,27 @@ class PesysKlientImpl(
 
     private val clientId = config.getString("pen.client.id")
     private val resourceUrl = config.getString("pen.client.url")
+
+    override suspend fun hentSaker(
+        fnr: String,
+        bruker: BrukerTokenInfo,
+    ): List<SakSammendragResponse> {
+        logger.info("Henter sak sammendrag for  ${fnr.maskerFnr()} fra PEN")
+
+        return downstreamResourceClient
+            .get(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/springapi/sak/sammendragWonderful",
+                        additionalHeaders = mapOf("fnr" to fnr),
+                    ),
+                brukerTokenInfo = bruker,
+            ).mapBoth(
+                success = { resource -> objectMapper.readValue(resource.response.toString()) },
+                failure = { errorResponse -> throw errorResponse },
+            )
+    }
 
     override suspend fun hentTrygdetidsgrunnlag(
         fnr: String,
@@ -124,4 +151,25 @@ class PesysKlientImpl(
                 },
                 failure = { errorResponse -> throw errorResponse },
             )
+}
+
+data class SakSammendragResponse(
+    val sakType: String,
+    val sakStatus: Status,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+    val fomDato: LocalDate?,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+    val tomDate: LocalDate?,
+) {
+    companion object {
+        const val UFORE_SAKTYPE = "UFOREP"
+        const val ALDER_SAKTYPE = "ALDER"
+    }
+
+    enum class Status {
+        AVSLUTTET,
+        LOPENDE,
+        OPPRETTET,
+        TIL_BEHANDLING,
+    }
 }

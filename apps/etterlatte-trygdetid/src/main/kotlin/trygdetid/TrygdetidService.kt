@@ -41,6 +41,7 @@ import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
+import no.nav.etterlatte.trygdetid.klienter.SakSammendragResponse
 import no.nav.etterlatte.trygdetid.klienter.Trygdetidsgrunnlag
 import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
 import org.slf4j.LoggerFactory
@@ -54,6 +55,11 @@ interface TrygdetidService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
+
+    suspend fun harYtelseIPesys(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
 
     suspend fun hentTrygdetidIBehandlingMedId(
         behandlingId: UUID,
@@ -325,6 +331,34 @@ class TrygdetidServiceImpl(
         }.also {
             logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
         }
+
+    override suspend fun harYtelseIPesys(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        if (avdoede.isEmpty()) {
+            throw InternfeilException("Mangler avdød")
+        }
+        val harUforeEllerAlderspensjon =
+            pesysKlient
+                .hentSaker(
+                    avdoede
+                        .first()
+                        .hentFoedselsnummer()
+                        ?.verdi
+                        ?.value!!,
+                    brukerTokenInfo,
+                ).filter {
+                    it.sakStatus in
+                        listOf(
+                            SakSammendragResponse.Status.TIL_BEHANDLING,
+                            SakSammendragResponse.Status.LOPENDE,
+                        )
+                }.any { it.sakType in listOf(SakSammendragResponse.UFORE_SAKTYPE, SakSammendragResponse.ALDER_SAKTYPE) }
+
+        return harUforeEllerAlderspensjon
+    }
 
     override suspend fun leggInnTrygdetidsgrunnlagFraPesys(
         behandlingId: UUID,

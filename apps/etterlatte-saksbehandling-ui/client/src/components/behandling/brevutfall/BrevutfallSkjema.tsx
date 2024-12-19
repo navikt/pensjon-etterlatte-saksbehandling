@@ -231,8 +231,8 @@ export const BrevutfallSkjema = ({
                     <ControlledRadioGruppe
                       name="frivilligSkattetrekk"
                       control={control}
-                      errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"
-                      legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk?</HStack>}
+                      errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk utover 17%"
+                      legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk utover 17%?</HStack>}
                       radios={
                         <>
                           <Radio size="small" value={ISvar.JA}>
@@ -254,8 +254,8 @@ export const BrevutfallSkjema = ({
                 <ControlledRadioGruppe
                   name="frivilligSkattetrekk"
                   control={control}
-                  errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"
-                  legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk?</HStack>}
+                  errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk utover 17%"
+                  legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk utover 17%?</HStack>}
                   radios={
                     <>
                       <Radio size="small" value={ISvar.JA}>

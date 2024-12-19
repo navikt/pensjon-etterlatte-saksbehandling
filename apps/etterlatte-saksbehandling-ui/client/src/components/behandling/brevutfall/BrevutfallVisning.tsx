@@ -101,7 +101,7 @@ export const BrevutfallVisning = (props: {
           )}
           {sakType === SakType.BARNEPENSJON && hasValue(brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk) && (
             <VStack gap="2">
-              <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
+              <Label>Har bruker meldt inn frivillig skattetrekk utover 17%?</Label>
               <BodyShort>{brevutfallOgEtterbetaling.brevutfall.frivilligSkattetrekk ? 'Ja' : 'Nei'}</BodyShort>
             </VStack>
           )}

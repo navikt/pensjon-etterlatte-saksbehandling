@@ -17,6 +17,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentLength
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.ktor.navConsumerId
@@ -116,6 +117,7 @@ class DownstreamResourceClient(
     private suspend fun Result<HttpResponse>.fold(resource: Resource) =
         this.fold(
             onSuccess = { response ->
+                resource.addStatusCode(response.status)
                 when {
                     response.status == HttpStatusCode.NoContent -> Ok(null)
                     response.status.isSuccess() -> {
@@ -124,8 +126,14 @@ class DownstreamResourceClient(
                         } else if (response.harContentType(ContentType.Text.Plain)) {
                             Ok(response.body<String>())
                         } else {
-                            logger.info("Mottok uhåndtert content-type: ${response.contentType()}")
-                            Ok(response.status)
+                            if (response.contentLength() == 0L) {
+                                logger.info("Mottok tom content type${response.contentType()}")
+                            } else {
+                                logger.warn(
+                                    "Mottok uhåndtert content-type: ${response.contentType()} lengde på innhold: ${response.contentLength()} ",
+                                )
+                            }
+                            Ok(null)
                         }
                     }
 

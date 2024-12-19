@@ -1,6 +1,7 @@
 package no.nav.etterlatte.trygdetid.klienter
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -8,6 +9,8 @@ import io.ktor.client.HttpClient
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -21,7 +24,7 @@ import java.util.Date
 
 interface PesysKlient {
     suspend fun hentTrygdetidsgrunnlag(
-        fnr: String,
+        avdoed: Pair<String, Grunnlagsdata<JsonNode>>,
         brukerTokenInfo: BrukerTokenInfo,
     ): TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
 }
@@ -41,13 +44,14 @@ data class Trygdetidsgrunnlag(
     val ikkeProRata: Boolean? = null,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class TrygdetidsgrunnlagListe(
     val trygdetidsgrunnlagListe: List<Trygdetidsgrunnlag>,
 )
 
 data class SakIdTrygdetidsgrunnlagListePairResponse(
     val sakId: SakId,
-    val trygdetidsgrunnlag: TrygdetidsgrunnlagListe,
+    val trygdetidsgrunnlagListe: TrygdetidsgrunnlagListe,
 )
 
 data class TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(
@@ -67,23 +71,24 @@ class PesysKlientImpl(
     private val resourceUrl = config.getString("pen.client.url")
 
     override suspend fun hentTrygdetidsgrunnlag(
-        fnr: String,
+        avdoed: Pair<String, Grunnlagsdata<JsonNode>>,
         brukerTokenInfo: BrukerTokenInfo,
     ): TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon {
-        logger.info("Henter trygdetidsgrunnlag(uføre og AP) for  ${fnr.maskerFnr()} fra PEN")
+        logger.info("Henter trygdetidsgrunnlag(uføre og AP) for  ${avdoed.first.maskerFnr()} fra PEN")
 
         val (trygdetidUfoerepensjon, trygdetidAlderspensjon) =
             coroutineScope {
-                val ufoereTrygd = async { hentTrygdetidsgrunnlagListeForLopendeUforetrygd(fnr, brukerTokenInfo) }
-                val alderspensjon = async { hentTrygdetidslisteForLoependeAlderspensjon(fnr, brukerTokenInfo) }
+                val ufoereTrygd = async { hentTrygdetidsgrunnlagListeForLopendeUforetrygd(avdoed, brukerTokenInfo) }
+                val alderspensjon = async { hentTrygdetidslisteForLoependeAlderspensjon(avdoed, brukerTokenInfo) }
 
                 awaitAll(ufoereTrygd, alderspensjon)
             }
+
         return TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon(trygdetidUfoerepensjon, trygdetidAlderspensjon)
     }
 
     private suspend fun hentTrygdetidsgrunnlagListeForLopendeUforetrygd(
-        fnr: String,
+        avdoed: Pair<String, Grunnlagsdata<JsonNode>>,
         brukerTokenInfo: BrukerTokenInfo,
     ): SakIdTrygdetidsgrunnlagListePairResponse? =
         downstreamResourceClient
@@ -94,14 +99,18 @@ class PesysKlientImpl(
                         url = "$resourceUrl/api/uforetrygd/grunnlag/trygdetidsgrunnlagListeForLopendeUforetrygd",
                     ),
                 brukerTokenInfo = brukerTokenInfo,
-                postBody = TrygdetidsgrunnlagRequest(fnr, LocalDate.now()),
+                postBody = TrygdetidsgrunnlagRequest(avdoed.first, avdoed.second.hentDoedsdato()?.verdi!!),
             ).mapBoth(
-                success = { resource -> objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(resource.response.toString()) },
+                success = { resource ->
+                    resource.response?.let {
+                        objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(resource.response.toString())
+                    }
+                },
                 failure = { errorResponse -> throw errorResponse },
             )
 
     private suspend fun hentTrygdetidslisteForLoependeAlderspensjon(
-        fnr: String,
+        avdoed: Pair<String, Grunnlagsdata<JsonNode>>,
         brukerTokenInfo: BrukerTokenInfo,
     ): SakIdTrygdetidsgrunnlagListePairResponse? =
         downstreamResourceClient
@@ -112,9 +121,15 @@ class PesysKlientImpl(
                         url = "$resourceUrl/api/alderspensjon/grunnlag/trygdetidsgrunnlagListeForLopendeAlderspensjon",
                     ),
                 brukerTokenInfo = brukerTokenInfo,
-                postBody = TrygdetidsgrunnlagRequest(fnr, LocalDate.now()),
+                postBody = TrygdetidsgrunnlagRequest(avdoed.first, avdoed.second.hentDoedsdato()?.verdi!!),
             ).mapBoth(
-                success = { resource -> objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(resource.response.toString()) },
+                success = { resource ->
+                    resource.response?.let {
+                        objectMapper.readValue<SakIdTrygdetidsgrunnlagListePairResponse?>(
+                            resource.response.toString(),
+                        )
+                    }
+                },
                 failure = { errorResponse -> throw errorResponse },
             )
 }

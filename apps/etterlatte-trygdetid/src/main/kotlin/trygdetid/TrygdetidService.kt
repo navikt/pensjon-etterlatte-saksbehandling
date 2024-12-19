@@ -55,11 +55,6 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
 
-    suspend fun harYtelseIPesys(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean
-
     suspend fun hentTrygdetidIBehandlingMedId(
         behandlingId: UUID,
         trygdetidId: UUID,
@@ -355,7 +350,6 @@ class TrygdetidServiceImpl(
             else -> throw InternfeilException("Kan kun hente inn trygdetider for førstegangsbehandling")
         }
 
-        val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
         return avdoede
             .map { avdoed ->
                 val fnr =
@@ -365,8 +359,6 @@ class TrygdetidServiceImpl(
                     }
 
                 Pair(fnr, avdoed)
-            }.filter { avdoedMedFnr ->
-                eksisterendeTrygdetider.none { avdoedMedFnr.first == it.ident }
             }.map { avdoedMedFnr ->
                 val hentTrygdetid =
                     trygdetidRepository.hentTrygdetid(behandlingId)

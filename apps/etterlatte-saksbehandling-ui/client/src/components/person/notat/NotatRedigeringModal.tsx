@@ -59,7 +59,7 @@ export const NotatRedigeringModal = ({ notat, minifyRedigerKnapp }: RedigerbartN
 
   return (
     <>
-      <Button variant="secondary" onClick={open} size="small" icon={<PencilIcon />}>
+      <Button variant="secondary" onClick={open} size="small" icon={<PencilIcon title="Rediger notat" />}>
         {!minifyRedigerKnapp && 'Rediger'}
       </Button>
 

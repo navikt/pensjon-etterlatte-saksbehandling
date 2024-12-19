@@ -21,7 +21,7 @@ export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNota
 
   return (
     <>
-      <Button variant="danger" size="small" icon={<TrashIcon />} onClick={() => setIsOpen(true)}>
+      <Button variant="danger" size="small" icon={<TrashIcon aria-hidden />} onClick={() => setIsOpen(true)}>
         Slett
       </Button>
 
@@ -38,7 +38,7 @@ export const SlettNotatModal = ({ notat, fjernNotat }: { notat: Notat; fjernNota
               Lukk
             </Button>
 
-            <Button variant="danger" icon={<TrashIcon />} onClick={slett} loading={isPending(slettStatus)}>
+            <Button variant="danger" icon={<TrashIcon aria-hidden />} onClick={slett} loading={isPending(slettStatus)}>
               Slett
             </Button>
           </HStack>

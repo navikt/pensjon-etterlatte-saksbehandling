@@ -76,7 +76,12 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
       )}
 
       {sideInfo?.finnesNesteSide && (
-        <Button variant="secondary" size="small" onClick={() => hent(sideInfo?.sluttpeker)} icon={<ArrowDownIcon />}>
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={() => hent(sideInfo?.sluttpeker)}
+          icon={<ArrowDownIcon aria-hidden />}
+        >
           Last flere
         </Button>
       )}
@@ -97,7 +102,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
             size="small"
             target="_blank"
             rel="noreferrer noopener"
-            icon={<ExternalLinkIcon />}
+            icon={<ExternalLinkIcon aria-hidden />}
           >
             Gå til dokumentoversikten
           </PersonButtonLink>

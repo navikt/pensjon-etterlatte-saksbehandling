@@ -60,7 +60,7 @@ export default function FerdigstillOppgave() {
             target="_blank"
             rel="noreferrer noopener"
           >
-            dokumentoversikten <ExternalLinkIcon />
+            dokumentoversikten <ExternalLinkIcon aria-hidden />
           </PersonLink>
         </Alert>
       )}

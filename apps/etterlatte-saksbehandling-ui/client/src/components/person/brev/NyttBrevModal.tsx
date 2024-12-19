@@ -141,7 +141,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
   return (
     <>
-      <Button variant="primary" icon={<DocPencilIcon />} iconPosition="right" onClick={() => setOpen(true)}>
+      <Button variant="primary" icon={<DocPencilIcon aria-hidden />} iconPosition="right" onClick={() => setOpen(true)}>
         Nytt brev
       </Button>
 

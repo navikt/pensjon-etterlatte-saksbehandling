@@ -127,7 +127,7 @@ export const BrevOppgaveModal = ({
                   variant="primary"
                   to={`/person/sak/${brev.sakId}/brev/${brev.id}`}
                   target="_blank"
-                  icon={<ExternalLinkIcon />}
+                  icon={<ExternalLinkIcon aria-hidden />}
                 >
                   Åpne brev
                 </Button>

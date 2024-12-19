@@ -146,7 +146,7 @@ export const Resultat = (props: Props) => {
                   }}
                   variant="tertiary"
                   size="small"
-                  icon={<TrashIcon />}
+                  icon={<TrashIcon aria-hidden />}
                 >
                   Slett vurdering
                 </Button>
@@ -164,7 +164,7 @@ export const Resultat = (props: Props) => {
                   }}
                   variant="tertiary"
                   size="small"
-                  icon={<PencilWritingIcon />}
+                  icon={<PencilWritingIcon aria-hidden />}
                   loading={isPending(totalVurderingStatus)}
                 >
                   Rediger totalvurdering

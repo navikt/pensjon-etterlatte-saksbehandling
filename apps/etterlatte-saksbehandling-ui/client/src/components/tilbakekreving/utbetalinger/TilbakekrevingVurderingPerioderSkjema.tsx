@@ -101,7 +101,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
           <div>
             <Button
               variant="secondary"
-              icon={<ArrowsCirclepathIcon />}
+              icon={<ArrowsCirclepathIcon aria-hidden />}
               iconPosition="right"
               loading={isPending(oppdaterKravgrunnlagStatus)}
               size="small"

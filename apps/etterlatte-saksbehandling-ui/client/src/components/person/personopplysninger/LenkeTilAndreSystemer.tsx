@@ -8,14 +8,14 @@ export const LenkeTilAndreSystemer = ({ fnr }: { fnr: string }): ReactNode => {
   const configContext = useContext(ConfigContext)
 
   return (
-    <Personopplysning heading="Snarvei til brukers opplysninger i andre system" icon={<MonitorIcon />}>
+    <Personopplysning heading="Snarvei til brukers opplysninger i andre system" icon={<MonitorIcon aria-hidden />}>
       <HStack gap="8">
         <HStack gap="2">
           <Tag variant="alt3" size="small">
             Go
           </Tag>
           <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${fnr}`} target="_blank">
-            Oversikt i Gosys <ExternalLinkIcon />
+            Oversikt i Gosys <ExternalLinkIcon aria-hidden />
           </Link>
         </HStack>
         <HStack gap="2">
@@ -23,7 +23,7 @@ export const LenkeTilAndreSystemer = ({ fnr }: { fnr: string }): ReactNode => {
             Py
           </Tag>
           <Link href={`${configContext['psakUrl']}/brukeroversikt/fnr=${fnr}`} target="_blank">
-            Oversikt i Pesys <ExternalLinkIcon />
+            Oversikt i Pesys <ExternalLinkIcon aria-hidden />
           </Link>
         </HStack>
         <HStack gap="2">
@@ -31,7 +31,7 @@ export const LenkeTilAndreSystemer = ({ fnr }: { fnr: string }): ReactNode => {
             Mo
           </Tag>
           <Link href={`${configContext['modiapersonoversiktUrl']}/person/${fnr}`} target="_blank">
-            Oversikt i Modia <ExternalLinkIcon />
+            Oversikt i Modia <ExternalLinkIcon aria-hidden />
           </Link>
         </HStack>
       </HStack>

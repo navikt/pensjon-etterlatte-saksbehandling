@@ -22,7 +22,7 @@ type Props = {
 export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props) => {
   return (
     <HStack gap="2" margin="1">
-      <PersonIcon fontSize={IconSize.DEFAULT} />
+      <PersonIcon fontSize={IconSize.DEFAULT} aria-hidden />
 
       <VStack gap="1">
         <Heading size="small" level="3">

@@ -67,7 +67,7 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
                     <Table.DataCell>
                       {!!notat.journalpostId ? (
                         <Tag variant="success">
-                          <CheckmarkIcon /> Journalført
+                          <CheckmarkIcon aria-hidden /> Journalført
                         </Tag>
                       ) : (
                         <Tag variant="neutral">Under arbeid</Tag>
@@ -83,7 +83,7 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
                               href={`/api/notat/${notat.id}/pdf`}
                               target="_blank"
                               variant="secondary"
-                              icon={<ExternalLinkIcon />}
+                              icon={<ExternalLinkIcon aria-hidden />}
                               size="small"
                             >
                               Åpne

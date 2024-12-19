@@ -96,13 +96,13 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
                       </BodyShort>
                       <Link href={`/behandling/${behandlingId}/trygdetid`} as="a" target="_blank">
                         Forhåndsvis trygdetiden
-                        <ExternalLinkIcon />
+                        <ExternalLinkIcon aria-hidden />
                       </Link>
                       <HStack gap="1">
                         <Button
                           variant="secondary"
                           size="small"
-                          icon={<XMarkOctagonIcon />}
+                          icon={<XMarkOctagonIcon aria-hidden />}
                           onClick={ikkeKopierTrygdetid}
                         >
                           Nei, jeg ønsker å fylle ut manuelt
@@ -110,7 +110,7 @@ export const TrygdetidIAnnenBehandlingMedSammeAvdoede = ({
                         <Button
                           variant="primary"
                           size="small"
-                          icon={<PlusCircleIcon />}
+                          icon={<PlusCircleIcon aria-hidden />}
                           onClick={() => kopierTrygdetid(behandlingId)}
                         >
                           Ja, kopier og legg til trygdetid

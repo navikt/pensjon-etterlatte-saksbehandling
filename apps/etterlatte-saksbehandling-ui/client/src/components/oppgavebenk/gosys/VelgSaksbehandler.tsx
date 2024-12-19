@@ -59,7 +59,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
         <Dropdown open={openDropdown}>
           <Button
             as={Dropdown.Toggle}
-            icon={valgtSaksbehandler?.ident ? <PersonPencilIcon /> : <PersonPlusIcon />}
+            icon={valgtSaksbehandler?.ident ? <PersonPencilIcon aria-hidden /> : <PersonPlusIcon aria-hidden />}
             iconPosition="left"
             size="small"
             variant="tertiary"
@@ -96,7 +96,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
                   variant="secondary"
                   size="small"
                   onClick={() => tildel(undefined)}
-                  icon={<PersonCrossIcon />}
+                  icon={<PersonCrossIcon aria-hidden />}
                   iconPosition="right"
                   loading={isPending(tildelResult)}
                 >

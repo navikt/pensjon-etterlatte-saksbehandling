@@ -12,7 +12,7 @@ export const Vergemaal = ({
   vergemaalEllerFremtidsfullmakt?: VergemaalEllerFremtidsfullmakt[]
 }): ReactNode => {
   return (
-    <Personopplysning heading="Vergemål" icon={<PersonGroupIcon />}>
+    <Personopplysning heading="Vergemål" icon={<PersonGroupIcon aria-hidden />}>
       <Table>
         <Table.Header>
           <Table.Row>

@@ -77,7 +77,7 @@ export const SettPaaVentModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
         {oppgave.status === Oppgavestatus.PAA_VENT ? 'Ta av vent' : 'Sett på vent'}
       </Button>
 
-      <Modal open={aapen} onClose={() => setAapen(false)} aria-labelledby="modal for å sette oppgave på vent">
+      <Modal open={aapen} onClose={() => setAapen(false)} aria-label="modal for å sette oppgave på vent">
         <Modal.Header>
           <Heading size="medium" spacing>
             {oppgave.status === Oppgavestatus.PAA_VENT ? 'Ta av vent' : 'Sett på vent'}

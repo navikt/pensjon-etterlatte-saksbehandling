@@ -45,7 +45,7 @@ export const BrevMottakerWrapper = ({ brev, kanRedigeres }: { brev: IBrev; kanRe
             variant="secondary"
             onClick={opprettNyMottaker}
             loading={isPending(opprettMottakerResult)}
-            icon={<PlusIcon />}
+            icon={<PlusIcon aria-hidden />}
           >
             Legg til mottaker
           </Button>

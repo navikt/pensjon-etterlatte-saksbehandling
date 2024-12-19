@@ -19,7 +19,7 @@ export const Sivilstatus = ({
     avdoede.find((val) => val.foedselsnummer === relatertVedSiviltilstand)
 
   return (
-    <Personopplysning heading="Sivilstatus" icon={<HeartIcon />}>
+    <Personopplysning heading="Sivilstatus" icon={<HeartIcon aria-hidden />}>
       <Table>
         <Table.Header>
           <Table.Row>

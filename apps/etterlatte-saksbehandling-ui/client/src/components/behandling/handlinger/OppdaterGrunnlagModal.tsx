@@ -43,7 +43,7 @@ export default function OppdaterGrunnlagModal({
       <Button
         variant="secondary"
         size="small"
-        icon={<ArrowsCirclepathIcon />}
+        icon={<ArrowsCirclepathIcon aria-hidden />}
         iconPosition="right"
         onClick={() => setIsOpen(true)}
       >

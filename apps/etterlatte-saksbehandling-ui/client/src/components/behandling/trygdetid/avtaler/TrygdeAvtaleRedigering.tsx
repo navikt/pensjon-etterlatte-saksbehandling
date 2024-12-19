@@ -338,7 +338,12 @@ export function TrygdeAvtaleRedigering(props: {
               Avbryt
             </Button>
           )}
-          <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="submit" icon={<FloppydiskIcon />}>
+          <Button
+            size="small"
+            loading={isPending(lagreTrygdeavtaleRequest)}
+            type="submit"
+            icon={<FloppydiskIcon aria-hidden />}
+          >
             Lagre
           </Button>
         </HStack>

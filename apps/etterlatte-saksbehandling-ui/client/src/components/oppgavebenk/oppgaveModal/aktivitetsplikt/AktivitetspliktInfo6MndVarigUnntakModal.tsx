@@ -76,7 +76,7 @@ export const AktivitetspliktInfo6MndVarigUnntakModal = ({
               <div>
                 <PersonButtonLink
                   size="small"
-                  icon={<EnvelopeClosedIcon />}
+                  icon={<EnvelopeClosedIcon aria-hidden />}
                   fnr={oppgave.fnr || '-'}
                   fane={PersonOversiktFane.BREV}
                   disabled={!oppgave.fnr}

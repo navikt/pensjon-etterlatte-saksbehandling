@@ -67,7 +67,12 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
               Avbryt
             </Button>
           )}
-          <Button variant="primary" type="submit" icon={<FloppydiskIcon />} loading={isPending(lagreUnntakStatus)}>
+          <Button
+            variant="primary"
+            type="submit"
+            icon={<FloppydiskIcon aria-hidden />}
+            loading={isPending(lagreUnntakStatus)}
+          >
             Lagre
           </Button>
         </HStack>

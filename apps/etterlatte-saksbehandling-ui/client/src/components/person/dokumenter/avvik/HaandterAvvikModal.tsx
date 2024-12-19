@@ -35,8 +35,7 @@ export const HaandterAvvikModal = ({
       <Button
         variant="secondary"
         size="small"
-        icon={<CogRotationIcon />}
-        title="Håndter avvik"
+        icon={<CogRotationIcon title="Håndter avvik" />}
         onClick={() => setIsOpen(true)}
       />
 

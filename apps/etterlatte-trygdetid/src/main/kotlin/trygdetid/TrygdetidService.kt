@@ -330,8 +330,21 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
         val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        when (behandling.behandlingType) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                val ukjentAvdoed = avdoede.isEmpty()
+                val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
+
+                if (ukjentAvdoed || tidligereFamiliepleier) {
+                    throw InternfeilException("Støtter ikke pesys henting for ukjent avdød eller tidligereFamiliepleier")
+                }
+            }
+            else -> throw InternfeilException("Kan kun hente inn trygdetider for førstegangsbehandling")
+        }
+
+        val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
         return avdoede
             .map { avdoed ->
                 val fnr =

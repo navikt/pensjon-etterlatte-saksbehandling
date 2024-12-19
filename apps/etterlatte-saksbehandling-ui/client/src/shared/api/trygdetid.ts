@@ -1,20 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { JaNei } from '~shared/types/ISvar'
 
-export const hentTrygdetidUfoeretrygdOgAlderspensjon = async (
-  fnr: string
-): Promise<ApiResponse<TrygdetidsperioderPesys>> =>
-  apiClient.post('trygdetid_v2/pesys/grunnlag', { foedselsnummer: fnr })
-
-export interface TrygdetidsperioderPesys {
-  ufoeretrygd: TrygdetidsperiodeListe
-  alderspensjon: TrygdetidsperiodeListe
-}
-
-export interface TrygdetidsperiodeListe {
-  trygdetidsGrunnlagListe?: TrygdetidPeriodePesys[]
-}
-
 export interface TrygdetidPeriodePesys {
   isoCountryCode: string // ISO 3166-1 alpha-3 code feks: "NOR" "SWE"
   fra: string //TODO: eller date? kommer i steg 2 da vi dette skal brukes i frontend
@@ -33,6 +19,10 @@ export const hentTrygdetider = async (behandlingId: string): Promise<ApiResponse
 
 export const opprettTrygdetider = async (behandlingId: string): Promise<ApiResponse<ITrygdetid[]>> =>
   apiClient.post(`/trygdetid_v2/${behandlingId}`, {})
+
+export const opprettTrygdetidUfoeretrygdOgAlderspensjon = async (
+  behandlingId: string
+): Promise<ApiResponse<ITrygdetid[]>> => apiClient.post(`trygdetid_v2/${behandlingId}/pesys`, {})
 
 export const overstyrTrygdetid = async (overstyring: ITrygdetidOverstyring): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid_v2/${overstyring.behandlingId}/overstyr`, { ...overstyring })

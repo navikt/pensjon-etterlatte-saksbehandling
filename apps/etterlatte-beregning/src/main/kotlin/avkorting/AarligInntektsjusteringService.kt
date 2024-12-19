@@ -56,7 +56,7 @@ class AarligInntektsjusteringService(
                 fratrekkInnAar = 0,
                 inntektUtlandTom = siseInntekt.inntektUtlandTom,
                 fratrekkInnAarUtland = 0,
-                spesifikasjon = siseInntekt.spesifikasjon,
+                spesifikasjon = "Automatisk jobb viderefører inntekt fra $aar med id=${siseInntekt.id}",
                 fom = YearMonth.of(aar, 1),
             )
 

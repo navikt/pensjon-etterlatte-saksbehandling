@@ -46,6 +46,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const dispatch = useAppDispatch()
 
   const kopierTrygdetidsgrunnlagEnabled = useFeaturetoggle(FeatureToggle.kopier_trygdetidsgrunnlag)
+  const kanHenteTrygdetidFraPesys = useFeaturetoggle(FeatureToggle.trygdetid_fra_pesys)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentTTPesysStatus, hentPesysTT] = useApiCall(opprettTrygdetidUfoeretrygdOgAlderspensjon)
@@ -150,13 +151,17 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       )}
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
-        <>
-          <Box maxWidth="fit-content">
-            <Button onClick={hentTrygdetidFraPesys}>Hent trygdetid fra PESYS for Uføre eller Alderspensjon</Button>
-          </Box>
-          {isFailure(hentTTPesysStatus) && <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>}
-          {isPending(hentTTPesysStatus) && <Spinner label="Henter trygdetid i Pesys" />}
-        </>
+        {kanHenteTrygdetidFraPesys && (
+          <>
+            <Box maxWidth="fit-content">
+              <Button onClick={hentTrygdetidFraPesys}>
+                Hent trygdetid fra Pesys for uføretrygd eller alderspensjon for avdød
+              </Button>
+            </Box>
+            {isFailure(hentTTPesysStatus) && <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>}
+            {isPending(hentTTPesysStatus) && <Spinner label="Henter trygdetid i Pesys" />}
+          </>
+        )}
         {landListe && (
           <>
             {trygdetider.length == 1 && (

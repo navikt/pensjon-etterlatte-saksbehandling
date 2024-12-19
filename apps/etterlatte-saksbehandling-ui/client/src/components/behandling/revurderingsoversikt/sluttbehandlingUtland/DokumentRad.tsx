@@ -41,7 +41,7 @@ export default function DokumentRad({
       {!lesevisning && (
         <Button
           variant="tertiary"
-          icon={<XMarkIcon />}
+          icon={<XMarkIcon aria-hidden />}
           onClick={() => fjernDokument()}
           style={{ marginTop: '1.9rem', maxHeight: '3rem' }}
         >

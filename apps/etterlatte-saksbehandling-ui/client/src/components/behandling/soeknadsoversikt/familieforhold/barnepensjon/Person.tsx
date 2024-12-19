@@ -58,7 +58,7 @@ export const Person = ({
   return (
     <PersonBorder>
       <IconWrapper>
-        <PersonIcon fontSize={IconSize.DEFAULT} />
+        <PersonIcon fontSize={IconSize.DEFAULT} aria-hidden />
       </IconWrapper>
       <PersonInfoWrapper>
         <Heading size="small" level="3">

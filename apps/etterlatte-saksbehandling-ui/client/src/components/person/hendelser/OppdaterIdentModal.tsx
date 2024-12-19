@@ -45,7 +45,7 @@ export const OppdaterIdentModal = ({
 
   return (
     <div>
-      <Button onClick={() => setIsOpen(true)} icon={<ArrowsCirclepathIcon />}>
+      <Button onClick={() => setIsOpen(true)} icon={<ArrowsCirclepathIcon aria-hidden />}>
         Oppdater ident
       </Button>
 

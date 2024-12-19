@@ -52,7 +52,7 @@ export const PersonSoekModal = ({ velgPerson }: { velgPerson: (bruker: SoekPerso
   return (
     <div>
       <Button
-        icon={<MagnifyingGlassIcon />}
+        icon={<MagnifyingGlassIcon aria-hidden />}
         iconPosition="right"
         variant="secondary"
         onClick={() => setIsOpen(true)}

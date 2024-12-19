@@ -9,12 +9,12 @@ export const Sidebar = ({ children }: { children: ReactNode }) => {
   return (
     <CollapsibleSidebar $collapsed={collapsed}>
       <SidebarTools>
-        <Button
-          variant={collapsed ? 'primary' : 'tertiary'}
-          onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? 'Åpne sidemeny' : 'Lukk sidemeny'}
-        >
-          {collapsed ? <ChevronLeftDoubleIcon /> : <ChevronRightDoubleIcon />}
+        <Button variant={collapsed ? 'primary' : 'tertiary'} onClick={() => setCollapsed(!collapsed)}>
+          {collapsed ? (
+            <ChevronLeftDoubleIcon aria-label="Åpne sidemeny" />
+          ) : (
+            <ChevronRightDoubleIcon aria-label="Lukk sidemeny" />
+          )}
         </Button>
       </SidebarTools>
 

@@ -18,7 +18,7 @@ export function LeggTilNyVurdering(props: { doedsdato?: Date }) {
   if (!leggerTilVurdering) {
     return (
       <Box>
-        <Button size="small" icon={<PlusIcon />} onClick={() => setLeggerTilVurdering(true)}>
+        <Button size="small" icon={<PlusIcon aria-hidden />} onClick={() => setLeggerTilVurdering(true)}>
           Legg til ny vurdering av aktivitetsplikt
         </Button>
       </Box>

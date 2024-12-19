@@ -118,7 +118,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
             <Button
               type="button"
               size="small"
-              icon={<PencilIcon />}
+              icon={<PencilIcon aria-hidden />}
               variant="secondary"
               onClick={() => setRedigeres(true)}
             >

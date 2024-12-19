@@ -167,7 +167,7 @@ export const ButtonNavigerTilBrev = (props: { klage: Klage }) => {
       fnr={props.klage.sak.ident}
       fane={PersonOversiktFane.BREV}
       variant="primary"
-      icon={<EnvelopeClosedIcon />}
+      icon={<EnvelopeClosedIcon aria-hidden />}
       target="_blank"
       rel="noreferrer noopener"
     >

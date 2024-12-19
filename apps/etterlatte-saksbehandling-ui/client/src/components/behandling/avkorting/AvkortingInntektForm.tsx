@@ -252,7 +252,7 @@ export const AvkortingInntektForm = ({
             size="medium"
             variant="secondary"
             onClick={toggleOverstyrtInnvilgaMaaneder}
-            icon={skalOverstyreMaaneder ? <TrashIcon /> : <CogRotationIcon />}
+            icon={skalOverstyreMaaneder ? <TrashIcon aria-hidden /> : <CogRotationIcon aria-hidden />}
           >
             {skalOverstyreMaaneder ? 'Fjern overstyrt innvilga måneder' : 'Overstyr innvilga måneder'}
           </Button>

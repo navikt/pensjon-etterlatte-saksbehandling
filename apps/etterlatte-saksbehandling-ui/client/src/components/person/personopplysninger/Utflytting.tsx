@@ -18,7 +18,7 @@ export const Utflytting = ({
   landListe: ILand[]
 }): ReactNode => {
   return (
-    <Personopplysning heading="Utflytting" icon={<AirplaneIcon />}>
+    <Personopplysning heading="Utflytting" icon={<AirplaneIcon aria-hidden />}>
       <Table>
         <Table.Header>
           <Table.Row>

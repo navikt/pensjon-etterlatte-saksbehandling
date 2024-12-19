@@ -91,7 +91,12 @@ export function RedigerMottakerModal({ brevId, sakId, mottaker: initialMottaker,
 
   return (
     <>
-      <Button variant="secondary" onClick={() => setIsOpen(true)} icon={<DocPencilIcon aria-hidden />} size="small" />
+      <Button
+        variant="secondary"
+        onClick={() => setIsOpen(true)}
+        icon={<DocPencilIcon title="Endre mottaker" />}
+        size="small"
+      />
 
       <form onSubmit={handleSubmit(lagreEndringer)}>
         <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Endre mottaker">

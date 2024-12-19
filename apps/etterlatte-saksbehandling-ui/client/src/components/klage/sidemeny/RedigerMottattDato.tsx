@@ -65,7 +65,7 @@ export function RedigerMottattDato() {
     <Box>
       <Button
         size="small"
-        icon={<PencilIcon />}
+        icon={<PencilIcon aria-hidden />}
         iconPosition="left"
         variant="secondary"
         onClick={() => setRedigererDato(true)}

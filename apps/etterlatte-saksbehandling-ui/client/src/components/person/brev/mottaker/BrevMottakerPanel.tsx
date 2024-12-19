@@ -182,7 +182,7 @@ export function BrevMottakerPanel({
         <HStack justify="center" marginBlock="4 0">
           <Button
             variant="secondary"
-            icon={<PersonCheckmarkIcon />}
+            icon={<PersonCheckmarkIcon aria-hidden />}
             size="small"
             onClick={() =>
               apiSettHovedmottaker({ brevId, sakId, mottakerId: mottaker.id }, () => window.location.reload())

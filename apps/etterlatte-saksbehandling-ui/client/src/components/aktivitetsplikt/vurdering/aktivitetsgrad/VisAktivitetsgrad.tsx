@@ -73,13 +73,18 @@ export function VisAktivitetsgrad(props: { aktivitet: IAktivitetspliktAktivitets
 
       {erRedigerbar && (
         <HStack gap="4">
-          <Button size="xsmall" variant="secondary" onClick={() => setRedigerer(true)} icon={<PencilIcon />}>
+          <Button
+            size="xsmall"
+            variant="secondary"
+            onClick={() => setRedigerer(true)}
+            icon={<PencilIcon aria-hidden />}
+          >
             Rediger
           </Button>
           <Button
             size="xsmall"
             variant="secondary"
-            icon={<TrashIcon />}
+            icon={<TrashIcon aria-hidden />}
             loading={isPending(slettStatus)}
             onClick={() => slettAktivitetsgradIOppgave(aktivitet)}
           >

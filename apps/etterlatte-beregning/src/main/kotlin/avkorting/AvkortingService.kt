@@ -225,11 +225,10 @@ class AvkortingService(
         // TODO skal forenkles.. EY-4632
         if (behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING &&
             virkningsAar == 2024 &&
+            (behandling.opphoerFraOgMed == null || behandling.opphoerFraOgMed!! > YearMonth.of(2025, 1)) &&
             featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, defaultValue = false)
         ) {
-            val opphoerSammeAar =
-                behandling.opphoerFraOgMed?.let { it.year == virkningsAar } ?: false
-            if (opphoerSammeAar || lagretAvkorting.aarsoppgjoer.size == 2) {
+            if (lagretAvkorting.aarsoppgjoer.size == 2) {
                 behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
             }
         } else {

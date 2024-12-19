@@ -39,15 +39,16 @@ export const Avkorting = ({
 
   const virkAar = new Date(virkningstidspunkt(behandling).dato).getFullYear()
 
+  const skalHaInntektNesteAar =
+    behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+    virkAar === 2024 && // TODO Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
+    (behandling.viderefoertOpphoer == null || new Date(behandling.viderefoertOpphoer.dato) > new Date('2025-01-01'))
+
   const klarForBrevutfall = () => {
     if (avkorting == undefined) {
       return false
     }
-    if (
-      behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-      inntektNesteAarBryter &&
-      virkAar == 2024 // TODO EY-4632
-    ) {
+    if (skalHaInntektNesteAar && inntektNesteAarBryter) {
       if (behandling.viderefoertOpphoer && new Date(behandling.viderefoertOpphoer.dato).getFullYear() === virkAar) {
         // Trenger ikke to inntekter hvis det er opphør i samme året
         return true
@@ -116,17 +117,15 @@ export const Avkorting = ({
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
-              {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-                virkAar === 2024 && // TODO Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
-                !!avkorting?.avkortingGrunnlag?.length && (
-                  <AvkortingInntekt
-                    behandling={behandling}
-                    avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
-                    erInnevaerendeAar={false}
-                    redigerbar={redigerbar}
-                    resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-                  />
-                )}
+              {skalHaInntektNesteAar && !!avkorting?.avkortingGrunnlag?.length && (
+                <AvkortingInntekt
+                  behandling={behandling}
+                  avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
+                  erInnevaerendeAar={false}
+                  redigerbar={redigerbar}
+                  resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+                />
+              )}
             </>
           ),
         })}

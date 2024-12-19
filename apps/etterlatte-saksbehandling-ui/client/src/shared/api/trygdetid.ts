@@ -1,19 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { JaNei } from '~shared/types/ISvar'
 
-export interface TrygdetidPeriodePesys {
-  isoCountryCode: string // ISO 3166-1 alpha-3 code feks: "NOR" "SWE"
-  fra: string //TODO: eller date? kommer i steg 2 da vi dette skal brukes i frontend
-  til: string
-  poengInnAar?: boolean
-  poengUtAar?: boolean
-  prorata?: boolean
-  kilde: {
-    tidspunkt: string
-    type: string
-  }
-}
-
 export const hentTrygdetider = async (behandlingId: string): Promise<ApiResponse<ITrygdetid[]>> =>
   apiClient.get<ITrygdetid[]>(`/trygdetid_v2/${behandlingId}`)
 

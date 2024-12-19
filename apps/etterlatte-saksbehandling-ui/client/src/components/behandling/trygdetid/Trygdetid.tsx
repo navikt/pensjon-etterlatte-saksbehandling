@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentTrygdetider, ITrygdetid, opprettTrygdetider } from '~shared/api/trygdetid'
+import {
+  hentTrygdetider,
+  ITrygdetid,
+  opprettTrygdetider,
+  opprettTrygdetidUfoeretrygdOgAlderspensjon,
+} from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -43,6 +48,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const kopierTrygdetidsgrunnlagEnabled = useFeaturetoggle(FeatureToggle.kopier_trygdetidsgrunnlag)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
+  const [, hentPesysTT] = useApiCall(opprettTrygdetidUfoeretrygdOgAlderspensjon)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
@@ -97,6 +103,12 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     })
   }
 
+  const hentTrygdetidFraPesys = () => {
+    hentPesysTT(behandling.id, (trygdetider: ITrygdetid[]) => {
+      oppdaterTrygdetider(trygdetider)
+    })
+  }
+
   useEffect(() => {
     if (!behandling?.id) {
       setBehandlingsIdMangler(true)
@@ -142,7 +154,11 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       )}
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
-
+        <>
+          <Box maxWidth="fit-content">
+            <Button onClick={hentTrygdetidFraPesys}>Hent trygdetid fra PESYS for Uføre eller Alderspensjon</Button>
+          </Box>
+        </>
         {landListe && (
           <>
             {trygdetider.length == 1 && (

@@ -4,12 +4,10 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.LocalDate
 import java.util.UUID
 
 fun mottakerFraAdresse(
@@ -109,9 +107,5 @@ data class OpprettNyttBrev(
 }
 
 data class EtterbetalingDTO(
-    val datoFom: LocalDate,
-    val datoTom: LocalDate,
-    val inneholderKrav: Boolean?,
     val frivilligSkattetrekk: Boolean?,
-    val etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
 )

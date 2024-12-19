@@ -138,22 +138,12 @@ private fun BrevutfallOgEtterbetalingDto.toBrevutfall(
 private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
     behandlingId: UUID,
     bruker: BrukerTokenInfo,
-): Etterbetaling? {
-    val etterbetalingCopy = etterbetaling
-    return if (etterbetalingCopy?.datoFom != null && etterbetalingCopy.datoTom != null) {
-        Etterbetaling.fra(
-            behandlingId = behandlingId,
-            datoFom = etterbetalingCopy.datoFom,
-            datoTom = etterbetalingCopy.datoTom,
-            inneholderKrav = etterbetalingCopy.inneholderKrav,
-            frivilligSkattetrekk = etterbetalingCopy.frivilligSkattetrekk,
-            etterbetalingPeriodeValg = etterbetalingCopy.etterbetalingPeriodeValg,
-            kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
-        )
-    } else {
-        null
-    }
-}
+): Etterbetaling? =
+    Etterbetaling.fra(
+        behandlingId = behandlingId,
+        frivilligSkattetrekk = etterbetaling?.frivilligSkattetrekk,
+        kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
+    )
 
 private fun Brevutfall.toDto() =
     BrevutfallDto(
@@ -167,12 +157,8 @@ private fun Brevutfall.toDto() =
 private fun Etterbetaling.toDto() =
     EtterbetalingDto(
         behandlingId = behandlingId,
-        datoFom = fom.atDay(1),
-        datoTom = tom.atEndOfMonth(),
         kilde = kilde,
-        inneholderKrav = inneholderKrav,
         frivilligSkattetrekk = frivilligSkattetrekk,
-        etterbetalingPeriodeValg = etterbetalingPeriodeValg,
     )
 
 class OpphoerIkkeSatt(

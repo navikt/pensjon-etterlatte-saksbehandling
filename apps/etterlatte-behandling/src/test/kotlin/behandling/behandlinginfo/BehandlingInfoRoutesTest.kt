@@ -27,7 +27,6 @@ import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -41,7 +40,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -113,10 +111,6 @@ internal class BehandlingInfoRoutesTest {
             opprettetBrevutfallOgEtterbetaling.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
             opprettetBrevutfallOgEtterbetaling.brevutfall?.kilde shouldNotBe null
 
-            opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoFom shouldBe dto.etterbetaling?.datoFom
-            opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoTom shouldBe dto.etterbetaling?.datoTom
-            opprettetBrevutfallOgEtterbetaling.etterbetaling?.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
-            opprettetBrevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.kilde shouldNotBe null
         }
@@ -171,10 +165,6 @@ internal class BehandlingInfoRoutesTest {
             val etterbetaling: EtterbetalingDto = response.body()
             response.status shouldBe HttpStatusCode.OK
 
-            etterbetaling.datoFom shouldBe dto.etterbetaling?.datoFom
-            etterbetaling.datoTom shouldBe dto.etterbetaling?.datoTom
-            etterbetaling.inneholderKrav shouldBe dto.etterbetaling?.inneholderKrav
-            etterbetaling.etterbetalingPeriodeValg shouldBe dto.etterbetaling?.etterbetalingPeriodeValg
             etterbetaling.frivilligSkattetrekk shouldBe dto.etterbetaling?.frivilligSkattetrekk
         }
     }
@@ -209,12 +199,8 @@ internal class BehandlingInfoRoutesTest {
     private fun etterbetaling(behandlingId: UUID) =
         Etterbetaling(
             behandlingId = behandlingId,
-            fom = YearMonth.of(2023, 1),
-            tom = YearMonth.of(2023, 2),
-            inneholderKrav = true,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
             frivilligSkattetrekk = true,
-            etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
         )
 
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
@@ -232,11 +218,7 @@ internal class BehandlingInfoRoutesTest {
             etterbetaling =
                 EtterbetalingDto(
                     behandlingId = behandlingId,
-                    datoFom = LocalDate.of(2023, 1, 1),
-                    datoTom = LocalDate.of(2023, 2, 28),
-                    inneholderKrav = true,
                     frivilligSkattetrekk = true,
-                    etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
                     kilde = null,
                 ),
         )

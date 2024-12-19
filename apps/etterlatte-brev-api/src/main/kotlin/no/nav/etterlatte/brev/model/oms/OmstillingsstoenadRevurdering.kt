@@ -5,13 +5,11 @@ import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.model.BrevVedleggKey
-import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningRedigerbartUtfall
-import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
@@ -132,7 +130,6 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val beregning: OmstillingsstoenadBeregningRedigerbartUtfall,
     val erEndret: Boolean,
     val erEtterbetaling: Boolean,
-    val etterbetaling: OmstillingsstoenadEtterbetaling?,
     val feilutbetaling: FeilutbetalingType,
     val harFlereUtbetalingsperioder: Boolean,
     val harUtbetaling: Boolean,
@@ -169,13 +166,6 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
                     avkortingsinfo.endringIUtbetalingVedVirk ||
                         revurderingaarsak == Revurderingaarsak.FRA_0UTBETALING_TIL_UTBETALING,
                 erEtterbetaling = etterbetaling != null,
-                etterbetaling =
-                    etterbetaling?.let {
-                        Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
-                            etterbetaling,
-                            beregningsperioder,
-                        )
-                    },
                 feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
                 harFlereUtbetalingsperioder = beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },

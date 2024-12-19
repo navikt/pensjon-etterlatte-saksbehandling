@@ -6,7 +6,7 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
-import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
+import no.nav.etterlatte.brev.model.BarnepensjonFrivilligSkattetrekk
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -30,7 +30,7 @@ data class BarnepensjonRevurdering(
     val erOmgjoering: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
     val beregning: BarnepensjonBeregning,
-    val etterbetaling: BarnepensjonEtterbetaling?,
+    val etterbetaling: BarnepensjonFrivilligSkattetrekk?,
     val frivilligSkattetrekk: Boolean,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,

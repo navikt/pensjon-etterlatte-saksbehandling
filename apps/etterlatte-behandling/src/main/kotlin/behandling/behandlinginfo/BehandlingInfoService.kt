@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BehandlingInfoService(
@@ -20,8 +19,6 @@ class BehandlingInfoService(
     private val behandlingService: BehandlingService,
     private val behandlingsstatusService: BehandlingStatusService,
 ) {
-    private val logger = LoggerFactory.getLogger(BehandlingInfoService::class.java)
-
     fun lagreBrevutfallOgEtterbetaling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -84,7 +81,6 @@ class BehandlingInfoService(
             return null
         }
 
-        sjekkEtterbetalingFoerVirkningstidspunkt(behandling, etterbetaling)
         return behandlingInfoDao.lagreEtterbetaling(etterbetaling)
     }
 
@@ -134,19 +130,6 @@ class BehandlingInfoService(
                 behandling.id,
                 behandling.status,
             )
-        }
-    }
-
-    private fun sjekkEtterbetalingFoerVirkningstidspunkt(
-        behandling: Behandling,
-        etterbetaling: Etterbetaling,
-    ) {
-        val virkningstidspunkt =
-            behandling.virkningstidspunkt?.dato
-                ?: throw BrevutfallException.VirkningstidspunktIkkeSatt(behandling.id)
-
-        if (etterbetaling.fom < virkningstidspunkt) {
-            throw EtterbetalingException.EtterbetalingFraDatoErFoerVirk(etterbetaling.fom, virkningstidspunkt)
         }
     }
 

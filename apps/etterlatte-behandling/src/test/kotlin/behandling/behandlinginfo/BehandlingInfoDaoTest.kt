@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -33,7 +32,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -169,8 +167,6 @@ internal class BehandlingInfoDaoTest(
         val lagretEtterbetaling = dao.lagreEtterbetaling(etterbetaling)
 
         lagretEtterbetaling shouldNotBe null
-        lagretEtterbetaling.fom shouldBe etterbetaling.fom
-        lagretEtterbetaling.tom shouldBe etterbetaling.tom
         lagretEtterbetaling.kilde shouldBe etterbetaling.kilde
     }
 
@@ -209,11 +205,7 @@ internal class BehandlingInfoDaoTest(
     private fun etterbetaling(behandlingId: UUID) =
         Etterbetaling(
             behandlingId = behandlingId,
-            fom = YearMonth.of(2023, 11),
-            tom = YearMonth.of(2023, 12),
-            inneholderKrav = true,
             frivilligSkattetrekk = true,
-            etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
         )
 

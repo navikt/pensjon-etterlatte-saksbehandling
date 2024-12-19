@@ -376,7 +376,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 innholdMedVedlegg,
                 avdoede,
                 utbetalingsinfo.await(),
-                etterbetaling.await(),
+                etterbetaling.await().frivilligSkattetrekk,
                 requireNotNull(trygdetid.await()) { "Mangler trygdetid" },
                 requireNotNull(grunnbeloep.await()) { "Mangler grunnbeløp" },
                 utlandstilknytningType,

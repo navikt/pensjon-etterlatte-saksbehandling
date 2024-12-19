@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -140,23 +139,6 @@ internal class BehandlingInfoServiceTest {
     }
 
     @Test
-    fun `skal feile ved opprettelse av etterbetaling hvis etterbetaling fra-dato er foer virkningstidspunkt`() {
-        val behandlingId = randomUUID()
-        val etterbetaling =
-            etterbetaling(
-                behandlingId = behandlingId,
-                fom = YearMonth.of(2022, 12),
-                tom = YearMonth.of(2023, 1),
-            )
-
-        every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling
-
-        assertThrows<EtterbetalingException.EtterbetalingFraDatoErFoerVirk> {
-            behandlingInfoService.lagreEtterbetaling(behandling(behandlingId), etterbetaling)
-        }
-    }
-
-    @Test
     fun `skal slette etterbetaling hvis den er null og det allerede finnes en etterbetaling`() {
         val behandlingId = randomUUID()
 
@@ -261,17 +243,10 @@ internal class BehandlingInfoServiceTest {
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 
-    private fun etterbetaling(
-        behandlingId: UUID,
-        fom: YearMonth = YearMonth.of(2023, 1),
-        tom: YearMonth = YearMonth.of(2023, 2),
-    ) = Etterbetaling(
-        behandlingId = behandlingId,
-        fom = fom,
-        tom = tom,
-        inneholderKrav = true,
-        frivilligSkattetrekk = true,
-        etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
-        kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
-    )
+    private fun etterbetaling(behandlingId: UUID) =
+        Etterbetaling(
+            behandlingId = behandlingId,
+            frivilligSkattetrekk = true,
+            kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
+        )
 }

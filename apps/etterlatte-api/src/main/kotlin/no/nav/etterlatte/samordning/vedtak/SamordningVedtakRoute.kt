@@ -15,6 +15,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.route.dato
@@ -32,7 +33,10 @@ fun Route.samordningVedtakRoute(
         }
 
         get("{vedtakId}") {
-            val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+            val vedtakId =
+                krevIkkeNull(call.parameters["vedtakId"]?.toLong()) {
+                    "VedtakId mangler - dette er mest sannsynlig en systemfeil"
+                }
 
             val tpnummer =
                 call.request.headers["tpnr"]

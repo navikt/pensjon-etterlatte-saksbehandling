@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -179,7 +180,7 @@ class AktivitetspliktDao(
             stmt.setDate(3, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(4, kilde.toJson())
             stmt.setString(5, aktivitet.beskrivelse)
-            stmt.setObject(6, requireNotNull(aktivitet.id))
+            stmt.setObject(6, krevIkkeNull(aktivitet.id) { "Aktivitet id mangler" })
             stmt.setObject(7, behandlingId)
 
             stmt.executeUpdate()
@@ -205,7 +206,7 @@ class AktivitetspliktDao(
             stmt.setDate(3, aktivitet.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(4, kilde.toJson())
             stmt.setString(5, aktivitet.beskrivelse)
-            stmt.setObject(6, requireNotNull(aktivitet.id))
+            stmt.setObject(6, krevIkkeNull(aktivitet.id) { "Aktivitet id mangler" })
             stmt.setSakId(7, sakId)
 
             stmt.executeUpdate()

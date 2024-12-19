@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -63,7 +64,7 @@ fun Grunnlag.mapInnsender(): Innsender? =
         val opplysning = hentKonstantOpplysning<Persongalleri>(Opplysningstype.PERSONGALLERI_V1)
 
         val persongalleri =
-            requireNotNull(opplysning?.verdi) {
+            krevIkkeNull(opplysning?.verdi) {
                 "Sak (id=${metadata.sakId}) mangler opplysningstype PERSONGALLERI_V1"
             }
 
@@ -76,7 +77,7 @@ fun Grunnlag.mapSpraak(): Spraak =
     with(this.sak) {
         val opplysning = hentKonstantOpplysning<Spraak>(Opplysningstype.SPRAAK)
 
-        requireNotNull(opplysning?.verdi) {
+        krevIkkeNull(opplysning?.verdi) {
             "Sak (id=${metadata.sakId}) mangler opplysningstype SPRAAK"
         }
     }
@@ -127,7 +128,7 @@ fun Grunnlag.erOver18(aldersgruppe: Aldersgruppe?): Boolean {
     // TODO henting fra PDL skal fjernes når migrering er unnagjort. Da kan vi alltid bruke brevutfall
     // TODO denne brukes nå også midlertidig av avslagsbrev siden vi ikke har noe brevutfall der enda
     val dato18Aar =
-        requireNotNull(this.soeker.hentFoedselsdato()) {
+        krevIkkeNull(this.soeker.hentFoedselsdato()) {
             "Barnet har ikke fødselsdato i grunnlag. Dette skal ikke skje, vi " +
                 "klarer ikke å avgjøre hvor gammelt barnet er"
         }.verdi.plusYears(18)

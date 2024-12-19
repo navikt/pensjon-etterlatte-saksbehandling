@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -164,7 +165,11 @@ class OversendelseBrevServiceImpl(
             )
         }
 
-        val klage = behandlingService.hentKlage(requireNotNull(brev.behandlingId), brukerTokenInfo)
+        val klage =
+            behandlingService.hentKlage(
+                klageId = krevIkkeNull(brev.behandlingId) { "Behandlingid mangler i brevet" },
+                brukerTokenInfo = brukerTokenInfo,
+            )
         return pdfGenerator.genererPdf(
             id = brev.id,
             bruker = brukerTokenInfo,

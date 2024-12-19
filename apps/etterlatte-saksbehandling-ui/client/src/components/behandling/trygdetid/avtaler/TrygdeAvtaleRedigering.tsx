@@ -9,7 +9,20 @@ import {
 import { useBehandling } from '~components/behandling/useBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useForm } from 'react-hook-form'
-import { Alert, Box, Button, Heading, HelpText, HGrid, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
+import {
+  Alert,
+  BodyLong,
+  Box,
+  Button,
+  Heading,
+  HelpText,
+  HGrid,
+  HStack,
+  Radio,
+  Select,
+  Textarea,
+  VStack,
+} from '@navikt/ds-react'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { JaNei } from '~shared/types/ISvar'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
@@ -290,10 +303,21 @@ export function TrygdeAvtaleRedigering(props: {
               />
               {watch('nordiskTrygdeAvtale') === JaNei.JA && (
                 <Alert variant="info" size="small" inline>
-                  Fremtidig trygdetid skal avkortes. Gjenny støtter ikke dette. Du må derfor beregne fremtidig trygdetid
-                  manuelt, og beregning av ytelsen må manuelt overstyres. Formel: Avkortet framtidig trygdetid =
-                  Framtidig trygdetid x norsk faktisk trygdetid/samlet faktisk trygdetid i de nordiske land som beregner
-                  framtidig trygdetid (maks. 40 år).
+                  <VStack gap="3">
+                    <BodyLong size="small">
+                      Fremtidig trygdetid skal avkortes. De automatiske beregningene av fremtidig trygdetid i Gjenny
+                      støtter ikke dette. Du må derfor beregne fremtidig trygdetid manuelt og registrere en periode som
+                      tilsvarer det antall år avdøde skal ha på fremtidig trygdetid.
+                    </BodyLong>
+                    <BodyLong size="small">
+                      <strong>Formel: </strong>
+                      <em>
+                        Avkortet framtidig trygdetid = Framtidig trygdetid x norsk faktisk trygdetid/samlet faktisk
+                        trygdetid i de nordiske land som beregner framtidig trygdetid
+                      </em>{' '}
+                      (maks. 40 år).
+                    </BodyLong>
+                  </VStack>
                 </Alert>
               )}
             </>

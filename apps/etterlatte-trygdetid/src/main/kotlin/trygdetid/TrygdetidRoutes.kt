@@ -88,15 +88,14 @@ fun Route.trygdetid(
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Oppretter trygdetid(er) fra pesys for behandling $behandlingId")
 
-                    val trygdetider =
-                        trygdetidService.leggInnTrygdetidsgrunnlagFraPesys(behandlingId, brukerTokenInfo)
+                    trygdetidService.leggInnTrygdetidsgrunnlagFraPesys(behandlingId, brukerTokenInfo)
                     /*
                     eller kalle på?
-                    trygdetidService
-                            .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+
                      */
                     call.respond(
-                        trygdetider
+                        trygdetidService
+                            .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                             .map { it.toDto() },
                     )
                 }

@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
@@ -61,6 +62,11 @@ interface TrygdetidService {
     ): Trygdetid?
 
     suspend fun opprettTrygdetiderForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Trygdetid>
+
+    suspend fun leggInnTrygdetidsgrunnlagFraPesys(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
@@ -126,11 +132,6 @@ interface TrygdetidService {
         overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
-
-    suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-        fnr: String,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): TrygdetidsperioderPesys
 
     suspend fun finnBehandlingMedTrygdetidForSammeAvdoede(
         behandlingId: UUID,
@@ -205,11 +206,6 @@ class TrygdetidServiceImpl(
     companion object {
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
     }
-
-    override suspend fun hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-        fnr: String,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = pesysKlient.hentTrygdetidsgrunnlag(fnr, brukerTokenInfo).tilTrygdetidsperioder()
 
     override suspend fun hentTrygdetiderIBehandling(
         behandlingId: UUID,
@@ -319,10 +315,8 @@ class TrygdetidServiceImpl(
                     ident = avdoedMedFnr.first,
                     yrkesskade = false,
                 )
-            val pesystt = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr.first, brukerTokenInfo)
-            val oppdatertTrygdetidv2 = populertrygdetidFraPesys(trygdetid, pesystt)
 
-            val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(oppdatertTrygdetidv2)
+            val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
 
             val oppdatertTrygdetid =
                 opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
@@ -331,6 +325,38 @@ class TrygdetidServiceImpl(
         }.also {
             logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
         }
+
+    override suspend fun leggInnTrygdetidsgrunnlagFraPesys(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Trygdetid> {
+        val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        return avdoede
+            .map { avdoed ->
+                val fnr =
+                    requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                        "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                            "behandlingen med id=$behandlingId"
+                    }
+
+                Pair(fnr, avdoed)
+            }.filter { avdoedMedFnr ->
+                eksisterendeTrygdetider.none { avdoedMedFnr.first == it.ident }
+            }.map { avdoedMedFnr ->
+                val hentTrygdetid =
+                    trygdetidRepository.hentTrygdetid(behandlingId)
+                        ?: throw InternfeilException("Trygdetid er ikke opprettet")
+                val pesystt = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr.first, brukerTokenInfo)
+
+                val opprettetTrygdetidMedPesys = populertrygdetidFraPesys(hentTrygdetid, pesystt)
+                trygdetidRepository.oppdaterTrygdetid(opprettetTrygdetidMedPesys)
+                val oppdatertTrygdetid =
+                    opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetidMedPesys, avdoedMedFnr.second, brukerTokenInfo)
+
+                oppdatertTrygdetid ?: opprettetTrygdetidMedPesys
+            }
+    }
 
     private fun populertrygdetidFraPesys(
         trygdetid: Trygdetid,

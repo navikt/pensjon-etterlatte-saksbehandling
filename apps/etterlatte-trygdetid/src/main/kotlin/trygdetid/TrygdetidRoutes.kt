@@ -60,16 +60,6 @@ fun Route.trygdetid(
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/trygdetid_v2") {
-        post("/pesys") {
-            withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
-                call.respond(
-                    trygdetidService.hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-                        fnr = fnr.value,
-                        brukerTokenInfo = brukerTokenInfo,
-                    ),
-                )
-            }
-        }
         route("/{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
                 withBehandlingId(behandlingKlient) {
@@ -90,6 +80,24 @@ fun Route.trygdetid(
                     call.respond(
                         trygdetidService
                             .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                            .map { it.toDto() },
+                    )
+                }
+            }
+
+            post("/pesys") {
+                withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
+                    logger.info("Oppretter trygdetid(er) fra pesys for behandling $behandlingId")
+
+                    val trygdetider =
+                        trygdetidService.leggInnTrygdetidsgrunnlagFraPesys(behandlingId, brukerTokenInfo)
+                    /*
+                    eller kalle på?
+                    trygdetidService
+                            .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                     */
+                    call.respond(
+                        trygdetider
                             .map { it.toDto() },
                     )
                 }

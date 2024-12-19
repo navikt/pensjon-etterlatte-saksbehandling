@@ -190,7 +190,6 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetidMedId(any(), any())
@@ -510,7 +509,6 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
@@ -638,7 +636,6 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
@@ -726,7 +723,6 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetidMedId(behandlingId, any())
@@ -1778,7 +1774,6 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            pesysklient.hentTrygdetidsgrunnlag(any(), any())
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)

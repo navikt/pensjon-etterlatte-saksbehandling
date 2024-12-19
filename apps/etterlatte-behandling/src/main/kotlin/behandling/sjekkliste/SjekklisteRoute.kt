@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
@@ -38,7 +39,11 @@ internal fun Route.sjekklisteRoute(sjekklisteService: SjekklisteService) {
 
         post("/item/{sjekklisteItemId}") {
             kunSaksbehandlerMedSkrivetilgang {
-                val sjekklisteItemId = requireNotNull(call.parameters["sjekklisteItemId"]).toLong()
+                val sjekklisteItemId =
+                    krevIkkeNull(call.parameters["sjekklisteItemId"]?.toLong()) {
+                        "SjekklistepunktID mangler – dette er mest sannsynlig en systemfeil"
+                    }
+
                 val oppdatering = call.receive<OppdaterSjekklisteItem>()
 
                 val result =

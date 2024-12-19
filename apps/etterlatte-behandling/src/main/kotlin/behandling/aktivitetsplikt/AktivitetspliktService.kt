@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -524,12 +525,12 @@ class AktivitetspliktService(
         bruker: BrukerTokenInfo,
     ): OpprettRevurderingForAktivitetspliktResponse {
         val forrigeBehandling =
-            requireNotNull(behandlingService.hentSisteIverksatte(request.sakId)) {
+            krevIkkeNull(behandlingService.hentSisteIverksatte(request.sakId)) {
                 "Fant ikke forrige behandling i sak ${request.sakId}sakId"
             }
         val persongalleri =
             runBlocking {
-                requireNotNull(
+                krevIkkeNull(
                     grunnlagKlient
                         .hentPersongalleri(
                             forrigeBehandling.id,
@@ -793,7 +794,7 @@ fun hentVurderingForSakHelper(
                 return AktivitetspliktVurdering(aktivitetForBehandling, unntak)
             } else {
                 val oppgaveId =
-                    requireNotNull(foersteUnntak.oppgaveId) {
+                    krevIkkeNull(foersteUnntak.oppgaveId) {
                         "Har et unntak med id=${foersteUnntak.id} i sak=${foersteUnntak.sakId} som ikke " +
                             "er koblet på hverken sak eller oppgave."
                     }
@@ -808,7 +809,7 @@ fun hentVurderingForSakHelper(
                 return AktivitetspliktVurdering(aktivitet, unntakForBehandling)
             } else {
                 val oppgaveId =
-                    requireNotNull(foersteVurdering.oppgaveId) {
+                    krevIkkeNull(foersteVurdering.oppgaveId) {
                         "Har en vurdering med id=${foersteVurdering.id} i sak=${foersteVurdering.sakId} som ikke " +
                             "er koblet på hverken sak eller oppgave."
                     }

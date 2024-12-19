@@ -9,6 +9,7 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -62,19 +63,19 @@ inline val PipelineContext<*, ApplicationCall>.sakId: SakId
 
 inline val PipelineContext<*, ApplicationCall>.oppgaveId: UUID
     get() =
-        requireNotNull(call.parameters[OPPGAVEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
+        krevIkkeNull(call.parameters[OPPGAVEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
             "OppgaveId er ikke i path params"
         }
 
 inline val PipelineContext<*, ApplicationCall>.klageId: UUID
     get() =
-        requireNotNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
+        krevIkkeNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
             "KlageId er ikke i path params"
         }
 
 inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
     get() =
-        requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
+        krevIkkeNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
             "Gosys oppgaveId er ikke i path params"
         }
 

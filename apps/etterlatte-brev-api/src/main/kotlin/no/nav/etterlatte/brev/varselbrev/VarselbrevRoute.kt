@@ -8,6 +8,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.BREV_ID_CALL_PARAMETER
+import no.nav.etterlatte.brev.brevId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.behandlingId
@@ -58,8 +59,6 @@ internal fun Route.varselbrevRoute(
 
         get("/pdf") {
             withBehandlingId(tilgangssjekker) {
-                val brevId = requireNotNull(call.parameters["brevId"]).toLong()
-
                 logger.info("Genererer PDF for varselbrev (id=$brevId)")
 
                 measureTimedValue {
@@ -75,8 +74,6 @@ internal fun Route.varselbrevRoute(
     route("brev/{$BREV_ID_CALL_PARAMETER}/varsel") {
         post("/ferdigstill") {
             withSakId(tilgangssjekker, skrivetilgang = true) {
-                val brevId = requireNotNull(call.parameters[BREV_ID_CALL_PARAMETER]).toLong()
-
                 logger.info("Genererer og ferdigstiller PDF for varselbrev (id=$brevId)")
 
                 measureTimedValue {

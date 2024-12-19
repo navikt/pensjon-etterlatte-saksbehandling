@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarsel
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.YearMonth
 import java.util.UUID
@@ -50,7 +51,7 @@ class BrevDataMapperFerdigstillVarsel(
 
     private suspend fun hentBrevDataFerdigstillingBarnepensjon(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
-            val behandlingId = requireNotNull(request.behandlingId)
+            val behandlingId = krevIkkeNull(request.behandlingId) { "BehandlingId mangler" }
             val beregning =
                 if (hentUtfall(request) == VilkaarsvurderingUtfall.IKKE_OPPFYLT) {
                     null
@@ -91,7 +92,7 @@ class BrevDataMapperFerdigstillVarsel(
                 utbetalingsinfo = utbetalingsinfo.await(),
                 grunnbeloep = grunnbeloep.await(),
                 beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo.await()),
-                trygdetid = requireNotNull(trygdetid.await()),
+                trygdetid = krevIkkeNull(trygdetid.await()) { "Fant ingen trygdetid for behandling $behandlingId" },
                 erForeldreloes = request.erForeldreloes,
             )
         }

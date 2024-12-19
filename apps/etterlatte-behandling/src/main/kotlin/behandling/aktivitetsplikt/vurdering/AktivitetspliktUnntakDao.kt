@@ -8,6 +8,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
@@ -90,7 +91,7 @@ class AktivitetspliktUnntakDao(
             stmt.setDate(3, unntak.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(4, kilde.toJson())
             stmt.setString(5, unntak.beskrivelse)
-            stmt.setObject(6, requireNotNull(unntak.id))
+            stmt.setObject(6, krevIkkeNull(unntak.id) { "" })
             stmt.setObject(7, behandlingId)
 
             stmt.executeUpdate()
@@ -176,7 +177,7 @@ class AktivitetspliktUnntakDao(
                 if (behandlingId != null) {
                     hentUnntakForBehandling(UUID.fromString(behandlingId))
                 } else {
-                    requireNotNull(oppgaveId) {
+                    krevIkkeNull(oppgaveId) {
                         "Har en vurdering av aktivitet som ikke er knyttet til en oppgave eller en behandling"
                     }
                     hentUnntakForOppgave(UUID.fromString(oppgaveId))

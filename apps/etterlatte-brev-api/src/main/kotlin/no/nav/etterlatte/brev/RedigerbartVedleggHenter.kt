@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -217,7 +218,10 @@ class RedigerbartVedleggHenter(
     ): Boolean =
         coroutineScope {
             val brevutfall = async { behandlingId?.let { behandlingService.hentBrevutfall(it, bruker) } }
-            val brevutfallHentet = requireNotNull(brevutfall.await())
+            val brevutfallHentet =
+                krevIkkeNull(brevutfall.await()) {
+                    "Fant ingen brevutfall"
+                }
             brevutfallHentet.feilutbetaling?.valg == FeilutbetalingValg.JA_VARSEL
         }
 }

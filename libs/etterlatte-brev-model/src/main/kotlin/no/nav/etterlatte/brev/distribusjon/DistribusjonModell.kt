@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.distribusjon
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 
 // https://confluence.adeo.no/pages/viewpage.action?pageId=320038938
 data class DistribuerJournalpostRequest(
@@ -26,10 +27,10 @@ data class Adresse(
 ) {
     init {
         if (adressetype == AdresseType.NORSK) {
-            requireNotNull(postnummer)
-            requireNotNull(poststed)
+            krevIkkeNull(postnummer) { "Kan ikke distribuere uten postnummer" }
+            krevIkkeNull(poststed) { "Kan ikke distribuere uten poststed" }
         } else if (adressetype == AdresseType.UTENLANDSK) {
-            requireNotNull(adresselinje1)
+            krevIkkeNull(adresselinje1) { "Kan ikke distribuere uten adresselinjer" }
         }
     }
 }

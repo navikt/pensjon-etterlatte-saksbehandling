@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -336,7 +337,7 @@ class OppgaveService(
 
             ferdigstillOppgave(oppgaveUnderbehandling, saksbehandler, merknad)
 
-            return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
+            return krevIkkeNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
             }
         } catch (e: NoSuchElementException) {
@@ -536,7 +537,7 @@ class OppgaveService(
             sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
 
-            return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
+            return krevIkkeNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat avbrøt kunne ikke hentes ut"
             }
         } catch (e: NoSuchElementException) {

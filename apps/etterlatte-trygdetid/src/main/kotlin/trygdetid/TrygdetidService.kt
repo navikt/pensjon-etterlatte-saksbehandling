@@ -364,7 +364,7 @@ class TrygdetidServiceImpl(
                     trygdetidRepository.hentTrygdetid(behandlingId)
                         ?: throw InternfeilException("Trygdetid er ikke opprettet")
                 val pesystt = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr, brukerTokenInfo)
-
+                logger.info("Trygdetid fra pesys $pesystt")
                 val opprettetTrygdetidMedPesys = populertrygdetidFraPesys(hentTrygdetid, pesystt)
                 trygdetidRepository.oppdaterTrygdetid(opprettetTrygdetidMedPesys)
                 val oppdatertTrygdetid =

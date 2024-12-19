@@ -330,7 +330,6 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         if (!behandling.status.kanEndres()) {
             throw UgyldigForespoerselException(
@@ -338,13 +337,14 @@ class TrygdetidServiceImpl(
                 detail = "Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand",
             )
         }
+        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
         when (behandling.behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 val ukjentAvdoed = avdoede.isEmpty()
                 val tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar ?: false
 
                 if (ukjentAvdoed || tidligereFamiliepleier) {
-                    throw InternfeilException("Støtter ikke pesys henting for ukjent avdød eller tidligereFamiliepleier")
+                    throw InternfeilException("Støtter ikke pesys henting for ukjent avdød eller tidligere Familiepleier")
                 }
             }
             else -> throw InternfeilException("Kan kun hente inn trygdetider for førstegangsbehandling")
@@ -363,32 +363,33 @@ class TrygdetidServiceImpl(
                 val hentTrygdetid =
                     trygdetidRepository.hentTrygdetid(behandlingId)
                         ?: throw InternfeilException("Trygdetid er ikke opprettet")
-                val pesystt = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr, brukerTokenInfo)
 
-                val opprettetTrygdetidMedPesys = populertrygdetidFraPesys(hentTrygdetid, pesystt)
-                trygdetidRepository.oppdaterTrygdetid(opprettetTrygdetidMedPesys)
+                val trygdetidForUfoereOgAlderspensjon = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr, brukerTokenInfo)
+
+                val opprettetTrygdetidMedPesysTrygdetid = populerTrygdetidFraPesys(hentTrygdetid, trygdetidForUfoereOgAlderspensjon)
+                trygdetidRepository.oppdaterTrygdetid(opprettetTrygdetidMedPesysTrygdetid)
                 val oppdatertTrygdetid =
-                    opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetidMedPesys, avdoedMedFnr.second, brukerTokenInfo)
+                    opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetidMedPesysTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
 
-                oppdatertTrygdetid ?: opprettetTrygdetidMedPesys
+                oppdatertTrygdetid ?: opprettetTrygdetidMedPesysTrygdetid
             }
     }
 
-    private fun populertrygdetidFraPesys(
+    private fun populerTrygdetidFraPesys(
         trygdetid: Trygdetid,
         pesystt: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
     ): Trygdetid {
-        val mappedAP =
+        val mappedAlderspensjonTt =
             pesystt.trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                 mapPesysTrygdetidsgrunnlag(it)
             } ?: emptyList()
 
-        val mappedUfoere =
+        val mappedUfoeretrygdTt =
             pesystt.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                 mapPesysTrygdetidsgrunnlag(it)
             } ?: emptyList()
 
-        return trygdetid.copy(trygdetidGrunnlag = mappedAP + mappedUfoere)
+        return trygdetid.copy(trygdetidGrunnlag = mappedAlderspensjonTt + mappedUfoeretrygdTt)
     }
 
     private fun mapPesysTrygdetidsgrunnlag(tt: Trygdetidsgrunnlag): TrygdetidGrunnlag {

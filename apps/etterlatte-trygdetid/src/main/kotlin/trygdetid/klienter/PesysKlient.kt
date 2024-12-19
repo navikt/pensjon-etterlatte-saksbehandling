@@ -24,7 +24,7 @@ import java.util.Date
 
 interface PesysKlient {
     suspend fun hentTrygdetidsgrunnlag(
-        fnr: Pair<String, Grunnlagsdata<JsonNode>>,
+        avdoed: Pair<String, Grunnlagsdata<JsonNode>>,
         brukerTokenInfo: BrukerTokenInfo,
     ): TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
 }

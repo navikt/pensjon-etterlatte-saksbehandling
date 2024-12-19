@@ -4,7 +4,7 @@ import {
   hentTrygdetider,
   ITrygdetid,
   opprettTrygdetider,
-  opprettTrygdetidUfoeretrygdOgAlderspensjon,
+  hentTrygdetidForUfoeretrygdOgAlderspensjon,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Button, Heading, Tabs, VStack } from '@navikt/ds-react'
@@ -49,7 +49,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const kanHenteTrygdetidFraPesys = useFeaturetoggle(FeatureToggle.trygdetid_fra_pesys)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
-  const [hentTTPesysStatus, hentPesysTT] = useApiCall(opprettTrygdetidUfoeretrygdOgAlderspensjon)
+  const [hentTTPesysStatus, hentPesysTT] = useApiCall(hentTrygdetidForUfoeretrygdOgAlderspensjon)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()

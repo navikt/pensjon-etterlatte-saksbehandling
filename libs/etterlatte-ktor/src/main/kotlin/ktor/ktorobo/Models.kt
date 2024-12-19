@@ -13,6 +13,7 @@ data class Resource(
     val url: String,
     val additionalHeaders: Map<String, String>? = null,
     val response: Any? = null,
+    val ignoreContentType: Boolean = false,
 ) {
     fun addResponse(response: Any?): Resource = this.copy(response = response)
 }

@@ -124,8 +124,12 @@ class DownstreamResourceClient(
                         } else if (response.harContentType(ContentType.Text.Plain)) {
                             Ok(response.body<String>())
                         } else {
-                            logger.info("Mottok uhåndtert content-type: ${response.contentType()}")
-                            Ok(response.status)
+                            if (resource.ignoreContentType) {
+                                Ok(response.body<String>())
+                            } else {
+                                logger.info("Mottok uhåndtert content-type: ${response.contentType()}")
+                                Ok(response.status)
+                            }
                         }
                     }
 

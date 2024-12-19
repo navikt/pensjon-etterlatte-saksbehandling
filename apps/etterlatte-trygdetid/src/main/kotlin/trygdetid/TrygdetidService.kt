@@ -332,6 +332,12 @@ class TrygdetidServiceImpl(
     ): List<Trygdetid> {
         val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        if (!behandling.status.kanEndres()) {
+            throw UgyldigForespoerselException(
+                code = "UGYLDIG_TILSTAND_TRYGDETID",
+                detail = "Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand",
+            )
+        }
         when (behandling.behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 val ukjentAvdoed = avdoede.isEmpty()

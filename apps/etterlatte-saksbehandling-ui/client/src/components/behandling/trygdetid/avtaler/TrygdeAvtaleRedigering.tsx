@@ -290,10 +290,11 @@ export function TrygdeAvtaleRedigering(props: {
               />
               {watch('nordiskTrygdeAvtale') === JaNei.JA && (
                 <Alert variant="info" size="small" inline>
-                  Fremtidig trygdetid skal avkortes. Gjenny støtter ikke dette. Du må derfor beregne fremtidig trygdetid
-                  manuelt, og beregning av ytelsen må manuelt overstyres. Formel: Avkortet framtidig trygdetid =
-                  Framtidig trygdetid x norsk faktisk trygdetid/samlet faktisk trygdetid i de nordiske land som beregner
-                  framtidig trygdetid (maks. 40 år).
+                  Fremtidig trygdetid skal avkortes. De automatiske beregningene av fremtidig trygdetid i Gjenny støtter
+                  ikke dette. Du må derfor beregne fremtidig trygdetid manuelt og registrere en periode som tilsvarer
+                  det antall år avdøde skal ha på fremtidig trygdetid. Formel: Avkortet framtidig trygdetid = Framtidig
+                  trygdetid x norsk faktisk trygdetid/samlet faktisk trygdetid i de nordiske land som beregner framtidig
+                  trygdetid (maks. 40 år).
                 </Alert>
               )}
             </>

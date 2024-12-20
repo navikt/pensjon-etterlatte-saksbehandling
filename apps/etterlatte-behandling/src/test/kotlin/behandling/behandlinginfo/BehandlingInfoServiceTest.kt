@@ -10,7 +10,7 @@ import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
@@ -38,7 +38,7 @@ internal class BehandlingInfoServiceTest {
     @Test
     fun `Skal oppdatere behandlingsstatus hvis endret barnepensjon`() {
         val behandlingId = randomUUID()
-        val brevutfall = brevutfall(behandlingId)
+        val brevutfall = brevutfallDto(behandlingId)
         val etterbetaling = etterbetaling(behandlingId = behandlingId)
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
@@ -49,7 +49,7 @@ internal class BehandlingInfoServiceTest {
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = false,
-            brevutfall = brevutfall,
+            brevutfallDto = brevutfall,
             etterbetaling = etterbetaling,
         )
 
@@ -63,7 +63,7 @@ internal class BehandlingInfoServiceTest {
     @Test
     fun `Etterbetaling skal oppdatere behandlingsstatus hvis endret omstillingstoenad`() {
         val behandlingId = randomUUID()
-        val brevutfall = brevutfall(behandlingId)
+        val brevutfall = brevutfallDto(behandlingId)
         val etterbetaling = etterbetaling(behandlingId = behandlingId)
 
         every { behandlingService.hentBehandling(any()) } returns
@@ -81,7 +81,7 @@ internal class BehandlingInfoServiceTest {
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = false,
-            brevutfall = brevutfall,
+            brevutfallDto = brevutfall,
             etterbetaling = etterbetaling,
         )
 
@@ -107,7 +107,7 @@ internal class BehandlingInfoServiceTest {
                 behandlingId = behandlingId,
                 brukerTokenInfo = bruker,
                 opphoer = false,
-                brevutfall = brevutfall(behandlingId),
+                brevutfallDto = brevutfallDto(behandlingId),
                 etterbetaling = null,
             )
         }
@@ -133,7 +133,7 @@ internal class BehandlingInfoServiceTest {
                 behandlingId = behandlingId,
                 brukerTokenInfo = bruker,
                 opphoer = false,
-                brevutfall = brevutfall(behandlingId).copy(feilutbetaling = null),
+                brevutfallDto = brevutfallDto(behandlingId).copy(feilutbetaling = null),
                 etterbetaling = etterbetaling(behandlingId = behandlingId),
             )
         }
@@ -188,7 +188,7 @@ internal class BehandlingInfoServiceTest {
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = true,
-            brevutfall = brevutfall(behandlingId).copy(aldersgruppe = null),
+            brevutfallDto = brevutfallDto(behandlingId).copy(aldersgruppe = null),
             etterbetaling = null,
         )
 
@@ -218,7 +218,7 @@ internal class BehandlingInfoServiceTest {
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = true,
-            brevutfall = brevutfall(behandlingId).copy(),
+            brevutfallDto = brevutfallDto(behandlingId).copy(),
             etterbetaling = null,
         )
 
@@ -252,8 +252,8 @@ internal class BehandlingInfoServiceTest {
                 )
         }
 
-    private fun brevutfall(behandlingId: UUID) =
-        Brevutfall(
+    private fun brevutfallDto(behandlingId: UUID) =
+        BrevutfallDto(
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),

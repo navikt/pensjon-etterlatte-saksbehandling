@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
@@ -110,7 +110,7 @@ internal class BehandlingInfoDaoTest(
 
     @Test
     fun `skal lagre brevutfall`() {
-        val brevutfall = brevutfall(behandlingId)
+        val brevutfall = brevutfallDto(behandlingId)
 
         val lagretBrevutfall = dao.lagreBrevutfall(brevutfall)
 
@@ -121,32 +121,32 @@ internal class BehandlingInfoDaoTest(
 
     @Test
     fun `skal hente brevutfall`() {
-        val brevutfall = brevutfall(behandlingId)
-        dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
+        val brevutfall = brevutfallDto(behandlingId)
+        dao.hentBrevutfall(brevutfall.behandlingId!!) shouldBe null
         dao.lagreBrevutfall(brevutfall)
-        val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)
+        val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId!!)
 
         lagretBrevutfall shouldNotBe null
     }
 
     @Test
     fun `skal hente brevutfall men etterbetaling lå der, skal allikevel gå bra`() {
-        val brevutfall = brevutfall(behandlingId)
-        dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
+        val brevutfall = brevutfallDto(behandlingId)
+        dao.hentBrevutfall(brevutfall.behandlingId!!) shouldBe null
         val etterbetaling = etterbetaling(behandlingId)
         dao.lagreEtterbetaling(etterbetaling)
         // Tryna her tidligere fordi etterbetaling gjorde at next i singleOrNull ga true og block ble kjørt. Den tryna da på this.getString("brevutfall").let var uten spørsmålstegn
-        dao.hentBrevutfall(brevutfall.behandlingId)
+        dao.hentBrevutfall(brevutfall.behandlingId!!)
 
         dao.lagreBrevutfall(brevutfall)
-        val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)
+        val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId!!)
 
         lagretBrevutfall shouldBe brevutfall
     }
 
     @Test
     fun `skal oppdatere brevutfall`() {
-        val brevutfall = brevutfall(behandlingId)
+        val brevutfall = brevutfallDto(behandlingId)
 
         val lagretBrevutfall = dao.lagreBrevutfall(brevutfall)
 
@@ -197,8 +197,8 @@ internal class BehandlingInfoDaoTest(
         dao.hentEtterbetaling(etterbetaling.behandlingId) shouldBe null
     }
 
-    private fun brevutfall(behandlingId: UUID) =
-        Brevutfall(
+    private fun brevutfallDto(behandlingId: UUID) =
+        BrevutfallDto(
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),

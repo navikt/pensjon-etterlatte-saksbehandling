@@ -27,6 +27,7 @@ const val DRYRUN = "dry_run"
 const val BOR_I_UTLAND_KEY = "bor_i_utland"
 const val ER_OVER_18_AAR = "er_over_18_aar"
 const val KONTEKST_KEY = "kontekst"
+const val VEDTAK_KEY = "vedtak"
 
 var JsonMessage.sakId: SakId
     get() = SakId(this[SAK_ID_KEY].asLong())

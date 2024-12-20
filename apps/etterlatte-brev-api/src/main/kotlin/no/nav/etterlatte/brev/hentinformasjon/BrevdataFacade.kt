@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingS
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -87,7 +88,7 @@ class BrevdataFacade(
             val relatertKlageId =
                 when (behandling?.revurderingsaarsak) {
                     Revurderingaarsak.OMGJOERING_ETTER_KLAGE -> {
-                        requireNotNull(behandling.relatertBehandlingId) {
+                        krevIkkeNull(behandling.relatertBehandlingId) {
                             "Vi må få med den relaterte klagen til behanldingen hvis dette vedtaket er en omgjøring " +
                                 "etter klage, for å få riktig brev."
                         }

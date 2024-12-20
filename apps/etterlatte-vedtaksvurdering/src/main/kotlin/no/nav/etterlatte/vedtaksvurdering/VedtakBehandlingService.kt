@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -458,7 +459,7 @@ class VedtakBehandlingService(
     }
 
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =
-        requireNotNull(repository.hentVedtak(behandlingId)) {
+        krevIkkeNull(repository.hentVedtak(behandlingId)) {
             "Vedtak for behandling $behandlingId finnes ikke"
         }
 
@@ -617,7 +618,7 @@ class VedtakBehandlingService(
                     when (sakType) {
                         SakType.BARNEPENSJON -> {
                             val beregningsperioder =
-                                requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
+                                krevIkkeNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
                                     "Mangler beregning"
                                 }
                             beregningsperioder.map {
@@ -735,7 +736,7 @@ class VedtakBehandlingService(
         }
 
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
-        requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
+        krevIkkeNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 

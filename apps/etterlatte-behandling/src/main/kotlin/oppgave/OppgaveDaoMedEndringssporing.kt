@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -36,12 +37,12 @@ class OppgaveDaoMedEndringssporingImpl(
         block: () -> Unit,
     ) {
         val foer =
-            requireNotNull(hentOppgave(oppgaveId)) {
+            krevIkkeNull(hentOppgave(oppgaveId)) {
                 "Må ha en oppgave for å kunne endre den"
             }
         block()
         val etter =
-            requireNotNull(hentOppgave(oppgaveId)) {
+            krevIkkeNull(hentOppgave(oppgaveId)) {
                 "Må ha en oppgave etter endring"
             }
         lagreEndringerPaaOppgave(foer, etter)

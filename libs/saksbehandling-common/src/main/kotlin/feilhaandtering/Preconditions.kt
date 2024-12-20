@@ -1,4 +1,9 @@
+@file:OptIn(ExperimentalContracts::class)
+
 package no.nav.etterlatte.libs.common.feilhaandtering
+
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 /**
  * Erstatter Kotlin sin precondition [require]
@@ -9,6 +14,10 @@ inline fun krev(
     verdi: Boolean,
     feilmelding: () -> String,
 ) {
+    contract {
+        returns() implies verdi
+    }
+
     if (!verdi) {
         throw InternfeilException(feilmelding())
     }
@@ -25,10 +34,15 @@ inline fun <T : Any> krevIkkeNull(
     verdi: T?,
     feilmelding: () -> String,
 ): T {
+    contract {
+        returns() implies (verdi != null)
+    }
+
     if (verdi == null) {
         throw InternfeilException(feilmelding())
+    } else {
+        return verdi
     }
-    return verdi
 }
 
 /**
@@ -40,6 +54,10 @@ inline fun sjekk(
     verdi: Boolean,
     feilmelding: () -> String,
 ) {
+    contract {
+        returns() implies verdi
+    }
+
     if (!verdi) {
         throw UgyldigForespoerselException(code = "TILSTANDSSJEKK_FEILET", detail = feilmelding())
     }
@@ -56,8 +74,13 @@ inline fun <T : Any> sjekkIkkeNull(
     verdi: T?,
     feilmelding: () -> String,
 ): T {
+    contract {
+        returns() implies (verdi != null)
+    }
+
     if (verdi == null) {
         throw UgyldigForespoerselException(code = "VERDI_ER_NULL", detail = feilmelding())
+    } else {
+        return verdi
     }
-    return verdi
 }

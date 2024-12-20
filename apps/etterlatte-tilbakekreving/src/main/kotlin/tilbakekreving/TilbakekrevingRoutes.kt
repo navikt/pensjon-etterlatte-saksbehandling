@@ -8,9 +8,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.sakId
 import org.slf4j.LoggerFactory
 
 fun Route.tilbakekrevingRoutes(tilbakekrevingService: TilbakekrevingService) {
@@ -30,8 +31,8 @@ fun Route.tilbakekrevingRoutes(tilbakekrevingService: TilbakekrevingService) {
 
         get("/kravgrunnlag/{kravgrunnlagId}") {
             kunSystembruker {
-                val sakId = SakId(requireNotNull(call.parameters["sakId"]).toLong())
-                val kravgrunnlagId = requireNotNull(call.parameters["kravgrunnlagId"]).toLong()
+                val kravgrunnlagId =
+                    krevIkkeNull(call.parameters["kravgrunnlagId"]?.toLong()) { "KravgrunnlagId mangler" }
 
                 logger.info("Henter oppdatert kravgrunnlag for sak $sakId med kravgrunnlagId $kravgrunnlagId")
 

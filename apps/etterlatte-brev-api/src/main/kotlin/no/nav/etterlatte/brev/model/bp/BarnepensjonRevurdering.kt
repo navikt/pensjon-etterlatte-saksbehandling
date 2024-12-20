@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import java.time.LocalDate
 
@@ -57,7 +58,11 @@ data class BarnepensjonRevurdering(
             erMigrertYrkesskade: Boolean,
         ): BarnepensjonRevurdering {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
-            val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
+            val feilutbetaling =
+                krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                    "Feilutbetaling mangler i brevutfall"
+                }
+
             val frivilligSkattetrekk =
                 brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
                     ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
@@ -125,8 +130,14 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
             return BarnepensjonRevurderingRedigerbartUtfall(
                 erEtterbetaling = etterbetaling != null,
                 harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
-                brukerUnder18Aar = requireNotNull(brevutfall.aldersgruppe) == Aldersgruppe.UNDER_18,
+                feilutbetaling =
+                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                        "Feilutbetaling mangler i brevutfall"
+                    },
+                brukerUnder18Aar =
+                    krevIkkeNull(brevutfall.aldersgruppe) {
+                        "Aldersgruppe mangler i brevutfall"
+                    } == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 frivilligSkattetrekk = frivilligSkattetrekk,
             )

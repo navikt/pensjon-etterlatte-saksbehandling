@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -169,7 +170,10 @@ class BehandlingFactory(
 
         if (request.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
             coroutineScope {
-                val pesysId = requireNotNull(request.pesysId) { "Manuell migrering må ha pesysid til sak som migreres" }
+                val pesysId =
+                    krevIkkeNull(request.pesysId) {
+                        "Manuell migrering må ha pesysid til sak som migreres"
+                    }
                 migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysId, sakId = sak.id)
             }
         }
@@ -434,7 +438,11 @@ class BehandlingFactory(
         }
 
     internal fun hentDataForOpprettBehandling(sakId: SakId): DataHentetForOpprettBehandling {
-        val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
+        val sak =
+            krevIkkeNull(sakService.finnSak(sakId)) {
+                "Fant ingen sak med id=$sakId!"
+            }
+
         val harBehandlingerForSak =
             behandlingDao.hentBehandlingerForSak(sak.id)
 

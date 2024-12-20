@@ -45,7 +45,6 @@ import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Date
-import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -421,7 +420,10 @@ class BehandlingDao(
                 statement.setObject(6, behandlingId)
                 statement.setString(7, viderefoertOpphoer.vilkaar?.name)
                 statement.setBoolean(8, viderefoertOpphoer.aktiv)
-                statement.updateSuccessful()
+
+                krev(statement.executeUpdate() == 1) {
+                    "Feil ved lagring av videreført opphør"
+                }
             }
         }
     }
@@ -444,7 +446,10 @@ class BehandlingDao(
                     )
                 statement.setJsonb(1, kilde)
                 statement.setObject(2, behandlingId)
-                statement.updateSuccessful()
+
+                krev(statement.executeUpdate() == 1) {
+                    "Feil ved fjerning av videreført opphør"
+                }
             }
         }
     }
@@ -562,6 +567,3 @@ private fun ResultSet.toTidligereFamiliepleier(): TidligereFamiliepleier? =
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-// TODO: fjerne denne bruke, blir veldig dårlig feilmelding
-fun PreparedStatement.updateSuccessful() = require(this.executeUpdate() == 1)

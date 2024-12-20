@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -303,7 +304,7 @@ class TrygdetidServiceImpl(
     ) = avdoede
         .map { avdoed ->
             val fnr =
-                requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                     "Kunne ikke hente identifikator for avdød til trygdetid i " +
                         "behandlingen med id=${behandling.id}"
                 }
@@ -759,13 +760,13 @@ class TrygdetidServiceImpl(
 
         val ident =
             if (tidligereFamiliepleier) {
-                requireNotNull(behandling.soeker) {
+                krevIkkeNull(behandling.soeker) {
                     "Kunne ikke hente identifikator for soeker til trygdetid i " +
                         "behandlingen med id=$behandlingId"
                 }
             } else {
                 avdoed?.let {
-                    requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
+                    krevIkkeNull(it.hentFoedselsnummer()?.verdi?.value) {
                         "Kunne ikke hente identifikator for avdød til trygdetid i " +
                             "behandlingen med id=$behandlingId"
                     }

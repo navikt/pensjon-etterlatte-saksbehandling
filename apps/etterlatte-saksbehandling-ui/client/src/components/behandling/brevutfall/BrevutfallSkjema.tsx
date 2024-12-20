@@ -197,38 +197,6 @@ export const BrevutfallSkjema = ({
                 {behandling.sakType == SakType.BARNEPENSJON && (
                   <>
                     <ControlledRadioGruppe
-                      name="kravIEtterbetaling"
-                      control={control}
-                      errorVedTomInput="Du må velge om det er krav i etterbetalingen"
-                      legend={<HStack gap="2">Er det krav i etterbetalingen?</HStack>}
-                      radios={
-                        <>
-                          <Radio size="small" value={ISvar.JA}>
-                            Ja
-                          </Radio>
-                          <Radio size="small" value={ISvar.NEI}>
-                            Nei
-                          </Radio>
-                        </>
-                      }
-                    />
-                    <ControlledRadioGruppe
-                      name="etterbetalingPeriodeValg"
-                      control={control}
-                      errorVedTomInput="Velg hvor lang etterbetalingsperiode det er"
-                      legend={<HStack gap="2">Hvor mange måneder etterbetales det for?</HStack>}
-                      radios={
-                        <>
-                          <Radio size="small" value={EtterbetalingPeriodeValg.UNDER_3_MND}>
-                            Etterbetaling 1 - 2 måneder
-                          </Radio>
-                          <Radio size="small" value={EtterbetalingPeriodeValg.FRA_3_MND}>
-                            Etterbetaling fra 3 måneder
-                          </Radio>
-                        </>
-                      }
-                    />
-                    <ControlledRadioGruppe
                       name="frivilligSkattetrekk"
                       control={control}
                       errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"

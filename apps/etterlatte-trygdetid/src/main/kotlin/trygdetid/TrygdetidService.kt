@@ -405,13 +405,13 @@ class TrygdetidServiceImpl(
                         brukerTokenInfo,
                     )
 
-                val opprettetTrygdetidMedPesysTrygdetid =
+                val hentetTrygdetidMedPesysTrygdetid =
                     populerTrygdetidsGrunnlagFraPesys(hentTrygdetid, trygdetidForUfoereOgAlderspensjon)
-                trygdetidRepository.oppdaterTrygdetid(opprettetTrygdetidMedPesysTrygdetid)
+                trygdetidRepository.oppdaterTrygdetid(hentetTrygdetidMedPesysTrygdetid)
                 val oppdatertTrygdetid =
-                    opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetidMedPesysTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
+                    opprettFremtidigTrygdetidForAvdoed(hentetTrygdetidMedPesysTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
 
-                oppdatertTrygdetid ?: opprettetTrygdetidMedPesysTrygdetid
+                oppdatertTrygdetid ?: hentetTrygdetidMedPesysTrygdetid
             }
     }
 

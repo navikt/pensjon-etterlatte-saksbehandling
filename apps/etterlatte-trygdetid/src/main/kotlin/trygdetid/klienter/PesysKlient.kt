@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.Date
 
 interface PesysKlient {
     suspend fun hentTrygdetidsgrunnlag(
@@ -34,8 +33,8 @@ data class TrygdetidsgrunnlagRequest(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Trygdetidsgrunnlag(
     val land: String? = null, // ISO 3166-1 alpha-3 code
-    val fomDato: Date,
-    val tomDato: Date,
+    val fomDato: LocalDate,
+    val tomDato: LocalDate,
     val poengIInnAr: Boolean? = null,
     val poengIUtAr: Boolean? = null,
     val ikkeProRata: Boolean? = null,

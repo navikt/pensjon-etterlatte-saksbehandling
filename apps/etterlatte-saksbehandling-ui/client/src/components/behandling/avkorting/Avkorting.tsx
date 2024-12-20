@@ -39,10 +39,8 @@ export const Avkorting = ({
 
   const virkAar = new Date(virkningstidspunkt(behandling).dato).getFullYear()
 
-  const skalHaInntektNesteAar =
-    behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-    virkAar === 2024 && // TODO Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
-    (behandling.viderefoertOpphoer == null || new Date(behandling.viderefoertOpphoer.dato) > new Date('2025-01-01'))
+  const skalHaInntektNesteAar = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && virkAar === 2024 // TODO Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
+  //  && (behandling.viderefoertOpphoer == null || new Date(behandling.viderefoertOpphoer.dato) > new Date('2025-01-01')) TODO Fjerner midlertidig
 
   const klarForBrevutfall = () => {
     if (avkorting == undefined) {

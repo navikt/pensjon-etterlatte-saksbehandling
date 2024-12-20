@@ -4,7 +4,8 @@ import {
   hentTrygdetider,
   ITrygdetid,
   opprettTrygdetider,
-  hentTrygdetidForUfoeretrygdOgAlderspensjon,
+  hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon,
+  sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { Alert, BodyShort, Box, Button, Heading, Tabs, VStack } from '@navikt/ds-react'
@@ -12,7 +13,7 @@ import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
@@ -49,7 +50,10 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const kanHenteTrygdetidFraPesys = useFeaturetoggle(FeatureToggle.trygdetid_fra_pesys)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
-  const [hentTTPesysStatus, hentPesysTT] = useApiCall(hentTrygdetidForUfoeretrygdOgAlderspensjon)
+  const [hentTTPesysStatus, hentPesysTT] = useApiCall(hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon)
+  const [sjekkOmAvodedHarTTIPesysStatus, sjekkOmAvdoedHarTTIPesysHent] = useApiCall(
+    sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys
+  )
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
@@ -119,6 +123,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     fetchAlleLand(null, (landListe: ILand[]) => {
       setLandListe(sorterLand(landListe))
     })
+    sjekkOmAvdoedHarTTIPesysHent(behandling.id)
   }, [])
 
   if (harPilotTrygdetid) {
@@ -153,13 +158,31 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         {kanHenteTrygdetidFraPesys && (
           <>
-            <Box maxWidth="fit-content">
-              <Button onClick={hentTrygdetidFraPesys}>
-                Hent trygdetid fra Pesys for uføretrygd eller alderspensjon for avdød
-              </Button>
-            </Box>
-            {isFailure(hentTTPesysStatus) && <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>}
-            {isPending(hentTTPesysStatus) && <Spinner label="Henter trygdetid i Pesys" />}
+            {mapApiResult(
+              sjekkOmAvodedHarTTIPesysStatus,
+              <Spinner label="Sjekker om avdøed har trygdetidsgrunnlag i Pesys" />,
+              () => (
+                <Alert variant="warning">Kunne ikke sjekke trygdetidsgrunnag i Pesys</Alert>
+              ),
+              (harTrygdetidsgrunnlagIPesys) => {
+                return (
+                  <>
+                    {harTrygdetidsgrunnlagIPesys && (
+                      <>
+                        <Box maxWidth="fit-content">
+                          <BodyShort>Hent trygdetid fra Pesys for uføretrygd eller alderspensjon for avdød</BodyShort>
+                          <Button onClick={hentTrygdetidFraPesys}>Hent</Button>
+                        </Box>
+                        {isFailure(hentTTPesysStatus) && (
+                          <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>
+                        )}
+                        {isPending(hentTTPesysStatus) && <Spinner label="Henter trygdetid i Pesys" />}
+                      </>
+                    )}
+                  </>
+                )
+              }
+            )}
           </>
         )}
         {landListe && (

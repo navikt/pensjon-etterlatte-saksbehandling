@@ -84,16 +84,29 @@ fun Route.trygdetid(
                 }
             }
 
-            post("/pesys") {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    logger.info("Oppretter trygdetid(er) fra pesys for behandling $behandlingId")
+            route("pesys") {
+                post {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        logger.info("Oppretter trygdetid(er) fra pesys for behandling $behandlingId")
 
-                    trygdetidService.leggInnTrygdetidsgrunnlagFraPesys(behandlingId, brukerTokenInfo)
-                    call.respond(
-                        trygdetidService
-                            .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-                            .map { it.toDto() },
-                    )
+                        trygdetidService.leggInnTrygdetidsgrunnlagFraPesys(behandlingId, brukerTokenInfo)
+                        call.respond(
+                            trygdetidService
+                                .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                                .map { it.toDto() },
+                        )
+                    }
+                }
+                get("/sjekk-pesys-trygdetidsgrunnlag") {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        logger.info("Sjekker om avdød for behandling $behandlingId har trygdetidsgrunnlag i Pesys for AP og Uføre")
+                        val harTrygdetidsgrunnlagIPesys =
+                            trygdetidService.harTrygdetidsgrunnlagIPesysForApOgUfoere(
+                                behandlingId,
+                                brukerTokenInfo,
+                            )
+                        call.respond(harTrygdetidsgrunnlagIPesys)
+                    }
                 }
             }
 

@@ -7,9 +7,14 @@ export const hentTrygdetider = async (behandlingId: string): Promise<ApiResponse
 export const opprettTrygdetider = async (behandlingId: string): Promise<ApiResponse<ITrygdetid[]>> =>
   apiClient.post(`/trygdetid_v2/${behandlingId}`, {})
 
-export const hentTrygdetidForUfoeretrygdOgAlderspensjon = async (
+export const hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon = async (
   behandlingId: string
 ): Promise<ApiResponse<ITrygdetid[]>> => apiClient.post(`trygdetid_v2/${behandlingId}/pesys`, {})
+
+export const sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys = async (
+  behandlingId: string
+): Promise<ApiResponse<ITrygdetid[]>> =>
+  apiClient.get(`trygdetid_v2/${behandlingId}/pesys/sjekk-pesys-trygdetidsgrunnlag`)
 
 export const overstyrTrygdetid = async (overstyring: ITrygdetidOverstyring): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid_v2/${overstyring.behandlingId}/overstyr`, { ...overstyring })

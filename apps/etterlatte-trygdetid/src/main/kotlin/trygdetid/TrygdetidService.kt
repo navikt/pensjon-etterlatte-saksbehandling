@@ -66,6 +66,11 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
 
+    suspend fun harTrygdetidsgrunnlagIPesysForApOgUfoere(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
+
     suspend fun leggInnTrygdetidsgrunnlagFraPesys(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -326,6 +331,30 @@ class TrygdetidServiceImpl(
             logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
         }
 
+    override suspend fun harTrygdetidsgrunnlagIPesysForApOgUfoere(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        val perioderIPesys =
+            avdoede
+                .map { avdoed ->
+                    val fnr =
+                        requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                            "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                                "behandlingen med id=$behandlingId"
+                        }
+
+                    Pair(fnr, avdoed)
+                }.map { avdoedMedFnr ->
+                    val trygdetidForUfoereOgAlderspensjon = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr, brukerTokenInfo)
+                    trygdetidForUfoereOgAlderspensjon
+                }.map {
+                    mapTrygdetidsgrunnlagFraPesys(it)
+                }
+        return perioderIPesys.flatten().isNotEmpty()
+    }
+
     override suspend fun leggInnTrygdetidsgrunnlagFraPesys(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -366,7 +395,8 @@ class TrygdetidServiceImpl(
 
                 val trygdetidForUfoereOgAlderspensjon = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr, brukerTokenInfo)
 
-                val opprettetTrygdetidMedPesysTrygdetid = populerTrygdetidFraPesys(hentTrygdetid, trygdetidForUfoereOgAlderspensjon)
+                val opprettetTrygdetidMedPesysTrygdetid =
+                    populerTrygdetidsGrunnlagFraPesys(hentTrygdetid, trygdetidForUfoereOgAlderspensjon)
                 trygdetidRepository.oppdaterTrygdetid(opprettetTrygdetidMedPesysTrygdetid)
                 val oppdatertTrygdetid =
                     opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetidMedPesysTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
@@ -375,21 +405,28 @@ class TrygdetidServiceImpl(
             }
     }
 
-    private fun populerTrygdetidFraPesys(
+    private fun populerTrygdetidsGrunnlagFraPesys(
         trygdetid: Trygdetid,
-        pesystt: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
+        pesysTrygdetidsgrunnlag: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
     ): Trygdetid {
+        mapTrygdetidsgrunnlagFraPesys(pesysTrygdetidsgrunnlag)
+
+        return trygdetid.copy(trygdetidGrunnlag = mapTrygdetidsgrunnlagFraPesys(pesysTrygdetidsgrunnlag))
+    }
+
+    private fun mapTrygdetidsgrunnlagFraPesys(
+        pesysTrygdetidsgrunnlag: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
+    ): List<TrygdetidGrunnlag> {
         val mappedAlderspensjonTt =
-            pesystt.trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
+            pesysTrygdetidsgrunnlag.trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                 mapPesysTrygdetidsgrunnlag(it)
             } ?: emptyList()
 
         val mappedUfoeretrygdTt =
-            pesystt.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
+            pesysTrygdetidsgrunnlag.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                 mapPesysTrygdetidsgrunnlag(it)
             } ?: emptyList()
-
-        return trygdetid.copy(trygdetidGrunnlag = mappedAlderspensjonTt + mappedUfoeretrygdTt)
+        return mappedAlderspensjonTt + mappedUfoeretrygdTt
     }
 
     private fun mapPesysTrygdetidsgrunnlag(tt: Trygdetidsgrunnlag): TrygdetidGrunnlag {

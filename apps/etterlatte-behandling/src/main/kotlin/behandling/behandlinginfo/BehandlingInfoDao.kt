@@ -91,7 +91,7 @@ class BehandlingInfoDao(
                             "Kunne ikke lagreBrevutfall behandling for ${brevutfall.behandlingId}"
                         }
                     }.let {
-                        hentBrevutfall(brevutfall.behandlingId!!)
+                        hentBrevutfall(brevutfall.behandlingId)
                             ?: throw InternfeilException("Feilet under lagring av brevutfall")
                     }
             }

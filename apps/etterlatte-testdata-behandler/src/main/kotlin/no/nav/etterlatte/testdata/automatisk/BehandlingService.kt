@@ -5,7 +5,7 @@ import no.nav.etterlatte.behandling.VirkningstidspunktRequest
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.BrevutfallOgInfo
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -184,7 +184,7 @@ class BehandlingService(
                 .post(
                     Resource(clientId, "$url/api/behandling/$behandling/info/brevutfall"),
                     bruker,
-                    BrevutfallOgEtterbetalingDto(
+                    BrevutfallOgInfo(
                         behandlingId = behandling,
                         opphoer = false,
                         etterbetaling = null,

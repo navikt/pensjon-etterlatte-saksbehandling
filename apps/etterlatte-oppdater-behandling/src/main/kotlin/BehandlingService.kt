@@ -11,7 +11,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.BrevutfallOgInfo
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
@@ -125,7 +125,7 @@ interface BehandlingService {
         frist: Tidspunkt? = null,
     ): UUID
 
-    fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto)
+    fun leggInnBrevutfall(request: BrevutfallOgInfo)
 
     fun lagreKjoering(
         sakId: SakId,
@@ -394,7 +394,7 @@ class BehandlingServiceImpl(
                 }.body<OpprettOppgaveForAktivitetspliktResponse>()
         }
 
-    override fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto) {
+    override fun leggInnBrevutfall(request: BrevutfallOgInfo) {
         runBlocking {
             behandlingKlient.post("$url/api/behandling/${request.behandlingId}/info/brevutfall") {
                 contentType(ContentType.Application.Json)

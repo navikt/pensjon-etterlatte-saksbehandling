@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BehandlingInfoService(
@@ -20,15 +19,12 @@ class BehandlingInfoService(
     private val behandlingService: BehandlingService,
     private val behandlingsstatusService: BehandlingStatusService,
 ) {
-    private val logger = LoggerFactory.getLogger(BehandlingInfoService::class.java)
-
-    fun lagreBrevutfallOgEtterbetaling(
+    fun lagreBrevutfall(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         opphoer: Boolean,
         brevutfall: Brevutfall,
-        etterbetaling: Etterbetaling?,
-    ): Pair<Brevutfall, Etterbetaling?> {
+    ): Brevutfall {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
@@ -43,11 +39,9 @@ class BehandlingInfoService(
         }
 
         val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
-        val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
-
         oppdaterBehandlingStatus(behandling, opphoer, brukerTokenInfo)
 
-        return Pair(lagretBrevutfall, lagretEtterbetaling)
+        return lagretBrevutfall
     }
 
     fun lagreErOmgjoeringSluttbehandlingUtland(behandling: Behandling) =

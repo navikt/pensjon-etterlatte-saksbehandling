@@ -14,7 +14,6 @@ import { Grunnlagsendringshendelse, GrunnlagsendringsListe } from '~components/p
 import { FoersteVirk, ISak } from '~shared/types/sak'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formatering/dato'
-import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 import { AnnenForelder, RedigertFamilieforhold } from '~shared/types/grunnlag'
 import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
@@ -23,6 +22,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { ILand } from '~utils/kodeverk'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 import { AvbrytBehandlingRequest } from '~shared/types/AnnullerBehandling'
+import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -210,15 +210,13 @@ export const redigerSendeBrev = async (args: {
 
 export const lagreBrevutfallApi = async (args: {
   behandlingId: string
-  brevutfall: BrevutfallOgEtterbetaling
-}): Promise<ApiResponse<BrevutfallOgEtterbetaling>> => {
+  brevutfall: Brevutfall
+}): Promise<ApiResponse<Brevutfall>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/info/brevutfall`, { ...args.brevutfall })
 }
 
-export const hentBrevutfallOgEtterbetalingApi = async (
-  behandlingId: string
-): Promise<ApiResponse<BrevutfallOgEtterbetaling | null>> => {
-  return apiClient.get(`/behandling/${behandlingId}/info/brevutfallogetterbetaling`)
+export const hentBrevutfallApi = async (behandlingId: string): Promise<ApiResponse<Brevutfall | null>> => {
+  return apiClient.get(`/behandling/${behandlingId}/info/brevutfall`)
 }
 
 export interface SluttbehandlingUtlandOmgjoering {

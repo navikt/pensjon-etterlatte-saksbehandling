@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { Alert, BodyLong, Heading } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBrevutfallOgEtterbetalingApi } from '~shared/api/behandling'
+import { hentBrevutfallApi } from '~shared/api/behandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
 import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallVisning'
@@ -10,27 +10,18 @@ import Spinner from '~shared/Spinner'
 import { MapApiResult } from '~shared/components/MapApiResult'
 import { SakType } from '~shared/types/sak'
 import { useAppDispatch } from '~store/Store'
-import { IBehandlingReducer, updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, updateBrevutfall } from '~store/reducers/BehandlingReducer'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SkalSendeBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
-export interface BrevutfallOgEtterbetaling {
-  opphoer?: boolean | null
-  etterbetaling?: Etterbetaling | null
-  brevutfall: Brevutfall
-}
-
 export interface Brevutfall {
+  opphoer?: boolean | null
   aldersgruppe?: Aldersgruppe | null
   feilutbetaling?: Feilutbetaling | null
   frivilligSkattetrekk?: boolean | null
-}
-
-export enum EtterbetalingPeriodeValg {
-  UNDER_3_MND = 'UNDER_3_MND',
-  FRA_3_MND = 'FRA_3_MND',
+  harEtterbetaling?: boolean | null
 }
 
 export enum Aldersgruppe {
@@ -51,25 +42,15 @@ export enum FeilutbetalingValg {
   JA_INGEN_TK = 'JA_INGEN_TK',
 }
 
-export interface Etterbetaling {
-  datoFom?: string | null
-  datoTom?: string | null
-  inneholderKrav: boolean | null
-  frivilligSkattetrekk?: boolean | null
-  etterbetalingPeriodeValg: EtterbetalingPeriodeValg | null
-}
-
-const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
+const initialBrevutfall = (saktype: SakType) => {
   switch (saktype) {
     case SakType.BARNEPENSJON:
       return {
-        brevutfall: {
-          aldersgruppe: Aldersgruppe.IKKE_VALGT,
-        },
+        aldersgruppe: Aldersgruppe.IKKE_VALGT,
       }
     case SakType.OMSTILLINGSSTOENAD:
       return {
-        brevutfall: {},
+        aldersgruppe: undefined,
       }
   }
 }
@@ -84,22 +65,18 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
-  const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
-    initialBrevutfallOgEtterbetaling(behandling.sakType)
-  )
-  const [hentBrevutfallOgEtterbetalingResult, hentBrevutfallOgEtterbetalingRequest] = useApiCall(
-    hentBrevutfallOgEtterbetalingApi
-  )
+  const [brevutfall, setBrevutfall] = useState<Brevutfall>(initialBrevutfall(behandling.sakType))
+  const [hentBrevutfallOgEtterbetalingResult, hentBrevutfallOgEtterbetalingRequest] = useApiCall(hentBrevutfallApi)
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
   const hentBrevutfall = () => {
-    hentBrevutfallOgEtterbetalingRequest(behandling.id, (brevutfall: BrevutfallOgEtterbetaling | null) => {
+    hentBrevutfallOgEtterbetalingRequest(behandling.id, (brevutfall: Brevutfall | null) => {
       if (brevutfall) {
-        setBrevutfallOgEtterbetaling(brevutfall)
-        dispatch(updateBrevutfallOgEtterbetaling(brevutfall))
+        setBrevutfall(brevutfall)
+        dispatch(updateBrevutfall(brevutfall))
         setVisSkjema(false)
       } else {
-        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling(behandling.sakType))
+        setBrevutfall(initialBrevutfall(behandling.sakType))
         if (redigerbar) setVisSkjema(true)
       }
     })
@@ -131,8 +108,8 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
               behandlingErOpphoer={behandlingErOpphoer}
               resetBrevutfallvalidering={props.resetBrevutfallvalidering}
               behandling={behandling}
-              brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
-              setBrevutfallOgEtterbetaling={setBrevutfallOgEtterbetaling}
+              brevutfall={brevutfall}
+              setBrevutfall={setBrevutfall}
               setVisSkjema={setVisSkjema}
               onAvbryt={hentBrevutfall}
             />
@@ -140,7 +117,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
             <BrevutfallVisning
               behandlingErOpphoer={behandlingErOpphoer}
               redigerbar={redigerbar}
-              brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
+              brevutfall={brevutfall}
               sakType={behandling.sakType}
               setVisSkjema={setVisSkjema}
             />

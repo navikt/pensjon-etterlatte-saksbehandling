@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.BrevutfallOgInfo
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
@@ -107,7 +107,7 @@ internal class BehandlingInfoRoutesTest {
                     setBody(dto)
                 }
 
-            val opprettetBrevutfallOgEtterbetaling: BrevutfallOgEtterbetalingDto = response.body()
+            val opprettetBrevutfallOgEtterbetaling: BrevutfallOgInfo = response.body()
             response.status shouldBe HttpStatusCode.OK
 
             opprettetBrevutfallOgEtterbetaling.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
@@ -138,11 +138,11 @@ internal class BehandlingInfoRoutesTest {
                 }
 
             val response =
-                client.get("/api/behandling/${UUID.randomUUID()}/info/brevutfallogetterbetaling") {
+                client.get("/api/behandling/${UUID.randomUUID()}/info/brevutfall") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val hentetBrevutfall: BrevutfallOgEtterbetalingDto = response.body()
+            val hentetBrevutfall: BrevutfallOgInfo = response.body()
             response.status shouldBe HttpStatusCode.OK
 
             hentetBrevutfall.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
@@ -218,7 +218,7 @@ internal class BehandlingInfoRoutesTest {
         )
 
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
-        BrevutfallOgEtterbetalingDto(
+        BrevutfallOgInfo(
             behandlingId = UUID.randomUUID(),
             opphoer = false,
             brevutfall =

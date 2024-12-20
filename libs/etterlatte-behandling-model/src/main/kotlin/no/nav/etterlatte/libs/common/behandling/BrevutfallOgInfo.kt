@@ -2,9 +2,7 @@ package no.nav.etterlatte.libs.common.behandling
 
 import java.util.UUID
 
-data class BrevutfallOgEtterbetalingDto(
+data class BrevutfallOgInfo(
     val behandlingId: UUID?,
-    val opphoer: Boolean? = null,
-    val etterbetaling: EtterbetalingDto?,
     val brevutfall: BrevutfallDto?,
 )

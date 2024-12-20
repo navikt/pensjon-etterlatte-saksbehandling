@@ -9,6 +9,7 @@ data class Brevutfall(
     val feilutbetaling: Feilutbetaling?,
     val frivilligSkattetrekk: Boolean?,
     val kilde: Grunnlagsopplysning.Kilde,
+    val harEtterbetaling: Boolean?,
 )
 
 enum class Aldersgruppe {

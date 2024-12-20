@@ -25,7 +25,7 @@ export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering | undefin
   'behandling/update_vilkaarsvurdering'
 )
 
-export const updateBrevutfallOgEtterbetaling = createAction<BrevutfallOgEtterbetaling | undefined>(
+export const updateBrevutfall = createAction<BrevutfallOgEtterbetaling | undefined>(
   'behandling/update_brevutfallogetterbetaling'
 )
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
@@ -80,7 +80,7 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
     state.behandling!!.vilkaarsvurdering = action.payload
   })
-  builder.addCase(updateBrevutfallOgEtterbetaling, (state, action) => {
+  builder.addCase(updateBrevutfall, (state, action) => {
     state.behandling!!.brevutfallOgEtterbetaling = action.payload
   })
   builder.addCase(oppdaterGyldighetsproeving, (state, action) => {

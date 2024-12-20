@@ -3,7 +3,7 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.BrevutfallOgInfo
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -67,7 +67,7 @@ internal class OmregningsHendelserBehandlingRiver(
         val revurderingaarsak = omregningData.revurderingaarsak
         if (revurderingaarsak == Revurderingaarsak.AARLIG_INNTEKTSJUSTERING || revurderingaarsak == Revurderingaarsak.INNTEKTSENDRING) {
             behandlinger.leggInnBrevutfall(
-                BrevutfallOgEtterbetalingDto(
+                BrevutfallOgInfo(
                     behandlingId = behandlingId,
                     opphoer = false, // TODO opphørfom?a
                     etterbetaling = null,

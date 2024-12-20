@@ -45,7 +45,7 @@ internal class BehandlingInfoServiceTest {
         every { behandlingInfoDao.lagreEtterbetaling(any()) } returns mockk()
         every { behandlingsstatusService.settBeregnet(any(), any(), any()) } returns Unit
 
-        behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+        behandlingInfoService.lagreBrevutfall(
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = false,
@@ -77,7 +77,7 @@ internal class BehandlingInfoServiceTest {
         every { behandlingInfoDao.lagreEtterbetaling(any()) } returns mockk()
         every { behandlingsstatusService.settAvkortet(any(), any(), any()) } returns Unit
 
-        behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+        behandlingInfoService.lagreBrevutfall(
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = false,
@@ -103,7 +103,7 @@ internal class BehandlingInfoServiceTest {
             )
 
         assertThrows<BrevutfallException.BehandlingKanIkkeEndres> {
-            behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+            behandlingInfoService.lagreBrevutfall(
                 behandlingId = behandlingId,
                 brukerTokenInfo = bruker,
                 opphoer = false,
@@ -129,7 +129,7 @@ internal class BehandlingInfoServiceTest {
         every { behandlingsstatusService.settAvkortet(any(), any(), any()) } returns Unit
 
         assertThrows<BrevutfallException.FeilutbetalingIkkeSatt> {
-            behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+            behandlingInfoService.lagreBrevutfall(
                 behandlingId = behandlingId,
                 brukerTokenInfo = bruker,
                 opphoer = false,
@@ -184,7 +184,7 @@ internal class BehandlingInfoServiceTest {
         every { behandlingsstatusService.settVilkaarsvurdert(any(), any(), any()) } returns Unit
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns null
 
-        behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+        behandlingInfoService.lagreBrevutfall(
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = true,
@@ -214,7 +214,7 @@ internal class BehandlingInfoServiceTest {
         every { behandlingsstatusService.settVilkaarsvurdert(any(), any(), any()) } returns Unit
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns null
 
-        behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+        behandlingInfoService.lagreBrevutfall(
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = true,

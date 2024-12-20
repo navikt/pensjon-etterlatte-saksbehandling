@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
@@ -44,7 +43,6 @@ import no.nav.etterlatte.trygdetid.klienter.PesysKlient
 import no.nav.etterlatte.trygdetid.klienter.Trygdetidsgrunnlag
 import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 import java.util.UUID
@@ -144,31 +142,6 @@ interface TrygdetidService {
     ): UUID?
 }
 
-data class TrygdetidsperioderPesys(
-    val ufoeretrygd: TrygdetidsPeriodeListe?,
-    val alderspensjon: TrygdetidsPeriodeListe?,
-)
-
-fun TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon.tilTrygdetidsperioder() =
-    TrygdetidsperioderPesys(
-        ufoeretrygd =
-            TrygdetidsPeriodeListe(
-                trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
-                    it.tilTrygdetidsPeriode()
-                },
-            ),
-        alderspensjon =
-            TrygdetidsPeriodeListe(
-                trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
-                    it.tilTrygdetidsPeriode()
-                },
-            ),
-    )
-
-data class TrygdetidsPeriodeListe(
-    val trygdetidsGrunnlagListe: List<TrygdetidPeriodePesys>?,
-)
-
 data class TrygdetidPeriodePesys(
     val isoCode: String, // ISO 3166-1 alpha-3 code:
     val fra: LocalDate,
@@ -182,8 +155,8 @@ data class TrygdetidPeriodePesys(
 fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
     TrygdetidPeriodePesys(
         isoCode = land!!,
-        fra = toNorskLocalDate(fomDato.toInstant()),
-        til = toNorskLocalDate(fomDato.toInstant()),
+        fra = fomDato,
+        til = fomDato,
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
@@ -195,8 +168,6 @@ fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
         fra = fra,
         til = til,
     )
-
-fun toNorskLocalDate(instant: Instant): LocalDate = LocalDate.ofInstant(instant, norskTidssone)
 
 class TrygdetidServiceImpl(
     private val trygdetidRepository: TrygdetidRepository,

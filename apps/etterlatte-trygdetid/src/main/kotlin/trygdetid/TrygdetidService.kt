@@ -418,11 +418,7 @@ class TrygdetidServiceImpl(
     private fun populerTrygdetidsGrunnlagFraPesys(
         trygdetid: Trygdetid,
         pesysTrygdetidsgrunnlag: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
-    ): Trygdetid {
-        mapTrygdetidsgrunnlagFraPesys(pesysTrygdetidsgrunnlag)
-
-        return trygdetid.copy(trygdetidGrunnlag = mapTrygdetidsgrunnlagFraPesys(pesysTrygdetidsgrunnlag))
-    }
+    ): Trygdetid = trygdetid.copy(trygdetidGrunnlag = mapTrygdetidsgrunnlagFraPesys(pesysTrygdetidsgrunnlag))
 
     private fun mapTrygdetidsgrunnlagFraPesys(
         pesysTrygdetidsgrunnlag: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
@@ -436,6 +432,11 @@ class TrygdetidServiceImpl(
             pesysTrygdetidsgrunnlag.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
                 mapPesysTrygdetidsgrunnlag(it)
             } ?: emptyList()
+        if (mappedAlderspensjonTt.isNotEmpty() && mappedUfoeretrygdTt.isNotEmpty()) {
+            logger.error(
+                "Vi fikk trygdetidsgrunnlag for både alderspensjon og uføretrygd, vi må sjekke om dette gir mening eller om det blir feil.",
+            )
+        }
         return mappedAlderspensjonTt + mappedUfoeretrygdTt
     }
 

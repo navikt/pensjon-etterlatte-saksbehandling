@@ -18,7 +18,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -159,7 +159,7 @@ internal class BehandlingStatusServiceTest {
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
-        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfallDto(behandlingId)
 
         inTransaction {
             sut.settIverksattVedtak(behandlingId, iverksettVedtak)
@@ -216,7 +216,7 @@ internal class BehandlingStatusServiceTest {
         val iverksattVedtak = VedtakHendelse(1L, Tidspunkt.now(), saksbehandler)
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
-        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfallDto(behandlingId)
 
         val generellBehandlingUtland =
             GenerellBehandling.opprettUtland(
@@ -343,7 +343,7 @@ internal class BehandlingStatusServiceTest {
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
-        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
+        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfallDto(behandlingId, feilutbetalingValg)
         every { oppgaveService.hentOppgaverForSak(sakId, any()) } returns
             listOf(
                 oppgave(UUID.randomUUID(), sakId, Status.FERDIGSTILT),
@@ -391,7 +391,7 @@ internal class BehandlingStatusServiceTest {
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
-        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
+        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfallDto(behandlingId, feilutbetalingValg)
         every { oppgaveService.hentOppgaverForSak(sakId, OppgaveType.TILBAKEKREVING) } returns listOf(oppgave(oppgaveId, sakId))
         every { oppgaveService.endrePaaVent(any(), any(), any(), any()) } returns oppgave(oppgaveId, sakId, Status.PAA_VENT)
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
@@ -432,10 +432,10 @@ internal class BehandlingStatusServiceTest {
         frist = Tidspunkt.now(),
     )
 
-    private fun brevutfall(
+    private fun brevutfallDto(
         behandlingId: UUID,
         feilutbetalingValg: FeilutbetalingValg = FeilutbetalingValg.NEI,
-    ) = Brevutfall(
+    ) = BrevutfallDto(
         behandlingId = behandlingId,
         aldersgruppe = null,
         feilutbetaling = Feilutbetaling(feilutbetalingValg, "kommentar"),

@@ -3,7 +3,7 @@ package no.nav.etterlatte.behandling.behandlinginfo
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
 import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.objectMapper
@@ -72,7 +72,7 @@ class BehandlingInfoDao(
             }
         }
 
-    fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall =
+    fun lagreBrevutfall(brevutfall: BrevutfallDto): BrevutfallDto =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(
@@ -91,13 +91,13 @@ class BehandlingInfoDao(
                             "Kunne ikke lagreBrevutfall behandling for ${brevutfall.behandlingId}"
                         }
                     }.let {
-                        hentBrevutfall(brevutfall.behandlingId)
+                        hentBrevutfall(brevutfall.behandlingId!!)
                             ?: throw InternfeilException("Feilet under lagring av brevutfall")
                     }
             }
         }
 
-    fun hentBrevutfall(behandlingId: UUID): Brevutfall? =
+    fun hentBrevutfall(behandlingId: UUID): BrevutfallDto? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(

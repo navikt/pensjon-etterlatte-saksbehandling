@@ -14,6 +14,13 @@ Oppdateringer av ACL er ikke automatisk, og må kjøres inn manuelt med `kubectl
 | dev-gcp  | .nais/topic-vedtakshendelser-dev.yaml   |
 | prod-gcp | .nais/topic-vedtakshendelser-prod.yaml  |
 
+## For å oppdatere endringer i topic yamler kjør dette:
+### Obs: Må stå samme path som filen(e) og ha riktig context! feks kubectl config use-context dev-gcp
+https://docs.nais.io/persistence/kafka/how-to/create/?h=kafka+topic#apply-the-topic-resource
+```
+kubectl apply -f .nais/topic-vedtakshendelser-dev.yaml
+```
+
 ### Meldingsinnhold
 
 | Felt        | Datatype   | Beskrivelse                                                             |

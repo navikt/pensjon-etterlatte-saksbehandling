@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.util.UUID
 
 data class BrevutfallDto(
-    val behandlingId: UUID?,
+    val behandlingId: UUID,
     val aldersgruppe: Aldersgruppe?,
     val feilutbetaling: Feilutbetaling?,
     val frivilligSkattetrekk: Boolean?,

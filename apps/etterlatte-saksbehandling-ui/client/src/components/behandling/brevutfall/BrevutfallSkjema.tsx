@@ -65,19 +65,12 @@ export const BrevutfallSkjema = ({
           : brevutfallOgEtterbetaling.etterbetaling
             ? ISvar.JA
             : ISvar.NEI,
-      kravIEtterbetaling:
-        brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav === undefined
-          ? undefined
-          : brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav
-            ? ISvar.JA
-            : ISvar.NEI,
       frivilligSkattetrekk:
         brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk === undefined
           ? undefined
           : brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk
             ? ISvar.JA
             : ISvar.NEI,
-      etterbetalingPeriodeValg: brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg,
       datoFom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
         ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
         : undefined,
@@ -197,42 +190,10 @@ export const BrevutfallSkjema = ({
                 {behandling.sakType == SakType.BARNEPENSJON && (
                   <>
                     <ControlledRadioGruppe
-                      name="kravIEtterbetaling"
-                      control={control}
-                      errorVedTomInput="Du må velge om det er krav i etterbetalingen"
-                      legend={<HStack gap="2">Er det krav i etterbetalingen?</HStack>}
-                      radios={
-                        <>
-                          <Radio size="small" value={ISvar.JA}>
-                            Ja
-                          </Radio>
-                          <Radio size="small" value={ISvar.NEI}>
-                            Nei
-                          </Radio>
-                        </>
-                      }
-                    />
-                    <ControlledRadioGruppe
-                      name="etterbetalingPeriodeValg"
-                      control={control}
-                      errorVedTomInput="Velg hvor lang etterbetalingsperiode det er"
-                      legend={<HStack gap="2">Hvor mange måneder etterbetales det for?</HStack>}
-                      radios={
-                        <>
-                          <Radio size="small" value={EtterbetalingPeriodeValg.UNDER_3_MND}>
-                            Etterbetaling 1 - 2 måneder
-                          </Radio>
-                          <Radio size="small" value={EtterbetalingPeriodeValg.FRA_3_MND}>
-                            Etterbetaling fra 3 måneder
-                          </Radio>
-                        </>
-                      }
-                    />
-                    <ControlledRadioGruppe
                       name="frivilligSkattetrekk"
                       control={control}
-                      errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"
-                      legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk?</HStack>}
+                      errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk utover 17%"
+                      legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk utover 17%?</HStack>}
                       radios={
                         <>
                           <Radio size="small" value={ISvar.JA}>
@@ -254,8 +215,8 @@ export const BrevutfallSkjema = ({
                 <ControlledRadioGruppe
                   name="frivilligSkattetrekk"
                   control={control}
-                  errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk"
-                  legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk?</HStack>}
+                  errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk utover 17%"
+                  legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk utover 17%?</HStack>}
                   radios={
                     <>
                       <Radio size="small" value={ISvar.JA}>

@@ -3,7 +3,6 @@ import React from 'react'
 import {
   Aldersgruppe,
   BrevutfallOgEtterbetaling,
-  EtterbetalingPeriodeValg,
   FeilutbetalingValg,
 } from '~components/behandling/brevutfall/Brevutfall'
 import { SakType } from '~shared/types/sak'
@@ -32,17 +31,6 @@ export function feilutbetalingToString(feilutbetaling?: FeilutbetalingValg | nul
       return 'Ja, men motregnes mot annen ytelse fra NAV, så avventer varsel om feilutbetaling til ev. tilbakekrevingssak'
     case FeilutbetalingValg.JA_INGEN_TK:
       return 'Ja, men ikke grunnlag for tilbakekreving pga under 4 rettsgebyr, eller annen grunn (se notat)'
-    default:
-      return 'Ikke satt'
-  }
-}
-
-function etterbetalingPeriodeValgToString(etterbetalingPeriodeValg?: EtterbetalingPeriodeValg | null) {
-  switch (etterbetalingPeriodeValg) {
-    case EtterbetalingPeriodeValg.UNDER_3_MND:
-      return 'Under 3 måneder'
-    case EtterbetalingPeriodeValg.FRA_3_MND:
-      return 'Fra 3 måneder'
     default:
       return 'Ikke satt'
   }
@@ -77,31 +65,11 @@ export const BrevutfallVisning = (props: {
                   <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
                 </VStack>
               </HStack>
-              {sakType === SakType.BARNEPENSJON && (
-                <>
-                  {hasValue(brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav) && (
-                    <VStack gap="2">
-                      <Label>Er det krav i etterbetalingen?</Label>
-                      <BodyShort>{brevutfallOgEtterbetaling.etterbetaling?.inneholderKrav ? 'Ja' : 'Nei'}</BodyShort>
-                    </VStack>
-                  )}
-                  {hasValue(brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg) && (
-                    <VStack gap="2">
-                      <Label>Hvor mange måneder etterbetales det for?</Label>
-                      <BodyShort>
-                        {etterbetalingPeriodeValgToString(
-                          brevutfallOgEtterbetaling.etterbetaling?.etterbetalingPeriodeValg
-                        )}
-                      </BodyShort>
-                    </VStack>
-                  )}
-                </>
-              )}
             </>
           )}
           {sakType === SakType.BARNEPENSJON && hasValue(brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk) && (
             <VStack gap="2">
-              <Label>Har bruker meldt inn frivillig skattetrekk?</Label>
+              <Label>Har bruker meldt inn frivillig skattetrekk utover 17%?</Label>
               <BodyShort>{brevutfallOgEtterbetaling.brevutfall.frivilligSkattetrekk ? 'Ja' : 'Nei'}</BodyShort>
             </VStack>
           )}

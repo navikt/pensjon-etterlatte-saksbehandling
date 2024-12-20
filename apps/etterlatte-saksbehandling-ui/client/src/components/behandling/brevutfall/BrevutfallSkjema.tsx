@@ -187,31 +187,11 @@ export const BrevutfallSkjema = ({
                   validate={validerTom}
                   required
                 />
-                {behandling.sakType == SakType.BARNEPENSJON && (
-                  <>
-                    <ControlledRadioGruppe
-                      name="frivilligSkattetrekk"
-                      control={control}
-                      errorVedTomInput="Du må velge om bruker har meldt inn frivillig skattetrekk utover 17%"
-                      legend={<HStack gap="2">Har bruker meldt inn frivillig skattetrekk utover 17%?</HStack>}
-                      radios={
-                        <>
-                          <Radio size="small" value={ISvar.JA}>
-                            Ja
-                          </Radio>
-                          <Radio size="small" value={ISvar.NEI}>
-                            Nei
-                          </Radio>
-                        </>
-                      }
-                    />
-                  </>
-                )}
               </HStack>
             )}
 
-            {watch('harEtterbetaling') == ISvar.NEI && behandling.sakType == SakType.BARNEPENSJON && (
-              <HStack gap="4">
+            {behandling.sakType == SakType.BARNEPENSJON && (
+              <VStack gap="4">
                 <ControlledRadioGruppe
                   name="frivilligSkattetrekk"
                   control={control}
@@ -228,7 +208,7 @@ export const BrevutfallSkjema = ({
                     </>
                   }
                 />
-              </HStack>
+              </VStack>
             )}
           </VStack>
         )}

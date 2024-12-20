@@ -48,33 +48,36 @@ export const BrevutfallVisning = (props: {
   return (
     <VStack gap="8">
       {!behandlingErOpphoer && (
-        <VStack gap="2">
+        <>
           <VStack gap="2">
-            <Label>Skal det etterbetales?</Label>
-            <BodyShort>{brevutfallOgEtterbetaling.etterbetaling ? 'Ja' : 'Nei'}</BodyShort>
+            <VStack gap="2">
+              <Label>Skal det etterbetales?</Label>
+              <BodyShort>{brevutfallOgEtterbetaling.etterbetaling ? 'Ja' : 'Nei'}</BodyShort>
+            </VStack>
+            {brevutfallOgEtterbetaling.etterbetaling && (
+              <>
+                <HStack gap="8">
+                  <VStack gap="2">
+                    <Label>Fra og med</Label>
+                    <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoFom!!)}</BodyShort>
+                  </VStack>
+                  <VStack gap="2">
+                    <Label>Til og med</Label>
+                    <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
+                  </VStack>
+                </HStack>
+              </>
+            )}
           </VStack>
-          {brevutfallOgEtterbetaling.etterbetaling && (
-            <>
-              <HStack gap="8">
-                <VStack gap="2">
-                  <Label>Fra og med</Label>
-                  <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoFom!!)}</BodyShort>
-                </VStack>
-                <VStack gap="2">
-                  <Label>Til og med</Label>
-                  <BodyShort>{formaterMaanedDato(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
-                </VStack>
-              </HStack>
-            </>
-          )}
           {sakType === SakType.BARNEPENSJON && hasValue(brevutfallOgEtterbetaling.brevutfall?.frivilligSkattetrekk) && (
             <VStack gap="2">
               <Label>Har bruker meldt inn frivillig skattetrekk utover 17%?</Label>
               <BodyShort>{brevutfallOgEtterbetaling.brevutfall.frivilligSkattetrekk ? 'Ja' : 'Nei'}</BodyShort>
             </VStack>
           )}
-        </VStack>
+        </>
       )}
+
       {sakType === SakType.BARNEPENSJON && (
         <VStack gap="2">
           <Label>Gjelder brevet under eller over 18 år?</Label>

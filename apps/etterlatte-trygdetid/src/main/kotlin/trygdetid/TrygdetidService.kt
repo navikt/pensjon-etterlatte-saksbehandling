@@ -347,7 +347,12 @@ class TrygdetidServiceImpl(
 
                     Pair(fnr, avdoed)
                 }.map { avdoedMedFnr ->
-                    val trygdetidForUfoereOgAlderspensjon = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr, brukerTokenInfo)
+                    val doedsdato = avdoedMedFnr.second.hentDoedsdato()?.verdi ?: throw InternfeilException("Avdød mangler dødsdato")
+                    val trygdetidForUfoereOgAlderspensjon =
+                        pesysKlient.hentTrygdetidsgrunnlag(
+                            Pair(avdoedMedFnr.first, doedsdato),
+                            brukerTokenInfo,
+                        )
                     trygdetidForUfoereOgAlderspensjon
                 }.map {
                     mapTrygdetidsgrunnlagFraPesys(it)
@@ -392,8 +397,13 @@ class TrygdetidServiceImpl(
                 val hentTrygdetid =
                     trygdetidRepository.hentTrygdetid(behandlingId)
                         ?: throw InternfeilException("Trygdetid er ikke opprettet")
+                val doedsdato = avdoedMedFnr.second.hentDoedsdato()?.verdi ?: throw InternfeilException("Avdød mangler dødsdato")
 
-                val trygdetidForUfoereOgAlderspensjon = pesysKlient.hentTrygdetidsgrunnlag(avdoedMedFnr, brukerTokenInfo)
+                val trygdetidForUfoereOgAlderspensjon =
+                    pesysKlient.hentTrygdetidsgrunnlag(
+                        Pair(avdoedMedFnr.first, doedsdato),
+                        brukerTokenInfo,
+                    )
 
                 val opprettetTrygdetidMedPesysTrygdetid =
                     populerTrygdetidsGrunnlagFraPesys(hentTrygdetid, trygdetidForUfoereOgAlderspensjon)

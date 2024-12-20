@@ -171,9 +171,11 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                       <>
                         <Box maxWidth="fit-content">
                           <BodyShort>
-                            Her kan du hente trygdetid registrert i avdødes uføretrygd eller alderspensjon
+                            Her kan du hente trygdetid registrert i avdødes uføretrygd eller alderspensjon.
                           </BodyShort>
-                          <Button onClick={hentTrygdetidFraPesys}>Hent</Button>
+                          <Button onClick={hentTrygdetidFraPesys} loading={isPending(hentTTPesysStatus)}>
+                            Hent
+                          </Button>
                         </Box>
                         {isFailure(hentTTPesysStatus) && (
                           <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>

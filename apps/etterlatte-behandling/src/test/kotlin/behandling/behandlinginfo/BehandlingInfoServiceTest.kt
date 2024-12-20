@@ -39,7 +39,6 @@ internal class BehandlingInfoServiceTest {
     fun `Skal oppdatere behandlingsstatus hvis endret barnepensjon`() {
         val behandlingId = randomUUID()
         val brevutfall = brevutfall(behandlingId)
-        val etterbetaling = etterbetaling(behandlingId = behandlingId)
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
         every { behandlingInfoDao.lagreEtterbetaling(any()) } returns mockk()
@@ -50,12 +49,10 @@ internal class BehandlingInfoServiceTest {
             brukerTokenInfo = bruker,
             opphoer = false,
             brevutfall = brevutfall,
-            etterbetaling = etterbetaling,
         )
 
         verify {
             behandlingInfoDao.lagreBrevutfall(brevutfall)
-            behandlingInfoDao.lagreEtterbetaling(etterbetaling)
             behandlingsstatusService.settBeregnet(behandlingId, bruker, false)
         }
     }
@@ -74,7 +71,6 @@ internal class BehandlingInfoServiceTest {
                 BehandlingStatus.AVKORTET,
             )
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
-        every { behandlingInfoDao.lagreEtterbetaling(any()) } returns mockk()
         every { behandlingsstatusService.settAvkortet(any(), any(), any()) } returns Unit
 
         behandlingInfoService.lagreBrevutfall(
@@ -82,12 +78,10 @@ internal class BehandlingInfoServiceTest {
             brukerTokenInfo = bruker,
             opphoer = false,
             brevutfall = brevutfall,
-            etterbetaling = etterbetaling,
         )
 
         verify {
             behandlingInfoDao.lagreBrevutfall(brevutfall)
-            behandlingInfoDao.lagreEtterbetaling(etterbetaling)
             behandlingsstatusService.settAvkortet(behandlingId, bruker, false)
         }
     }
@@ -108,7 +102,6 @@ internal class BehandlingInfoServiceTest {
                 brukerTokenInfo = bruker,
                 opphoer = false,
                 brevutfall = brevutfall(behandlingId),
-                etterbetaling = null,
             )
         }
     }
@@ -134,7 +127,6 @@ internal class BehandlingInfoServiceTest {
                 brukerTokenInfo = bruker,
                 opphoer = false,
                 brevutfall = brevutfall(behandlingId).copy(feilutbetaling = null),
-                etterbetaling = etterbetaling(behandlingId = behandlingId),
             )
         }
     }
@@ -189,7 +181,6 @@ internal class BehandlingInfoServiceTest {
             brukerTokenInfo = bruker,
             opphoer = true,
             brevutfall = brevutfall(behandlingId).copy(aldersgruppe = null),
-            etterbetaling = null,
         )
 
         verify {
@@ -219,7 +210,6 @@ internal class BehandlingInfoServiceTest {
             brukerTokenInfo = bruker,
             opphoer = true,
             brevutfall = brevutfall(behandlingId).copy(),
-            etterbetaling = null,
         )
 
         verify {
@@ -259,6 +249,7 @@ internal class BehandlingInfoServiceTest {
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
             frivilligSkattetrekk = true,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
+            harEtterbetaling = false,
         )
 
     private fun etterbetaling(

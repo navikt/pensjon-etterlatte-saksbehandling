@@ -204,6 +204,7 @@ internal class BehandlingInfoDaoTest(
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
             frivilligSkattetrekk = true,
+            harEtterbetaling = false,
         )
 
     private fun etterbetaling(behandlingId: UUID) =

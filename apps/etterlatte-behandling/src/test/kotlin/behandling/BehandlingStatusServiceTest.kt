@@ -441,5 +441,6 @@ internal class BehandlingStatusServiceTest {
         feilutbetaling = Feilutbetaling(feilutbetalingValg, "kommentar"),
         kilde = Grunnlagsopplysning.Saksbehandler("123456", Tidspunkt.now()),
         frivilligSkattetrekk = true,
+        harEtterbetaling = false,
     )
 }

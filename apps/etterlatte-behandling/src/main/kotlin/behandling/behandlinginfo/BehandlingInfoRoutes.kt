@@ -32,7 +32,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
             post {
                 kunSkrivetilgang {
                     medBody<BrevutfallOgInfo> { request ->
-                        val brevutfallOgEtterbetaling =
+                        val brevutfall =
                             inTransaction {
                                 logger.info("Lagrer brevutfall for behandling $behandlingId")
 
@@ -47,7 +47,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                                         ).toDto(),
                                 )
                             }
-                        call.respond(brevutfallOgEtterbetaling)
+                        call.respond(brevutfall)
                     }
                 }
             }
@@ -89,7 +89,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
 
         get("/brevutfall") {
             logger.info("Henter brevutfall for behandling $behandlingId")
-            val brevutfallOgEtterbetaling =
+            val brevutfall =
                 inTransaction {
                     val brevutfall = service.hentBrevutfall(behandlingId)
                     if (brevutfall != null) {
@@ -101,9 +101,9 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                         null
                     }
                 }
-            when (brevutfallOgEtterbetaling) {
+            when (brevutfall) {
                 null -> call.respond(HttpStatusCode.NoContent)
-                else -> call.respond(brevutfallOgEtterbetaling)
+                else -> call.respond(brevutfall)
             }
         }
 

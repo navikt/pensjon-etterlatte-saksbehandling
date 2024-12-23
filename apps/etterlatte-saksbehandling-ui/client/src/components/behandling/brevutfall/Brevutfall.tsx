@@ -17,12 +17,14 @@ import { SkalSendeBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export interface BrevutfallOgEtterbetaling {
+  behandlingId: string
   opphoer?: boolean | null
   etterbetaling?: Etterbetaling | null
   brevutfall: Brevutfall
 }
 
 export interface Brevutfall {
+  behandlingId: string
   aldersgruppe?: Aldersgruppe | null
   feilutbetaling?: Feilutbetaling | null
   frivilligSkattetrekk?: boolean | null
@@ -59,17 +61,22 @@ export interface Etterbetaling {
   etterbetalingPeriodeValg: EtterbetalingPeriodeValg | null
 }
 
-const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
+const initialBrevutfallOgEtterbetaling = (saktype: SakType, behandlingId: string) => {
   switch (saktype) {
     case SakType.BARNEPENSJON:
       return {
+        behandlingId: behandlingId,
         brevutfall: {
           aldersgruppe: Aldersgruppe.IKKE_VALGT,
+          behandlingId: behandlingId,
         },
       }
     case SakType.OMSTILLINGSSTOENAD:
       return {
-        brevutfall: {},
+        behandlingId: behandlingId,
+        brevutfall: {
+          behandlingId: behandlingId,
+        },
       }
   }
 }
@@ -85,7 +92,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
     innloggetSaksbehandler.skriveEnheter
   )
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
-    initialBrevutfallOgEtterbetaling(behandling.sakType)
+    initialBrevutfallOgEtterbetaling(behandling.sakType, behandling.id)
   )
   const [hentBrevutfallOgEtterbetalingResult, hentBrevutfallOgEtterbetalingRequest] = useApiCall(
     hentBrevutfallOgEtterbetalingApi
@@ -99,7 +106,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
         dispatch(updateBrevutfallOgEtterbetaling(brevutfall))
         setVisSkjema(false)
       } else {
-        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling(behandling.sakType))
+        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling(behandling.sakType, behandling.id))
         if (redigerbar) setVisSkjema(true)
       }
     })

@@ -87,8 +87,10 @@ export const BrevutfallSkjema = ({
     lagreBrevutfallReset()
 
     const brevutfall: BrevutfallOgEtterbetaling = {
+      behandlingId: behandling.id,
       opphoer: behandlingErOpphoer,
       brevutfall: {
+        behandlingId: behandling.id,
         aldersgruppe: data.aldersgruppe,
         feilutbetaling: data.feilutbetalingValg
           ? { valg: data.feilutbetalingValg, kommentar: data.feilutbetalingKommentar }

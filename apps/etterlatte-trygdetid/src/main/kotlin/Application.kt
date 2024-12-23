@@ -25,7 +25,7 @@ class Server(
                 httpPort = properties.httpPort,
                 applicationConfig = context.config,
             ) {
-                trygdetid(trygdetidService, behandlingKlient)
+                trygdetid(trygdetidService, behandlingKlient, featureToggleService)
                 avtale(avtaleService, behandlingKlient)
             }
         }

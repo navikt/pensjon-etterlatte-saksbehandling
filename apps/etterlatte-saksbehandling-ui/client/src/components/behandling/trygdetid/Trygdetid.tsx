@@ -108,7 +108,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     })
   }
 
-  const hentTrygdetidFraPesys = () => {
+  const oppdaterTrygdetidMedPesysData = () => {
     hentPesysTT(behandling.id, (trygdetider: ITrygdetid[]) => {
       oppdaterTrygdetider(trygdetider)
     })
@@ -123,7 +123,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     fetchAlleLand(null, (landListe: ILand[]) => {
       setLandListe(sorterLand(landListe))
     })
-    sjekkOmAvdoedHarTTIPesysHent(behandling.id)
+    if (kanHenteTrygdetidFraPesys) {
+      sjekkOmAvdoedHarTTIPesysHent(behandling.id)
+    }
   }, [])
 
   if (harPilotTrygdetid) {
@@ -173,7 +175,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                           <BodyShort>
                             Her kan du hente trygdetid registrert i avdødes uføretrygd eller alderspensjon.
                           </BodyShort>
-                          <Button onClick={hentTrygdetidFraPesys} loading={isPending(hentTTPesysStatus)}>
+                          <Button onClick={oppdaterTrygdetidMedPesysData} loading={isPending(hentTTPesysStatus)}>
                             Hent
                           </Button>
                         </Box>

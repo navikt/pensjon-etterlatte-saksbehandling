@@ -50,7 +50,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const kanHenteTrygdetidFraPesys = useFeaturetoggle(FeatureToggle.trygdetid_fra_pesys)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
-  const [hentTTPesysStatus, hentPesysTT] = useApiCall(hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon)
+  const [hentTTPesysStatus, hentOgOppdaterDataFraPesys] = useApiCall(
+    hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon
+  )
   const [sjekkOmAvodedHarTTIPesysStatus, sjekkOmAvdoedHarTTIPesysHent] = useApiCall(
     sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys
   )
@@ -109,7 +111,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   }
 
   const oppdaterTrygdetidMedPesysData = () => {
-    hentPesysTT(behandling.id, (trygdetider: ITrygdetid[]) => {
+    hentOgOppdaterDataFraPesys(behandling.id, (trygdetider: ITrygdetid[]) => {
       oppdaterTrygdetider(trygdetider)
     })
   }

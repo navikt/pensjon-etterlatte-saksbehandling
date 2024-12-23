@@ -12,6 +12,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -54,9 +56,19 @@ private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
 
 private val logger: Logger = LoggerFactory.getLogger("TrygdetidRoutes")
 
+enum class TrygdetidToggles(
+    val value: String,
+) : FeatureToggle {
+    TRYGDETID_FRA_PESYS("trygdetid-fra-pesys"),
+    ;
+
+    override fun key(): String = this.value
+}
+
 fun Route.trygdetid(
     trygdetidService: TrygdetidService,
     behandlingKlient: BehandlingKlient,
+    featureToggleService: FeatureToggleService,
 ) {
     route("/api/trygdetid_v2") {
         route("/{$BEHANDLINGID_CALL_PARAMETER}") {
@@ -99,13 +111,21 @@ fun Route.trygdetid(
                 }
                 get("/sjekk-pesys-trygdetidsgrunnlag") {
                     withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                        logger.info("Sjekker om avdød for behandling $behandlingId har trygdetidsgrunnlag i Pesys for AP og Uføre")
-                        val harTrygdetidsgrunnlagIPesys =
-                            trygdetidService.harTrygdetidsgrunnlagIPesysForApOgUfoere(
-                                behandlingId,
-                                brukerTokenInfo,
+                        if (featureToggleService.isEnabled(
+                                TrygdetidToggles.TRYGDETID_FRA_PESYS,
+                                defaultValue = false,
                             )
-                        call.respond(harTrygdetidsgrunnlagIPesys)
+                        ) {
+                            logger.info("Sjekker om avdød for behandling $behandlingId har trygdetidsgrunnlag i Pesys for AP og Uføre")
+                            val harTrygdetidsgrunnlagIPesys =
+                                trygdetidService.harTrygdetidsgrunnlagIPesysForApOgUfoere(
+                                    behandlingId,
+                                    brukerTokenInfo,
+                                )
+                            call.respond(harTrygdetidsgrunnlagIPesys)
+                        } else {
+                            call.respond(HttpStatusCode.Forbidden)
+                        }
                     }
                 }
             }

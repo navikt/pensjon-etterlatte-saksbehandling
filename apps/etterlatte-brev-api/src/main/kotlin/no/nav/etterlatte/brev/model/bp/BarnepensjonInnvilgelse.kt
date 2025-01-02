@@ -7,8 +7,6 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
-import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
-import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManglerFrivilligSkattetrekk
@@ -25,7 +23,6 @@ import java.time.LocalDate
 data class BarnepensjonInnvilgelse(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
-    val etterbetaling: BarnepensjonEtterbetaling?,
     val frivilligSkattetrekk: Boolean,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
@@ -34,6 +31,7 @@ data class BarnepensjonInnvilgelse(
     val harUtbetaling: Boolean,
     val erMigrertYrkesskade: Boolean,
     val erSluttbehandling: Boolean,
+    val erEtterbetaling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -64,7 +62,6 @@ data class BarnepensjonInnvilgelse(
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 erGjenoppretting = erGjenoppretting,
                 erMigrertYrkesskade = erMigrertYrkesskade,
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
                 frivilligSkattetrekk = frivilligSkattetrekk,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =
@@ -72,6 +69,7 @@ data class BarnepensjonInnvilgelse(
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
                 erSluttbehandling = erSluttbehandling,
+                erEtterbetaling = etterbetaling != null,
             )
         }
     }

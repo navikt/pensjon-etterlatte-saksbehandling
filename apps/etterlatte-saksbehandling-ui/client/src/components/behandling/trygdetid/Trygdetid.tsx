@@ -13,7 +13,7 @@ import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { isFailure, isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isFailure, isPending, mapApiResultEgenInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
@@ -162,8 +162,9 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         {kanHenteTrygdetidFraPesys && (
           <>
-            {mapApiResult(
+            {mapApiResultEgenInitial(
               sjekkOmAvodedHarTTIPesysStatus,
+              null,
               <Spinner label="Sjekker om avdøed har trygdetidsgrunnlag i Pesys" />,
               () => (
                 <Alert variant="warning">Kunne ikke sjekke trygdetidsgrunnag i Pesys</Alert>

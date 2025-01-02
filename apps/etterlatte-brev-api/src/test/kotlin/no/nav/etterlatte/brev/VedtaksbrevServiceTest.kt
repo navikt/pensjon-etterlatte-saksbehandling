@@ -19,7 +19,6 @@ import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Innsender
@@ -165,7 +164,7 @@ internal class VedtaksbrevServiceTest {
                 LocalDate.now(),
                 false,
                 listOf(
-                    Beregningsperiode(
+                    beregningsperiode(
                         LocalDate.now(),
                         LocalDate.now().plusYears(4),
                         Kroner(120000),

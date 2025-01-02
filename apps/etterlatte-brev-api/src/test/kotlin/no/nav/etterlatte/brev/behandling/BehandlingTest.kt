@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.beregningsperiode
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -475,7 +476,7 @@ internal class BehandlingTest {
         fom: LocalDate,
         tom: LocalDate? = null,
         beloep: Int,
-    ) = Beregningsperiode(
+    ) = beregningsperiode(
         fom,
         tom,
         Kroner(101011),

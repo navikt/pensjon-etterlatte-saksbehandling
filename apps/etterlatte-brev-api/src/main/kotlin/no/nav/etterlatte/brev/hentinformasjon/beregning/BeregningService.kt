@@ -94,6 +94,7 @@ class BeregningService(
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
                     beregningsMetodeFraGrunnlag = finnBeregningsmetodeIGrunnlag(beregningsGrunnlag, it),
                     avdoedeForeldre = it.avdoedeForeldre,
+                    harForeldreloessats = it.harForeldreloessats,
                 )
             }
 

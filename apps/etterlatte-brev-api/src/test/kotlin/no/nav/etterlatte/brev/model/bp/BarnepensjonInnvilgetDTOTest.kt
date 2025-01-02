@@ -189,6 +189,7 @@ internal class BarnepensjonInnvilgetDTOTest {
         beregningsMetodeFraGrunnlag = BeregningsMetode.BEST,
         trygdetidForIdent = "123",
         avdoedeForeldre = if (datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) null else listOf("123"),
+        harForeldreloessats = false,
     )
 
     private fun lagInnholdMedVedlegg() =

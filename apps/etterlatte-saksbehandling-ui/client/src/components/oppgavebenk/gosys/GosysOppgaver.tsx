@@ -11,6 +11,10 @@ import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils
 import { GosysOppgave } from '~shared/types/Gosys'
 import { GosysOppgaverTable } from './GosysOppgaverTable'
 import { AlertIngenOppgaver } from '~components/oppgavebenk/utils/oppgaveFelles'
+import { OppdatertOppgaveversjonResponseDto } from '~shared/api/gosys'
+import { OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
+import { sorterOppgaverEtterOpprettetGosys } from '~components/oppgavebenk/GosysOppgaveliste'
 
 export interface Props {
   oppgaver: GosysOppgave[]
@@ -23,11 +27,28 @@ export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Pro
 
   const filtrerteOppgaver = fnrFilter ? oppgaver.filter(({ bruker }) => bruker?.ident === fnrFilter.trim()) : oppgaver
   const sorterteOppgaver = sorterGosysOppgaver(filtrerteOppgaver, sortering)
+  const dispatcher = useOppgavebenkStateDispatcher()
 
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(hentPagineringSizeFraLocalStorage())
 
   let paginerteOppgaver = sorterteOppgaver
+
+  const oppdaterOppgaveTildeling = (
+    oppgaveId: number,
+    versjonDto: OppdatertOppgaveversjonResponseDto,
+    saksbehandler?: OppgaveSaksbehandler
+  ) => {
+    const index = oppgaver.findIndex((o) => o.id === oppgaveId)
+    if (index > -1) {
+      const oppdatertOppgaveState = [...oppgaver]
+      oppdatertOppgaveState[index].saksbehandler = saksbehandler
+      oppdatertOppgaveState[index].versjon = versjonDto.versjon
+      dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettetGosys(oppdatertOppgaveState))
+    } else {
+      // NO-OP
+    }
+  }
 
   useEffect(() => {
     if (paginerteOppgaver.length === 0 && oppgaver.length > 0) setPage(1)
@@ -49,6 +70,7 @@ export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Pro
         oppgaver={paginerteOppgaver}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         setSortering={setSortering}
+        oppdaterOppgaveTildeling={oppdaterOppgaveTildeling}
       />
 
       <PagineringsKontroller

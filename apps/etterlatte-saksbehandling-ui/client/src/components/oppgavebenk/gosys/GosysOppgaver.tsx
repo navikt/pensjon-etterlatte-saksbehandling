@@ -45,8 +45,6 @@ export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Pro
       oppdatertOppgaveState[index].saksbehandler = saksbehandler
       oppdatertOppgaveState[index].versjon = versjonDto.versjon
       dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettetGosys(oppdatertOppgaveState))
-    } else {
-      // NO-OP
     }
   }
 

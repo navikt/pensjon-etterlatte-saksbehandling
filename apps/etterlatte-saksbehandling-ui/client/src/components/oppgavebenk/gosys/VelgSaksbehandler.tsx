@@ -9,12 +9,12 @@ import { isPending } from '~shared/api/apiUtils'
 import { OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { GosysOppgave } from '~shared/types/Gosys'
-import { tildelSaksbehandlerApi } from '~shared/api/gosys'
+import { OppdatertOppgaveversjonResponseDto, tildelSaksbehandlerApi } from '~shared/api/gosys'
 
 interface Props {
   oppgave: GosysOppgave
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppdaterTildeling: (saksbehandler?: OppgaveSaksbehandler) => void
+  oppdaterTildeling: (versjon: OppdatertOppgaveversjonResponseDto, saksbehandler?: OppgaveSaksbehandler) => void
 }
 
 export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTildeling }: Props): ReactNode => {
@@ -27,24 +27,24 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
   const [valgtSaksbehandler, setValgtSaksbehandler] = useState<OppgaveSaksbehandler | undefined>(saksbehandler)
   const [tildelResult, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
-  const onSaksbehandlerSelect = (saksbehandlerNavn: string, erValgt: boolean) => {
+  const vedValgtSaksbehandler = (saksbehandlerNavn: string, erValgt: boolean) => {
     if (erValgt) {
       const selectedSaksbehandler: Saksbehandler | undefined = saksbehandlereIEnhet.find(
         (behandler) => behandler.navn === saksbehandlerNavn
       )
 
       if (selectedSaksbehandler) {
-        tildel(selectedSaksbehandler)
+        tildelOppgave(selectedSaksbehandler)
       }
     }
   }
 
-  const tildel = (saksbehandler?: OppgaveSaksbehandler) => {
+  const tildelOppgave = (saksbehandler?: OppgaveSaksbehandler) => {
     tildelSaksbehandler(
       { oppgaveId, nysaksbehandler: { saksbehandler: saksbehandler?.ident || '', versjon } },
-      () => {
+      (oppgaveVersjon) => {
         setValgtSaksbehandler(saksbehandler)
-        oppdaterTildeling(saksbehandler)
+        oppdaterTildeling(oppgaveVersjon, saksbehandler)
         setOpenDropdown(false)
       },
       (error) => {
@@ -75,7 +75,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
               <VelgSaksbehandlerCombobox
                 label="Velg saksbehandler"
                 options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
-                onToggleSelected={onSaksbehandlerSelect}
+                onToggleSelected={vedValgtSaksbehandler}
                 selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
                 isLoading={isPending(tildelResult)}
               />
@@ -83,7 +83,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
                 <ValgButton
                   variant="tertiary"
                   size="xsmall"
-                  onClick={() => tildel(innloggetSaksbehandler)}
+                  onClick={() => tildelOppgave(innloggetSaksbehandler)}
                   loading={isPending(tildelResult)}
                 >
                   Tildel til meg
@@ -95,7 +95,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
                 <ValgButton
                   variant="secondary"
                   size="small"
-                  onClick={() => tildel(undefined)}
+                  onClick={() => tildelOppgave(undefined)}
                   icon={<PersonCrossIcon aria-hidden />}
                   iconPosition="right"
                   loading={isPending(tildelResult)}

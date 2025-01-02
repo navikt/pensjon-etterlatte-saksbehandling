@@ -5,7 +5,7 @@ license = { id = 'com.github.jk1.dependency-license-report', version = '2.9' }
 
 [versions]
 jackson-version = "2.18.2"
-jupiter-version = "5.11.3"
+jupiter-version = "5.11.4"
 ktor2-version = "2.3.13"
 navfelles-token-version = "5.0.13"
 prometheus-version = "0.16.0"
@@ -16,8 +16,8 @@ tjenestespesifikasjoner-version = "1.1436e29"
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.0.0" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.0.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "11.1.0" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "11.1.0" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.4" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -31,7 +31,7 @@ kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version 
 
 klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.6.10" }
 
-kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.0.0" }
+kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "2.0.1" }
 
 pdf-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.3" }
 
@@ -61,7 +61,7 @@ etterlatte-common = { module = "pensjon-etterlatte-felles:common", version = "20
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.16" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.12" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.5.15" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.0" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.14.2" }
@@ -85,7 +85,7 @@ test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.9.1" }
-test-mockk = { module = "io.mockk:mockk", version = "1.13.13" }
+test-mockk = { module = "io.mockk:mockk", version = "1.13.14" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-testcontainer-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainer-version" }

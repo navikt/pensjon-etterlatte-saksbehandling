@@ -8,6 +8,8 @@ import {
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { GosysOppgave } from '~shared/types/Gosys'
 import { GosysOppgaveRow } from '~components/oppgavebenk/gosys/GosysOppgaveRow'
+import { OppdatertOppgaveversjonResponseDto } from '~shared/api/gosys'
+import { OppgaveSaksbehandler } from '~shared/types/oppgave'
 
 export enum SortKey {
   REGISTRERINGSDATO = 'registreringsdato',
@@ -19,9 +21,19 @@ interface Props {
   oppgaver: ReadonlyArray<GosysOppgave>
   saksbehandlereIEnhet: Array<Saksbehandler>
   setSortering: (nySortering: OppgaveSortering) => void
+  oppdaterOppgaveTildeling: (
+    oppgaveId: number,
+    versjonDto: OppdatertOppgaveversjonResponseDto,
+    saksbehandler?: OppgaveSaksbehandler
+  ) => void
 }
 
-export const GosysOppgaverTable = ({ oppgaver, saksbehandlereIEnhet, setSortering }: Props): ReactNode => {
+export const GosysOppgaverTable = ({
+  oppgaver,
+  saksbehandlereIEnhet,
+  setSortering,
+  oppdaterOppgaveTildeling,
+}: Props): ReactNode => {
   const [sort, setSort] = useState<SortState>()
 
   const handleSort = (sortKey: SortKey) => {
@@ -92,7 +104,12 @@ export const GosysOppgaverTable = ({ oppgaver, saksbehandlereIEnhet, setSorterin
       </Table.Header>
       <Table.Body>
         {oppgaver?.map((oppgave: GosysOppgave) => (
-          <GosysOppgaveRow key={oppgave.id} oppgave={oppgave} saksbehandlereIEnhet={saksbehandlereIEnhet} />
+          <GosysOppgaveRow
+            key={oppgave.id}
+            oppgave={oppgave}
+            saksbehandlereIEnhet={saksbehandlereIEnhet}
+            oppdaterOppgaveTildeling={oppdaterOppgaveTildeling}
+          />
         ))}
       </Table.Body>
     </Table>

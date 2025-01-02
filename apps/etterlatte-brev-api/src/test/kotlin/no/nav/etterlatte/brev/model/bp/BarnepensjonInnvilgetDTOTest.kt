@@ -13,7 +13,6 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -58,9 +57,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                     EtterbetalingDTO(
                         datoFom = LocalDate.of(2022, Month.JANUARY, 1),
                         datoTom = LocalDate.of(2022, Month.MARCH, 31),
-                        inneholderKrav = true,
                         frivilligSkattetrekk = true,
-                        etterbetalingPeriodeValg = EtterbetalingPeriodeValg.FRA_3_MND,
                     ),
                 trygdetid =
                     listOf(

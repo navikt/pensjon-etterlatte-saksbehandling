@@ -5,9 +5,7 @@ import java.time.LocalDate
 object Etterbetaling {
     fun fraBarnepensjonDTO(dto: EtterbetalingDTO) =
         BarnepensjonEtterbetaling(
-            inneholderKrav = dto.inneholderKrav,
             frivilligSkattetrekk = dto.frivilligSkattetrekk,
-            etterbetalingPeriodeValg = dto.etterbetalingPeriodeValg,
         )
 
     fun fraOmstillingsstoenadBeregningsperioder(

@@ -40,7 +40,7 @@ export const GosysOppgaveRow = (props: {
             setOppgave({
               ...oppgave,
               saksbehandler,
-              versjon: oppgaveVersjonResponse.versjon ?? oppgave.versjon,
+              versjon: oppgaveVersjonResponse.versjon,
             })
           }
         />

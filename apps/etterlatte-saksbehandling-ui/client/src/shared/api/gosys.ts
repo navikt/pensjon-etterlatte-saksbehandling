@@ -39,10 +39,10 @@ export const ferdigstilleGosysOppgave = async (args: {
   apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/ferdigstill?versjon=${args.versjon}`, {})
 
 export interface OppdatertOppgaveversjonResponseDto {
-  versjon: number | null
+  versjon: number
 }
 
 export interface SaksbehandlerEndringDto {
   saksbehandler: string
-  versjon: number | null
+  versjon: number
 }

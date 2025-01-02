@@ -13,6 +13,7 @@ export const GosysOppgaveRow = (props: {
   saksbehandlereIEnhet: Array<Saksbehandler>
   skjulBruker?: boolean
 }) => {
+  //TODO: for at dette skal bli riktig så må man faktisk oppdatere oppgavelista helt og ikke bare en lokal shallow kopi
   const [oppgave, setOppgave] = useState(props.oppgave)
 
   return (

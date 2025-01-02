@@ -37,6 +37,7 @@ data class BarnepensjonRevurdering(
     val harUtbetaling: Boolean,
     val feilutbetaling: FeilutbetalingType,
     val erMigrertYrkesskade: Boolean,
+    val erEtterbetaling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -93,6 +94,7 @@ data class BarnepensjonRevurdering(
                                 BarnepensjonInnvilgelse.tidspunktNyttRegelverk,
                             )
                     },
+                erEtterbetaling = etterbetaling != null,
             )
         }
     }

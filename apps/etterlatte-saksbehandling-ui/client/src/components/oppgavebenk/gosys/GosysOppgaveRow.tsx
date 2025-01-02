@@ -35,7 +35,7 @@ export const GosysOppgaveRow = (props: {
         <VelgSaksbehandler
           saksbehandlereIEnhet={props.saksbehandlereIEnhet}
           oppgave={oppgave}
-          oppdaterTildeling={(saksbehandler) => setOppgave({ ...oppgave, saksbehandler })}
+          oppdaterTildeling={(saksbehandler) => setOppgave({ ...oppgave, saksbehandler, versjon: oppgave.versjon + 1 })}
         />
       </Table.DataCell>
       <Table.DataCell>

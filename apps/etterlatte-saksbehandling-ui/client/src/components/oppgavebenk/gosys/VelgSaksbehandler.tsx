@@ -27,19 +27,19 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
   const [valgtSaksbehandler, setValgtSaksbehandler] = useState<OppgaveSaksbehandler | undefined>(saksbehandler)
   const [tildelResult, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
-  const onSaksbehandlerSelect = (saksbehandlerNavn: string, erValgt: boolean) => {
+  const vedValgtSaksbehandler = (saksbehandlerNavn: string, erValgt: boolean) => {
     if (erValgt) {
       const selectedSaksbehandler: Saksbehandler | undefined = saksbehandlereIEnhet.find(
         (behandler) => behandler.navn === saksbehandlerNavn
       )
 
       if (selectedSaksbehandler) {
-        tildel(selectedSaksbehandler)
+        tildelOppgave(selectedSaksbehandler)
       }
     }
   }
 
-  const tildel = (saksbehandler?: OppgaveSaksbehandler) => {
+  const tildelOppgave = (saksbehandler?: OppgaveSaksbehandler) => {
     tildelSaksbehandler(
       { oppgaveId, nysaksbehandler: { saksbehandler: saksbehandler?.ident || '', versjon } },
       () => {
@@ -75,7 +75,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
               <VelgSaksbehandlerCombobox
                 label="Velg saksbehandler"
                 options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
-                onToggleSelected={onSaksbehandlerSelect}
+                onToggleSelected={vedValgtSaksbehandler}
                 selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
                 isLoading={isPending(tildelResult)}
               />
@@ -83,7 +83,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
                 <ValgButton
                   variant="tertiary"
                   size="xsmall"
-                  onClick={() => tildel(innloggetSaksbehandler)}
+                  onClick={() => tildelOppgave(innloggetSaksbehandler)}
                   loading={isPending(tildelResult)}
                 >
                   Tildel til meg
@@ -95,7 +95,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
                 <ValgButton
                   variant="secondary"
                   size="small"
-                  onClick={() => tildel(undefined)}
+                  onClick={() => tildelOppgave(undefined)}
                   icon={<PersonCrossIcon aria-hidden />}
                   iconPosition="right"
                   loading={isPending(tildelResult)}

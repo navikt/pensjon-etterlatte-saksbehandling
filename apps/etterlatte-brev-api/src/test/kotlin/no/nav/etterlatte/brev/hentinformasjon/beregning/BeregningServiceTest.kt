@@ -95,6 +95,7 @@ class BeregningServiceTest {
         samletNorskTrygdetid = 10,
         samletTeoretiskTrygdetid = 20,
         broek = null,
+        harForeldreloessats = false,
     )
 
     private fun opprettBeregningSoeskenjustering() =

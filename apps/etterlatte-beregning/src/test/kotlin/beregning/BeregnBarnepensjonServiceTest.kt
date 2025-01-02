@@ -634,6 +634,7 @@ internal class BeregnBarnepensjonServiceTest {
                 datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe GRUNNBELOEP_MAI_23
                 kunEnJuridiskForelder shouldBe false
+                harForeldreloessats shouldBe false
             }
         }
     }

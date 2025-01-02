@@ -1,11 +1,12 @@
 import { useKlage } from '~components/klage/useKlage'
 import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { formaterVedtakType } from '~utils/formatering/formatering'
-import { formaterKanskjeStringDato } from '~utils/formatering/dato'
+import { formaterDatoMedKlokkeslett, formaterKanskjeStringDato } from '~utils/formatering/dato'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
 import { useNavigate } from 'react-router-dom'
 import { nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import { TekstMedBeholdtWhitespace } from '~shared/TekstMedBeholdtWhitespace'
 
 export function KlageFormkravVisning() {
   const klage = useKlage()
@@ -57,12 +58,17 @@ export function KlageFormkravVisning() {
         <Heading size="small" spacing>
           Totalvurdering
         </Heading>
-        <BodyShort spacing>{formkrav?.begrunnelse}</BodyShort>
+        <TekstMedBeholdtWhitespace spacing>{formkrav?.begrunnelse}</TekstMedBeholdtWhitespace>
 
         <Heading size="small" spacing>
           Saksbehandler
         </Heading>
-        <BodyShort spacing>{saksbehandler?.ident}</BodyShort>
+        <BodyShort spacing>
+          {saksbehandler?.ident} -{' '}
+          {saksbehandler?.tidspunkt
+            ? formaterDatoMedKlokkeslett(saksbehandler.tidspunkt)
+            : 'Mangler tidspunkt for vurdering'}
+        </BodyShort>
       </Box>
       <HStack justify="center">
         <Button onClick={() => navigate(nesteSteg(klage, 'formkrav'))}>Neste side</Button>

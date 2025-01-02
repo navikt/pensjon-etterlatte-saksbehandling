@@ -9,12 +9,12 @@ import { isPending } from '~shared/api/apiUtils'
 import { OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { GosysOppgave } from '~shared/types/Gosys'
-import { tildelSaksbehandlerApi } from '~shared/api/gosys'
+import { OppdatertOppgaveversjonResponseDto, tildelSaksbehandlerApi } from '~shared/api/gosys'
 
 interface Props {
   oppgave: GosysOppgave
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppdaterTildeling: (saksbehandler?: OppgaveSaksbehandler) => void
+  oppdaterTildeling: (versjon: OppdatertOppgaveversjonResponseDto, saksbehandler?: OppgaveSaksbehandler) => void
 }
 
 export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTildeling }: Props): ReactNode => {
@@ -42,9 +42,9 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppgave, oppdaterTilde
   const tildelOppgave = (saksbehandler?: OppgaveSaksbehandler) => {
     tildelSaksbehandler(
       { oppgaveId, nysaksbehandler: { saksbehandler: saksbehandler?.ident || '', versjon } },
-      () => {
+      (oppgaveVersjon) => {
         setValgtSaksbehandler(saksbehandler)
-        oppdaterTildeling(saksbehandler)
+        oppdaterTildeling(oppgaveVersjon, saksbehandler)
         setOpenDropdown(false)
       },
       (error) => {

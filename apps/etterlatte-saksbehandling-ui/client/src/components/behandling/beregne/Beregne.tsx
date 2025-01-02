@@ -29,7 +29,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
           case SakType.BARNEPENSJON:
             return <BeregneBP behandling={behandling} />
           case SakType.OMSTILLINGSSTOENAD:
-            return <BeregneOMS behandling={behandling} />
+            return <BeregneOMS />
         }
       })()}
     </>

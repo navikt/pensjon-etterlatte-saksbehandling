@@ -5,12 +5,12 @@ import { useAppDispatch, useAppSelector } from '~store/Store'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
 import React, { useContext, useEffect, useState } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
-import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
+import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
@@ -25,18 +25,24 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
+import { useBehandling } from '~components/behandling/useBehandling'
 
-export const BeregneOMS = (props: { behandling: IBehandlingReducer }) => {
-  const { behandling } = props
+export const BeregneOMS = () => {
+  const behandling = useBehandling()
+  if (behandling == null) {
+    // TODO bedre feilhåndtering?
+    return
+  }
   const { next } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtakStatus, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
-  const virkningstidspunkt = behandling.virkningstidspunkt?.dato
-    ? formaterDato(behandling.virkningstidspunkt.dato)
-    : undefined
+  //const virkningstidspunkt = behandling.virkningstidspunkt?.dato ? formaterDato(behandling.virkningstidspunkt.dato) : undefined
+
+  //const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting) as IAvkorting
+
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const vedtaksresultat = useVedtaksResultat()
@@ -55,8 +61,6 @@ export const BeregneOMS = (props: { behandling: IBehandlingReducer }) => {
   const [manglerBrevutfall, setManglerbrevutfall] = useState(false)
   const [manglerAvkorting, setManglerAvkorting] = useState(false)
 
-  const skalHaInntektNesteAar = useFeaturetoggle(FeatureToggle.validere_aarsintnekt_neste_aar)
-
   const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   useEffect(() => {
@@ -64,6 +68,21 @@ export const BeregneOMS = (props: { behandling: IBehandlingReducer }) => {
       hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
     }
   }, [])
+
+  const virkAar = new Date(virkningstidspunkt(behandling).dato).getFullYear()
+
+  const skalHaInntektNesteAar = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && virkAar === 2024 // TODO Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
+  //  && (behandling.viderefoertOpphoer == null || new Date(behandling.viderefoertOpphoer.dato) > new Date('2025-01-01')) TODO Fjerner midlertidig
+
+  const erAvkortet = () =>
+    !(
+      [
+        IBehandlingStatus.OPPRETTET,
+        IBehandlingStatus.VILKAARSVURDERT,
+        IBehandlingStatus.TRYGDETID_OPPDATERT,
+        IBehandlingStatus.BEREGNET,
+      ] as IBehandlingStatus[]
+    ).includes(behandling.status)
 
   const opprettEllerOppdaterVedtak = () => {
     const skalSendeBrev = behandling.sendeBrev
@@ -80,19 +99,13 @@ export const BeregneOMS = (props: { behandling: IBehandlingReducer }) => {
     }
     setManglerbrevutfall(false)
 
-    // TODO er denne nødvendig?
     oppdaterVedtakRequest(behandling.id, () => {
-      oppdaterStatus(skalSendeBrev)
+      if (skalSendeBrev) {
+        next()
+      } else {
+        setVisAttesteringsmodal(true)
+      }
     })
-  }
-
-  const oppdaterStatus = (skalSendeBrev: boolean) => {
-    dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
-    if (skalSendeBrev) {
-      next()
-    } else {
-      setVisAttesteringsmodal(true)
-    }
   }
 
   return (
@@ -101,7 +114,10 @@ export const BeregneOMS = (props: { behandling: IBehandlingReducer }) => {
         <Heading spacing size="large" level="1">
           Beregning og vedtak
         </Heading>
-        <Vedtaksresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
+        <Vedtaksresultat
+          vedtaksresultat={vedtaksresultat}
+          virkningstidspunktFormatert={formaterDato(virkningstidspunkt(behandling).dato)}
+        />
       </Box>
       {erOpphoer ? (
         <Box paddingInline="18" paddingBlock="4">
@@ -121,10 +137,14 @@ export const BeregneOMS = (props: { behandling: IBehandlingReducer }) => {
                   <OmstillingsstoenadSammendrag beregning={beregning} />
                   <Avkorting
                     behandling={behandling}
-                    resetBrevutfallvalidering={() => setManglerbrevutfall(false)} // TODO trekk ut brevutfall hit..
                     resetInntektsavkortingValidering={() => setManglerAvkorting(false)}
+                    skalHaInntektNesteAar={skalHaInntektNesteAar}
                   />
                 </>
+                {erAvkortet() && <SimulerUtbetaling behandling={behandling} />}
+                {erAvkortet() && (
+                  <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+                )}
                 {manglerBrevutfall && (
                   <Alert style={{ maxWidth: '16em' }} variant="error">
                     Du må fylle ut utfall i brev

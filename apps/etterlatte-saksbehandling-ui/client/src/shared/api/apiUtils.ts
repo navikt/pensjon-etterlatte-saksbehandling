@@ -1,5 +1,5 @@
 import { ApiError } from '~shared/api/apiClient'
-import { ReactElement, ReactNode } from 'react'
+import { ReactElement } from 'react'
 
 export type Result<T> = Initial | Pending | Error<ApiError> | Success<T>
 type Initial = { status: 'initial' }
@@ -48,21 +48,7 @@ export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T
 
 export const mapResult = <T, R>(result: Result<T>, mappers: Mappers<T, R>) => mapResultFallback(result, mappers, null)
 
-export const mapApiResultEgenInitial = <T>(
-  result: Result<T>,
-  mapInitial: ReactNode,
-  mapPending: ReactElement,
-  mapError: (_: ApiError) => ReactElement | null,
-  mapSuccess: (_: T) => ReactElement
-): ReactNode | null => {
-  return mapResult(result, {
-    initial: mapInitial,
-    pending: mapPending,
-    error: (error) => (error.status === 502 ? null : mapError(error)),
-    success: mapSuccess,
-  })
-}
-
+//TODO: ikke bruk, burde slettes og skrives om til mapResult over
 export const mapApiResult = <T>(
   result: Result<T>,
   mapInitialOrPending: ReactElement,

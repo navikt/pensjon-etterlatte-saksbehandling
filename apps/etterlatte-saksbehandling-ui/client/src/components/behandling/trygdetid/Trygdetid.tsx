@@ -93,7 +93,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         if (behandlingErIverksatt(behandling.status)) {
           setHarPilotTrygdetid(true)
         } else if (redigerbar) {
-          requestOpprettTrygdetid(behandling.id, (trygdetider: ITrygdetid[]) => {
+          requestOpprettTrygdetid({ behandlingId: behandling.id, overskriv: false }, (trygdetider: ITrygdetid[]) => {
             oppdaterTrygdetider(trygdetider)
           })
         } else if (vedtaksresultat === 'avslag') {

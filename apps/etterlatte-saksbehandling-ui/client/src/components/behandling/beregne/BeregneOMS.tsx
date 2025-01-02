@@ -31,17 +31,14 @@ import { useBehandling } from '~components/behandling/useBehandling'
 export const BeregneOMS = () => {
   const behandling = useBehandling()
   if (behandling == null) {
-    // TODO bedre feilhåndtering?
     return
   }
+
   const { next } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtakStatus, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
-  //const virkningstidspunkt = behandling.virkningstidspunkt?.dato ? formaterDato(behandling.virkningstidspunkt.dato) : undefined
-
-  //const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting) as IAvkorting
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
@@ -69,10 +66,18 @@ export const BeregneOMS = () => {
     }
   }, [])
 
-  const virkAar = new Date(virkningstidspunkt(behandling).dato).getFullYear()
-
-  const skalHaInntektNesteAar = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && virkAar === 2024 // TODO Midlertidig til vi får en bedre løsning på hele avkorting frontend....EY-4632
-  //  && (behandling.viderefoertOpphoer == null || new Date(behandling.viderefoertOpphoer.dato) > new Date('2025-01-01')) TODO Fjerner midlertidig
+  const skalHaInntektNesteAar = () => {
+    const virk = new Date(virkningstidspunkt(behandling).dato)
+    const virkOktoberEllerSenere = virk.getMonth() > 8
+    const opphoerSammeAarSomVirk =
+      behandling.viderefoertOpphoer != null &&
+      new Date(behandling.viderefoertOpphoer.dato).getFullYear() === virk.getFullYear()
+    return (
+      behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+      virkOktoberEllerSenere &&
+      !opphoerSammeAarSomVirk
+    )
+  }
 
   const erAvkortet = () =>
     !(
@@ -138,7 +143,7 @@ export const BeregneOMS = () => {
                   <Avkorting
                     behandling={behandling}
                     resetInntektsavkortingValidering={() => setManglerAvkorting(false)}
-                    skalHaInntektNesteAar={skalHaInntektNesteAar}
+                    skalHaInntektNesteAar={skalHaInntektNesteAar()}
                   />
                 </>
                 {erAvkortet() && <SimulerUtbetaling behandling={behandling} />}
@@ -152,7 +157,7 @@ export const BeregneOMS = () => {
                 )}
                 {manglerAvkorting && (
                   <Alert style={{ maxWidth: '16em' }} variant="error">
-                    {skalHaInntektNesteAar
+                    {skalHaInntektNesteAar()
                       ? 'Du må legge til inntektsavkorting for inneværende og neste år, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'
                       : 'Du må legge til inntektsavkorting, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'}
                   </Alert>

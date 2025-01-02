@@ -3,7 +3,6 @@ package no.nav.etterlatte.avkorting
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -41,7 +40,6 @@ class AvkortingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vedtakKlient: VedtaksvurderingKlient,
     private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -215,19 +213,27 @@ class AvkortingService(
         return lagretAvkorting
     }
 
+    /*
+    I tilfeller der det behøves inntekt for året etter virkningsitdspunkt oppdateres status kun hvis to inntekter er lagt til.
+    Dette gjelder førstegangsbehandlinger med virk fra og med oktober uten oppphør i samme år.
+     */
     private suspend fun settBehandlingStatusAvkortet(
         brukerTokenInfo: BrukerTokenInfo,
         behandling: DetaljertBehandling,
         behandlingType: BehandlingType,
         lagretAvkorting: Avkorting,
     ) {
-        val virkningsAar = behandling.virkningstidspunkt().dato.year
-        // TODO skal forenkles.. EY-4632
-        if (behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING &&
-            virkningsAar == 2024 &&
-            (behandling.opphoerFraOgMed == null || behandling.opphoerFraOgMed!! > YearMonth.of(2025, 1)) &&
-            featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, defaultValue = false)
-        ) {
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val virkFraOgMedOktober = virkningstidspunkt.month.value > 9
+        val ikkeOpphoerSammeAar =
+            !(behandling.opphoerFraOgMed != null && behandling.opphoerFraOgMed!!.year == virkningstidspunkt.year)
+
+        val skalHaInntektNesteAar =
+            behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING &&
+                virkFraOgMedOktober &&
+                ikkeOpphoerSammeAar
+
+        if (skalHaInntektNesteAar) {
             if (lagretAvkorting.aarsoppgjoer.size == 2) {
                 behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
             }

@@ -13,7 +13,9 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.VedtakTilJournalfoering
+import no.nav.etterlatte.brev.brevId
 import no.nav.etterlatte.brev.model.GenererOgFerdigstillVedtaksbrev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
@@ -81,7 +83,10 @@ fun Route.vedtaksbrevRoute(
 
         get("vedtak/pdf") {
             withBehandlingId(tilgangssjekker) {
-                val brevId = requireNotNull(call.parameters["brevId"]).toLong()
+                val brevId =
+                    krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                        "Kan ikke generere PDF uten brevId"
+                    }
 
                 logger.info("Genererer PDF for vedtaksbrev (id=$brevId)")
 

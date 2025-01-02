@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -168,7 +169,7 @@ internal fun Route.sakSystemRoutes(
     post("personer/saker/{type}") {
         withFoedselsnummerInternal(tilgangService) { fnr ->
             val type: SakType =
-                enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
+                enumValueOf(krevIkkeNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
             val message = inTransaction { sakService.finnEllerOpprettSakMedGrunnlag(fnr = fnr.value, type) }
             requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/saker")
             call.respond(message)
@@ -178,7 +179,7 @@ internal fun Route.sakSystemRoutes(
     post("personer/getsak/{type}") {
         withFoedselsnummerInternal(tilgangService) { fnr ->
             val type: SakType =
-                enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
+                enumValueOf(krevIkkeNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
 
             requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/getsak/{type}")
 
@@ -378,7 +379,7 @@ internal fun Route.sakWebRoutes(
                     val opprettHvisIkkeFinnes = call.request.queryParameters["opprettHvisIkkeFinnes"].toBoolean()
 
                     val type: SakType =
-                        requireNotNull(call.parameters["type"]) {
+                        krevIkkeNull(call.parameters["type"]) {
                             "Mangler påkrevd parameter {type} for å hente sak på bruker"
                         }.let { enumValueOf(it) }
 

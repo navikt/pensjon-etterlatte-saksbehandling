@@ -21,6 +21,7 @@ import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -124,8 +125,14 @@ class JournalfoerBrevService(
         mottaker: Mottaker,
         sak: Sak,
     ): JournalpostRequest {
-        val innhold = requireNotNull(db.hentBrevInnhold(brevId))
-        val pdf = requireNotNull(db.hentPdf(brevId))
+        val innhold =
+            krevIkkeNull(db.hentBrevInnhold(brevId)) {
+                "Brevet mangler innhold – dette er mest sannsynlig en systemfeil"
+            }
+        val pdf =
+            krevIkkeNull(db.hentPdf(brevId)) {
+                "Brevet mangler PDF – dette er mest sannsynlig en systemfeil"
+            }
 
         val tittel =
             when (mottaker.type) {

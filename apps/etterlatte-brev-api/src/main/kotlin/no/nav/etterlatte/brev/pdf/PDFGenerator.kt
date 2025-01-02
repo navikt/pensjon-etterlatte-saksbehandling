@@ -24,6 +24,7 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.vedtaksbrev.UgyldigMottakerKanIkkeFerdigstilles
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -76,10 +77,10 @@ class PDFGenerator(
 
         if (!brev.kanEndres()) {
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke pdf for brev med id=${brev.id}" }
+            return krevIkkeNull(db.hentPdf(brev.id)) { "Fant ikke pdf for brev med id=${brev.id}" }
         } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
             logger.info("Brev er en opplastet PDF – returnerer lagret innhold")
-            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke pdf for brev med id=${brev.id}" }
+            return krevIkkeNull(db.hentPdf(brev.id)) { "Fant ikke pdf for brev med id=${brev.id}" }
         }
 
         val behandlingId = brev.behandlingId?.takeIf { brev.brevtype.erKobletTilEnBehandling() }
@@ -169,12 +170,12 @@ class PDFGenerator(
     }
 
     private fun hentLagretInnhold(brev: Brev) =
-        requireNotNull(
+        krevIkkeNull(
             db.hentBrevPayload(brev.id),
         ) { "Fant ikke payload for brev ${brev.id}" }.elements
 
     private fun hentLagretInnholdVedlegg(brev: Brev) =
-        requireNotNull(db.hentBrevPayloadVedlegg(brev.id)) {
+        krevIkkeNull(db.hentBrevPayloadVedlegg(brev.id)) {
             "Fant ikke payloadvedlegg for brev ${brev.id}"
         }
 

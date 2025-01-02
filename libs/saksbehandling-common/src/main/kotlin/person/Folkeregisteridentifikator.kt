@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.person
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -25,7 +26,9 @@ class Folkeregisteridentifikator private constructor(
             if (fnr.isNullOrEmpty()) {
                 throw InvalidFoedselsnummerException("Fødselsnummer er tomt")
             } else {
-                return requireNotNull(ofNullable(fnr))
+                return krevIkkeNull(ofNullable(fnr)) {
+                    "Fødselsnummer mangler"
+                }
             }
         }
 

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -29,6 +30,6 @@ data class DetaljertBehandling(
 )
 
 fun DetaljertBehandling.virkningstidspunkt() =
-    requireNotNull(virkningstidspunkt) {
+    krevIkkeNull(virkningstidspunkt) {
         "Mangler virkningstidspunkt for behandling=$id"
     }

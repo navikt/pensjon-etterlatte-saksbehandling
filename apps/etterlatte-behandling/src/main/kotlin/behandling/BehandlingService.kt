@@ -47,6 +47,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -443,7 +444,9 @@ internal class BehandlingServiceImpl(
         overstyr: Boolean,
     ): Boolean {
         val behandling =
-            requireNotNull(hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            krevIkkeNull(hentBehandling(behandlingId)) {
+                "Fant ikke behandling $behandlingId"
+            }
 
         if (request.dato.year !in (0..9999) || request.begrunnelse == null) {
             return false

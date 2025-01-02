@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -523,8 +524,16 @@ class TilbakekrevingService(
                 enhet = vedtak.enhet,
                 dato = vedtak.dato,
             ),
-        aarsak = requireNotNull(tilbakekreving.tilbakekreving.vurdering?.aarsak),
-        hjemmel = hjemmelFraVurdering(requireNotNull(tilbakekreving.tilbakekreving.vurdering)),
+        aarsak =
+            krevIkkeNull(tilbakekreving.tilbakekreving.vurdering?.aarsak) {
+                "Årsak for tilbakekreving mangler"
+            },
+        hjemmel =
+            hjemmelFraVurdering(
+                krevIkkeNull(tilbakekreving.tilbakekreving.vurdering) {
+                    "Kan ikke opprette hjemmel uten vurdering"
+                },
+            ),
         kravgrunnlagId =
             tilbakekreving.tilbakekreving.kravgrunnlag.kravgrunnlagId.value
                 .toString(),
@@ -536,7 +545,9 @@ class TilbakekrevingService(
         if (vurdering.vilkaarsresultat == TilbakekrevingVilkaar.IKKE_OPPFYLT) {
             TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD
         } else {
-            requireNotNull(vurdering.rettsligGrunnlag)
+            krevIkkeNull(vurdering.rettsligGrunnlag) {
+                "Rettslig grunnlag mangler"
+            }
         }
 
     private fun tilbakekrevingForStatistikk(tilbakekreving: TilbakekrevingBehandling): StatistikkTilbakekrevingDto {

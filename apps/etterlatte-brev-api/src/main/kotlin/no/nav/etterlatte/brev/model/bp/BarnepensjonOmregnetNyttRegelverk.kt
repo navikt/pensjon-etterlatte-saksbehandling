@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -74,6 +75,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
             etterbetaling: EtterbetalingDTO?,
             utlandstilknytning: UtlandstilknytningType?,
             avdoede: List<Avdoed>,
+            brevutfall: BrevutfallDto?,
         ): BarnepensjonOmregnetNyttRegelverk {
             val erUnder18AarNonNull =
                 requireNotNull(erUnder18Aar) {
@@ -94,7 +96,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         beregningsperioder,
                         trygdetid,
                     ),
-                frivilligSkattetrekk = etterbetaling?.frivilligSkattetrekk ?: false,
+                frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
                 erBosattUtlandet =
                     (
                         requireNotNull(utlandstilknytning)

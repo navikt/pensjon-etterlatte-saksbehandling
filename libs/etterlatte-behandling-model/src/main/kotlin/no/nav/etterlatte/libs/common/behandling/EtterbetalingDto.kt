@@ -8,6 +8,5 @@ data class EtterbetalingDto(
     val behandlingId: UUID?,
     val datoFom: LocalDate?,
     val datoTom: LocalDate?,
-    val frivilligSkattetrekk: Boolean?,
     val kilde: Grunnlagsopplysning.Kilde?,
 )

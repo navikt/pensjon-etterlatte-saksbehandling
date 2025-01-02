@@ -57,7 +57,6 @@ internal class BarnepensjonInnvilgetDTOTest {
                     EtterbetalingDTO(
                         datoFom = LocalDate.of(2022, Month.JANUARY, 1),
                         datoTom = LocalDate.of(2022, Month.MARCH, 31),
-                        frivilligSkattetrekk = true,
                     ),
                 trygdetid =
                     listOf(

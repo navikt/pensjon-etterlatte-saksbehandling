@@ -10,7 +10,6 @@ data class Etterbetaling(
     val behandlingId: UUID,
     val fom: YearMonth,
     val tom: YearMonth,
-    val frivilligSkattetrekk: Boolean?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
 ) {
     init {
@@ -27,7 +26,6 @@ data class Etterbetaling(
             behandlingId: UUID,
             datoFom: LocalDate?,
             datoTom: LocalDate?,
-            frivilligSkattetrekk: Boolean?,
             kilde: Grunnlagsopplysning.Saksbehandler,
         ): Etterbetaling {
             if (datoFom == null || datoTom == null) {
@@ -37,7 +35,6 @@ data class Etterbetaling(
                 behandlingId = behandlingId,
                 fom = YearMonth.from(datoFom),
                 tom = YearMonth.from(datoTom),
-                frivilligSkattetrekk = frivilligSkattetrekk,
                 kilde = kilde,
             )
         }

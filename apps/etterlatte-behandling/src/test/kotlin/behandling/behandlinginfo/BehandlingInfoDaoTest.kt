@@ -210,7 +210,6 @@ internal class BehandlingInfoDaoTest(
             behandlingId = behandlingId,
             fom = YearMonth.of(2023, 11),
             tom = YearMonth.of(2023, 12),
-            frivilligSkattetrekk = true,
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
         )
 

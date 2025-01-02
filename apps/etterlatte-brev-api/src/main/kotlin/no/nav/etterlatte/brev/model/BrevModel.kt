@@ -110,5 +110,4 @@ data class OpprettNyttBrev(
 data class EtterbetalingDTO(
     val datoFom: LocalDate,
     val datoTom: LocalDate,
-    val frivilligSkattetrekk: Boolean?,
 )

@@ -268,7 +268,6 @@ internal class BehandlingInfoServiceTest {
         behandlingId = behandlingId,
         fom = fom,
         tom = tom,
-        frivilligSkattetrekk = true,
         kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
     )
 }

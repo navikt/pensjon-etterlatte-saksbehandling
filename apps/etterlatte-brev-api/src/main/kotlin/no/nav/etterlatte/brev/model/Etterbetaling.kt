@@ -3,11 +3,6 @@ package no.nav.etterlatte.brev.model
 import java.time.LocalDate
 
 object Etterbetaling {
-    fun fraBarnepensjonDTO(dto: EtterbetalingDTO) =
-        BarnepensjonEtterbetaling(
-            frivilligSkattetrekk = dto.frivilligSkattetrekk,
-        )
-
     fun fraOmstillingsstoenadBeregningsperioder(
         dto: EtterbetalingDTO,
         perioder: List<OmstillingsstoenadBeregningsperiode>,

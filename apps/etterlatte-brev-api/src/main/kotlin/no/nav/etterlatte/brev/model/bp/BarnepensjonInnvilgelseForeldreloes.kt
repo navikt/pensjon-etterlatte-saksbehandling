@@ -9,7 +9,6 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.ForskjelligAvdoedPeriode
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.ManglerFrivilligSkattetrekk
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -53,9 +52,6 @@ data class BarnepensjonInnvilgelseForeldreloes(
         ): BarnepensjonInnvilgelseForeldreloes {
             val beregningsperioder =
                 barnepensjonBeregningsperioder(utbetalingsinfo)
-            val frivilligSkattetrekk =
-                brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
-                    ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
 
             return BarnepensjonInnvilgelseForeldreloes(
                 innhold = innhold.innhold(),
@@ -73,7 +69,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 erGjenoppretting = erGjenoppretting,
                 erMigrertYrkesskade = erMigrertYrkesskade,
-                frivilligSkattetrekk = frivilligSkattetrekk,
+                frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
                 harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {

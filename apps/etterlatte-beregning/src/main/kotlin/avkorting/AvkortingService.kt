@@ -218,6 +218,9 @@ class AvkortingService(
         }
     }
 
+    /*
+     OBS! Samme logikk benyttes i frontend (BeregneOMS.tsx skalHaInntektNesteAar ())
+     */
     private fun skalHaInntektInnevaerendeOgNesteAar(behandling: DetaljertBehandling): Boolean {
         if (behandling.behandlingType != BehandlingType.FØRSTEGANGSBEHANDLING) {
             return false

@@ -66,6 +66,9 @@ export const BeregneOMS = () => {
     }
   }, [])
 
+  /*
+   OBS! Samme logikk benyttes i bakcend (AvkortingService.kt skalHaInntektInnevaerendeOgNesteAar())
+  */
   const skalHaInntektNesteAar = () => {
     if (behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING) {
       return false

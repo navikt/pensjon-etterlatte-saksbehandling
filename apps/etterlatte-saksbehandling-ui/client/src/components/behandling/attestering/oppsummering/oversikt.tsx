@@ -26,6 +26,7 @@ export const Oversikt = ({
 }) => {
   const attestering = behandlingsInfo.attestertLogg?.slice(-1)[0]
   const kommentarFraAttestant = attestering?.kommentar
+
   const oppgave = useSelectorOppgaveUnderBehandling()
 
   const [saksbehandlerNavn, hentNavnForIdent] = useApiCall(hentNavnforIdent)

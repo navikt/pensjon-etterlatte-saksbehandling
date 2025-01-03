@@ -536,6 +536,9 @@ internal class ApplicationContext(
             krrKlient = krrKlient,
         )
 
+    val saksbehandlerService: SaksbehandlerService =
+        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
+
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(
             behandlingDao,
@@ -544,6 +547,7 @@ internal class ApplicationContext(
             oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,
+            saksbehandlerService,
         )
 
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)
@@ -564,8 +568,7 @@ internal class ApplicationContext(
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
-    val saksbehandlerService: SaksbehandlerService =
-        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
+
     val gosysOppgaveService =
         GosysOppgaveServiceImpl(
             gosysOppgaveKlient,

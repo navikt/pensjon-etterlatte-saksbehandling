@@ -9,6 +9,7 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
+import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.common.Enheter
@@ -16,6 +17,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -24,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -43,6 +46,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -62,30 +66,33 @@ internal class BehandlingStatusServiceTest {
     private val behandlingInfoDao = mockk<BehandlingInfoDao>(relaxUnitFun = true)
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val generellBehandlingService = mockk<GenerellBehandlingService>()
-    private val behandlingdao = mockk<BehandlingDao>(relaxUnitFun = true)
+    private val behandlingDao = mockk<BehandlingDao>(relaxUnitFun = true)
+    private val saksbehandlerService: SaksbehandlerService = mockk()
 
     private val brukerTokenInfo = simpleSaksbehandler("Z123456")
 
     private val sut =
         BehandlingStatusServiceImpl(
-            behandlingdao,
+            behandlingDao,
             behandlingService,
             behandlingInfoDao,
             oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,
+            saksbehandlerService,
         )
 
     @BeforeEach
     fun before() {
         val user = mockk<SaksbehandlerMedEnheterOgRoller>().also { every { it.name() } returns this::class.java.simpleName }
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Roald Amundsen"
         nyKontekstMedBruker(user)
     }
 
     @AfterEach
     fun after() {
         confirmVerified(
-            behandlingdao,
+            behandlingDao,
             behandlingService,
             oppgaveService,
             behandlingInfoDao,
@@ -93,6 +100,48 @@ internal class BehandlingStatusServiceTest {
             generellBehandlingService,
         )
         clearAllMocks()
+    }
+
+    @Test
+    fun `Revurdering av type inntektsendring som er automatisk skal flyttes til manuell prosess hvis underkjent attestering`() {
+        val revurdering =
+            AutomatiskRevurdering(
+                id = UUID.randomUUID(),
+                sak = mockk(),
+                behandlingOpprettet = LocalDateTime.now(),
+                status = BehandlingStatus.FATTET_VEDTAK,
+                kommerBarnetTilgode = null,
+                virkningstidspunkt = null,
+                boddEllerArbeidetUtlandet = null,
+                soeknadMottattDato = null,
+                revurderingsaarsak = Revurderingaarsak.INNTEKTSENDRING,
+                revurderingInfo = null,
+                kilde = Vedtaksloesning.GJENNY,
+                begrunnelse = "",
+                relatertBehandlingId = null,
+                opphoerFraOgMed = null,
+                tidligereFamiliepleier = null,
+                sendeBrev = true,
+                sistEndret = LocalDateTime.now(),
+                utlandstilknytning = null,
+            )
+        val vedtaksendring =
+            VedtakEndringDTO(
+                sakIdOgReferanse = SakIdOgReferanse(SakId(123L), ""),
+                vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), null, null, null),
+                vedtakType = VedtakType.ENDRING,
+            )
+
+        every { behandlingDao.lagreStatus(any()) } just runs
+        every { behandlingService.registrerVedtakHendelse(any(), any(), any()) } just runs
+        every { oppgaveService.tilUnderkjent(any(), any(), any()) } returns mockk()
+        every { behandlingService.endreProsesstype(any(), any()) } just runs
+        sut.settReturnertVedtak(revurdering, vedtaksendring, brukerTokenInfo)
+
+        verify { behandlingService.endreProsesstype(revurdering.id, Prosesstype.MANUELL) }
+        verify { behandlingDao.lagreStatus(any()) }
+        verify { behandlingService.registrerVedtakHendelse(any(), any(), any()) }
+        verify { oppgaveService.tilUnderkjent(any(), any(), any()) }
     }
 
     @ParameterizedTest
@@ -141,7 +190,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(any())
+            behandlingDao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.FATTET)
             oppgaveService.tilAttestering(
                 behandlingId.toString(),
@@ -166,7 +215,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(any())
+            behandlingDao.lagreStatus(any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
@@ -186,11 +235,11 @@ internal class BehandlingStatusServiceTest {
         every { oppgaveService.tilUnderkjent(any(), any(), any()) } returns mockk()
 
         inTransaction {
-            sut.settReturnertVedtak(behandling, vedtakEndringDto)
+            sut.settReturnertVedtak(behandling, vedtakEndringDto, brukerTokenInfo)
         }
 
         verify {
-            behandlingdao.lagreStatus(any())
+            behandlingDao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.UNDERKJENT)
             oppgaveService.tilUnderkjent(behandlingId.toString(), OppgaveType.FOERSTEGANGSBEHANDLING, any())
         }
@@ -231,7 +280,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(any())
+            behandlingDao.lagreStatus(any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksattVedtak, HendelseType.IVERKSATT)
             generellBehandlingService.opprettBehandling(any(), any())
@@ -276,7 +325,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(any())
+            behandlingDao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.ATTESTERT)
             generellBehandlingService.opprettBehandling(any(), any())
             oppgaveService.ferdigStillOppgaveUnderBehandling(
@@ -318,7 +367,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(any())
+            behandlingDao.lagreStatus(any())
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.ATTESTERT)
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 behandlingId.toString(),
@@ -358,7 +407,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(any())
+            behandlingDao.lagreStatus(any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
@@ -401,7 +450,7 @@ internal class BehandlingStatusServiceTest {
         }
 
         verify {
-            behandlingdao.lagreStatus(any())
+            behandlingDao.lagreStatus(any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)

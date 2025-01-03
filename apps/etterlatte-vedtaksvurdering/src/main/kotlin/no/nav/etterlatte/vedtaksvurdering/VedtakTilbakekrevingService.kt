@@ -1,30 +1,23 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.plugins.NotFoundException
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class VedtakTilbakekrevingService(
     private val repository: VedtaksvurderingRepository,
-    private val rapidService: VedtaksvurderingRapidService,
-    private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun opprettEllerOppdaterVedtak(tilbakekrevingVedtakData: TilbakekrevingVedtakDto): Long {
+    fun opprettEllerOppdaterVedtak(tilbakekrevingVedtakData: TilbakekrevingVedtakDto): Vedtak {
         logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=${tilbakekrevingVedtakData.tilbakekrevingId}")
         val eksisterendeVedtak = repository.hentVedtak(tilbakekrevingVedtakData.tilbakekrevingId)
         val vedtak =
@@ -53,13 +46,13 @@ class VedtakTilbakekrevingService(
                     ),
                 )
             }
-        return vedtak.id
+        return vedtak
     }
 
     fun fattVedtak(
         tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
+    ): Vedtak {
         logger.info("Fatter vedtak for tilbakekreving=${tilbakekrevingVedtakData.tilbakekrevingId}")
         verifiserGyldigVedtakStatus(tilbakekrevingVedtakData.tilbakekrevingId, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         return repository
@@ -71,13 +64,13 @@ class VedtakTilbakekrevingService(
                     // Blir ikke brukt fordi egen now() brukes i db..
                     tidspunkt = Tidspunkt.now(),
                 ),
-            ).id
+            )
     }
 
     fun attesterVedtak(
         tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto,
         brukerTokenInfo: BrukerTokenInfo,
-    ): TilbakekrevingVedtakLagretDto {
+    ): Vedtak {
         logger.info("Attesterer vedtak for tilbakekreving=${tilbakekrevingVedtakData.tilbakekrevingId}")
         val tilbakekrevingId = tilbakekrevingVedtakData.tilbakekrevingId
         val vedtak =
@@ -86,6 +79,9 @@ class VedtakTilbakekrevingService(
             }
         verifiserGyldigVedtakStatus(tilbakekrevingId, listOf(VedtakStatus.FATTET_VEDTAK))
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
+
+        // Behandling sender ut hendelse om attestert vedtak selv for å unngå at brev blir sendt selv om
+        // tilbakekrevingsvedtak feiler.
 
         return repository.inTransaction { tx ->
             val attestertVedtak =
@@ -100,40 +96,14 @@ class VedtakTilbakekrevingService(
                     tx,
                 )
 
-            val skalSendeBrev =
-                runBlocking {
-                    behandlingKlient.hentTilbakekrevingBehandling(tilbakekrevingId, brukerTokenInfo).sendeBrev
-                }
-
-            rapidService.sendToRapid(
-                VedtakOgRapid(
-                    attestertVedtak.toDto(),
-                    RapidInfo(
-                        vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
-                        vedtak = attestertVedtak.toDto(),
-                        tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
-                        behandlingId = attestertVedtak.behandlingId,
-                        extraParams =
-                            mapOf(SKAL_SENDE_BREV to skalSendeBrev),
-                    ),
-                ),
-            )
-
-            requireNotNull(attestertVedtak.vedtakFattet).let {
-                TilbakekrevingVedtakLagretDto(
-                    id = attestertVedtak.id,
-                    fattetAv = it.ansvarligSaksbehandler,
-                    enhet = it.ansvarligEnhet,
-                    dato = it.tidspunkt.toLocalDate(),
-                )
-            }
+            attestertVedtak
         }
     }
 
-    fun underkjennVedtak(tilbakekrevingId: UUID): Long {
+    fun underkjennVedtak(tilbakekrevingId: UUID): Vedtak {
         logger.info("Underkjenner vedtak for tilbakekreving=$tilbakekrevingId")
         verifiserGyldigVedtakStatus(tilbakekrevingId, listOf(VedtakStatus.FATTET_VEDTAK))
-        return repository.underkjennVedtak(tilbakekrevingId).id
+        return repository.underkjennVedtak(tilbakekrevingId)
     }
 
     private fun verifiserGyldigVedtakStatus(

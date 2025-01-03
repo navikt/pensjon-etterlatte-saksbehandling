@@ -1,9 +1,8 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
-import io.kotest.matchers.maps.shouldContain
 import io.kotest.matchers.shouldBe
-import io.mockk.coEvery
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -12,18 +11,14 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.temporal.ChronoUnit
@@ -31,9 +26,7 @@ import java.util.UUID
 
 class VedtakTilbakekrevingServiceTest {
     private val repo = mockk<VedtaksvurderingRepository>()
-    private val rapid = mockk<VedtaksvurderingRapidService>()
-    private val behandlingKlient = mockk<BehandlingKlient>()
-    private val service = VedtakTilbakekrevingService(repo, rapid, behandlingKlient)
+    private val service = VedtakTilbakekrevingService(repo)
 
     @Test
     fun `opprettEllerOppdaterVedtak oppretter hvis ikke finnes fra foer`() {
@@ -49,7 +42,9 @@ class VedtakTilbakekrevingServiceTest {
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns null
         every { repo.opprettVedtak(any()) } returns vedtak()
 
-        service.opprettEllerOppdaterVedtak(dto) shouldBe 1L
+        val vedtak = service.opprettEllerOppdaterVedtak(dto)
+
+        vedtak shouldNotBe null
 
         verify { repo.hentVedtak(dto.tilbakekrevingId) }
         verify {
@@ -82,7 +77,7 @@ class VedtakTilbakekrevingServiceTest {
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns eksisterende
         every { repo.oppdaterVedtak(any()) } returns eksisterende
 
-        service.opprettEllerOppdaterVedtak(dto) shouldBe 1L
+        service.opprettEllerOppdaterVedtak(dto).id shouldBe 1L
 
         verify { repo.hentVedtak(dto.tilbakekrevingId) }
         verify {
@@ -124,7 +119,9 @@ class VedtakTilbakekrevingServiceTest {
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak()
         every { repo.fattVedtak(any(), any()) } returns vedtak()
 
-        service.fattVedtak(dto, saksbehandler) shouldBe 1L
+        val vedtak = service.fattVedtak(dto, saksbehandler)
+
+        vedtak shouldNotBe null
 
         verify { repo.hentVedtak(dto.tilbakekrevingId) }
         verify {
@@ -172,11 +169,6 @@ class VedtakTilbakekrevingServiceTest {
                     ),
             )
 
-        coEvery { behandlingKlient.hentTilbakekrevingBehandling(attesterDto.tilbakekrevingId, any()) } returns
-            mockk {
-                every { sendeBrev } returns true
-            }
-
         val attestertVedtak =
             vedtakTilbakekreving(
                 behandlingId = attesterDto.tilbakekrevingId,
@@ -193,21 +185,20 @@ class VedtakTilbakekrevingServiceTest {
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
-        every { repo.inTransaction<TilbakekrevingVedtakLagretDto>(any()) } answers
+        every { repo.inTransaction<Vedtak>(any()) } answers
             {
-                val block = firstArg<VedtaksvurderingRepository.(TransactionalSession) -> TilbakekrevingVedtakLagretDto>()
+                val block = firstArg<VedtaksvurderingRepository.(TransactionalSession) -> Vedtak>()
                 repo.block(mockk())
             }
         every { repo.attesterVedtak(any(), any(), any()) } returns attestertVedtak
-        every { rapid.sendToRapid(any()) } returns Unit
 
-        val vedtakDto = service.attesterVedtak(attesterDto, saksbehandler)
+        val vedtak = service.attesterVedtak(attesterDto, saksbehandler)
 
-        with(vedtakDto) {
+        with(vedtak) {
             id shouldBe 1L
-            fattetAv shouldBe "saksbehandler"
-            enhet shouldBe Enheter.STEINKJER.enhetNr
-            dato shouldBe attestertVedtak.vedtakFattet!!.tidspunkt.toLocalDate()
+            vedtakFattet?.ansvarligSaksbehandler shouldBe "saksbehandler"
+            vedtakFattet?.ansvarligEnhet shouldBe Enheter.STEINKJER.enhetNr
+            vedtakFattet?.tidspunkt?.toLocalDate() shouldBe attestertVedtak.vedtakFattet!!.tidspunkt.toLocalDate()
         }
         verify { repo.hentVedtak(attesterDto.tilbakekrevingId) }
         verify {
@@ -218,21 +209,6 @@ class VedtakTilbakekrevingServiceTest {
                     it.attesterendeEnhet shouldBe attesterDto.enhet
                 },
                 any(),
-            )
-        }
-        verify {
-            val returDto = attestertVedtak.toDto()
-            rapid.sendToRapid(
-                withArg {
-                    it.vedtak shouldBe returDto
-                    with(it.rapidInfo1) {
-                        vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.ATTESTERT
-                        vedtak shouldBe returDto
-                        behandlingId shouldBe attesterDto.tilbakekrevingId
-                        extraParams.size shouldBe 1
-                        extraParams shouldContain Pair(SKAL_SENDE_BREV, true)
-                    }
-                },
             )
         }
     }
@@ -282,7 +258,9 @@ class VedtakTilbakekrevingServiceTest {
         every { repo.hentVedtak(tilbakekrevingId) } returns vedtak(status = VedtakStatus.FATTET_VEDTAK)
         every { repo.underkjennVedtak(tilbakekrevingId) } returns vedtak()
 
-        service.underkjennVedtak(tilbakekrevingId) shouldBe 1L
+        val vedtak = service.underkjennVedtak(tilbakekrevingId)
+
+        vedtak shouldNotBe null
 
         verify { repo.hentVedtak(tilbakekrevingId) }
         verify { repo.underkjennVedtak(tilbakekrevingId) }

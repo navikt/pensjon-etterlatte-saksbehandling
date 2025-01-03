@@ -89,8 +89,6 @@ class ApplicationContext {
     val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),
-            rapidService = vedtaksvurderingRapidService,
-            behandlingKlient = behandlingKlient,
         )
     val vedtakKlageService =
         VedtakKlageService(

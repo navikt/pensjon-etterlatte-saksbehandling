@@ -310,27 +310,27 @@ fun Route.tilbakekrevingvedtakRoute(
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingVedtakDto>()
                 logger.info("Oppretter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.opprettEllerOppdaterVedtak(dto))
+                call.respond(service.opprettEllerOppdaterVedtak(dto).toDto())
             }
         }
         post("/fatt-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.fattVedtak(dto, brukerTokenInfo))
+                call.respond(service.fattVedtak(dto, brukerTokenInfo).toDto())
             }
         }
         post("/attester-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.attesterVedtak(dto, brukerTokenInfo))
+                call.respond(service.attesterVedtak(dto, brukerTokenInfo).toDto())
             }
         }
         post("/underkjenn-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
-                call.respond(service.underkjennVedtak(behandlingId))
+                call.respond(service.underkjennVedtak(behandlingId).toDto())
             }
         }
     }

@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -30,24 +29,24 @@ interface VedtakKlient {
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long
+    ): VedtakDto
 
     suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long
+    ): VedtakDto
 
     suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): TilbakekrevingVedtakLagretDto
+    ): VedtakDto
 
     suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long
+    ): VedtakDto
 
     suspend fun lagreVedtakKlage(
         klage: Klage,
@@ -97,7 +96,7 @@ class VedtakKlientImpl(
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long {
+    ): VedtakDto {
         try {
             logger.info(
                 "Sender tilbakekreving som det skal lagre vedtak for tilbakekreving=${tilbakekrevingBehandling.id} til vedtak",
@@ -134,7 +133,7 @@ class VedtakKlientImpl(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long {
+    ): VedtakDto {
         try {
             logger.info("Sender tilbakekreving som skal fatte vedtak for tilbakekreving=$tilbakekrevingId til vedtak")
             return downstreamResourceClient
@@ -166,7 +165,7 @@ class VedtakKlientImpl(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): TilbakekrevingVedtakLagretDto {
+    ): VedtakDto {
         try {
             logger.info("Sender attesteringsinfo for tilbakekreving=$tilbakekrevingId til vedtak")
             return downstreamResourceClient
@@ -197,7 +196,7 @@ class VedtakKlientImpl(
     override suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
+    ): VedtakDto {
         try {
             logger.info("Ber om underkjennelse for tilbakekreving=$tilbakekrevingId til vedtak")
             return downstreamResourceClient

@@ -6,7 +6,7 @@ export const hentTrygdetider = async (behandlingId: string): Promise<ApiResponse
 
 export const opprettTrygdetider = async (args: {
   behandlingId: string
-  overskriv?: boolean
+  overskriv: boolean
 }): Promise<ApiResponse<ITrygdetid[]>> =>
   apiClient.post(`/trygdetid_v2/${args.behandlingId}?overskriv=${args.overskriv}`, {})
 

@@ -216,7 +216,7 @@ class TrygdetidServiceImpl(
                 if (overskriv) {
                     trygdetider
                         .forEach { trygdetid -> trygdetidRepository.slettTrygdetid(trygdetid.id) }
-                        .let { emptyList() }
+                    emptyList()
                 } else {
                     trygdetider
                 }

@@ -67,16 +67,27 @@ export const BeregneOMS = () => {
   }, [])
 
   const skalHaInntektNesteAar = () => {
+    if (behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING) {
+      return false
+    }
     const virk = new Date(virkningstidspunkt(behandling).dato)
+
     const virkOktoberEllerSenere = virk.getMonth() > 8
-    const opphoerSammeAarSomVirk =
-      behandling.viderefoertOpphoer != null &&
-      new Date(behandling.viderefoertOpphoer.dato).getFullYear() === virk.getFullYear()
-    return (
-      behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-      virkOktoberEllerSenere &&
-      !opphoerSammeAarSomVirk
-    )
+    if (!virkOktoberEllerSenere) {
+      return false
+    }
+
+    if (behandling.viderefoertOpphoer == null) {
+      return true
+    }
+    const opphoerDato = new Date(behandling.viderefoertOpphoer.dato)
+
+    const opphoerSammeAarSomVirk = opphoerDato.getFullYear() === virk.getFullYear()
+    if (opphoerSammeAarSomVirk) {
+      return true
+    }
+    const januarEtterVirkAar = opphoerDato.getFullYear() + 1 === virk.getFullYear() && opphoerDato.getMonth() === 0
+    return januarEtterVirkAar
   }
 
   const erAvkortet = () =>

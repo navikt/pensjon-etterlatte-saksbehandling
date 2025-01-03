@@ -2,7 +2,6 @@ package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -20,17 +19,9 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
-
-enum class AvkortingToggles(
-    val value: String,
-) : FeatureToggle {
-    VALIDERE_AARSINNTEKT_NESTE_AAR("validere_aarsintnekt_neste_aar"),
-    ;
-
-    override fun key(): String = this.value
-}
 
 class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
@@ -59,7 +50,6 @@ class AvkortingService(
                             behandling,
                             eksisterendeAvkorting,
                             brukerTokenInfo,
-                            BehandlingType.FØRSTEGANGSBEHANDLING,
                         )
                     avkortingMedTillegg(reberegnetAvkorting, behandling)
                 } else {
@@ -80,7 +70,6 @@ class AvkortingService(
                     behandling,
                     eksisterendeAvkorting,
                     brukerTokenInfo,
-                    BehandlingType.REVURDERING,
                 )
             avkortingMedTillegg(reberegnetAvkorting, behandling, forrigeAvkorting)
         } else {
@@ -161,7 +150,7 @@ class AvkortingService(
                 )
             }
 
-        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, behandling.behandlingType, lagretAvkorting)
+        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)
         return avkortingFrontend
     }
 
@@ -193,7 +182,6 @@ class AvkortingService(
             behandling,
             kopiertAvkorting,
             brukerTokenInfo,
-            behandling.behandlingType,
         )
     }
 
@@ -201,7 +189,6 @@ class AvkortingService(
         behandling: DetaljertBehandling,
         avkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
-        behandlingType: BehandlingType,
     ): Avkorting {
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
@@ -209,7 +196,7 @@ class AvkortingService(
         val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning, sanksjoner)
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
-        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, behandlingType, lagretAvkorting)
+        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)
         return lagretAvkorting
     }
 
@@ -220,26 +207,40 @@ class AvkortingService(
     private suspend fun settBehandlingStatusAvkortet(
         brukerTokenInfo: BrukerTokenInfo,
         behandling: DetaljertBehandling,
-        behandlingType: BehandlingType,
         lagretAvkorting: Avkorting,
     ) {
-        val virkningstidspunkt = behandling.virkningstidspunkt().dato
-        val virkFraOgMedOktober = virkningstidspunkt.month.value > 9
-        val ikkeOpphoerSammeAar =
-            !(behandling.opphoerFraOgMed != null && behandling.opphoerFraOgMed!!.year == virkningstidspunkt.year)
-
-        val skalHaInntektNesteAar =
-            behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING &&
-                virkFraOgMedOktober &&
-                ikkeOpphoerSammeAar
-
-        if (skalHaInntektNesteAar) {
+        if (skalHaInntektInnevaerendeOgNesteAar(behandling)) {
             if (lagretAvkorting.aarsoppgjoer.size == 2) {
                 behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
             }
         } else {
             behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
         }
+    }
+
+    private fun skalHaInntektInnevaerendeOgNesteAar(behandling: DetaljertBehandling): Boolean {
+        if (behandling.behandlingType != BehandlingType.FØRSTEGANGSBEHANDLING) {
+            return false
+        }
+
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
+        val virkFraOgMedOktober = virkningstidspunkt.month.value > 9
+        if (!virkFraOgMedOktober) {
+            return false
+        }
+
+        if (behandling.opphoerFraOgMed == null) {
+            return true
+        }
+
+        val opphoerDato = behandling.opphoerFraOgMed!!
+
+        val opphoerSammeAarSomVirk = opphoerDato.year == virkningstidspunkt.year
+        if (opphoerSammeAarSomVirk) {
+            return false
+        }
+        val januarEtterVirkAar = opphoerDato.year + 1 == virkningstidspunkt.year && opphoerDato.month == Month.JANUARY
+        return januarEtterVirkAar
     }
 
     private fun hentAvkortingNonNull(behandlingId: UUID) =

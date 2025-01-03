@@ -96,19 +96,19 @@ export function BrevMottakerPanel({
     <Box padding="4" borderWidth="1" borderRadius="small">
       {mapResult(soeker, {
         initial: kanRedigeres && mottaker.type === MottakerType.HOVED && (
-          <Alert variant="info" size="small" inline>
+          <Alert variant="info" size="small" style={{ marginBottom: '1em' }}>
             Sjekk om bruker har verge
           </Alert>
         ),
         pending: <Spinner label="Henter eventuelle verger" margin="0" />,
-        error: (error) => (
-          <ApiErrorAlert>
-            {error.detail || 'Feil oppsto ved henting av eventuelle verger. Prøv igjen senere'}
-          </ApiErrorAlert>
+        error: () => (
+          <Alert variant="info" size="small" style={{ marginBottom: '1em' }}>
+            Sjekk om brevet skal sendes til verge. Registrer eventuelt riktig adresse.
+          </Alert>
         ),
         success: (soekeren) =>
           (soekeren?.opplysning?.vergemaalEllerFremtidsfullmakt || []).length > 0 && (
-            <Alert variant="info" size="small" inline>
+            <Alert variant="info" size="small" style={{ marginBottom: '1em' }}>
               Brevet skal sendes til verge. Registrer riktig adresse.
             </Alert>
           ),

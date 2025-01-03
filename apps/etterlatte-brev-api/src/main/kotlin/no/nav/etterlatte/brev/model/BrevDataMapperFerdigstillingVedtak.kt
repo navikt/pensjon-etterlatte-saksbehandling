@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.Brevkoder.OMS_REVURDERING
 import no.nav.etterlatte.brev.Brevkoder.TILBAKEKREVING
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
@@ -232,11 +233,7 @@ class BrevDataMapperFerdigstillingVedtak(
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
-                beregningService.finnUtbetalingsinfo(
-                    behandlingId,
-                    virkningstidspunkt,
-                    bruker,
-                )
+                finnUtbetalingsinfo(behandlingId, virkningstidspunkt, bruker)
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
@@ -284,11 +281,7 @@ class BrevDataMapperFerdigstillingVedtak(
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
-                beregningService.finnUtbetalingsinfo(
-                    behandlingId,
-                    virkningstidspunkt,
-                    bruker,
-                )
+                finnUtbetalingsinfo(behandlingId, virkningstidspunkt, bruker)
             }
         val forrigeUtbetalingsinfo =
             async {
@@ -343,11 +336,7 @@ class BrevDataMapperFerdigstillingVedtak(
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
-                beregningService.finnUtbetalingsinfo(
-                    behandlingId,
-                    virkningstidspunkt,
-                    bruker,
-                )
+                finnUtbetalingsinfo(behandlingId, virkningstidspunkt, bruker)
             }
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
@@ -386,6 +375,25 @@ class BrevDataMapperFerdigstillingVedtak(
                 erSluttbehandling = behandling.erSluttbehandling,
             )
         }
+    }
+
+    private suspend fun finnUtbetalingsinfo(
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        bruker: BrukerTokenInfo,
+    ): Utbetalingsinfo {
+        val utbetalingsinfo =
+            beregningService.finnUtbetalingsinfo(
+                behandlingId,
+                virkningstidspunkt,
+                bruker,
+            )
+        if (!utbetalingsinfo.overstyrt &&
+            utbetalingsinfo.beregningsperioder.any { it.harForeldreloessats == null }
+        ) {
+            throw ManglerHarForeldreloessats()
+        }
+        return utbetalingsinfo
     }
 
     private suspend fun barnepensjonAvslag(

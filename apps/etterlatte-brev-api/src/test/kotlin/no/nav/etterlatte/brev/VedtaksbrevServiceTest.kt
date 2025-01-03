@@ -159,6 +159,7 @@ internal class VedtaksbrevServiceTest {
         val ATTESTANT = simpleAttestant()
         val utbetalingsinfo =
             Utbetalingsinfo(
+                false,
                 1,
                 Kroner(3436),
                 LocalDate.now(),

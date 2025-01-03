@@ -10,6 +10,7 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class Utbetalingsinfo(
+    val overstyrt: Boolean,
     val antallBarn: Int,
     val beloep: Kroner,
     val virkningsdato: LocalDate,

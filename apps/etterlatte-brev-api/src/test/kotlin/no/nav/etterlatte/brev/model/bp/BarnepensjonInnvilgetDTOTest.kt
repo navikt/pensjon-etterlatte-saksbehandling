@@ -40,6 +40,7 @@ internal class BarnepensjonInnvilgetDTOTest {
             BarnepensjonInnvilgelse.fra(
                 utbetalingsinfo =
                     Utbetalingsinfo(
+                        false,
                         antallBarn = 1,
                         beloep = Kroner(1234),
                         virkningsdato = LocalDate.of(2023, Month.JANUARY, 1),

@@ -229,11 +229,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
-                beregningService.finnUtbetalingsinfo(
-                    behandlingId,
-                    virkningstidspunkt!!,
-                    bruker,
-                )
+                finnUtbetalingsinfo(behandlingId, virkningstidspunkt!!, bruker)
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
 
@@ -285,11 +281,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val utbetalingsinfo =
             async {
-                beregningService.finnUtbetalingsinfo(
-                    behandlingId,
-                    virkningstidspunkt!!,
-                    bruker,
-                )
+                finnUtbetalingsinfo(behandlingId, virkningstidspunkt!!, bruker)
             }
 
         BarnepensjonRevurderingRedigerbartUtfall.fra(
@@ -309,7 +301,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
-                beregningService.finnUtbetalingsinfo(
+                finnUtbetalingsinfo(
                     behandlingId,
                     virkningstidspunkt,
                     bruker,
@@ -407,4 +399,14 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
     }
+
+    private suspend fun finnUtbetalingsinfo(
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        bruker: BrukerTokenInfo,
+    ) = beregningService.finnUtbetalingsinfo(
+        behandlingId,
+        virkningstidspunkt,
+        bruker,
+    )
 }

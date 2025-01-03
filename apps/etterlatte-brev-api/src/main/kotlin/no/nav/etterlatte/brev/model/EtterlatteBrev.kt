@@ -50,7 +50,7 @@ data class BarnepensjonBeregningsperiode(
     val avdoedeForeldre: List<String?>?,
     val trygdetidForIdent: String?,
     var utbetaltBeloep: Kroner,
-    val harForeldreloessats: Boolean,
+    val harForeldreloessats: Boolean?,
 ) {
     companion object {
         fun fra(beregningsperiode: Beregningsperiode): BarnepensjonBeregningsperiode =
@@ -62,9 +62,7 @@ data class BarnepensjonBeregningsperiode(
                 antallBarn = beregningsperiode.antallBarn,
                 avdoedeForeldre = beregningsperiode.avdoedeForeldre,
                 trygdetidForIdent = beregningsperiode.trygdetidForIdent,
-                harForeldreloessats =
-                    beregningsperiode.harForeldreloessats
-                        ?: throw ManglerHarForeldreloessats(),
+                harForeldreloessats = beregningsperiode.harForeldreloessats,
             )
     }
 }
@@ -245,9 +243,9 @@ class ManglerBrevutfall(
         meta = mapOf("behandlingId" to behandlingId.toString()),
     )
 
-// TODO Fjern når alle beregninger på åpne behandlinger er gjort med harForeldreloessats
+// TODO (EY-4381) Fjern når alle beregninger på åpne behandlinger er gjort med harForeldreloessats
 class ManglerHarForeldreloessats :
     UgyldigForespoerselException(
         "MANGLER_HAR_FORELDRELOESSATS",
-        "Beklager, saken må returneres da en endring i Gjenny krever at beregningen gjøres på nytt",
+        "Beklager, men saken må beregnes på nytt på grunn av en teknisk endring i Gjenny",
     )

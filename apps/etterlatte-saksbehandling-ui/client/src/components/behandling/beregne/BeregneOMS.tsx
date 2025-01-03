@@ -67,8 +67,8 @@ export const BeregneOMS = () => {
   }, [])
 
   /*
-   OBS! Samme logikk benyttes i bakcend (AvkortingService.kt skalHaInntektInnevaerendeOgNesteAar())
-  */
+             OBS! Samme logikk benyttes i bakcend (AvkortingService.kt skalHaInntektInnevaerendeOgNesteAar())
+            */
   const skalHaInntektNesteAar = () => {
     if (behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING) {
       return false
@@ -78,14 +78,11 @@ export const BeregneOMS = () => {
 
     let erOpphoer = false
     if (behandling.viderefoertOpphoer != null) {
-      const opphoerDato = new Date(behandling.viderefoertOpphoer.dato)
+      const loependeTom = new Date(behandling.viderefoertOpphoer.dato)
+      loependeTom.setMonth(loependeTom.getMonth() - 1)
 
-      const opphoerSammeAarSomVirk = opphoerDato.getFullYear() === virk.getFullYear()
+      const opphoerSammeAarSomVirk = loependeTom.getFullYear() === virk.getFullYear()
       if (opphoerSammeAarSomVirk) {
-        erOpphoer = true
-      }
-      const januarEtterVirkAar = opphoerDato.getFullYear() - 1 === virk.getFullYear() && opphoerDato.getMonth() === 0
-      if (januarEtterVirkAar) {
         erOpphoer = true
       }
     }

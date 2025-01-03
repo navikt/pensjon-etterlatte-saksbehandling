@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
-import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -202,7 +201,7 @@ class AvkortingService(
 
     /*
     I tilfeller der det behøves inntekt for året etter virkningsitdspunkt oppdateres status kun hvis to inntekter er lagt til.
-    Dette gjelder førstegangsbehandlinger med virk fra og med oktober uten oppphør i samme år.
+    Dette gjelder hvis behandling er førstegangsbehandling og nåtid er fra og med oktober i innvilgelesår
      */
     private suspend fun settBehandlingStatusAvkortet(
         brukerTokenInfo: BrukerTokenInfo,
@@ -233,11 +232,8 @@ class AvkortingService(
             if (behandling.opphoerFraOgMed == null) {
                 false
             } else {
-                val opphoerDato = behandling.opphoerFraOgMed!!
-                val opphoerSammeAarSomVirk = opphoerDato.year == virkningstidspunkt.year
-                val januarEtterVirkAar =
-                    opphoerDato.year - 1 == virkningstidspunkt.year && opphoerDato.month == Month.JANUARY
-                opphoerSammeAarSomVirk || januarEtterVirkAar
+                val loependeTom = behandling.opphoerFraOgMed!!.minusMonths(1)
+                loependeTom.year == virkningstidspunkt.year
             }
 
         val virkIFjor = naa.year > virkningstidspunkt.year

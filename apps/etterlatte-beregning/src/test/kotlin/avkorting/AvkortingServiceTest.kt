@@ -31,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
@@ -133,6 +134,7 @@ internal class AvkortingServiceTest {
                     sak = sakId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     status = BehandlingStatus.BEREGNET,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(Year.now().value, 1)),
                 )
             val eksisterendeAvkorting = mockk<Avkorting>()
             val beregning = mockk<Beregning>()
@@ -160,7 +162,7 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingRevurdering(beregning, any())
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, reberegnetAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
-                lagretAvkorting.toFrontend(YearMonth.of(2024, 1), null, BehandlingStatus.BEREGNET)
+                lagretAvkorting.toFrontend(YearMonth.of(Year.now().value, 1), null, BehandlingStatus.BEREGNET)
             }
             coVerify(exactly = 2) {
                 avkortingRepository.hentAvkorting(behandlingId)
@@ -386,7 +388,13 @@ internal class AvkortingServiceTest {
                     id = behandlingId,
                     sak = sakId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
+                    virkningstidspunkt =
+                        VirkningstidspunktTestData.virkningstidsunkt(
+                            YearMonth.of(
+                                Year.now().value,
+                                1,
+                            ),
+                        ),
                 )
 
             every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
@@ -428,7 +436,7 @@ internal class AvkortingServiceTest {
                     any(),
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
-                lagretAvkorting.toFrontend(YearMonth.of(2024, 1), null, BehandlingStatus.BEREGNET)
+                lagretAvkorting.toFrontend(YearMonth.of(Year.now().value, 1), null, BehandlingStatus.BEREGNET)
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
             coVerify(exactly = 2) {
@@ -673,7 +681,13 @@ internal class AvkortingServiceTest {
                     id = behandlingId,
                     sak = sakId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
+                    virkningstidspunkt =
+                        VirkningstidspunktTestData.virkningstidsunkt(
+                            YearMonth.of(
+                                Year.now().value,
+                                1,
+                            ),
+                        ),
                 )
 
             val foedselsdato67aar = YearMonth.of(2024, 6)
@@ -718,7 +732,7 @@ internal class AvkortingServiceTest {
                     foedselsdato67aar,
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
-                lagretAvkorting.toFrontend(YearMonth.of(2024, 1), null, BehandlingStatus.BEREGNET)
+                lagretAvkorting.toFrontend(YearMonth.of(Year.now().value, 1), null, BehandlingStatus.BEREGNET)
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
             coVerify(exactly = 2) {

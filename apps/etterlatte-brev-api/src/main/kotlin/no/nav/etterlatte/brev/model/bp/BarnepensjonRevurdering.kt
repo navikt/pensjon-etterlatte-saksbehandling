@@ -108,6 +108,7 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val frivilligSkattetrekk: Boolean,
+    val etterbetaling: BarnepensjonEtterbetaling?,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -127,6 +128,7 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
                 brukerUnder18Aar = requireNotNull(brevutfall.aldersgruppe) == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 frivilligSkattetrekk = frivilligSkattetrekk,
+                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
             )
         }
     }

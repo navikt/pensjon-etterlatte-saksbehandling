@@ -7,26 +7,26 @@
   resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.4.0.tgz#728c484f4e10df03d5a3acd0d8adcbbebff8ad63"
   integrity sha512-Ff9+ksdQQB3rMncgqDK78uLznstjyfIf2Arnh22pW8kBpLs6rpKDwgnZT46hin5Hl1WzazzK64DOrhSwYpS7bQ==
 
-"@amplitude/analytics-browser@^2.11.9":
-  version "2.11.9"
-  resolved "https://registry.yarnpkg.com/@amplitude/analytics-browser/-/analytics-browser-2.11.9.tgz#d54de7b53e8578d6bde2d4690198acf0df19c8e7"
-  integrity sha512-FHejpsW3OypNKaIBvMwLm74UUSBcR+VwrBsj7V2VlPDNRdeaFi21kJgVYUW5AcjxTsadMzBQGBb4BarZ4k2+9Q==
+"@amplitude/analytics-browser@^2.11.11":
+  version "2.11.11"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-browser/-/analytics-browser-2.11.11.tgz#b41dea21ca97b8688b3e3acf392cc1481d5f9485"
+  integrity sha512-AdpNNPwoNPezojeeU2ITcyqKcrrW8edVBHlCEvDNIXYkf5Y0i5Blbes3x6rgONsOeV2hx85trTXhhVkilWgHcg==
   dependencies:
-    "@amplitude/analytics-client-common" "^2.3.5"
-    "@amplitude/analytics-core" "^2.5.4"
+    "@amplitude/analytics-client-common" "^2.3.7"
+    "@amplitude/analytics-core" "^2.5.5"
     "@amplitude/analytics-remote-config" "^0.4.0"
     "@amplitude/analytics-types" "^2.8.4"
     "@amplitude/plugin-autocapture-browser" "^1.0.2"
-    "@amplitude/plugin-page-view-tracking-browser" "^2.3.5"
+    "@amplitude/plugin-page-view-tracking-browser" "^2.3.7"
     tslib "^2.4.1"
 
-"@amplitude/analytics-client-common@>=1 <3", "@amplitude/analytics-client-common@^2.3.5":
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/@amplitude/analytics-client-common/-/analytics-client-common-2.3.5.tgz#8c31d6d1848e26d705ad21205db79aceb7b1cf5a"
-  integrity sha512-BCP+jorfLMAKK/g87fAk4IPP/NzQLMCep+Qe23tqOCWguwTEINYnyzD/GmhaIKXSM2o9pmMLlHbhkA1vXUtF8g==
+"@amplitude/analytics-client-common@>=1 <3", "@amplitude/analytics-client-common@^2.3.7":
+  version "2.3.7"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-client-common/-/analytics-client-common-2.3.7.tgz#f943325ea317eb89c2eb92291fff19e4b4a3e3ea"
+  integrity sha512-HuwP2MFoeCTZWFIxkeYZOy5GP9ydjRO+n2KUMhHXTXGUx1M9vxIx1BUHsHKOZ4BZ5qEUTacgmznyc6uJJUiCWg==
   dependencies:
     "@amplitude/analytics-connector" "^1.4.8"
-    "@amplitude/analytics-core" "^2.5.4"
+    "@amplitude/analytics-core" "^2.5.5"
     "@amplitude/analytics-types" "^2.8.4"
     tslib "^2.4.1"
 
@@ -37,10 +37,10 @@
   dependencies:
     "@amplitude/experiment-core" "^0.9.0"
 
-"@amplitude/analytics-core@>=1 <3", "@amplitude/analytics-core@^2.5.4":
-  version "2.5.4"
-  resolved "https://registry.yarnpkg.com/@amplitude/analytics-core/-/analytics-core-2.5.4.tgz#b45308333c66bd75076c3bf256a51fd1565a807d"
-  integrity sha512-J5ZF8hQmxmxM+7bu25a2TfTnk/LQ/oH5FYdg79f1lJ85Aa6oUlCDxgvXwy1RVpwaFjWlZQgV4XVaAUrxtSPRFw==
+"@amplitude/analytics-core@>=1 <3", "@amplitude/analytics-core@^2.5.5":
+  version "2.5.5"
+  resolved "https://registry.yarnpkg.com/@amplitude/analytics-core/-/analytics-core-2.5.5.tgz#2df29bc1607bfbf23b531413c0dc8d0c4ac9bc59"
+  integrity sha512-OSB1WSD6qYoHyHliZaSujyatik2SP+vtoy8Y0vgRdYIpbE24F2q+SwBF3X5A1IeUqZ5fdpz+BNMwwUVl0Z4Ykg==
   dependencies:
     "@amplitude/analytics-types" "^2.8.4"
     tslib "^2.4.1"
@@ -77,12 +77,12 @@
     rxjs "^7.8.1"
     tslib "^2.4.1"
 
-"@amplitude/plugin-page-view-tracking-browser@^2.3.5":
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/@amplitude/plugin-page-view-tracking-browser/-/plugin-page-view-tracking-browser-2.3.5.tgz#cd5bcdb7c53bb70baae1573d16ab4dc9fd8690bf"
-  integrity sha512-qcV4DLxRAZRriYBNvjc2PGW1EDad6PSsIXmxVs6j8i9fxY2SfdvsFd/Qd23CHj1e6Dt5QpAVJZpUMCEdqqDZbA==
+"@amplitude/plugin-page-view-tracking-browser@^2.3.7":
+  version "2.3.7"
+  resolved "https://registry.yarnpkg.com/@amplitude/plugin-page-view-tracking-browser/-/plugin-page-view-tracking-browser-2.3.7.tgz#a19e295e5a83c7f29ea02b987ceae2d17453c860"
+  integrity sha512-9LEzU33vpQ1OdPwVn0nwcCqPLkfK3P19hLmFTflx+aBM70TH9xCwvJL6nJ5eyc4kkmE9x7r0mRVnQIxaHfTxGg==
   dependencies:
-    "@amplitude/analytics-client-common" "^2.3.5"
+    "@amplitude/analytics-client-common" "^2.3.7"
     "@amplitude/analytics-types" "^2.8.4"
     tslib "^2.4.1"
 
@@ -386,10 +386,15 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@eslint/js@9.16.0", "@eslint/js@^9.16.0":
+"@eslint/js@9.16.0":
   version "9.16.0"
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-9.16.0.tgz#3df2b2dd3b9163056616886c86e4082f45dbf3f4"
   integrity sha512-tw2HxzQkrbeuvyj1tG2Yqq+0H9wGoI2IMk4EOsQeX+vmd75FtJAzf+gTA69WF+baUKRYQ3x2kbLE08js5OsTVg==
+
+"@eslint/js@^9.17.0":
+  version "9.17.0"
+  resolved "https://registry.yarnpkg.com/@eslint/js/-/js-9.17.0.tgz#1523e586791f80376a6f8398a3964455ecc651ec"
+  integrity sha512-Sxc4hqcs1kTu0iID3kcZDW3JHq2a77HO9P8CP6YEA/FpH3Ll8UXE2r/86Rz9YJLKme39S9vU5OWNjC6Xl0Cr3w==
 
 "@eslint/object-schema@^2.1.4":
   version "2.1.4"
@@ -508,33 +513,33 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^7.6.0":
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.6.0.tgz#e55f0293cfbf140fa3a4d9722a7eb1865253ec04"
-  integrity sha512-EHma8qQx136cBJeT3uxnMm/7I9LYwXhdbu+uVS21C0qO/UeUQzy0+e3e1q3CxwIV6A7QSkVlgqhDmlymZ7vF9g==
+"@navikt/aksel-icons@^7.9.0":
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-7.9.0.tgz#d55434e48dc21d31d7c77f8fdbe4193c73f900aa"
+  integrity sha512-uN+wZKDIoIWs1R4SZHmvjS1mnO/Ft5DYWj1xmAD8vaLuX5dASPOOSu4cgPafVXqQ/k+Rpm9TfctwNcfHMVVcfA==
 
-"@navikt/ds-css@~7.6.0":
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-7.6.0.tgz#dce0c20349b06d964f44335f7f2f6f605ccacbaa"
-  integrity sha512-bT7INZIpskL6yoMITbbCxejgQPpw4YGQT+1HzxKd5LPQ6PolICvfSobNMMLtpJ1q/g1F4ULDeBn1u08vuc5JLA==
+"@navikt/ds-css@~7.9.0":
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-7.9.0.tgz#96957455a1f49a23d0a4fdbd3333320164573094"
+  integrity sha512-rCFzBMzRq+ba8TqbKRK7HCPU/Mcd5QRvuQebTuKpdU7UodSlrphcU2fwxdq4RanO/kNEM8HBKXfnZfnrPUN5sA==
 
-"@navikt/ds-react@~7.6.0":
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.6.0.tgz#affcdb539be6ae0510dc2b4e3cfd667a6edee95a"
-  integrity sha512-fh7WjNP5Rk8G7HScy03ge71ooeRXryYUvz0puEH5LkVVOz0EzQwDmXMj9PdnQId64PCQwmjZZHehnHim0fWD3A==
+"@navikt/ds-react@~7.9.0":
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-7.9.0.tgz#db8bf7ecb6434363a687f0e1c75f1b71cf2cfd30"
+  integrity sha512-ht2STPmvpsvGTPtKTJDAUxsVArJf8sYDRo/05GJxqEwCCVBs9JVE9bjaVTJ039pV+X4ViW21C4ZocQ1xWnvi/w==
   dependencies:
     "@floating-ui/react" "0.25.4"
     "@floating-ui/react-dom" "^2.0.9"
-    "@navikt/aksel-icons" "^7.6.0"
-    "@navikt/ds-tokens" "^7.6.0"
+    "@navikt/aksel-icons" "^7.9.0"
+    "@navikt/ds-tokens" "^7.9.0"
     clsx "^2.1.0"
     date-fns "^3.0.0"
     react-day-picker "8.10.1"
 
-"@navikt/ds-tokens@^7.6.0", "@navikt/ds-tokens@~7.6.0":
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.6.0.tgz#d543e0c2eca1dc09d53c6d7c070f98bfec9f4a1f"
-  integrity sha512-4V86JnYzwPmiLtvQKJHODKO+lzT1DFWzdCkxu9W5OXCtYxgpMGSiZnAdq949FCFVergYMvhTi2kGiN5XgXIovw==
+"@navikt/ds-tokens@^7.9.0", "@navikt/ds-tokens@~7.9.0":
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-7.9.0.tgz#561412e689e6cb10c12fde8de5d4dfe34e212670"
+  integrity sha512-YLkMtzTJo0cqEuEsPAGEZ/5JmOMcQr6hgBya3VvM46CU7yi7/sqZTcb3h0q3tBRCf5a3KvtXGfcqcvDChtcHAQ==
 
 "@navikt/navspa@^6.0.1":
   version "6.0.1"
@@ -2018,10 +2023,10 @@ globals@^14.0.0:
   resolved "https://registry.yarnpkg.com/globals/-/globals-14.0.0.tgz#898d7413c29babcf6bafe56fcadded858ada724e"
   integrity sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==
 
-globals@^15.12.0:
-  version "15.12.0"
-  resolved "https://registry.yarnpkg.com/globals/-/globals-15.12.0.tgz#1811872883ad8f41055b61457a130221297de5b5"
-  integrity sha512-1+gLErljJFhbOVyaetcwJiJ4+eLe45S2E7P5UiZ9xGfeq3ATQf5DOv9G7MH3gGbKQLkzmNh2DxfZwLdw+j6oTQ==
+globals@^15.14.0:
+  version "15.14.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-15.14.0.tgz#b8fd3a8941ff3b4d38f3319d433b61bbb482e73f"
+  integrity sha512-OkToC372DtlQeje9/zHIo5CT8lRP/FUgEOKBEhU4e0abL7J7CD24fD9ohiLN5hagG/kWCYj4K5oaxxtj2Z0Dig==
 
 globalthis@^1.0.3, globalthis@^1.0.4:
   version "1.0.4"

@@ -92,6 +92,7 @@ internal class BehandlingStatusServiceTest {
     @AfterEach
     fun after() {
         confirmVerified(
+            saksbehandlerService,
             behandlingDao,
             behandlingService,
             oppgaveService,
@@ -99,7 +100,7 @@ internal class BehandlingStatusServiceTest {
             grunnlagsendringshendelseService,
             generellBehandlingService,
         )
-        clearAllMocks()
+        clearAllMocks(currentThreadOnly = true)
     }
 
     @Test
@@ -142,6 +143,7 @@ internal class BehandlingStatusServiceTest {
         verify { behandlingDao.lagreStatus(any()) }
         verify { behandlingService.registrerVedtakHendelse(any(), any(), any()) }
         verify { oppgaveService.tilUnderkjent(any(), any(), any()) }
+        verify { saksbehandlerService.hentNavnForIdent(any()) }
     }
 
     @ParameterizedTest
@@ -243,6 +245,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.UNDERKJENT)
             oppgaveService.tilUnderkjent(behandlingId.toString(), OppgaveType.FOERSTEGANGSBEHANDLING, any())
         }
+        verify(exactly = 1) { saksbehandlerService.hentNavnForIdent(any()) }
     }
 
     @Test
@@ -335,6 +338,7 @@ internal class BehandlingStatusServiceTest {
                 any(),
             )
         }
+        verify(exactly = 1) { saksbehandlerService.hentNavnForIdent(any()) }
     }
 
     @Test
@@ -375,6 +379,7 @@ internal class BehandlingStatusServiceTest {
                 brukerTokenInfo,
                 any<String>(),
             )
+            saksbehandlerService.hentNavnForIdent(any())
         }
     }
 

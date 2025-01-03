@@ -81,7 +81,7 @@ export const BeregneOMS = () => {
       if (opphoerSammeAarSomVirk) {
         erOpphoer = true
       }
-      const januarEtterVirkAar = opphoerDato.getFullYear() + 1 === virk.getFullYear() && opphoerDato.getMonth() === 0
+      const januarEtterVirkAar = opphoerDato.getFullYear() - 1 === virk.getFullYear() && opphoerDato.getMonth() === 0
       if (januarEtterVirkAar) {
         erOpphoer = true
       }

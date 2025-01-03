@@ -233,7 +233,7 @@ class AvkortingService(
                 val opphoerDato = behandling.opphoerFraOgMed!!
                 val opphoerSammeAarSomVirk = opphoerDato.year == virkningstidspunkt.year
                 val januarEtterVirkAar =
-                    opphoerDato.year + 1 == virkningstidspunkt.year && opphoerDato.month == Month.JANUARY
+                    opphoerDato.year - 1 == virkningstidspunkt.year && opphoerDato.month == Month.JANUARY
                 opphoerSammeAarSomVirk || januarEtterVirkAar
             }
 

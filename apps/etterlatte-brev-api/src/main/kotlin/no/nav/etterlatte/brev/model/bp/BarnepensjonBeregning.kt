@@ -21,8 +21,10 @@ import no.nav.etterlatte.sikkerLogg
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.util.UUID
 
-internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo): List<BarnepensjonBeregningsperiode> =
-    utbetalingsinfo.beregningsperioder.map { BarnepensjonBeregningsperiode.fra(it) }
+internal fun barnepensjonBeregningsperioder(
+    utbetalingsinfo: Utbetalingsinfo,
+    erForeldreloes: Boolean,
+): List<BarnepensjonBeregningsperiode> = utbetalingsinfo.beregningsperioder.map { BarnepensjonBeregningsperiode.fra(it, erForeldreloes) }
 
 internal fun barnepensjonBeregning(
     innhold: InnholdMedVedlegg,
@@ -33,13 +35,7 @@ internal fun barnepensjonBeregning(
     erForeldreloes: Boolean = false,
 ): BarnepensjonBeregning {
     val beregningsperioder =
-        barnepensjonBeregningsperioder(utbetalingsinfo).map { periode ->
-            if (periode.harForeldreloessats == null) {
-                periode.copy(harForeldreloessats = erForeldreloes)
-            } else {
-                periode
-            }
-        }
+        barnepensjonBeregningsperioder(utbetalingsinfo, erForeldreloes)
     val sisteBeregningsperiode = beregningsperioder.maxBy { periode -> periode.datoFOM }
     val mappedeTrygdetider =
         mapRiktigMetodeForAnvendteTrygdetider(trygdetid, avdoede, utbetalingsinfo.beregningsperioder)

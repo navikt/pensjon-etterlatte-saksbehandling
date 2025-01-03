@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.BrevDataRedigerbarRequest
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslagRedigerbar
@@ -404,9 +405,18 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         bruker: BrukerTokenInfo,
-    ) = beregningService.finnUtbetalingsinfo(
-        behandlingId,
-        virkningstidspunkt,
-        bruker,
-    )
+    ): Utbetalingsinfo {
+        val utbetalingsinfo =
+            beregningService.finnUtbetalingsinfo(
+                behandlingId,
+                virkningstidspunkt,
+                bruker,
+            )
+        if (!utbetalingsinfo.overstyrt &&
+            utbetalingsinfo.beregningsperioder.any { it.harForeldreloessats == null }
+        ) {
+            throw ManglerHarForeldreloessats()
+        }
+        return utbetalingsinfo
+    }
 }

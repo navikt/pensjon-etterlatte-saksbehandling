@@ -50,10 +50,13 @@ data class BarnepensjonBeregningsperiode(
     val avdoedeForeldre: List<String?>?,
     val trygdetidForIdent: String?,
     var utbetaltBeloep: Kroner,
-    val harForeldreloessats: Boolean?,
+    val harForeldreloessats: Boolean,
 ) {
     companion object {
-        fun fra(beregningsperiode: Beregningsperiode): BarnepensjonBeregningsperiode =
+        fun fra(
+            beregningsperiode: Beregningsperiode,
+            erForeldreloes: Boolean,
+        ): BarnepensjonBeregningsperiode =
             BarnepensjonBeregningsperiode(
                 datoFOM = beregningsperiode.datoFOM,
                 datoTOM = beregningsperiode.datoTOM,
@@ -62,7 +65,7 @@ data class BarnepensjonBeregningsperiode(
                 antallBarn = beregningsperiode.antallBarn,
                 avdoedeForeldre = beregningsperiode.avdoedeForeldre,
                 trygdetidForIdent = beregningsperiode.trygdetidForIdent,
-                harForeldreloessats = beregningsperiode.harForeldreloessats,
+                harForeldreloessats = beregningsperiode.harForeldreloessats ?: erForeldreloes,
             )
     }
 }

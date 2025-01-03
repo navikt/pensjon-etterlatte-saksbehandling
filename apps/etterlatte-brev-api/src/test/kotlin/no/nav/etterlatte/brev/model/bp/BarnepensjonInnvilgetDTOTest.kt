@@ -204,5 +204,9 @@ internal class BarnepensjonInnvilgetDTOTest {
             )
         })
 
-    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() = BarnepensjonBeregningsperiode.fra(this)
+    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() =
+        BarnepensjonBeregningsperiode.fra(
+            this,
+            false,
+        )
 }

@@ -44,6 +44,14 @@ fun Route.avkorting(
             }
         }
 
+        get("skalHaInntektNesteAar") {
+            withBehandlingId(behandlingKlient) {
+                val behandling = behandlingKlient.hentBehandling(it, brukerTokenInfo)
+                val skalHaInntektNesteAar = avkortingService.skalHaInntektInnevaerendeOgNesteAar(behandling)
+                call.respond(AvkortingSkalHaToInntektDTO(skalHaInntektNesteAar))
+            }
+        }
+
         get("ferdig") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter ferdig avkorting med behandlingId=$it")
@@ -120,6 +128,10 @@ fun Route.avkorting(
         }
     }
 }
+
+data class AvkortingSkalHaToInntektDTO(
+    val skalHaToInntekter: Boolean,
+)
 
 fun AvkortingGrunnlag.toDto() =
     AvkortingGrunnlagDto(

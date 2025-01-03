@@ -6,6 +6,10 @@ export interface IAvkorting {
   tidligereAvkortetYtelse: IAvkortetYtelse[]
 }
 
+export interface IAvkortingSkalHaToInntekt {
+  skalHaToInntekter: boolean
+}
+
 export interface IAvkortingGrunnlagFrontend {
   aar: number
   fraVirk: IAvkortingGrunnlag | null

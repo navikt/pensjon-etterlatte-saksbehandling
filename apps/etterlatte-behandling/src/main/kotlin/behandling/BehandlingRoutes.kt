@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleierRequest
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -96,6 +97,15 @@ internal fun Route.behandlingRoutes(
             val detaljertBehandlingDTO =
                 behandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingId, brukerTokenInfo)
             call.respond(detaljertBehandlingDTO)
+        }
+
+        get("status") {
+            val status =
+                inTransaction {
+                    behandlingService.hentBehandling(behandlingId)?.status
+                        ?: throw InternfeilException("Fant ikke behandling id=$behandlingId")
+                }
+            call.respond(status)
         }
 
         post("/gyldigfremsatt") {

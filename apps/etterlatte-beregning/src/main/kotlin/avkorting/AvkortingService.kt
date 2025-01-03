@@ -219,13 +219,15 @@ class AvkortingService(
     Dette gjelder hvis behandling er førstegangsbehandling og nåtid er fra og med oktober i innvilgelesår.
     Da anses det at nytt år er nærme nok til at søker bør kunne oppgi inntekt for nytt år.
      */
-    fun skalHaInntektInnevaerendeOgNesteAar(behandling: DetaljertBehandling): Boolean {
+    fun skalHaInntektInnevaerendeOgNesteAar(
+        behandling: DetaljertBehandling,
+        naa: YearMonth = YearMonth.now(),
+    ): Boolean {
         if (behandling.behandlingType != BehandlingType.FØRSTEGANGSBEHANDLING) {
             return false
         }
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
-        val naa = YearMonth.now()
 
         val erOpphoer =
             if (behandling.opphoerFraOgMed == null) {

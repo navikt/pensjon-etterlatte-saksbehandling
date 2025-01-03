@@ -134,7 +134,13 @@ internal class AvkortingServiceTest {
                     sak = sakId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     status = BehandlingStatus.BEREGNET,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(Year.now().value, 1)),
+                    virkningstidspunkt =
+                        VirkningstidspunktTestData.virkningstidsunkt(
+                            YearMonth.of(
+                                Year.now().value,
+                                1,
+                            ),
+                        ),
                 )
             val eksisterendeAvkorting = mockk<Avkorting>()
             val beregning = mockk<Beregning>()
@@ -738,6 +744,87 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 2) {
                 avkortingRepository.hentAvkorting(behandlingId)
             }
+        }
+    }
+
+    @Nested
+    inner class InntektFlereAar {
+        @Test
+        fun `naatid er fra og med oktober skal ha to inntekter`() {
+            val behandling =
+                behandling(
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 6)),
+                )
+
+            val skalHaToInntekter =
+                service.skalHaInntektInnevaerendeOgNesteAar(behandling, naa = YearMonth.of(2024, 10))
+            skalHaToInntekter shouldBe true
+        }
+
+        @Test
+        fun `naatid er fra og med oktober med opphoer samme aar skal ikke ha to inntekter`() {
+            val behandling =
+                behandling(
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 6)),
+                    opphoerFraOgMed = YearMonth.of(2024, 11),
+                )
+
+            val skalHaToInntekter =
+                service.skalHaInntektInnevaerendeOgNesteAar(behandling, naa = YearMonth.of(2024, 10))
+            skalHaToInntekter shouldBe false
+        }
+
+        @Test
+        fun `naatid foer oktober skal ikke ha to inntekter`() {
+            val behandling =
+                behandling(
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 6)),
+                    opphoerFraOgMed = null,
+                )
+
+            val skalHaToInntekter =
+                service.skalHaInntektInnevaerendeOgNesteAar(behandling, naa = YearMonth.of(2024, 9))
+            skalHaToInntekter shouldBe false
+        }
+
+        @Test
+        fun `virkningstidspunkt tidligere enn naavaerende aar skal ha to inntekter`() {
+            val behandling =
+                behandling(
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 6)),
+                    opphoerFraOgMed = null,
+                )
+
+            val skalHaToInntekter =
+                service.skalHaInntektInnevaerendeOgNesteAar(behandling, naa = YearMonth.of(2025, 1))
+            skalHaToInntekter shouldBe true
+        }
+
+        @Test
+        fun `virkningstidspunkt tidligere enn naavaerende aar med opphoer samme aar skal ikke ha to inntekter`() {
+            val behandling =
+                behandling(
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 6)),
+                    opphoerFraOgMed = YearMonth.of(2024, 12),
+                )
+
+            val skalHaToInntekter =
+                service.skalHaInntektInnevaerendeOgNesteAar(behandling, naa = YearMonth.of(2025, 1))
+            skalHaToInntekter shouldBe false
+        }
+
+        @Test
+        fun `opphoer fra og med januar samme aaret etter virk skal ikke ha to inntekter`() {
+            // Fra og med januar året etter betyr til og med desember..
+            val behandling =
+                behandling(
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 6)),
+                    opphoerFraOgMed = YearMonth.of(2025, 1),
+                )
+
+            val skalHaToInntekter =
+                service.skalHaInntektInnevaerendeOgNesteAar(behandling, naa = YearMonth.of(2025, 2))
+            skalHaToInntekter shouldBe false
         }
     }
 

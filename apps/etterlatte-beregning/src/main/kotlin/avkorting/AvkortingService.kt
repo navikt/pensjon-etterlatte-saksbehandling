@@ -224,23 +224,26 @@ class AvkortingService(
         }
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
-        val virkFraOgMedOktober = virkningstidspunkt.month.value > 9
-        if (!virkFraOgMedOktober) {
-            return false
-        }
+        val naa = YearMonth.now()
 
-        if (behandling.opphoerFraOgMed == null) {
+        val erOpphoer =
+            if (behandling.opphoerFraOgMed == null) {
+                false
+            } else {
+                val opphoerDato = behandling.opphoerFraOgMed!!
+                val opphoerSammeAarSomVirk = opphoerDato.year == virkningstidspunkt.year
+                val januarEtterVirkAar =
+                    opphoerDato.year + 1 == virkningstidspunkt.year && opphoerDato.month == Month.JANUARY
+                opphoerSammeAarSomVirk || januarEtterVirkAar
+            }
+
+        val virkIFjor = naa.year > virkningstidspunkt.year
+        if (virkIFjor && !erOpphoer) {
             return true
         }
 
-        val opphoerDato = behandling.opphoerFraOgMed!!
-
-        val opphoerSammeAarSomVirk = opphoerDato.year == virkningstidspunkt.year
-        if (opphoerSammeAarSomVirk) {
-            return false
-        }
-        val januarEtterVirkAar = opphoerDato.year + 1 == virkningstidspunkt.year && opphoerDato.month == Month.JANUARY
-        return januarEtterVirkAar
+        val virkFraOgMedOktober = virkningstidspunkt.month.value > 9
+        return virkFraOgMedOktober && !erOpphoer
     }
 
     private fun hentAvkortingNonNull(behandlingId: UUID) =

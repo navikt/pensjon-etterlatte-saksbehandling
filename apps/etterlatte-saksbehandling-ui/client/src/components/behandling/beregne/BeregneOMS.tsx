@@ -71,23 +71,29 @@ export const BeregneOMS = () => {
       return false
     }
     const virk = new Date(virkningstidspunkt(behandling).dato)
+    const naa = new Date()
 
-    const virkOktoberEllerSenere = virk.getMonth() > 8
-    if (!virkOktoberEllerSenere) {
-      return false
+    let erOpphoer = false
+    if (behandling.viderefoertOpphoer != null) {
+      const opphoerDato = new Date(behandling.viderefoertOpphoer.dato)
+
+      const opphoerSammeAarSomVirk = opphoerDato.getFullYear() === virk.getFullYear()
+      if (opphoerSammeAarSomVirk) {
+        erOpphoer = true
+      }
+      const januarEtterVirkAar = opphoerDato.getFullYear() + 1 === virk.getFullYear() && opphoerDato.getMonth() === 0
+      if (januarEtterVirkAar) {
+        erOpphoer = true
+      }
     }
 
-    if (behandling.viderefoertOpphoer == null) {
+    const virkIFjor = naa.getFullYear() > virk.getFullYear()
+    if (virkIFjor && !erOpphoer) {
       return true
     }
-    const opphoerDato = new Date(behandling.viderefoertOpphoer.dato)
 
-    const opphoerSammeAarSomVirk = opphoerDato.getFullYear() === virk.getFullYear()
-    if (opphoerSammeAarSomVirk) {
-      return true
-    }
-    const januarEtterVirkAar = opphoerDato.getFullYear() + 1 === virk.getFullYear() && opphoerDato.getMonth() === 0
-    return januarEtterVirkAar
+    const erOktoberEllerSenere = naa.getFullYear() === virk.getFullYear() && naa.getMonth() > 8
+    return erOktoberEllerSenere && !erOpphoer
   }
 
   const erAvkortet = () =>

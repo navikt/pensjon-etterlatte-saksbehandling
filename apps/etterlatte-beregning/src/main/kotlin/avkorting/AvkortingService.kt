@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -199,10 +200,6 @@ class AvkortingService(
         return lagretAvkorting
     }
 
-    /*
-    I tilfeller der det behøves inntekt for året etter virkningsitdspunkt oppdateres status kun hvis to inntekter er lagt til.
-    Dette gjelder hvis behandling er førstegangsbehandling og nåtid er fra og med oktober i innvilgelesår
-     */
     private suspend fun settBehandlingStatusAvkortet(
         brukerTokenInfo: BrukerTokenInfo,
         behandling: DetaljertBehandling,
@@ -218,9 +215,11 @@ class AvkortingService(
     }
 
     /*
-     OBS! Samme logikk benyttes i frontend (BeregneOMS.tsx skalHaInntektNesteAar ())
+    I tilfeller der det behøves inntekt for året etter virkningsitdspunkt oppdateres status kun hvis to inntekter er lagt til.
+    Dette gjelder hvis behandling er førstegangsbehandling og nåtid er fra og med oktober i innvilgelesår.
+    Da anses det at nytt år er nærme nok til at søker bør kunne oppgi inntekt for nytt år.
      */
-    private fun skalHaInntektInnevaerendeOgNesteAar(behandling: DetaljertBehandling): Boolean {
+    fun skalHaInntektInnevaerendeOgNesteAar(behandling: DetaljertBehandling): Boolean {
         if (behandling.behandlingType != BehandlingType.FØRSTEGANGSBEHANDLING) {
             return false
         }
@@ -241,7 +240,7 @@ class AvkortingService(
             return true
         }
 
-        val virkFraOgMedOktober = virkningstidspunkt.month.value > 9
+        val virkFraOgMedOktober = naa.year == virkningstidspunkt.year && naa.month.value >= Month.OCTOBER.value
         return virkFraOgMedOktober && !erOpphoer
     }
 

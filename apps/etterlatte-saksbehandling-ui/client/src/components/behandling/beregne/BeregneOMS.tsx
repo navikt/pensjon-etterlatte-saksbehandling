@@ -10,7 +10,7 @@ import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { IBehandlingStatus, IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
@@ -27,6 +27,7 @@ import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { avkortingSkalHaToInntekter } from '~shared/api/avkorting'
 
 export const BeregneOMS = () => {
   const behandling = useBehandling()
@@ -37,6 +38,10 @@ export const BeregneOMS = () => {
   const { next } = useContext(BehandlingRouteContext)
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
+
+  const [, avkortingSkalHaToInntekterRequest] = useApiCall(avkortingSkalHaToInntekter)
+  const [skalHaInntektNesteAar, setSkalHaInntektNesteAar] = useState(false)
+
   const [vedtakStatus, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
 
@@ -63,38 +68,11 @@ export const BeregneOMS = () => {
   useEffect(() => {
     if (!erOpphoer) {
       hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
+      avkortingSkalHaToInntekterRequest(behandling.id, (response) =>
+        setSkalHaInntektNesteAar(response.skalHaToInntekter)
+      )
     }
   }, [])
-
-  /*
-             OBS! Samme logikk benyttes i bakcend (AvkortingService.kt skalHaInntektInnevaerendeOgNesteAar())
-            */
-  const skalHaInntektNesteAar = () => {
-    if (behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING) {
-      return false
-    }
-    const virk = new Date(virkningstidspunkt(behandling).dato)
-    const naa = new Date()
-
-    let erOpphoer = false
-    if (behandling.viderefoertOpphoer != null) {
-      const loependeTom = new Date(behandling.viderefoertOpphoer.dato)
-      loependeTom.setMonth(loependeTom.getMonth() - 1)
-
-      const opphoerSammeAarSomVirk = loependeTom.getFullYear() === virk.getFullYear()
-      if (opphoerSammeAarSomVirk) {
-        erOpphoer = true
-      }
-    }
-
-    const virkIFjor = naa.getFullYear() > virk.getFullYear()
-    if (virkIFjor && !erOpphoer) {
-      return true
-    }
-
-    const erOktoberEllerSenere = naa.getFullYear() === virk.getFullYear() && naa.getMonth() > 8
-    return erOktoberEllerSenere && !erOpphoer
-  }
 
   const erAvkortet = () =>
     !(
@@ -160,7 +138,7 @@ export const BeregneOMS = () => {
                   <Avkorting
                     behandling={behandling}
                     resetInntektsavkortingValidering={() => setManglerAvkorting(false)}
-                    skalHaInntektNesteAar={skalHaInntektNesteAar()}
+                    skalHaInntektNesteAar={skalHaInntektNesteAar}
                   />
                 </>
                 {erAvkortet() && <SimulerUtbetaling behandling={behandling} />}
@@ -174,7 +152,7 @@ export const BeregneOMS = () => {
                 )}
                 {manglerAvkorting && (
                   <Alert style={{ maxWidth: '16em' }} variant="error">
-                    {skalHaInntektNesteAar()
+                    {skalHaInntektNesteAar
                       ? 'Du må legge til inntektsavkorting for inneværende og neste år, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'
                       : 'Du må legge til inntektsavkorting, også når etterlatte ikke har inntekt. Legg da inn 0 i inntektsfeltene.'}
                   </Alert>

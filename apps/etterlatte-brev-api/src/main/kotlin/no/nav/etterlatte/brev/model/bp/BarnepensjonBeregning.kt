@@ -29,11 +29,18 @@ internal fun barnepensjonBeregning(
     avdoede: List<Avdoed>,
     utbetalingsinfo: Utbetalingsinfo,
     grunnbeloep: Grunnbeloep,
-    beregningsperioder: List<BarnepensjonBeregningsperiode>,
     trygdetid: List<TrygdetidDto>,
     erForeldreloes: Boolean = false,
 ): BarnepensjonBeregning {
-    val sisteBeregningsperiode = utbetalingsinfo.beregningsperioder.maxBy { periode -> periode.datoFOM }
+    val beregningsperioder =
+        barnepensjonBeregningsperioder(utbetalingsinfo).map { periode ->
+            if (periode.harForeldreloessats == null) {
+                periode.copy(harForeldreloessats = erForeldreloes)
+            } else {
+                periode
+            }
+        }
+    val sisteBeregningsperiode = beregningsperioder.maxBy { periode -> periode.datoFOM }
     val mappedeTrygdetider =
         mapRiktigMetodeForAnvendteTrygdetider(trygdetid, avdoede, utbetalingsinfo.beregningsperioder)
     val forskjelligTrygdetid =

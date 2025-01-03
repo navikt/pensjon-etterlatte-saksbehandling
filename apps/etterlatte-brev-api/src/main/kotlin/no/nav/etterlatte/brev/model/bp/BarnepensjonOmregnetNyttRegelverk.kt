@@ -82,8 +82,6 @@ data class BarnepensjonOmregnetNyttRegelverk(
                     "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
                 }
 
-            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
-
             return BarnepensjonOmregnetNyttRegelverk(
                 innhold = innhold.innhold(),
                 erUnder18Aar = erUnder18AarNonNull,
@@ -93,7 +91,6 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         avdoede,
                         utbetalingsinfo,
                         grunnbeloep,
-                        beregningsperioder,
                         trygdetid,
                     ),
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },

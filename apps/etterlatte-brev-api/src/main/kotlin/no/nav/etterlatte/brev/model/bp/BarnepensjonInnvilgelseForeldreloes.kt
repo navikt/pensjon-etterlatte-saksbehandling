@@ -53,8 +53,6 @@ data class BarnepensjonInnvilgelseForeldreloes(
             erMigrertYrkesskade: Boolean,
             erSluttbehandling: Boolean,
         ): BarnepensjonInnvilgelseForeldreloes {
-            val beregningsperioder =
-                barnepensjonBeregningsperioder(utbetalingsinfo)
             val frivilligSkattetrekk =
                 brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
                     ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
@@ -67,7 +65,6 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         avdoede,
                         utbetalingsinfo,
                         grunnbeloep,
-                        beregningsperioder,
                         trygdetid,
                         erForeldreloes = true,
                     ),
@@ -108,27 +105,25 @@ data class BarnepensjonForeldreloesRedigerbar(
             vedtaksloesning: Vedtaksloesning,
             loependeIPesys: Boolean,
         ): BarnepensjonForeldreloesRedigerbar {
-            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
-
             val forskjelligAvdoedPeriode = finnEventuellForskjelligAvdoedPeriode(avdoede, utbetalingsinfo)
 
             return BarnepensjonForeldreloesRedigerbar(
                 virkningsdato = utbetalingsinfo.virkningsdato,
                 sisteBeregningsperiodeDatoFom =
-                    beregningsperioder.maxByOrNull { it.datoFOM }?.datoFOM
+                    utbetalingsinfo.beregningsperioder.maxByOrNull { it.datoFOM }?.datoFOM
                         ?: throw UgyldigForespoerselException(
                             code = "INGEN_BEREGNINGSPERIODE_MED_FOM",
                             detail = "Ingen beregningsperiode med dato FOM",
                         ),
                 sisteBeregningsperiodeBeloep =
-                    beregningsperioder.maxByOrNull { it.datoFOM }?.utbetaltBeloep
+                    utbetalingsinfo.beregningsperioder.maxByOrNull { it.datoFOM }?.utbetaltBeloep
                         ?: throw UgyldigForespoerselException(
                             code = "INTET_UTBETALT_BELOEP",
                             detail = "Intet utbetalt beløp i siste beregningsperiode",
                         ),
                 erEtterbetaling = etterbetaling != null,
                 flerePerioder = utbetalingsinfo.beregningsperioder.size > 1,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 erGjenoppretting = vedtaksloesning == Vedtaksloesning.GJENOPPRETTA,
                 vedtattIPesys = loependeIPesys,
                 forskjelligAvdoedPeriode = forskjelligAvdoedPeriode,

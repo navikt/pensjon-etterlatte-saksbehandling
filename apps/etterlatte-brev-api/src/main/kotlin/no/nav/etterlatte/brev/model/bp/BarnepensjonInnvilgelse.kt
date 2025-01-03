@@ -51,7 +51,6 @@ data class BarnepensjonInnvilgelse(
             erMigrertYrkesskade: Boolean,
             erSluttbehandling: Boolean,
         ): BarnepensjonInnvilgelse {
-            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             val frivilligSkattetrekk =
                 brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
                     ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
@@ -59,14 +58,14 @@ data class BarnepensjonInnvilgelse(
             return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning =
-                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, trygdetid),
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 erGjenoppretting = erGjenoppretting,
                 erMigrertYrkesskade = erMigrertYrkesskade,
                 etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
                 frivilligSkattetrekk = frivilligSkattetrekk,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)

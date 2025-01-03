@@ -74,6 +74,7 @@ class BeregningServiceTest {
                         beloep = 3063,
                     ),
                 )
+            every { overstyrBeregning } returns null
         }
 
     private fun opprettBeregningsperiode(
@@ -108,6 +109,7 @@ class BeregningServiceTest {
                         soeskenFlokk = listOf("barn2"),
                     ),
                 )
+            every { overstyrBeregning } returns null
         }
 
     private fun opprettBeregningsgrunnlag() =

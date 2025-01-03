@@ -11,7 +11,6 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
-import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAktivitetspliktVarsel
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -90,7 +89,6 @@ class BrevDataMapperFerdigstillVarsel(
                 avdoede = request.avdoede,
                 utbetalingsinfo = utbetalingsinfo.await(),
                 grunnbeloep = grunnbeloep.await(),
-                beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo.await()),
                 trygdetid = requireNotNull(trygdetid.await()),
                 erForeldreloes = request.erForeldreloes,
             )

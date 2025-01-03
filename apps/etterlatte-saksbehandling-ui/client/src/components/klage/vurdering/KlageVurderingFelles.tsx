@@ -19,7 +19,7 @@ import { forhaandsvisBlankettKa } from '~shared/api/klage'
 import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
 import { PersonButtonLink } from '~components/person/lenker/PersonButtonLink'
 import { PersonOversiktFane } from '~components/person/Person'
-import { BodyShortMedNewlines } from '~shared/BodyShortMedNewlines'
+import { TekstMedBeholdtWhitespace } from '~shared/TekstMedBeholdtWhitespace'
 
 export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
   const klage = useKlage()
@@ -69,11 +69,11 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
       <Heading size="xsmall" level="4">
         Innstillingstekst:
       </Heading>
-      <BodyShort spacing>{innstilling.innstillingTekst}</BodyShort>
+      <TekstMedBeholdtWhitespace spacing>{innstilling.innstillingTekst}</TekstMedBeholdtWhitespace>
       <Heading size="xsmall" level="4">
         Intern kommentar:
       </Heading>
-      <BodyShort spacing>{innstilling.internKommentar || 'Ikke registrert'}</BodyShort>
+      <TekstMedBeholdtWhitespace spacing>{innstilling.internKommentar || 'Ikke registrert'}</TekstMedBeholdtWhitespace>
 
       <BodyShort spacing>
         <Button size="small" variant="primary" onClick={visOversendelseModal}>
@@ -131,7 +131,7 @@ export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: bool
       <BodyShort>
         <strong>Begrunnelse:</strong>
       </BodyShort>
-      <BodyShortMedNewlines spacing>{omgjoering.begrunnelse}</BodyShortMedNewlines>
+      <TekstMedBeholdtWhitespace spacing>{omgjoering.begrunnelse}</TekstMedBeholdtWhitespace>
 
       {kanRedigere && (
         <Alert variant="info">Når klagen ferdigstilles vil det opprettes en oppgave for omgjøring av vedtaket.</Alert>

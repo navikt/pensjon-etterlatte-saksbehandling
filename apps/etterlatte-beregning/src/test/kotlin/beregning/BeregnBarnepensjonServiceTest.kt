@@ -634,6 +634,7 @@ internal class BeregnBarnepensjonServiceTest {
                 datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe GRUNNBELOEP_MAI_23
                 kunEnJuridiskForelder shouldBe false
+                harForeldreloessats shouldBe false
             }
         }
     }
@@ -809,6 +810,7 @@ internal class BeregnBarnepensjonServiceTest {
                     regelVersjon shouldNotBe null
                     avdoedeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
                     kunEnJuridiskForelder shouldBe true
+                    harForeldreloessats shouldBe true
                 }
                 with(beregningsperioder[1]) {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
@@ -821,6 +823,7 @@ internal class BeregnBarnepensjonServiceTest {
                     regelVersjon shouldNotBe null
                     avdoedeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value)
                     kunEnJuridiskForelder shouldBe false
+                    harForeldreloessats shouldBe false
                 }
                 beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
             }

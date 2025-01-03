@@ -20,6 +20,7 @@ fun beregningsperiode(
     beregningsMetodeAnvendt: BeregningsMetode = BeregningsMetode.NASJONAL,
     beregningsMetodeFraGrunnlag: BeregningsMetode = BeregningsMetode.BEST,
     avdoedeForeldre: List<String?>? = null,
+    harForeldreloessats: Boolean? = false,
 ): Beregningsperiode =
     Beregningsperiode(
         datoFOM = datoFOM,
@@ -34,4 +35,5 @@ fun beregningsperiode(
         beregningsMetodeAnvendt = beregningsMetodeAnvendt,
         beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag,
         avdoedeForeldre = avdoedeForeldre,
+        harForeldreloessats = harForeldreloessats,
     )

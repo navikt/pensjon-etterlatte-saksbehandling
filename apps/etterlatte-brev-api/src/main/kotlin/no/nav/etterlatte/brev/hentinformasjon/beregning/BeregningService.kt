@@ -94,6 +94,7 @@ class BeregningService(
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
                     beregningsMetodeFraGrunnlag = finnBeregningsmetodeIGrunnlag(beregningsGrunnlag, it),
                     avdoedeForeldre = it.avdoedeForeldre,
+                    harForeldreloessats = it.harForeldreloessats,
                 )
             }
 
@@ -101,6 +102,7 @@ class BeregningService(
         val antallBarn = if (soeskenjustering) beregningsperioder.last().antallBarn else 1
 
         return Utbetalingsinfo(
+            beregning.overstyrBeregning != null,
             antallBarn,
             Kroner(beregningsperioder.hentUtbetaltBeloep()),
             virkningstidspunkt.atDay(1),

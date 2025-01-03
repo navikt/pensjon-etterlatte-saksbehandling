@@ -90,3 +90,23 @@ fun SubsumsjonsNode<*>.finnAnvendtRegelverkBarnepensjon(): Regelverk? =
         accept(this)
         regelverk
     }
+
+class FinnHarForeldreloessatsVisitor(
+    private val skalHaForeldreloessatsRegel: Regel<*, *>,
+) : Visitor {
+    var skalHaForeldreloessats: Boolean? = null
+
+    override fun visit(node: Node<*>) {}
+
+    override fun visit(node: SubsumsjonsNode<*>) {
+        if (node.regel === skalHaForeldreloessatsRegel && node.verdi is Boolean) {
+            skalHaForeldreloessats = (node.verdi as Boolean)
+        }
+    }
+}
+
+fun SubsumsjonsNode<*>.finnHarForeldreloessats(skalHaForeldreloessatsRegel: Regel<*, *>): Boolean? =
+    with(FinnHarForeldreloessatsVisitor(skalHaForeldreloessatsRegel)) {
+        accept(this)
+        skalHaForeldreloessats
+    }

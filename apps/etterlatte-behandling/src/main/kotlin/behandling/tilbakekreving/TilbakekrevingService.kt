@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.feilhaandtering.sjekkIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -25,7 +26,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVilkaar
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakLesDao
@@ -102,7 +103,7 @@ class TilbakekrevingService(
                 )
             }
 
-            tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.OPPRETTET)
+            lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.OPPRETTET)
 
             tilbakekrevinghendelser.sendTilbakekreving(
                 statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
@@ -155,7 +156,7 @@ class TilbakekrevingService(
 
             oppgaveService.avbrytAapneOppgaverMedReferanse(tilbakekreving.id.toString(), merknad)
 
-            tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.AVBRUTT)
+            lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.AVBRUTT)
 
             tilbakekrevinghendelser.sendTilbakekreving(
                 statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
@@ -355,7 +356,7 @@ class TilbakekrevingService(
             }
         }
 
-        val vedtakId =
+        val vedtak =
             runBlocking {
                 vedtakKlient.fattVedtakTilbakekreving(
                     tilbakekrevingId = tilbakekreving.id,
@@ -369,7 +370,7 @@ class TilbakekrevingService(
                 tilbakekreving.copy(status = TilbakekrevingStatus.FATTET_VEDTAK),
             )
 
-        tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.FATTET_VEDTAK, vedtakId, saksbehandler)
+        lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.FATTET_VEDTAK, vedtak.id, saksbehandler)
 
         tilbakekrevinghendelser.sendTilbakekreving(
             statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
@@ -393,11 +394,12 @@ class TilbakekrevingService(
         inTransaction {
             logger.info("Attesterer vedtak for tilbakekreving=$tilbakekrevingId")
             val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+            val sendeBrev = tilbakekreving.sendeBrev
 
             sjekkForventetStatus(tilbakekreving, TilbakekrevingStatus.FATTET_VEDTAK)
             sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
-            if (tilbakekreving.sendeBrev) {
+            if (sendeBrev) {
                 logger.info("Ferdigstiller vedtaksbrev for tilbakekreving=$tilbakekrevingId")
                 runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, tilbakekreving.sak.id, saksbehandler) }
             } else {
@@ -419,19 +421,24 @@ class TilbakekrevingService(
                 )
 
             runBlocking {
+                logger.info("Sender vedtak til tilbakekrevingskomponenten for tilbakekreving=$tilbakekrevingId")
                 tilbakekrevingKlient.sendTilbakekrevingsvedtak(
                     saksbehandler,
                     tilbakekrevingVedtak(tilbakekreving, vedtak),
                 )
             }
 
-            tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.ATTESTERT, vedtak.id, saksbehandler, kommentar)
+            lagreTilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.ATTESTERT, vedtak.id, saksbehandler, kommentar)
 
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 referanse = tilbakekreving.id.toString(),
                 type = OppgaveType.TILBAKEKREVING,
                 saksbehandler = saksbehandler,
             )
+
+            if (sendeBrev) {
+                tilbakekrevinghendelser.sendVedtakForJournalfoeringOgDistribusjonAvBrev(tilbakekrevingId, vedtak)
+            }
 
             tilbakekrevinghendelser.sendTilbakekreving(
                 statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
@@ -454,7 +461,7 @@ class TilbakekrevingService(
             sjekkForventetStatus(tilbakekreving, TilbakekrevingStatus.FATTET_VEDTAK)
             sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
-            val vedtakId =
+            val vedtak =
                 runBlocking {
                     vedtakKlient.underkjennVedtakTilbakekreving(
                         tilbakekrevingId = tilbakekreving.id,
@@ -465,9 +472,9 @@ class TilbakekrevingService(
             val oppdatertTilbakekreving =
                 tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.UNDERKJENT))
 
-            tilbakekrevingHendelse(
+            lagreTilbakekrevingHendelse(
                 tilbakekreving = tilbakekreving,
-                vedtakId = vedtakId,
+                vedtakId = vedtak.id,
                 saksbehandler = saksbehandler,
                 hendelseType = TilbakekrevingHendelseType.UNDERKJENT,
                 kommentar = kommentar,
@@ -488,7 +495,7 @@ class TilbakekrevingService(
             oppdatertTilbakekreving
         }
 
-    private fun tilbakekrevingHendelse(
+    private fun lagreTilbakekrevingHendelse(
         tilbakekreving: TilbakekrevingBehandling,
         hendelseType: TilbakekrevingHendelseType,
         vedtakId: Long? = null,
@@ -514,16 +521,18 @@ class TilbakekrevingService(
 
     private fun tilbakekrevingVedtak(
         tilbakekreving: TilbakekrevingBehandling,
-        vedtak: TilbakekrevingVedtakLagretDto,
+        vedtak: VedtakDto,
     ) = TilbakekrevingVedtak(
         sakId = tilbakekreving.sak.id,
         vedtakId = tilbakekreving.tilbakekreving.kravgrunnlag.vedtakId.value,
         fattetVedtak =
-            FattetVedtak(
-                saksbehandler = vedtak.fattetAv,
-                enhet = vedtak.enhet,
-                dato = vedtak.dato,
-            ),
+            sjekkIkkeNull(vedtak.vedtakFattet) { "Vedtak ${vedtak.id} i tilbakekreving ${tilbakekreving.id} er ikke fattet" }.let {
+                FattetVedtak(
+                    saksbehandler = it.ansvarligSaksbehandler,
+                    enhet = it.ansvarligEnhet,
+                    dato = it.tidspunkt.toLocalDate(),
+                )
+            },
         aarsak =
             krevIkkeNull(tilbakekreving.tilbakekreving.vurdering?.aarsak) {
                 "Årsak for tilbakekreving mangler"

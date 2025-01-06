@@ -9,8 +9,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfoRequest
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -31,7 +29,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
         route("/brevutfall") {
             post {
                 kunSkrivetilgang {
-                    medBody<BrevutfallOgEtterbetalingDto> { dto ->
+                    medBody<BrevutfallOgEtterbetalingDto> { brevutfallDto ->
                         val brevutfallOgEtterbetaling =
                             inTransaction {
                                 logger.info("Lagrer brevutfall og etterbetaling for behandling $behandlingId")
@@ -39,16 +37,16 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                                     service.lagreBrevutfallOgEtterbetaling(
                                         behandlingId,
                                         brukerTokenInfo,
-                                        dto.opphoer ?: throw OpphoerIkkeSatt(behandlingId),
-                                        dto.toBrevutfall(behandlingId, brukerTokenInfo),
-                                        dto.toEtterbetaling(behandlingId, brukerTokenInfo),
+                                        brevutfallDto.opphoer ?: throw OpphoerIkkeSatt(behandlingId),
+                                        brevutfallDto.brevutfall!!,
+                                        brevutfallDto.toEtterbetaling(behandlingId, brukerTokenInfo),
                                     )
 
                                 BrevutfallOgEtterbetalingDto(
                                     behandlingId,
-                                    dto.opphoer,
+                                    brevutfallDto.opphoer,
                                     etterbetalingLagret?.toDto(),
-                                    brevutfallLagret.toDto(),
+                                    brevutfallLagret,
                                 )
                             }
                         call.respond(brevutfallOgEtterbetaling)
@@ -64,7 +62,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                     }
                 when (brevutfall) {
                     null -> call.respond(HttpStatusCode.NoContent)
-                    else -> call.respond(brevutfall.toDto())
+                    else -> call.respond(brevutfall)
                 }
             }
         }
@@ -101,7 +99,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                         BrevutfallOgEtterbetalingDto(
                             behandlingId = behandlingId,
                             etterbetaling = etterbetaling?.toDto(),
-                            brevutfall = brevutfall.toDto(),
+                            brevutfall = brevutfall,
                         )
                     } else {
                         null
@@ -123,18 +121,6 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
     }
 }
 
-private fun BrevutfallOgEtterbetalingDto.toBrevutfall(
-    behandlingId: UUID,
-    bruker: BrukerTokenInfo,
-): Brevutfall =
-    Brevutfall(
-        behandlingId = behandlingId,
-        aldersgruppe = brevutfall?.aldersgruppe,
-        feilutbetaling = brevutfall?.feilutbetaling,
-        frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk,
-        kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
-    )
-
 private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
     behandlingId: UUID,
     bruker: BrukerTokenInfo,
@@ -145,9 +131,6 @@ private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
             behandlingId = behandlingId,
             datoFom = etterbetalingCopy.datoFom,
             datoTom = etterbetalingCopy.datoTom,
-            inneholderKrav = etterbetalingCopy.inneholderKrav,
-            frivilligSkattetrekk = etterbetalingCopy.frivilligSkattetrekk,
-            etterbetalingPeriodeValg = etterbetalingCopy.etterbetalingPeriodeValg,
             kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
         )
     } else {
@@ -155,24 +138,12 @@ private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
     }
 }
 
-private fun Brevutfall.toDto() =
-    BrevutfallDto(
-        behandlingId = behandlingId,
-        aldersgruppe = aldersgruppe,
-        feilutbetaling = feilutbetaling,
-        frivilligSkattetrekk = frivilligSkattetrekk,
-        kilde = kilde,
-    )
-
 private fun Etterbetaling.toDto() =
     EtterbetalingDto(
         behandlingId = behandlingId,
         datoFom = fom.atDay(1),
         datoTom = tom.atEndOfMonth(),
         kilde = kilde,
-        inneholderKrav = inneholderKrav,
-        frivilligSkattetrekk = frivilligSkattetrekk,
-        etterbetalingPeriodeValg = etterbetalingPeriodeValg,
     )
 
 class OpphoerIkkeSatt(

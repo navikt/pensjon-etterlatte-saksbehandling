@@ -6,11 +6,10 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
-import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
-import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
@@ -62,10 +61,10 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
 data class BarnepensjonOmregnetNyttRegelverk(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
-    val etterbetaling: BarnepensjonEtterbetaling?,
     val frivilligSkattetrekk: Boolean?,
     val erUnder18Aar: Boolean,
     val erBosattUtlandet: Boolean,
+    val erEtterbetaling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -77,6 +76,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
             etterbetaling: EtterbetalingDTO?,
             utlandstilknytning: UtlandstilknytningType?,
             avdoede: List<Avdoed>,
+            brevutfall: BrevutfallDto?,
         ): BarnepensjonOmregnetNyttRegelverk {
             val erUnder18AarNonNull =
                 krevIkkeNull(erUnder18Aar) {
@@ -97,10 +97,10 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         beregningsperioder,
                         trygdetid,
                     ),
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
-                frivilligSkattetrekk = etterbetaling?.frivilligSkattetrekk ?: false,
+                frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
                 erBosattUtlandet =
                     krevIkkeNull(utlandstilknytning) { "Utlandstilknytning mangler" } == UtlandstilknytningType.BOSATT_UTLAND,
+                erEtterbetaling = etterbetaling != null,
             )
         }
     }

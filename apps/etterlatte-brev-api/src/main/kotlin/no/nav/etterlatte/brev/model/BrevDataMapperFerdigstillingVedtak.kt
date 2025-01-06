@@ -242,6 +242,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
+        val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         if (erForeldreloes) {
             barnepensjonInnvilgelse(
@@ -266,6 +267,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 grunnbeloep = grunnbeloep.await(),
                 utlandstilknytning = utlandstilknytningType,
                 avdoede = avdoede,
+                brevutfall = brevutfall.await(),
             )
         }
     }
@@ -355,7 +357,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
-        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+        val behandling = async { behandlingService.hentBehandling(behandlingId, bruker) }.await()
 
         if (erForeldreloes) {
             BarnepensjonInnvilgelseForeldreloes.fra(

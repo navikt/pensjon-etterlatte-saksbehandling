@@ -126,7 +126,7 @@ export const ValgForInfobrev = () => {
             target="_blank"
           >
             Vis siste beregning
-            <ExternalLinkIcon />
+            <ExternalLinkIcon aria-hidden />
           </Link>
         )}
         {redigeres ? (
@@ -240,7 +240,7 @@ export const ValgForInfobrev = () => {
                   <Button
                     type="button"
                     size="small"
-                    icon={<PencilIcon />}
+                    icon={<PencilIcon aria-hidden />}
                     variant="secondary"
                     onClick={() => setRedigeres(true)}
                   >

@@ -1,38 +1,23 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { JaNei } from '~shared/types/ISvar'
 
-export const hentTrygdetidUfoeretrygdOgAlderspensjon = async (
-  fnr: string
-): Promise<ApiResponse<TrygdetidsperioderPesys>> =>
-  apiClient.post('trygdetid_v2/pesys/grunnlag', { foedselsnummer: fnr })
-
-export interface TrygdetidsperioderPesys {
-  ufoeretrygd: TrygdetidsperiodeListe
-  alderspensjon: TrygdetidsperiodeListe
-}
-
-export interface TrygdetidsperiodeListe {
-  trygdetidsGrunnlagListe?: TrygdetidPeriodePesys[]
-}
-
-export interface TrygdetidPeriodePesys {
-  isoCountryCode: string // ISO 3166-1 alpha-3 code feks: "NOR" "SWE"
-  fra: string //TODO: eller date? kommer i steg 2 da vi dette skal brukes i frontend
-  til: string
-  poengInnAar?: boolean
-  poengUtAar?: boolean
-  prorata?: boolean
-  kilde: {
-    tidspunkt: string
-    type: string
-  }
-}
-
 export const hentTrygdetider = async (behandlingId: string): Promise<ApiResponse<ITrygdetid[]>> =>
   apiClient.get<ITrygdetid[]>(`/trygdetid_v2/${behandlingId}`)
 
-export const opprettTrygdetider = async (behandlingId: string): Promise<ApiResponse<ITrygdetid[]>> =>
-  apiClient.post(`/trygdetid_v2/${behandlingId}`, {})
+export const opprettTrygdetider = async (args: {
+  behandlingId: string
+  overskriv: boolean
+}): Promise<ApiResponse<ITrygdetid[]>> =>
+  apiClient.post(`/trygdetid_v2/${args.behandlingId}?overskriv=${args.overskriv}`, {})
+
+export const hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon = async (
+  behandlingId: string
+): Promise<ApiResponse<ITrygdetid[]>> => apiClient.post(`trygdetid_v2/${behandlingId}/pesys`, {})
+
+export const sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys = async (
+  behandlingId: string
+): Promise<ApiResponse<ITrygdetid[]>> =>
+  apiClient.get(`trygdetid_v2/${behandlingId}/pesys/sjekk-pesys-trygdetidsgrunnlag`)
 
 export const overstyrTrygdetid = async (overstyring: ITrygdetidOverstyring): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid_v2/${overstyring.behandlingId}/overstyr`, { ...overstyring })

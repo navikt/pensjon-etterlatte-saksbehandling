@@ -15,7 +15,7 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
   return (
     <VStack gap="2" width="67%">
       <HStack gap="2" align="center" marginBlock="0 2">
-        <HeartIcon fontSize={IconSize.DEFAULT} />
+        <HeartIcon fontSize={IconSize.DEFAULT} aria-hidden />
         <Heading size="small" level="3">
           Sivilstand (gjenlevende)
         </Heading>

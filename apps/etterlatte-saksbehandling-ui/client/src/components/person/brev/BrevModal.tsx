@@ -9,7 +9,7 @@ export default function BrevModal({ brev }: { brev: IBrev }) {
 
   return (
     <>
-      <Button variant="primary" icon={<EyeIcon />} onClick={() => setOpen(true)} size="small">
+      <Button variant="primary" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)} size="small">
         Vis
       </Button>
 

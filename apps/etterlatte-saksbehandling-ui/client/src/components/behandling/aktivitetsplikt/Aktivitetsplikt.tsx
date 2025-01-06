@@ -151,7 +151,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
             target="_blank"
           >
-            Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon />
+            Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon aria-hidden />
           </Button>
         </TekstWrapper>
 
@@ -195,7 +195,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
             target="_blank"
           >
-            Lag oppgave til lokalkontor <ExternalLinkIcon />
+            Lag oppgave til lokalkontor <ExternalLinkIcon aria-hidden />
           </Button>
         </TekstWrapper>
 

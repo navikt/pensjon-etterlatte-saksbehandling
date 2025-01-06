@@ -119,7 +119,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
               )}
               {erBarnepensjon && (
                 <Link href={configContext['bisysUrl']} target="_blank">
-                  Bisys <ExternalLinkIcon />
+                  Bisys <ExternalLinkIcon aria-hidden />
                 </Link>
               )}
             </VStack>
@@ -203,7 +203,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
           </VStack>
 
           {!redigerbar && behandling.status == IBehandlingStatus.FATTET_VEDTAK && oppgaveErTildeltInnloggetBruker && (
-            <Button variant="tertiary" icon={<PencilIcon />} onClick={() => setRedigerbar(true)}>
+            <Button variant="tertiary" icon={<PencilIcon aria-hidden />} onClick={() => setRedigerbar(true)}>
               Rediger
             </Button>
           )}

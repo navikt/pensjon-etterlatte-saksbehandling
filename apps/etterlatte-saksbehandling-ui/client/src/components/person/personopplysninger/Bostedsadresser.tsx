@@ -8,7 +8,7 @@ import { Bostedsadresse } from '~shared/types/familieOpplysninger'
 
 export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: Bostedsadresse[] }): ReactNode => {
   return (
-    <Personopplysning heading="Bostedsadresser" icon={<HouseIcon />}>
+    <Personopplysning heading="Bostedsadresser" icon={<HouseIcon aria-hidden />}>
       <Table>
         <Table.Header>
           <Table.Row>

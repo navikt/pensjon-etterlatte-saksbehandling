@@ -104,7 +104,8 @@ internal fun Route.sakSystemRoutes(
                                 "${call.parameters[PLEIEFORHOLDET_OPPHOERTE_PARAMETER]}",
                         )
                     }
-                call.respond(sakService.hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte))
+                val opphoerte = inTransaction { sakService.hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte) }
+                call.respond(opphoerte)
             }
         }
 

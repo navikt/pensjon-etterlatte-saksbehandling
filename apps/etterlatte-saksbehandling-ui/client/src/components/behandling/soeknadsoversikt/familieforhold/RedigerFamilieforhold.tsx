@@ -77,7 +77,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
         variant="tertiary"
         size="small"
         onClick={() => setIsOpen(true)}
-        icon={<PencilIcon />}
+        icon={<PencilIcon aria-hidden />}
         style={{ float: 'right' }}
       >
         Rediger
@@ -108,12 +108,16 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                       />
                     </Box>
                     <div>
-                      <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => avdoedListe.remove(index)} />
+                      <Button
+                        icon={<XMarkIcon title="Fjern avdød" />}
+                        variant="tertiary"
+                        onClick={() => avdoedListe.remove(index)}
+                      />
                     </div>
                   </HStack>
                 ))}
                 <Button
-                  icon={<PlusIcon />}
+                  icon={<PlusIcon aria-hidden />}
                   onClick={() => avdoedListe.append({ fnr: '' })}
                   disabled={!kanLeggeTil() || isPending(status)}
                 >
@@ -139,13 +143,17 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                       />
                     </Box>
                     <div>
-                      <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => gjenlevendeListe.remove(index)} />
+                      <Button
+                        icon={<XMarkIcon title="Fjern gjenlevende" />}
+                        variant="tertiary"
+                        onClick={() => gjenlevendeListe.remove(index)}
+                      />
                     </div>
                   </HStack>
                 ))}
 
                 <Button
-                  icon={<PlusIcon />}
+                  icon={<PlusIcon aria-hidden />}
                   onClick={() => gjenlevendeListe.append({ fnr: '' })}
                   disabled={!kanLeggeTil() || isPending(status)}
                 >

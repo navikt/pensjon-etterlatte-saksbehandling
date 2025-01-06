@@ -23,6 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         env:
+          TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           CLUSTER: dev-gcp
           RESOURCE: apps/etterlatte-${{ inputs.applikasjon }}/.nais/dev.yaml
           VAR: image=${{ env.image }}

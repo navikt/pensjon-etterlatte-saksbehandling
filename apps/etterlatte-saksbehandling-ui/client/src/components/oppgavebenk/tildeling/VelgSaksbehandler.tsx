@@ -305,7 +305,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                     variant="secondary"
                     size="small"
                     onClick={onFjernTildeling}
-                    icon={<PersonCrossIcon />}
+                    icon={<PersonCrossIcon aria-hidden />}
                     iconPosition="right"
                     loading={isPending(fjernSaksbehandlerResult)}
                   >

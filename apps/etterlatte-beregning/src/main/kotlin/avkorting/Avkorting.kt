@@ -132,7 +132,12 @@ data class Avkorting(
                                                     fom = inntektsavkorting.grunnlag.periode.fom,
                                                     tom =
                                                         inntektsavkorting.grunnlag.periode.tom
-                                                            ?: opphoerFom?.minusMonths(1),
+                                                            ?: opphoerFom?.let {
+                                                                tomOpphoerFomEllerAarsskifte(
+                                                                    inntektsavkorting.grunnlag.periode.fom,
+                                                                    opphoerFom,
+                                                                )
+                                                            },
                                                 ),
                                         ),
                                 )
@@ -430,6 +435,15 @@ data class Avkorting(
             true -> YearMonth.of(aarsoppgjoer.aar, 12)
             false -> null
         }
+    }
+
+    private fun tomOpphoerFomEllerAarsskifte(
+        fom: YearMonth,
+        opphoerFom: YearMonth,
+    ) = if (opphoerFom.year > fom.year) {
+        YearMonth.of(fom.year, Month.DECEMBER)
+    } else {
+        opphoerFom.minusMonths(1)
     }
 
     /*

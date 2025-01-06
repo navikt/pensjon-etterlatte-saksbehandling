@@ -294,7 +294,7 @@ const KravpakkeUtlandBehandling = (props: {
 
               <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
                 Gå til RINA for å opprette kravpakke til utlandet
-                <ExternalLinkIcon fill={ABlue500} />
+                <ExternalLinkIcon fill={ABlue500} aria-hidden />
               </LenkeMargin>
               <TextField
                 label="Saksnummer RINA"
@@ -412,7 +412,7 @@ const KravpakkeUtlandBehandling = (props: {
                         <Button
                           disabled={!redigerbar}
                           variant="tertiary"
-                          icon={<TrashIcon />}
+                          icon={<TrashIcon aria-hidden />}
                           onClick={() => fjernDokument()}
                           style={{ marginLeft: '5rem' }}
                         >
@@ -435,7 +435,7 @@ const KravpakkeUtlandBehandling = (props: {
               <div>
                 <Button
                   disabled={!redigerbar}
-                  icon={<PencilWritingIcon />}
+                  icon={<PencilWritingIcon aria-hidden />}
                   onClick={opprettNyttBrevINyFane}
                   loading={isPending(nyttBrevStatus)}
                   iconPosition="right"

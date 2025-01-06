@@ -22,7 +22,7 @@ export const Foreldre = ({
   }
 
   return (
-    <Personopplysning heading="Foreldre" icon={<PersonIcon />}>
+    <Personopplysning heading="Foreldre" icon={<PersonIcon aria-hidden />}>
       <Table>
         <Table.Header>
           <Table.Row>

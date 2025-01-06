@@ -14,6 +14,7 @@ import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.sanksjon.Sanksjon
 import java.time.LocalDate
 import kotlin.math.max
+import kotlin.math.min
 
 data class PeriodisertAvkortetYtelseGrunnlag(
     val beregningsperioder: PeriodisertGrunnlag<FaktumNode<Int>>,
@@ -88,20 +89,28 @@ val avkortetYtelseMedRestanse =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Legger til restanse fra endret avkorting til tidligere måneder",
-        regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE"),
+        regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE", versjon = "2"),
     ) benytter avkorteYtelse og fordeltRestanseGrunnlag med { avkorteYtelse, fordeltRestanse ->
         avkorteYtelse
             .minus(Beregningstall(fordeltRestanse))
             .toInteger()
-            .let { max(it, 0) }
+    }
+
+val avkortetYtelseMedRestanseMinMaks =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "Utbetalt hver måned skal ikke være mindre enn 0 eller høyere en beregnet beløp",
+        regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MAKS-MIN"),
+    ) benytter avkortetYtelseMedRestanse og beregningsbeloep med { avkortetYtelseMedRestanse, beregningsbeloep ->
+        min(max(avkortetYtelseMedRestanse, 0), beregningsbeloep)
     }
 
 val avkortetYtelseMedRestanseOgSanksjon =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Setter 0 hvis sanksjon, ellers beregner avkortet ytelse med restanse",
-        regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE-OG-SANKSJON"),
-    ) benytter avkortetYtelseMedRestanse og harSanksjon med { avkorteYtelseMedRestanse, sanksjon ->
+        regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE-OG-SANKSJON", versjon = "2"),
+    ) benytter avkortetYtelseMedRestanseMinMaks og harSanksjon med { avkorteYtelseMedRestanse, sanksjon ->
         if (sanksjon != null) {
             0
         } else {

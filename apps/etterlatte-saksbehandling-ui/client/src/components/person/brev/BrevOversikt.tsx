@@ -33,7 +33,7 @@ const handlingKnapp = (brev: IBrev) => {
       : `/person/sak/${brev.sakId}/brev/${brev.id}`
 
     return (
-      <Button as="a" href={href} variant="secondary" title="Rediger" icon={<DocPencilIcon />} size="small">
+      <Button as="a" href={href} variant="secondary" title="Rediger" icon={<DocPencilIcon aria-hidden />} size="small">
         Rediger
       </Button>
     )
@@ -46,7 +46,7 @@ const handlingKnapp = (brev: IBrev) => {
         href={`/api/brev/${brev.id}/pdf?sakId=${brev.sakId}`}
         target="_blank"
         variant="secondary"
-        icon={<ExternalLinkIcon />}
+        icon={<ExternalLinkIcon aria-hidden />}
         size="small"
       >
         Åpne

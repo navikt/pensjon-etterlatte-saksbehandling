@@ -16,6 +16,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.ktor.startRandomPort
 import no.nav.etterlatte.ktor.token.issueSaksbehandlerToken
@@ -37,6 +38,7 @@ internal class TrygdetidRoutesTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val trygdetidService = mockk<TrygdetidService>()
+    private val unleashMock = mockk<FeatureToggleService>()
 
     @BeforeEach
     fun setUp() {
@@ -153,7 +155,7 @@ internal class TrygdetidRoutesTest {
     private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
         io.ktor.server.testing.testApplication {
             runServer(mockOAuth2Server) {
-                trygdetid(trygdetidService, behandlingKlient)
+                trygdetid(trygdetidService, behandlingKlient, unleashMock)
             }
             block(this)
         }

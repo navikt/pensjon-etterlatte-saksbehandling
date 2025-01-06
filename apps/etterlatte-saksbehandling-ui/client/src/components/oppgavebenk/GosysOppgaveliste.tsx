@@ -23,7 +23,7 @@ interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
 }
 
-const sorterOppgaverEtterOpprettet = (oppgaver: GosysOppgave[]) => {
+export const sorterOppgaverEtterOpprettetGosys = (oppgaver: GosysOppgave[]) => {
   return oppgaver.sort((a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime())
 }
 
@@ -74,7 +74,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
 
   const hentOppgaver = () => {
     hentGosysOppgaverFetch(filter, (oppgaver) => {
-      dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
+      dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettetGosys(oppgaver))
     })
   }
 

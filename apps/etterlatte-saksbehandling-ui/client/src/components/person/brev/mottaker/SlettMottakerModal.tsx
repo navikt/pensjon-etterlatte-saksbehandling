@@ -31,7 +31,12 @@ export function SlettMottakerModal({ brevId, sakId, mottakerId, fjernMottaker }:
 
   return (
     <>
-      <Button variant="danger" onClick={() => setIsOpen(true)} icon={<TrashIcon aria-hidden />} size="small" />
+      <Button
+        variant="danger"
+        onClick={() => setIsOpen(true)}
+        icon={<TrashIcon title="Slett mottaker" />}
+        size="small"
+      />
 
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Slett mottaker">
         <Modal.Body>

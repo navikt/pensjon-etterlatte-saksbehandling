@@ -77,7 +77,7 @@ spec:
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-grunnlag
     - name: PEN_URL
-      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi
+      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen
     - name: PEN_CLIENT_ID
       value: ddd52335-cfe8-4ee9-9e68-416a5ab26efa
   envFrom:

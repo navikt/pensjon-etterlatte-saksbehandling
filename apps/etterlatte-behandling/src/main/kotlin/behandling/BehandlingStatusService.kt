@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -80,6 +81,7 @@ interface BehandlingStatusService {
     fun settReturnertVedtak(
         behandling: Behandling,
         vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     fun settTilSamordnetVedtak(
@@ -107,6 +109,7 @@ class BehandlingStatusServiceImpl(
     private val oppgaveService: OppgaveService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val generellBehandlingService: GenerellBehandlingService,
+    private val saksbehandlerService: SaksbehandlerService,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
 
@@ -223,9 +226,13 @@ class BehandlingStatusServiceImpl(
             referanse = vedtak.sakIdOgReferanse.referanse,
             type = OppgaveType.fra(behandling.type),
             saksbehandler = brukerTokenInfo,
-            merknad = "${vedtak.vedtakType.tilLesbarString()}: ${vedtak.vedtakHendelse.kommentar ?: ""}",
+            merknad = "${vedtak.vedtakType.tilLesbarString()}: ${vedtak.vedtakHendelse.kommentar ?: ""}. Attestant: ${hentSaksbehandlerNavn(
+                brukerTokenInfo.ident(),
+            )}",
         )
     }
+
+    private fun hentSaksbehandlerNavn(ident: String): String = saksbehandlerService.hentNavnForIdent(ident) ?: ident
 
     override fun sjekkOmKanReturnereVedtak(behandlingId: UUID) {
         hentBehandling(behandlingId).tilReturnert()
@@ -234,6 +241,7 @@ class BehandlingStatusServiceImpl(
     override fun settReturnertVedtak(
         behandling: Behandling,
         vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         lagreNyBehandlingStatus(behandling.tilReturnert())
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.UNDERKJENT)
@@ -244,7 +252,7 @@ class BehandlingStatusServiceImpl(
             merknad =
                 vedtak.vedtakHendelse.let {
                     listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
-                },
+                } + ". Attestant: ${hentSaksbehandlerNavn(brukerTokenInfo.ident())}",
         )
         // Automatisk inntektsendring skal gjøres manuelt hvis returnert fra attestering
         if (

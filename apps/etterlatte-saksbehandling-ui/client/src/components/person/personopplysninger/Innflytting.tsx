@@ -15,7 +15,7 @@ export const Innflytting = ({
   landListe: ILand[]
 }): ReactNode => {
   return (
-    <Personopplysning heading="Innflytting" icon={<AirplaneIcon />}>
+    <Personopplysning heading="Innflytting" icon={<AirplaneIcon aria-hidden />}>
       <VStack gap="4">
         <ReadMore header="Gyldighetsdato">
           Gyldighetsdato kommer fra folkeregisteret og har ikke nødvendigvis sammenheng med når innflytting faktisk

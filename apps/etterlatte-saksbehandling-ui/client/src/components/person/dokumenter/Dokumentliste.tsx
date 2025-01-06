@@ -107,7 +107,7 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
 
         <HStack justify="center" marginBlock="4">
           {sideInfo?.finnesNesteSide && (
-            <Button variant="secondary" onClick={() => hent(sideInfo?.sluttpeker)} icon={<ArrowDownIcon />}>
+            <Button variant="secondary" onClick={() => hent(sideInfo?.sluttpeker)} icon={<ArrowDownIcon aria-hidden />}>
               Last flere
             </Button>
           )}

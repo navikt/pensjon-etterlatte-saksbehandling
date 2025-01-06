@@ -17,8 +17,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -110,7 +109,7 @@ internal class BehandlingInfoDaoTest(
 
     @Test
     fun `skal lagre brevutfall`() {
-        val brevutfall = brevutfall(behandlingId)
+        val brevutfall = brevutfallDto(behandlingId)
 
         val lagretBrevutfall = dao.lagreBrevutfall(brevutfall)
 
@@ -121,7 +120,7 @@ internal class BehandlingInfoDaoTest(
 
     @Test
     fun `skal hente brevutfall`() {
-        val brevutfall = brevutfall(behandlingId)
+        val brevutfall = brevutfallDto(behandlingId)
         dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
         dao.lagreBrevutfall(brevutfall)
         val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)
@@ -131,7 +130,7 @@ internal class BehandlingInfoDaoTest(
 
     @Test
     fun `skal hente brevutfall men etterbetaling lå der, skal allikevel gå bra`() {
-        val brevutfall = brevutfall(behandlingId)
+        val brevutfall = brevutfallDto(behandlingId)
         dao.hentBrevutfall(brevutfall.behandlingId) shouldBe null
         val etterbetaling = etterbetaling(behandlingId)
         dao.lagreEtterbetaling(etterbetaling)
@@ -146,7 +145,7 @@ internal class BehandlingInfoDaoTest(
 
     @Test
     fun `skal oppdatere brevutfall`() {
-        val brevutfall = brevutfall(behandlingId)
+        val brevutfall = brevutfallDto(behandlingId)
 
         val lagretBrevutfall = dao.lagreBrevutfall(brevutfall)
 
@@ -197,8 +196,8 @@ internal class BehandlingInfoDaoTest(
         dao.hentEtterbetaling(etterbetaling.behandlingId) shouldBe null
     }
 
-    private fun brevutfall(behandlingId: UUID) =
-        Brevutfall(
+    private fun brevutfallDto(behandlingId: UUID) =
+        BrevutfallDto(
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
@@ -211,9 +210,6 @@ internal class BehandlingInfoDaoTest(
             behandlingId = behandlingId,
             fom = YearMonth.of(2023, 11),
             tom = YearMonth.of(2023, 12),
-            inneholderKrav = true,
-            frivilligSkattetrekk = true,
-            etterbetalingPeriodeValg = EtterbetalingPeriodeValg.UNDER_3_MND,
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
         )
 

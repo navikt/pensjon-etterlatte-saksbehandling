@@ -1,4 +1,5 @@
 import {
+  IBehandlingStatus,
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
   IGyldighetResultat,
@@ -36,6 +37,10 @@ export const arkiverGrunnlagshendelse = async (hendelse: Grunnlagsendringshendel
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {
   return apiClient.get(`/behandling/${id}`)
+}
+
+export const hentBehandlingstatus = async (id: string): Promise<ApiResponse<IBehandlingStatus>> => {
+  return apiClient.get(`/behandling/${id}/status`)
 }
 
 export const opprettBehandling = async (nyBehandlingRequest: NyBehandlingRequest): Promise<ApiResponse<string>> =>

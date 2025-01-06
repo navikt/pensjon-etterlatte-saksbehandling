@@ -141,7 +141,7 @@ class AvkortingValiderTest {
                     fratrekkInnAarUtland = 0,
                     fom = YearMonth.of(2024, 1),
                 )
-            validerInntekt(utenFratrekk, avkorting, true)
+            validerInntekt(utenFratrekk, avkorting, true, naa = YearMonth.of(2024, 1))
 
             assertThrows<HarFratrekkInnAarForFulltAar> {
                 val inntektMedFratrekk =
@@ -150,7 +150,7 @@ class AvkortingValiderTest {
                         fratrekkInnAarUtland = 0,
                         fom = YearMonth.of(2024, 1),
                     )
-                validerInntekt(inntektMedFratrekk, avkorting, true)
+                validerInntekt(inntektMedFratrekk, avkorting, true, naa = YearMonth.of(2024, 1))
             }
 
             assertThrows<HarFratrekkInnAarForFulltAar> {
@@ -161,7 +161,7 @@ class AvkortingValiderTest {
                         fom = YearMonth.of(2024, 1),
                     )
 
-                validerInntekt(inntektMedFratrekkUtland, avkorting, true)
+                validerInntekt(inntektMedFratrekkUtland, avkorting, true, naa = YearMonth.of(2024, 1))
             }
         }
 
@@ -234,6 +234,7 @@ class AvkortingValiderTest {
             ),
             Avkorting(),
             true,
+            naa = YearMonth.of(2024, 1),
         )
     }
 
@@ -250,6 +251,7 @@ class AvkortingValiderTest {
             ),
             avkorting(),
             false,
+            naa = YearMonth.of(2024, 1),
         )
     }
 }

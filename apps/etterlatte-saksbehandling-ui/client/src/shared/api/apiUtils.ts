@@ -48,6 +48,7 @@ export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T
 
 export const mapResult = <T, R>(result: Result<T>, mappers: Mappers<T, R>) => mapResultFallback(result, mappers, null)
 
+//TODO: ikke bruk, burde slettes og skrives om til mapResult over
 export const mapApiResult = <T>(
   result: Result<T>,
   mapInitialOrPending: ReactElement,

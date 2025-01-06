@@ -29,6 +29,9 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class DokumentManglerDatoException(
@@ -201,7 +204,16 @@ class GenerellBehandlingService(
                 attestant = Attestant(saksbehandler.ident, Tidspunkt.now()),
             ),
         )
+
         opprettHendelse(GenerellBehandlingHendelseType.ATTESTERT, hentetBehandling, saksbehandler)
+        oppgaveService.opprettOppgave(
+            generellbehandlingId.toString(),
+            hentetBehandling.sakId,
+            OppgaveKilde.GENERELL_BEHANDLING,
+            OppgaveType.GENERELL_OPPGAVE,
+            "Sluttbehandling - VO utland",
+            Tidspunkt.ofNorskTidssone(LocalDate.now().plus(3, ChronoUnit.MONTHS), LocalTime.NOON),
+        )
     }
 
     private fun verifiserRiktigSaksbehandler(

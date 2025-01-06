@@ -72,7 +72,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
@@ -257,30 +256,42 @@ class VedtakKlientTest : VedtakKlient {
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long = 123L
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+        }
 
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long = 123L
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+        }
 
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): TilbakekrevingVedtakLagretDto =
-        TilbakekrevingVedtakLagretDto(
-            id = 123L,
-            fattetAv = "saksbehandler",
-            enhet = Enheter.defaultEnhet.enhetNr,
-            dato = LocalDate.now(),
-        )
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+            every { vedtakFattet } returns
+                mockk {
+                    every { ansvarligSaksbehandler } returns "saksbehandler"
+                    every { ansvarligEnhet } returns Enheter.defaultEnhet.enhetNr
+                    every { tidspunkt } returns Tidspunkt.now()
+                }
+        }
 
     override suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long = 123L
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+        }
 
     override suspend fun lagreVedtakKlage(
         klage: Klage,

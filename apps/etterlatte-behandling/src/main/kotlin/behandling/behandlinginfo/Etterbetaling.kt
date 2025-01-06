@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDate
@@ -11,9 +10,6 @@ data class Etterbetaling(
     val behandlingId: UUID,
     val fom: YearMonth,
     val tom: YearMonth,
-    val inneholderKrav: Boolean?,
-    val frivilligSkattetrekk: Boolean?,
-    val etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
 ) {
     init {
@@ -30,9 +26,6 @@ data class Etterbetaling(
             behandlingId: UUID,
             datoFom: LocalDate?,
             datoTom: LocalDate?,
-            inneholderKrav: Boolean?,
-            frivilligSkattetrekk: Boolean?,
-            etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
             kilde: Grunnlagsopplysning.Saksbehandler,
         ): Etterbetaling {
             if (datoFom == null || datoTom == null) {
@@ -42,9 +35,6 @@ data class Etterbetaling(
                 behandlingId = behandlingId,
                 fom = YearMonth.from(datoFom),
                 tom = YearMonth.from(datoTom),
-                inneholderKrav = inneholderKrav,
-                frivilligSkattetrekk = frivilligSkattetrekk,
-                etterbetalingPeriodeValg = etterbetalingPeriodeValg,
                 kilde = kilde,
             )
         }

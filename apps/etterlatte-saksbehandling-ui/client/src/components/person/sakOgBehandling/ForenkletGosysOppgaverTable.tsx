@@ -49,6 +49,7 @@ export const ForenkletGosysOppgaverTable = ({
             oppgave={oppgave}
             saksbehandlereIEnhet={saksbehandlereIEnhet}
             skjulBruker={true}
+            oppdaterOppgaveTildeling={() => {}}
           />
         ))}
       </Table.Body>

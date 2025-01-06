@@ -2,8 +2,6 @@ package no.nav.etterlatte.avkorting
 
 import no.nav.etterlatte.avkorting.AvkortingValider.validerInntekt
 import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VedtaksvurderingKlient
@@ -21,17 +19,9 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
-
-enum class AvkortingToggles(
-    val value: String,
-) : FeatureToggle {
-    VALIDERE_AARSINNTEKT_NESTE_AAR("validere_aarsintnekt_neste_aar"),
-    ;
-
-    override fun key(): String = this.value
-}
 
 class AvkortingService(
     private val behandlingKlient: BehandlingKlient,
@@ -41,7 +31,6 @@ class AvkortingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vedtakKlient: VedtaksvurderingKlient,
     private val avkortingReparerAarsoppgjoeret: AvkortingReparerAarsoppgjoeret,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -61,7 +50,6 @@ class AvkortingService(
                             behandling,
                             eksisterendeAvkorting,
                             brukerTokenInfo,
-                            BehandlingType.FØRSTEGANGSBEHANDLING,
                         )
                     avkortingMedTillegg(reberegnetAvkorting, behandling)
                 } else {
@@ -82,7 +70,6 @@ class AvkortingService(
                     behandling,
                     eksisterendeAvkorting,
                     brukerTokenInfo,
-                    BehandlingType.REVURDERING,
                 )
             avkortingMedTillegg(reberegnetAvkorting, behandling, forrigeAvkorting)
         } else {
@@ -163,7 +150,7 @@ class AvkortingService(
                 )
             }
 
-        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, behandling.behandlingType, lagretAvkorting)
+        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)
         return avkortingFrontend
     }
 
@@ -195,7 +182,6 @@ class AvkortingService(
             behandling,
             kopiertAvkorting,
             brukerTokenInfo,
-            behandling.behandlingType,
         )
     }
 
@@ -203,7 +189,6 @@ class AvkortingService(
         behandling: DetaljertBehandling,
         avkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
-        behandlingType: BehandlingType,
     ): Avkorting {
         tilstandssjekk(behandling.id, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
@@ -211,29 +196,54 @@ class AvkortingService(
         val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning, sanksjoner)
         avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
-        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, behandlingType, lagretAvkorting)
+        settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)
         return lagretAvkorting
     }
 
     private suspend fun settBehandlingStatusAvkortet(
         brukerTokenInfo: BrukerTokenInfo,
         behandling: DetaljertBehandling,
-        behandlingType: BehandlingType,
         lagretAvkorting: Avkorting,
     ) {
-        val virkningsAar = behandling.virkningstidspunkt().dato.year
-        // TODO skal forenkles.. EY-4632
-        if (behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING &&
-            virkningsAar == 2024 &&
-            (behandling.opphoerFraOgMed == null || behandling.opphoerFraOgMed!! > YearMonth.of(2025, 1)) &&
-            featureToggleService.isEnabled(AvkortingToggles.VALIDERE_AARSINNTEKT_NESTE_AAR, defaultValue = false)
-        ) {
+        if (skalHaInntektInnevaerendeOgNesteAar(behandling)) {
             if (lagretAvkorting.aarsoppgjoer.size == 2) {
                 behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
             }
         } else {
             behandlingKlient.avkort(behandling.id, brukerTokenInfo, true)
         }
+    }
+
+    /*
+    I tilfeller der det behøves inntekt for året etter virkningsitdspunkt oppdateres status kun hvis to inntekter er lagt til.
+    Dette gjelder hvis behandling er førstegangsbehandling og nåtid er fra og med oktober i innvilgelesår.
+    Da anses det at nytt år er nærme nok til at søker bør kunne oppgi inntekt for nytt år.
+     */
+    fun skalHaInntektInnevaerendeOgNesteAar(
+        behandling: DetaljertBehandling,
+        naa: YearMonth = YearMonth.now(),
+    ): Boolean {
+        if (behandling.behandlingType != BehandlingType.FØRSTEGANGSBEHANDLING) {
+            return false
+        }
+
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
+
+        val erOpphoer =
+            if (behandling.opphoerFraOgMed == null) {
+                false
+            } else {
+                val loependeTom = behandling.opphoerFraOgMed!!.minusMonths(1)
+                loependeTom.year == virkningstidspunkt.year
+            }
+
+        val virkIFjor = naa.year > virkningstidspunkt.year
+        if (virkIFjor && !erOpphoer) {
+            return true
+        }
+
+        val virkFraOgMedOktober = naa.year == virkningstidspunkt.year && naa.month.value >= Month.OCTOBER.value
+        return virkFraOgMedOktober && !erOpphoer
     }
 
     private fun hentAvkortingNonNull(behandlingId: UUID) =

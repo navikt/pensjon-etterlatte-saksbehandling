@@ -15,18 +15,19 @@ export const initialSortering: OppgaveSortering = {
 }
 
 type Retning = 'ascending' | 'descending' | 'none'
+type DatoFelt = 'frist' | 'opprettet'
 
-const sammenlignDato = (a: OppgaveDTO | GosysOppgave, b: OppgaveDTO | GosysOppgave) => {
+const sammenlignDatofelt = (felt: DatoFelt) => (a: OppgaveDTO | GosysOppgave, b: OppgaveDTO | GosysOppgave) => {
   // Konverterer datoene til en numerisk verdi og sammenligner dem
-  return (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
+  return (!!a[felt] ? new Date(a[felt]).getTime() : 0) - (!!b[felt] ? new Date(b[felt]).getTime() : 0)
 }
 
-function sorterDato(retning: Retning, oppgaver: OppgaveDTO[] | GosysOppgave[]) {
+function sorterDato(retning: Retning, oppgaver: OppgaveDTO[] | GosysOppgave[], felt: DatoFelt) {
   switch (retning) {
     case 'ascending':
-      return oppgaver.sort(sammenlignDato)
+      return oppgaver.sort(sammenlignDatofelt(felt))
     case 'descending':
-      return oppgaver.sort(sammenlignDato).reverse()
+      return oppgaver.sort(sammenlignDatofelt(felt)).reverse()
     case 'none':
       return oppgaver
   }
@@ -64,15 +65,15 @@ const sorterGosysBruker = (retning: Retning, oppgaver: GosysOppgave[]) => {
 }
 
 export function sorterOppgaver(oppgaver: OppgaveDTO[], sortering: OppgaveSortering): OppgaveDTO[] {
-  const sortertRegistreringsdato = sorterDato(sortering.registreringsdatoSortering, oppgaver)
-  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato) as OppgaveDTO[]
+  const sortertRegistreringsdato = sorterDato(sortering.registreringsdatoSortering, oppgaver, 'opprettet')
+  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato, 'frist') as OppgaveDTO[]
 
   return sorterFnr(sortering.fnrSortering, sortertFrist)
 }
 
 export function sorterGosysOppgaver(oppgaver: GosysOppgave[], sortering: OppgaveSortering): GosysOppgave[] {
-  const sortertRegistreringsdato = sorterDato(sortering.registreringsdatoSortering, oppgaver)
-  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato) as GosysOppgave[]
+  const sortertRegistreringsdato = sorterDato(sortering.registreringsdatoSortering, oppgaver, 'opprettet')
+  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato, 'frist') as GosysOppgave[]
 
   return sorterGosysBruker(sortering.fnrSortering, sortertFrist)
 }

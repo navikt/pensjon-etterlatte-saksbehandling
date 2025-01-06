@@ -12,6 +12,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -30,7 +32,6 @@ import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.route.withUuidParam
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -55,21 +56,21 @@ private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
 
 private val logger: Logger = LoggerFactory.getLogger("TrygdetidRoutes")
 
+enum class TrygdetidToggles(
+    val value: String,
+) : FeatureToggle {
+    TRYGDETID_FRA_PESYS("trygdetid-fra-pesys"),
+    ;
+
+    override fun key(): String = this.value
+}
+
 fun Route.trygdetid(
     trygdetidService: TrygdetidService,
     behandlingKlient: BehandlingKlient,
+    featureToggleService: FeatureToggleService,
 ) {
     route("/api/trygdetid_v2") {
-        post("/pesys") {
-            withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
-                call.respond(
-                    trygdetidService.hentTrygdetidsgrunnlagUforeOgAlderspensjon(
-                        fnr = fnr.value,
-                        brukerTokenInfo = brukerTokenInfo,
-                    ),
-                )
-            }
-        }
         route("/{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
                 withBehandlingId(behandlingKlient) {
@@ -86,12 +87,48 @@ fun Route.trygdetid(
             post {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
-                    trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
+                    val overskriv = call.request.queryParameters["overskriv"]?.toBoolean() ?: false
+
+                    trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo, overskriv)
                     call.respond(
                         trygdetidService
                             .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                             .map { it.toDto() },
                     )
+                }
+            }
+
+            route("pesys") {
+                post {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        logger.info("Oppretter trygdetid(er) fra pesys for behandling $behandlingId")
+
+                        trygdetidService.leggInnTrygdetidsgrunnlagFraPesys(behandlingId, brukerTokenInfo)
+                        call.respond(
+                            trygdetidService
+                                .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                                .map { it.toDto() },
+                        )
+                    }
+                }
+                get("/sjekk-pesys-trygdetidsgrunnlag") {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        if (featureToggleService.isEnabled(
+                                TrygdetidToggles.TRYGDETID_FRA_PESYS,
+                                defaultValue = false,
+                            )
+                        ) {
+                            logger.info("Sjekker om avdød for behandling $behandlingId har trygdetidsgrunnlag i Pesys for AP og Uføre")
+                            val harTrygdetidsgrunnlagIPesys =
+                                trygdetidService.harTrygdetidsgrunnlagIPesysForApOgUfoere(
+                                    behandlingId,
+                                    brukerTokenInfo,
+                                )
+                            call.respond(harTrygdetidsgrunnlagIPesys)
+                        } else {
+                            call.respond(HttpStatusCode.Forbidden)
+                        }
+                    }
                 }
             }
 

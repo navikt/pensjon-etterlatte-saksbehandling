@@ -14,6 +14,9 @@ og hvilken mal ferdigstillingsdelen er basert på. Denne enumen er nettopp den k
 Det er også ei logisk kopling mellom redigerbart utfall og ferdigstillingsmal - det vil for eksempel ikke gi meining
 å bruke den redigerbare delen for tilbakekreving i ferdigstillingsmalen for vedtak avslag.
 Så her modellerer vi det eksplisitt.
+
+BP = Barnepensjon
+OMS = Omstillingsstoenad
 */
 enum class Brevkoder(
     val redigering: EtterlatteBrevKode,

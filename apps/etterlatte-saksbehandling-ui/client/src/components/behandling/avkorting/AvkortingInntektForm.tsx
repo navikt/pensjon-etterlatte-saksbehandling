@@ -12,7 +12,7 @@ import {
 } from '@navikt/ds-react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { IAvkortingGrunnlagFrontend, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
-import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterAvkorting, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { aarFraDatoString, formaterDato, maanedFraDatoString } from '~utils/formatering/dato'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -23,6 +23,7 @@ import { isPending } from '@reduxjs/toolkit'
 import OverstyrInnvilgaMaander from '~components/behandling/avkorting/OverstyrInnvilgaMaaneder'
 import React, { useState } from 'react'
 import { CogRotationIcon, TrashIcon } from '@navikt/aksel-icons'
+import { hentBehandlingstatus } from '~shared/api/behandling'
 
 export const AvkortingInntektForm = ({
   behandling,
@@ -38,6 +39,7 @@ export const AvkortingInntektForm = ({
   const dispatch = useAppDispatch()
 
   const [lagreAvkortingGrunnlagResult, lagreAvkortingGrunnlagRequest] = useApiCall(lagreAvkortingGrunnlag)
+  const [, hentBehandlingstatusRequest] = useApiCall(hentBehandlingstatus)
 
   const virk = virkningstidspunkt(behandling).dato
   const inntektFom = erInnevaerendeAar ? virk : `${aarFraDatoString(virk) + 1}-01`
@@ -119,12 +121,14 @@ export const AvkortingInntektForm = ({
           fom: inntektFom,
         },
       },
-      (respons) => {
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
-        const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
-        if (nyttAvkortingGrunnlag.fraVirk) reset(nyttAvkortingGrunnlag.fraVirk)
-        dispatch(oppdaterAvkorting(respons))
-        setVisForm(false)
+      (nyAvkorting) => {
+        hentBehandlingstatusRequest(behandling.id, (status) => {
+          dispatch(oppdaterBehandlingsstatus(status))
+          const nyttAvkortingGrunnlag = nyAvkorting.avkortingGrunnlag[nyAvkorting.avkortingGrunnlag.length - 1]
+          if (nyttAvkortingGrunnlag.fraVirk) reset(nyttAvkortingGrunnlag.fraVirk)
+          dispatch(oppdaterAvkorting(nyAvkorting))
+          setVisForm(false)
+        })
       }
     )
   }

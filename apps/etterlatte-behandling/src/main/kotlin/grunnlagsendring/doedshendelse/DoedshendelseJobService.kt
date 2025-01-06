@@ -111,7 +111,8 @@ class DoedshendelseJobService(
 
                     else -> {
                         logger.error(
-                            "Kunne ikke identifisere kontrollpunkter for sak $sak. Ukjent feil: msg: ${e.message}",
+                            "Kunne ikke identifisere kontrollpunkter dødshendelse id=${doedshendelse.id} for sak $sak. " +
+                                "Ukjent feil: msg: ${e.message}",
                             e,
                         )
                         throw e

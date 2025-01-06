@@ -1,7 +1,9 @@
 package no.nav.etterlatte.trygdetid
 
 import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.justRun
@@ -10,6 +12,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -125,6 +128,41 @@ internal class TrygdetidServiceIntegrationTest(
                         .plusYears(66)
             }
         }
+    }
+
+    @Test
+    fun `skal opprette ny trygdetid og overskrive eksisterende`() {
+        val behandlingId = UUID.randomUUID()
+        val sakId = randomSakId()
+        val grunnlagTestData = GrunnlagTestData()
+
+        coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
+        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
+            mockk {
+                every { id } returns behandlingId
+                every { sak } returns sakId
+                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { tidligereFamiliepleier } returns null
+            }
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlagTestData.hentOpplysningsgrunnlag()
+
+        val trygdetidOpprinnelig =
+            repository.opprettTrygdetid(
+                trygdetid(
+                    behandlingId = behandlingId,
+                    sakId = sakId,
+                    opplysninger = opplysningsgrunnlag(grunnlagTestData),
+                ),
+            )
+
+        val trygdetidOverskrevet =
+            runBlocking {
+                trygdetidService.opprettTrygdetiderForBehandling(behandlingId, saksbehandler, overskriv = true)
+            }.first()
+
+        trygdetidOverskrevet shouldNotBe null
+        trygdetidOverskrevet.id shouldNotBeEqual trygdetidOpprinnelig.id
     }
 
     @Test

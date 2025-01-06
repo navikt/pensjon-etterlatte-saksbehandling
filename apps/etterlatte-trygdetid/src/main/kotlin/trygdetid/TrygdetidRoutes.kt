@@ -87,7 +87,9 @@ fun Route.trygdetid(
             post {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
-                    trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
+                    val overskriv = call.request.queryParameters["overskriv"]?.toBoolean() ?: false
+
+                    trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo, overskriv)
                     call.respond(
                         trygdetidService
                             .hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)

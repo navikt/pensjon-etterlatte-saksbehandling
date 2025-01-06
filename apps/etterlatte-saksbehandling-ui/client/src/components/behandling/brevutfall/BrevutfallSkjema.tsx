@@ -8,7 +8,6 @@ import { isFailure, isPending } from '~shared/api/apiUtils'
 import {
   Aldersgruppe,
   BrevutfallOgEtterbetaling,
-  EtterbetalingPeriodeValg,
   FeilutbetalingValg,
 } from '~components/behandling/brevutfall/Brevutfall'
 import { add, formatISO, lastDayOfMonth, startOfDay } from 'date-fns'
@@ -27,9 +26,7 @@ interface BrevutfallSkjemaData {
   harEtterbetaling: ISvar | null
   datoFom?: Date | null
   datoTom?: Date | null
-  kravIEtterbetaling: ISvar | null
   frivilligSkattetrekk: ISvar | null
-  etterbetalingPeriodeValg: EtterbetalingPeriodeValg | null
   aldersgruppe?: Aldersgruppe | null
   feilutbetalingValg?: FeilutbetalingValg | null
   feilutbetalingKommentar: string | null
@@ -102,8 +99,6 @@ export const BrevutfallSkjema = ({
           ? {
               datoFom: formatISO(data.datoFom!, { representation: 'date' }),
               datoTom: formatISO(data.datoTom!, { representation: 'date' }),
-              inneholderKrav: data.kravIEtterbetaling === ISvar.JA,
-              etterbetalingPeriodeValg: data.etterbetalingPeriodeValg,
             }
           : null,
     }

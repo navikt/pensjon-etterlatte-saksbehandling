@@ -62,6 +62,7 @@ interface TrygdetidService {
     suspend fun opprettTrygdetiderForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        overskriv: Boolean = false,
     ): List<Trygdetid>
 
     suspend fun harTrygdetidsgrunnlagIPesysForApOgUfoere(
@@ -204,12 +205,23 @@ class TrygdetidServiceImpl(
     override suspend fun opprettTrygdetiderForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        overskriv: Boolean,
     ) = kanOppdatereTrygdetid(
         behandlingId,
         brukerTokenInfo,
     ) {
         val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
-        val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+        val eksisterendeTrygdetider =
+            trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).let { trygdetider ->
+                if (overskriv) {
+                    trygdetider
+                        .forEach { trygdetid -> trygdetidRepository.slettTrygdetid(trygdetid.id) }
+                    emptyList()
+                } else {
+                    trygdetider
+                }
+            }
+
         if (eksisterendeTrygdetider.isNotEmpty() && avdoede.size == eksisterendeTrygdetider.size) {
             throw TrygdetidAlleredeOpprettetException()
         }

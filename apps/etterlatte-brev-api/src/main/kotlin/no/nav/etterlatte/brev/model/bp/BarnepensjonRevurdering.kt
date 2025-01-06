@@ -6,9 +6,7 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
-import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
 import no.nav.etterlatte.brev.model.BrevVedleggKey
-import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
@@ -30,7 +28,7 @@ data class BarnepensjonRevurdering(
     val erOmgjoering: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
     val beregning: BarnepensjonBeregning,
-    val etterbetaling: BarnepensjonEtterbetaling?,
+    val etterbetaling: EtterbetalingDTO?,
     val frivilligSkattetrekk: Boolean,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
@@ -39,6 +37,7 @@ data class BarnepensjonRevurdering(
     val harUtbetaling: Boolean,
     val feilutbetaling: FeilutbetalingType,
     val erMigrertYrkesskade: Boolean,
+    val erEtterbetaling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -57,9 +56,6 @@ data class BarnepensjonRevurdering(
             erMigrertYrkesskade: Boolean,
         ): BarnepensjonRevurdering {
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
-            val frivilligSkattetrekk =
-                brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
-                    ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
 
             return BarnepensjonRevurdering(
                 innhold = innhold.innhold(),
@@ -78,9 +74,9 @@ data class BarnepensjonRevurdering(
                 erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 erMigrertYrkesskade = erMigrertYrkesskade,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
+                etterbetaling = etterbetaling,
                 feilutbetaling = feilutbetaling,
-                frivilligSkattetrekk = frivilligSkattetrekk,
+                frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 innholdForhaandsvarsel =
@@ -96,6 +92,7 @@ data class BarnepensjonRevurdering(
                                 BarnepensjonInnvilgelse.tidspunktNyttRegelverk,
                             )
                     },
+                erEtterbetaling = etterbetaling != null,
             )
         }
     }
@@ -108,7 +105,6 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val frivilligSkattetrekk: Boolean,
-    val etterbetaling: BarnepensjonEtterbetaling?,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -118,8 +114,7 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
             utlandstilknytning: UtlandstilknytningType?,
         ): BarnepensjonRevurderingRedigerbartUtfall {
             val frivilligSkattetrekk =
-                brevutfall.frivilligSkattetrekk ?: etterbetaling?.frivilligSkattetrekk
-                    ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
+                brevutfall.frivilligSkattetrekk ?: throw ManglerFrivilligSkattetrekk(brevutfall.behandlingId)
 
             return BarnepensjonRevurderingRedigerbartUtfall(
                 erEtterbetaling = etterbetaling != null,
@@ -128,7 +123,6 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
                 brukerUnder18Aar = requireNotNull(brevutfall.aldersgruppe) == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 frivilligSkattetrekk = frivilligSkattetrekk,
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
             )
         }
     }

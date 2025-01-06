@@ -30,11 +30,6 @@ export interface Brevutfall {
   frivilligSkattetrekk?: boolean | null
 }
 
-export enum EtterbetalingPeriodeValg {
-  UNDER_3_MND = 'UNDER_3_MND',
-  FRA_3_MND = 'FRA_3_MND',
-}
-
 export enum Aldersgruppe {
   OVER_18 = 'OVER_18',
   UNDER_18 = 'UNDER_18',
@@ -56,9 +51,6 @@ export enum FeilutbetalingValg {
 export interface Etterbetaling {
   datoFom?: string | null
   datoTom?: string | null
-  inneholderKrav: boolean | null
-  frivilligSkattetrekk?: boolean | null
-  etterbetalingPeriodeValg: EtterbetalingPeriodeValg | null
 }
 
 const initialBrevutfallOgEtterbetaling = (saktype: SakType, behandlingId: string) => {

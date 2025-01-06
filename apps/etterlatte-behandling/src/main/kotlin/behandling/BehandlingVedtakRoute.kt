@@ -69,7 +69,7 @@ internal fun Route.behandlingVedtakRoute(
                         )
                     } ?: throw BehandlingIkkeFunnetException(underkjennVedtakOppgave.sakIdOgReferanse)
                 inTransaction {
-                    behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave)
+                    behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave, brukerTokenInfo)
                 }
                 call.respond(HttpStatusCode.OK)
             }

@@ -5,7 +5,7 @@ import {
   IDetaljertBeregnetTrygdetid,
   ITrygdetid,
   oppdaterTrygdetidOverstyrtMigrering,
-  opprettTrygdetidOverstyrtMigrering,
+  opprettTrygdetider,
 } from '~shared/api/trygdetid'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -44,7 +44,7 @@ export const TrygdetidManueltOverstyrt = ({
   const [prorataNevner, setNevner] = useState<number | undefined>(beregnetTrygdetid.resultat.prorataBroek?.nevner)
 
   const [oppdaterStatus, oppdaterTrygdetidRequest] = useApiCall(oppdaterTrygdetidOverstyrtMigrering)
-  const [opprettStatus, opprettOverstyrtTrygdetid] = useApiCall(opprettTrygdetidOverstyrtMigrering)
+  const [opprettStatus, opprettTrygdetid] = useApiCall(opprettTrygdetider)
 
   const lagre = () => {
     oppdaterTrygdetidRequest(
@@ -65,8 +65,8 @@ export const TrygdetidManueltOverstyrt = ({
     )
   }
 
-  const overskrivOverstyrtTrygdetid = () => {
-    opprettOverstyrtTrygdetid({ behandlingId: behandling!!.id, overskriv: true }, () => window.location.reload())
+  const opprettNyTrygdetid = () => {
+    opprettTrygdetid({ behandlingId: behandling!!.id, overskriv: true }, () => window.location.reload())
   }
 
   if (!behandling) return <ApiErrorAlert>Fant ikke behandling</ApiErrorAlert>
@@ -88,19 +88,15 @@ export const TrygdetidManueltOverstyrt = ({
         <>
           {ident == 'UKJENT_AVDOED' && (
             <Box maxWidth="40rem">
-              <VStack gap="1">
+              <VStack gap="3">
                 <Alert variant="warning">
-                  OBS! Trygdetiden er koblet til ukjent avdød. Hvis avdød i saken faktisk er kjent bør du annullere
-                  behandlingen og lage en ny behandling med riktig avdød i familieoversikten.
+                  Trygdetiden er koblet til en ukjent avdød. Hvis avdøde i saken er kjent, og familieoversikten er
+                  oppdatert, bør trygdetid opprettes på nytt. Dette for å unngå å bruke manuelt overstyrt trygdetid der
+                  dette ikke er nødvendig.
                 </Alert>
                 <Box maxWidth="20rem">
-                  <Button
-                    variant="danger"
-                    size="small"
-                    onClick={overskrivOverstyrtTrygdetid}
-                    loading={isPending(opprettStatus)}
-                  >
-                    Opprett overstyrt trygdetid på nytt
+                  <Button variant="danger" size="small" onClick={opprettNyTrygdetid} loading={isPending(opprettStatus)}>
+                    Opprett ny trygdetid
                   </Button>
                 </Box>
               </VStack>
@@ -145,15 +141,19 @@ export const TrygdetidManueltOverstyrt = ({
               </HStack>
             )}
 
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={lagre}
-              loading={isPending(oppdaterStatus)}
-              disabled={anvendtTrygdetid == null || (skalHaProrata && (prorataNevner == null || prorataTeller == null))}
-            >
+            <Box width="20rem">
+              <Button
+                variant="primary"
+                size="small"
+                onClick={lagre}
+                loading={isPending(oppdaterStatus)}
+                disabled={
+                  anvendtTrygdetid == null || (skalHaProrata && (prorataNevner == null || prorataTeller == null))
+                }
+              >
                 Lagre overstyrt trygdetid
-            </Button>
+              </Button>
+            </Box>
           </VStack>
           {mapResult(oppdaterStatus, {
             pending: <Spinner label="Lagrer trygdetid" />,

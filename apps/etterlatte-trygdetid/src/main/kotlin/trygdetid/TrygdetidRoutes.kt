@@ -16,6 +16,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
@@ -377,7 +378,7 @@ fun Trygdetid.toDto(): TrygdetidDto =
         opplysninger = this.opplysninger.toDto(),
         overstyrtNorskPoengaar = this.overstyrtNorskPoengaar,
         ident = this.ident,
-        opplysningerDifferanse = requireNotNull(opplysningerDifferanse),
+        opplysningerDifferanse = krevIkkeNull(opplysningerDifferanse) { "Differanseopplysninger mangler" },
     )
 
 private fun DetaljertBeregnetTrygdetid.toDto(): DetaljertBeregnetTrygdetidDto =

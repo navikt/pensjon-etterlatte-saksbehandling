@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.util.UUID
 
@@ -28,7 +29,9 @@ class SjekklisteService(
     fun opprettSjekkliste(behandlingId: UUID): Sjekkliste {
         val behandling =
             inTransaction {
-                requireNotNull(behandlingService.hentBehandling(behandlingId))
+                krevIkkeNull(behandlingService.hentBehandling(behandlingId)) {
+                    "Fant ikke behandling – kan ikke opprette sjekkliste"
+                }
             }
 
         if (!kanEndres(behandling)) {
@@ -74,7 +77,9 @@ class SjekklisteService(
             dao.opprettSjekkliste(behandling.id, sjekklisteItems)
         }
 
-        return requireNotNull(hentSjekkliste(behandling.id))
+        return krevIkkeNull(hentSjekkliste(behandling.id)) {
+            "Kunne ikke hente ut sjekkliste som nettopp ble opprettet"
+        }
     }
 
     fun oppdaterSjekkliste(
@@ -82,7 +87,10 @@ class SjekklisteService(
         oppdaterSjekkliste: OppdatertSjekkliste,
     ): Sjekkliste =
         inTransaction {
-            val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
+            val behandling =
+                krevIkkeNull(behandlingService.hentBehandling(behandlingId)) {
+                    "Fant ikke behandling – kan ikke oppdatere sjekkliste"
+                }
 
             if (!(kanEndres(behandling) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
                 throw SjekklisteIkkeTillattException(
@@ -101,7 +109,10 @@ class SjekklisteService(
         oppdatering: OppdaterSjekklisteItem,
     ): SjekklisteItem =
         inTransaction {
-            val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
+            val behandling =
+                krevIkkeNull(behandlingService.hentBehandling(behandlingId)) {
+                    "Fant ikke behandling - kan ikke oppdatere sjekklistepunkt"
+                }
 
             if (!(kanEndres(behandling) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
                 throw SjekklisteIkkeTillattException(

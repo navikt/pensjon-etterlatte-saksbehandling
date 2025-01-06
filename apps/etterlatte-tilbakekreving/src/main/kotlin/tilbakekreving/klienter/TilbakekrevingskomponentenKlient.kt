@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -185,11 +186,11 @@ class TilbakekrevingskomponentenKlient(
             kodeKlasse = klasseKode
             belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
             belopNy = nyBruttoUtbetaling.medToDesimaler()
-            belopTilbakekreves = requireNotNull(bruttoTilbakekreving).medToDesimaler()
-            belopSkatt = requireNotNull(skatt).medToDesimaler()
-            kodeResultat = requireNotNull(resultat).name
+            belopTilbakekreves = krevIkkeNull(bruttoTilbakekreving?.medToDesimaler()) { "Tilbakekrevingsbeløp mangler" }
+            belopSkatt = krevIkkeNull(skatt?.medToDesimaler()) { "Skattebeløp mangler" }
+            kodeResultat = krevIkkeNull(resultat?.name) { "Resultatkode mangler" }
             kodeAarsak = mapFraTilbakekrevingAarsak(aarsak)
-            kodeSkyld = requireNotNull(skyld).name
+            kodeSkyld = krevIkkeNull(skyld?.name) { "Skyldkode mangler" }
         }
 
     private fun mapFraTilbakekrevingAarsak(aarsak: TilbakekrevingAarsak): String =
@@ -204,7 +205,7 @@ class TilbakekrevingskomponentenKlient(
             kodeKlasse = klasseKode
             belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
             belopNy = nyBruttoUtbetaling.medToDesimaler()
-            belopTilbakekreves = requireNotNull(bruttoTilbakekreving).medToDesimaler()
+            belopTilbakekreves = krevIkkeNull(bruttoTilbakekreving?.medToDesimaler()) { "Tilbakekrevingsbeløp mangler" }
         }
 
     private fun toKravgrunnlagHentDetaljRequest(kravgrunnlagId: Long): KravgrunnlagHentDetaljRequest =

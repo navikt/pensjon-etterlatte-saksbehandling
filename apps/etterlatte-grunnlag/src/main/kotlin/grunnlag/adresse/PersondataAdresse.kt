@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag.adresse
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.MottakerAdresse
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
@@ -142,7 +143,7 @@ private fun utledLandkode(
     if (landkodeRegnesSomNorsk(landkode) && landRegnesSomNorsk(land)) {
         "NO"
     } else {
-        requireNotNull(landkode) { "Landkode kunne ikke settes " }
+        krevIkkeNull(landkode) { "Landkode kunne ikke settes " }
     }
 
 private fun landkodeRegnesSomNorsk(landkode: String?) = landkode.isNullOrBlank() || listOf("no", "nor").contains(landkode.lowercase())

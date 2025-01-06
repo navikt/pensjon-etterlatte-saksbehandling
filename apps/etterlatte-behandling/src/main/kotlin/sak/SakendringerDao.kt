@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -19,11 +20,11 @@ class SakendringerDao(
         kallendeMetode: String,
         block: (connection: Connection) -> Unit,
     ): Int {
-        val foer = requireNotNull(hentSak(id)) { "Må ha en sak for å kunne endre den" }
+        val foer = krevIkkeNull(hentSak(id)) { "Må ha en sak for å kunne endre den" }
         connectionAutoclosing.hentConnection { connection ->
             block(connection)
         }
-        val etter = requireNotNull(hentSak(id)) { "Må ha en sak etter endring" }
+        val etter = krevIkkeNull(hentSak(id)) { "Må ha en sak etter endring" }
         return lagreEndringerPaaSak(foer, etter, kallendeMetode)
     }
 
@@ -32,11 +33,11 @@ class SakendringerDao(
         kallendeMetode: String,
         block: (connection: Connection) -> Unit,
     ) = saker.forEach {
-        val foer = requireNotNull(hentSak(it)) { "Må ha en sak for å kunne endre den" }
+        val foer = krevIkkeNull(hentSak(it)) { "Må ha en sak for å kunne endre den" }
         connectionAutoclosing.hentConnection { connection ->
             block(connection)
         }
-        val etter = requireNotNull(hentSak(it)) { "Må ha en sak etter endring" }
+        val etter = krevIkkeNull(hentSak(it)) { "Må ha en sak etter endring" }
         lagreEndringerPaaSak(foer, etter, kallendeMetode)
     }
 

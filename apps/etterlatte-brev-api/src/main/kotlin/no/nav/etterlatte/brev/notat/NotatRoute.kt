@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.SamordningManueltBehandletRequest
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
@@ -43,7 +44,7 @@ const val NOTAT_ID_CALL_PARAMETER = "notatId"
 
 inline val PipelineContext<*, ApplicationCall>.notatId: NotatID
     get() =
-        requireNotNull(call.parameters[NOTAT_ID_CALL_PARAMETER]?.toLong()) {
+        krevIkkeNull(call.parameters[NOTAT_ID_CALL_PARAMETER]?.toLong()) {
             "Gosys oppgaveId er ikke i path params"
         }
 

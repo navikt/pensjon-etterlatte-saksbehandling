@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -53,7 +54,7 @@ class BeregnOverstyrBeregningService(
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
         val beregningsGrunnlag =
-            requireNotNull(
+            krevIkkeNull(
                 beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandling.id),
             ) { "Behandling ${behandling.id} mangler overstyr beregningsgrunnlag" }
 
@@ -202,7 +203,7 @@ class BeregnOverstyrBeregningService(
                             )
 
                             val grunnbeloep =
-                                requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
+                                krevIkkeNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
                                     "Anvendt grunnbeløp ikke funnet for perioden"
                                 }
 

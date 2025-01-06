@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -66,7 +67,10 @@ data class OmstillingsstoenadRevurdering(
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
 
-            val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
+            val feilutbetaling =
+                krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                    "Feilutbetaling mangler i brevutfall"
+                }
             val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
             val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
 
@@ -176,7 +180,10 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
                             beregningsperioder,
                         )
                     },
-                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
+                feilutbetaling =
+                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                        "Feilutbetaling mangler i brevutfall"
+                    },
                 harFlereUtbetalingsperioder = beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 inntekt = sisteBeregningsperiode.inntekt,

@@ -13,6 +13,7 @@ import no.nav.etterlatte.klage.modell.KlageinstansUtfall
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.klage.kodeverk.Fagsystem
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -51,7 +52,9 @@ class BehandlingKlient(
                         BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET ->
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
-                                requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
+                                krevIkkeNull(klageHendelse.detaljer.klagebehandlingAvsluttet) {
+                                    "Detaljer på klage mangler"
+                                }.utfall.tilResultat(),
                             )
 
                         // TODO: Se på hvordan vi håndterer anke -- det burde nok sette et eget flagg
@@ -65,16 +68,17 @@ class BehandlingKlient(
                         BehandlingEventType.ANKEBEHANDLING_AVSLUTTET ->
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
-                                requireNotNull(klageHendelse.detaljer.ankebehandlingAvsluttet).utfall.tilResultat(),
+                                krevIkkeNull(klageHendelse.detaljer.ankebehandlingAvsluttet) {
+                                    "Detailjer på avsluttet anke mangler"
+                                }.utfall.tilResultat(),
                             )
 
                         BehandlingEventType.ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET ->
                             Kabalrespons(
                                 KabalStatus.OPPRETTET,
-                                requireNotNull(
-                                    klageHendelse.detaljer.ankeITrygderettenbehandlingOpprettet,
-                                ).utfall?.tilResultat()
-                                    ?: BehandlingResultat.IKKE_SATT,
+                                krevIkkeNull(klageHendelse.detaljer.ankeITrygderettenbehandlingOpprettet) {
+                                    "Detaljer på anke i trygderetten mangler"
+                                }.utfall?.tilResultat() ?: BehandlingResultat.IKKE_SATT,
                             )
 
                         BehandlingEventType.BEHANDLING_FEILREGISTRERT ->
@@ -86,12 +90,16 @@ class BehandlingKlient(
                         BehandlingEventType.BEHANDLING_ETTER_TRYGDERETTEN_OPPHEVET_AVSLUTTET ->
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
-                                requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
+                                krevIkkeNull(klageHendelse.detaljer.klagebehandlingAvsluttet) {
+                                    "Detaljer på avsluttet klagebehandling mangler"
+                                }.utfall.tilResultat(),
                             )
                         BehandlingEventType.OMGJOERINGSKRAVBEHANDLING_AVSLUTTET ->
                             Kabalrespons(
                                 KabalStatus.FERDIGSTILT,
-                                requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
+                                krevIkkeNull(klageHendelse.detaljer.klagebehandlingAvsluttet) {
+                                    "Detaljer på avsluttet klagebehandling mangler"
+                                }.utfall.tilResultat(),
                             )
                     }
                 } catch (e: Exception) {

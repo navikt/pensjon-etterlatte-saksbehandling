@@ -31,7 +31,7 @@ sealed class BrevParametereAutomatisk {
     data class BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar(
         val avdoedNavn: String,
         val borIutland: Boolean,
-        override val brevkode: Brevkoder = Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT,
+        override val brevkode: Brevkoder = Brevkoder.BP_DOEDSFALL_18_20_VED_REFORMTIDSPUNKT,
     ) : BrevParametereAutomatisk() {
         override fun brevDataMapping(): BrevDataRedigerbar =
             BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(

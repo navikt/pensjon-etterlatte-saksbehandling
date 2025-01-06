@@ -96,7 +96,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                     )
                 }
 
-                Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
+                Brevkoder.BP_DOEDSFALL_18_20_VED_REFORMTIDSPUNKT -> {
                     val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                     val brevdata =
                         opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)

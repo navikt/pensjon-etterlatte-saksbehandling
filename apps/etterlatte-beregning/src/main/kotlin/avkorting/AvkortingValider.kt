@@ -9,15 +9,15 @@ object AvkortingValider {
     fun validerInntekt(
         nyInntekt: AvkortingGrunnlagLagreDto,
         avkorting: Avkorting,
-        innvilgelse: Boolean,
+        erFoerstegangsbehandling: Boolean,
         naa: YearMonth = YearMonth.now(),
     ) {
-        skalIkkeKunneEndreInntektITidligereAar(innvilgelse, nyInntekt.fom, naa)
+        skalIkkeKunneEndreInntektITidligereAar(erFoerstegangsbehandling, nyInntekt.fom, naa)
 
         foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
             nyInntekt,
             avkorting,
-            innvilgelse,
+            erFoerstegangsbehandling,
         )
         skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(
             nyInntekt.fom,
@@ -44,9 +44,9 @@ object AvkortingValider {
     private fun foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
         nyInntekt: AvkortingGrunnlagLagreDto,
         avkorting: Avkorting,
-        innvilgelse: Boolean,
+        erFoerstegangsbehandling: Boolean,
     ) {
-        if (!innvilgelse) {
+        if (!erFoerstegangsbehandling) {
             if (avkorting.aarsoppgjoer.none { it.aar == nyInntekt.fom.year }) {
                 if (nyInntekt.fom.month != Month.JANUARY) {
                     throw FoersteRevurderingSenereEnnJanuar()

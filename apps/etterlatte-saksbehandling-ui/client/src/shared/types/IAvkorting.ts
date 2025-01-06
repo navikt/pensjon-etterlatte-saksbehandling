@@ -6,8 +6,8 @@ export interface IAvkorting {
   tidligereAvkortetYtelse: IAvkortetYtelse[]
 }
 
-export interface IAvkortingSkalHaToInntekt {
-  skalHaToInntekter: boolean
+export interface IAvkortingSkalHaInntektNesteAar {
+  skalHaInntektNesteAar: boolean
 }
 
 export interface IAvkortingGrunnlagFrontend {

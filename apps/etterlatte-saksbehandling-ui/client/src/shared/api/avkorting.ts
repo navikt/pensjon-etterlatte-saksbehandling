@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { IAvkorting, IAvkortingGrunnlagLagre, IAvkortingSkalHaToInntekt } from '~shared/types/IAvkorting'
+import { IAvkorting, IAvkortingGrunnlagLagre, IAvkortingSkalHaInntektNesteAar } from '~shared/types/IAvkorting'
 
 export const hentAvkorting = async (behandlingId: string): Promise<ApiResponse<IAvkorting>> => {
   return apiClient.get(`/beregning/avkorting/${behandlingId}`)
@@ -7,7 +7,7 @@ export const hentAvkorting = async (behandlingId: string): Promise<ApiResponse<I
 
 export const avkortingSkalHaToInntekter = async (
   behandlingId: string
-): Promise<ApiResponse<IAvkortingSkalHaToInntekt>> => {
+): Promise<ApiResponse<IAvkortingSkalHaInntektNesteAar>> => {
   return apiClient.get(`/beregning/avkorting/${behandlingId}/skalHaInntektNesteAar`)
 }
 

@@ -69,7 +69,7 @@ export const BeregneOMS = () => {
     if (!erOpphoer) {
       hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
       avkortingSkalHaToInntekterRequest(behandling.id, (response) =>
-        setSkalHaInntektNesteAar(response.skalHaToInntekter)
+        setSkalHaInntektNesteAar(response.skalHaInntektNesteAar)
       )
     }
   }, [])

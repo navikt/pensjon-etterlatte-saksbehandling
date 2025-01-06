@@ -48,7 +48,7 @@ fun Route.avkorting(
             withBehandlingId(behandlingKlient) {
                 val behandling = behandlingKlient.hentBehandling(it, brukerTokenInfo)
                 val skalHaInntektNesteAar = avkortingService.skalHaInntektInnevaerendeOgNesteAar(behandling)
-                call.respond(AvkortingSkalHaToInntektDTO(skalHaInntektNesteAar))
+                call.respond(AvkortingSkalHaInntektNesteAarDTO(skalHaInntektNesteAar))
             }
         }
 
@@ -129,7 +129,7 @@ fun Route.avkorting(
     }
 }
 
-data class AvkortingSkalHaToInntektDTO(
+data class AvkortingSkalHaInntektNesteAarDTO(
     val skalHaToInntekter: Boolean,
 )
 

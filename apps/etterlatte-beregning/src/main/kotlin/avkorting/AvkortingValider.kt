@@ -32,11 +32,11 @@ object AvkortingValider {
     }
 
     private fun skalIkkeKunneEndreInntektITidligereAar(
-        innvilgelse: Boolean,
+        erFoerstegangsbehandling: Boolean,
         nyInntektFom: YearMonth,
         naa: YearMonth,
     ) {
-        if (!innvilgelse && nyInntektFom.year < naa.year) {
+        if (!erFoerstegangsbehandling && nyInntektFom.year < naa.year) {
             throw InntektForTidligereAar()
         }
     }

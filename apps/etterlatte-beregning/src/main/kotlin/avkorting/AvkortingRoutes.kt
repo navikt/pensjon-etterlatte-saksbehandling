@@ -130,7 +130,7 @@ fun Route.avkorting(
 }
 
 data class AvkortingSkalHaInntektNesteAarDTO(
-    val skalHaToInntekter: Boolean,
+    val skalHaInntektNesteAar: Boolean,
 )
 
 fun AvkortingGrunnlag.toDto() =

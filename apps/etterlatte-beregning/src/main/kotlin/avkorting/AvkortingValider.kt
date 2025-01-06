@@ -12,7 +12,7 @@ object AvkortingValider {
         innvilgelse: Boolean,
         naa: YearMonth = YearMonth.now(),
     ) {
-        skalIkkeKunneEndreInntektITidligereAar(nyInntekt.fom, naa)
+        skalIkkeKunneEndreInntektITidligereAar(innvilgelse, nyInntekt.fom, naa)
 
         foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
             nyInntekt,
@@ -32,10 +32,11 @@ object AvkortingValider {
     }
 
     private fun skalIkkeKunneEndreInntektITidligereAar(
-        fom: YearMonth,
+        innvilgelse: Boolean,
+        nyInntektFom: YearMonth,
         naa: YearMonth,
     ) {
-        if (fom.year < naa.year) {
+        if (!innvilgelse && nyInntektFom.year < naa.year) {
             throw InntektForTidligereAar()
         }
     }

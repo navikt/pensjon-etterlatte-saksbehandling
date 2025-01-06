@@ -3,7 +3,7 @@ import { Klage, teksterKlageutfall } from '~shared/types/Klage'
 import { Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDatoMedTidspunkt } from '~utils/formatering/dato'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { TekstMedBeholdtWhitespace } from '~shared/TekstMedBeholdtWhitespace'
+import { TekstMedMellomrom } from '~shared/TekstMedMellomrom'
 
 export const InitiellVurderingVisning = (props: { klage: Klage }) => {
   const klage = props.klage
@@ -35,9 +35,9 @@ export const InitiellVurderingVisningContent = (props: { klage: Klage }) => {
         <Info label="Saksbehandler" tekst={saksbehandler} />
       </HStack>
       <Heading size="xsmall">Begrunnelse</Heading>
-      <TekstMedBeholdtWhitespace spacing>
+      <TekstMedMellomrom spacing>
         {klage.initieltUtfall?.utfallMedBegrunnelse.begrunnelse || 'Ikke registrert'}
-      </TekstMedBeholdtWhitespace>
+      </TekstMedMellomrom>
     </VStack>
   )
 }

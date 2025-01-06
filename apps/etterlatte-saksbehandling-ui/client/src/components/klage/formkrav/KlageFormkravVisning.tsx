@@ -6,7 +6,7 @@ import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
 import { useNavigate } from 'react-router-dom'
 import { nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
-import { TekstMedBeholdtWhitespace } from '~shared/TekstMedBeholdtWhitespace'
+import { TekstMedMellomrom } from '~shared/TekstMedMellomrom'
 
 export function KlageFormkravVisning() {
   const klage = useKlage()
@@ -58,7 +58,7 @@ export function KlageFormkravVisning() {
         <Heading size="small" spacing>
           Totalvurdering
         </Heading>
-        <TekstMedBeholdtWhitespace spacing>{formkrav?.begrunnelse}</TekstMedBeholdtWhitespace>
+        <TekstMedMellomrom spacing>{formkrav?.begrunnelse}</TekstMedMellomrom>
 
         <Heading size="small" spacing>
           Saksbehandler

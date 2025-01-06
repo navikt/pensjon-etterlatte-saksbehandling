@@ -3,7 +3,7 @@ import React from 'react'
 import { BodyShortProps } from '@navikt/ds-react/src/typography/BodyShort'
 import { OverridableComponent } from '@navikt/ds-react/src/util/types'
 
-export const TekstMedBeholdtWhitespace: OverridableComponent<BodyShortProps, HTMLParagraphElement> = (
+export const TekstMedMellomrom: OverridableComponent<BodyShortProps, HTMLParagraphElement> = (
   props: BodyShortProps
 ) => {
   return (

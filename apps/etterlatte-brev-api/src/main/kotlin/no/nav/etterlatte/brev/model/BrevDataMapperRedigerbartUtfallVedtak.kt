@@ -95,7 +95,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 brukerTokenInfo,
                 behandlingId,
                 virkningstidspunkt,
-                sakType,
                 true,
                 systemkilde,
                 loependeIPesys,
@@ -137,7 +136,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                             brukerTokenInfo,
                             behandlingId,
                             virkningstidspunkt,
-                            sakType,
                             erForeldreloes,
                             systemkilde,
                             loependeIPesys,
@@ -221,7 +219,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         behandlingId: UUID,
         virkningstidspunkt: YearMonth?,
-        sakType: SakType,
         erForeldreloes: Boolean,
         systemkilde: Vedtaksloesning,
         loependeIPesys: Boolean,
@@ -236,6 +233,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 )
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
+        val behandling = async { behandlingService.hentBehandling(behandlingId, bruker) }.await()
 
         if (erForeldreloes) {
             BarnepensjonForeldreloesRedigerbar.fra(
@@ -251,6 +249,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 etterbetaling.await(),
                 avdoede,
                 systemkilde,
+                erSluttbehandling = behandling.erSluttbehandling,
             )
         }
     }

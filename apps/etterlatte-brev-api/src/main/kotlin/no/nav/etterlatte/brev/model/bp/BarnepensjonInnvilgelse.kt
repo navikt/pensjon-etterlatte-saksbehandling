@@ -81,6 +81,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val harFlereUtbetalingsperioder: Boolean,
     val erGjenoppretting: Boolean,
     val harUtbetaling: Boolean,
+    val erSluttbehandling: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -88,6 +89,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
             etterbetaling: EtterbetalingDTO?,
             avdoede: List<Avdoed>,
             systemkilde: Vedtaksloesning,
+            erSluttbehandling: Boolean,
         ): BarnepensjonInnvilgelseRedigerbartUtfall {
             val beregningsperioder =
                 utbetalingsinfo.beregningsperioder.map {
@@ -119,6 +121,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                erSluttbehandling = erSluttbehandling,
             )
         }
     }

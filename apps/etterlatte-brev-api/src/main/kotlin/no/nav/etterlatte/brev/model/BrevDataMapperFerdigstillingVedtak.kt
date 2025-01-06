@@ -356,7 +356,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
-        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+        val behandling = async { behandlingService.hentBehandling(behandlingId, bruker) }.await()
 
         if (erForeldreloes) {
             BarnepensjonInnvilgelseForeldreloes.fra(

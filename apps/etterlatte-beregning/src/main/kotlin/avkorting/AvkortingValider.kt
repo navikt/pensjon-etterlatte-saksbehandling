@@ -101,5 +101,5 @@ class HarFratrekkInnAarForFulltAar :
 class InntektForTidligereAar :
     IkkeTillattException(
         "ENDRE_INNTEKT_TIDLIGERE_AAR",
-        "Det er ikke mulig å endre inntekt i år som har vært.",
+        "Det er ikke mulig å endre inntekt for tidligere år",
     )

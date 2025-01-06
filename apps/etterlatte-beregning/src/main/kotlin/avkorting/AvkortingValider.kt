@@ -10,7 +10,10 @@ object AvkortingValider {
         nyInntekt: AvkortingGrunnlagLagreDto,
         avkorting: Avkorting,
         innvilgelse: Boolean,
+        naa: YearMonth = YearMonth.now(),
     ) {
+        skalIkkeKunneEndreInntektITidligereAar(nyInntekt.fom, naa)
+
         foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
             nyInntekt,
             avkorting,
@@ -28,6 +31,15 @@ object AvkortingValider {
         // TODO valider at virk tidligere enn forrige innvilgelse ikke støttes enda
     }
 
+    private fun skalIkkeKunneEndreInntektITidligereAar(
+        fom: YearMonth,
+        naa: YearMonth,
+    ) {
+        if (fom.year < naa.year) {
+            throw InntektForTidligereAar()
+        }
+    }
+
     private fun foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
         nyInntekt: AvkortingGrunnlagLagreDto,
         avkorting: Avkorting,
@@ -42,6 +54,10 @@ object AvkortingValider {
         }
     }
 
+    /*
+    Det skal i utgangspunktet ikke være lov å endre inntekt bakover i tid. Skal alltid være måned etter rapportert endrng.
+    Er det gjort feil av saksbehandler kan siste inntektsendring redigeres.
+     */
     private fun skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(
         fom: YearMonth,
         avkorting: Avkorting,
@@ -80,4 +96,10 @@ class HarFratrekkInnAarForFulltAar :
     IkkeTillattException(
         code = "NY_INNTEKT_FRATREKK_INN_AAR_FULLT_AAR",
         detail = "Kan ikke legge til fratrekk inn år når det er innvilga måned fra og med januar",
+    )
+
+class InntektForTidligereAar :
+    IkkeTillattException(
+        "ENDRE_INNTEKT_TIDLIGERE_AAR",
+        "Det er ikke mulig å endre inntekt i år som har vært.",
     )

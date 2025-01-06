@@ -166,30 +166,24 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                 <option value={FormType.KLAGE_SAKSBEHANDLINGSTID}>Klage saksbehandlingstid informasjon</option>
                 {sakType === SakType.OMSTILLINGSSTOENAD && (
                   <>
-                    <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
+                    <option value={FormType.OMS_AKTIVITETSPLIKT_INFORMASJON_4MND}>
                       Informasjon om aktivitetsplikt ved 4 måneder
                     </option>
-                    <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND}>
+                    <option value={FormType.OMS_AKTIVITETSPLIKT_INFORMASJON_6MND}>
                       Informasjon om aktivitetsplikt ved 6 måneder - varig unntak
                     </option>
-                    <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD}>
-                      Informasjon om dødsfall
-                    </option>
-                    <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD}>
-                      Kvitteringsbrev på mottatt søknad
-                    </option>
-                    <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER}>
+                    <option value={FormType.OMS_INFORMASJON_DOEDSFALL_INNHOLD}>Informasjon om dødsfall</option>
+                    <option value={FormType.OMS_INFORMASJON_MOTTATT_SOEKNAD}>Kvitteringsbrev på mottatt søknad</option>
+                    <option value={FormType.OMS_INFORMASJON_INNHENTING_AV_OPPLYSNINGER}>
                       Innhenting av opplysninger
                     </option>
                   </>
                 )}
                 {sakType === SakType.BARNEPENSJON && (
                   <>
-                    <option value={FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD}>Informasjon om dødsfall</option>
-                    <option value={FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD}>
-                      Kvitteringsbrev på mottatt søknad
-                    </option>
-                    <option value={FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER}>
+                    <option value={FormType.BP_INFORMASJON_DOEDSFALL_INNHOLD}>Informasjon om dødsfall</option>
+                    <option value={FormType.BP_INFORMASJON_MOTTATT_SOEKNAD}>Kvitteringsbrev på mottatt søknad</option>
+                    <option value={FormType.BP_INFORMASJON_INNHENTING_AV_OPPLYSNINGER}>
                       Innhenting av opplysninger
                     </option>
                   </>
@@ -219,7 +213,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                   <KlageMotattDato control={control} />
                 </>
               )}
-              {skjemaet.type === FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND && (
+              {skjemaet.type === FormType.OMS_AKTIVITETSPLIKT_INFORMASJON_4MND && (
                 <>
                   <Select
                     error={errors?.aktivitetsgrad?.message}
@@ -250,16 +244,15 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                   <NasjonalEllerUtlandRadio control={control} />
                 </>
               )}
-              {FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND === skjemaet.type && (
+              {FormType.OMS_AKTIVITETSPLIKT_INFORMASJON_6MND === skjemaet.type && (
                 <>
                   <RedusertEtterInntektRadio control={control} />
                   <NasjonalEllerUtlandRadio control={control} />
                 </>
               )}
-              {[
-                FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD,
-                FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD,
-              ].includes(skjemaet.type) && (
+              {[FormType.OMS_INFORMASJON_DOEDSFALL_INNHOLD, FormType.BP_INFORMASJON_DOEDSFALL_INNHOLD].includes(
+                skjemaet.type
+              ) && (
                 <>
                   <NasjonalEllerUtlandRadio control={control} />
                   <Controller
@@ -279,12 +272,10 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                       )
                     }}
                   />
-                  {FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD === skjemaet.type && (
-                    <ErOver18Aar control={control} />
-                  )}
+                  {FormType.BP_INFORMASJON_DOEDSFALL_INNHOLD === skjemaet.type && <ErOver18Aar control={control} />}
                 </>
               )}
-              {skjemaet.type === FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD && (
+              {skjemaet.type === FormType.BP_INFORMASJON_MOTTATT_SOEKNAD && (
                 <>
                   <SoeknadMottattDato control={control} />
                   <ErOver18Aar control={control} />
@@ -292,19 +283,19 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                   <BorINorgeEllerIkkeAvtaleland control={control} />
                 </>
               )}
-              {skjemaet.type === FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER && (
+              {skjemaet.type === FormType.BP_INFORMASJON_INNHENTING_AV_OPPLYSNINGER && (
                 <>
                   <ErOver18Aar control={control} />
                   <NasjonalEllerUtlandRadio control={control} />
                 </>
               )}
-              {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD && (
+              {skjemaet.type === FormType.OMS_INFORMASJON_MOTTATT_SOEKNAD && (
                 <>
                   <SoeknadMottattDato control={control} />
                   <BorINorgeEllerIkkeAvtaleland control={control} />
                 </>
               )}
-              {skjemaet.type === FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER && (
+              {skjemaet.type === FormType.OMS_INFORMASJON_INNHENTING_AV_OPPLYSNINGER && (
                 <NasjonalEllerUtlandRadio control={control} />
               )}
             </VStack>
@@ -331,7 +322,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
 export type BrevParametre =
   | {
-      type: FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND
+      type: FormType.OMS_AKTIVITETSPLIKT_INFORMASJON_4MND
       spraak: Spraak
       aktivitetsgrad: string
       utbetaling: boolean
@@ -339,37 +330,37 @@ export type BrevParametre =
       nasjonalEllerUtland: NasjonalEllerUtland
     }
   | {
-      type: FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND
+      type: FormType.OMS_AKTIVITETSPLIKT_INFORMASJON_6MND
       spraak: Spraak
       redusertEtterInntekt: boolean
       nasjonalEllerUtland: NasjonalEllerUtland
     }
   | {
-      type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD
+      type: FormType.OMS_INFORMASJON_DOEDSFALL_INNHOLD
       spraak: Spraak
       bosattUtland: boolean
       avdoedNavn: string
     }
   | {
-      type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD
+      type: FormType.OMS_INFORMASJON_MOTTATT_SOEKNAD
       spraak: Spraak
       mottattDato: Date
       borINorgeEllerIkkeAvtaleland: boolean
     }
   | {
-      type: FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
+      type: FormType.OMS_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
       spraak: Spraak
       borIUtlandet: boolean
     }
   | {
-      type: FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD
+      type: FormType.BP_INFORMASJON_DOEDSFALL_INNHOLD
       spraak: Spraak
       bosattUtland: boolean
       avdoedNavn: string
       erOver18Aar: boolean
     }
   | {
-      type: FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD
+      type: FormType.BP_INFORMASJON_MOTTATT_SOEKNAD
       spraak: Spraak
       mottattDato: Date
       bosattUtland: boolean
@@ -377,7 +368,7 @@ export type BrevParametre =
       borINorgeEllerIkkeAvtaleland: boolean
     }
   | {
-      type: FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
+      type: FormType.BP_INFORMASJON_INNHENTING_AV_OPPLYSNINGER
       spraak: Spraak
       borIUtlandet: boolean
       erOver18aar: boolean
@@ -418,19 +409,19 @@ export enum NasjonalEllerUtland {
 enum FormType {
   TOMT_BREV = 'TOMT_BREV',
   KLAGE_SAKSBEHANDLINGSTID = 'KLAGE_SAKSBEHANDLINGSTID',
-  OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND',
-  OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND',
-  OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD = 'OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD',
-  OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD = 'OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD',
-  OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
-  BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD = 'BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD',
-  BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD = 'BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD',
-  BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
+  OMS_AKTIVITETSPLIKT_INFORMASJON_4MND = 'OMS_AKTIVITETSPLIKT_INFORMASJON_4MND',
+  OMS_AKTIVITETSPLIKT_INFORMASJON_6MND = 'OMS_AKTIVITETSPLIKT_INFORMASJON_6MND',
+  OMS_INFORMASJON_DOEDSFALL_INNHOLD = 'OMS_INFORMASJON_DOEDSFALL_INNHOLD',
+  OMS_INFORMASJON_MOTTATT_SOEKNAD = 'OMS_INFORMASJON_MOTTATT_SOEKNAD',
+  OMS_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'OMS_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
+  BP_INFORMASJON_DOEDSFALL_INNHOLD = 'BP_INFORMASJON_DOEDSFALL_INNHOLD',
+  BP_INFORMASJON_MOTTATT_SOEKNAD = 'BP_INFORMASJON_MOTTATT_SOEKNAD',
+  BP_INFORMASJON_INNHENTING_AV_OPPLYSNINGER = 'BP_INFORMASJON_INNHENTING_AV_OPPLYSNINGER',
 }
 
 function mapFormdataToBrevParametre(formdata: FilledFormData, sakType: SakType): BrevParametre {
   switch (formdata.type) {
-    case FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND:
+    case FormType.OMS_AKTIVITETSPLIKT_INFORMASJON_4MND:
       return {
         type: formdata.type,
         spraak: formdata.spraak,
@@ -439,34 +430,34 @@ function mapFormdataToBrevParametre(formdata: FilledFormData, sakType: SakType):
         redusertEtterInntekt: formdata.redusertEtterInntekt!! === JaNei.JA,
         nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
-    case FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND:
+    case FormType.OMS_AKTIVITETSPLIKT_INFORMASJON_6MND:
       return {
         type: formdata.type,
         spraak: formdata.spraak,
         redusertEtterInntekt: formdata.redusertEtterInntekt!! === JaNei.JA,
         nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
-    case FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD:
+    case FormType.OMS_INFORMASJON_DOEDSFALL_INNHOLD:
       return {
         type: formdata.type,
         spraak: formdata.spraak,
         bosattUtland: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
         avdoedNavn: formdata.avdoedNavn!!,
       }
-    case FormType.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD:
+    case FormType.OMS_INFORMASJON_MOTTATT_SOEKNAD:
       return {
         type: formdata.type,
         spraak: formdata.spraak,
         mottattDato: formdata.mottattDato!!,
         borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,
       }
-    case FormType.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
+    case FormType.OMS_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
       return {
         type: formdata.type,
         spraak: formdata.spraak,
         borIUtlandet: formdata.nasjonalEllerUtland === NasjonalEllerUtland.UTLAND,
       }
-    case FormType.BARNEPENSJON_INFORMASJON_DOEDSFALL_INNHOLD:
+    case FormType.BP_INFORMASJON_DOEDSFALL_INNHOLD:
       return {
         type: formdata.type,
         spraak: formdata.spraak,
@@ -474,7 +465,7 @@ function mapFormdataToBrevParametre(formdata: FilledFormData, sakType: SakType):
         avdoedNavn: formdata.avdoedNavn!!,
         erOver18Aar: formdata.erOver18Aar === JaNei.JA,
       }
-    case FormType.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD:
+    case FormType.BP_INFORMASJON_MOTTATT_SOEKNAD:
       return {
         type: formdata.type,
         spraak: formdata.spraak,
@@ -483,7 +474,7 @@ function mapFormdataToBrevParametre(formdata: FilledFormData, sakType: SakType):
         erOver18aar: formdata.erOver18Aar === JaNei.JA,
         borINorgeEllerIkkeAvtaleland: formdata.borINorgeEllerIkkeAvtaleland === JaNei.JA,
       }
-    case FormType.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
+    case FormType.BP_INFORMASJON_INNHENTING_AV_OPPLYSNINGER:
       return {
         type: formdata.type,
         spraak: formdata.spraak,

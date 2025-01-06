@@ -163,7 +163,7 @@ enum class Brevkoder(
                 Spraak.EN to "Appeals - Information about processing time",
             ),
     ),
-    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
+    OMS_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om aktivitetsplikt for omstillingsstønad",
@@ -175,7 +175,7 @@ enum class Brevkoder(
                 Spraak.EN to "Information about the activity requirement for adjustment allowance",
             ),
     ),
-    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD(
+    OMS_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om aktivitetsplikt for omstillingsstønad",
@@ -187,31 +187,31 @@ enum class Brevkoder(
                 Spraak.EN to "Information about the activity requirement for adjustment allowance",
             ),
     ),
-    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
+    OMS_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om omstillingsstønaden din",
         Brevtype.INFORMASJON,
     ),
-    OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD(
+    OMS_INFORMASJON_MOTTATT_SOEKNAD(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_MOTTATT_SOEKNAD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Vi har mottatt søknaden din om omstillingsstønad",
         Brevtype.INFORMASJON,
     ),
-    OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(
+    OMS_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Du må sende oss flere opplysninger",
         Brevtype.INFORMASJON,
     ),
-    BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD(
+    BP_INFORMASJON_MOTTATT_SOEKNAD(
         EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_MOTTATT_SOEKNAD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Vi har mottatt søknaden din om barnepensjon",
         Brevtype.INFORMASJON,
     ),
-    BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(
+    BP_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(
         EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Du må sende oss flere opplysninger",

@@ -27,7 +27,7 @@ sealed class BrevParametereAutomatisk {
             )
     }
 
-    @JsonTypeName("BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT")
+    @JsonTypeName("BP_DOEDSFALL_18_20_VED_REFORMTIDSPUNKT")
     data class BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar(
         val avdoedNavn: String,
         val borIutland: Boolean,
@@ -40,7 +40,7 @@ sealed class BrevParametereAutomatisk {
             )
     }
 
-    @JsonTypeName("OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL")
+    @JsonTypeName("OMS_INFORMASJON_DOEDSFALL")
     data class OmstillingsstoenadInformasjonDoedsfallRedigerbar(
         val bosattUtland: Boolean,
         val avdoedNavn: String,

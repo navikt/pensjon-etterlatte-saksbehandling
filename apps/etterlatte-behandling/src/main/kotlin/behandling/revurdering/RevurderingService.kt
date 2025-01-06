@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -17,6 +18,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -182,6 +184,7 @@ class RevurderingService(
                     ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
                 aktivitetspliktDao.kopierAktiviteter(behandlingId, opprettBehandling.id)
                 aktivitetspliktKopierService.kopierVurderingTilBehandling(sakId, opprettBehandling.id)
+                kopierViderefoertOpphoer(behandlingId, opprettBehandling)
             }
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
@@ -284,6 +287,42 @@ class RevurderingService(
             }
 
         lagreRevurderingInfo(revurdering.id, RevurderingInfoMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
+    }
+
+    /**
+     * Sjekker om det er satt opphoerFom fra forrige behandling. Hvis så skal ViderefoertOpphoer også kopieres med.
+     * Dersom denne ikke er satt (dette kan feks skje dersom en revrudering kun er opphør, opprettes det en ny
+     * ViderefoertOpphoer uten vilkår da dette ikke er trivielt å utlede fra forrige behandlings vilkårsvurdering.
+     */
+    private fun kopierViderefoertOpphoer(
+        forrigeBehandlingId: UUID,
+        opprettBehandling: OpprettBehandling,
+    ) {
+        val opphoerFom = opprettBehandling.opphoerFraOgMed
+        if (opphoerFom != null) {
+            val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(forrigeBehandlingId)
+            if (viderefoertOpphoer != null) {
+                logger.info("Lagrer tidligere opprettet videreført opphør i behandling ${opprettBehandling.id}")
+                behandlingDao.lagreViderefoertOpphoer(
+                    opprettBehandling.id,
+                    viderefoertOpphoer.copy(behandlingId = opprettBehandling.id),
+                )
+            } else {
+                logger.info("Oppretter nytt videreført opphør i behandling ${opprettBehandling.id}")
+                behandlingDao.lagreViderefoertOpphoer(
+                    opprettBehandling.id,
+                    ViderefoertOpphoer(
+                        skalViderefoere = JaNei.JA,
+                        behandlingId = opprettBehandling.id,
+                        dato = opphoerFom,
+                        vilkaar = null,
+                        begrunnelse = "Automatisk videreført fra eksisterende opphør",
+                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        kravdato = null,
+                    ),
+                )
+            }
+        }
     }
 }
 

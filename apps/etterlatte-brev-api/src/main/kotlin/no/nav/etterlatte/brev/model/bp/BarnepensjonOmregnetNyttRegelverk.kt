@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
@@ -78,7 +79,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
             brevutfall: BrevutfallDto?,
         ): BarnepensjonOmregnetNyttRegelverk {
             val erUnder18AarNonNull =
-                requireNotNull(erUnder18Aar) {
+                krevIkkeNull(erUnder18Aar) {
                     "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
                 }
 
@@ -95,9 +96,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
                     ),
                 frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
                 erBosattUtlandet =
-                    (
-                        requireNotNull(utlandstilknytning)
-                    ) == UtlandstilknytningType.BOSATT_UTLAND,
+                    krevIkkeNull(utlandstilknytning) { "Utlandstilknytning mangler" } == UtlandstilknytningType.BOSATT_UTLAND,
                 erEtterbetaling = etterbetaling != null,
             )
         }

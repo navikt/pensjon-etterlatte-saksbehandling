@@ -41,6 +41,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.opprettBrevFra
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -366,7 +367,7 @@ class BrevRepository(
                     ).asUpdateAndReturnGeneratedKey,
                 )
 
-            requireNotNull(brevId) { "Brev ikke opprettet!" }
+            krevIkkeNull(brevId) { "Brev ikke opprettet!" }
 
             ulagretBrev.mottakere
                 .sumOf { tx.opprettMottaker(brevId, it) }

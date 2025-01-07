@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.omregning.OmregningData
 import no.nav.etterlatte.omregning.OmregningDataPacket
@@ -155,21 +156,23 @@ internal class OmregningHendelserBeregningRiver(
     ) {
         val dato = packet.omregningData.hentFraDato()
         val forrige =
-            requireNotNull(beregning.forrigeBeregning.beregningsperioder.paaDato(dato))
-                .let {
-                    Pair(it.utbetaltBeloep, it.grunnbelop)
-                }.also {
-                    packet[ReguleringEvents.BEREGNING_BELOEP_FOER] = it.first
-                    packet[ReguleringEvents.BEREGNING_G_FOER] = it.second
-                }
+            krevIkkeNull(beregning.forrigeBeregning.beregningsperioder.paaDato(dato)) {
+                "Forrige beregning mangler beregningsperiode på dato $dato"
+            }.let {
+                Pair(it.utbetaltBeloep, it.grunnbelop)
+            }.also {
+                packet[ReguleringEvents.BEREGNING_BELOEP_FOER] = it.first
+                packet[ReguleringEvents.BEREGNING_G_FOER] = it.second
+            }
         val naavaerende =
-            requireNotNull(beregning.beregning.beregningsperioder.paaDato(dato))
-                .let {
-                    Pair(it.utbetaltBeloep, it.grunnbelop)
-                }.also {
-                    packet[ReguleringEvents.BEREGNING_BELOEP_ETTER] = it.first
-                    packet[ReguleringEvents.BEREGNING_G_ETTER] = it.second
-                }
+            krevIkkeNull(beregning.beregning.beregningsperioder.paaDato(dato)) {
+                "Beregning mangler beregningsperiode på dato $dato"
+            }.let {
+                Pair(it.utbetaltBeloep, it.grunnbelop)
+            }.also {
+                packet[ReguleringEvents.BEREGNING_BELOEP_ETTER] = it.first
+                packet[ReguleringEvents.BEREGNING_G_ETTER] = it.second
+            }
         packet[ReguleringEvents.BEREGNING_BRUKT_OMREGNINGSFAKTOR] =
             BigDecimal(naavaerende.first).divide(BigDecimal(forrige.first))
 
@@ -192,7 +195,10 @@ internal class OmregningHendelserBeregningRiver(
                 .first()
                 .datoFOM
                 .atDay(1)
-        val sistePeriodeNy = requireNotNull(ny.beregningsperioder.paaDato(dato))
+        val sistePeriodeNy =
+            krevIkkeNull(ny.beregningsperioder.paaDato(dato)) {
+                "Fant ingen beregningsperiode på dato $dato"
+            }
         val nyttBeloep = sistePeriodeNy.utbetaltBeloep
         val sistePeriodeGammel = gammel.beregningsperioder.paaDato(dato)
         val gammeltBeloep = sistePeriodeGammel?.utbetaltBeloep

@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -323,7 +324,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 
         OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
             utbetalingsinfo.await(),
-            requireNotNull(avkortingsinfo.await()),
+            krevIkkeNull(avkortingsinfo.await()) { "Avkortingsinfo mangler i brevutfall" },
             etterbetaling.await(),
             behandling.tidligereFamiliepleier?.svar ?: false,
         )
@@ -352,7 +353,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
 
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
-            requireNotNull(avkortingsinfo.await()),
+            krevIkkeNull(avkortingsinfo.await()) { "Avkortingsinfo mangler i brevutfall" },
             behandling,
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
             etterbetaling.await(),

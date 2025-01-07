@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -309,7 +310,7 @@ class VedtaksvurderingRepository(
     private fun hentVedtakNonNull(
         behandlingId: UUID,
         tx: TransactionalSession? = null,
-    ): Vedtak = requireNotNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
+    ): Vedtak = krevIkkeNull(hentVedtak(behandlingId, tx)) { "Fant ikke vedtak for behandling $behandlingId" }
 
     fun hentVedtakForSak(
         sakId: SakId,

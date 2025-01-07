@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
@@ -61,7 +62,8 @@ fun Route.vedtaksvurderingRoute(
 
         post("/sak/{$SAKID_CALL_PARAMETER}/samordning/melding") {
             withSakId(behandlingKlient) { sakId ->
-                val oppdatering = requireNotNull(call.receive<OppdaterSamordningsmelding>())
+                val oppdatering = call.receive<OppdaterSamordningsmelding>()
+
                 logger.info("Oppdaterer samordningsmelding=${oppdatering.samId}, sak=$sakId")
                 vedtakBehandlingService.oppdaterSamordningsmelding(oppdatering, brukerTokenInfo).run {
                     rapidService.sendGenerellHendelse(
@@ -252,7 +254,10 @@ fun Route.vedtaksvurderingRoute(
     route("/vedtak") {
         route("/samordnet") {
             post("/{vedtakId}") {
-                val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+                val vedtakId =
+                    krevIkkeNull(call.parameters["vedtakId"]?.toLong()) {
+                        "VedtakId mangler"
+                    }
 
                 val vedtak =
                     vedtakService.hentVedtak(vedtakId)
@@ -290,7 +295,10 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
         }
 
         get("/{vedtakId}") {
-            val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+            val vedtakId =
+                krevIkkeNull(call.parameters["vedtakId"]?.toLong()) {
+                    "VedtakId mangler"
+                }
 
             val vedtak =
                 vedtakSamordningService.hentVedtak(vedtakId)

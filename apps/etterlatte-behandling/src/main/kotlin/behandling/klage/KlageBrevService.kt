@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -144,7 +145,7 @@ class KlageBrevService(
                         "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
                             "journalført på journalpostId=${eksisterendeInnstillingsbrev.mottakere.first().journalpostId}",
                     )
-                    requireNotNull(eksisterendeInnstillingsbrev.mottakere.first().journalpostId) {
+                    krevIkkeNull(eksisterendeInnstillingsbrev.mottakere.first().journalpostId) {
                         "Har et brev med id=$brevId med status=${eksisterendeInnstillingsbrev.status} som mangler journalpostId"
                     }
                 }

@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
@@ -135,7 +136,7 @@ class VedtaksbrevService(
         migrering: Boolean = false,
     ) {
         val brev =
-            requireNotNull(hentVedtaksbrev(behandlingId)) {
+            krevIkkeNull(hentVedtaksbrev(behandlingId)) {
                 "Fant ingen brev for behandling (id=$behandlingId)"
             }
 

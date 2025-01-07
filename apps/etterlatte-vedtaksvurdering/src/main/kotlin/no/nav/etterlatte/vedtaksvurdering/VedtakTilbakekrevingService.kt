@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
@@ -74,7 +75,7 @@ class VedtakTilbakekrevingService(
         logger.info("Attesterer vedtak for tilbakekreving=${tilbakekrevingVedtakData.tilbakekrevingId}")
         val tilbakekrevingId = tilbakekrevingVedtakData.tilbakekrevingId
         val vedtak =
-            requireNotNull(repository.hentVedtak(tilbakekrevingId)) {
+            krevIkkeNull(repository.hentVedtak(tilbakekrevingId)) {
                 "Vedtak for tilbakekreving $tilbakekrevingId finnes ikke"
             }
         verifiserGyldigVedtakStatus(tilbakekrevingId, listOf(VedtakStatus.FATTET_VEDTAK))

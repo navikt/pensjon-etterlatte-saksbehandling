@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -259,7 +260,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 erUnder18Aar = soekerUnder18,
                 utbetalingsinfo = utbetalingsinfo.await(),
                 etterbetaling = etterbetaling.await(),
-                trygdetid = requireNotNull(trygdetid.await()) { "Mangler trygdetid" },
+                trygdetid = krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" },
                 grunnbeloep = grunnbeloep.await(),
                 utlandstilknytning = utlandstilknytningType,
                 avdoede = avdoede,
@@ -312,8 +313,8 @@ class BrevDataMapperFerdigstillingVedtak(
             utbetalingsinfo.await(),
             forrigeUtbetalingsinfo.await(),
             etterbetaling.await(),
-            requireNotNull(trygdetid.await()) { "Mangler trygdetid" },
-            requireNotNull(grunnbeloep.await()) { "Mangler grunnbeloep" },
+            krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" },
+            krevIkkeNull(grunnbeloep.await()) { "Mangler grunnbeloep" },
             utlandstilknytningType,
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
             revurderingaarsak,
@@ -352,8 +353,8 @@ class BrevDataMapperFerdigstillingVedtak(
                 innholdMedVedlegg,
                 utbetalingsinfo.await(),
                 etterbetaling.await(),
-                requireNotNull(trygdetid.await()) { "Mangler trygdetid" },
-                requireNotNull(grunnbeloep.await()) { "Mangler grunnbeloep" },
+                krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" },
+                krevIkkeNull(grunnbeloep.await()) { "Mangler grunnbeloep" },
                 utlandstilknytningType,
                 brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
                 loependeIPesys,
@@ -368,8 +369,8 @@ class BrevDataMapperFerdigstillingVedtak(
                 avdoede,
                 utbetalingsinfo.await(),
                 etterbetaling.await(),
-                requireNotNull(trygdetid.await()) { "Mangler trygdetid" },
-                requireNotNull(grunnbeloep.await()) { "Mangler grunnbeløp" },
+                krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" },
+                krevIkkeNull(grunnbeloep.await()) { "Mangler grunnbeløp" },
                 utlandstilknytningType,
                 brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
@@ -458,8 +459,8 @@ class BrevDataMapperFerdigstillingVedtak(
             innholdMedVedlegg,
             avkortingsinfo.await(),
             etterbetaling.await(),
-            requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
-            requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkårsvurdering" },
+            krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
+            krevIkkeNull(vilkaarsvurdering.await()) { "Mangler vilkårsvurdering" },
             avdoede,
             utlandstilknytningType,
             behandling,
@@ -513,10 +514,10 @@ class BrevDataMapperFerdigstillingVedtak(
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
             avkortingsinfo.await(),
-            requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
+            krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
             revurderingaarsak,
-            requireNotNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
+            krevIkkeNull(vilkaarsvurdering.await()) { "Mangler vilkarsvurdering" },
             datoVedtakOmgjoering,
             utlandstilknytningType,
             behandling,
@@ -569,7 +570,7 @@ class BrevDataMapperFerdigstillingVedtak(
         OmstillingsstoenadInntektsjusteringVedtak.fra(
             innholdMedVedlegg = innholdMedVedlegg,
             avkortingsinfo = avkortingsinfo.await(),
-            trygdetid = requireNotNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
+            trygdetid = krevIkkeNull(trygdetid.await()) { "Mangler trygdetid" }.single(),
             vilkaarsVurdering = vilkaarsvurdering.await(),
             behandling = behandling,
             navnAvdoed = avdoede.single().navn,

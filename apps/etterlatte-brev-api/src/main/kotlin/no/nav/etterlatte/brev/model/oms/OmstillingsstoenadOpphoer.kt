@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import java.time.LocalDate
 
 data class OmstillingsstoenadOpphoer(
@@ -26,7 +27,10 @@ data class OmstillingsstoenadOpphoer(
             virkningsdato: LocalDate?,
             utlandstilknytningType: UtlandstilknytningType?,
         ): OmstillingsstoenadOpphoer {
-            val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
+            val feilutbetaling =
+                krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                    "Feilutbetaling mangler i brevutfall"
+                }
 
             return OmstillingsstoenadOpphoer(
                 innhold = innholdMedVedlegg.innhold(),
@@ -37,7 +41,10 @@ data class OmstillingsstoenadOpphoer(
                         BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
                     ),
                 bosattUtland = utlandstilknytningType == UtlandstilknytningType.BOSATT_UTLAND,
-                virkningsdato = requireNotNull(virkningsdato),
+                virkningsdato =
+                    krevIkkeNull(virkningsdato) {
+                        "Virkningsdato mangler i brevutfall"
+                    },
                 feilutbetaling = feilutbetaling,
             )
         }
@@ -50,7 +57,10 @@ data class OmstillingsstoenadOpphoerRedigerbartUtfall(
     companion object {
         fun fra(brevutfall: BrevutfallDto): OmstillingsstoenadOpphoerRedigerbartUtfall =
             OmstillingsstoenadOpphoerRedigerbartUtfall(
-                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
+                feilutbetaling =
+                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                        "Feilutbetaling mangler i brevutfall"
+                    },
             )
     }
 }

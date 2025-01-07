@@ -184,7 +184,7 @@ class RevurderingService(
                     ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
                 aktivitetspliktDao.kopierAktiviteter(behandlingId, opprettBehandling.id)
                 aktivitetspliktKopierService.kopierVurderingTilBehandling(sakId, opprettBehandling.id)
-                kopierViderefoertOpphoer(behandlingId, opprettBehandling)
+                kopierViderefoertOpphoer(behandlingId, opprettBehandling, saksbehandlerIdent)
             }
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
@@ -298,6 +298,7 @@ class RevurderingService(
     private fun kopierViderefoertOpphoer(
         forrigeBehandlingId: UUID,
         opprettBehandling: OpprettBehandling,
+        saksbehandlerIdent: String?,
     ) {
         if (opprettBehandling.opphoerFraOgMed != null) {
             val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(forrigeBehandlingId)
@@ -317,7 +318,9 @@ class RevurderingService(
                         dato = opprettBehandling.opphoerFraOgMed,
                         vilkaar = null,
                         begrunnelse = "Automatisk videreført fra eksisterende opphør",
-                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        kilde =
+                            saksbehandlerIdent?.let { Grunnlagsopplysning.Saksbehandler(it, Tidspunkt.now()) }
+                                ?: Grunnlagsopplysning.automatiskSaksbehandler,
                         kravdato = null,
                     ),
                 )

@@ -290,16 +290,16 @@ class RevurderingService(
     }
 
     /**
-     * Sjekker om det er satt opphoerFom fra forrige behandling. Hvis så skal ViderefoertOpphoer også kopieres med.
-     * Dersom denne ikke er satt (dette kan feks skje dersom en revrudering kun er opphør, opprettes det en ny
-     * ViderefoertOpphoer uten vilkår da dette ikke er trivielt å utlede fra forrige behandlings vilkårsvurdering.
+     * Sjekker om det er satt opphoerFom i forrige behandling. Hvis så skal ViderefoertOpphoer også kopieres med.
+     * Dersom ViderefoertOpphoer ikke er satt (dette kan feks skje dersom en revrudering kun inneholder et opphør,
+     * opprettes det en ny ViderefoertOpphoer uten vilkår satt. Dette fordi det ikke er trivielt å utlede fra
+     * den forrige behandlingens vilkårsvurdering.
      */
     private fun kopierViderefoertOpphoer(
         forrigeBehandlingId: UUID,
         opprettBehandling: OpprettBehandling,
     ) {
-        val opphoerFom = opprettBehandling.opphoerFraOgMed
-        if (opphoerFom != null) {
+        if (opprettBehandling.opphoerFraOgMed != null) {
             val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(forrigeBehandlingId)
             if (viderefoertOpphoer != null) {
                 logger.info("Lagrer tidligere opprettet videreført opphør i behandling ${opprettBehandling.id}")
@@ -314,7 +314,7 @@ class RevurderingService(
                     ViderefoertOpphoer(
                         skalViderefoere = JaNei.JA,
                         behandlingId = opprettBehandling.id,
-                        dato = opphoerFom,
+                        dato = opprettBehandling.opphoerFraOgMed,
                         vilkaar = null,
                         begrunnelse = "Automatisk videreført fra eksisterende opphør",
                         kilde = Grunnlagsopplysning.automatiskSaksbehandler,

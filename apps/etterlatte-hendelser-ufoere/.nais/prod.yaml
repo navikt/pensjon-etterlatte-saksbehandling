@@ -17,7 +17,7 @@ spec:
   strategy:
     type: Recreate
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   azure:
     application:
       enabled: true

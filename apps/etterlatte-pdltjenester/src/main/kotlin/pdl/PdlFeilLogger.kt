@@ -28,7 +28,8 @@ fun loggDelvisReturnerteData(
         }
 
         result.errors?.joinToString(",")?.let { feil ->
-            val stackTrace = Exception()
+
+            val stackTrace = Stacktrace("Stacktrace")
             logger.error(
                 "Fikk data fra PDL, men også feil / mangler. Dette kan gjøre at saksbehandler får et " +
                     "ukomplett bilde av dataene i PDL, uten at vi indikerer dette." +
@@ -39,6 +40,10 @@ fun loggDelvisReturnerteData(
         }
     }
 }
+
+class Stacktrace(
+    message: String,
+) : Exception(message)
 
 class ManglerTilgangTilPerson :
     ForespoerselException(

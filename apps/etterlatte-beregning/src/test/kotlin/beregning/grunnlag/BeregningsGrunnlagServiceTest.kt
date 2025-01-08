@@ -245,7 +245,7 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            val beregningsGrunnlag =
+            assertThrows<UgyldigBeregningsgrunnlag> {
                 beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId = revurdering.id,
                     beregningsGrunnlag =
@@ -255,7 +255,7 @@ internal class BeregningsGrunnlagServiceTest {
                         ),
                     brukerTokenInfo = mockk(relaxed = true),
                 )
-            assertNotNull(beregningsGrunnlag)
+            }
         }
 
         coVerify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }

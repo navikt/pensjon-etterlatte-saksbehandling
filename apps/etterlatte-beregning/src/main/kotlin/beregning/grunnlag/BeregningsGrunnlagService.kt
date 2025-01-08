@@ -15,6 +15,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.automatiskSaksbehandler
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -36,6 +38,12 @@ class ManglerForrigeGrunnlag :
         detail = "Mangler forrige grunnlag for revurdering",
     )
 
+class UgyldigBeregningsgrunnlag :
+    UgyldigForespoerselException(
+        code = "UGYLDIG_BEREGNINGSGRUNNLAG",
+        detail = "Beregningsgrunnlaget er ikke gyldig",
+    )
+
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val beregningRepository: BeregningRepository,
@@ -52,6 +60,8 @@ class BeregningsGrunnlagService(
     ): BeregningsGrunnlag? =
         when {
             behandlingKlient.kanSetteStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) -> {
+                logger.info("Lagrer beregningsgrunnlag for behandling $behandlingId")
+
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
 
@@ -70,6 +80,8 @@ class BeregningsGrunnlagService(
                                 .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
                                 .sortedByDescending { it.datoFattet }
                                 .first { it.vedtakType != VedtakType.OPPHOER }
+
+                        logger.info("Siste iverksatte behandling er ${sisteIverksatteBehandling.behandlingId}")
 
                         grunnlagErIkkeEndretFoerVirk(
                             behandling,
@@ -106,7 +118,8 @@ class BeregningsGrunnlagService(
                         emptyList()
                     }
 
-                kanLagreDetteGrunnlaget &&
+                if (kanLagreDetteGrunnlaget) {
+                    logger.info("Beregningsgrunnlaget er gyldig for behandling $behandlingId - lagrer")
                     beregningsGrunnlagRepository.lagreBeregningsGrunnlag(
                         BeregningsGrunnlag(
                             behandlingId = behandlingId,
@@ -122,8 +135,15 @@ class BeregningsGrunnlagService(
                         ),
                     )
 
-                behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
-                beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
+                    behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
+                    beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
+                } else {
+                    logger.info("Beregningsgrunnlaget er ikke gyldig for behandling $behandlingId")
+                    sikkerlogger().info(
+                        "Beregningsgrunnlaget er ikke gyldig for behandling $behandlingId. Beregningsgrunnlag: ${beregningsGrunnlag.toJson()}",
+                    )
+                    throw UgyldigBeregningsgrunnlag()
+                }
             }
 
             else -> null
@@ -161,6 +181,7 @@ class BeregningsGrunnlagService(
         forrigeIverksatteBehandlingId: UUID,
         beregningsGrunnlag: LagreBeregningsGrunnlag,
     ): Boolean {
+        logger.info("Kontrollerer at beregningsgrunnlag ikke er endret før virkningstidspunkt")
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(
                 forrigeIverksatteBehandlingId,

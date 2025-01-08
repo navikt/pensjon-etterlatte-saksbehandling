@@ -321,7 +321,6 @@ class RevurderingService(
                         kilde =
                             saksbehandlerIdent?.let { Grunnlagsopplysning.Saksbehandler(it, Tidspunkt.now()) }
                                 ?: Grunnlagsopplysning.automatiskSaksbehandler,
-                        kravdato = null,
                     ),
                 )
             }

@@ -83,7 +83,7 @@ enum class Brevkoder(
         Brevtype.INFORMASJON,
     ),
     BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT(
-        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT,
+        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL_18_20,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om barnepensjon",
         Brevtype.INFORMASJON,
@@ -164,7 +164,7 @@ enum class Brevkoder(
             ),
     ),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
+        EtterlatteBrevKode.AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om aktivitetsplikt for omstillingsstønad",
         Brevtype.INFORMASJON,
@@ -176,7 +176,7 @@ enum class Brevkoder(
             ),
     ),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
+        EtterlatteBrevKode.AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om aktivitetsplikt for omstillingsstønad",
         Brevtype.INFORMASJON,
@@ -188,7 +188,7 @@ enum class Brevkoder(
             ),
     ),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
+        EtterlatteBrevKode.AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om omstillingsstønaden din",
         Brevtype.INFORMASJON,
@@ -212,7 +212,7 @@ enum class Brevkoder(
         Brevtype.INFORMASJON,
     ),
     BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER(
-        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_INNHENTING_AV_OPPLYSNINGER,
+        EtterlatteBrevKode.BARNEPENSJON_INNHENTING_AV_OPPLYSNINGER,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Du må sende oss flere opplysninger",
         Brevtype.INFORMASJON,

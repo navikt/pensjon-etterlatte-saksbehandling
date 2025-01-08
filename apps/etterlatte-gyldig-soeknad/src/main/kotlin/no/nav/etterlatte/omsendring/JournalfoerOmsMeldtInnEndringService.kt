@@ -95,7 +95,7 @@ class JournalfoerOmsMeldtInnEndringService(
                             endringer = omsMeldtInnEndring.endringer,
                             tidspunkt = formatertTidspunkt(omsMeldtInnEndring.tidspunkt),
                         ),
-                    mal = "inntektsjustering_nytt_aar_v1",
+                    mal = "oms_meldt_inn_endring_v1",
                 )
             }.let {
                 when (it) {

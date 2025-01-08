@@ -56,7 +56,6 @@ export const ViderefoereOpphoerVurdering = ({
   const [vilkaarError, setVilkaarError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(viderefoertOpphoer?.begrunnelse || '')
   const [setViderefoertOpphoerStatus, setViderefoertOpphoer, resetToInitial] = useApiCall(lagreViderefoertOpphoer)
-  const [kravdato] = useState<string | undefined>()
   const [slettViderefoertOpphoerResult, slettViderefoertOpphoerCall, resetSlettToInitial] =
     useApiCall(slettViderefoertOpphoer)
 
@@ -89,7 +88,7 @@ export const ViderefoereOpphoerVurdering = ({
     if (skalViderefoere !== undefined && !vilkaarError && isSuccess(vilkaartyperResult)) {
       const vilkaartype = vilkaar ? finnVilkaartypeFraTittel(vilkaartyperResult.data, vilkaar)?.name : undefined
       return setViderefoertOpphoer(
-        { skalViderefoere, behandlingId, begrunnelse, vilkaarType: vilkaartype, kravdato, opphoerstidspunkt },
+        { skalViderefoere, behandlingId, begrunnelse, vilkaarType: vilkaartype, opphoerstidspunkt },
         (viderefoertOpphoer) => {
           dispatch(oppdaterViderefoertOpphoer(viderefoertOpphoer))
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))

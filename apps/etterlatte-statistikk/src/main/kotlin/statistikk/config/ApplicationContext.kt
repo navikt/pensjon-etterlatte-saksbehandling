@@ -21,7 +21,7 @@ import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.AnnulerteDao
-import no.nav.etterlatte.statistikk.jobs.AvbrytAnnulerteBehandlingerJobb
+import no.nav.etterlatte.statistikk.jobs.AvbrytAnnullerteBehandlingerJobb
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
 import no.nav.etterlatte.statistikk.river.AktivitetspliktHendelseRiver
 import no.nav.etterlatte.statistikk.river.AvbruttOpprettetBehandlinghendelseRiver
@@ -93,8 +93,8 @@ class ApplicationContext {
         AktivitetspliktService(aktivitetspliktRepo)
     }
 
-    val avbrytAnnulerteBehandlingerJobb: AvbrytAnnulerteBehandlingerJobb by lazy {
-        AvbrytAnnulerteBehandlingerJobb(sakstatistikkRepository, annulerteDao, leaderElection)
+    val avbrytAnnullerteBehandlingerJobb: AvbrytAnnullerteBehandlingerJobb by lazy {
+        AvbrytAnnullerteBehandlingerJobb(sakstatistikkRepository, annulerteDao, leaderElection)
     }
 
     val maanedligStatistikkJob: MaanedligStatistikkJob by lazy {

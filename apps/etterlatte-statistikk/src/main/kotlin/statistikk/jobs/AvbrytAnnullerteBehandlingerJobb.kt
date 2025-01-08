@@ -18,7 +18,7 @@ import javax.sql.DataSource
 class AnnulerteDao(
     private val datasource: DataSource,
 ) {
-    fun hentIkkeAnnulerteBehandlinger(): List<UUID> =
+    fun hentIkkeAnnullerteBehandlinger(): List<UUID> =
         datasource.connection.use {
             val statement =
                 it.prepareStatement(
@@ -49,12 +49,12 @@ class AnnulerteDao(
     }
 }
 
-class AvbrytAnnulerteBehandlingerJobb(
+class AvbrytAnnullerteBehandlingerJobb(
     private val sakRepository: SakRepository,
     private val annulerteDao: AnnulerteDao,
     private val leaderElection: LeaderElection,
 ) : TimerJob {
-    private val logger: Logger = LoggerFactory.getLogger(AvbrytAnnulerteBehandlingerJobb::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(AvbrytAnnullerteBehandlingerJobb::class.java)
     private val initialDelay = Duration.of(2, ChronoUnit.MINUTES)
     private val period = Duration.of(5, ChronoUnit.MINUTES)
     private val jobbNavn = this::class.simpleName
@@ -68,7 +68,7 @@ class AvbrytAnnulerteBehandlingerJobb(
             period = period.toMillis(),
             loggerInfo = LoggerInfo(logger = logger, sikkerLogg = null, loggTilSikkerLogg = false),
         ) {
-            AvbrytAnnulertBehandling(
+            AvbrytAnnullertBehandling(
                 sakRepository = sakRepository,
                 annulerteDao = annulerteDao,
                 leaderElection = leaderElection,
@@ -76,12 +76,12 @@ class AvbrytAnnulerteBehandlingerJobb(
         }
     }
 
-    class AvbrytAnnulertBehandling(
+    class AvbrytAnnullertBehandling(
         private val sakRepository: SakRepository,
         private val annulerteDao: AnnulerteDao,
         private val leaderElection: LeaderElection,
     ) {
-        private val logger: Logger = LoggerFactory.getLogger(AvbrytAnnulertBehandling::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(AvbrytAnnullertBehandling::class.java)
 
         fun avbrytBehandlinger() {
             if (!leaderElection.isLeader()) {
@@ -89,7 +89,7 @@ class AvbrytAnnulerteBehandlingerJobb(
             }
 
             annulerteDao
-                .hentIkkeAnnulerteBehandlinger()
+                .hentIkkeAnnullerteBehandlinger()
                 .forEach {
                     try {
                         val rader = sakRepository.hentRaderForBehandlingId(it)

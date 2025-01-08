@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.omsendring.OmsMeldtInnEndringHendelseKeys.HENDELSE_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -42,7 +41,7 @@ internal class OmsMeldtInnEndringRiver(
         try {
             val sak =
                 runBlocking {
-                    behandlingKlient.finnEllerOpprettSak(endringer.fnr.value, SakType.OMSTILLINGSSTOENAD)
+                    behandlingKlient.finnEllerOpprettSak(endringer.fnr, SakType.OMSTILLINGSSTOENAD)
                 }
 
             val journalpostResponse =
@@ -93,7 +92,7 @@ enum class OmsMeldtInnEndringHendelsetype(
 //  TODO i lib
 data class OmsMeldtInnEndring(
     val id: UUID = UUID.randomUUID(),
-    val fnr: Foedselsnummer,
+    val fnr: String,
     val type: OmsEndringType,
     val endringer: String,
     val tidspunkt: Instant = Instant.now().truncatedTo(ChronoUnit.SECONDS),

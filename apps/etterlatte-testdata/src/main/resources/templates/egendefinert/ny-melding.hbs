@@ -26,6 +26,7 @@
                   <option value="omregning">Omregning</option>
                   <option value="inntektsjusteringjobb">Inntektsjusteringjobb</option>
                   <option value="inntektsjustering">Inntektsjustering fra selvbetjening</option>
+                  <option value="omsendring">OMS meldt inn endring</option>
                 </select>
             </div>
 
@@ -77,6 +78,20 @@
                 }
             });
             prettify()
+        } else if( hendelseType == 'omsendring') {
+                    const currentTimestamp = new Date().toISOString();
+
+                    document.getElementById('json').value = JSON.stringify({
+                        "@event_name": "oms_meldt_inn_endring",
+                        "@oms_meldt_inn_endring_innhold": {
+                            "id": "accdcbb1-be49-4ab5-b7d3-a3852d19cf42",
+                            "fnr": "123",
+                            "type": "ANNET",
+                            "endringer": "Beskrivelse av endringer fra bruker..",
+                            "tidspunkt": currentTimestamp
+                        }
+                    });
+                    prettify()
         } else {
         document.getElementById('json').value = ''
         }

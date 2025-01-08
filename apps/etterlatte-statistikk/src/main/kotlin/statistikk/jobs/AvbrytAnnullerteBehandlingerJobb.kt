@@ -3,6 +3,7 @@ package no.nav.etterlatte.statistikk.jobs
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -103,8 +104,8 @@ class AvbrytAnnullerteBehandlingerJobb(
                             return@forEach
                         }
                         aktuellRad.copy(
-                            status = "AVBRUTT",
-                            resultat = "AVBRUTT",
+                            status = BehandlingStatus.AVBRUTT.name,
+                            resultat = BehandlingStatus.AVBRUTT.name,
                             resultatBegrunnelse = "BEHANDLING_RULLET_TILBAKE",
                             ferdigbehandletTidspunkt = aktuellRad.tekniskTid,
                         )

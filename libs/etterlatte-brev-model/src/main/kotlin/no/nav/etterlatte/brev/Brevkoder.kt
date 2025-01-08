@@ -83,7 +83,7 @@ enum class Brevkoder(
         Brevtype.INFORMASJON,
     ),
     BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT(
-        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL_18_20,
+        EtterlatteBrevKode.BARNEPENSJON_18_20_VED_REFORMSTIDSPUNKT,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
         "Informasjon om barnepensjon",
         Brevtype.INFORMASJON,

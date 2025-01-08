@@ -44,6 +44,7 @@ data class Beregningsperiode(
     val regelverk: Regelverk? = null,
     val kunEnJuridiskForelder: Boolean = false,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
+    val harForeldreloessats: Boolean? = null,
 )
 
 data class OverstyrBeregningDTO(

@@ -56,7 +56,6 @@ data class BarnepensjonRevurdering(
             datoVedtakOmgjoering: LocalDate?,
             erMigrertYrkesskade: Boolean,
         ): BarnepensjonRevurdering {
-            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             val feilutbetaling =
                 krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
                     "Feilutbetaling mangler i brevutfall"
@@ -70,7 +69,6 @@ data class BarnepensjonRevurdering(
                         avdoede,
                         utbetalingsinfo,
                         grunnbeloep,
-                        beregningsperioder,
                         trygdetid,
                         erForeldreloes,
                     ),
@@ -84,7 +82,7 @@ data class BarnepensjonRevurdering(
                 feilutbetaling = feilutbetaling,
                 frivilligSkattetrekk = brevutfall.frivilligSkattetrekk ?: false,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
-                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 innholdForhaandsvarsel =
                     vedleggHvisFeilutbetaling(
                         feilutbetaling,

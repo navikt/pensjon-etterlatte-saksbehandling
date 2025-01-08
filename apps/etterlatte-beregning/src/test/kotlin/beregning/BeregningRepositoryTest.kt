@@ -207,6 +207,7 @@ internal class BeregningRepositoryTest(
                     regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
                     kunEnJuridiskForelder = true,
+                    harForeldreloessats = true,
                 ),
             ),
         overstyrBeregning = overstyrBeregning,

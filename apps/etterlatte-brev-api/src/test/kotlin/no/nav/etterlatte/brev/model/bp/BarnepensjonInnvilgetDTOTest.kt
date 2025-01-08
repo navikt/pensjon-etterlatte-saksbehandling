@@ -39,6 +39,7 @@ internal class BarnepensjonInnvilgetDTOTest {
             BarnepensjonInnvilgelse.fra(
                 utbetalingsinfo =
                     Utbetalingsinfo(
+                        false,
                         antallBarn = 1,
                         beloep = Kroner(1234),
                         virkningsdato = LocalDate.of(2023, Month.JANUARY, 1),
@@ -185,6 +186,7 @@ internal class BarnepensjonInnvilgetDTOTest {
         beregningsMetodeFraGrunnlag = BeregningsMetode.BEST,
         trygdetidForIdent = "123",
         avdoedeForeldre = if (datoFOM < BarnepensjonInnvilgelse.tidspunktNyttRegelverk) null else listOf("123"),
+        harForeldreloessats = false,
     )
 
     private fun lagInnholdMedVedlegg() =
@@ -198,5 +200,9 @@ internal class BarnepensjonInnvilgetDTOTest {
             )
         })
 
-    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() = BarnepensjonBeregningsperiode.fra(this)
+    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() =
+        BarnepensjonBeregningsperiode.fra(
+            this,
+            false,
+        )
 }

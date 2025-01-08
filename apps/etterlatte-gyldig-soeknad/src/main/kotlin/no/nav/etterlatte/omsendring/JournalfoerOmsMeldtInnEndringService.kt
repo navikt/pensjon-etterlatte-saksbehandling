@@ -2,6 +2,7 @@ package no.nav.etterlatte.omsendring
 
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.formatertTidspunkt
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.Bruker
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.DokarkivKlient
@@ -17,9 +18,6 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.Base64
 import java.util.UUID
 
@@ -95,7 +93,7 @@ class JournalfoerOmsMeldtInnEndringService(
                             sakId = sakId,
                             type = omsMeldtInnEndring.type.name,
                             endringer = omsMeldtInnEndring.endringer,
-                            tidspunkt = omsMeldtInnEndring.formatertTidspunkt(),
+                            tidspunkt = formatertTidspunkt(omsMeldtInnEndring.tidspunkt),
                         ),
                     mal = "inntektsjustering_nytt_aar_v1",
                 )
@@ -119,13 +117,3 @@ data class ArkiverOmsMeldtInnEndring(
     val endringer: String,
     val tidspunkt: String,
 ) : PDFMal
-
-// TODO lib
-private fun OmsMeldtInnEndring.formatertTidspunkt() =
-    with(LocalDateTime.ofInstant(tidspunkt, ZoneOffset.ofHours(0))) {
-        "${t(dayOfMonth)}.${t(monthValue)}.$year ${t(hour)}:${t(minute)}:${t(second)}"
-    }
-
-private fun LocalDate.formatert() = "${t(dayOfMonth)}.${t(monthValue)}.$year"
-
-private fun t(tall: Int) = if (tall < 10) "0$tall" else "$tall"

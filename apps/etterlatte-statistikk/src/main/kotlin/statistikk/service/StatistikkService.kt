@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
@@ -379,6 +380,7 @@ class StatistikkService(
                     statistikkKlage.klage.formkrav
                         ?.saksbehandler
                         ?.ident
+
                 else -> utfall.saksbehandler.ident
             },
         aktorId = statistikkKlage.klage.sak.ident,
@@ -507,7 +509,23 @@ class StatistikkService(
         statistikkBehandling: StatistikkBehandling,
         hendelse: BehandlingHendelseType,
         tekniskTid: LocalDateTime,
-    ): SakRad? = sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
+    ): SakRad? {
+        if (hendelse == BehandlingHendelseType.OPPRETTET) {
+            // Dette kan potensielt være en behandling som blir rullet tilbake. Vi vil gjøre ekstra verifisering på
+            // at behandlingen finnes
+            try {
+                runBlocking { retry(3) { behandlingKlient.hentStatistikkBehandling(statistikkBehandling.id) } }
+            } catch (e: Exception) {
+                logger.error(
+                    "Kunne ikke hente behandling med id ${statistikkBehandling.id} fra behandling. " +
+                        "Hvis opprettelse av behandlingen ble rullet tilbake og behandlingen med id=" +
+                        "${statistikkBehandling.id} ikke finnes i behandlingsbasen lengre, må det også legges inn " +
+                        "en avbrytelsesmelding til statistikk. ",
+                )
+            }
+        }
+        return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
+    }
 
     fun registrerStatistikkBehandlingPaaVentHendelse(
         behandlingId: UUID,
@@ -594,6 +612,7 @@ internal fun behandlingResultatFraVedtak(
                 false -> BehandlingResultat.ENDRING
             }
         }
+
         VedtakType.TILBAKEKREVING,
         VedtakType.AVVIST_KLAGE,
         -> throw InternfeilException("Skal ikke mappe vedtak")

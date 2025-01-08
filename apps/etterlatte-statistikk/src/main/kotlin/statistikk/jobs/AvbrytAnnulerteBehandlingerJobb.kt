@@ -106,6 +106,7 @@ class AvbrytAnnulerteBehandlingerJobb(
                             status = "AVBRUTT",
                             resultat = "AVBRUTT",
                             resultatBegrunnelse = "BEHANDLING_RULLET_TILBAKE",
+                            ferdigbehandletTidspunkt = aktuellRad.tekniskTid,
                         )
                         sakRepository.lagreRad(aktuellRad)
                         annulerteDao.lagreFikset(it)

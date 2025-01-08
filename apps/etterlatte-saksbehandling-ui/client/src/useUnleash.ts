@@ -15,7 +15,6 @@ export const enum FeatureToggle {
   notater = 'notater',
   kun_en_registrert_juridisk_forelder = 'kun-en-registrert-juridisk-forelder',
   kopier_trygdetidsgrunnlag = 'kopier-trygdetidsgrunnlag',
-  kan_redigere_journalpost_bruker = 'kan_redigere_journalpost_bruker',
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
@@ -55,10 +54,6 @@ const kopier_trygdetidsgrunnlag: Toggle = {
   togglename: FeatureToggle.kopier_trygdetidsgrunnlag,
   enabled: false,
 }
-const kan_redigere_journalpost_bruker: Toggle = {
-  togglename: FeatureToggle.kan_redigere_journalpost_bruker,
-  enabled: false,
-}
 const opprette_generell_oppgave: Toggle = {
   togglename: FeatureToggle.opprette_generell_oppgave,
   enabled: false,
@@ -84,7 +79,6 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.notater]: notater,
   [FeatureToggle.kun_en_registrert_juridisk_forelder]: kun_en_registrert_juridisk_forelder,
   [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,
-  [FeatureToggle.kan_redigere_journalpost_bruker]: kan_redigere_journalpost_bruker,
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:

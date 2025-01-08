@@ -88,33 +88,39 @@ class AvbrytAnnullerteBehandlingerJobb(
             if (!leaderElection.isLeader()) {
                 return
             }
-
-            annulerteDao
-                .hentIkkeAnnullerteBehandlinger()
-                .forEach {
-                    try {
-                        val rader = sakRepository.hentRaderForBehandlingId(it)
-                        val aktuellRad = rader.singleOrNull()
-                        if (aktuellRad == null) {
-                            logger.warn(
-                                "Kunne ikke avbryte behandling som er rullet tilbake i behandling, siden vi har " +
-                                    "${rader.size} rader registrert for id=$it.",
+            try {
+                annulerteDao
+                    .hentIkkeAnnullerteBehandlinger()
+                    .forEach {
+                        try {
+                            val rader = sakRepository.hentRaderForBehandlingId(it)
+                            val aktuellRad = rader.singleOrNull()
+                            if (aktuellRad == null) {
+                                logger.warn(
+                                    "Kunne ikke avbryte behandling som er rullet tilbake i behandling, siden vi har " +
+                                        "${rader.size} rader registrert for id=$it.",
+                                )
+                                annulerteDao.lagreFikset(it)
+                                return@forEach
+                            }
+                            aktuellRad.copy(
+                                status = BehandlingStatus.AVBRUTT.name,
+                                resultat = BehandlingStatus.AVBRUTT.name,
+                                resultatBegrunnelse = "BEHANDLING_RULLET_TILBAKE",
+                                ferdigbehandletTidspunkt = aktuellRad.tekniskTid,
                             )
+                            sakRepository.lagreRad(aktuellRad)
                             annulerteDao.lagreFikset(it)
-                            return@forEach
+                        } catch (e: Exception) {
+                            logger.warn(
+                                "Kunne ikke avbryte behandlingen som er rullet tilbake i behandling med id=$it",
+                                e,
+                            )
                         }
-                        aktuellRad.copy(
-                            status = BehandlingStatus.AVBRUTT.name,
-                            resultat = BehandlingStatus.AVBRUTT.name,
-                            resultatBegrunnelse = "BEHANDLING_RULLET_TILBAKE",
-                            ferdigbehandletTidspunkt = aktuellRad.tekniskTid,
-                        )
-                        sakRepository.lagreRad(aktuellRad)
-                        annulerteDao.lagreFikset(it)
-                    } catch (e: Exception) {
-                        logger.warn("Kunne ikke avbryte behandlingen som er rullet tilbake i behandling med id=$it", e)
                     }
-                }
+            } catch (e: Exception) {
+                logger.warn("Kunne ikke hente ut behandlinger som skal annulleres", e)
+            }
         }
     }
 }

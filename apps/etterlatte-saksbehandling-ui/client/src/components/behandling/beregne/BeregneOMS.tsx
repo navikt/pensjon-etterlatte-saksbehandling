@@ -1,6 +1,4 @@
 import { behandlingErRedigerbar } from '../felles/utils'
-import { formaterDato } from '~utils/formatering/dato'
-import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { BehandlingRouteContext } from '../BehandlingRoutes'
 import React, { useContext, useEffect, useState } from 'react'
@@ -8,9 +6,9 @@ import { hentBeregning } from '~shared/api/beregning'
 import { oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { Alert, Box, Button, Heading, HStack } from '@navikt/ds-react'
+import { Alert, Box, Button, HStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
@@ -18,7 +16,6 @@ import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { Vedtaksresultat } from '~components/behandling/felles/Vedtaksresultat'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -46,8 +43,6 @@ export const BeregneOMS = () => {
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-
-  const vedtaksresultat = useVedtaksResultat()
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
@@ -110,15 +105,6 @@ export const BeregneOMS = () => {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="16 4">
-        <Heading spacing size="large" level="1">
-          Beregning og vedtak
-        </Heading>
-        <Vedtaksresultat
-          vedtaksresultat={vedtaksresultat}
-          virkningstidspunktFormatert={formaterDato(virkningstidspunkt(behandling).dato)}
-        />
-      </Box>
       {erOpphoer ? (
         <Box paddingInline="18" paddingBlock="4">
           <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />

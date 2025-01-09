@@ -138,6 +138,19 @@ class SakRepository(
                     }
             statement.executeQuery().toList { tilSakRad() }
         }
+
+    fun slettRad(id: Long) {
+        datasource.connection.use { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    DELETE FROM sak WHERE id = ?
+                    """.trimIndent(),
+                )
+            statement.setLong(1, id)
+            statement.executeUpdate()
+        }
+    }
 }
 
 private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =

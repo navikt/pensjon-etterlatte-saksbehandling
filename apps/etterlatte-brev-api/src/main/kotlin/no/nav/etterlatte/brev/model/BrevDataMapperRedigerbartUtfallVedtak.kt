@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.BrevDataRedigerbarRequest
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslagRedigerbar
@@ -227,11 +228,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
-                beregningService.finnUtbetalingsinfo(
-                    behandlingId,
-                    virkningstidspunkt!!,
-                    bruker,
-                )
+                finnUtbetalingsinfo(behandlingId, virkningstidspunkt!!, bruker)
             }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val behandling = async { behandlingService.hentBehandling(behandlingId, bruker) }.await()
@@ -285,11 +282,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val utbetalingsinfo =
             async {
-                beregningService.finnUtbetalingsinfo(
-                    behandlingId,
-                    virkningstidspunkt!!,
-                    bruker,
-                )
+                finnUtbetalingsinfo(behandlingId, virkningstidspunkt!!, bruker)
             }
 
         BarnepensjonRevurderingRedigerbartUtfall.fra(
@@ -309,7 +302,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     ) = coroutineScope {
         val utbetalingsinfo =
             async {
-                beregningService.finnUtbetalingsinfo(
+                finnUtbetalingsinfo(
                     behandlingId,
                     virkningstidspunkt,
                     bruker,
@@ -406,5 +399,24 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
             brevutfall.await() ?: throw ManglerBrevutfall(behandlingId),
         )
+    }
+
+    private suspend fun finnUtbetalingsinfo(
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        bruker: BrukerTokenInfo,
+    ): Utbetalingsinfo {
+        val utbetalingsinfo =
+            beregningService.finnUtbetalingsinfo(
+                behandlingId,
+                virkningstidspunkt,
+                bruker,
+            )
+        if (!utbetalingsinfo.overstyrt &&
+            utbetalingsinfo.beregningsperioder.any { it.harForeldreloessats == null }
+        ) {
+            throw ManglerHarForeldreloessats()
+        }
+        return utbetalingsinfo
     }
 }

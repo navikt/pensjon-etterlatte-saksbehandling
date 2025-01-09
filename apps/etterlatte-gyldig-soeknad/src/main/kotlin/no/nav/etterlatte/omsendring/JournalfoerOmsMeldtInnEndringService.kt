@@ -1,8 +1,7 @@
-package no.nav.etterlatte.inntektsjustering
+package no.nav.etterlatte.omsendring
 
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.formatert
 import no.nav.etterlatte.formatertTidspunkt
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.Bruker
@@ -14,9 +13,7 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostRequest
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
-import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -24,7 +21,7 @@ import org.slf4j.LoggerFactory
 import java.util.Base64
 import java.util.UUID
 
-class JournalfoerInntektsjusteringService(
+class JournalfoerOmsMeldtInnEndringService(
     private val dokarkivKlient: DokarkivKlient,
     private val pdfgenKlient: PdfGeneratorKlient,
 ) {
@@ -34,11 +31,11 @@ class JournalfoerInntektsjusteringService(
 
     fun opprettJournalpost(
         sak: Sak,
-        inntektsjustering: Inntektsjustering,
+        omsMeldtInnEndring: OmsMeldtInnEndring,
     ): OpprettJournalpostResponse? {
         return try {
-            val tittel = "Inntektsjustering ${inntektsjustering.inntektsaar}"
-            val dokument = opprettDokument(tittel, sak.id, inntektsjustering)
+            val tittel = "Meldt inn endring Omstillingstønad"
+            val dokument = opprettDokument(tittel, sak.id, omsMeldtInnEndring)
 
             val request =
                 OpprettJournalpostRequest(
@@ -47,14 +44,17 @@ class JournalfoerInntektsjusteringService(
                     journalfoerendeEnhet = sak.enhet,
                     avsenderMottaker = AvsenderMottaker(sak.ident),
                     bruker = Bruker(sak.ident),
-                    eksternReferanseId = opprettEksternReferanseId(inntektsjustering.id, sak.sakType),
+                    eksternReferanseId = "etterlatte:${sak.sakType.name.lowercase()}:omsMeldtInnEndring:${omsMeldtInnEndring.id}",
                     sak = JournalpostSak(sak.id.toString()),
                     dokumenter = listOf(dokument),
                 )
 
             runBlocking { dokarkivKlient.opprettJournalpost(request) }
         } catch (e: Exception) {
-            logger.error("Feil oppsto ved journalføring av inntektsjustering (id=${inntektsjustering.id})", e)
+            logger.error(
+                "Feil oppsto ved journalføring av meldt inn endring for Omstillingstønad (id=${sak.id})",
+                e,
+            )
             return null
         }
     }
@@ -62,59 +62,46 @@ class JournalfoerInntektsjusteringService(
     private fun opprettDokument(
         tittel: String,
         sakId: SakId,
-        inntektsjustering: Inntektsjustering,
+        omsMeldtInnEndring: OmsMeldtInnEndring,
     ): JournalpostDokument {
         try {
-            logger.info("Oppretter PDF for inntektsjustering (id=${inntektsjustering.id})")
+            logger.info("Oppretter PDF for meldt inn endring for Omstillingstønad (id=$sakId)")
 
-            val pdf = opprettArkivPdf(sakId, inntektsjustering)
+            val pdf = opprettArkivPdf(sakId, omsMeldtInnEndring)
 
             return JournalpostDokument(
                 tittel = tittel,
                 dokumentvarianter = listOf(pdf),
             )
         } catch (e: ResponseException) {
-            throw Exception("Klarte ikke å generere PDF for inntektsjustering med id=${inntektsjustering.id}", e)
+            throw Exception("Klarte ikke å generere PDF for meldt inn endring for Omstillingstønad med id=$sakId", e)
         }
     }
 
-    private fun opprettEksternReferanseId(
-        id: UUID,
-        sakType: SakType,
-    ): String = "etterlatte:${sakType.name.lowercase()}:inntektsjustering:$id"
-
     private fun opprettArkivPdf(
         sakId: SakId,
-        inntektsjustering: Inntektsjustering,
-    ): DokumentVariant.ArkivPDF {
-        logger.info("Oppretter arkiv PDF for inntektsjustering med id ${inntektsjustering.id}")
+        omsMeldtInnEndring: OmsMeldtInnEndring,
+    ): DokumentVariant {
+        logger.info("Oppretter arkiv PDF for meldt inn endring for Omstillingstønad med id $sakId")
 
         return runBlocking {
             retry {
                 pdfgenKlient.genererPdf(
                     payload =
-                        ArkiverInntektsjustering(
-                            id = inntektsjustering.id,
+                        ArkiverOmsMeldtInnEndring(
+                            id = omsMeldtInnEndring.id,
                             sakId = sakId,
-                            aar = inntektsjustering.inntektsaar,
-                            arbeidsinntekt = inntektsjustering.arbeidsinntekt,
-                            naeringsinntekt = inntektsjustering.naeringsinntekt,
-                            inntektFraUtland = inntektsjustering.inntektFraUtland,
-                            afpInntekt = inntektsjustering.afpInntekt,
-                            afpTjenesteordning = inntektsjustering.afpTjenesteordning ?: "",
-                            skalGaaAvMedAlderspensjon = inntektsjustering.skalGaaAvMedAlderspensjon,
-                            datoForAaGaaAvMedAlderspensjon =
-                                inntektsjustering.datoForAaGaaAvMedAlderspensjon?.formatert()
-                                    ?: "",
-                            tidspunkt = formatertTidspunkt(inntektsjustering.tidspunkt),
+                            type = omsMeldtInnEndring.type.name,
+                            endringer = omsMeldtInnEndring.endringer,
+                            tidspunkt = formatertTidspunkt(omsMeldtInnEndring.tidspunkt),
                         ),
-                    mal = "inntektsjustering_nytt_aar_v1",
+                    mal = "oms_meldt_inn_endring_v1",
                 )
             }.let {
                 when (it) {
                     is RetryResult.Success -> DokumentVariant.ArkivPDF(encoder.encodeToString(it.content))
                     is RetryResult.Failure -> {
-                        logger.error("Kunne ikke opprette PDF for inntektsjustering med id ${inntektsjustering.id}")
+                        logger.error("Kunne ikke opprette PDF for meldt inn endring for Omstilingstønad med id $sakId")
                         throw it.samlaExceptions()
                     }
                 }
@@ -123,16 +110,10 @@ class JournalfoerInntektsjusteringService(
     }
 }
 
-data class ArkiverInntektsjustering(
+data class ArkiverOmsMeldtInnEndring(
     val id: UUID,
     val sakId: SakId,
-    val aar: Int,
-    val arbeidsinntekt: Int,
-    val naeringsinntekt: Int,
-    val inntektFraUtland: Int,
-    val afpInntekt: Int?,
-    val afpTjenesteordning: String,
-    val skalGaaAvMedAlderspensjon: String?,
-    val datoForAaGaaAvMedAlderspensjon: String,
+    val type: String,
+    val endringer: String,
     val tidspunkt: String,
 ) : PDFMal

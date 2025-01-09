@@ -53,7 +53,6 @@ import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -263,7 +262,6 @@ internal fun Route.behandlingRoutes(
                             begrunnelse = body.begrunnelse,
                             vilkaar = body.vilkaarType,
                             kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
-                            kravdato = body.kravdato,
                             aktiv = true,
                         )
 
@@ -465,7 +463,6 @@ data class ViderefoertOpphoerRequest(
     @JsonProperty("dato") private val _dato: String?,
     val skalViderefoere: JaNei,
     val begrunnelse: String?,
-    val kravdato: LocalDate? = null,
     val vilkaarType: VilkaarType?,
 ) {
     val dato: YearMonth? = _dato?.tilYearMonth()
@@ -478,6 +475,5 @@ data class ViderefoertOpphoer(
     val vilkaar: VilkaarType?,
     val begrunnelse: String?,
     val kilde: Grunnlagsopplysning.Kilde,
-    val kravdato: LocalDate?,
     val aktiv: Boolean = true,
 )

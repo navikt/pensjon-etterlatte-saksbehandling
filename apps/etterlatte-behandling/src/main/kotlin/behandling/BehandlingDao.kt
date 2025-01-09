@@ -44,7 +44,6 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -398,15 +397,14 @@ class BehandlingDao(
                 val statement =
                     prepareStatement(
                         "INSERT INTO viderefoert_opphoer " +
-                            "(skalViderefoere, dato, kilde, begrunnelse, kravdato, behandling_id, vilkaar, aktiv) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)" +
+                            "(skalViderefoere, dato, kilde, begrunnelse, behandling_id, vilkaar, aktiv) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?)" +
                             "ON CONFLICT (behandling_id) where aktiv = true " +
                             "DO UPDATE SET " +
                             "skalViderefoere=excluded.skalViderefoere, " +
                             "dato=excluded.dato, " +
                             "kilde=excluded.kilde, " +
                             "begrunnelse=excluded.begrunnelse, " +
-                            "kravdato=excluded.kravdato, " +
                             "behandling_id=excluded.behandling_id, " +
                             "vilkaar=excluded.vilkaar, " +
                             "aktiv=excluded.aktiv, " +
@@ -416,10 +414,9 @@ class BehandlingDao(
                 statement.setString(2, objectMapper.writeValueAsString(viderefoertOpphoer.dato))
                 statement.setJsonb(3, viderefoertOpphoer.kilde)
                 statement.setString(4, viderefoertOpphoer.begrunnelse)
-                statement.setDate(5, viderefoertOpphoer.kravdato?.let { d -> Date.valueOf(d) })
-                statement.setObject(6, behandlingId)
-                statement.setString(7, viderefoertOpphoer.vilkaar?.name)
-                statement.setBoolean(8, viderefoertOpphoer.aktiv)
+                statement.setObject(5, behandlingId)
+                statement.setString(6, viderefoertOpphoer.vilkaar?.name)
+                statement.setBoolean(7, viderefoertOpphoer.aktiv)
 
                 krev(statement.executeUpdate() == 1) {
                     "Feil ved lagring av videreført opphør"
@@ -459,7 +456,7 @@ class BehandlingDao(
             with(it) {
                 val statement =
                     prepareStatement(
-                        "SELECT skalViderefoere, dato, kilde, begrunnelse, kravdato, vilkaar, aktiv " +
+                        "SELECT skalViderefoere, dato, kilde, begrunnelse, vilkaar, aktiv " +
                             "FROM viderefoert_opphoer " +
                             "WHERE behandling_id = ? " +
                             "AND aktiv = TRUE",
@@ -471,7 +468,6 @@ class BehandlingDao(
                         dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
                         kilde = getString("kilde").let { objectMapper.readValue(it) },
                         begrunnelse = getString("begrunnelse"),
-                        kravdato = getDate("kravdato")?.toLocalDate(),
                         behandlingId = behandlingId,
                         vilkaar = getString("vilkaar")?.let { VilkaarType.valueOf(it) },
                         aktiv = getBoolean("aktiv"),

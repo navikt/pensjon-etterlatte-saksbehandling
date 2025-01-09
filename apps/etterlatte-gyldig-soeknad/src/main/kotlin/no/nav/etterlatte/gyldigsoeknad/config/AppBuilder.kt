@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
+import no.nav.etterlatte.omsendring.JournalfoerOmsMeldtInnEndringService
 
 class AppBuilder(
     private val env: Miljoevariabler,
@@ -45,6 +46,16 @@ class AppBuilder(
                 env.requireEnvValue(DOKARKIV_URL),
             ),
             PdfGeneratorKlient(httpClient(), "${env.requireEnvValue(PDFGEN_URL)}/inntektsjustering"),
+        )
+    }
+
+    val journalfoerOmsMeldtInnEndringService: JournalfoerOmsMeldtInnEndringService by lazy {
+        JournalfoerOmsMeldtInnEndringService(
+            DokarkivKlient(
+                httpClient(EnvKey.DOKARKIV_SCOPE),
+                env.requireEnvValue(DOKARKIV_URL),
+            ),
+            PdfGeneratorKlient(httpClient(), "${env.requireEnvValue(PDFGEN_URL)}/omsendringer"),
         )
     }
 

@@ -149,7 +149,6 @@ class ViderefoertOpphoerTest(
         (inaktivert.kilde as Grunnlagsopplysning.Saksbehandler).ident shouldBe "Slettersen"
         inaktivert.dato shouldBe viderefoertOpphoer.dato
         inaktivert.vilkaar shouldBe viderefoertOpphoer.vilkaar
-        inaktivert.kravdato shouldBe viderefoertOpphoer.kravdato
         inaktivert.skalViderefoere shouldBe viderefoertOpphoer.skalViderefoere
         inaktivert.begrunnelse shouldBe viderefoertOpphoer.begrunnelse
     }
@@ -259,7 +258,6 @@ class ViderefoertOpphoerTest(
             begrunnelse = "for testformål",
             vilkaar = vilkaar,
             kilde = saksbehandlerKilde,
-            kravdato = null,
         )
 
     private fun hentAlleViderefoertOpphoer(behandlingId: UUID): List<ViderefoertOpphoer> =
@@ -280,7 +278,6 @@ class ViderefoertOpphoerTest(
                         dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
                         kilde = getString("kilde").let { objectMapper.readValue(it) },
                         begrunnelse = getString("begrunnelse"),
-                        kravdato = getDate("kravdato")?.toLocalDate(),
                         behandlingId = behandlingId,
                         vilkaar = getString("vilkaar")?.let { VilkaarType.valueOf(it) },
                         aktiv = getBoolean("aktiv"),

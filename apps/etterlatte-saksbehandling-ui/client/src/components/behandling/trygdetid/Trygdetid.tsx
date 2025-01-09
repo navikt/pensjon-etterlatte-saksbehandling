@@ -125,10 +125,12 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     fetchAlleLand(null, (landListe: ILand[]) => {
       setLandListe(sorterLand(landListe))
     })
+  }, [])
+  useEffect(() => {
     if (kanHenteTrygdetidFraPesys) {
       sjekkOmAvdoedHarTTIPesysHent(behandling.id)
     }
-  }, [])
+  }, [kanHenteTrygdetidFraPesys])
 
   if (harPilotTrygdetid) {
     return (

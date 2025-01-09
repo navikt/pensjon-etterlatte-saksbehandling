@@ -60,9 +60,10 @@ internal fun Route.varselbrevRoute(
 
         get("/pdf") {
             withBehandlingId(tilgangssjekker) {
-                val brevId = krevIkkeNull(call.request.queryParameters[BREV_ID_CALL_PARAMETER]?.toLong()) {
-                    "BrevID må være satt"
-                }
+                val brevId =
+                    krevIkkeNull(call.request.queryParameters["brevId"]?.toLong()) {
+                        "BrevID må være satt"
+                    }
 
                 logger.info("Genererer PDF for varselbrev (id=$brevId)")
 

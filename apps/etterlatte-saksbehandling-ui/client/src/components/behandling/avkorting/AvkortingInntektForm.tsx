@@ -182,6 +182,7 @@ export const AvkortingInntektForm = ({
               type="tel"
               inputMode="numeric"
               disabled={alleMaanederIAaretErInnvilget()}
+              defaultValue={alleMaanederIAaretErInnvilget() ? 0 : undefined}
               error={errors.fratrekkInnAar?.message}
             />
           </Box>
@@ -221,6 +222,7 @@ export const AvkortingInntektForm = ({
               size="medium"
               type="tel"
               disabled={alleMaanederIAaretErInnvilget()}
+              defaultValue={alleMaanederIAaretErInnvilget() ? 0 : undefined}
               inputMode="numeric"
               error={errors.fratrekkInnAarUtland?.message}
             />

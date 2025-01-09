@@ -64,7 +64,7 @@ enum class Revurderingaarsak(
     UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    SLUTTBEHANDLING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
 
     FENGSELSOPPHOLD(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
     UT_AV_FENGSEL(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),

@@ -56,7 +56,7 @@ class BehandlingDao(
 ) {
     private val alleBehandlingerMedSak =
         """
-        SELECT b.*, i.omgjoering_sluttbehandling_utland, s.sakType, s.enhet, s.fnr 
+        SELECT b.*, i.omgjoering_sluttbehandling, s.sakType, s.enhet, s.fnr 
         FROM behandling b
         INNER JOIN sak s ON b.sak_id = s.id
         LEFT JOIN behandling_info i ON b.id = i.behandling_id
@@ -208,7 +208,7 @@ class BehandlingDao(
                 rs
                     .getString("tidligere_familiepleier")
                     ?.let { objectMapper.readValue(it) },
-            erSluttbehandling = rs.getBoolean("omgjoering_sluttbehandling_utland"),
+            erSluttbehandling = rs.getBoolean("omgjoering_sluttbehandling"),
         )
     }
 

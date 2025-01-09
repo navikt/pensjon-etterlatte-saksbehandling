@@ -7,7 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfoRequest
+import no.nav.etterlatte.behandling.utland.SluttbehandlingBehandlinginfoRequest
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
@@ -70,7 +70,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
         route("sluttbehandling") {
             post {
                 kunSkrivetilgang {
-                    medBody<SluttbehandlingUtlandBehandlinginfoRequest> { dto ->
+                    medBody<SluttbehandlingBehandlinginfoRequest> { dto ->
                         logger.info("Lagrer sluttbehandling for behandling $behandlingId")
                         inTransaction {
                             service.lagreSluttbehandling(

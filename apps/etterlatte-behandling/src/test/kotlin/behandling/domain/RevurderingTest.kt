@@ -22,8 +22,8 @@ import java.util.UUID
 
 internal class RevurderingTest {
     @Test
-    fun `erSluttbehandling() skal ta hensyn til revurderingsaarsak SLUTTBEHANDLING_UTLAND`() {
-        opprettetRevurdering(Prosesstype.MANUELL, Revurderingaarsak.SLUTTBEHANDLING_UTLAND).erSluttbehandling() shouldBe true
+    fun `erSluttbehandling() skal ta hensyn til revurderingsaarsak SLUTTBEHANDLING`() {
+        opprettetRevurdering(Prosesstype.MANUELL, Revurderingaarsak.SLUTTBEHANDLING).erSluttbehandling() shouldBe true
         opprettetRevurdering(Prosesstype.MANUELL, Revurderingaarsak.REGULERING).erSluttbehandling() shouldBe false
     }
 

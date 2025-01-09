@@ -68,7 +68,7 @@ const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderinga
       return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
     case Revurderingaarsak.INSTITUSJONSOPPHOLD:
       return [OMS_INST_HJEMLER_VIRK, OMS_INST_VIRK_BESKRIVELSE]
-    case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
+    case Revurderingaarsak.SLUTTBEHANDLING:
       return [FELLES_SLUTTBEHANDLING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
     default:
       return [FELLES_REVURDERING_HJEMLER, OMS_REVURDERING_BESKRIVELSE]
@@ -84,7 +84,7 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
     case Revurderingaarsak.INSTITUSJONSOPPHOLD:
     case Revurderingaarsak.FENGSELSOPPHOLD: //TODO: kanskje Revurderingaarsak.UT_AV_FENGSEL: men ikke i bruk nå..
       return [BP_INSTITUSJONSOPPHOLD_HJEMLER, BP_INSTITUSJONSOPPHOLD_BESKRIVELSE]
-    case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
+    case Revurderingaarsak.SLUTTBEHANDLING:
       return [FELLES_SLUTTBEHANDLING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
     case Revurderingaarsak.FORELDRELOES:
       return [BP_FORELDRELOES_HJEMLER, BP_FORELDRELOES_BESKRIVELSE]
@@ -136,7 +136,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             <BodyShort>{behandling.begrunnelse}</BodyShort>
           </>
         )}
-        {behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND && (
+        {behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING && (
           <SluttbehandlingUtland
             sakId={behandling.sakId}
             revurderingId={behandling.id}

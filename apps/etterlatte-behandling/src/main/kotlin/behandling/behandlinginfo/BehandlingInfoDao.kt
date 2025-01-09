@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
+import no.nav.etterlatte.behandling.utland.SluttbehandlingBehandlinginfo
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -14,15 +14,15 @@ import java.util.UUID
 class BehandlingInfoDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    fun lagreErOmgjoeringSluttbehandlingUtland(id: UUID) {
+    fun lagreErOmgjoeringSluttbehandling(id: UUID) {
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(
                     """
-                    INSERT INTO behandling_info(behandling_id, omgjoering_sluttbehandling_utland)
+                    INSERT INTO behandling_info(behandling_id, omgjoering_sluttbehandling)
                     VALUES (?, ?)
                     ON CONFLICT (behandling_id) DO 
-                    UPDATE SET omgjoering_sluttbehandling_utland = excluded.omgjoering_sluttbehandling_utland
+                    UPDATE SET omgjoering_sluttbehandling = excluded.omgjoering_sluttbehandling
                     """.trimIndent(),
                 ).apply {
                     setObject(1, id)
@@ -34,7 +34,7 @@ class BehandlingInfoDao(
 
     fun lagreSluttbehandling(
         behandlingId: UUID,
-        sluttbehandling: SluttbehandlingUtlandBehandlinginfo,
+        sluttbehandling: SluttbehandlingBehandlinginfo,
     ) {
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
@@ -54,7 +54,7 @@ class BehandlingInfoDao(
         }
     }
 
-    fun hentSluttbehandling(behandlingId: UUID): SluttbehandlingUtlandBehandlinginfo? =
+    fun hentSluttbehandling(behandlingId: UUID): SluttbehandlingBehandlinginfo? =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(

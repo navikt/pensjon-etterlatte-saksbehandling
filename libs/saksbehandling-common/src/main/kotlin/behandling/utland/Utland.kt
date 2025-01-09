@@ -14,13 +14,13 @@ data class MottattDokument(
     val kommentar: String?,
 )
 
-data class SluttbehandlingUtlandBehandlinginfo(
+data class SluttbehandlingBehandlinginfo(
     val landMedDokumenter: List<LandMedDokumenter>,
     val kilde: Grunnlagsopplysning.Kilde,
 )
 
-data class SluttbehandlingUtlandBehandlinginfoRequest(
+data class SluttbehandlingBehandlinginfoRequest(
     val landMedDokumenter: List<LandMedDokumenter>,
 ) {
-    fun toDomain(kilde: Grunnlagsopplysning.Kilde) = SluttbehandlingUtlandBehandlinginfo(landMedDokumenter, kilde)
+    fun toDomain(kilde: Grunnlagsopplysning.Kilde) = SluttbehandlingBehandlinginfo(landMedDokumenter, kilde)
 }

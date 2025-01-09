@@ -57,7 +57,7 @@ export default function SluttbehandlingUtland({
     fetchAlleLand(null, (landliste) => {
       setAlleLandKodeverk(sorterLand(landliste))
     })
-    hentRevurderingerForSakMedAarsakFetch({ sakId, revurderingsaarsak: Revurderingaarsak.SLUTTBEHANDLING_UTLAND })
+    hentRevurderingerForSakMedAarsakFetch({ sakId, revurderingsaarsak: Revurderingaarsak.SLUTTBEHANDLING })
   }, [])
 
   const lagreRevurderingsinfo = () => {

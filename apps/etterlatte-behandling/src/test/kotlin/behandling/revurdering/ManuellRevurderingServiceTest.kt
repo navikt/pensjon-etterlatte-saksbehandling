@@ -425,7 +425,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `kan opprette ny revurdering med aarsak = SLUTTBEHANDLING_UTLAND og lagre i db`() {
+    fun `kan opprette ny revurdering med aarsak = SLUTTBEHANDLING og lagre i db`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val grunnlagService = spyk(applicationContext.grunnlagsService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
@@ -466,7 +466,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     grunnlagService,
                 ).opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
+                    aarsak = Revurderingaarsak.SLUTTBEHANDLING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
                     saksbehandler = simpleSaksbehandler(),
@@ -555,7 +555,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             inTransaction {
                 manuellRevurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
+                    aarsak = Revurderingaarsak.SLUTTBEHANDLING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
                     saksbehandler = simpleSaksbehandler(),
@@ -600,7 +600,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             inTransaction {
                 revurderingService.hentRevurderingsinfoForSakMedAarsak(
                     sak.id,
-                    Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
+                    Revurderingaarsak.SLUTTBEHANDLING,
                 )
             }
         assertEquals(1, sluttbehandlingermedinfo.size)

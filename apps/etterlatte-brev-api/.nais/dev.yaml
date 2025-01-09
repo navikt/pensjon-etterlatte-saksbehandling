@@ -140,6 +140,8 @@ spec:
         - application: ey-pdfgen
         - application: clamav
           namespace: nais-system
+        - application: pensjon-brevbaker
+          namespace: pensjonsbrev
       external:
         - host: norg2.dev-fss-pub.nais.io
         - host: saf-q2.dev-fss-pub.nais.io
@@ -148,7 +150,6 @@ spec:
         - host: dokdistfordeling.dev-fss-pub.nais.io
         - host: dokdistkanal.dev-fss-pub.nais.io
         - host: data.brreg.no
-        - host: pensjon-brevbaker.intern.dev.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:

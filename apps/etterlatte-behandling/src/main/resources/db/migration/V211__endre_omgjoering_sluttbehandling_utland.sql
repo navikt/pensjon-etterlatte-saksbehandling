@@ -1,2 +1,0 @@
-ALTER TABLE behandling_info
-RENAME COLUMN omgjoering_sluttbehandling_utland TO omgjoering_sluttbehandling;

@@ -2,6 +2,7 @@ package no.nav.etterlatte.gyldigsoeknad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
+import no.nav.etterlatte.gyldigsoeknad.client.FeiletVedOpprettBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
@@ -56,7 +57,28 @@ internal class OpprettBehandlingRiver(
                 }
 
             val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, sakType)
-            val behandlingId = behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri)
+
+            val behandlingId =
+                try {
+                    behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri)
+                } catch (e: FeiletVedOpprettBehandling) {
+                    val aapenBehandling =
+                        behandlingClient
+                            .hentSakMedBehandlinger(sak.id)
+                            .behandlinger
+                            .find { it.status.aapenBehandling() }
+
+                    if (aapenBehandling == null) {
+                        logger.error("Opprett behandling feilet, uten at det finnes åpen behandling", e)
+                        throw e
+                    } else {
+                        logger.error(
+                            "Finnes allerede en åpen behandling på sak ${sak.id} (behandlingId=${aapenBehandling.id}). " +
+                                "Dette burde ikke skje og må kontrolleres manuelt.",
+                        )
+                        aapenBehandling.id
+                    }
+                }
 
             behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
 

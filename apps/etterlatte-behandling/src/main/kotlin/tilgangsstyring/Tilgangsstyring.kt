@@ -248,7 +248,7 @@ inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
             throw ForespoerselException(
                 status = HttpStatusCode.Forbidden.value,
                 code = "MANGLER_SKRIVETILGANG",
-                detail = "Mangler skrivetilgang til $enhetString",
+                detail = "Du mangler skrivetilgang til $enhetString og kan dermed ikke utføre handlingen",
             )
         }
     }
@@ -269,7 +269,13 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrive
                 }
                 false -> {
                     application.log.debug("Mangler skrivetilgang, avviser forespørselen")
-                    call.respond(HttpStatusCode.Forbidden)
+                    val enhetString = if (enhetNr == null) "enheten" else "enhet $enhetNr"
+
+                    throw ForespoerselException(
+                        status = HttpStatusCode.Forbidden.value,
+                        code = "MANGLER_SKRIVETILGANG",
+                        detail = "Du mangler skrivetilgang til $enhetString og kan dermed ikke utføre handlingen",
+                    )
                 }
             }
         }

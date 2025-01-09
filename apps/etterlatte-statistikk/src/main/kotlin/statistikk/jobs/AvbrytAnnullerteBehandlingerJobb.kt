@@ -111,6 +111,11 @@ class AvbrytAnnullerteBehandlingerJobb(
                                     resultatBegrunnelse = "BEHANDLING_RULLET_TILBAKE",
                                     ferdigbehandletTidspunkt = aktuellRad.tekniskTid,
                                 )
+                            logger.info(
+                                "Fant 2 rader for behandling med id $it, med id ${aktuellRad.id} (original) " +
+                                    "og ${radSomSkalFjernes.id} (feil oppdatert). Oppdaterer med en ny rad basert " +
+                                    "på ${aktuellRad.id}, og sletter rad med id ${radSomSkalFjernes.id}",
+                            )
                             sakRepository.slettRad(radSomSkalFjernes.id)
                             sakRepository.lagreRad(oppdatertRad)
                             annulerteDao.lagreFikset(it)

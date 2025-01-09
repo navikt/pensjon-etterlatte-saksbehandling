@@ -255,10 +255,12 @@ export const ValgForInfobrev = () => {
             )}
           </VStack>
         )}
-        <BodyShort>
-          Denne oppgaven er fra en gammel vurdering, derfor har den ingen brevvalg eller muligheten til å lagre dette.
-          For å se på brevet må du gå til brevoversikten til brukeren.
-        </BodyShort>
+        {gammelFlyt && (
+          <BodyShort>
+            Denne oppgaven er fra en gammel vurdering, derfor har den ingen brevvalg eller muligheten til å lagre dette.
+            For å se på brevet må du gå til brevoversikten til brukeren.
+          </BodyShort>
+        )}
         <NesteEllerOpprettBrevValg gammelFlyt={gammelFlyt} />
       </VStack>
     </Box>

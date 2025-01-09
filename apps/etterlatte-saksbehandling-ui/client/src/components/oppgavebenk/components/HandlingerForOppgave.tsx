@@ -157,18 +157,12 @@ export const HandlingerForOppgave = ({
         )
       )
     case Oppgavetype.AKTIVITETSPLIKT:
-      return (
-        erInnloggetSaksbehandlerOppgave && (
-          <AktivitetspliktOppgaveHandling oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
-        )
-      )
+      return <AktivitetspliktOppgaveHandling oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AKTIVITETSPLIKT_12MND:
       return (
-        erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/${AktivitetspliktSteg.VURDERING}`}>
-            Gå til vurdering
-          </Button>
-        )
+        <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/${AktivitetspliktSteg.VURDERING}`}>
+          Gå til vurdering
+        </Button>
       )
     case Oppgavetype.AKTIVITETSPLIKT_REVURDERING:
       return (

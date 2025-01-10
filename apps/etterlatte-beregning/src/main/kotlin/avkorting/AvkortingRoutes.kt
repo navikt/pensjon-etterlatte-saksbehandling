@@ -34,6 +34,10 @@ fun Route.avkorting(
     val logger = LoggerFactory.getLogger("AvkortingRoute")
 
     route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
+        /*
+        Tiltenkt frontend. Henting vil utføre endringer på avkorting og behandling
+        (beregning av avkorting, behandlingsstatus, etc).
+         */
         get {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter avkorting med behandlingId=$it")
@@ -52,6 +56,10 @@ fun Route.avkorting(
             }
         }
 
+        /*
+        Brukes når behandling er ferdig med avkorting slik at det kan hentes uten at det gjøres nye beregninger og
+        endringer på behandlingstatus.
+         */
         get("ferdig") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter ferdig avkorting med behandlingId=$it")
@@ -106,6 +114,7 @@ fun Route.avkorting(
             val respons = aarligInntektsjusteringService.hentSjekkAarligInntektsjustering(request)
             call.respond(respons)
         }
+
         post("aarlig-inntektsjustering") {
             val request = call.receive<AarligInntektsjusteringAvkortingRequest>()
             logger.info("Oppretter avkorting nytt år for behandling=${request.nyBehandling}")

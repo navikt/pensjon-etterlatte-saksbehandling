@@ -386,7 +386,7 @@ class BrevService(
                 Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
             ).contains(brev.brevkoder)
         ) {
-            throw BrevKanIkkeEndres(brev)
+            throw BrevKanIkkeEndres(brev, "brevkoden er feil, er ${brev.brevkoder}")
             // se https://jira.adeo.no/browse/FAGSYSTEM-363686?atlLinkOrigin=c2xhY2staW50ZWdyYXRpb258aXNzdWU%3D
         }
 
@@ -487,9 +487,10 @@ class BrevService(
 
 class BrevKanIkkeEndres(
     brev: Brev,
+    msg: String? = "",
 ) : UgyldigForespoerselException(
         code = "BREV_KAN_IKKE_ENDRES",
-        detail = "Brevet kan ikke endres siden det har status ${brev.status.name.lowercase()}",
+        detail = "Brevet kan ikke endres siden det har status ${brev.status.name.lowercase()} $msg",
         meta =
             mapOf(
                 "brevId" to brev.id,

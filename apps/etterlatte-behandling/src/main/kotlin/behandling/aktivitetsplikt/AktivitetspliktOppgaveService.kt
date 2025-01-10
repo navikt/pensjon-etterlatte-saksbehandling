@@ -289,6 +289,7 @@ class AktivitetspliktOppgaveService(
     ): OppgaveIntern {
         val brevData = aktivitetspliktBrevDao.hentBrevdata(oppgaveId) ?: throw GenerellIkkeFunnetException()
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        logger.info("Ferdigstiller brev aktivitetsplikt for oppgaveid $oppgaveId")
         try {
             oppgaveService.sjekkOmKanFerdigstilleOppgave(oppgave, brukerTokenInfo)
         } catch (e: Exception) {
@@ -308,6 +309,7 @@ class AktivitetspliktOppgaveService(
         if (brevrespons.status.erDistribuert()) {
             return oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
         } else {
+            logger.warn("Brev ble ikke distribuert, ferdigstiller ikke oppgave $oppgaveId for aktivitetsplikt")
             throw BrevBleIkkeFerdig(brevrespons.status)
         }
     }

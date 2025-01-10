@@ -51,7 +51,6 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
-    private val rapidService: VedtaksvurderingRapidService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -60,7 +59,8 @@ class VedtakBehandlingService(
         dato: LocalDate,
     ): LoependeYtelse {
         logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
-        val alleVedtakForSak = repository.hentVedtakForSak(sakId).filter { it.vedtakFattet != null && it.attestasjon != null }
+        val alleVedtakForSak =
+            repository.hentVedtakForSak(sakId).filter { it.vedtakFattet != null && it.attestasjon != null }
         return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
     }
 
@@ -101,7 +101,11 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider) =
+            hentDataForVedtak(
+                behandlingId,
+                brukerTokenInfo,
+            )
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
@@ -280,7 +284,7 @@ class VedtakBehandlingService(
         )
     }
 
-    suspend fun tilSamordningVedtak(
+    fun tilSamordningVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
@@ -326,12 +330,12 @@ class VedtakBehandlingService(
             return false
         }
 
+        val grunnbeloep = beregningKlient.hentGrunnbeloep(brukerTokenInfo)
+        val etterbetaling = vedtak.erVedtakMedEtterbetaling(repository, grunnbeloep)
+
         return samordningsKlient
-            .samordneVedtak(
-                vedtak = vedtak,
-                etterbetaling = vedtak.erVedtakMedEtterbetaling(repository),
-                brukerTokenInfo = brukerTokenInfo,
-            ).also {
+            .samordneVedtak(vedtak, etterbetaling, brukerTokenInfo)
+            .also {
                 logger.info("Samordning: skal vente? $it [vedtak=${vedtak.id}, behandlingId=$behandlingId]")
             }
     }
@@ -351,7 +355,8 @@ class VedtakBehandlingService(
                             .samordnetVedtak(behandlingId, tx = tx)
                             .also {
                                 runBlocking {
-                                    val samordnetVedtak = behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                                    val samordnetVedtak =
+                                        behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
                                     if (!samordnetVedtak) {
                                         throw VedtakSamordnetException(behandlingId)
                                     }
@@ -369,12 +374,14 @@ class VedtakBehandlingService(
                     ),
                 )
             }
+
             VedtakStatus.IVERKSATT -> {
                 logger.warn(
                     "Behandlet svar på samording for vedtak ${vedtak.id}, " +
                         "men vedtaket er allerede iverksatt [behandling=$behandlingId. Skipper",
                 )
             }
+
             else -> {
                 verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.TIL_SAMORDNING))
             }
@@ -718,7 +725,15 @@ class VedtakBehandlingService(
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
                     when (vilkaarsvurdering?.resultat?.utfall) {
-                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak, trygdetider)
+                        VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
+                            VedtakData(
+                                behandling,
+                                vilkaarsvurdering,
+                                null,
+                                sak,
+                                trygdetider,
+                            )
+
                         VilkaarsvurderingUtfall.OPPFYLT -> {
                             val beregningOgAvkorting =
                                 beregningKlient.hentBeregningOgAvkorting(

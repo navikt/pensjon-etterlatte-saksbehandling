@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType.UTBETALING
+import no.nav.etterlatte.vedtaksvurdering.EtterbetalingResultat
 import no.nav.etterlatte.vedtaksvurdering.vedtak
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -39,7 +40,7 @@ class SamordningsKlientTest {
                     ),
             )
 
-        val dto = vedtak.tilSamordneRequest(false)
+        val dto = vedtak.tilSamordneRequest(EtterbetalingResultat.ingen())
 
         dto.virkFom shouldBe of(2024, FEBRUARY).atDay(1)
         dto.virkTom shouldBe of(2024, NOVEMBER).atEndOfMonth()
@@ -69,7 +70,7 @@ class SamordningsKlientTest {
                     ),
             )
 
-        val dto = vedtak.tilSamordneRequest(true)
+        val dto = vedtak.tilSamordneRequest(EtterbetalingResultat(erEtterbetaling = true))
 
         dto.virkFom shouldBe of(2024, FEBRUARY).atDay(1)
         dto.virkTom shouldBe null

@@ -6,6 +6,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -32,6 +33,10 @@ class VedtakEtterbetalingTest {
 
     private val klokkeJanuar2024: Clock = Clock.fixed(Instant.parse("2024-01-20T11:00:00Z"), norskTidssone)
     private val klokkeMars2024: Clock = Clock.fixed(Instant.parse("2024-03-06T10:00:00Z"), norskTidssone)
+    private val grunnbeloep =
+        mockk<Grunnbeloep> {
+            every { grunnbeloep } returns 124028
+        }
 
     private val repository = mockk<VedtaksvurderingRepository>()
 
@@ -44,11 +49,11 @@ class VedtakEtterbetalingTest {
 
         every { repository.hentFerdigstilteVedtak(vedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns emptyList()
 
-        val resultat = vedtak.erVedtakMedEtterbetaling(repository, klokkeJanuar2024)
+        val resultat = vedtak.erVedtakMedEtterbetaling(repository, grunnbeloep, klokkeJanuar2024)
 
         verify { repository wasNot called }
 
-        resultat shouldBe false
+        resultat shouldBe EtterbetalingResultat.ingen()
     }
 
     @Test
@@ -57,11 +62,11 @@ class VedtakEtterbetalingTest {
 
         every { repository.hentFerdigstilteVedtak(vedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns emptyList()
 
-        val resultat = vedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
+        val resultat = vedtak.erVedtakMedEtterbetaling(repository, grunnbeloep, klokkeMars2024)
 
         verify { repository.hentFerdigstilteVedtak(vedtak.soeker, SakType.OMSTILLINGSSTOENAD) }
 
-        resultat shouldBe true
+        resultat shouldBe EtterbetalingResultat(erEtterbetaling = true, harUtvidetFrist = false)
     }
 
     @Test
@@ -84,9 +89,9 @@ class VedtakEtterbetalingTest {
                 ),
             )
 
-        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
+        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, grunnbeloep, klokkeMars2024)
 
-        resultat shouldBe false
+        resultat shouldBe EtterbetalingResultat.ingen()
     }
 
     @Test
@@ -115,9 +120,14 @@ class VedtakEtterbetalingTest {
                 ),
             )
 
-        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, Clock.fixed(Instant.parse("2024-10-23T10:00:00Z"), norskTidssone))
+        val resultat =
+            nyttVedtak.erVedtakMedEtterbetaling(
+                repository,
+                grunnbeloep,
+                Clock.fixed(Instant.parse("2024-10-23T10:00:00Z"), norskTidssone),
+            )
 
-        resultat shouldBe false
+        resultat shouldBe EtterbetalingResultat.ingen()
     }
 
     @Test
@@ -140,9 +150,9 @@ class VedtakEtterbetalingTest {
                 ),
             )
 
-        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
+        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, grunnbeloep, klokkeMars2024)
 
-        resultat shouldBe true
+        resultat shouldBe EtterbetalingResultat(erEtterbetaling = true)
     }
 
     @Test
@@ -177,9 +187,85 @@ class VedtakEtterbetalingTest {
                 ),
             )
 
-        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
+        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, grunnbeloep, klokkeMars2024)
 
-        resultat shouldBe true
+        resultat shouldBe EtterbetalingResultat(erEtterbetaling = true)
+    }
+
+    @Test
+    fun `Skal ha utvidet frist hvis etterbetaling er mer enn en halv G`() {
+        val nyttVedtak =
+            aVedtakMedUtbetalingsperiode(
+                id = 10L,
+                virkningstidspunkt = februar2024,
+                // 5167,83333333 = (1G / 2 / 12md)
+                beloep = 5169,
+                fattetTidspunkt = "2024-03-06T13:30:00Z",
+            )
+
+        every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
+            listOf(
+                aVedtakMedUtbetalingsperiode(
+                    id = 1L,
+                    virkningstidspunkt = januar2024,
+                    beloep = 2000,
+                    fattetTidspunkt = "2024-01-07T13:30:00Z",
+                ),
+                aVedtakMedUtbetalingsperiode(
+                    id = 2L,
+                    virkningstidspunkt = februar2024,
+                    beloep = 2500,
+                    fattetTidspunkt = "2024-01-26T14:00:00Z",
+                ),
+                aVedtakMedUtbetalingsperiode(
+                    id = 3L,
+                    virkningstidspunkt = mars2024,
+                    beloep = 3000,
+                    fattetTidspunkt = "2024-03-05T10:00:00Z",
+                ),
+            )
+
+        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, grunnbeloep, klokkeMars2024)
+
+        resultat shouldBe EtterbetalingResultat(erEtterbetaling = true, harUtvidetFrist = true)
+    }
+
+    @Test
+    fun `Skal IKKE ha utvidet frist hvis etterbetaling er under en halv G`() {
+        val nyttVedtak =
+            aVedtakMedUtbetalingsperiode(
+                id = 10L,
+                virkningstidspunkt = februar2024,
+                // 5167,83333333 = (1G / 2 / 12md)
+                beloep = 5165,
+                fattetTidspunkt = "2024-03-06T13:30:00Z",
+            )
+
+        every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
+            listOf(
+                aVedtakMedUtbetalingsperiode(
+                    id = 1L,
+                    virkningstidspunkt = januar2024,
+                    beloep = 2000,
+                    fattetTidspunkt = "2024-01-07T13:30:00Z",
+                ),
+                aVedtakMedUtbetalingsperiode(
+                    id = 2L,
+                    virkningstidspunkt = februar2024,
+                    beloep = 2500,
+                    fattetTidspunkt = "2024-01-26T14:00:00Z",
+                ),
+                aVedtakMedUtbetalingsperiode(
+                    id = 3L,
+                    virkningstidspunkt = mars2024,
+                    beloep = 3000,
+                    fattetTidspunkt = "2024-03-05T10:00:00Z",
+                ),
+            )
+
+        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, grunnbeloep, klokkeMars2024)
+
+        resultat shouldBe EtterbetalingResultat(erEtterbetaling = true, harUtvidetFrist = false)
     }
 
     private fun aVedtakMedUtbetalingsperiode(

@@ -1,9 +1,11 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Clock
 import java.time.Month
 import java.time.YearMonth
@@ -14,8 +16,9 @@ val OMS_START_YTELSE: YearMonth = YearMonth.of(2024, Month.JANUARY)
 
 internal fun Vedtak.erVedtakMedEtterbetaling(
     vedtaksvurderingRepository: VedtaksvurderingRepository,
+    grunnbeloep: Grunnbeloep,
     clock: Clock = norskKlokke(),
-): Boolean {
+): EtterbetalingResultat {
     when (val innhold = this.innhold) {
         is VedtakInnhold.Behandling -> {
             val now = YearMonth.now(clock)
@@ -34,19 +37,47 @@ internal fun Vedtak.erVedtakMedEtterbetaling(
 
                 // Finn tidligere utbetalingsperiode som matcher ny(e)
                 // og sjekk om det er endring i beløp, hvis ny er høyere så er det etterbetaling
-                return innhold.utbetalingsperioder
-                    .filter { it.periode.fom < now }
-                    .associateWith { tidligereUtbetalingsperioder.find { up -> up.overlapper(it) } }
-                    .any { entry -> entry.value?.beloepErMindreEnn(entry.key) ?: true }
+                val perioderMedEtterbetaling =
+                    innhold.utbetalingsperioder
+                        .filter { it.periode.fom < now }
+                        .associateWith { nyPeriode -> tidligereUtbetalingsperioder.find { it.overlapper(nyPeriode) } }
+                        .filter { (nyPeriode, tidligerePeriode) ->
+                            tidligerePeriode?.beloepErMindreEnn(nyPeriode) ?: true
+                        }.keys
+
+                return EtterbetalingResultat(
+                    erEtterbetaling = perioderMedEtterbetaling.isNotEmpty(),
+                    harUtvidetFrist = skalHaUtvidetFrist(perioderMedEtterbetaling, grunnbeloep),
+                )
             }
-            return false
+
+            return EtterbetalingResultat.ingen()
         }
 
         is VedtakInnhold.Tilbakekreving, is VedtakInnhold.Klage -> throw IllegalArgumentException("Ikke aktuelt for tilbakekreving")
     }
 }
 
-internal fun Utbetalingsperiode.beloepErMindreEnn(that: Utbetalingsperiode) = this.beloep?.compareTo(that.beloep.toNonNullBeloep()) == -1
+private fun Utbetalingsperiode.beloepErMindreEnn(that: Utbetalingsperiode): Boolean =
+    this.beloep?.compareTo(that.beloep.toNonNullBeloep()) == -1
+
+/*
+* Etterbetaling over 0.5G (en halv G), skal ha utvidet frist hos samordning
+*/
+private fun skalHaUtvidetFrist(
+    perioderMedEtterbetaling: Set<Utbetalingsperiode>,
+    grunnbeloep: Grunnbeloep,
+): Boolean {
+    if (perioderMedEtterbetaling.isEmpty()) return false
+
+    val enHalvG =
+        grunnbeloep.grunnbeloep
+            .toBigDecimal()
+            .divide(BigDecimal.TWO, RoundingMode.HALF_UP) // 0.5G
+            .divide(BigDecimal(12), RoundingMode.HALF_UP) // pr. måned
+
+    return perioderMedEtterbetaling.any { it.beloep?.compareTo(enHalvG) == 1 }
+}
 
 private fun BigDecimal?.toNonNullBeloep(): BigDecimal = this ?: BigDecimal.valueOf(0)
 
@@ -59,4 +90,13 @@ internal fun Periode.overlapper(other: Periode): Boolean {
         this.tom == other.tom ||
         other.fom.isBefore(thisTomSafe) &&
         thatTomSafe.isAfter(this.fom)
+}
+
+data class EtterbetalingResultat(
+    val erEtterbetaling: Boolean,
+    val harUtvidetFrist: Boolean = false,
+) {
+    companion object {
+        fun ingen() = EtterbetalingResultat(erEtterbetaling = false, harUtvidetFrist = false)
+    }
 }

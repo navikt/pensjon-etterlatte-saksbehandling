@@ -3,7 +3,7 @@ import { tekstAktivitetspliktUnntakType } from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Box, Detail, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { VisUnntak } from '~components/aktivitetsplikt/vurdering/unntak/VisUnntak'
 
 export function UnntakIOppgave() {

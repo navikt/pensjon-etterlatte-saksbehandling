@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.hentinformasjon.beregning.UgyldigBeregningsMetode
 import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingPeriodeValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
@@ -18,9 +17,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class BarnepensjonEtterbetaling(
-    val inneholderKrav: Boolean?,
     val frivilligSkattetrekk: Boolean?,
-    val etterbetalingPeriodeValg: EtterbetalingPeriodeValg?,
 )
 
 data class OmstillingsstoenadEtterbetaling(
@@ -38,8 +35,8 @@ data class BarnepensjonBeregning(
     val sisteBeregningsperiode: BarnepensjonBeregningsperiode,
     val bruktTrygdetid: TrygdetidMedBeregningsmetode,
     val trygdetid: List<TrygdetidMedBeregningsmetode>,
-    val erForeldreloes: Boolean = false,
-    val forskjelligTrygdetid: ForskjelligTrygdetid? = null,
+    val erForeldreloes: Boolean,
+    val forskjelligTrygdetid: ForskjelligTrygdetid?,
 ) : HarVedlegg
 
 data class BarnepensjonBeregningsperiode(
@@ -50,9 +47,13 @@ data class BarnepensjonBeregningsperiode(
     val avdoedeForeldre: List<String?>?,
     val trygdetidForIdent: String?,
     var utbetaltBeloep: Kroner,
+    val harForeldreloessats: Boolean,
 ) {
     companion object {
-        fun fra(beregningsperiode: Beregningsperiode): BarnepensjonBeregningsperiode =
+        fun fra(
+            beregningsperiode: Beregningsperiode,
+            erForeldreloes: Boolean,
+        ): BarnepensjonBeregningsperiode =
             BarnepensjonBeregningsperiode(
                 datoFOM = beregningsperiode.datoFOM,
                 datoTOM = beregningsperiode.datoTOM,
@@ -61,6 +62,7 @@ data class BarnepensjonBeregningsperiode(
                 antallBarn = beregningsperiode.antallBarn,
                 avdoedeForeldre = beregningsperiode.avdoedeForeldre,
                 trygdetidForIdent = beregningsperiode.trygdetidForIdent,
+                harForeldreloessats = beregningsperiode.harForeldreloessats ?: erForeldreloes,
             )
     }
 }
@@ -105,7 +107,7 @@ data class OmstillingsstoenadBeregningsperiode(
 )
 
 data class TrygdetidMedBeregningsmetode(
-    val navnAvdoed: String,
+    val navnAvdoed: String?,
     val trygdetidsperioder: List<Trygdetidsperiode>,
     val beregnetTrygdetidAar: Int,
     val prorataBroek: IntBroek?,
@@ -140,7 +142,7 @@ data class Trygdetidsperiode(
 fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt: BeregningsMetode,
     beregningsMetodeFraGrunnlag: BeregningsMetode,
-    navnAvdoed: String,
+    navnAvdoed: String?,
 ) = TrygdetidMedBeregningsmetode(
     navnAvdoed = navnAvdoed,
     trygdetidsperioder =
@@ -239,4 +241,11 @@ class ManglerBrevutfall(
         code = "BEHANDLING_MANGLER_BREVUTFALL",
         detail = "Behandling mangler brevutfall, som er påkrevd. Legg til dette ved å lagre Valg av utfall i brev.",
         meta = mapOf("behandlingId" to behandlingId.toString()),
+    )
+
+// TODO (EY-4381) Fjern når alle beregninger på åpne behandlinger er gjort med harForeldreloessats
+class ManglerHarForeldreloessats :
+    UgyldigForespoerselException(
+        "MANGLER_HAR_FORELDRELOESSATS",
+        "Beklager, men saken må beregnes på nytt på grunn av en teknisk endring i Gjenny",
     )

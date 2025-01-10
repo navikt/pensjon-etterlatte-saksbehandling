@@ -121,7 +121,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
               </BodyShort>
             </VStack>
             {isPending(slettHendelseResult) || isPending(slettHendelseForSakResult) ? (
-              <Spinner variant="neutral" label="Sletter" margin="1em" />
+              <Spinner variant="neutral" label="Sletter" margin="4" />
             ) : (
               <HStack gap="2">
                 <Button
@@ -187,7 +187,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
                     </BodyShort>
                   </VStack>
                   {isPending(slettAktivitetResult) || isPending(slettAktivitetForSakResult) ? (
-                    <Spinner variant="neutral" label="Sletter" margin="1em" />
+                    <Spinner variant="neutral" label="Sletter" margin="4" />
                   ) : (
                     <HStack gap="2">
                       <Button

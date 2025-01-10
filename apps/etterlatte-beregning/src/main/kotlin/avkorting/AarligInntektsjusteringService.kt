@@ -1,8 +1,8 @@
 package no.nav.etterlatte.avkorting
 
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
@@ -17,11 +17,9 @@ class AarligInntektsjusteringService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentSjekkAarligInntektsjustering(
-        request: AarligInntektsjusteringAvkortingSjekkRequest,
-    ): AarligInntektsjusteringAvkortingSjekkResponse {
+    fun hentSjekkAarligInntektsjustering(request: InntektsjusteringAvkortingInfoRequest): InntektsjusteringAvkortingInfoResponse {
         val sanksjoner = sanksjonService.hentSanksjon(request.sisteBehandling)
-        return AarligInntektsjusteringAvkortingSjekkResponse(
+        return InntektsjusteringAvkortingInfoResponse(
             sakId = request.sakId,
             aar = request.aar,
             harInntektForAar = avkortingRepository.harSakInntektForAar(request),
@@ -58,7 +56,7 @@ class AarligInntektsjusteringService(
                 fratrekkInnAar = 0,
                 inntektUtlandTom = siseInntekt.inntektUtlandTom,
                 fratrekkInnAarUtland = 0,
-                spesifikasjon = siseInntekt.spesifikasjon,
+                spesifikasjon = "Automatisk jobb viderefører inntekt fra $aar med id=${siseInntekt.id}",
                 fom = YearMonth.of(aar, 1),
             )
 

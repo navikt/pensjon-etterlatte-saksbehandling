@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PDFMal
 import no.nav.etterlatte.libs.common.inntektsjustering.Inntektsjustering
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -101,6 +103,7 @@ internal class InntektsjusteringRiverTest {
                     it.naeringsinntekt shouldBe 200
                     it.afpInntekt shouldBe 400
                     it.inntektFraUtland shouldBe 300
+                    it.mottattDato shouldBe LocalDateTime.ofInstant(inntektsjustering.tidspunkt, norskTidssone)
                     it.datoForAaGaaAvMedAlderspensjon shouldBe YearMonth.of(2025, 6)
                 },
             )

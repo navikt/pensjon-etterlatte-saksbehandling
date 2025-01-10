@@ -113,6 +113,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         env:
+          TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           CLUSTER: dev-gcp
           RESOURCE: apps/${{ github.workflow }}/.nais/dev.yaml
           VAR: image=${{ needs.build-and-publish.outputs.image }}
@@ -135,6 +136,7 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         if: steps.check_files.outputs.files_exists == 'true'
         env:
+          TELEMETRY: ${{ steps.docker-build-push.outputs.telemetry }}
           CLUSTER: prod-gcp
           RESOURCE: apps/${{ github.workflow }}/.nais/prod.yaml
           VAR: image=${{ needs.build-and-publish.outputs.image }}

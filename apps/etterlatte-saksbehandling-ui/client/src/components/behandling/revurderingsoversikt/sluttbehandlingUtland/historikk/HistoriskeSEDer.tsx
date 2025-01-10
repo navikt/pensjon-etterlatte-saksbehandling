@@ -11,7 +11,7 @@ import LandRad from '~components/behandling/revurderingsoversikt/sluttbehandling
 import { ILand } from '~utils/kodeverk'
 
 function erSluttbehandling(revurderingsinfo: RevurderingInfo): revurderingsinfo is SluttbehandlingUtlandInfo {
-  return revurderingsinfo.type === Revurderingaarsak.SLUTTBEHANDLING_UTLAND
+  return revurderingsinfo.type === Revurderingaarsak.SLUTTBEHANDLING
 }
 
 export default function HistoriskeSEDer({

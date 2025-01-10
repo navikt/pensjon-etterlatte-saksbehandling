@@ -43,7 +43,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
 
   return (
     <>
-      <Button variant="primary" size="small" icon={<EyeIcon />} onClick={() => setOpen(true)}>
+      <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setOpen(true)}>
         Se oppgave
       </Button>
 
@@ -122,7 +122,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
                   <Button
                     size="small"
                     variant="secondary"
-                    icon={<ChevronDownIcon />}
+                    icon={<ChevronDownIcon aria-hidden />}
                     iconPosition="right"
                     title="Flere handlinger"
                     as={Dropdown.Toggle}
@@ -157,7 +157,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
                     : configContext['gosysUrl']
                 }
                 target="_blank"
-                icon={<ExternalLinkIcon />}
+                icon={<ExternalLinkIcon aria-hidden />}
               >
                 Åpne i Gosys
               </Button>

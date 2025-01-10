@@ -43,7 +43,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -236,12 +235,12 @@ internal class BehandlingServiceImplTest {
 
         every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
 
-        every { behandlingHendelser.sendMeldingForHendelseStatisitkk(any(), any()) } returns Unit
+        every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any()) } returns Unit
 
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
 
-        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
 
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
@@ -271,10 +270,10 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id, AarsakTilAvbrytelse.ANNET, "test") } just runs
         every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
-        every { behandlingHendelser.sendMeldingForHendelseStatisitkk(any(), any()) } returns Unit
+        every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any()) } returns Unit
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
-        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "test")
@@ -310,14 +309,13 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id, any(), any()) } just runs
         every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
-        every { behandlingHendelser.sendMeldingForHendelseStatisitkk(any(), any()) } returns Unit
+        every { behandlingHendelser.sendMeldingForHendelseStatistikk(any(), any()) } returns Unit
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } throws
             RuntimeException(
                 "Alt må rulles tilbake",
             )
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
-
-        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
 
         assertFalse(didRollback)
         assertThrows<RuntimeException> {
@@ -342,20 +340,20 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id, any(), any()) } just runs
         every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
         every {
-            behandlingHendelser.sendMeldingForHendelseStatisitkk(
+            behandlingHendelser.sendMeldingForHendelseStatistikk(
                 any(),
                 BehandlingHendelseType.AVBRUTT,
             )
         } returns Unit
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
-        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler(), AarsakTilAvbrytelse.ANNET, "")
 
         verify {
-            behandlingHendelser.sendMeldingForHendelseStatisitkk(
+            behandlingHendelser.sendMeldingForHendelseStatistikk(
                 any(),
                 BehandlingHendelseType.AVBRUTT,
             )
@@ -372,14 +370,14 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id, any(), any()) } just runs
         every { hendelseDaoMock.behandlingAvbrutt(any(), any(), any(), any()) } returns Unit
         every {
-            behandlingHendelser.sendMeldingForHendelseStatisitkk(
+            behandlingHendelser.sendMeldingForHendelseStatistikk(
                 any(),
                 BehandlingHendelseType.AVBRUTT,
             )
         } returns Unit
         every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
         every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
-        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
+        every { oppgaveServiceMock.avbrytAapneOppgaverMedReferanse(any(), any()) } just runs
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, simpleSaksbehandler())
@@ -1008,8 +1006,8 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.hentBehandling(behandling.id) } returns behandling
         coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, TOKEN) } returns mockPersongalleri()
         coEvery { grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, any(), any()) } just runs
-        coEvery { grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any()) } just runs
-        every { behandlingDaoMock.lagreStatus(any(), any(), any()) } just runs
+        coEvery { grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any(), any()) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
         every { behandlingDaoMock.lagreStatus(any()) } just runs
 
         val annenForelderInRequest =
@@ -1027,7 +1025,7 @@ internal class BehandlingServiceImplTest {
         val slot = slot<NyeSaksopplysninger>()
         coVerify {
             grunnlagServiceMock.leggTilNyeOpplysninger(behandling.id, capture(slot), any())
-            grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any())
+            grunnlagServiceMock.oppdaterGrunnlag(behandling.id, behandling.sak.id, any(), TOKEN)
         }
         assertEquals(behandling.sak.id, slot.captured.sakId)
 

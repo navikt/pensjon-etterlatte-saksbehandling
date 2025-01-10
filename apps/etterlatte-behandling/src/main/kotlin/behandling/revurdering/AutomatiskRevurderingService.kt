@@ -65,6 +65,7 @@ class AutomatiskRevurderingService(
                     kilde = Vedtaksloesning.GJENNY,
                     persongalleri = persongalleri,
                     frist = request.oppgavefrist?.let { Tidspunkt.ofNorskTidssone(it, LocalTime.NOON) },
+                    mottattDato = request.mottattDato?.toString(),
                 )
             }
 
@@ -143,22 +144,20 @@ class AutomatiskRevurderingService(
         kilde: Vedtaksloesning,
         persongalleri: Persongalleri,
         frist: Tidspunkt? = null,
+        mottattDato: String? = null,
     ) = forrigeBehandling.let {
         revurderingService.opprettRevurdering(
             sakId = sakId,
             persongalleri = persongalleri,
-            forrigeBehandling = forrigeBehandling.id,
-            mottattDato = null,
+            forrigeBehandling = forrigeBehandling,
+            mottattDato = mottattDato,
             prosessType = Prosesstype.AUTOMATISK,
             kilde = kilde,
             revurderingAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt.tilVirkningstidspunkt("Opprettet automatisk"),
-            utlandstilknytning = forrigeBehandling.utlandstilknytning,
-            boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
             begrunnelse = "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
             saksbehandlerIdent = Fagsaksystem.EY.navn,
             frist = frist,
-            opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
         )
     }
 }

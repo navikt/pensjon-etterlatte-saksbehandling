@@ -37,6 +37,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 interface GrunnlagKlient : Pingable {
+    suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
+
     suspend fun finnPersonOpplysning(
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
@@ -67,13 +72,13 @@ interface GrunnlagKlient : Pingable {
     suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun hentPersongalleri(sakId: SakId): Persongalleri
@@ -81,19 +86,19 @@ interface GrunnlagKlient : Pingable {
     suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun leggInnNyttGrunnlagSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo? = null,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     suspend fun laasTilGrunnlagIBehandling(
@@ -131,6 +136,22 @@ class GrunnlagKlientImpl(
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
     private val resourceApiUrl = resourceUrl.plus("/api")
+
+    override suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        logger.info("Sjekker om det allerede finnes grunnlag på sak=$sakId")
+
+        return downstreamResourceClient
+            .get(
+                Resource(clientId, "$resourceApiUrl/grunnlag/sak/$sakId/grunnlag-finnes"),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { deserialize(it.response!!.toString()) },
+                failure = { throw it },
+            )
+    }
 
     override suspend fun finnPersonOpplysning(
         behandlingId: UUID,
@@ -250,7 +271,7 @@ class GrunnlagKlientImpl(
     override suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         downstreamResourceClient
             .post(
@@ -260,7 +281,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/opprett-grunnlag",
                     ),
                 postBody = opplysningsbehov.toJson(),
-                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },
@@ -270,7 +291,7 @@ class GrunnlagKlientImpl(
     override suspend fun leggInnNyttGrunnlagSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         downstreamResourceClient
             .post(
@@ -280,7 +301,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}/opprett-grunnlag",
                     ),
                 postBody = opplysningsbehov.toJson(),
-                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },
@@ -330,7 +351,7 @@ class GrunnlagKlientImpl(
     override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         downstreamResourceClient
             .post(
@@ -340,7 +361,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/oppdater-grunnlag",
                     ),
                 postBody = request.toJson(),
-                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },
@@ -350,7 +371,7 @@ class GrunnlagKlientImpl(
     override suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         downstreamResourceClient
             .post(
@@ -360,7 +381,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/behandling/$behandlingId/nye-opplysninger",
                     ),
                 postBody = saksopplysninger.toJson(),
-                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },
@@ -370,7 +391,7 @@ class GrunnlagKlientImpl(
     override suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         downstreamResourceClient
             .post(
@@ -380,7 +401,7 @@ class GrunnlagKlientImpl(
                         url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}/nye-opplysninger",
                     ),
                 postBody = saksopplysninger.toJson(),
-                brukerTokenInfo = brukerTokenInfo ?: Kontekst.get().brukerTokenInfo!!,
+                brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
                 success = { _ -> },
                 failure = { errorResponse -> throw errorResponse },

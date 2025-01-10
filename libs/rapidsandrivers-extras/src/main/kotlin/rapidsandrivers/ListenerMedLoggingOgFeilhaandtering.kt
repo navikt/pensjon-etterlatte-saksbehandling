@@ -1,7 +1,7 @@
 package no.nav.etterlatte.rapidsandrivers
 
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -63,7 +63,7 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         block: River.() -> Unit = {},
     ) {
         logger.info("Initialiserer river for ${this.javaClass.simpleName}")
-        checkInternFeil(
+        krev(
             kontekst() in
                 setOf(
                     Kontekst.MIGRERING,

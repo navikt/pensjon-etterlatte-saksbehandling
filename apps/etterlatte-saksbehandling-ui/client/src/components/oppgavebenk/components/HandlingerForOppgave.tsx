@@ -19,8 +19,8 @@ import { opprettManuellInntektsjustering as opprettManuellInntektsjusteringApi }
 import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { MottattInntektsjusteringModal } from '~components/oppgavebenk/oppgaveModal/MottattInntektsjusteringModal'
-import { AktivitetspliktOppgaveHandling } from '~components/oppgavebenk/oppgaveModal/aktivitetsplikt/AktivitetspliktOppgaveHandling'
+import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
+import { AktivitetspliktOppgaveHandling } from '~components/oppgavebenk/components/AktivitetspliktOppgaveHandling'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -79,7 +79,7 @@ export const HandlingerForOppgave = ({
       return (
         <PersonButtonLink
           size="small"
-          icon={<EyeIcon />}
+          icon={<EyeIcon aria-hidden />}
           fnr={fnr || '-'}
           fane={PersonOversiktFane.HENDELSER}
           queryParams={{ referanse: referanse || '-' }}
@@ -186,8 +186,8 @@ export const HandlingerForOppgave = ({
           <AktivitetspliktInfo6MndVarigUnntakModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
         )
       )
-    case Oppgavetype.MOTTATT_INNTEKTSJUSTERING:
-      return <MottattInntektsjusteringModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
+    case Oppgavetype.INNTEKTSOPPLYSNING:
+      return <InntektsopplysningModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AARLIG_INNTEKTSJUSTERING:
       return mapResult(opprettManuellRevurderingStatus, {
         initial: (

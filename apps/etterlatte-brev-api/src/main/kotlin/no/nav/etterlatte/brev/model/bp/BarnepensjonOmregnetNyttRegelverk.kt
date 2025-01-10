@@ -6,12 +6,12 @@ import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
-import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
-import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
@@ -61,10 +61,10 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
 data class BarnepensjonOmregnetNyttRegelverk(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
-    val etterbetaling: BarnepensjonEtterbetaling?,
     val frivilligSkattetrekk: Boolean?,
     val erUnder18Aar: Boolean,
     val erBosattUtlandet: Boolean,
+    val erEtterbetaling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -76,13 +76,12 @@ data class BarnepensjonOmregnetNyttRegelverk(
             etterbetaling: EtterbetalingDTO?,
             utlandstilknytning: UtlandstilknytningType?,
             avdoede: List<Avdoed>,
+            brevutfall: BrevutfallDto?,
         ): BarnepensjonOmregnetNyttRegelverk {
             val erUnder18AarNonNull =
-                requireNotNull(erUnder18Aar) {
+                krevIkkeNull(erUnder18Aar) {
                     "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
                 }
-
-            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
 
             return BarnepensjonOmregnetNyttRegelverk(
                 innhold = innhold.innhold(),
@@ -93,15 +92,12 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         avdoede,
                         utbetalingsinfo,
                         grunnbeloep,
-                        beregningsperioder,
                         trygdetid,
                     ),
-                etterbetaling = etterbetaling?.let { dto -> Etterbetaling.fraBarnepensjonDTO(dto) },
-                frivilligSkattetrekk = etterbetaling?.frivilligSkattetrekk ?: false,
+                frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
                 erBosattUtlandet =
-                    (
-                        requireNotNull(utlandstilknytning)
-                    ) == UtlandstilknytningType.BOSATT_UTLAND,
+                    krevIkkeNull(utlandstilknytning) { "Utlandstilknytning mangler" } == UtlandstilknytningType.BOSATT_UTLAND,
+                erEtterbetaling = etterbetaling != null,
             )
         }
     }

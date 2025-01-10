@@ -25,7 +25,8 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
@@ -43,8 +44,6 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import java.sql.Date
-import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -57,7 +56,7 @@ class BehandlingDao(
 ) {
     private val alleBehandlingerMedSak =
         """
-        SELECT b.*, i.omgjoering_sluttbehandling_utland, s.sakType, s.enhet, s.fnr 
+        SELECT b.*, i.omgjoering_sluttbehandling, s.sakType, s.enhet, s.fnr 
         FROM behandling b
         INNER JOIN sak s ON b.sak_id = s.id
         LEFT JOIN behandling_info i ON b.id = i.behandling_id
@@ -209,7 +208,7 @@ class BehandlingDao(
                 rs
                     .getString("tidligere_familiepleier")
                     ?.let { objectMapper.readValue(it) },
-            erSluttbehandling = rs.getBoolean("omgjoering_sluttbehandling_utland"),
+            erSluttbehandling = rs.getBoolean("omgjoering_sluttbehandling"),
         )
     }
 
@@ -261,7 +260,7 @@ class BehandlingDao(
                     stmt.setString(17, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
                     stmt.setJsonb(18, tidligereFamiliepleier)
                 }
-                checkInternFeil(stmt.executeUpdate() == 1) {
+                krev(stmt.executeUpdate() == 1) {
                     "Kunne ikke opprette behandling for ${behandling.id}"
                 }
             }
@@ -283,17 +282,23 @@ class BehandlingDao(
             stmt.setObject(1, objectMapper.writeValueAsString(gyldighetsproeving))
             stmt.setTidspunkt(2, Tidspunkt.now().toLocalDatetimeUTC().toTidspunkt())
             stmt.setObject(3, behandlingId)
-            checkInternFeil(stmt.executeUpdate() == 1) {
+            krev(stmt.executeUpdate() == 1) {
                 "Kunne ikke lagreGyldighetsproeving behandling for $behandlingId"
             }
         }
     }
 
     fun lagreStatus(lagretBehandling: Behandling) {
+        if (lagretBehandling.status == BehandlingStatus.AVBRUTT) {
+            throw InternfeilException(
+                "Behandlinger skal ikke avbrytes med status direkte, siden vi da mangler " +
+                    "utsending av statistikkmelding og lagring av behandlingshendelse.",
+            )
+        }
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }
 
-    fun lagreStatus(
+    private fun lagreStatus(
         behandlingId: UUID,
         status: BehandlingStatus,
         sistEndret: LocalDateTime,
@@ -304,7 +309,7 @@ class BehandlingDao(
             stmt.setString(1, status.name)
             stmt.setTidspunkt(2, sistEndret.toTidspunkt())
             stmt.setObject(3, behandlingId)
-            checkInternFeil(stmt.executeUpdate() == 1) {
+            krev(stmt.executeUpdate() == 1) {
                 "Kunne ikke lagreStatus behandling for $behandlingId"
             }
         }
@@ -316,12 +321,13 @@ class BehandlingDao(
         kommentar: String,
     ) = connectionAutoclosing.hentConnection {
         with(it) {
-            val stmt = prepareStatement("UPDATE behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
+            val stmt =
+                prepareStatement("UPDATE behandling SET aarsak_til_avbrytelse = ?, kommentar_til_avbrytelse = ? WHERE id = ?")
 
             stmt.setString(1, aarsakTilAvbrytelse.name)
             stmt.setString(2, kommentar)
             stmt.setObject(3, behandlingId)
-            checkInternFeil(stmt.executeUpdate() == 1) {
+            krev(stmt.executeUpdate() == 1) {
                 "Kunne ikke lagreStatus behandling for $behandlingId"
             }
         }
@@ -336,7 +342,7 @@ class BehandlingDao(
 
             stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
             stmt.setObject(2, behandlingId)
-            checkInternFeil(stmt.executeUpdate() == 1) {
+            krev(stmt.executeUpdate() == 1) {
                 "Kunne ikke lagreBoddEllerArbeidetUtlandet behandling for $behandlingId"
             }
         }
@@ -350,7 +356,7 @@ class BehandlingDao(
             val statement = prepareStatement("UPDATE behandling set utlandstilknytning = ? where id = ?")
             statement.setJsonb(1, utlandstilknytning)
             statement.setObject(2, behandlingId)
-            checkInternFeil(statement.executeUpdate() == 1) {
+            krev(statement.executeUpdate() == 1) {
                 "Kunne ikke lagreUtlandstilknytning behandling for $behandlingId"
             }
         }
@@ -364,7 +370,7 @@ class BehandlingDao(
             val statement = prepareStatement("UPDATE behandling set tidligere_familiepleier = ? where id = ?")
             statement.setJsonb(1, tidligereFamiliepleier)
             statement.setObject(2, behandlingId)
-            checkInternFeil(statement.executeUpdate() == 1) {
+            krev(statement.executeUpdate() == 1) {
                 "Kunne ikke lagreTidligereFamiliepleier behandling for $behandlingId"
             }
         }
@@ -391,15 +397,14 @@ class BehandlingDao(
                 val statement =
                     prepareStatement(
                         "INSERT INTO viderefoert_opphoer " +
-                            "(skalViderefoere, dato, kilde, begrunnelse, kravdato, behandling_id, vilkaar, aktiv) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)" +
+                            "(skalViderefoere, dato, kilde, begrunnelse, behandling_id, vilkaar, aktiv) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?)" +
                             "ON CONFLICT (behandling_id) where aktiv = true " +
                             "DO UPDATE SET " +
                             "skalViderefoere=excluded.skalViderefoere, " +
                             "dato=excluded.dato, " +
                             "kilde=excluded.kilde, " +
                             "begrunnelse=excluded.begrunnelse, " +
-                            "kravdato=excluded.kravdato, " +
                             "behandling_id=excluded.behandling_id, " +
                             "vilkaar=excluded.vilkaar, " +
                             "aktiv=excluded.aktiv, " +
@@ -409,11 +414,13 @@ class BehandlingDao(
                 statement.setString(2, objectMapper.writeValueAsString(viderefoertOpphoer.dato))
                 statement.setJsonb(3, viderefoertOpphoer.kilde)
                 statement.setString(4, viderefoertOpphoer.begrunnelse)
-                statement.setDate(5, viderefoertOpphoer.kravdato?.let { d -> Date.valueOf(d) })
-                statement.setObject(6, behandlingId)
-                statement.setString(7, viderefoertOpphoer.vilkaar?.name)
-                statement.setBoolean(8, viderefoertOpphoer.aktiv)
-                statement.updateSuccessful()
+                statement.setObject(5, behandlingId)
+                statement.setString(6, viderefoertOpphoer.vilkaar?.name)
+                statement.setBoolean(7, viderefoertOpphoer.aktiv)
+
+                krev(statement.executeUpdate() == 1) {
+                    "Feil ved lagring av videreført opphør"
+                }
             }
         }
     }
@@ -436,7 +443,10 @@ class BehandlingDao(
                     )
                 statement.setJsonb(1, kilde)
                 statement.setObject(2, behandlingId)
-                statement.updateSuccessful()
+
+                krev(statement.executeUpdate() == 1) {
+                    "Feil ved fjerning av videreført opphør"
+                }
             }
         }
     }
@@ -446,7 +456,7 @@ class BehandlingDao(
             with(it) {
                 val statement =
                     prepareStatement(
-                        "SELECT skalViderefoere, dato, kilde, begrunnelse, kravdato, vilkaar, aktiv " +
+                        "SELECT skalViderefoere, dato, kilde, begrunnelse, vilkaar, aktiv " +
                             "FROM viderefoert_opphoer " +
                             "WHERE behandling_id = ? " +
                             "AND aktiv = TRUE",
@@ -458,7 +468,6 @@ class BehandlingDao(
                         dato = getString("dato").let { objectMapper.readValue<YearMonth>(it) },
                         kilde = getString("kilde").let { objectMapper.readValue(it) },
                         begrunnelse = getString("begrunnelse"),
-                        kravdato = getDate("kravdato")?.toLocalDate(),
                         behandlingId = behandlingId,
                         vilkaar = getString("vilkaar")?.let { VilkaarType.valueOf(it) },
                         aktiv = getBoolean("aktiv"),
@@ -475,7 +484,7 @@ class BehandlingDao(
             val statement = prepareStatement("UPDATE behandling set sende_brev = ? where id = ?")
             statement.setBoolean(1, skalSendeBrev)
             statement.setObject(2, behandlingId)
-            checkInternFeil(statement.executeUpdate() == 1) {
+            krev(statement.executeUpdate() == 1) {
                 "Kunne ikke send brev behandling for $behandlingId"
             }
         }
@@ -531,6 +540,18 @@ class BehandlingDao(
             statement.executeUpdate()
         }
     }
+
+    fun endreProsesstype(
+        behandlingId: UUID,
+        ny: Prosesstype,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling SET prosesstype = ? WHERE id = ?")
+            statement.setString(1, ny.name)
+            statement.setObject(2, behandlingId)
+            statement.executeUpdate()
+        }
+    }
 }
 
 fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLocalDatetimeUTC()
@@ -542,6 +563,3 @@ private fun ResultSet.toTidligereFamiliepleier(): TidligereFamiliepleier? =
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-// TODO: fjerne denne bruke, blir veldig dårlig feilmelding
-fun PreparedStatement.updateSuccessful() = require(this.executeUpdate() == 1)

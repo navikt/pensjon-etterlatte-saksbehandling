@@ -52,7 +52,7 @@ export const BrevOppgaveModal = ({
 
   return (
     <>
-      <Button variant="primary" size="small" icon={<EyeIcon />} onClick={() => setIsOpen(true)}>
+      <Button variant="primary" size="small" icon={<EyeIcon aria-hidden />} onClick={() => setIsOpen(true)}>
         Se oppgave
       </Button>
 
@@ -127,7 +127,7 @@ export const BrevOppgaveModal = ({
                   variant="primary"
                   to={`/person/sak/${brev.sakId}/brev/${brev.id}`}
                   target="_blank"
-                  icon={<ExternalLinkIcon />}
+                  icon={<ExternalLinkIcon aria-hidden />}
                 >
                   Åpne brev
                 </Button>

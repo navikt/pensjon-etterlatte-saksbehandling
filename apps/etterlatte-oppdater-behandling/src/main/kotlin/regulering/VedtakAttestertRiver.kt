@@ -2,6 +2,7 @@ package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
@@ -45,6 +46,7 @@ internal class VedtakAttestertRiver(
             }
             validate { it.requireKey(OmregningDataPacket.KEY) }
             validate { it.requireKey(OmregningDataPacket.SAK_ID) }
+            validate { it.requireKey(OmregningDataPacket.BEHANDLING_ID) }
             validate { it.requireKey(OmregningDataPacket.KJOERING) }
             validate { it.requireKey(OmregningDataPacket.REV_AARSAK) }
             validate { it.interestedIn(BEREGNING_BELOEP_FOER) }
@@ -65,12 +67,7 @@ internal class VedtakAttestertRiver(
         context: MessageContext,
     ) {
         val erFattetVedtak = packet.eventName == VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType()
-        if (erFattetVedtak &&
-            !featureToggleService.isEnabled(
-                ReguleringFeatureToggle.SKAL_STOPPE_ETTER_FATTET_VEDTAK,
-                false,
-            )
-        ) {
+        if (erFattetVedtak && !skalStoppeEtterFattet(packet.omregningData.revurderingaarsak)) {
             return
         }
 
@@ -86,6 +83,7 @@ internal class VedtakAttestertRiver(
                         false -> KjoeringStatus.FERDIGSTILT
                     },
                 sakId = sakId,
+                behandling = packet.omregningData.hentBehandlingId(),
                 beregningBeloepFoer = bigDecimal(packet, BEREGNING_BELOEP_FOER),
                 beregningBeloepEtter = bigDecimal(packet, BEREGNING_BELOEP_ETTER),
                 beregningGFoer = bigDecimal(packet, BEREGNING_G_FOER),
@@ -104,4 +102,14 @@ internal class VedtakAttestertRiver(
         packet: JsonMessage,
         noekkel: String,
     ): BigDecimal? = packet[noekkel].asText().takeIf { it.isNotEmpty() }?.let { BigDecimal(it) }
+
+    private fun skalStoppeEtterFattet(revurderingaarsak: Revurderingaarsak): Boolean {
+        if (featureToggleService.isEnabled(ReguleringFeatureToggle.SKAL_STOPPE_ETTER_FATTET_VEDTAK, false)) {
+            return true
+        }
+        return when (revurderingaarsak) {
+            Revurderingaarsak.INNTEKTSENDRING -> true
+            else -> false
+        }
+    }
 }

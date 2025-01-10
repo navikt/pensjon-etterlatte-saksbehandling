@@ -19,7 +19,6 @@ import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Innsender
@@ -64,6 +63,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -159,12 +159,13 @@ internal class VedtaksbrevServiceTest {
         val ATTESTANT = simpleAttestant()
         val utbetalingsinfo =
             Utbetalingsinfo(
+                false,
                 1,
                 Kroner(3436),
                 LocalDate.now(),
                 false,
                 listOf(
-                    Beregningsperiode(
+                    beregningsperiode(
                         LocalDate.now(),
                         LocalDate.now().plusYears(4),
                         Kroner(120000),
@@ -257,6 +258,7 @@ internal class VedtaksbrevServiceTest {
                 coEvery { behandlingService.hentBehandling(any(), any()) } returns
                     mockk {
                         every { opphoerFraOgMed } returns null
+                        every { prosesstype } returns Prosesstype.MANUELL
                     }
 
                 coEvery { beregningService.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns
@@ -283,6 +285,7 @@ internal class VedtaksbrevServiceTest {
                             ),
                         ),
                         false,
+                        true,
                     )
             }
 
@@ -344,6 +347,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { beregningService.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
             coEvery { behandlingService.hentEtterbetaling(any(), any()) } returns null
             coEvery { behandlingService.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
+            coEvery { behandlingService.hentBehandling(any(), any()) } returns mockk { every { erSluttbehandling } returns false }
             coEvery { behandlingService.hentBrevutfall(any(), any()) } returns
                 mockk<BrevutfallDto> {
                     every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL

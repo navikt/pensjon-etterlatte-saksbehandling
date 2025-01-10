@@ -9,6 +9,7 @@ export interface OppgaveDTO {
   type: Oppgavetype
   kilde: OppgaveKilde
   referanse: string | null
+  gruppeId: string | null
   merknad?: string
   opprettet: string
   sakType: SakType
@@ -87,7 +88,7 @@ export enum Oppgavetype {
   AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK = 'AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK',
   GENERELL_OPPGAVE = 'GENERELL_OPPGAVE',
   AARLIG_INNTEKTSJUSTERING = 'AARLIG_INNTEKTSJUSTERING',
-  MOTTATT_INNTEKTSJUSTERING = 'MOTTATT_INNTEKTSJUSTERING',
+  INNTEKTSOPPLYSNING = 'INNTEKTSOPPLYSNING',
   MANUELL_UTSENDING_BREV = 'MANUELL_UTSENDING_BREV',
 }
 

@@ -115,6 +115,7 @@ internal class OppgaveDaoReguleringTest(
                 type = OppgaveType.REVURDERING,
                 saksbehandler = OppgaveSaksbehandler(saksbehandler),
                 referanse = "",
+                gruppeId = null,
                 merknad = "",
                 opprettet = Tidspunkt.now(),
                 sakType = SakType.BARNEPENSJON,

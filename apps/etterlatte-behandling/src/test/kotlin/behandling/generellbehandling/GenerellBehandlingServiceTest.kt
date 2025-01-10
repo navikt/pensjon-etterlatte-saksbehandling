@@ -3,7 +3,10 @@ package no.nav.etterlatte.behandling.generellbehandling
 import io.kotest.inspectors.forExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -11,6 +14,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
@@ -55,6 +59,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -82,7 +87,7 @@ internal class GenerellBehandlingServiceTest(
     private val behandlingService = mockk<BehandlingService>()
     private val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
     private val saksbehandlerNavn = "Ola Nordmann"
-    private val saksbehandler = mockSaksbehandler("Z123456")
+    private lateinit var saksbehandler: SaksbehandlerMedEnheterOgRoller
 
     @BeforeAll
     fun beforeAll() {
@@ -98,14 +103,15 @@ internal class GenerellBehandlingServiceTest(
                 ConnectionAutoclosingTest(dataSource),
             )
         oppgaveService =
-            OppgaveService(
-                OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
-                sakLesDao,
-                hendelseDao,
-                hendelser,
+            spyk(
+                OppgaveService(
+                    OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
+                    sakLesDao,
+                    hendelseDao,
+                    hendelser,
+                ),
             )
 
-        every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns saksbehandlerNavn
         service =
             GenerellBehandlingService(
                 dao,
@@ -115,12 +121,19 @@ internal class GenerellBehandlingServiceTest(
                 hendelseDao,
                 saksbehandlerInfoDao,
             )
+    }
 
+    @BeforeEach
+    fun beforeEach() {
+        clearAllMocks(currentThreadOnly = true)
+        every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns saksbehandlerNavn
+        saksbehandler = mockSaksbehandler("Z123456")
         nyKontekstMedBrukerOgDatabase(saksbehandler, dataSource)
     }
 
     @AfterEach
     fun afterEach() {
+        confirmVerified(hendelser, grunnlagKlient, behandlingService, saksbehandlerInfoDao)
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE generellbehandling CASCADE; TRUNCATE oppgave CASCADE").execute()
         }
@@ -189,6 +202,8 @@ internal class GenerellBehandlingServiceTest(
         val kravpakkeMedArbeidetUtlandet = runBlocking { service.hentKravpakkeForSak(sak.id, brukerTokenInfo) }
         assertEquals(opprettBehandlingGenerell.id, kravpakkeMedArbeidetUtlandet.kravpakke.id)
         assertEquals(foerstegangsbehandling.id, kravpakkeMedArbeidetUtlandet.kravpakke.tilknyttetBehandling)
+        coVerify { grunnlagKlient.finnPersonOpplysning(any(), any(), any()) }
+        verify { behandlingService.hentBehandlingerForSak(any()) }
     }
 
     @Test
@@ -254,7 +269,13 @@ internal class GenerellBehandlingServiceTest(
         assertNull(opprettBehandling.innhold)
 
         val oppgaveForFoerstegangsBehandling =
-            oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(behandlingId.toString(), sak.id)
+            oppgaveService.opprettOppgave(
+                behandlingId.toString(),
+                sak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
         val saksbehandler = "saksbehandler"
         oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsBehandling.id, saksbehandler)
 
@@ -343,6 +364,7 @@ internal class GenerellBehandlingServiceTest(
         assertThrows<KanIkkeEndreGenerellBehandling> {
             service.avbrytBehandling(opprettBehandling.id, sak.id, SAKSBEHANDLER)
         }
+        verify { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) }
     }
 
     @Test
@@ -391,6 +413,7 @@ internal class GenerellBehandlingServiceTest(
                 any(),
             )
         }
+        verify { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) }
     }
 
     @Test
@@ -542,11 +565,11 @@ internal class GenerellBehandlingServiceTest(
     @Test
     fun `Kan attestere behandling`() {
         val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val behandlingId = randomUUID()
+        val vanligBehandlingId = randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
                 sak.id,
-                behandlingId,
+                vanligBehandlingId,
             )
         val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling, SAKSBEHANDLER)
         assertEquals(GenerellBehandling.Status.OPPRETTET, opprettBehandling.status)
@@ -599,6 +622,30 @@ internal class GenerellBehandlingServiceTest(
                 any(),
                 GenerellBehandlingHendelseType.ATTESTERT,
                 any(),
+                any(),
+            )
+        }
+        verify { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) }
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                opprettBehandling.id.toString(),
+                sak.id,
+                OppgaveKilde.GENERELL_BEHANDLING,
+                OppgaveType.KRAVPAKKE_UTLAND,
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                opprettBehandling.id.toString(),
+                sak.id,
+                OppgaveKilde.GENERELL_BEHANDLING,
+                OppgaveType.GENERELL_OPPGAVE,
+                "Sluttbehandling - VO utland",
                 any(),
             )
         }
@@ -660,6 +707,7 @@ internal class GenerellBehandlingServiceTest(
                 service.attester(oppdaterBehandling.id, attestant)
             }
         assertEquals("ATTESTERING_SAMME_SAKSBEHANDLER", ugyldigAttesteringsForespoersel.code)
+        verify { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) }
     }
 
     @Test
@@ -701,6 +749,7 @@ internal class GenerellBehandlingServiceTest(
                 kommentar.begrunnelse,
             )
         }
+        verify { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) }
     }
 
     private fun kravpakkeUtland() =

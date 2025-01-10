@@ -1090,6 +1090,57 @@ internal class VedtakBehandlingServiceTest(
     }
 
     @Test
+    fun `skal rulle tilbake vedtak ved iverksatt dersom behandling returnerer false`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
+        val gjeldendeSaksbehandler = saksbehandler
+        val attestant = attestant
+        coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                sakId1,
+                ENHET_1,
+            )
+        coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
+        coEvery { behandlingKlientMock.attesterVedtak(any(), any()) } returns true
+        coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+            )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
+            BeregningOgAvkorting(
+                beregning = mockBeregning(virkningstidspunkt, behandlingId),
+                avkorting = null,
+            )
+
+        coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } returns false
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId),
+            )
+            service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
+        }
+
+        assertThrows<BehandlingIverksettelseException> {
+            runBlocking {
+                service.iverksattVedtak(behandlingId, attestant)
+            }
+        }
+        val ikkeIverksattVedtak = repository.hentVedtak(behandlingId)!!
+        ikkeIverksattVedtak shouldNotBe null
+        ikkeIverksattVedtak.status shouldNotBe VedtakStatus.IVERKSATT
+        ikkeIverksattVedtak.status shouldBe VedtakStatus.ATTESTERT
+    }
+
+    @Test
     fun `skal ikke sette vedtak til iverksatt naar vedtak ikke er attestert`() {
         val behandlingId = randomUUID()
 
@@ -1550,6 +1601,32 @@ internal class VedtakBehandlingServiceTest(
     }
 
     @Test
+    fun `skal rulle tilbake hvis sette vedtak til til_samordning feiler`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns false
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    status = VedtakStatus.ATTESTERT,
+                    soeker = Folkeregisteridentifikator.of("08815997000"),
+                ),
+            )
+
+            assertThrows<VedtakTilSamordningException> {
+                service.tilSamordningVedtak(behandlingId, attestant)
+            }
+        }
+
+        val ikkeTilSamordningVedtak = repository.hentVedtak(behandlingId)!!
+        ikkeTilSamordningVedtak shouldNotBe null
+        ikkeTilSamordningVedtak.status shouldNotBe VedtakStatus.TIL_SAMORDNING
+        ikkeTilSamordningVedtak.status shouldBe VedtakStatus.ATTESTERT
+    }
+
+    @Test
     fun `skal kalle SAM for aa samordne, ikke oppdatere vedtaksstatus`() {
         mockkStatic(Vedtak::erVedtakMedEtterbetaling)
         every { any<Vedtak>().erVedtakMedEtterbetaling(repository) } returns true
@@ -1616,6 +1693,37 @@ internal class VedtakBehandlingServiceTest(
             coVerify(exactly = 1) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
             coVerify(exactly = 0) { samordningsKlientMock.samordneVedtak(any(), false, attestant) }
         }
+    }
+
+    @Test
+    fun `skal rulle vedtak tilbake ved feil under setting av vedtak til samordnet`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
+        coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns false
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    type = VedtakType.ENDRING,
+                    status = VedtakStatus.ATTESTERT,
+                    revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
+                ),
+            )
+            service.tilSamordningVedtak(behandlingId, attestant)
+
+            assertThrows<VedtakSamordnetException> {
+                service.samordnetVedtak(behandlingId, attestant)
+            }
+        }
+
+        val ikkeSamordnetVedtak = repository.hentVedtak(behandlingId)!!
+        ikkeSamordnetVedtak shouldNotBe null
+        ikkeSamordnetVedtak.status shouldNotBe VedtakStatus.SAMORDNET
+        ikkeSamordnetVedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
     }
 
     @Test

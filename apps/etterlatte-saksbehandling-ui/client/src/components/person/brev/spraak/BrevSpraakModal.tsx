@@ -64,7 +64,12 @@ export const BrevSpraakModal = ({
 
   return (
     <div>
-      <Button variant="secondary" onClick={() => setIsOpen(true)} icon={<DocPencilIcon aria-hidden />} size="small" />
+      <Button
+        variant="secondary"
+        onClick={() => setIsOpen(true)}
+        icon={<DocPencilIcon title="Endre Språk" />}
+        size="small"
+      />
 
       <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Endre tittel">
         <form onSubmit={handleSubmit(lagre)}>

@@ -1,4 +1,5 @@
 import {
+  IBehandlingStatus,
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
   IGyldighetResultat,
@@ -36,6 +37,10 @@ export const arkiverGrunnlagshendelse = async (hendelse: Grunnlagsendringshendel
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {
   return apiClient.get(`/behandling/${id}`)
+}
+
+export const hentBehandlingstatus = async (id: string): Promise<ApiResponse<IBehandlingStatus>> => {
+  return apiClient.get(`/behandling/${id}/status`)
 }
 
 export const opprettBehandling = async (nyBehandlingRequest: NyBehandlingRequest): Promise<ApiResponse<string>> =>
@@ -114,21 +119,18 @@ export const lagreViderefoertOpphoer = async ({
   behandlingId,
   begrunnelse,
   vilkaarType,
-  kravdato,
   opphoerstidspunkt,
 }: {
   skalViderefoere: JaNei | undefined
   behandlingId: string
   begrunnelse: string
   vilkaarType: string | undefined
-  kravdato: string | null | undefined
   opphoerstidspunkt: Date | null
 }): Promise<ApiResponse<ViderefoertOpphoer>> => {
   return apiClient.post(`/behandling/${behandlingId}/viderefoert-opphoer`, {
     skalViderefoere: skalViderefoere,
     vilkaarType: vilkaarType,
     begrunnelse: begrunnelse,
-    kravdato: kravdato,
     dato: opphoerstidspunkt,
   })
 }

@@ -4,7 +4,7 @@ import { setAktivitetspliktOppgave } from '~store/reducers/Aktivitetsplikt12mnd'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillBrevOgOppgaveAktivitetsplikt } from '~shared/api/aktivitetsplikt'
 import { useDispatch } from 'react-redux'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { isPending, isSuccess, mapFailure, mapSuccess } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 

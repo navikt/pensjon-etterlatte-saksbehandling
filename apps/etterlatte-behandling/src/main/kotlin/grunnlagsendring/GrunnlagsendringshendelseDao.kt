@@ -209,6 +209,7 @@ class GrunnlagsendringshendelseDao(
                     FROM grunnlagsendringshendelse
                     WHERE sak_id = ?
                     AND status = ANY(?)
+                    ORDER BY opprettet DESC
                     """.trimIndent(),
                 ).use {
                     it.setSakId(1, sakId)

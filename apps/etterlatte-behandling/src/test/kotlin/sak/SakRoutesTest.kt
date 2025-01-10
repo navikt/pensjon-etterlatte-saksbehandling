@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -101,6 +102,7 @@ internal class SakRoutesTest {
                     type = OppgaveType.FOERSTEGANGSBEHANDLING,
                     saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
                     referanse = "hmm",
+                    gruppeId = null,
                     merknad = null,
                     opprettet = Tidspunkt.now(),
                     sakType = SakType.BARNEPENSJON,
@@ -116,6 +118,7 @@ internal class SakRoutesTest {
                     type = OppgaveType.KLAGE,
                     saksbehandler = null,
                     referanse = "hmm",
+                    gruppeId = null,
                     merknad = null,
                     opprettet = Tidspunkt.now(),
                     sakType = SakType.BARNEPENSJON,
@@ -131,6 +134,7 @@ internal class SakRoutesTest {
                     type = OppgaveType.KLAGE,
                     saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
                     referanse = "hmm",
+                    gruppeId = null,
                     merknad = null,
                     opprettet = Tidspunkt.now(),
                     sakType = SakType.BARNEPENSJON,
@@ -239,9 +243,10 @@ internal class SakRoutesTest {
 
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/$sakId/oppdater-ident?hendelseId=$hendelseId") {
+                client.post("/api/sak/$sakId/oppdater-ident") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
+                    setBody(OppdaterIdentRequest(hendelseId))
                 }
             assertEquals(200, response.status.value)
         }
@@ -257,6 +262,49 @@ internal class SakRoutesTest {
                 any(),
             )
             grunnlagsendringshendelseService.arkiverHendelseMedKommentar(hendelseId, any(), any())
+        }
+    }
+
+    @Test
+    fun `Oppdater ident på sak - uten hendelse`() {
+        val nyIdent = KONTANT_FOT
+        val sakId = SakId(Random.nextLong())
+        val sak =
+            Sak(
+                "ident",
+                SakType.OMSTILLINGSSTOENAD,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
+
+        every { sakService.finnSak(any()) } returns sak
+        every { sakService.oppdaterIdentForSak(any(), any()) } returns sak.copy(ident = nyIdent.value)
+        val behandlingOgSak = BehandlingOgSak(UUID.randomUUID(), sakId)
+        every { behandlingService.hentAapneBehandlingerForSak(sakId) } returns listOf(behandlingOgSak)
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/$sakId/oppdater-ident") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(OppdaterIdentRequest(null, utenHendelse = true))
+                }
+            assertEquals(200, response.status.value)
+        }
+
+        verify(exactly = 1) {
+            sakService.finnSak(sakId)
+            sakService.oppdaterIdentForSak(sak, any())
+            behandlingService.hentAapneBehandlingerForSak(sakId)
+            behandlingService.avbrytBehandling(
+                behandlingOgSak.behandlingId,
+                any(),
+                AarsakTilAvbrytelse.ENDRET_FOLKEREGISTERIDENT,
+                any(),
+            )
+        }
+        verify {
+            grunnlagsendringshendelseService wasNot Called
         }
     }
 

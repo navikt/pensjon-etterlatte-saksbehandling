@@ -65,7 +65,7 @@ export const TilleggsinformasjonOppgaveModal = ({
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} size="small" icon={<EyeIcon />}>
+      <Button onClick={() => setIsOpen(true)} size="small" icon={<EyeIcon aria-hidden />}>
         Se oppgave
       </Button>
 

@@ -6,13 +6,11 @@ import { addKlage, resetKlage } from '~store/reducers/KlageReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import Spinner from '~shared/Spinner'
-import { GridContainer, MainContent } from '~shared/styled'
 import { hentKlage } from '~shared/api/klage'
 import { KlageStegmeny } from '~components/klage/stegmeny/KlageStegmeny'
 import { KlageOppsummering } from '~components/klage/oppsummering/KlageOppsummering'
 import { KlageSidemeny } from '~components/klage/sidemeny/KlageSidemeny'
 import { KlageBrev } from '~components/klage/brev/KlageBrev'
-
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { KlageFormkrav } from '~components/klage/formkrav/KlageFormkrav'
@@ -20,6 +18,7 @@ import { KlageVurdering } from '~components/klage/vurdering/KlageVurdering'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { Box, HStack } from '@navikt/ds-react'
 
 export function Klagebehandling() {
   useSidetittel('Klage')
@@ -66,8 +65,8 @@ export function Klagebehandling() {
       <Spinner visible={isPending(fetchKlageStatus)} label="Henter klagebehandling" />
 
       {klage !== null && viHarLastetRiktigKlage && (
-        <GridContainer>
-          <MainContent>
+        <HStack height="100%" minHeight="100vh" wrap={false}>
+          <Box width="100%">
             <Routes>
               <Route path="formkrav" element={<KlageFormkrav kanRedigere={kanRedigere} />} />
               <Route path="vurdering" element={<KlageVurdering kanRedigere={kanRedigere} />} />
@@ -75,9 +74,9 @@ export function Klagebehandling() {
               <Route path="oppsummering" element={<KlageOppsummering kanRedigere={kanRedigere} />} />
               <Route path="*" element={<Navigate to="formkrav" replace />} />
             </Routes>
-          </MainContent>
+          </Box>
           <KlageSidemeny />
-        </GridContainer>
+        </HStack>
       )}
 
       {isFailureHandler({

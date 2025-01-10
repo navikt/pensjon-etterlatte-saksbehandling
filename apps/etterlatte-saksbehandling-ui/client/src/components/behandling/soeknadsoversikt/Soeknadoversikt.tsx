@@ -111,9 +111,11 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               <OversiktKommerBarnetTilgode
                 kommerBarnetTilgode={behandling.kommerBarnetTilgode}
                 redigerbar={redigerbar}
-                soeker={personopplysninger?.soeker?.opplysning}
+                soeker={personopplysninger?.soeker}
                 gjenlevendeForelder={personopplysninger?.gjenlevende?.find((po) => po)}
                 behandlingId={behandling.id}
+                innsender={personopplysninger?.innsender?.opplysning}
+                avdoed={personopplysninger?.avdoede.map((avdoed) => avdoed.opplysning.foedselsnummer) || []}
               />
             )}
             <Virkningstidspunkt

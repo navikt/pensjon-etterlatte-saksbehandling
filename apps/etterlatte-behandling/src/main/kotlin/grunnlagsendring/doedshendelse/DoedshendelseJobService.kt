@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -36,6 +37,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
@@ -100,11 +102,19 @@ class DoedshendelseJobService(
                 val sak = doedshendelse.sakId?.toString() ?: "mangler"
                 when (e) {
                     is SocketException, is SocketTimeoutException -> {
-                        logger.error("Kontrollerpunkter feilet på nettverksproblemer, Burde løses på neste retry sak: $sak.", e)
+                        logger.error(
+                            "Kontrollerpunkter feilet på nettverksproblemer, Burde løses på neste retry sak: $sak.",
+                            e,
+                        )
                         throw e
                     }
+
                     else -> {
-                        logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak. Ukjent feil: msg: ${e.message}", e)
+                        logger.error(
+                            "Kunne ikke identifisere kontrollpunkter dødshendelse id=${doedshendelse.id} for sak $sak. " +
+                                "Ukjent feil: msg: ${e.message}",
+                            e,
+                        )
                         throw e
                     }
                 }
@@ -114,9 +124,9 @@ class DoedshendelseJobService(
             true -> {
                 logger.info(
                     "Avbryter behandling av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()} med avdød " +
-                        "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
-                        kontrollpunkter.joinToString(","),
+                        "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkter, se sikker logg for mer info",
                 )
+                sikkerlogger().info("kontrollpunkter: " + kontrollpunkter.joinToString(","))
 
                 doedshendelseDao.oppdaterDoedshendelse(
                     doedshendelse.tilAvbrutt(
@@ -179,7 +189,13 @@ class DoedshendelseJobService(
                 innsender = Vedtaksloesning.GJENNY.name,
             )
 
-        runBlocking { grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri) }
+        runBlocking {
+            grunnlagService.leggInnNyttGrunnlagSak(
+                sak = opprettetSak,
+                galleri,
+                HardkodaSystembruker.doedshendelse,
+            )
+        }
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
 
         val spraak = hentSpraak(doedshendelse)
@@ -188,6 +204,7 @@ class DoedshendelseJobService(
             grunnlagService.leggTilNyeOpplysningerBareSak(
                 sakId = opprettetSak.id,
                 opplysninger = NyeSaksopplysninger(opprettetSak.id, listOf(spraakOpplysning)),
+                HardkodaSystembruker.doedshendelse,
             )
         }
         return opprettetSak
@@ -239,6 +256,7 @@ class DoedshendelseJobService(
                     val under18aar = sjekkUnder18aar(doedshendelse)
                     deodshendelserProducer.sendBrevRequestBP(sak, borIUtlandet, !under18aar)
                 }
+
                 SakType.OMSTILLINGSSTOENAD -> deodshendelserProducer.sendBrevRequestOMS(sak, borIUtlandet)
             }
             return true
@@ -266,6 +284,7 @@ class DoedshendelseJobService(
                         saktype = SakType.BARNEPENSJON,
                     )
                 }
+
                 SakType.OMSTILLINGSSTOENAD -> {
                     pdlTjenesterKlient.hentPdlModellForSaktype(
                         foedselsnummer = doedshendelse.beroertFnr,

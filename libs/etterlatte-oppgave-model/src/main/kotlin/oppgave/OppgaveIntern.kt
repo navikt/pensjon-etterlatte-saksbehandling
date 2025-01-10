@@ -28,6 +28,7 @@ data class OppgaveIntern(
     val saksbehandler: OppgaveSaksbehandler? = null,
     val forrigeSaksbehandlerIdent: String? = null,
     val referanse: String,
+    val gruppeId: String?,
     val merknad: String? = null,
     val opprettet: Tidspunkt,
     val sakType: SakType,
@@ -120,7 +121,7 @@ enum class OppgaveType {
     AKTIVITETSPLIKT_REVURDERING,
     AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK,
     GENERELL_OPPGAVE,
-    MOTTATT_INNTEKTSJUSTERING,
+    INNTEKTSOPPLYSNING,
     AARLIG_INNTEKTSJUSTERING,
     MANUELL_UTSENDING_BREV,
     ;
@@ -182,6 +183,7 @@ data class NyOppgaveDto(
     val referanse: String? = null,
     val frist: Tidspunkt? = null,
     val saksbehandler: String? = null,
+    val gruppeId: String? = null,
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(
@@ -192,6 +194,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
     merknad: String?,
     frist: Tidspunkt? = null,
     saksbehandler: String? = null,
+    gruppeId: String? = null,
 ): OppgaveIntern {
     val opprettet = Tidspunkt.now()
 
@@ -209,6 +212,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         kilde = kilde,
         saksbehandler = saksbehandler?.let { OppgaveSaksbehandler(ident = it) },
         referanse = referanse,
+        gruppeId = gruppeId,
         merknad = merknad,
         opprettet = opprettet,
         sakType = sak.sakType,

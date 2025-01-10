@@ -444,6 +444,7 @@ internal class ApplicationContext(
         OmregningService(
             behandlingService = behandlingService,
             omregningDao = omregningDao,
+            oppgaveService = oppgaveService,
         )
 
     val tilgangService = TilgangServiceImpl(sakTilgangDao)
@@ -480,6 +481,7 @@ internal class ApplicationContext(
             vedtakKlient = vedtakKlient,
             rapid = rapid,
             featureToggleService = featureToggleService,
+            beregningKlient = beregningsKlient,
         )
 
     val aarligInntektsjusteringJobbService =
@@ -534,6 +536,9 @@ internal class ApplicationContext(
             krrKlient = krrKlient,
         )
 
+    val saksbehandlerService: SaksbehandlerService =
+        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
+
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(
             behandlingDao,
@@ -542,6 +547,7 @@ internal class ApplicationContext(
             oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,
+            saksbehandlerService,
         )
 
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)
@@ -562,8 +568,7 @@ internal class ApplicationContext(
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
-    val saksbehandlerService: SaksbehandlerService =
-        SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
+
     val gosysOppgaveService =
         GosysOppgaveServiceImpl(
             gosysOppgaveKlient,

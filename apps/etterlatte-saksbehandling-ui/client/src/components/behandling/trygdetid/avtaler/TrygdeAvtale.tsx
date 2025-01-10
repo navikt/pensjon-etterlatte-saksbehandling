@@ -98,7 +98,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                     variant="secondary"
                     onClick={() => setRedigering(true)}
                     type="button"
-                    icon={<PencilIcon />}
+                    icon={<PencilIcon aria-hidden />}
                   >
                     Rediger avtale
                   </Button>

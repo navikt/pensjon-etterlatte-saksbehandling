@@ -22,7 +22,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
@@ -93,14 +93,14 @@ class AarligInntektsjusteringJobbServiceTest {
 
         coEvery { vedtakKlient.sakHarLopendeVedtakPaaDato(any(), any(), any()) } returns loependeYtdelseDto()
         coEvery {
-            beregningKlient.aarligInntektsjusteringSjekk(
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
                 any(),
                 any(),
                 any(),
                 any(),
             )
         } returns
-            AarligInntektsjusteringAvkortingSjekkResponse(
+            InntektsjusteringAvkortingInfoResponse(
                 SakId(123L),
                 aar = 2025,
                 harInntektForAar = false,
@@ -138,9 +138,6 @@ class AarligInntektsjusteringJobbServiceTest {
         coEvery { grunnlagService.hentPersongalleri(any()) } returns persongalleri
         coEvery {
             revurderingService.opprettRevurdering(
-                any(),
-                any(),
-                any(),
                 any(),
                 any(),
                 any(),
@@ -209,15 +206,11 @@ class AarligInntektsjusteringJobbServiceTest {
                 kilde = any(),
                 revurderingAarsak = any(),
                 virkningstidspunkt = any(),
-                utlandstilknytning = any(),
-                boddEllerArbeidetUtlandet = any(),
                 begrunnelse = any(),
                 saksbehandlerIdent = any(),
                 relatertBehandlingId = any(),
                 frist = any(),
                 paaGrunnAvOppgave = any(),
-                opphoerFraOgMed = any(),
-                tidligereFamiliepleier = any(),
             )
 
             oppgaveService.ferdigstillOppgave(oppgaveId, any())
@@ -304,14 +297,14 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         coEvery {
-            beregningKlient.aarligInntektsjusteringSjekk(
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
                 any(),
                 any(),
                 any(),
                 any(),
             )
         } returns
-            AarligInntektsjusteringAvkortingSjekkResponse(
+            InntektsjusteringAvkortingInfoResponse(
                 SakId(123L),
                 aar = 2025,
                 harInntektForAar = true,
@@ -419,14 +412,14 @@ class AarligInntektsjusteringJobbServiceTest {
             )
 
         coEvery {
-            beregningKlient.aarligInntektsjusteringSjekk(
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
                 any(),
                 any(),
                 any(),
                 any(),
             )
         } returns
-            AarligInntektsjusteringAvkortingSjekkResponse(
+            InntektsjusteringAvkortingInfoResponse(
                 SakId(123L),
                 aar = 2025,
                 harInntektForAar = false,
@@ -656,11 +649,6 @@ class AarligInntektsjusteringJobbServiceTest {
                 },
             )
         }
-    }
-
-    @Test
-    fun `et eller annet feilhaandtering`() {
-        // TODO
     }
 
     companion object {

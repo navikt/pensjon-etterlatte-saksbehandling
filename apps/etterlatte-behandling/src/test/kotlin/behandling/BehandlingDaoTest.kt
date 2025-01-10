@@ -330,7 +330,7 @@ internal class BehandlingDaoTest(
         assertEquals(false, behandling.first().status == BehandlingStatus.AVBRUTT)
 
         val avbruttbehandling = (behandling.first() as Foerstegangsbehandling).copy(status = BehandlingStatus.AVBRUTT)
-        behandlingRepo.lagreStatus(avbruttbehandling)
+        behandlingRepo.avbrytBehandling(avbruttbehandling.id, null, null)
         behandling = behandlingRepo.hentBehandlingerForSak(sak1)
         assertEquals(1, behandling.size)
         assertEquals(true, behandling.first().status == BehandlingStatus.AVBRUTT)
@@ -608,7 +608,7 @@ internal class BehandlingDaoTest(
                 behandlingRepo.lagreNyttVirkningstidspunkt(it.id, it.virkningstidspunkt!!)
                 behandlingRepo.lagreGyldighetsproeving(it.id, it.gyldighetsproeving())
                 kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(it.kommerBarnetTilgode!!)
-                behandlingRepo.lagreStatus(it.id, it.status, it.sistEndret)
+                behandlingRepo.lagreStatus(it)
             }
 
         with(behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling) {
@@ -638,5 +638,26 @@ internal class BehandlingDaoTest(
         val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
 
         behandling?.opphoerFraOgMed shouldBe YearMonth.of(2024, 6)
+    }
+
+    @Test
+    fun `endreProsesstype skal oppdatere behandling med ny prosesstype`() {
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
+                sakId = sak,
+                status = BehandlingStatus.OPPRETTET,
+                prosesstype = Prosesstype.AUTOMATISK,
+            )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        behandlingRepo.endreProsesstype(opprettBehandling.id, Prosesstype.MANUELL)
+
+        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
+
+        behandling?.prosesstype shouldBe Prosesstype.MANUELL
     }
 }

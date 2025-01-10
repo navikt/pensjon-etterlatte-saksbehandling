@@ -29,7 +29,7 @@ const HentBosattutland = ({ behandling, redigerbar }: { behandling: IDetaljertBe
   return (
     <>
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }} spacing>
-        Mottatt krav fra utland{' '}
+        Mottatt svar fra utland{' '}
         <EessiPensjonLenke sakId={behandling.sakId} behandlingId={behandling.id} sakType={behandling.sakType} />
       </Heading>
 

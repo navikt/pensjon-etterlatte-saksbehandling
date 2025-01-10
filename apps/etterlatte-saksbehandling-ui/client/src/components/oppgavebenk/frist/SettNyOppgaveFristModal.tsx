@@ -23,7 +23,7 @@ export const SettNyOppgaveFristModal = ({ oppgave, oppdaterFrist }: Props) => {
 
   const settNyFristForOppgave = () => {
     if (nyFrist) {
-      redigerFristFunc({ oppgaveId: oppgave.id, redigerFristRequest: { frist: nyFrist, versjon: null } }, () => {
+      redigerFristFunc({ oppgaveId: oppgave.id, frist: nyFrist }, () => {
         oppdaterFrist(oppgave.id, nyFrist.toISOString())
         setFristFeilmelding('')
         setAapen(false)
@@ -45,7 +45,7 @@ export const SettNyOppgaveFristModal = ({ oppgave, oppdaterFrist }: Props) => {
         <StatusPaaOppgaveFrist oppgaveFrist={oppgave.frist} oppgaveStatus={oppgave.status} />
       </Button>
 
-      <Modal open={aapen} onClose={() => setAapen(false)} aria-labelledby="modal for å sette ny oppgave frist">
+      <Modal open={aapen} onClose={() => setAapen(false)} aria-label="modal for å sette ny oppgave frist">
         <Modal.Body>
           <Modal.Header>
             <Heading size="medium" spacing>

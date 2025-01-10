@@ -4,7 +4,6 @@ import {
   generellbehandlingErRedigerbar,
   KravpakkeUtland,
 } from '~shared/types/Generellbehandling'
-import { GridContainer, MainContent } from '~shared/styled'
 import {
   Alert,
   BodyShort,
@@ -160,8 +159,8 @@ const KravpakkeUtlandBehandling = (props: {
   }
 
   return (
-    <GridContainer>
-      <MainContent style={{ whiteSpace: 'pre-wrap' }}>
+    <HStack height="100%" minHeight="100vh" wrap={false}>
+      <Box width="100%" style={{ whiteSpace: 'pre-wrap' }}>
         <div style={{ maxWidth: '55rem', margin: 'auto' }}>
           <Box paddingInline="16" paddingBlock="16 4">
             <Heading spacing size="large" level="1">
@@ -295,7 +294,7 @@ const KravpakkeUtlandBehandling = (props: {
 
               <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
                 Gå til RINA for å opprette kravpakke til utlandet
-                <ExternalLinkIcon fill={ABlue500} />
+                <ExternalLinkIcon fill={ABlue500} aria-hidden />
               </LenkeMargin>
               <TextField
                 label="Saksnummer RINA"
@@ -413,7 +412,7 @@ const KravpakkeUtlandBehandling = (props: {
                         <Button
                           disabled={!redigerbar}
                           variant="tertiary"
-                          icon={<TrashIcon />}
+                          icon={<TrashIcon aria-hidden />}
                           onClick={() => fjernDokument()}
                           style={{ marginLeft: '5rem' }}
                         >
@@ -436,7 +435,7 @@ const KravpakkeUtlandBehandling = (props: {
               <div>
                 <Button
                   disabled={!redigerbar}
-                  icon={<PencilWritingIcon />}
+                  icon={<PencilWritingIcon aria-hidden />}
                   onClick={opprettNyttBrevINyFane}
                   loading={isPending(nyttBrevStatus)}
                   iconPosition="right"
@@ -489,9 +488,9 @@ const KravpakkeUtlandBehandling = (props: {
             </HStack>
           </Box>
         </div>
-      </MainContent>
+      </Box>
       <GenerellbehandlingSidemeny utlandsBehandling={generellBehandlingMedLocalState} />
-    </GridContainer>
+    </HStack>
   )
 }
 export default KravpakkeUtlandBehandling

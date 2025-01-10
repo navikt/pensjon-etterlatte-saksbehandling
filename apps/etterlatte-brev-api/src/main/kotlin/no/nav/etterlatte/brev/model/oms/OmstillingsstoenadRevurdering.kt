@@ -17,14 +17,17 @@ import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class OmstillingsstoenadRevurdering(
@@ -37,6 +40,8 @@ data class OmstillingsstoenadRevurdering(
     val omsRettUtenTidsbegrensning: Boolean,
     val feilutbetaling: FeilutbetalingType,
     val bosattUtland: Boolean,
+    val erInnvilgelsesaar: Boolean,
+    val tidligereFamiliepleier: Boolean,
 ) : BrevDataFerdigstilling {
     init {
         if (erOmgjoering && datoVedtakOmgjoering == null) {
@@ -54,7 +59,6 @@ data class OmstillingsstoenadRevurdering(
             trygdetid: TrygdetidDto,
             brevutfall: BrevutfallDto,
             revurderingaarsak: Revurderingaarsak?,
-            navnAvdoed: String,
             vilkaarsVurdering: VilkaarsvurderingDto,
             datoVedtakOmgjoering: LocalDate?,
             utlandstilknytning: UtlandstilknytningType?,
@@ -63,7 +67,10 @@ data class OmstillingsstoenadRevurdering(
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
 
-            val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
+            val feilutbetaling =
+                krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                    "Feilutbetaling mangler i brevutfall"
+                }
             val beregningsperioderOpphoer = utledBeregningsperioderOpphoer(behandling, beregningsperioder)
             val sisteBeregningsperiode = beregningsperioderOpphoer.sisteBeregningsperiode
 
@@ -90,7 +97,7 @@ data class OmstillingsstoenadRevurdering(
                 datoVedtakOmgjoering = datoVedtakOmgjoering,
                 beregning =
                     OmstillingsstoenadBeregning(
-                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
+                        innhold = innholdMedVedlegg(innholdMedVedlegg, behandling),
                         virkningsdato = avkortingsinfo.virkningsdato,
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
@@ -99,7 +106,7 @@ data class OmstillingsstoenadRevurdering(
                             trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
-                                navnAvdoed = navnAvdoed,
+                                navnAvdoed = null,
                             ),
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =
@@ -108,7 +115,19 @@ data class OmstillingsstoenadRevurdering(
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 feilutbetaling = feilutbetaling,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                erInnvilgelsesaar = avkortingsinfo.erInnvilgelsesaar,
+                tidligereFamiliepleier = behandling.tidligereFamiliepleier?.svar == true,
             )
+        }
+
+        private fun innholdMedVedlegg(
+            innholdMedVedlegg: InnholdMedVedlegg,
+            behandling: DetaljertBehandling,
+        ): List<Slate.Element> {
+            if (behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING && behandling.prosesstype == Prosesstype.AUTOMATISK) {
+                return emptyList()
+            }
+            return innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING)
         }
     }
 }
@@ -121,6 +140,9 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val feilutbetaling: FeilutbetalingType,
     val harFlereUtbetalingsperioder: Boolean,
     val harUtbetaling: Boolean,
+    val inntekt: Kroner,
+    val inntektsAar: Int,
+    val mottattInntektendringAutomatisk: LocalDate?,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -158,9 +180,23 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
                             beregningsperioder,
                         )
                     },
-                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
+                feilutbetaling =
+                    krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
+                        "Feilutbetaling mangler i brevutfall"
+                    },
                 harFlereUtbetalingsperioder = beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
+                inntekt = sisteBeregningsperiode.inntekt,
+                inntektsAar = sisteBeregningsperiode.datoFOM.year,
+                mottattInntektendringAutomatisk =
+                    if (behandling.prosesstype == Prosesstype.AUTOMATISK &&
+                        behandling.revurderingsaarsak == Revurderingaarsak.INNTEKTSENDRING
+                    ) {
+                        behandling.mottattDato?.toLocalDate()
+                            ?: throw InternfeilException("Automatisk inntektsendring må ha mottatt dato")
+                    } else {
+                        null
+                    },
             )
         }
     }

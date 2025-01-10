@@ -7,7 +7,7 @@ import {
   tekstAktivitetspliktVurderingType,
   teksterAktivitetspliktSkjoennsmessigVurdering,
 } from '~shared/types/Aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { addMonths, startOfMonth } from 'date-fns'
 import { maanederForVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradForm'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -60,9 +60,12 @@ export function VurderingAktivitetsgradOgUnntak(props: {
   const { handleSubmit, register, watch, control } = methods
 
   const svarAktivitetsgrad = watch('vurderingAvAktivitet.aktivitetsgrad')
-  const harKanskjeUnntak =
-    svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 ||
-    svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50
+  // 12 mnd krever unntak for alt under 100% mens 6 mnd krever unntak for kun under 50 % aktivitetsgrad
+  const skalViseUnntak =
+    typeVurdering === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
+      ? svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 ||
+        svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50
+      : svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50
 
   function lagreOgOppdater(formdata: NyVurderingAktivitetsgradOgUnntak) {
     lagreVurdering(
@@ -126,7 +129,7 @@ export function VurderingAktivitetsgradOgUnntak(props: {
               description="Hvis det er oppgitt sluttdato"
             />
           </HStack>
-          {harKanskjeUnntak && (
+          {skalViseUnntak && (
             <ControlledRadioGruppe
               name="harUnntak"
               control={control}

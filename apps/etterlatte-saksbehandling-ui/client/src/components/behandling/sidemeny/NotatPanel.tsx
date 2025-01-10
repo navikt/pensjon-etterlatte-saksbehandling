@@ -70,7 +70,7 @@ export const NotatPanel = ({ sakId, behandlingId, fnr }: { sakId: number; behand
             size="small"
             target="_blank"
             rel="noreferrer noopener"
-            icon={<ExternalLinkIcon />}
+            icon={<ExternalLinkIcon aria-hidden />}
           >
             Gå til notatoversikten
           </PersonButtonLink>

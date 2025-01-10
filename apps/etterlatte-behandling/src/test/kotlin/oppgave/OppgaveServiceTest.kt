@@ -1135,28 +1135,6 @@ internal class OppgaveServiceTest(
     }
 
     @Test
-    fun `skal lukke nye ikke ferdige eller feilregistrerte oppgaver hvis ny søknad kommer inn`() {
-        val opprettetSak = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val behandlingsref = UUID.randomUUID().toString()
-        val oppgaveSomSkalBliAvbrutt =
-            oppgaveService.opprettOppgave(
-                behandlingsref,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
-            )
-        oppgaveService.tildelSaksbehandler(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01")
-
-        oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(behandlingsref, opprettetSak.id)
-
-        val alleOppgaver = oppgaveDao.hentOppgaverForReferanse(behandlingsref)
-        assertEquals(2, alleOppgaver.size)
-        val avbruttOppgave = oppgaveDao.hentOppgave(oppgaveSomSkalBliAvbrutt.id)!!
-        assertEquals(avbruttOppgave.status, Status.AVBRUTT)
-    }
-
-    @Test
     fun `Skal filtrere bort oppgaver med annen enhet`() {
         nyKontekstMedBrukerOgDatabaseContext(saksbehandler, DatabaseContextTest(dataSource))
 

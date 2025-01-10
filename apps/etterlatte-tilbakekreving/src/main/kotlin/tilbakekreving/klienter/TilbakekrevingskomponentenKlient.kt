@@ -13,18 +13,20 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.SakId
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.toLocalDate
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljRequest
 import no.nav.okonomi.tilbakekrevingservice.KravgrunnlagHentDetaljResponse
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
@@ -77,7 +79,7 @@ class TilbakekrevingskomponentenKlient(
 
         hendelseRepository.lagreTilbakekrevingHendelse(
             sakId = vedtak.sakId,
-            payload = response.toJson(),
+            payload = tilbakekrevingObjectMapper.writeValueAsString(response),
             type = TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
         )
 
@@ -114,7 +116,7 @@ class TilbakekrevingskomponentenKlient(
 
         hendelseRepository.lagreTilbakekrevingHendelse(
             sakId = sakId,
-            payload = response.toJson(),
+            payload = tilbakekrevingObjectMapper.writeValueAsString(response),
             type = TilbakekrevingHendelseType.KRAVGRUNNLAG_FORESPOERSEL_KVITTERING,
         )
 
@@ -154,13 +156,24 @@ class TilbakekrevingskomponentenKlient(
 
                                 // Saksbehandler beregner renter, derfor settes denne til NEI
                                 renterBeregnes = RenterBeregnes.NEI.kode
-                                belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.medToDesimaler()
+                                belopRenter =
+                                    tilbakekrevingPeriode.tilbakekrevingsbeloep
+                                        .filter { it.klasseType == KlasseType.YTEL.name }
+                                        .sumOf { it.rentetillegg ?: 0 }
+                                        .medToDesimaler()
 
                                 tilbakekrevingsbelop.apply {
-                                    add(tilbakekrevingPeriode.ytelse.toTilbakekreivngsbelopYtelse(vedtak.aarsak))
+                                    // Mapper YTEL (det saksbehandler har svart ut)
+                                    tilbakekrevingPeriode.tilbakekrevingsbeloep
+                                        .filter {
+                                            it.klasseType == KlasseType.YTEL.name
+                                        }.forEach { add(it.toTilbakekreivngsbelopYtelse(vedtak.aarsak)) }
 
-                                    // Feilkonto skal i praksis være tilsvarende det vi mottar
-                                    add(tilbakekrevingPeriode.feilkonto.toTilbakekreivngsbelopFeilkonto())
+                                    // Andre klassetyper, blant annet FEIL
+                                    tilbakekrevingPeriode.tilbakekrevingsbeloep
+                                        .filter {
+                                            it.klasseType != KlasseType.YTEL.name
+                                        }.forEach { add(it.toTilbakekreivngsbelopAndreKlassetyper()) }
                                 }
                             }
                         },
@@ -168,16 +181,16 @@ class TilbakekrevingskomponentenKlient(
                 }
         }
 
-    private fun TilbakekrevingsbelopYtelseVedtak.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
+    private fun Tilbakekrevingsbelop.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
         TilbakekrevingsbelopDto().apply {
             kodeKlasse = klasseKode
             belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
             belopNy = nyBruttoUtbetaling.medToDesimaler()
-            belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
-            belopSkatt = skatt.medToDesimaler()
-            kodeResultat = resultat.name
+            belopTilbakekreves = krevIkkeNull(bruttoTilbakekreving?.medToDesimaler()) { "Tilbakekrevingsbeløp mangler" }
+            belopSkatt = krevIkkeNull(skatt?.medToDesimaler()) { "Skattebeløp mangler" }
+            kodeResultat = krevIkkeNull(resultat?.name) { "Resultatkode mangler" }
             kodeAarsak = mapFraTilbakekrevingAarsak(aarsak)
-            kodeSkyld = skyld.name
+            kodeSkyld = krevIkkeNull(skyld?.name) { "Skyldkode mangler" }
         }
 
     private fun mapFraTilbakekrevingAarsak(aarsak: TilbakekrevingAarsak): String =
@@ -186,13 +199,13 @@ class TilbakekrevingskomponentenKlient(
             else -> TilbakekrevingAarsak.ANNET.name
         }
 
-    private fun TilbakekrevingsbelopFeilkontoVedtak.toTilbakekreivngsbelopFeilkonto() =
+    private fun Tilbakekrevingsbelop.toTilbakekreivngsbelopAndreKlassetyper() =
         TilbakekrevingsbelopDto().apply {
             // Kun obligatoriske felter sendes her
             kodeKlasse = klasseKode
             belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
             belopNy = nyBruttoUtbetaling.medToDesimaler()
-            belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
+            belopTilbakekreves = krevIkkeNull(bruttoTilbakekreving?.medToDesimaler()) { "Tilbakekrevingsbeløp mangler" }
         }
 
     private fun toKravgrunnlagHentDetaljRequest(kravgrunnlagId: Long): KravgrunnlagHentDetaljRequest =
@@ -277,8 +290,6 @@ private class CustomXMLGregorianCalendarModule : SimpleModule() {
                     if (value != null) {
                         gen?.writeString(
                             value
-                                .toGregorianCalendar()
-                                .toZonedDateTime()
                                 .toLocalDate()
                                 .toString(),
                         )

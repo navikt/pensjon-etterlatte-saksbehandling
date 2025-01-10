@@ -105,7 +105,7 @@ export const KnyttTilAnnenBruker = ({
           onClick={() => hentAnnenSak(Number(sakid))}
           loading={isPending(annenSakStatus)}
           disabled={!sakid}
-          icon={<MagnifyingGlassIcon />}
+          icon={<MagnifyingGlassIcon aria-hidden />}
         >
           Søk
         </Button>

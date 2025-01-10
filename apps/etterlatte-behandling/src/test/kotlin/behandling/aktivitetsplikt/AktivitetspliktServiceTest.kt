@@ -243,6 +243,7 @@ class AktivitetspliktServiceTest {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.AKTIVITETSPLIKT,
                     referanse = UUID.randomUUID().toString(),
+                    gruppeId = null,
                     opprettet = Tidspunkt.now(),
                     sakType = SakType.OMSTILLINGSSTOENAD,
                     frist = null,
@@ -306,6 +307,7 @@ class AktivitetspliktServiceTest {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.AKTIVITETSPLIKT,
                     referanse = UUID.randomUUID().toString(),
+                    gruppeId = null,
                     opprettet = Tidspunkt.now(),
                     sakType = SakType.OMSTILLINGSSTOENAD,
                     frist = null,
@@ -676,7 +678,7 @@ class AktivitetspliktServiceTest {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleriOpplysning.opplysning,
-                    forrigeBehandling = forrigeBehandling.id,
+                    forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
@@ -685,12 +687,9 @@ class AktivitetspliktServiceTest {
                             .atDay(1)
                             .plusMonths(1)
                             .tilVirkningstidspunkt("Aktivitetsplikt"),
-                    utlandstilknytning = null,
-                    boddEllerArbeidetUtlandet = null,
                     begrunnelse = request6mnd.jobbType.beskrivelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
-                    opphoerFraOgMed = null,
                     mottattDato = null,
                 )
             } returns
@@ -732,7 +731,7 @@ class AktivitetspliktServiceTest {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleriOpplysning.opplysning,
-                    forrigeBehandling = forrigeBehandling.id,
+                    forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
@@ -741,12 +740,9 @@ class AktivitetspliktServiceTest {
                             .atDay(1)
                             .plusMonths(1)
                             .tilVirkningstidspunkt("Aktivitetsplikt"),
-                    utlandstilknytning = null,
-                    boddEllerArbeidetUtlandet = null,
                     begrunnelse = request12mnd.jobbType.beskrivelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
-                    opphoerFraOgMed = null,
                     mottattDato = null,
                 )
             } returns
@@ -791,7 +787,7 @@ class AktivitetspliktServiceTest {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleriOpplysning.opplysning,
-                    forrigeBehandling = forrigeBehandling.id,
+                    forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
@@ -800,12 +796,9 @@ class AktivitetspliktServiceTest {
                             .atDay(1)
                             .plusMonths(1)
                             .tilVirkningstidspunkt("Aktivitetsplikt"),
-                    utlandstilknytning = null,
-                    boddEllerArbeidetUtlandet = null,
                     begrunnelse = request12mnd.jobbType.beskrivelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
-                    opphoerFraOgMed = null,
                     mottattDato = null,
                 )
             } returns
@@ -866,7 +859,7 @@ class AktivitetspliktServiceTest {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleriOpplysning.opplysning,
-                    forrigeBehandling = forrigeBehandling.id,
+                    forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
@@ -875,12 +868,9 @@ class AktivitetspliktServiceTest {
                             .atDay(1)
                             .plusMonths(1)
                             .tilVirkningstidspunkt("Aktivitetsplikt"),
-                    utlandstilknytning = null,
-                    boddEllerArbeidetUtlandet = null,
                     begrunnelse = request12mnd.jobbType.beskrivelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
-                    opphoerFraOgMed = null,
                     mottattDato = null,
                 )
             } returns
@@ -941,7 +931,7 @@ class AktivitetspliktServiceTest {
                 revurderingService.opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleriOpplysning.opplysning,
-                    forrigeBehandling = forrigeBehandling.id,
+                    forrigeBehandling = forrigeBehandling,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
@@ -950,12 +940,9 @@ class AktivitetspliktServiceTest {
                             .atDay(1)
                             .plusMonths(1)
                             .tilVirkningstidspunkt("Aktivitetsplikt"),
-                    utlandstilknytning = null,
-                    boddEllerArbeidetUtlandet = null,
                     begrunnelse = request12mnd.jobbType.beskrivelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = frist,
-                    opphoerFraOgMed = null,
                     mottattDato = null,
                 )
             } returns
@@ -1157,6 +1144,7 @@ fun lagNyOppgave(
     sakId = sak.id,
     kilde = oppgaveKilde,
     referanse = "referanse",
+    gruppeId = null,
     merknad = "merknad",
     opprettet = Tidspunkt.now(),
     sakType = sak.sakType,

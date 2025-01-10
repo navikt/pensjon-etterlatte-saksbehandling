@@ -8,16 +8,19 @@ import { ISakMedUtlandstilknytning } from '~shared/types/sak'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { usePerson } from '~shared/statusbar/usePerson'
+import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
 export const OppdaterIdentModal = ({
   sak,
   hendelse,
 }: {
   sak: ISakMedUtlandstilknytning
-  hendelse: Grunnlagsendringshendelse
+  hendelse: Grunnlagsendringshendelse | null
 }) => {
-  const samsvar = hendelse.samsvarMellomKildeOgGrunnlag as Folkeregisteridentifikatorsamsvar
+  const samsvar = hendelse?.samsvarMellomKildeOgGrunnlag as Folkeregisteridentifikatorsamsvar
 
+  const person = usePerson()
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -25,18 +28,26 @@ export const OppdaterIdentModal = ({
   const kanOppdatereIdentPaaSak = useFeaturetoggle(FeatureToggle.pensjon_etterlatte_oppdater_ident_paa_sak)
 
   const oppdaterIdent = () => {
-    apiOppdaterIdentPaaSak({ sakId: sak.id, hendelseId: hendelse.id }, (sak) => {
+    apiOppdaterIdentPaaSak({ sakId: sak.id, hendelseId: hendelse?.id, utenHendelse: hendelse === null }, (sak) => {
       setTimeout(() => navigate('/person', { state: { fnr: sak.ident } }), 3000)
     })
   }
 
   if (!kanOppdatereIdentPaaSak) {
     return null
+  } else if (!!person?.foedselsnummer && person.foedselsnummer === sak.ident) {
+    return (
+      <Alert variant="warning" size="small">
+        Saken ser ut til å være koblet til siste gjeldende fødselsnummer. Hendelsen kan arkiveres.
+      </Alert>
+    )
   }
 
   return (
-    <>
-      <Button onClick={() => setIsOpen(true)}>Oppdater ident</Button>
+    <div>
+      <Button onClick={() => setIsOpen(true)} icon={<ArrowsCirclepathIcon aria-hidden />}>
+        Oppdater ident
+      </Button>
 
       <Modal
         open={isOpen}
@@ -57,15 +68,24 @@ export const OppdaterIdentModal = ({
                   <Tag variant="error">{sak.ident}</Tag>
                 </div>
 
-                <div>
-                  <Heading size="xsmall">Ident i Grunnlag</Heading>
-                  <Tag variant="error">{samsvar.fraGrunnlag}</Tag>
-                </div>
+                {!!samsvar ? (
+                  <>
+                    <div>
+                      <Heading size="xsmall">Ident i Grunnlag</Heading>
+                      <Tag variant="error">{samsvar.fraGrunnlag}</Tag>
+                    </div>
 
-                <div>
-                  <Heading size="xsmall">Ident i PDL</Heading>
-                  <Tag variant="success">{samsvar.fraPdl}</Tag>
-                </div>
+                    <div>
+                      <Heading size="xsmall">Ident i PDL</Heading>
+                      <Tag variant="success">{samsvar.fraPdl}</Tag>
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <Heading size="xsmall">Gjeldende ident i PDL</Heading>
+                    <Tag variant="success">{person?.foedselsnummer}</Tag>
+                  </div>
+                )}
               </HStack>
 
               <Alert variant="warning">
@@ -91,6 +111,6 @@ export const OppdaterIdentModal = ({
           )}
         </Modal.Body>
       </Modal>
-    </>
+    </div>
   )
 }

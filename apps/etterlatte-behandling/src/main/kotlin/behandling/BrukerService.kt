@@ -99,6 +99,7 @@ class BrukerServiceImpl(
                 val geografiskTilknytning = tilknytning.geografiskTilknytning()
                 when (geografiskTilknytning) {
                     null -> {
+                        logger.info("Geografisk tilknytning mangler fra PDL setter utland enhet")
                         ArbeidsFordelingEnhet(
                             Enheter.UTLAND.navn,
                             Enheter.UTLAND.enhetNr,

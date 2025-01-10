@@ -7,13 +7,18 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.request.url
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -36,7 +41,7 @@ class VedtaksvurderingKlient(
                 .get {
                     url("$vedtaksvurderingUrl/$vedtakId")
                     if (callerContext is MaskinportenTpContext) {
-                        header("orgnr", callerContext.organisasjonsnr)
+                        header("orgnr", callerContext.organisasjonsnr).also { logger.info("Henter vedtak med orgnr $it") }
                     }
                 }.body()
         } catch (e: ClientRequestException) {
@@ -57,16 +62,16 @@ class VedtaksvurderingKlient(
         callerContext: CallerContext,
     ): List<VedtakSamordningDto> {
         logger.info("Henter vedtaksliste, fomDato=$fomDato")
-
         return try {
             httpClient
-                .get(vedtaksvurderingUrl) {
+                .post(vedtaksvurderingUrl) {
                     parameter("sakstype", sakType)
                     parameter("fomDato", fomDato)
-                    header("fnr", fnr)
                     if (callerContext is MaskinportenTpContext) {
-                        header("orgnr", callerContext.organisasjonsnr)
+                        header("orgnr", callerContext.organisasjonsnr).also { logger.info("Henter vedtaksliste med orgnr $it") }
                     }
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
                 }.body()
         } catch (e: ClientRequestException) {
             logger.error("Det oppstod feil i kall til vedtaksliste API", e)

@@ -11,6 +11,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -18,16 +19,14 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.SakslisteDTO
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.UUID
 
 interface BehandlingStatusService {
@@ -82,6 +81,7 @@ interface BehandlingStatusService {
     fun settReturnertVedtak(
         behandling: Behandling,
         vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     fun settTilSamordnetVedtak(
@@ -109,6 +109,7 @@ class BehandlingStatusServiceImpl(
     private val oppgaveService: OppgaveService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val generellBehandlingService: GenerellBehandlingService,
+    private val saksbehandlerService: SaksbehandlerService,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
 
@@ -120,7 +121,7 @@ class BehandlingStatusServiceImpl(
         val behandling = hentBehandling(behandlingId).tilOpprettet()
 
         if (!dryRun) {
-            behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+            behandlingDao.lagreStatus(behandling)
             behandlingService.registrerBehandlingHendelse(behandling, brukerTokenInfo.ident())
         }
     }
@@ -133,7 +134,7 @@ class BehandlingStatusServiceImpl(
         val behandling = hentBehandling(behandlingId).tilVilkaarsvurdert()
 
         if (!dryRun) {
-            behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+            behandlingDao.lagreStatus(behandling)
             behandlingService.registrerBehandlingHendelse(behandling, brukerTokenInfo.ident())
         }
     }
@@ -185,18 +186,22 @@ class BehandlingStatusServiceImpl(
 
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.FATTET)
 
-        val merknadBehandling =
+        val merknad =
             when (brukerTokenInfo) {
-                is Saksbehandler -> "Behandlet av ${brukerTokenInfo.ident}"
-                is Systembruker -> "Behandlet av systemet"
+                is Saksbehandler -> genererMerknad(vedtak, "Behandlet av ${brukerTokenInfo.ident}")
+                is Systembruker -> {
+                    if (behandling.revurderingsaarsak() == Revurderingaarsak.INNTEKTSENDRING) {
+                        "Inntektsendring - automatisk behandlet"
+                    } else {
+                        genererMerknad(vedtak, "Behandlet av systemet")
+                    }
+                }
             }
 
         oppgaveService.tilAttestering(
             referanse = vedtak.sakIdOgReferanse.referanse,
             type = OppgaveType.fra(behandling.type),
-            merknad =
-                listOfNotNull(vedtak.vedtakType.tilLesbarString(), merknadBehandling, vedtak.vedtakHendelse.kommentar)
-                    .joinToString(separator = ": "),
+            merknad = merknad,
         )
     }
 
@@ -221,9 +226,13 @@ class BehandlingStatusServiceImpl(
             referanse = vedtak.sakIdOgReferanse.referanse,
             type = OppgaveType.fra(behandling.type),
             saksbehandler = brukerTokenInfo,
-            merknad = "${vedtak.vedtakType.tilLesbarString()}: ${vedtak.vedtakHendelse.kommentar ?: ""}",
+            merknad = "${vedtak.vedtakType.tilLesbarString()}: ${vedtak.vedtakHendelse.kommentar ?: ""}. Attestant: ${hentSaksbehandlerNavn(
+                brukerTokenInfo.ident(),
+            )}",
         )
     }
+
+    private fun hentSaksbehandlerNavn(ident: String): String = saksbehandlerService.hentNavnForIdent(ident) ?: ident
 
     override fun sjekkOmKanReturnereVedtak(behandlingId: UUID) {
         hentBehandling(behandlingId).tilReturnert()
@@ -232,6 +241,7 @@ class BehandlingStatusServiceImpl(
     override fun settReturnertVedtak(
         behandling: Behandling,
         vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         lagreNyBehandlingStatus(behandling.tilReturnert())
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.UNDERKJENT)
@@ -242,8 +252,15 @@ class BehandlingStatusServiceImpl(
             merknad =
                 vedtak.vedtakHendelse.let {
                     listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
-                },
+                } + ". Attestant: ${hentSaksbehandlerNavn(brukerTokenInfo.ident())}",
         )
+        // Automatisk inntektsendring skal gjøres manuelt hvis returnert fra attestering
+        if (
+            behandling.revurderingsaarsak() == Revurderingaarsak.INNTEKTSENDRING &&
+            behandling.prosesstype == Prosesstype.AUTOMATISK
+        ) {
+            behandlingService.endreProsesstype(behandling.id, Prosesstype.MANUELL)
+        }
     }
 
     override fun settTilSamordnetVedtak(
@@ -251,7 +268,7 @@ class BehandlingStatusServiceImpl(
         vedtakHendelse: VedtakHendelse,
     ) {
         val behandling = hentBehandling(behandlingId)
-        lagreNyBehandlingStatus(behandling.tilTilSamordning(), Tidspunkt.now().toLocalDatetimeUTC())
+        lagreNyBehandlingStatus(behandling.tilTilSamordning())
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.TIL_SAMORDNING)
     }
 
@@ -260,7 +277,7 @@ class BehandlingStatusServiceImpl(
         vedtakHendelse: VedtakHendelse,
     ) {
         val behandling = hentBehandling(behandlingId)
-        lagreNyBehandlingStatus(behandling.tilSamordnet(), Tidspunkt.now().toLocalDatetimeUTC())
+        lagreNyBehandlingStatus(behandling.tilSamordnet())
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.SAMORDNET)
     }
 
@@ -269,7 +286,7 @@ class BehandlingStatusServiceImpl(
         vedtakHendelse: VedtakHendelse,
     ) {
         val behandling = hentBehandling(behandlingId)
-        lagreNyBehandlingStatus(behandling.tilIverksatt(), Tidspunkt.now().toLocalDatetimeUTC())
+        lagreNyBehandlingStatus(behandling.tilIverksatt())
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
         haandterUtland(behandling)
         haandterFeilutbetaling(behandling)
@@ -371,15 +388,16 @@ class BehandlingStatusServiceImpl(
         behandlingService.registrerBehandlingHendelse(this, saksbehandler)
     }
 
-    private fun lagreNyBehandlingStatus(
-        behandling: Behandling,
-        sistEndret: LocalDateTime,
-    ) = behandlingDao.lagreStatus(behandling.id, behandling.status, sistEndret)
-
-    private fun lagreNyBehandlingStatus(behandling: Behandling) =
-        behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+    private fun lagreNyBehandlingStatus(behandling: Behandling) = behandlingDao.lagreStatus(behandling)
 
     private fun hentBehandling(behandlingId: UUID): Behandling =
         behandlingService.hentBehandling(behandlingId)
             ?: throw NotFoundException("Fant ikke behandling med id=$behandlingId")
+
+    private fun genererMerknad(
+        vedtak: VedtakEndringDTO,
+        merknad: String,
+    ): String =
+        listOfNotNull(vedtak.vedtakType.tilLesbarString(), merknad, vedtak.vedtakHendelse.kommentar)
+            .joinToString(separator = ": ")
 }

@@ -3,10 +3,10 @@ package no.nav.etterlatte.behandling.behandlinginfo
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
+import no.nav.etterlatte.behandling.utland.SluttbehandlingBehandlinginfo
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -26,9 +26,9 @@ class BehandlingInfoService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         opphoer: Boolean,
-        brevutfall: Brevutfall,
+        brevutfallDto: BrevutfallDto,
         etterbetaling: Etterbetaling?,
-    ): Pair<Brevutfall, Etterbetaling?> {
+    ): Pair<BrevutfallDto, Etterbetaling?> {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
@@ -42,7 +42,7 @@ class BehandlingInfoService(
             sjekkBehandlingKanEndres(behandling, opphoer)
         }
 
-        val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
+        val lagretBrevutfall = lagreBrevutfall(behandling, brevutfallDto)
         val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
 
         oppdaterBehandlingStatus(behandling, opphoer, brukerTokenInfo)
@@ -50,28 +50,27 @@ class BehandlingInfoService(
         return Pair(lagretBrevutfall, lagretEtterbetaling)
     }
 
-    fun lagreErOmgjoeringSluttbehandlingUtland(behandling: Behandling) =
-        behandlingInfoDao.lagreErOmgjoeringSluttbehandlingUtland(behandling.id)
+    fun lagreErOmgjoeringSluttbehandlingUtland(behandling: Behandling) = behandlingInfoDao.lagreErOmgjoeringSluttbehandling(behandling.id)
 
     fun lagreSluttbehandling(
         behandlingId: UUID,
-        sluttbehandling: SluttbehandlingUtlandBehandlinginfo,
+        sluttbehandling: SluttbehandlingBehandlinginfo,
     ) {
         behandlingInfoDao.lagreSluttbehandling(behandlingId, sluttbehandling)
     }
 
-    fun hentSluttbehandling(behandlingId: UUID): SluttbehandlingUtlandBehandlinginfo? = behandlingInfoDao.hentSluttbehandling(behandlingId)
+    fun hentSluttbehandling(behandlingId: UUID): SluttbehandlingBehandlinginfo? = behandlingInfoDao.hentSluttbehandling(behandlingId)
 
     private fun lagreBrevutfall(
         behandling: Behandling,
-        brevutfall: Brevutfall,
-    ): Brevutfall {
-        sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
-        sjekkFeilutbetalingErSatt(behandling, brevutfall)
-        return behandlingInfoDao.lagreBrevutfall(brevutfall)
+        brevutfallDto: BrevutfallDto,
+    ): BrevutfallDto {
+        sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfallDto)
+        sjekkFeilutbetalingErSatt(behandling, brevutfallDto)
+        return behandlingInfoDao.lagreBrevutfall(brevutfallDto)
     }
 
-    fun hentBrevutfall(behandlingId: UUID): Brevutfall? = behandlingInfoDao.hentBrevutfall(behandlingId)
+    fun hentBrevutfall(behandlingId: UUID): BrevutfallDto? = behandlingInfoDao.hentBrevutfall(behandlingId)
 
     fun lagreEtterbetaling(
         behandling: Behandling,
@@ -152,19 +151,19 @@ class BehandlingInfoService(
 
     private fun sjekkAldersgruppeSattVedBarnepensjon(
         behandling: Behandling,
-        brevutfall: Brevutfall,
+        brevutfallDto: BrevutfallDto,
     ) {
-        if (behandling.sak.sakType == SakType.BARNEPENSJON && brevutfall.aldersgruppe == null) {
+        if (behandling.sak.sakType == SakType.BARNEPENSJON && brevutfallDto.aldersgruppe == null) {
             throw BrevutfallException.AldergruppeIkkeSatt()
         }
     }
 
     private fun sjekkFeilutbetalingErSatt(
         behandling: Behandling,
-        brevutfall: Brevutfall,
+        brevutfallDto: BrevutfallDto,
     ) {
         if (behandling.type == BehandlingType.REVURDERING &&
-            brevutfall.feilutbetaling == null
+            brevutfallDto.feilutbetaling == null
         ) {
             throw BrevutfallException.FeilutbetalingIkkeSatt()
         }

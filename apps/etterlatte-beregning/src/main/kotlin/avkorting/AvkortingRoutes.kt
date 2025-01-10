@@ -11,12 +11,12 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingRequest
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkRequest
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingOverstyrtInnvilgaMaanederDto
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoRequest
 import no.nav.etterlatte.libs.common.beregning.MottattInntektsjusteringAvkortigRequest
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.uuid
@@ -41,6 +41,14 @@ fun Route.avkorting(
                     null -> call.response.status(HttpStatusCode.NoContent)
                     else -> call.respond(avkorting)
                 }
+            }
+        }
+
+        get("skalHaInntektNesteAar") {
+            withBehandlingId(behandlingKlient) {
+                val behandling = behandlingKlient.hentBehandling(it, brukerTokenInfo)
+                val skalHaInntektNesteAar = avkortingService.skalHaInntektInnevaerendeOgNesteAar(behandling)
+                call.respond(AvkortingSkalHaInntektNesteAarDTO(skalHaInntektNesteAar))
             }
         }
 
@@ -93,7 +101,7 @@ fun Route.avkorting(
 
     route("/api/beregning/avkorting") {
         post("aarlig-inntektsjustering-sjekk") {
-            val request = call.receive<AarligInntektsjusteringAvkortingSjekkRequest>()
+            val request = call.receive<InntektsjusteringAvkortingInfoRequest>()
             logger.info("Henter har inntekt for ${request.aar} for sakId=${request.sakId}")
             val respons = aarligInntektsjusteringService.hentSjekkAarligInntektsjustering(request)
             call.respond(respons)
@@ -120,6 +128,10 @@ fun Route.avkorting(
         }
     }
 }
+
+data class AvkortingSkalHaInntektNesteAarDTO(
+    val skalHaInntektNesteAar: Boolean,
+)
 
 fun AvkortingGrunnlag.toDto() =
     AvkortingGrunnlagDto(

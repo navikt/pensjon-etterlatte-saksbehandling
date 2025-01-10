@@ -1,4 +1,5 @@
 import {
+  AktivitetspliktOppgaveType,
   AktivitetspliktUnntakType,
   IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNyDto,
@@ -11,7 +12,7 @@ import { FloppydiskIcon } from '@navikt/aksel-icons'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettAktivitetspliktUnntak } from '~shared/api/aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { startOfMonth } from 'date-fns'
@@ -66,7 +67,12 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
               Avbryt
             </Button>
           )}
-          <Button variant="primary" type="submit" icon={<FloppydiskIcon />} loading={isPending(lagreUnntakStatus)}>
+          <Button
+            variant="primary"
+            type="submit"
+            icon={<FloppydiskIcon aria-hidden />}
+            loading={isPending(lagreUnntakStatus)}
+          >
             Lagre
           </Button>
         </HStack>
@@ -79,6 +85,8 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
 }
 
 export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?: string }) {
+  const { vurderingType } = useAktivitetspliktOppgaveVurdering()
+  const er6mndVurdering = vurderingType !== AktivitetspliktOppgaveType.TOLV_MAANEDER
   const { register, control } = useFormContext()
   return (
     <Box maxWidth="40rem">
@@ -99,7 +107,7 @@ export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?:
               message: 'Du må velge type unntak.',
             },
           })}
-          label="Type unntak"
+          label="Hvilket unntak er det?"
         >
           <option value={AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM}>
             {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM]}
@@ -116,9 +124,14 @@ export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?:
           <option value={AktivitetspliktUnntakType.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE}>
             {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE]}
           </option>
+          {er6mndVurdering && (
+            <option value={AktivitetspliktUnntakType.GRADERT_UFOERETRYGD}>
+              {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.GRADERT_UFOERETRYGD]}
+            </option>
+          )}
         </Select>
 
-        <Textarea {...register(`${formPrefix}beskrivelse`)} label="Beskrivelse" />
+        <Textarea {...register(`${formPrefix}beskrivelse`)} label="Vurdering av unntak" />
       </VStack>
     </Box>
   )

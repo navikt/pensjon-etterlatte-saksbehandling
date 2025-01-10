@@ -45,7 +45,7 @@ class BarnepensjonBeregningTest {
     }
 
     @Test
-    fun `trygdetid med beregning utleder avdoedes navn hvis trygdetid gjelder ukjent avdoed`() {
+    fun `trygdetid med beregning utleder setter avdødes navn til null ved ukjent avdoed`() {
         val avdoede = emptyList<Avdoed>()
 
         with(
@@ -61,7 +61,7 @@ class BarnepensjonBeregningTest {
                 avdoede,
             ),
         ) {
-            navnAvdoed shouldBe "ukjent avdød"
+            navnAvdoed shouldBe null
         }
     }
 
@@ -69,7 +69,7 @@ class BarnepensjonBeregningTest {
     fun `trygdetid med beregning feiler i utleding av avdoedes navn hvis ingen avdoede og trygdetid ikke gjelder ukjent avdød`() {
         val avdoede = emptyList<Avdoed>()
 
-        assertThrows<IngenStoetteForUkjentAvdoed> {
+        assertThrows<FantIkkeIdentTilTrygdetidBlantAvdoede> {
             trygdetidMedBeregningsmetode(
                 trygdetidDto(
                     ident = "17418340118",

@@ -1,7 +1,9 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -24,9 +26,10 @@ data class DetaljertBehandling(
     val relatertBehandlingId: String?,
     val tidligereFamiliepleier: TidligereFamiliepleier?,
     val erSluttbehandling: Boolean = false,
+    val mottattDato: LocalDateTime? = null,
 )
 
 fun DetaljertBehandling.virkningstidspunkt() =
-    requireNotNull(virkningstidspunkt) {
+    krevIkkeNull(virkningstidspunkt) {
         "Mangler virkningstidspunkt for behandling=$id"
     }

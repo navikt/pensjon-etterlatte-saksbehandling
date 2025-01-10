@@ -10,6 +10,7 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class Utbetalingsinfo(
+    val overstyrt: Boolean,
     val antallBarn: Int,
     val beloep: Kroner,
     val virkningsdato: LocalDate,
@@ -21,6 +22,7 @@ data class Avkortingsinfo(
     val virkningsdato: LocalDate,
     val beregningsperioder: List<AvkortetBeregningsperiode>,
     val endringIUtbetalingVedVirk: Boolean,
+    val erInnvilgelsesaar: Boolean,
 )
 
 data class AvkortetBeregningsperiode(
@@ -74,7 +76,8 @@ data class Beregningsperiode(
     val institusjon: Boolean,
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
-    val avdoedeForeldre: List<String?>? = null,
+    val avdoedeForeldre: List<String?>?,
+    val harForeldreloessats: Boolean?,
 )
 
 fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {

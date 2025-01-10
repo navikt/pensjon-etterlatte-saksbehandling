@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { SakOversikt } from './sakOgBehandling/SakOversikt'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Tabs } from '@navikt/ds-react'
+import { Link, Tabs } from '@navikt/ds-react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import {
@@ -45,7 +45,7 @@ export const Person = () => {
   useSidetittel('Personoversikt')
 
   const [search, setSearch] = useSearchParams()
-  const { fnr } = usePersonLocationState(search.get('key'))
+  const fnr = usePersonLocationState(search.get('key'))?.fnr
 
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
@@ -63,7 +63,16 @@ export const Person = () => {
     }
   }, [fnr])
 
-  if (!fnrHarGyldigFormat(fnr)) {
+  if (!fnr) {
+    return (
+      <ApiErrorAlert>
+        Fant ikke fødselsnummer. Dette kan komme av at URL-en ble kopiert fra en annen fane eller nettleser, eller har
+        blitt endret manuelt.
+        <br />
+        <Link href="/">Gå til forsiden</Link>
+      </ApiErrorAlert>
+    )
+  } else if (!fnrHarGyldigFormat(fnr)) {
     return <ApiErrorAlert>Fødselsnummeret {fnr} har et ugyldig format (ikke 11 siffer)</ApiErrorAlert>
   }
 

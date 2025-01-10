@@ -13,9 +13,11 @@ import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.inntektsjustering.JournalfoerInntektsjusteringService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
+import no.nav.etterlatte.omsendring.JournalfoerOmsMeldtInnEndringService
 
 class AppBuilder(
     private val env: Miljoevariabler,
@@ -47,12 +49,25 @@ class AppBuilder(
         )
     }
 
+    val journalfoerOmsMeldtInnEndringService: JournalfoerOmsMeldtInnEndringService by lazy {
+        JournalfoerOmsMeldtInnEndringService(
+            DokarkivKlient(
+                httpClient(EnvKey.DOKARKIV_SCOPE),
+                env.requireEnvValue(DOKARKIV_URL),
+            ),
+            PdfGeneratorKlient(httpClient(), "${env.requireEnvValue(PDFGEN_URL)}/omsendringer"),
+        )
+    }
+
     private fun httpClient(scope: EnvEnum) =
         httpClient(
             auth = {
                 it.install(Auth) {
                     clientCredential {
-                        config = env.append(AZURE_APP_OUTBOUND_SCOPE) { requireNotNull(it[scope]) }
+                        config =
+                            env.append(AZURE_APP_OUTBOUND_SCOPE) {
+                                krevIkkeNull(it[scope]) { "Azure outbound scope mangler" }
+                            }
                     }
                 }
             },

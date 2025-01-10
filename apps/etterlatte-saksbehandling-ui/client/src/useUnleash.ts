@@ -15,16 +15,21 @@ export const enum FeatureToggle {
   notater = 'notater',
   kun_en_registrert_juridisk_forelder = 'kun-en-registrert-juridisk-forelder',
   kopier_trygdetidsgrunnlag = 'kopier-trygdetidsgrunnlag',
-  kan_redigere_journalpost_bruker = 'kan_redigere_journalpost_bruker',
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
   pensjon_etterlatte_kan_opprette_vedtak_avvist_klage = 'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
   pensjon_etterlatte_oppdater_ident_paa_sak = 'pensjon-etterlatte.oppdater-ident-paa-sak',
+  trygdetid_fra_pesys = 'trygdetid-fra-pesys',
 }
 
 export interface Toggle {
   togglename: FeatureToggle
   enabled: boolean
+}
+
+const trygdetid_fra_pesys: Toggle = {
+  togglename: FeatureToggle.trygdetid_fra_pesys,
+  enabled: false,
 }
 
 const sanksjon: Toggle = { togglename: FeatureToggle.sanksjon, enabled: false }
@@ -49,10 +54,6 @@ const kopier_trygdetidsgrunnlag: Toggle = {
   togglename: FeatureToggle.kopier_trygdetidsgrunnlag,
   enabled: false,
 }
-const kan_redigere_journalpost_bruker: Toggle = {
-  togglename: FeatureToggle.kan_redigere_journalpost_bruker,
-  enabled: false,
-}
 const opprette_generell_oppgave: Toggle = {
   togglename: FeatureToggle.opprette_generell_oppgave,
   enabled: false,
@@ -71,13 +72,13 @@ const pensjon_etterlatte_oppdater_ident_paa_sak: Toggle = {
 }
 
 export const unleashStartState: Record<string, Toggle> = {
+  [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.sanksjon]: sanksjon,
   [FeatureToggle.aktivitetsplikt_ny_vurdering]: aktivitetsplikt_ny_vurdering,
   [FeatureToggle.validere_aarsintnekt_neste_aar]: validere_aarsintnekt_neste_aar,
   [FeatureToggle.notater]: notater,
   [FeatureToggle.kun_en_registrert_juridisk_forelder]: kun_en_registrert_juridisk_forelder,
   [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,
-  [FeatureToggle.kan_redigere_journalpost_bruker]: kan_redigere_journalpost_bruker,
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,
   [FeatureToggle.pensjon_etterlatte_kan_opprette_vedtak_avvist_klage]:

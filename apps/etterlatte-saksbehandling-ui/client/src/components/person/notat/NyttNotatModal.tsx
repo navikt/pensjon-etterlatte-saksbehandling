@@ -25,7 +25,7 @@ export const NyttNotatModal = ({ sakId, leggTilNotat }: { sakId: number; leggTil
     <Box>
       <Button
         variant="primary"
-        icon={<DocPencilIcon />}
+        icon={<DocPencilIcon aria-hidden />}
         iconPosition="right"
         onClick={opprettNyttNotat}
         loading={isPending(opprettNotatStatus)}

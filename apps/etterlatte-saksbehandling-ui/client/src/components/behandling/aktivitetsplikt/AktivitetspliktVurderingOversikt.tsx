@@ -1,10 +1,10 @@
 import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import React from 'react'
 import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktStatusOgGyldig'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { AktivitetspliktOppgaveType } from '~shared/types/Aktivitetsplikt'
 
-export const AktivitetspliktVurdering12MndOversikt = () => {
+export const AktivitetspliktVurderingOversikt = () => {
   const { vurdering, vurderingType } = useAktivitetspliktOppgaveVurdering()
   return (
     <>

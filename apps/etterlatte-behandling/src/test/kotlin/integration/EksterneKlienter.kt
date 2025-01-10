@@ -46,7 +46,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -72,7 +72,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
@@ -94,6 +93,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 class GrunnlagKlientTest : GrunnlagKlient {
+    override suspend fun grunnlagFinnes(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean = false
+
     override suspend fun finnPersonOpplysning(
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
@@ -151,7 +155,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -159,7 +163,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -167,7 +171,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun lagreNyeSaksopplysninger(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -175,7 +179,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun lagreNyeSaksopplysningerBareSak(
         sakId: SakId,
         saksopplysninger: NyeSaksopplysninger,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -183,7 +187,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun leggInnNyttGrunnlagSak(
         sakId: SakId,
         opplysningsbehov: Opplysningsbehov,
-        brukerTokenInfo: BrukerTokenInfo?,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -233,12 +237,12 @@ class BeregningKlientTest :
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = false
 
-    override suspend fun aarligInntektsjusteringSjekk(
+    override suspend fun inntektsjusteringAvkortingInfoSjekk(
         sakId: SakId,
         aar: Int,
         sisteBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): AarligInntektsjusteringAvkortingSjekkResponse = mockk()
+    ): InntektsjusteringAvkortingInfoResponse = mockk()
 
     override suspend fun harTilgangTilSak(
         sakId: SakId,
@@ -252,30 +256,42 @@ class VedtakKlientTest : VedtakKlient {
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long = 123L
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+        }
 
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): Long = 123L
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+        }
 
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: Enhetsnummer,
-    ): TilbakekrevingVedtakLagretDto =
-        TilbakekrevingVedtakLagretDto(
-            id = 123L,
-            fattetAv = "saksbehandler",
-            enhet = Enheter.defaultEnhet.enhetNr,
-            dato = LocalDate.now(),
-        )
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+            every { vedtakFattet } returns
+                mockk {
+                    every { ansvarligSaksbehandler } returns "saksbehandler"
+                    every { ansvarligEnhet } returns Enheter.defaultEnhet.enhetNr
+                    every { tidspunkt } returns Tidspunkt.now()
+                }
+        }
 
     override suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long = 123L
+    ): VedtakDto =
+        mockk<VedtakDto> {
+            every { id } returns 123L
+        }
 
     override suspend fun lagreVedtakKlage(
         klage: Klage,
@@ -370,7 +386,7 @@ class BrevApiKlientTest : BrevApiKlient {
         TODO("Not yet implemented")
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun ferdigstillJournalFoerOgDistribuerBrev(
         req: FerdigstillJournalFoerOgDistribuerOpprettetBrev,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevStatusResponse {
@@ -606,6 +622,7 @@ class AxsysKlientTest : AxsysKlient {
 class KodeverkKlientTest : KodeverkKlient {
     override suspend fun hent(
         kodeverkNavn: KodeverkNavn,
+        ekskluderUgyldige: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): KodeverkResponse {
         val betydning =

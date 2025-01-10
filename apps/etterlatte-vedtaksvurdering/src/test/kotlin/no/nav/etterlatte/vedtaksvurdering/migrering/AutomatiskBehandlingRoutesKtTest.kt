@@ -361,6 +361,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         type = OppgaveType.FOERSTEGANGSBEHANDLING,
         saksbehandler = null,
         referanse = referanse.toString(),
+        gruppeId = null,
         merknad = null,
         sakType = SakType.BARNEPENSJON,
         fnr = null,

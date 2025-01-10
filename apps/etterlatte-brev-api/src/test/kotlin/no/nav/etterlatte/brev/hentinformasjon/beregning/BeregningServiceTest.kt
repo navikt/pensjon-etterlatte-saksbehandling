@@ -5,6 +5,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.beregningsperiode
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
@@ -73,6 +74,7 @@ class BeregningServiceTest {
                         beloep = 3063,
                     ),
                 )
+            every { overstyrBeregning } returns null
         }
 
     private fun opprettBeregningsperiode(
@@ -94,6 +96,7 @@ class BeregningServiceTest {
         samletNorskTrygdetid = 10,
         samletTeoretiskTrygdetid = 20,
         broek = null,
+        harForeldreloessats = false,
     )
 
     private fun opprettBeregningSoeskenjustering() =
@@ -106,6 +109,7 @@ class BeregningServiceTest {
                         soeskenFlokk = listOf("barn2"),
                     ),
                 )
+            every { overstyrBeregning } returns null
         }
 
     private fun opprettBeregningsgrunnlag() =
@@ -122,7 +126,7 @@ class BeregningServiceTest {
         private const val SAKSBEHANDLER_IDENT = "Z1235"
         private val BRUKERTokenInfo = simpleSaksbehandler(SAKSBEHANDLER_IDENT)
         private val BREV_BEREGNINGSPERIODE =
-            no.nav.etterlatte.brev.behandling.Beregningsperiode(
+            beregningsperiode(
                 YearMonth.now().atDay(1),
                 null,
                 Kroner(10000),

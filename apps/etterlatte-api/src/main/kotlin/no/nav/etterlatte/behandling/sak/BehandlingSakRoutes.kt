@@ -16,15 +16,11 @@ import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.Issuer
 
-private fun generateRoles(config: Config): Set<String> {
-    val defaultRoles =
-        setOf(
-            config.getString("roller.pensjon-saksbehandler"),
-            config.getString("roller.gjenny-saksbehandler"),
-        )
-    // TODO: les-oms-sak-for-person kan fjernes siden de kaller oss med OBO......
-    return defaultRoles + "les-oms-sak-for-person"
-}
+private fun generateGjennyRoller(config: Config): Set<String> =
+    setOf(
+        config.getString("roller.pensjon-saksbehandler"),
+        config.getString("roller.gjenny-saksbehandler"),
+    )
 
 fun Route.behandlingSakRoutes(
     behandlingService: BehandlingService,
@@ -32,7 +28,7 @@ fun Route.behandlingSakRoutes(
 ) {
     route("api/oms") {
         install(AuthorizationPlugin) {
-            accessPolicyRolesEllerAdGrupper = generateRoles(config)
+            accessPolicyRolesEllerAdGrupper = generateGjennyRoller(config)
             issuers = setOf(Issuer.AZURE.issuerName)
         }
 

@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -294,7 +295,10 @@ class VedtakBehandlingService(
                     .tilSamordningVedtak(behandlingId, tx = tx)
                     .also {
                         runBlocking {
-                            behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
+                            val tilSamordning = behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
+                            if (!tilSamordning) {
+                                throw VedtakTilSamordningException(behandlingId)
+                            }
                         }
                     }
             }
@@ -347,7 +351,10 @@ class VedtakBehandlingService(
                             .samordnetVedtak(behandlingId, tx = tx)
                             .also {
                                 runBlocking {
-                                    behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                                    val samordnetVedtak = behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                                    if (!samordnetVedtak) {
+                                        throw VedtakSamordnetException(behandlingId)
+                                    }
                                 }
                             }
                     }
@@ -431,7 +438,10 @@ class VedtakBehandlingService(
                 val iverksattVedtakLocal =
                     repository.iverksattVedtak(behandlingId, tx = tx).also {
                         runBlocking {
-                            behandlingKlient.iverksett(behandlingId, brukerTokenInfo, it.id)
+                            val iverksattBehandling = behandlingKlient.iverksett(behandlingId, brukerTokenInfo, it.id)
+                            if (!iverksattBehandling) {
+                                throw BehandlingIverksettelseException(behandlingId)
+                            }
                         }
                     }
                 iverksattVedtakLocal
@@ -449,7 +459,7 @@ class VedtakBehandlingService(
     }
 
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak =
-        requireNotNull(repository.hentVedtak(behandlingId)) {
+        krevIkkeNull(repository.hentVedtak(behandlingId)) {
             "Vedtak for behandling $behandlingId finnes ikke"
         }
 
@@ -608,7 +618,7 @@ class VedtakBehandlingService(
                     when (sakType) {
                         SakType.BARNEPENSJON -> {
                             val beregningsperioder =
-                                requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
+                                krevIkkeNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
                                     "Mangler beregning"
                                 }
                             beregningsperioder.map {
@@ -726,7 +736,7 @@ class VedtakBehandlingService(
         }
 
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
-        requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
+        krevIkkeNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
@@ -753,6 +763,18 @@ class VedtakTilstandException(
 class BehandlingstilstandException(
     vedtak: Vedtak,
 ) : IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
+
+class BehandlingIverksettelseException(
+    behandlingId: UUID,
+) : InternfeilException("Iverksettelse av behandling $behandlingId feilet")
+
+class VedtakTilSamordningException(
+    behandlingId: UUID,
+) : InternfeilException("Sette vedtak til 'til samordning' for behandling $behandlingId feilet")
+
+class VedtakSamordnetException(
+    behandlingId: UUID,
+) : InternfeilException("Sette vedtak til 'samordnet' for behandling $behandlingId feilet")
 
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(

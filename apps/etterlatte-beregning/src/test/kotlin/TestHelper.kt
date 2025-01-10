@@ -331,6 +331,7 @@ fun behandling(
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt: Virkningstidspunkt? = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
     status: BehandlingStatus = BehandlingStatus.BEREGNET,
+    opphoerFraOgMed: YearMonth? = null,
 ) = DetaljertBehandling(
     id = id,
     sak = sak,
@@ -346,7 +347,7 @@ fun behandling(
     revurderingInfo = null,
     kilde = Vedtaksloesning.GJENNY,
     sendeBrev = true,
-    opphoerFraOgMed = null,
+    opphoerFraOgMed = opphoerFraOgMed,
     relatertBehandlingId = null,
     tidligereFamiliepleier = null,
 )

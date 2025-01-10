@@ -174,6 +174,7 @@ export interface IBrevAktivitetspliktRequest {
   utbetaling?: boolean
   redusertEtterInntekt?: boolean
   spraak?: Spraak
+  begrunnelse?: string
 }
 
 export const lagreAktivitetspliktBrevdata = async (args: {
@@ -200,5 +201,6 @@ export interface IBrevAktivitetspliktDto {
   utbetaling?: boolean
   redusertEtterInntekt?: boolean
   spraak?: Spraak
+  begrunnelse?: string
   kilde: KildeSaksbehandler
 }

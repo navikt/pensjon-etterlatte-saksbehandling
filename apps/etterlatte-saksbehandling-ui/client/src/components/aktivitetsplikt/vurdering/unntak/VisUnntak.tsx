@@ -1,5 +1,5 @@
 import { IAktivitetspliktUnntak, IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { slettAktivitetspliktUnntak } from '~shared/api/aktivitetsplikt'
@@ -63,13 +63,18 @@ export function VisUnntak(props: { unntak: IAktivitetspliktUnntak }) {
 
       {oppgaveErRedigerbar && (
         <HStack gap="4">
-          <Button size="xsmall" variant="secondary" icon={<PencilIcon />} onClick={() => setRedigerer(true)}>
+          <Button
+            size="xsmall"
+            variant="secondary"
+            icon={<PencilIcon aria-hidden />}
+            onClick={() => setRedigerer(true)}
+          >
             Rediger
           </Button>
           <Button
             size="xsmall"
             variant="secondary"
-            icon={<TrashIcon />}
+            icon={<TrashIcon aria-hidden />}
             onClick={() => slettUnntak(unntak)}
             loading={isPending(slettUnntakStatus)}
           >

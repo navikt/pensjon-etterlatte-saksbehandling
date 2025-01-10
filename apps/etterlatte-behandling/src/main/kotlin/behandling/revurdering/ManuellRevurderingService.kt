@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 import java.util.UUID
 
 class ManuellRevurderingService(
@@ -79,14 +78,6 @@ class ManuellRevurderingService(
             begrunnelse = begrunnelse,
             fritekstAarsak = fritekstAarsak,
             saksbehandler = saksbehandler,
-            opphoerFraOgMed =
-                if (aarsak !=
-                    Revurderingaarsak.REVURDERE_ETTER_OPPHOER
-                ) {
-                    forrigeIverksatteBehandling.opphoerFraOgMed
-                } else {
-                    null
-                },
         )
     }
 
@@ -108,7 +99,6 @@ class ManuellRevurderingService(
         begrunnelse: String?,
         fritekstAarsak: String?,
         saksbehandler: Saksbehandler,
-        opphoerFraOgMed: YearMonth? = null,
     ): Revurdering =
         forrigeBehandling.let {
             val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
@@ -118,19 +108,16 @@ class ManuellRevurderingService(
                 .opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleri,
-                    forrigeBehandling = forrigeBehandling.id,
+                    forrigeBehandling = forrigeBehandling,
                     mottattDato = Tidspunkt.now().toLocalDatetimeUTC().toString(),
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = revurderingAarsak,
                     virkningstidspunkt = null,
-                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
-                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                     begrunnelse = begrunnelse ?: triggendeOppgave?.merknad,
                     saksbehandlerIdent = saksbehandler.ident,
                     frist = triggendeOppgave?.frist,
                     paaGrunnAvOppgave = paaGrunnAvOppgave,
-                    opphoerFraOgMed = opphoerFraOgMed,
                 ).oppdater()
                 .also { revurdering ->
                     if (!fritekstAarsak.isNullOrEmpty() && revurdering.revurderingsaarsak!!.kanLagreFritekstFeltForManuellRevurdering()) {

@@ -5,55 +5,41 @@ import { AvkortingInntekt } from '~components/behandling/avkorting/AvkortingInnt
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
-import { IBehandlingReducer, oppdaterAvkorting, resetAvkorting } from '~store/reducers/BehandlingReducer'
+import {
+  IBehandlingReducer,
+  oppdaterAvkorting,
+  oppdaterBehandlingsstatus,
+  resetAvkorting,
+} from '~store/reducers/BehandlingReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { IBehandlingsType, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { mapResult } from '~shared/api/apiUtils'
-import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
 import { Alert, BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
-import { SimulerUtbetaling } from '~components/behandling/beregne/SimulerUtbetaling'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { IAvkorting } from '~shared/types/IAvkorting'
 import { aarFraDatoString } from '~utils/formatering/dato'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { hentBehandlingstatus } from '~shared/api/behandling'
 
 export const Avkorting = ({
   behandling,
-  resetBrevutfallvalidering,
   resetInntektsavkortingValidering,
+  skalHaInntektNesteAar,
 }: {
   behandling: IBehandlingReducer
-  resetBrevutfallvalidering: () => void
   resetInntektsavkortingValidering: () => void
+  skalHaInntektNesteAar: boolean
 }) => {
   const dispatch = useAppDispatch()
   const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting) as IAvkorting
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
+  const [, hentBehandlingstatusRequest] = useApiCall(hentBehandlingstatus)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const visSanksjon = useFeaturetoggle(FeatureToggle.sanksjon)
-  const inntektNesteAarBryter = useFeaturetoggle(FeatureToggle.validere_aarsintnekt_neste_aar)
-
-  const klarForBrevutfall = () => {
-    if (avkorting == undefined) {
-      return false
-    }
-    if (behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && inntektNesteAarBryter) {
-      if (
-        behandling.viderefoertOpphoer &&
-        new Date(behandling.viderefoertOpphoer.dato).getFullYear() ==
-          new Date(virkningstidspunkt(behandling).dato).getFullYear()
-      ) {
-        // Trenger ikke to inntekter hvis det er opphør i samme året
-        return true
-      }
-      return avkorting.avkortingGrunnlag.length === 2
-    }
-    return true
-  }
 
   const harInstitusjonsopphold = behandling?.beregning?.beregningsperioder.find((bp) => bp.institusjonsopphold)
 
@@ -66,8 +52,11 @@ export const Avkorting = ({
   useEffect(() => {
     if (!avkorting) {
       dispatch(resetAvkorting())
-      hentAvkortingRequest(behandling.id, (res) => {
-        dispatch(oppdaterAvkorting(res))
+      hentAvkortingRequest(behandling.id, (avkorting) => {
+        hentBehandlingstatusRequest(behandling.id, (status) => {
+          dispatch(oppdaterBehandlingsstatus(status))
+          dispatch(oppdaterAvkorting(avkorting))
+        })
       })
     }
   }, [])
@@ -114,26 +103,23 @@ export const Avkorting = ({
                 redigerbar={redigerbar}
                 resetInntektsavkortingValidering={resetInntektsavkortingValidering}
               />{' '}
-              {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-                !!avkorting?.avkortingGrunnlag?.length && (
-                  <AvkortingInntekt
-                    behandling={behandling}
-                    avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
-                    erInnevaerendeAar={false}
-                    redigerbar={redigerbar}
-                    resetInntektsavkortingValidering={resetInntektsavkortingValidering}
-                  />
-                )}
+              {skalHaInntektNesteAar && !!avkorting?.avkortingGrunnlag?.length && (
+                <AvkortingInntekt
+                  behandling={behandling}
+                  avkortingGrunnlagFrontend={avkorting?.avkortingGrunnlag[1]}
+                  erInnevaerendeAar={false}
+                  redigerbar={redigerbar}
+                  resetInntektsavkortingValidering={resetInntektsavkortingValidering}
+                />
+              )}
             </>
           ),
         })}
 
-        {visSanksjon && <Sanksjon behandling={behandling} />}
-        {avkorting && <YtelseEtterAvkorting />}
-        {avkorting && <SimulerUtbetaling behandling={behandling} />}
-        {klarForBrevutfall() && (
-          <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />
+        {visSanksjon && (
+          <Sanksjon behandling={behandling} manglerInntektVirkAar={!avkortingGrunnlagInnevaerendeAar()} />
         )}
+        {avkorting && <YtelseEtterAvkorting />}
       </VStack>
     </Box>
   )

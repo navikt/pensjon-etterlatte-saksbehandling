@@ -329,12 +329,86 @@ internal class OppgaveDaoTest(
         val oppgaveFinnesIkke = oppgaveDao.oppgaveMedTypeFinnes(sakAalesund.id, OppgaveType.MANGLER_SOEKNAD)
         assertEquals(true, oppgaveFinnesIkke)
     }
+
+    @Test
+    fun `GruppeId fungerer som forventet`() {
+        val sak = sakSkrivDao.opprettSak("ident", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+
+        repeat(10) {
+            oppgaveDao.opprettOppgave(lagNyOppgave(sak, gruppeId = null))
+        }
+
+        val gruppeId = UUID.randomUUID().toString()
+
+        repeat(3) {
+            oppgaveDao.opprettOppgave(
+                lagNyOppgave(
+                    sak,
+                    oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+                    gruppeId = gruppeId,
+                ),
+            )
+        }
+
+        oppgaveDao.opprettOppgave(
+            lagNyOppgave(
+                sak,
+                oppgaveType = OppgaveType.REVURDERING,
+                gruppeId = gruppeId,
+            ),
+        )
+
+        val oppgaver = oppgaveDao.hentOppgaverForSakMedType(sak.id, OppgaveType.entries)
+        assertEquals(14, oppgaver.size)
+
+        val foerstegangsbehandlingGruppert =
+            oppgaveDao.hentOppgaverForGruppeId(gruppeId, OppgaveType.FOERSTEGANGSBEHANDLING)
+        assertEquals(3, foerstegangsbehandlingGruppert.size)
+
+        val revurderingGruppert = oppgaveDao.hentOppgaverForGruppeId(gruppeId, OppgaveType.REVURDERING)
+        assertEquals(1, revurderingGruppert.size)
+    }
+
+    @Test
+    fun `GruppeId fungerer som forventet - henter ikke avsluttede oppgaver`() {
+        val sak = sakSkrivDao.opprettSak("ident", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+
+        val gruppeId = UUID.randomUUID().toString()
+        oppgaveDao.opprettOppgave(lagNyOppgave(sak, gruppeId = gruppeId))
+
+        val oppgaveAvbrutt =
+            lagNyOppgave(sak, gruppeId = gruppeId).also {
+                oppgaveDao.opprettOppgave(it)
+            }
+        val oppgaveFerdigstilt =
+            lagNyOppgave(sak, gruppeId = gruppeId).also {
+                oppgaveDao.opprettOppgave(it)
+            }
+        val oppgaveFeilregistrert =
+            lagNyOppgave(sak, gruppeId = gruppeId).also {
+                oppgaveDao.opprettOppgave(it)
+            }
+
+        val oppgaver = oppgaveDao.hentOppgaverForSakMedType(sak.id, OppgaveType.entries)
+        assertEquals(4, oppgaver.size)
+
+        val grupperteOppgaver = oppgaveDao.hentOppgaverForGruppeId(gruppeId, OppgaveType.FOERSTEGANGSBEHANDLING)
+        assertEquals(4, grupperteOppgaver.size)
+
+        oppgaveDao.endreStatusPaaOppgave(oppgaveAvbrutt.id, Status.AVBRUTT)
+        oppgaveDao.endreStatusPaaOppgave(oppgaveFerdigstilt.id, Status.FERDIGSTILT)
+        oppgaveDao.endreStatusPaaOppgave(oppgaveFeilregistrert.id, Status.FEILREGISTRERT)
+
+        val grupperteOppgaverEtterEndretStatus = oppgaveDao.hentOppgaverForGruppeId(gruppeId, OppgaveType.FOERSTEGANGSBEHANDLING)
+        assertEquals(1, grupperteOppgaverEtterEndretStatus.size)
+    }
 }
 
 fun lagNyOppgave(
     sak: Sak,
     oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
     oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+    gruppeId: String? = null,
 ) = OppgaveIntern(
     id = UUID.randomUUID(),
     status = Status.NY,
@@ -342,6 +416,7 @@ fun lagNyOppgave(
     sakId = sak.id,
     kilde = oppgaveKilde,
     referanse = "referanse",
+    gruppeId = gruppeId,
     merknad = "merknad",
     opprettet = Tidspunkt.now(),
     sakType = sak.sakType,

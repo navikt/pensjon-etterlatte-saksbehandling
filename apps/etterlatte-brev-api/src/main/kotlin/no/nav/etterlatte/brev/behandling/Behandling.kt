@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -16,6 +17,7 @@ data class GenerellBrevData(
     val systemkilde: Vedtaksloesning,
     val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
+    val prosesstype: Prosesstype? = null,
 )
 
 // KAN IKKE FJERNES FØR VI HAR EKSPLISITT AVKLART AT ALLE MANUELLE BEHANDLINGER ER FERDIGE

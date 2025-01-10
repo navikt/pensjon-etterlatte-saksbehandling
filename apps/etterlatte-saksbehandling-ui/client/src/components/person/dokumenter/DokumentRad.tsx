@@ -60,7 +60,7 @@ export const DokumentRad = ({
 
           {dokument.dokumenter.length > 1 ? (
             <Dropdown>
-              <Button icon={<ChevronDownIcon />} size="small" as={Dropdown.Toggle} variant="secondary">
+              <Button icon={<ChevronDownIcon aria-hidden />} size="small" as={Dropdown.Toggle} variant="secondary">
                 Åpne
               </Button>
               <Dropdown.Menu>
@@ -103,7 +103,7 @@ export const DokumentRad = ({
               rel="noreferrer noopener"
               size="small"
               variant="secondary"
-              icon={<ExternalLinkIcon />}
+              icon={<ExternalLinkIcon aria-hidden />}
               title={dokument.dokumenter[0].tittel || dokument.tittel}
             >
               Åpne

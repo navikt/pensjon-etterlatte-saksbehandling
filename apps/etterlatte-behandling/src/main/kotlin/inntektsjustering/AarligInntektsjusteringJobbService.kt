@@ -30,7 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
-import no.nav.etterlatte.libs.common.beregning.AarligInntektsjusteringAvkortingSjekkResponse
+import no.nav.etterlatte.libs.common.beregning.InntektsjusteringAvkortingInfoResponse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
@@ -127,8 +127,8 @@ class AarligInntektsjusteringJobbService(
             }
 
             val forrigeBehandling = hentForrigeBehandling(sakId)
-            val avkortingSjekk = hentAvkortingSjekk(sakId, loependeFom, forrigeBehandling.id)
 
+            val avkortingSjekk = hentAvkortingSjekk(sakId, loependeFom, forrigeBehandling.id)
             if (avkortingSjekk.harInntektForAar) {
                 oppdaterKjoering(
                     kjoering,
@@ -161,7 +161,7 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
         loependeFom: YearMonth,
         vedtak: LoependeYtelseDTO,
-        avkortingSjekk: AarligInntektsjusteringAvkortingSjekkResponse,
+        avkortingSjekk: InntektsjusteringAvkortingInfoResponse,
         forrigeBehandling: Behandling,
     ): Boolean {
         val sak = sakService.finnSak(sakId) ?: throw InternfeilException("Fant ikke sak med id $sakId")
@@ -249,9 +249,9 @@ class AarligInntektsjusteringJobbService(
         sakId: SakId,
         loependeFom: YearMonth,
         forrigeBehandlingId: UUID,
-    ): AarligInntektsjusteringAvkortingSjekkResponse =
+    ): InntektsjusteringAvkortingInfoResponse =
         runBlocking {
-            beregningKlient.aarligInntektsjusteringSjekk(
+            beregningKlient.inntektsjusteringAvkortingInfoSjekk(
                 sakId,
                 loependeFom.year,
                 forrigeBehandlingId,
@@ -331,18 +331,15 @@ class AarligInntektsjusteringJobbService(
                 .opprettRevurdering(
                     sakId = sakId,
                     persongalleri = persongalleri,
-                    forrigeBehandling = forrigeBehandling.id,
+                    forrigeBehandling = forrigeBehandling,
                     mottattDato = null,
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
                     virkningstidspunkt = loependeFom.atDay(1).tilVirkningstidspunkt(begrunnelse),
-                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
-                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                     begrunnelse = begrunnelse,
                     saksbehandlerIdent = Fagsaksystem.EY.navn,
                     frist = Tidspunkt.ofNorskTidssone(loependeFom.minusMonths(1).atDay(1), LocalTime.NOON),
-                    opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
                 ).oppdater()
                 .also {
                     revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(it)

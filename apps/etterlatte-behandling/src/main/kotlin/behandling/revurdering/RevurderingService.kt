@@ -4,8 +4,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.ViderefoertOpphoer
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -16,13 +18,11 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -37,7 +37,6 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 class MaksEnAktivOppgavePaaBehandling(
@@ -146,22 +145,18 @@ class RevurderingService(
 
     internal fun opprettRevurdering(
         sakId: SakId,
+        forrigeBehandling: Behandling,
         persongalleri: Persongalleri,
-        forrigeBehandling: UUID?,
         mottattDato: String?,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
         revurderingAarsak: Revurderingaarsak,
         virkningstidspunkt: Virkningstidspunkt?,
-        utlandstilknytning: Utlandstilknytning?,
-        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
         begrunnelse: String?,
         saksbehandlerIdent: String?,
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
-        opphoerFraOgMed: YearMonth? = null,
-        tidligereFamiliepleier: TidligereFamiliepleier? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -170,25 +165,26 @@ class RevurderingService(
             soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
             revurderingsAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt,
-            utlandstilknytning = utlandstilknytning,
-            boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+            utlandstilknytning = forrigeBehandling.utlandstilknytning,
+            boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
             kilde = kilde,
             prosesstype = prosessType,
             begrunnelse = begrunnelse,
             relatertBehandlingId = relatertBehandlingId,
             sendeBrev = revurderingAarsak.skalSendeBrev,
-            opphoerFraOgMed = opphoerFraOgMed,
-            tidligereFamiliepleier = tidligereFamiliepleier,
+            opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
+            tidligereFamiliepleier = forrigeBehandling.tidligereFamiliepleier,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 
-            forrigeBehandling?.let { behandlingId ->
+            forrigeBehandling.id.let { behandlingId ->
                 kommerBarnetTilGodeService
                     .hentKommerBarnetTilGode(behandlingId)
                     ?.copy(behandlingId = opprettBehandling.id)
                     ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
                 aktivitetspliktDao.kopierAktiviteter(behandlingId, opprettBehandling.id)
                 aktivitetspliktKopierService.kopierVurderingTilBehandling(sakId, opprettBehandling.id)
+                kopierViderefoertOpphoer(behandlingId, opprettBehandling, saksbehandlerIdent)
             }
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
@@ -220,7 +216,7 @@ class RevurderingService(
                         } else {
                             grunnlagService.laasTilGrunnlagIBehandling(
                                 it,
-                                checkNotNull(forrigeBehandling) {
+                                checkNotNull(forrigeBehandling.id) {
                                     "Har en automatisk behandling som ikke sender med behandlingId for sist iverksatt. " +
                                         "Da kan vi ikke legge inn riktig grunnlag. Automatisk behandling id=${it.id}"
                                 },
@@ -230,7 +226,7 @@ class RevurderingService(
                     }
                 },
                 sendMeldingForHendelse = {
-                    behandlingHendelser.sendMeldingForHendelseStatisitkk(
+                    behandlingHendelser.sendMeldingForHendelseStatistikk(
                         it.toStatistikkBehandling(persongalleri),
                         BehandlingHendelseType.OPPRETTET,
                     )
@@ -252,6 +248,7 @@ class RevurderingService(
                                 type = OppgaveType.REVURDERING,
                                 merknad = begrunnelse,
                                 frist = frist,
+                                gruppeId = persongalleri.avdoed.firstOrNull(),
                             )
                         if (saksbehandlerIdent != null &&
                             (prosessType == Prosesstype.MANUELL && saksbehandlerIdent != Fagsaksystem.EY.navn) ||
@@ -290,6 +287,44 @@ class RevurderingService(
             }
 
         lagreRevurderingInfo(revurdering.id, RevurderingInfoMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
+    }
+
+    /**
+     * Sjekker om det er satt opphoerFom i forrige behandling. Hvis så skal ViderefoertOpphoer også kopieres med.
+     * Dersom ViderefoertOpphoer ikke er satt (dette kan feks skje dersom en revrudering kun inneholder et opphør,
+     * opprettes det en ny ViderefoertOpphoer uten vilkår satt. Dette fordi det ikke er trivielt å utlede fra
+     * den forrige behandlingens vilkårsvurdering.
+     */
+    private fun kopierViderefoertOpphoer(
+        forrigeBehandlingId: UUID,
+        opprettBehandling: OpprettBehandling,
+        saksbehandlerIdent: String?,
+    ) {
+        if (opprettBehandling.opphoerFraOgMed != null) {
+            val viderefoertOpphoer = behandlingDao.hentViderefoertOpphoer(forrigeBehandlingId)
+            if (viderefoertOpphoer != null) {
+                logger.info("Lagrer tidligere opprettet videreført opphør i behandling ${opprettBehandling.id}")
+                behandlingDao.lagreViderefoertOpphoer(
+                    opprettBehandling.id,
+                    viderefoertOpphoer.copy(behandlingId = opprettBehandling.id),
+                )
+            } else {
+                logger.info("Oppretter nytt videreført opphør i behandling ${opprettBehandling.id}")
+                behandlingDao.lagreViderefoertOpphoer(
+                    opprettBehandling.id,
+                    ViderefoertOpphoer(
+                        skalViderefoere = JaNei.JA,
+                        behandlingId = opprettBehandling.id,
+                        dato = opprettBehandling.opphoerFraOgMed,
+                        vilkaar = null,
+                        begrunnelse = "Automatisk videreført fra eksisterende opphør",
+                        kilde =
+                            saksbehandlerIdent?.let { Grunnlagsopplysning.Saksbehandler(it, Tidspunkt.now()) }
+                                ?: Grunnlagsopplysning.automatiskSaksbehandler,
+                    ),
+                )
+            }
+        }
     }
 }
 

@@ -33,7 +33,13 @@ export const SlettBrev = ({ brev }: { brev: IBrev }) => {
 
   return (
     <>
-      <Button variant="danger" icon={<TrashIcon />} onClick={() => setIsOpen(true)} title="Slett brev" size="small">
+      <Button
+        variant="danger"
+        icon={<TrashIcon aria-hidden />}
+        onClick={() => setIsOpen(true)}
+        title="Slett brev"
+        size="small"
+      >
         Slett
       </Button>
 

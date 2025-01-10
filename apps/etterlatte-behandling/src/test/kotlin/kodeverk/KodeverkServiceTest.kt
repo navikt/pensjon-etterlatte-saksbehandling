@@ -19,26 +19,26 @@ internal class KodeverkServiceTest {
 
     @Test
     fun `Hent alle landkoder`() {
-        coEvery { mockKlient.hent(LANDKODER, saksbehandler) } returns opprettLandkoderResponse()
+        coEvery { mockKlient.hent(LANDKODER, false, saksbehandler) } returns opprettLandkoderResponse()
 
         runBlocking {
             val land = service.hentAlleLand(saksbehandler)
 
             assertEquals(5, land.size)
-            coVerify(exactly = 1) { mockKlient.hent(LANDKODER, saksbehandler) }
+            coVerify(exactly = 1) { mockKlient.hent(LANDKODER, false, saksbehandler) }
         }
     }
 
     @Test
     fun `Cache for landkode fungerer`() {
-        coEvery { mockKlient.hent(LANDKODER, saksbehandler) } returns opprettLandkoderResponse()
+        coEvery { mockKlient.hent(LANDKODER, false, saksbehandler) } returns opprettLandkoderResponse()
 
         runBlocking {
             val land = service.hentAlleLand(saksbehandler)
             assertEquals(5, land.size)
         }
 
-        coVerify(exactly = 1) { mockKlient.hent(LANDKODER, saksbehandler) }
+        coVerify(exactly = 1) { mockKlient.hent(LANDKODER, false, saksbehandler) }
     }
 
     @Test
@@ -57,7 +57,7 @@ internal class KodeverkServiceTest {
                 ),
             )
 
-        coEvery { mockKlient.hent(LANDKODER, saksbehandler) } returns KodeverkResponse(testdatasandwich)
+        coEvery { mockKlient.hent(LANDKODER, false, saksbehandler) } returns KodeverkResponse(testdatasandwich)
 
         runBlocking {
             val alleLand = service.hentAlleLand(saksbehandler)

@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
@@ -45,7 +46,8 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -265,6 +267,11 @@ interface BehandlingService {
 
     fun hentAapenOmregning(sakId: SakId): Revurdering?
 
+    fun endreProsesstype(
+        behandlingId: UUID,
+        ny: Prosesstype,
+    )
+
     fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,
         tidligereFamiliepleier: TidligereFamiliepleier,
@@ -356,7 +363,8 @@ internal class BehandlingServiceImpl(
         behandlingDao.avbrytBehandling(behandlingId, aarsak, kommentar).also {
             val hendelserKnyttetTilBehandling =
                 grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
-            oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
+
+            oppgaveService.avbrytAapneOppgaverMedReferanse(behandlingId.toString(), "Behandlingen avbrytes manuelt")
 
             hendelserKnyttetTilBehandling.forEach { hendelse ->
                 oppgaveService.opprettOppgave(
@@ -394,7 +402,7 @@ internal class BehandlingServiceImpl(
         val persongalleri =
             runBlocking { grunnlagKlient.hentPersongalleri(behandlingId, saksbehandler) }
 
-        behandlingHendelser.sendMeldingForHendelseStatisitkk(
+        behandlingHendelser.sendMeldingForHendelseStatistikk(
             behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
             BehandlingHendelseType.AVBRUTT,
         )
@@ -436,7 +444,9 @@ internal class BehandlingServiceImpl(
         overstyr: Boolean,
     ): Boolean {
         val behandling =
-            requireNotNull(hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            krevIkkeNull(hentBehandling(behandlingId)) {
+                "Fant ikke behandling $behandlingId"
+            }
 
         if (request.dato.year !in (0..9999) || request.begrunnelse == null) {
             return false
@@ -591,6 +601,7 @@ internal class BehandlingServiceImpl(
                         behandling.id,
                         behandling.sak.id,
                         behandling.sak.sakType,
+                        brukerTokenInfo,
                     )
                 }
                 behandlingDao.lagreStatus(behandling)
@@ -631,7 +642,7 @@ internal class BehandlingServiceImpl(
     ) {
         inTransaction {
             val behandling = behandlingDao.hentBehandling(behandlingId)
-            checkInternFeil(behandling != null) {
+            krev(behandling != null) {
                 "Behandling finnes ikke $behandlingId"
             }
             when (behandling!!.type) {
@@ -843,7 +854,10 @@ internal class BehandlingServiceImpl(
         }
 
         if (virkningstidspunktErEtterOpphoerFraOgMed(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)) {
-            throw VirkningstidspunktKanIkkeVaereEtterOpphoer(behandling.virkningstidspunkt?.dato, viderefoertOpphoer.dato)
+            throw VirkningstidspunktKanIkkeVaereEtterOpphoer(
+                behandling.virkningstidspunkt?.dato,
+                viderefoertOpphoer.dato,
+            )
         }
 
         behandling
@@ -885,10 +899,18 @@ internal class BehandlingServiceImpl(
                     Revurderingaarsak.REGULERING,
                     Revurderingaarsak.OMREGNING,
                     Revurderingaarsak.AARLIG_INNTEKTSJUSTERING,
+                    Revurderingaarsak.INNTEKTSENDRING,
                 ),
             ).singleOrNull {
                 it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
             }
+
+    override fun endreProsesstype(
+        behandlingId: UUID,
+        ny: Prosesstype,
+    ) {
+        behandlingDao.endreProsesstype(behandlingId, ny)
+    }
 
     override fun oppdaterTidligereFamiliepleier(
         behandlingId: UUID,
@@ -984,6 +1006,7 @@ internal class BehandlingServiceImpl(
                             behandling.id,
                             behandling.sak.id,
                             behandling.sak.sakType,
+                            brukerTokenInfo,
                         )
                     }
                     behandlingDao.lagreStatus(behandling)

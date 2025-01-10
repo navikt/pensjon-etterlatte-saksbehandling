@@ -44,6 +44,7 @@ data class Beregningsperiode(
     val regelverk: Regelverk? = null,
     val kunEnJuridiskForelder: Boolean = false,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
+    val harForeldreloessats: Boolean? = null,
 )
 
 data class OverstyrBeregningDTO(
@@ -85,9 +86,9 @@ data class AvkortingGrunnlagDto(
 data class AvkortingGrunnlagLagreDto(
     val id: UUID = UUID.randomUUID(),
     val inntektTom: Int,
-    val fratrekkInnAar: Int,
+    val fratrekkInnAar: Int = 0,
     val inntektUtlandTom: Int,
-    val fratrekkInnAarUtland: Int,
+    val fratrekkInnAarUtland: Int = 0,
     val spesifikasjon: String,
     val fom: YearMonth,
     val overstyrtInnvilgaMaaneder: AvkortingOverstyrtInnvilgaMaanederDto? = null,
@@ -118,6 +119,7 @@ data class AvkortetYtelseDto(
 
 data class BeregningOgAvkortingDto(
     val perioder: List<BeregningOgAvkortingPeriodeDto>,
+    val erInnvilgelsesaar: Boolean,
     // Hvis nytt beløp fra siste åpne periode er ulik den siste åpne perioden til forrige behandling
     val endringIUtbetalingVedVirk: Boolean,
 )
@@ -148,13 +150,13 @@ enum class OverstyrtBeregningKategori {
     UKJENT_KATEGORI, // for å kunne håndtere tidligere overstyringer som ikke har kategori
 }
 
-data class AarligInntektsjusteringAvkortingSjekkRequest(
+data class InntektsjusteringAvkortingInfoRequest(
     val sakId: SakId,
     val aar: Int,
     val sisteBehandling: UUID,
 )
 
-data class AarligInntektsjusteringAvkortingSjekkResponse(
+data class InntektsjusteringAvkortingInfoResponse(
     val sakId: SakId,
     val aar: Int,
     val harInntektForAar: Boolean,

@@ -1,18 +1,14 @@
 import React, { useState } from 'react'
 import { Alert, BodyShort, Box, Button, Checkbox, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
-import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   IDetaljertBeregnetTrygdetid,
   ITrygdetid,
   oppdaterTrygdetidOverstyrtMigrering,
-  opprettTrygdetidOverstyrtMigrering,
+  opprettTrygdetider,
 } from '~shared/api/trygdetid'
-import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
-
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Toast } from '~shared/alerts/Toast'
@@ -48,7 +44,7 @@ export const TrygdetidManueltOverstyrt = ({
   const [prorataNevner, setNevner] = useState<number | undefined>(beregnetTrygdetid.resultat.prorataBroek?.nevner)
 
   const [oppdaterStatus, oppdaterTrygdetidRequest] = useApiCall(oppdaterTrygdetidOverstyrtMigrering)
-  const [opprettStatus, opprettOverstyrtTrygdetid] = useApiCall(opprettTrygdetidOverstyrtMigrering)
+  const [opprettStatus, opprettTrygdetid] = useApiCall(opprettTrygdetider)
 
   const lagre = () => {
     oppdaterTrygdetidRequest(
@@ -69,8 +65,8 @@ export const TrygdetidManueltOverstyrt = ({
     )
   }
 
-  const overskrivOverstyrtTrygdetid = () => {
-    opprettOverstyrtTrygdetid({ behandlingId: behandling!!.id, overskriv: true }, () => window.location.reload())
+  const opprettNyTrygdetid = () => {
+    opprettTrygdetid({ behandlingId: behandling!!.id, overskriv: true }, () => window.location.reload())
   }
 
   if (!behandling) return <ApiErrorAlert>Fant ikke behandling</ApiErrorAlert>
@@ -79,27 +75,6 @@ export const TrygdetidManueltOverstyrt = ({
   if (!identErIGrunnlag && !tidligereFamiliepleier) {
     if (ident !== 'UKJENT_AVDOED') {
       return <Alert variant="error">Fant ikke avdød ident {ident} (trygdetid) i behandlingsgrunnlaget</Alert>
-    }
-    if (ident === 'UKJENT_AVDOED' && behandling.behandlingType !== IBehandlingsType.REVURDERING) {
-      return (
-        <>
-          {!redigerbar && <Alert variant="warning">OBS! Trygdetiden er koblet til ukjent avdød.</Alert>}
-          {redigerbar && (
-            <>
-              <Alert variant="error">
-                Brev støtter ikke ukjent avdød. Dersom avdød ikke ble oppgitt ved opprettelse av behandlingen må du
-                opprette ny overstyrt trygdetid.
-              </Alert>
-              <br />
-              <Box maxWidth="20rem">
-                <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
-                  Opprett på nytt
-                </Button>
-              </Box>
-            </>
-          )}
-        </>
-      )
     }
   }
 
@@ -113,20 +88,21 @@ export const TrygdetidManueltOverstyrt = ({
         <>
           {ident == 'UKJENT_AVDOED' && (
             <Box maxWidth="40rem">
-              <VStack gap="1">
+              <VStack gap="3">
                 <Alert variant="warning">
-                  OBS! Trygdetiden er koblet til ukjent avdød. Hvis avdød i saken faktisk er kjent bør du annullere
-                  behandlingen og lage en ny behandling med riktig avdød i familieoversikten.
+                  Trygdetiden er koblet til en ukjent avdød. Hvis avdøde i saken er kjent, og familieoversikten er
+                  oppdatert, bør trygdetid opprettes på nytt. Dette for å unngå å bruke manuelt overstyrt trygdetid der
+                  dette ikke er nødvendig.
                 </Alert>
                 <Box maxWidth="20rem">
-                  <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
-                    Opprett overstyrt trygdetid på nytt
+                  <Button variant="danger" size="small" onClick={opprettNyTrygdetid} loading={isPending(opprettStatus)}>
+                    Opprett ny trygdetid
                   </Button>
                 </Box>
               </VStack>
             </Box>
           )}
-          <FormWrapper>
+          <VStack gap="4">
             <TextField
               label="Anvendt trygdetid"
               placeholder="Anvendt trygdetid"
@@ -141,39 +117,44 @@ export const TrygdetidManueltOverstyrt = ({
               Prorata brøk
             </Checkbox>
             {skalHaProrata && (
-              <InputRow>
-                <TextField
-                  label="Prorata teller"
-                  placeholder="Prorata teller"
-                  value={prorataTeller || ''}
-                  pattern="[0-9]{11}"
-                  maxLength={11}
-                  onChange={(e) => setTeller(Number(e.target.value))}
-                />
-                <TextField
-                  label="Prorata nevner"
-                  placeholder="Prorata nevner"
-                  value={prorataNevner || ''}
-                  pattern="[0-9]{11}"
-                  maxLength={11}
-                  onChange={(e) => setNevner(Number(e.target.value))}
-                />
-              </InputRow>
+              <HStack gap="4">
+                <Box width="20rem">
+                  <TextField
+                    label="Prorata teller"
+                    placeholder="Prorata teller"
+                    value={prorataTeller || ''}
+                    pattern="[0-9]{11}"
+                    maxLength={11}
+                    onChange={(e) => setTeller(Number(e.target.value))}
+                  />
+                </Box>
+                <Box width="20rem">
+                  <TextField
+                    label="Prorata nevner"
+                    placeholder="Prorata nevner"
+                    value={prorataNevner || ''}
+                    pattern="[0-9]{11}"
+                    maxLength={11}
+                    onChange={(e) => setNevner(Number(e.target.value))}
+                  />
+                </Box>
+              </HStack>
             )}
 
-            <Knapp>
+            <Box width="20rem">
               <Button
-                variant="secondary"
+                variant="primary"
+                size="small"
                 onClick={lagre}
                 loading={isPending(oppdaterStatus)}
                 disabled={
                   anvendtTrygdetid == null || (skalHaProrata && (prorataNevner == null || prorataTeller == null))
                 }
               >
-                Send inn
+                Lagre overstyrt trygdetid
               </Button>
-            </Knapp>
-          </FormWrapper>
+            </Box>
+          </VStack>
           {mapResult(oppdaterStatus, {
             pending: <Spinner label="Lagrer trygdetid" />,
             error: () => <ApiErrorAlert>En feil har oppstått ved lagring av trygdetid</ApiErrorAlert>,
@@ -222,11 +203,3 @@ export const TrygdetidManueltOverstyrt = ({
     </>
   )
 }
-
-const FormWrapper = styled.div`
-  display: grid;
-  gap: var(--a-spacing-4);
-`
-const Knapp = styled.div`
-  margin-top: 1em;
-`

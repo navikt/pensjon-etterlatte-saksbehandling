@@ -66,7 +66,10 @@ internal class SamsvarHelperKtTest {
     fun `samsvarUtflytting med samsvar`() {
         val utland =
             Utland(
-                innflyttingTilNorge = listOf(InnflyttingTilNorge("Tyskland", LocalDate.of(2013, 7, 9))),
+                innflyttingTilNorge =
+                    listOf(
+                        InnflyttingTilNorge("Tyskland", LocalDate.of(2013, 7, 9), LocalDate.of(2013, 7, 9), LocalDate.of(2013, 7, 9)),
+                    ),
                 utflyttingFraNorge = listOf(UtflyttingFraNorge("Tyskland", LocalDate.of(2022, 1, 1))),
             )
         val utflyttingPdl = utland
@@ -79,7 +82,10 @@ internal class SamsvarHelperKtTest {
     fun `samsvarUtflytting uten samsvar`() {
         val utflyttingPdl =
             Utland(
-                innflyttingTilNorge = listOf(InnflyttingTilNorge("Tyskland", LocalDate.of(2013, 7, 9))),
+                innflyttingTilNorge =
+                    listOf(
+                        InnflyttingTilNorge("Tyskland", LocalDate.of(2013, 7, 9), LocalDate.of(2013, 7, 9), LocalDate.of(2013, 7, 9)),
+                    ),
                 utflyttingFraNorge = listOf(UtflyttingFraNorge("Tyskland", LocalDate.of(2022, 1, 1))),
             )
         val utflyttingGrunnlag =

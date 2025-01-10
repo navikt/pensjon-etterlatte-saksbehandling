@@ -2,8 +2,8 @@ import { Button } from '@navikt/ds-react'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import React from 'react'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
-import { AktivitetspliktInfoModal } from './AktivitetspliktInfoModal'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { AktivitetspliktInfoModal } from '~components/oppgavebenk/oppgaveModal/aktivitetsplikt/AktivitetspliktInfoModal'
 
 /**
  * TODO: Burde fjernes når feature-toggle ikke lenger er aktuelt

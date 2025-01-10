@@ -2,6 +2,7 @@ package no.nav.etterlatte.avkorting
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
+import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagFrontend
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.SanksjonertYtelse
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -130,7 +132,12 @@ data class Avkorting(
                                                     fom = inntektsavkorting.grunnlag.periode.fom,
                                                     tom =
                                                         inntektsavkorting.grunnlag.periode.tom
-                                                            ?: opphoerFom?.minusMonths(1),
+                                                            ?: opphoerFom?.let {
+                                                                tomOpphoerFomEllerAarsskifte(
+                                                                    inntektsavkorting.grunnlag.periode.fom,
+                                                                    opphoerFom,
+                                                                )
+                                                            },
                                                 ),
                                         ),
                                 )
@@ -391,7 +398,7 @@ data class Avkorting(
                 )
             // Ytelse etter avkorting må reberegnes fra første sanksjon som ikke er "sett" i tidlegere beregninger
             val tidligsteFomIkkeBeregnetSanksjon =
-                requireNotNull(sorterteSanksjonerInnenforAarsoppgjoer.firstOrNull { it.fom >= senesteInntektsjusteringFom }?.fom) {
+                krevIkkeNull(sorterteSanksjonerInnenforAarsoppgjoer.firstOrNull { it.fom >= senesteInntektsjusteringFom }?.fom) {
                     "Fant tidligere at vi har en sanksjon som er etter siste inntektsjustering, men finner ingen nå"
                 }
             val ytelseMedAlleSanksjoner =
@@ -428,6 +435,15 @@ data class Avkorting(
             true -> YearMonth.of(aarsoppgjoer.aar, 12)
             false -> null
         }
+    }
+
+    private fun tomOpphoerFomEllerAarsskifte(
+        fom: YearMonth,
+        opphoerFom: YearMonth,
+    ) = if (opphoerFom.year > fom.year) {
+        YearMonth.of(fom.year, Month.DECEMBER)
+    } else {
+        opphoerFom.minusMonths(1)
     }
 
     /*

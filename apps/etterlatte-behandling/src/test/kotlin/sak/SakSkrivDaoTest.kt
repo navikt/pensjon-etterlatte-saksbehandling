@@ -13,16 +13,20 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -37,6 +41,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
+import java.time.Month
+import java.time.YearMonth
 import javax.sql.DataSource
 import kotlin.random.Random
 
@@ -484,5 +490,62 @@ internal class SakSkrivDaoTest(
             foer.ident shouldBe opprinneligIdent
             etter.ident shouldBe nyIdent.value
         }
+    }
+
+    @Test
+    fun `skal hente saker med dato pleieforholdet opphoerte`() {
+        val sak1 = sakRepo.opprettSak("ident1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val sak2 = sakRepo.opprettSak("ident2", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val pleieForholdEnStart = LocalDate.of(2021, Month.AUGUST, 7)
+        val pleieForholdEnSlutt = LocalDate.of(2024, Month.AUGUST, 9)
+        val pleieForholdToStart = LocalDate.of(2022, Month.SEPTEMBER, 1)
+        val pleieForholdToSlutt = LocalDate.of(2024, Month.SEPTEMBER, 30)
+
+        val behandlingSakEn =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak1.id,
+            )
+
+        behandlingRepo.opprettBehandling(behandlingSakEn)
+        behandlingRepo.lagreTidligereFamiliepleier(
+            behandlingSakEn.id,
+            tidligereFamiliepleier =
+                TidligereFamiliepleier(
+                    svar = true,
+                    kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                    foedselsnummer = "pleid1",
+                    startPleieforhold = pleieForholdEnStart,
+                    opphoertPleieforhold = pleieForholdEnSlutt,
+                    begrunnelse = "",
+                ),
+        )
+        val behandlingEn = behandlingRepo.hentBehandling(behandlingSakEn.id) as Foerstegangsbehandling
+        behandlingRepo.lagreStatus(behandlingEn.copy(status = BehandlingStatus.IVERKSATT))
+
+        val behandlingSakTo =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak2.id,
+            )
+        behandlingRepo.opprettBehandling(behandlingSakTo)
+        behandlingRepo.lagreTidligereFamiliepleier(
+            behandlingSakTo.id,
+            TidligereFamiliepleier(
+                svar = true,
+                kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                foedselsnummer = "pleid2",
+                startPleieforhold = pleieForholdToStart,
+                opphoertPleieforhold = pleieForholdToSlutt,
+                begrunnelse = "",
+            ),
+        )
+        val behandlingTo = behandlingRepo.hentBehandling(behandlingSakTo.id) as Foerstegangsbehandling
+        behandlingRepo.lagreStatus(behandlingTo.copy(status = BehandlingStatus.IVERKSATT))
+
+        sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdEnSlutt)) shouldBe listOf(sak1.id)
+        sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdToSlutt)) shouldBe listOf(sak2.id)
+        sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdEnStart)) shouldBe emptyList()
+        sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdToStart)) shouldBe emptyList()
     }
 }

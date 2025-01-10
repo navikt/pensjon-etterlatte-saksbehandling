@@ -1,10 +1,14 @@
 import * as amplitude from '@amplitude/analytics-browser'
+import { JaNei } from '~shared/types/ISvar'
 
 export enum LogEvents {
   CLICK = 'klikk',
 }
 
 export enum ClickEvent {
+  //Aktivitetsplikt
+  SJEKKER_SISTE_BEREGNING = 'sjekker siste beregning',
+
   // Vilkaarsvurdering
   SLETT_VILKAARSVURDERING = 'slett vilkaarsvurdering',
 
@@ -17,7 +21,6 @@ export enum ClickEvent {
   OPPHEV_FEILREGISTRERING_JOURNALPOST = 'opphev feilregistrering journalpost',
   FLYTT_JOURNALPOST = 'flytt journalpost',
   KNYTT_JOURNALPOST_TIL_ANNEN_SAK = 'knytt journalpost til annen sak',
-  OPPRETT_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave',
 
   // Brev
   OPPRETT_NYTT_BREV = 'opprett nytt brev',
@@ -29,12 +32,20 @@ export enum ClickEvent {
   SLETT_NOTAT = 'slett notat',
   JOURNALFOER_NOTAT = 'journalfoer notat',
 
+  // Oppgave
+  OPPRETT_GENERELL_OPPGAVE = 'opprett generell oppgave',
+  OPPRETT_JOURNALFOERINGSOPPGAVE = 'opprett journalfoeringsoppgave',
+  TILDEL_TILKNYTTEDE_OPPGAVER = 'tildel tilknyttede oppgaver',
+
   // Avkorting
   AVKORTING_FORVENTET_INNTEKT_HJELPETEKST = 'avkorting forventet inntekt hjelpetekst',
   AVKORTING_INNVILGA_MAANEDER_HJELPETEKST = 'avkorting innvilga måneder hjelpetekst',
 
   // Trygdetid
   KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
+
+  // Generelt
+  VIS_VARSLINGER = 'vis varslinger',
 }
 
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined
@@ -84,6 +95,22 @@ export const trackClick = (name: ClickEvent) => {
     event_type: LogEvents.CLICK,
     event_properties: {
       tekst: name,
+    },
+  })
+}
+
+export const trackClickJaNei = (name: ClickEvent, svar: JaNei) => trackClickMedSvar(name, svar)
+
+export const trackClickMedSvar = (name: ClickEvent, svar: string) => {
+  if (!amplitudeInstance) {
+    console.warn('Amplitude is not initialized. Ignoring')
+    return
+  }
+  amplitudeInstance.track({
+    event_type: LogEvents.CLICK,
+    event_properties: {
+      tekst: name,
+      svar,
     },
   })
 }

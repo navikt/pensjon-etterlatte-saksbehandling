@@ -25,6 +25,15 @@ interface Props {
   oppgaveId?: string
 }
 
+function sorterRevurderingerKronologisk(revurderinger: Revurderingaarsak[]): Revurderingaarsak[] {
+  return revurderinger.toSorted((first, last) => {
+    if (tekstRevurderingsaarsak[first].trim().toLowerCase() > tekstRevurderingsaarsak[last].trim().toLowerCase()) {
+      return 1
+    }
+    return -1
+  })
+}
+
 export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseId, oppgaveId }: Props) => {
   const navigate = useNavigate()
 
@@ -82,68 +91,74 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
         <Modal.Body>
           {mapResult(muligeRevurderingAarsakerResult, {
             pending: <Spinner label="Henter revurderingsårsaker..." />,
-            success: (muligeRevurderingAarsaker) =>
-              !!muligeRevurderingAarsaker?.length ? (
-                <VStack gap="4">
-                  <Select
-                    {...register('aarsak', {
-                      required: {
-                        value: true,
-                        message: 'Du må velge en årsak for revurdering',
-                      },
-                    })}
-                    label="Årsak til revurdering"
-                    error={errors.aarsak?.message}
-                  >
-                    <option value="">Velg årsak</option>
-                    {muligeRevurderingAarsaker.map((aarsak, index) => (
-                      <option key={index} value={aarsak}>
-                        {tekstRevurderingsaarsak[aarsak]}
-                      </option>
-                    ))}
-                  </Select>
-                  {watch().aarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND && (
-                    <Alert variant="warning">
-                      Sluttbehandling kan nå opprettes uten å huket av for skal sende kravpakke, dette for å støtte
-                      kravpakke som finnes i feks PESYS.
-                    </Alert>
-                  )}
-                  {watch().aarsak === Revurderingaarsak.ANNEN && (
-                    <AnnenRevurderingWrapper gap="4">
-                      <TextField
-                        {...register('fritekstAarsak', {
+            success: (muligeRevurderingAarsaker) => {
+              const sorterteMuligeRevurderingAarsaker = sorterRevurderingerKronologisk(muligeRevurderingAarsaker)
+              return (
+                <>
+                  {sorterteMuligeRevurderingAarsaker.length ? (
+                    <VStack gap="4">
+                      <Select
+                        {...register('aarsak', {
                           required: {
                             value: true,
-                            message: 'Du må beskrive årsaken',
+                            message: 'Du må velge en årsak for revurdering',
                           },
                         })}
-                        label="Beskriv årsak"
-                        error={errors.fritekstAarsak?.message}
-                      />
-                      <AnnenRevurderingAlert variant="warning" size="small" inline>
-                        Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
-                      </AnnenRevurderingAlert>
-                    </AnnenRevurderingWrapper>
+                        label="Årsak til revurdering"
+                        error={errors.aarsak?.message}
+                      >
+                        <option value="">Velg årsak</option>
+                        {sorterteMuligeRevurderingAarsaker.map((aarsak, index) => (
+                          <option key={index} value={aarsak}>
+                            {tekstRevurderingsaarsak[aarsak]}
+                          </option>
+                        ))}
+                      </Select>
+                      {watch().aarsak == Revurderingaarsak.SLUTTBEHANDLING && (
+                        <Alert variant="warning">
+                          Sluttbehandling kan nå opprettes uten å huket av for skal sende kravpakke, dette for å støtte
+                          kravpakke som finnes i feks PESYS.
+                        </Alert>
+                      )}
+                      {watch().aarsak === Revurderingaarsak.ANNEN && (
+                        <AnnenRevurderingWrapper gap="4">
+                          <TextField
+                            {...register('fritekstAarsak', {
+                              required: {
+                                value: true,
+                                message: 'Du må beskrive årsaken',
+                              },
+                            })}
+                            label="Beskriv årsak"
+                            error={errors.fritekstAarsak?.message}
+                          />
+                          <AnnenRevurderingAlert variant="warning" size="small" inline>
+                            Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
+                          </AnnenRevurderingAlert>
+                        </AnnenRevurderingWrapper>
+                      )}
+
+                      {mapFailure(opprettRevurderingResult, (error) => (
+                        <ApiErrorAlert>{error.detail || 'Kunne ikke opprette revurdering'}</ApiErrorAlert>
+                      ))}
+
+                      <HStack gap="2" justify="end">
+                        <Button variant="secondary" type="button" onClick={lukkModal}>
+                          Avbryt
+                        </Button>
+                        <Button loading={isPending(opprettRevurderingResult)} onClick={handleSubmit(paaOpprett)}>
+                          Opprett
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  ) : (
+                    <Alert variant="info" size="small">
+                      Ingen revurderingsårsaker for denne saken
+                    </Alert>
                   )}
-
-                  {mapFailure(opprettRevurderingResult, (error) => (
-                    <ApiErrorAlert>{error.detail || 'Kunne ikke opprette revurdering'}</ApiErrorAlert>
-                  ))}
-
-                  <HStack gap="2" justify="end">
-                    <Button variant="secondary" type="button" onClick={lukkModal}>
-                      Avbryt
-                    </Button>
-                    <Button loading={isPending(opprettRevurderingResult)} onClick={handleSubmit(paaOpprett)}>
-                      Opprett
-                    </Button>
-                  </HStack>
-                </VStack>
-              ) : (
-                <Alert variant="info" size="small">
-                  Ingen revurderingsårsaker for denne saken
-                </Alert>
-              ),
+                </>
+              )
+            },
           })}
         </Modal.Body>
       </Modal>

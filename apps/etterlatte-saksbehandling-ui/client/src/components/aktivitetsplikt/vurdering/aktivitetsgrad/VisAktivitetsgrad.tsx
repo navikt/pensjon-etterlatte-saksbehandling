@@ -3,7 +3,7 @@ import {
   IAktivitetspliktVurderingNyDto,
   teksterAktivitetspliktSkjoennsmessigVurdering,
 } from '~shared/types/Aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { slettAktivitetspliktVurdering } from '~shared/api/aktivitetsplikt'
 import React, { useState } from 'react'
@@ -73,13 +73,18 @@ export function VisAktivitetsgrad(props: { aktivitet: IAktivitetspliktAktivitets
 
       {erRedigerbar && (
         <HStack gap="4">
-          <Button size="xsmall" variant="secondary" onClick={() => setRedigerer(true)} icon={<PencilIcon />}>
+          <Button
+            size="xsmall"
+            variant="secondary"
+            onClick={() => setRedigerer(true)}
+            icon={<PencilIcon aria-hidden />}
+          >
             Rediger
           </Button>
           <Button
             size="xsmall"
             variant="secondary"
-            icon={<TrashIcon />}
+            icon={<TrashIcon aria-hidden />}
             loading={isPending(slettStatus)}
             onClick={() => slettAktivitetsgradIOppgave(aktivitet)}
           >

@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -336,7 +337,7 @@ class OppgaveService(
 
             ferdigstillOppgave(oppgaveUnderbehandling, saksbehandler, merknad)
 
-            return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
+            return krevIkkeNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
             }
         } catch (e: NoSuchElementException) {
@@ -428,7 +429,7 @@ class OppgaveService(
         val forrigeSaksbehandler = saksbehandlerSomFattetVedtak(oppgave)
 
         if (forrigeSaksbehandler.isNullOrBlank()) {
-            logger.warn("Fant ikke saksbehandleren som sendte oppgave $oppgave til attestering")
+            logger.warn("Fant ikke saksbehandleren som sendte oppgaveid ${oppgave.id} til attestering")
         } else {
             logger.info("Tildeler oppgave ${oppgave.id} til $forrigeSaksbehandler som sendte oppgaven til attestering")
             oppgaveDao.settNySaksbehandler(oppgave.id, forrigeSaksbehandler)
@@ -503,6 +504,11 @@ class OppgaveService(
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
+    fun hentOppgaverForGruppeId(
+        gruppeId: String,
+        type: OppgaveType,
+    ): List<OppgaveIntern> = oppgaveDao.hentOppgaverForGruppeId(gruppeId, type)
+
     fun hentForrigeStatus(oppgaveId: UUID): Status {
         val oppgave = hentOppgave(oppgaveId)
 
@@ -531,7 +537,7 @@ class OppgaveService(
             sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
 
-            return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
+            return krevIkkeNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat avbrøt kunne ikke hentes ut"
             }
         } catch (e: NoSuchElementException) {
@@ -556,27 +562,6 @@ class OppgaveService(
                     logger.warn("Ingen oppgave under behandling for referanse: $referanse")
                 }
             }
-
-    fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-        referanse: String,
-        sakId: SakId,
-        oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
-        merknad: String? = null,
-    ): OppgaveIntern {
-        val oppgaverForBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
-        val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
-        oppgaverSomKanLukkes.forEach {
-            oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
-        }
-
-        return opprettOppgave(
-            referanse = referanse,
-            sakId = sakId,
-            kilde = oppgaveKilde,
-            type = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = merknad,
-        )
-    }
 
     fun opprettOppgaveBulk(
         referanse: String,
@@ -618,6 +603,7 @@ class OppgaveService(
         merknad: String?,
         frist: Tidspunkt? = null,
         saksbehandler: String? = null,
+        gruppeId: String? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
 
@@ -629,6 +615,7 @@ class OppgaveService(
                 type = type,
                 merknad = merknad,
                 frist = frist,
+                gruppeId = gruppeId,
             )
         oppgaveDao.opprettOppgave(oppgave)
 
@@ -700,7 +687,7 @@ class OppgaveService(
                         OppgaveType.MANGLER_SOEKNAD,
                         OppgaveType.GENERELL_OPPGAVE,
                         OppgaveType.AARLIG_INNTEKTSJUSTERING,
-                        OppgaveType.MOTTATT_INNTEKTSJUSTERING,
+                        OppgaveType.INNTEKTSOPPLYSNING,
                         OppgaveType.MANUELL_UTSENDING_BREV,
                         -> {
                             logger.info(

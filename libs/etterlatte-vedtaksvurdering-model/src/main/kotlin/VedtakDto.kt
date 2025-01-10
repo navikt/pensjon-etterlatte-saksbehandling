@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -87,7 +87,7 @@ data class Periode(
     val tom: YearMonth?,
 ) {
     init {
-        checkInternFeil(isNull(tom) || fom == tom || fom.isBefore(tom)) {
+        krev(isNull(tom) || fom == tom || fom.isBefore(tom)) {
             "Fom må vera før eller lik tom, men fom er $fom og tom er $tom"
         }
     }

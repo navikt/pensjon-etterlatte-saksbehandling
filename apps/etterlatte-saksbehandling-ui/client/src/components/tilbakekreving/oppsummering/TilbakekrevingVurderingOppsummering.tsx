@@ -1,20 +1,22 @@
-import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
+import { klasseTypeYtelse, TilbakekrevingBehandling, TilbakekrevingBeloep } from '~shared/types/Tilbakekreving'
 import React from 'react'
 import { Table } from '@navikt/ds-react'
 import { NOK } from '~utils/formatering/formatering'
 
 export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling: TilbakekrevingBehandling }) {
-  function sum(beloeper: (number | null)[]) {
-    if (beloeper.length === 0) return 0
-    return beloeper.map((beloep) => (beloep ? beloep : 0)).reduce((sum, current) => sum + current)
+  function sumKlasseTypeYtelse(callback: (beloep: TilbakekrevingBeloep) => number | null) {
+    return tilbakekreving.perioder
+      .flatMap((it) => it.tilbakekrevingsbeloep.filter(klasseTypeYtelse).map((beloep) => callback(beloep)))
+      .map((beloep) => (beloep ? beloep : 0))
+      .reduce((sum, current) => sum + current, 0)
   }
 
   const tilbakekreving = behandling.tilbakekreving
-  const sumFeilutbetaling = sum(tilbakekreving.perioder.map((it) => it.ytelse.beregnetFeilutbetaling))
-  const sumNettoTilbakekreving = sum(tilbakekreving.perioder.map((it) => it.ytelse.nettoTilbakekreving))
-  const sumBruttoTilbakekreving = sum(tilbakekreving.perioder.map((it) => it.ytelse.bruttoTilbakekreving))
-  const sumRenter = sum(tilbakekreving.perioder.map((it) => it.ytelse.rentetillegg))
-  const sumSkatt = sum(tilbakekreving.perioder.map((it) => it.ytelse.skatt))
+  const sumFeilutbetaling = sumKlasseTypeYtelse((beloep) => beloep.beregnetFeilutbetaling)
+  const sumNettoTilbakekreving = sumKlasseTypeYtelse((beloep) => beloep.nettoTilbakekreving)
+  const sumBruttoTilbakekreving = sumKlasseTypeYtelse((beloep) => beloep.bruttoTilbakekreving)
+  const sumRenter = sumKlasseTypeYtelse((beloep) => beloep.rentetillegg)
+  const sumSkatt = sumKlasseTypeYtelse((beloep) => beloep.skatt)
   const oppsummertInnkreving = sumNettoTilbakekreving + sumRenter
 
   return (

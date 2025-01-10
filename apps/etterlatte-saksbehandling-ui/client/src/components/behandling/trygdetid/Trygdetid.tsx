@@ -4,15 +4,16 @@ import {
   hentTrygdetider,
   ITrygdetid,
   opprettTrygdetider,
-  opprettTrygdetidOverstyrtMigrering,
+  hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon,
+  sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending, mapResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
@@ -26,7 +27,6 @@ import { TrygdetidMelding } from '~components/behandling/trygdetid/components/Tr
 import { hentAlleLand } from '~shared/api/behandling'
 import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
@@ -37,16 +37,8 @@ interface Props {
   virkningstidspunktEtterNyRegelDato: boolean
 }
 
-const manglerTrygdetid = (
-  trygdetider: ITrygdetid[],
-  tidligereFamiliepleier: boolean,
-  avdoede?: Personopplysning[],
-  soeker?: Personopplysning
-): boolean => {
+const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[]): boolean => {
   const trygdetidIdenter = trygdetider.map((trygdetid) => trygdetid.ident)
-
-  if (tidligereFamiliepleier) return soeker ? !trygdetidIdenter.includes(soeker.opplysning.foedselsnummer) : true
-
   const avdoedIdenter = (avdoede || []).map((avdoed) => avdoed.opplysning.foedselsnummer)
   return !avdoedIdenter.every((ident) => trygdetidIdenter.includes(ident))
 }
@@ -55,11 +47,16 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const dispatch = useAppDispatch()
 
   const kopierTrygdetidsgrunnlagEnabled = useFeaturetoggle(FeatureToggle.kopier_trygdetidsgrunnlag)
+  const kanHenteTrygdetidFraPesys = useFeaturetoggle(FeatureToggle.trygdetid_fra_pesys)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
+  const [hentTTPesysStatus, hentOgOppdaterDataFraPesys] = useApiCall(
+    hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon
+  )
+  const [sjekkOmAvodedHarTTIPesysStatus, sjekkOmAvdoedHarTTIPesysHent] = useApiCall(
+    sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys
+  )
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
-  const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
-
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
   const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
@@ -81,11 +78,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     return `${formaterNavn(opplysning)} ${visFnr ? ` (${fnr})` : ''}`
   }
 
-  const tidligereFamiliepleier =
-    (behandling.tidligereFamiliepleier?.svar &&
-      behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT) ??
-    false
-
   const oppdaterTrygdetider = (trygdetid: ITrygdetid[]) => {
     setTrygdetider(trygdetid)
     dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
@@ -96,26 +88,20 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       if (
         trygdetider === null ||
         trygdetider.length == 0 ||
-        manglerTrygdetid(trygdetider, tidligereFamiliepleier, personopplysninger?.avdoede, personopplysninger?.soeker)
+        manglerTrygdetid(trygdetider, personopplysninger?.avdoede)
       ) {
-        if (tidligereFamiliepleier) {
-          opprettOverstyrtTrygdetidReq({ behandlingId: behandling.id, overskriv: true }, () =>
-            fetchTrygdetider(behandlingId)
-          )
+        if (behandlingErIverksatt(behandling.status)) {
+          setHarPilotTrygdetid(true)
+        } else if (redigerbar) {
+          requestOpprettTrygdetid({ behandlingId: behandling.id, overskriv: false }, (trygdetider: ITrygdetid[]) => {
+            oppdaterTrygdetider(trygdetider)
+          })
+        } else if (vedtaksresultat === 'avslag') {
+          setTrygdetidManglerVedAvslag(true)
         } else {
-          if (behandlingErIverksatt(behandling.status)) {
-            setHarPilotTrygdetid(true)
-          } else if (redigerbar) {
-            requestOpprettTrygdetid(behandling.id, (trygdetider: ITrygdetid[]) => {
-              oppdaterTrygdetider(trygdetider)
-            })
-          } else if (vedtaksresultat === 'avslag') {
-            setTrygdetidManglerVedAvslag(true)
-          } else {
-            setTrygdetidIdMangler(true)
-            if (behandling.status !== IBehandlingStatus.AVBRUTT) {
-              throw new Error('Kan ikke opprette trygdetid når readonly')
-            }
+          setTrygdetidIdMangler(true)
+          if (behandling.status !== IBehandlingStatus.AVBRUTT) {
+            throw new Error('Kan ikke opprette trygdetid når readonly')
           }
         }
       } else {
@@ -124,20 +110,27 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     })
   }
 
+  const oppdaterTrygdetidMedPesysData = () => {
+    hentOgOppdaterDataFraPesys(behandling.id, (trygdetider: ITrygdetid[]) => {
+      oppdaterTrygdetider(trygdetider)
+    })
+  }
+
   useEffect(() => {
     if (!behandling?.id) {
       setBehandlingsIdMangler(true)
       throw new Error('Mangler behandlingsid')
     }
-
     fetchTrygdetider(behandling.id)
-  }, [])
-
-  useEffect(() => {
     fetchAlleLand(null, (landListe: ILand[]) => {
       setLandListe(sorterLand(landListe))
     })
   }, [])
+  useEffect(() => {
+    if (kanHenteTrygdetidFraPesys) {
+      sjekkOmAvdoedHarTTIPesysHent(behandling.id)
+    }
+  }, [kanHenteTrygdetidFraPesys])
 
   if (harPilotTrygdetid) {
     return (
@@ -169,7 +162,37 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       )}
       <VStack gap="12">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
-
+        {kanHenteTrygdetidFraPesys && (
+          <>
+            {mapResult(sjekkOmAvodedHarTTIPesysStatus, {
+              initial: null,
+              pending: <Spinner label="Sjekker om avdøed har trygdetidsgrunnlag i Pesys" />,
+              error: () => <Alert variant="warning">Kunne ikke sjekke trygdetidsgrunnag i Pesys</Alert>,
+              success: (harTrygdetidsgrunnlagIPesys) => {
+                return (
+                  <>
+                    {harTrygdetidsgrunnlagIPesys && (
+                      <>
+                        <Box maxWidth="fit-content">
+                          <BodyShort>
+                            Her kan du hente trygdetid registrert i avdødes uføretrygd eller alderspensjon.
+                          </BodyShort>
+                          <Button onClick={oppdaterTrygdetidMedPesysData} loading={isPending(hentTTPesysStatus)}>
+                            Hent
+                          </Button>
+                        </Box>
+                        {isFailure(hentTTPesysStatus) && (
+                          <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>
+                        )}
+                        {isPending(hentTTPesysStatus) && <Spinner label="Henter trygdetid i Pesys" />}
+                      </>
+                    )}
+                  </>
+                )
+              },
+            })}
+          </>
+        )}
         {landListe && (
           <>
             {trygdetider.length == 1 && (
@@ -250,10 +273,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         {isFailureHandler({
           apiResult: hentAlleLandRequest,
           errorMessage: 'En feil har oppstått ved henting av landliste',
-        })}
-        {isFailureHandler({
-          apiResult: overstyrTrygdetidStatus,
-          errorMessage: 'En feil har oppstått ved opprettelse av overstyrt trygdetid',
         })}
 
         {behandlingsIdMangler && <ApiErrorAlert>Finner ikke behandling - ID mangler</ApiErrorAlert>}

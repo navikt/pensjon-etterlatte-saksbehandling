@@ -1,6 +1,6 @@
 import { Alert } from '@navikt/ds-react'
 import React from 'react'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/OppgaveVurderingRoute'
+import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
 
 function loeperUnntakEtterSisteVurdering(vurdering: IAktivitetspliktVurderingNyDto): boolean {

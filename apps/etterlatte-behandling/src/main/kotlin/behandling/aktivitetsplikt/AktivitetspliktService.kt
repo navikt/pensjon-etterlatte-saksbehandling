@@ -36,7 +36,8 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.checkInternFeil
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -52,7 +53,6 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.collections.filter
 
 class AktivitetspliktService(
     private val aktivitetspliktDao: AktivitetspliktDao,
@@ -415,7 +415,7 @@ class AktivitetspliktService(
         if (aktivitetsgrad.id != null) {
             aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgrad, kilde, behandlingId)
         } else {
-            checkInternFeil(
+            krev(
                 aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId).isEmpty(),
             ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
             val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
@@ -512,7 +512,7 @@ class AktivitetspliktService(
         if (unntak.id != null) {
             aktivitetspliktUnntakDao.oppdaterUnntak(unntak, kilde, behandlingId)
         } else {
-            checkInternFeil(
+            krev(
                 aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId).isEmpty(),
             ) { "Unntak finnes allerede for behandling $behandlingId" }
 
@@ -535,13 +535,20 @@ class AktivitetspliktService(
         return AktivitetspliktVurdering(aktivitetsgrad, unntak)
     }
 
-    fun hentVurderingForOppgaveGammel(oppgaveId: UUID): AktivitetspliktVurderingGammel? =
-        hentVurderingForOppgave(oppgaveId).let {
-            AktivitetspliktVurderingGammel(
-                aktivitet = it.aktivitet.firstOrNull(),
-                unntak = it.unntak.firstOrNull(),
-            )
+    fun hentVurderingForOppgaveGammel(oppgaveId: UUID): AktivitetspliktVurderingGammel? {
+        val vurdering = hentVurderingForOppgave(oppgaveId)
+        // Denne må returnere null for at frontend skal fungerer riktig
+        return if (vurdering.erTom()) {
+            null
+        } else {
+            vurdering.let {
+                AktivitetspliktVurderingGammel(
+                    aktivitet = it.aktivitet.firstOrNull(),
+                    unntak = it.unntak.firstOrNull(),
+                )
+            }
         }
+    }
 
     fun hentVurderingForBehandling(behandlingId: UUID): AktivitetspliktVurdering? {
         val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
@@ -604,12 +611,12 @@ class AktivitetspliktService(
         bruker: BrukerTokenInfo,
     ): OpprettRevurderingForAktivitetspliktResponse {
         val forrigeBehandling =
-            requireNotNull(behandlingService.hentSisteIverksatte(request.sakId)) {
+            krevIkkeNull(behandlingService.hentSisteIverksatte(request.sakId)) {
                 "Fant ikke forrige behandling i sak ${request.sakId}sakId"
             }
         val persongalleri =
             runBlocking {
-                requireNotNull(
+                krevIkkeNull(
                     grunnlagKlient
                         .hentPersongalleri(
                             forrigeBehandling.id,
@@ -698,18 +705,15 @@ class AktivitetspliktService(
             .opprettRevurdering(
                 sakId = request.sakId,
                 persongalleri = persongalleri,
-                forrigeBehandling = forrigeBehandling.id,
+                forrigeBehandling = forrigeBehandling,
                 mottattDato = null,
                 prosessType = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
                 revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
                 virkningstidspunkt = aktivitetspliktDato?.tilVirkningstidspunkt("Aktivitetsplikt"),
-                utlandstilknytning = forrigeBehandling.utlandstilknytning,
-                boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                 begrunnelse = request.jobbType.beskrivelse,
                 saksbehandlerIdent = Fagsaksystem.EY.navn,
                 frist = request.frist,
-                opphoerFraOgMed = forrigeBehandling.opphoerFraOgMed,
             ).oppdater()
             .let { revurdering ->
                 revurderingService.fjernSaksbehandlerFraRevurderingsOppgave(revurdering)
@@ -876,7 +880,7 @@ fun hentVurderingForSakHelper(
                 return AktivitetspliktVurdering(aktivitetForBehandling, unntak)
             } else {
                 val oppgaveId =
-                    requireNotNull(foersteUnntak.oppgaveId) {
+                    krevIkkeNull(foersteUnntak.oppgaveId) {
                         "Har et unntak med id=${foersteUnntak.id} i sak=${foersteUnntak.sakId} som ikke " +
                             "er koblet på hverken sak eller oppgave."
                     }
@@ -891,7 +895,7 @@ fun hentVurderingForSakHelper(
                 return AktivitetspliktVurdering(aktivitet, unntakForBehandling)
             } else {
                 val oppgaveId =
-                    requireNotNull(foersteVurdering.oppgaveId) {
+                    krevIkkeNull(foersteVurdering.oppgaveId) {
                         "Har en vurdering med id=${foersteVurdering.id} i sak=${foersteVurdering.sakId} som ikke " +
                             "er koblet på hverken sak eller oppgave."
                     }

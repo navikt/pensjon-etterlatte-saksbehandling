@@ -1,5 +1,4 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { OppdatertOppgaveversjonResponseDto, SaksbehandlerEndringDto } from '~shared/api/oppgaver'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { GosysFilter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { GosysOppgave } from '~shared/types/Gosys'
@@ -38,3 +37,12 @@ export const ferdigstilleGosysOppgave = async (args: {
   versjon: number
 }): Promise<ApiResponse<OppgaveDTO>> =>
   apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/ferdigstill?versjon=${args.versjon}`, {})
+
+export interface OppdatertOppgaveversjonResponseDto {
+  versjon: number
+}
+
+export interface SaksbehandlerEndringDto {
+  saksbehandler: string
+  versjon: number
+}

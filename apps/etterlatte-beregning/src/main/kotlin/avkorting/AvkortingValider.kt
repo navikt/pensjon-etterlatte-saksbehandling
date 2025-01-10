@@ -9,12 +9,15 @@ object AvkortingValider {
     fun validerInntekt(
         nyInntekt: AvkortingGrunnlagLagreDto,
         avkorting: Avkorting,
-        innvilgelse: Boolean,
+        erFoerstegangsbehandling: Boolean,
+        naa: YearMonth = YearMonth.now(),
     ) {
+        skalIkkeKunneEndreInntektITidligereAar(erFoerstegangsbehandling, nyInntekt.fom, naa)
+
         foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
             nyInntekt,
             avkorting,
-            innvilgelse,
+            erFoerstegangsbehandling,
         )
         skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(
             nyInntekt.fom,
@@ -28,12 +31,22 @@ object AvkortingValider {
         // TODO valider at virk tidligere enn forrige innvilgelse ikke støttes enda
     }
 
+    private fun skalIkkeKunneEndreInntektITidligereAar(
+        erFoerstegangsbehandling: Boolean,
+        nyInntektFom: YearMonth,
+        naa: YearMonth,
+    ) {
+        if (!erFoerstegangsbehandling && nyInntektFom.year < naa.year) {
+            throw InntektForTidligereAar()
+        }
+    }
+
     private fun foersteRevurderingIAareneEtterInnvilgelsesaarMaaStarteIJanuar(
         nyInntekt: AvkortingGrunnlagLagreDto,
         avkorting: Avkorting,
-        innvilgelse: Boolean,
+        erFoerstegangsbehandling: Boolean,
     ) {
-        if (!innvilgelse) {
+        if (!erFoerstegangsbehandling) {
             if (avkorting.aarsoppgjoer.none { it.aar == nyInntekt.fom.year }) {
                 if (nyInntekt.fom.month != Month.JANUARY) {
                     throw FoersteRevurderingSenereEnnJanuar()
@@ -42,6 +55,10 @@ object AvkortingValider {
         }
     }
 
+    /*
+    Det skal i utgangspunktet ikke være lov å endre inntekt bakover i tid. Skal alltid være måned etter rapportert endrng.
+    Er det gjort feil av saksbehandler kan siste inntektsendring redigeres.
+     */
     private fun skalIkkeKunneLeggeTilEllerEndreAarsinntektTidligereEnnForrigeAarsinntekt(
         fom: YearMonth,
         avkorting: Avkorting,
@@ -80,4 +97,10 @@ class HarFratrekkInnAarForFulltAar :
     IkkeTillattException(
         code = "NY_INNTEKT_FRATREKK_INN_AAR_FULLT_AAR",
         detail = "Kan ikke legge til fratrekk inn år når det er innvilga måned fra og med januar",
+    )
+
+class InntektForTidligereAar :
+    IkkeTillattException(
+        "ENDRE_INNTEKT_TIDLIGERE_AAR",
+        "Det er ikke mulig å endre inntekt for tidligere år",
     )

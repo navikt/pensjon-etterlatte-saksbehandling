@@ -117,7 +117,9 @@ class SakRepository(
             statement.executeQuery().toList { tilSakRad() }
         }
 
-    fun hentSisteRad(behandlingId: UUID): SakRad? =
+    fun hentSisteRad(behandlingId: UUID): SakRad? = hentRaderForBehandlingId(behandlingId).firstOrNull()
+
+    fun hentRaderForBehandlingId(behandlingId: UUID): List<SakRad> =
         datasource.connection.use { connection ->
             val statement =
                 connection
@@ -134,8 +136,21 @@ class SakRepository(
                     ).apply {
                         setObject(1, behandlingId)
                     }
-            statement.executeQuery().toList { tilSakRad() }.firstOrNull()
+            statement.executeQuery().toList { tilSakRad() }
         }
+
+    fun slettRad(id: Long) {
+        datasource.connection.use { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    DELETE FROM sak WHERE id = ?
+                    """.trimIndent(),
+                )
+            statement.setLong(1, id)
+            statement.executeUpdate()
+        }
+    }
 }
 
 private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =

@@ -126,8 +126,6 @@ export const NyAktivitet = ({
                 </option>
               ))}
             </Select>
-          </HStack>
-          <HStack>
             <Textarea
               style={{ width: '630px' }}
               {...register('beskrivelse', {

@@ -11,7 +11,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
-import no.nav.etterlatte.behandling.utland.SluttbehandlingUtlandBehandlinginfo
+import no.nav.etterlatte.behandling.utland.SluttbehandlingBehandlinginfo
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -75,14 +75,14 @@ internal class BehandlingInfoDaoTest(
     fun `skal lagre erOmgjoeringSluttbehandlingUtland`() {
         val sluttbehandlingUtland = true
         behandlingDao.hentBehandling(behandlingId)?.erSluttbehandling() shouldBe !sluttbehandlingUtland
-        dao.lagreErOmgjoeringSluttbehandlingUtland(behandlingId)
+        dao.lagreErOmgjoeringSluttbehandling(behandlingId)
         behandlingDao.hentBehandling(behandlingId)?.erSluttbehandling() shouldBe sluttbehandlingUtland
     }
 
     @Test
     fun `Skal lagre sluttbehandling for behandling`() {
         val sluttbehandling =
-            SluttbehandlingUtlandBehandlinginfo(
+            SluttbehandlingBehandlinginfo(
                 listOf(
                     LandMedDokumenter(
                         landIsoKode = "AFG",

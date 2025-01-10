@@ -52,7 +52,7 @@ export interface LandMedDokumenter {
 }
 
 export interface SluttbehandlingUtlandInfo {
-  type: 'SLUTTBEHANDLING_UTLAND'
+  type: 'SLUTTBEHANDLING'
   landMedDokumenter: LandMedDokumenter[]
 }
 

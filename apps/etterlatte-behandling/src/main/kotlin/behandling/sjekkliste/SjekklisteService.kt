@@ -52,7 +52,7 @@ class SjekklisteService(
                     when (behandling.type) {
                         BehandlingType.FØRSTEGANGSBEHANDLING -> skjekklisteItemsFoerstegangsbehandlingBP
                         BehandlingType.REVURDERING -> {
-                            if (behandling.revurderingsaarsak() == Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
+                            if (behandling.revurderingsaarsak() == Revurderingaarsak.SLUTTBEHANDLING) {
                                 sjekklisteItemsRevurderingBP + sjekklisteItemsBosattNorgeSluttbehandling
                             } else {
                                 sjekklisteItemsRevurderingBP
@@ -63,7 +63,7 @@ class SjekklisteService(
                     when (behandling.type) {
                         BehandlingType.FØRSTEGANGSBEHANDLING -> sjekklisteItemsFoerstegangsbehandlingOMS
                         BehandlingType.REVURDERING -> {
-                            if (behandling.revurderingsaarsak() == Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
+                            if (behandling.revurderingsaarsak() == Revurderingaarsak.SLUTTBEHANDLING) {
                                 sjekklisteItemsRevurderingOMS + sjekklisteItemsBosattNorgeSluttbehandling
                             } else {
                                 sjekklisteItemsRevurderingOMS

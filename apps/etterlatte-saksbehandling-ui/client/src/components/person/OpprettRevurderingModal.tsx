@@ -114,7 +114,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
                           </option>
                         ))}
                       </Select>
-                      {watch().aarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND && (
+                      {watch().aarsak == Revurderingaarsak.SLUTTBEHANDLING && (
                         <Alert variant="warning">
                           Sluttbehandling kan nå opprettes uten å huket av for skal sende kravpakke, dette for å støtte
                           kravpakke som finnes i feks PESYS.

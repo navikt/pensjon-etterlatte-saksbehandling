@@ -94,8 +94,7 @@ class AvbrytAnnullerteBehandlingerJobb(
                     .forEach {
                         try {
                             val rader = sakRepository.hentRaderForBehandlingId(it)
-                            val aktuellRad = rader.singleOrNull()
-                            if (aktuellRad == null) {
+                            if (rader.size != 2) {
                                 logger.warn(
                                     "Kunne ikke avbryte behandling som er rullet tilbake i behandling, siden vi har " +
                                         "${rader.size} rader registrert for id=$it.",
@@ -103,13 +102,22 @@ class AvbrytAnnullerteBehandlingerJobb(
                                 annulerteDao.lagreFikset(it)
                                 return@forEach
                             }
-                            aktuellRad.copy(
-                                status = BehandlingStatus.AVBRUTT.name,
-                                resultat = BehandlingStatus.AVBRUTT.name,
-                                resultatBegrunnelse = "BEHANDLING_RULLET_TILBAKE",
-                                ferdigbehandletTidspunkt = aktuellRad.tekniskTid,
+                            val aktuellRad = rader.minBy { rad -> rad.id }
+                            val radSomSkalFjernes = rader.maxBy { rad -> rad.id }
+                            val oppdatertRad =
+                                aktuellRad.copy(
+                                    status = BehandlingStatus.AVBRUTT.name,
+                                    resultat = BehandlingStatus.AVBRUTT.name,
+                                    resultatBegrunnelse = "BEHANDLING_RULLET_TILBAKE",
+                                    ferdigbehandletTidspunkt = aktuellRad.tekniskTid,
+                                )
+                            logger.info(
+                                "Fant 2 rader for behandling med id $it, med id ${aktuellRad.id} (original) " +
+                                    "og ${radSomSkalFjernes.id} (feil oppdatert). Oppdaterer med en ny rad basert " +
+                                    "på ${aktuellRad.id}, og sletter rad med id ${radSomSkalFjernes.id}",
                             )
-                            sakRepository.lagreRad(aktuellRad)
+                            sakRepository.slettRad(radSomSkalFjernes.id)
+                            sakRepository.lagreRad(oppdatertRad)
                             annulerteDao.lagreFikset(it)
                         } catch (e: Exception) {
                             logger.warn(

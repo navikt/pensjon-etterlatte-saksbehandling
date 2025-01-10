@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class AutomatiskBehandlingService(
-    val service: VedtakBehandlingService,
-    val behandlingKlient: BehandlingKlient,
+    private val service: VedtakBehandlingService,
+    private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -87,8 +87,8 @@ class AutomatiskBehandlingService(
             behandlingKlient
                 .hentOppgaverForSak(sakId, brukerTokenInfo)
                 .filter { it.referanse == behandlingId.toString() }
-                .filter { it.status == Status.ATTESTERING }
-                .first()
+                .first { it.status == Status.ATTESTERING }
+
         behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo)
         return vedtakOgRapid
     }

@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.IVERKSATT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.SAMORDNET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.TIL_SAMORDNING
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.TRYGDETID_OPPDATERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -1071,6 +1072,7 @@ class TrygdetidServiceImpl(
         runBlocking {
             behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).status in
                 listOf(
+                    TRYGDETID_OPPDATERT,
                     IVERKSATT,
                     BEREGNET,
                     AVKORTET,

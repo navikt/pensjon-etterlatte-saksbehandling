@@ -65,7 +65,7 @@ data class AvkortingGrunnlagFrontend(
 )
 
 data class AvkortingDto(
-    val avkortingGrunnlag: List<AvkortingGrunnlagDto>, // TODO kan "flyttes" inn i avkortetYteleDto?
+    val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
     val avkortetYtelse: List<AvkortetYtelseDto>,
 )
 

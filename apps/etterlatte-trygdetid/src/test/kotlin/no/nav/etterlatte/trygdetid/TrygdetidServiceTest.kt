@@ -256,13 +256,8 @@ internal class TrygdetidServiceTest {
 
         val forrigebehandlingId = randomUUID()
         val forrigeTrygdetid = trygdetid(behandlingId, sakId)
-        val vedtakSammendrag: VedtakSammendragDto =
-            mockk {
-                every { this@mockk.behandlingId } returns forrigebehandlingId
-                every { vedtakType } returns VedtakType.ENDRING
-            }
-
         val oppdatertTrygdetidCaptured = slot<Trygdetid>()
+        val vedtakSammendrag = mockVedtak(forrigebehandlingId, VedtakType.ENDRING)
 
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
@@ -270,7 +265,10 @@ internal class TrygdetidServiceTest {
             SisteIverksatteBehandling(
                 forrigebehandlingId,
             )
-        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns listOf(vedtakSammendrag)
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(any(), any()) } returns
+            listOf(
+                vedtakSammendrag,
+            )
         every { repository.hentTrygdetiderForBehandling(forrigebehandlingId) } returns listOf(forrigeTrygdetid)
         every { repository.opprettTrygdetid(capture(oppdatertTrygdetidCaptured)) } returns forrigeTrygdetid
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
@@ -331,11 +329,7 @@ internal class TrygdetidServiceTest {
             }
         val grunnlagUtenAvdoede = grunnlagUtenAvdoede()
         val forrigebehandlingId = forrigeTrygdetid.behandlingId
-        val vedtakSammendrag: VedtakSammendragDto =
-            mockk {
-                every { this@mockk.behandlingId } returns forrigebehandlingId
-                every { vedtakType } returns VedtakType.ENDRING
-            }
+        val vedtakSammendrag = mockVedtak(forrigebehandlingId, VedtakType.ENDRING)
 
         val oppdatertTrygdetidCaptured = slot<Trygdetid>()
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
@@ -500,11 +494,7 @@ internal class TrygdetidServiceTest {
                 .hentFoedselsnummer()!!
                 .verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
-        val vedtakSammendrag: VedtakSammendragDto =
-            mockk {
-                every { this@mockk.behandlingId } returns forrigeBehandlingId
-                every { vedtakType } returns VedtakType.ENDRING
-            }
+        val vedtakSammendrag = mockVedtak(forrigeBehandlingId, VedtakType.ENDRING)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
@@ -573,11 +563,7 @@ internal class TrygdetidServiceTest {
             }
         val forrigeBehandlingId = randomUUID()
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val vedtakSammendrag: VedtakSammendragDto =
-            mockk {
-                every { this@mockk.behandlingId } returns forrigeBehandlingId
-                every { vedtakType } returns VedtakType.ENDRING
-            }
+        val vedtakSammendrag = mockVedtak(forrigeBehandlingId, VedtakType.ENDRING)
 
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
@@ -634,11 +620,7 @@ internal class TrygdetidServiceTest {
                 .hentFoedselsnummer()!!
                 .verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
-        val vedtakSammendrag: VedtakSammendragDto =
-            mockk {
-                every { this@mockk.behandlingId } returns forrigeBehandlingId
-                every { vedtakType } returns VedtakType.ENDRING
-            }
+        val vedtakSammendrag = mockVedtak(forrigeBehandlingId, VedtakType.ENDRING)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
@@ -2046,4 +2028,9 @@ internal class TrygdetidServiceTest {
             ).hentOpplysningsgrunnlag()
         return grunnlag
     }
+
+    private fun mockVedtak(
+        behandlingId: UUID,
+        type: VedtakType,
+    ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null, null)
 }

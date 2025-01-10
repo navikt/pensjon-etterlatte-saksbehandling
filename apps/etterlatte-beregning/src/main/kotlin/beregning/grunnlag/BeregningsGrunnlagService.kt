@@ -239,12 +239,13 @@ class BeregningsGrunnlagService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         return if (behandling.behandlingType == BehandlingType.REVURDERING) {
             val sisteIverksatteBehandling =
-                behandlingKlient.hentSisteIverksatteBehandling(
-                    behandling.sak,
-                    brukerTokenInfo,
-                )
+                vedtaksvurderingKlient
+                    .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                    .sortedByDescending { it.datoFattet }
+                    .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke beregningsgrunnlag
+
             beregningsGrunnlagRepository
-                .finnBeregningsGrunnlag(sisteIverksatteBehandling.id)
+                .finnBeregningsGrunnlag(sisteIverksatteBehandling.behandlingId)
                 ?.also {
                     logger.info(
                         "Ga ut forrige beregningsgrunnlag for $behandlingId, funnet i " +

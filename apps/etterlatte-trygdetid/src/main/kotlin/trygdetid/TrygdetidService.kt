@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.trygdetid.land.LandNormalisert
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -43,6 +44,7 @@ import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
 import no.nav.etterlatte.trygdetid.klienter.Trygdetidsgrunnlag
 import no.nav.etterlatte.trygdetid.klienter.TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon
+import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -178,6 +180,7 @@ class TrygdetidServiceImpl(
     private val beregnTrygdetidService: TrygdetidBeregningService,
     private val pesysKlient: PesysKlient,
     private val avtaleService: AvtaleService,
+    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
 ) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -247,12 +250,13 @@ class TrygdetidServiceImpl(
             }
 
             BehandlingType.REVURDERING -> {
-                val forrigeBehandling =
-                    behandlingKlient.hentSisteIverksatteBehandling(
-                        behandling.sak,
-                        brukerTokenInfo,
-                    )
-                val forrigeTrygdetider = hentTrygdetiderIBehandling(forrigeBehandling.id, brukerTokenInfo)
+                val sisteIverksatteBehandling =
+                    vedtaksvurderingKlient
+                        .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                        .sortedByDescending { it.datoFattet }
+                        .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke trygdetid
+
+                val forrigeTrygdetider = hentTrygdetiderIBehandling(sisteIverksatteBehandling.behandlingId, brukerTokenInfo)
                 if (forrigeTrygdetider.isEmpty()) {
                     opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
                 } else {

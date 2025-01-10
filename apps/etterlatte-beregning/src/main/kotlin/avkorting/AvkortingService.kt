@@ -265,7 +265,7 @@ class AvkortingService(
         val forrigeBehandlingId =
             alleVedtak
                 .filter {
-                    it.vedtakType != VedtakType.OPPHOER
+                    it.vedtakType != VedtakType.OPPHOER // Opphør har ikke avkorting
                 }.maxBy {
                     it.datoAttestert ?: throw InternfeilException("Iverksatt vedtak mangler dato attestert")
                 }.behandlingId

@@ -11,6 +11,7 @@ export interface IBrev {
   mottakere: Mottaker[]
   opprettet: string
   brevtype: Brevtype
+  brevkoder: string
 }
 
 export interface Mottaker {

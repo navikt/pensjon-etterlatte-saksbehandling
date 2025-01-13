@@ -26,6 +26,12 @@ interface DollyInterface {
         gruppeId: Long,
         accessToken: String,
     ): BestillingStatus
+
+    fun sendSoeknad(
+        request: NySoeknadRequest,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    ): String
 }
 
 class DollyService(
@@ -109,7 +115,7 @@ class DollyService(
             }
         }
 
-    fun sendSoeknad(
+    override fun sendSoeknad(
         request: NySoeknadRequest,
         navIdent: String?,
         behandlingssteg: Behandlingssteg,
@@ -172,10 +178,10 @@ class DollyMock : DollyInterface {
     ): List<ForenkletFamilieModell> =
         listOf(
             ForenkletFamilieModell(
-                ibruk = false,
+                ibruk = true,
                 avdoed = "123",
                 gjenlevende = "321",
-                barn = listOf("444"),
+                barn = listOf("444", "555"),
             ),
         )
 
@@ -188,4 +194,10 @@ class DollyMock : DollyInterface {
             123L,
             false,
         )
+
+    override fun sendSoeknad(
+        request: NySoeknadRequest,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    ): String = "123"
 }

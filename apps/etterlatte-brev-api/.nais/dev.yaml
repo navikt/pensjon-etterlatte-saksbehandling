@@ -69,7 +69,7 @@ spec:
     min: 2
   env:
     - name: BREVBAKER_URL
-      value: https://pensjon-brevbaker.intern.dev.nav.no
+      value: http://pensjon-brevbaker
     - name: BREVBAKER_SCOPE
       value: api://dev-gcp.pensjonsbrev.pensjon-brevbaker/.default
     - name: PDFGEN_URL

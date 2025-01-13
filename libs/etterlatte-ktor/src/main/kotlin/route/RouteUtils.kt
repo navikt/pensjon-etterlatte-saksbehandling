@@ -100,7 +100,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
                 onSuccess(behandlingId)
             } else {
                 logger.info("Har ikke tilgang til behandling")
-                throw GenerellIkkeFunnetException()
+                throw IkkeTilgangTilBehandlingException()
             }
         }
 
@@ -130,7 +130,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
                 onSuccess(sakId)
             } else {
                 logger.info("Har ikke tilgang til sak")
-                throw GenerellIkkeFunnetException()
+                throw IkkeTilgangTilSakException()
             }
         }
 
@@ -246,6 +246,20 @@ class FeatureIkkeStoettetException :
         code = "NOT_IMPLEMENTED",
         status = HttpStatusCode.NotImplemented.value,
         detail = "Funksjonaliteten er ikke tilgjengelig enda.",
+    )
+
+class IkkeTilgangTilBehandlingException :
+    ForespoerselException(
+        code = "IKKE_TILGANG_TIL_BEHANDLING",
+        status = HttpStatusCode.Forbidden.value,
+        detail = "Bruker har ikke tilgang til behandling",
+    )
+
+class IkkeTilgangTilSakException :
+    ForespoerselException(
+        code = "IKKE_TILGANG_TIL_SAK",
+        status = HttpStatusCode.Forbidden.value,
+        detail = "Bruker har ikke tilgang til sak",
     )
 
 fun BrukerTokenInfo.lagGrunnlagsopplysning() =

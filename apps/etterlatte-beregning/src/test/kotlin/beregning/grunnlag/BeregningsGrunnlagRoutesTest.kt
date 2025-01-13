@@ -240,7 +240,7 @@ internal class BeregningsGrunnlagRoutesTest {
     }
 
     @Test
-    fun `skal returnere not found naar saksbehandler ikke har tilgang til behandling`() {
+    fun `skal returnere forbidden naar saksbehandler ikke har tilgang til behandling`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
@@ -253,13 +253,13 @@ internal class BeregningsGrunnlagRoutesTest {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
-                    it.status shouldBe HttpStatusCode.NotFound
+                    it.status shouldBe HttpStatusCode.Forbidden
                 }
         }
     }
 
     @Test
-    fun `skal returnere not found naar saksbehandler ikke har tilgang til behandling ved opprettelse`() {
+    fun `skal returnere forbidden naar saksbehandler ikke har tilgang til behandling ved opprettelse`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
@@ -279,7 +279,7 @@ internal class BeregningsGrunnlagRoutesTest {
                         ),
                     )
                 }.let {
-                    it.status shouldBe HttpStatusCode.NotFound
+                    it.status shouldBe HttpStatusCode.Forbidden
                 }
         }
     }

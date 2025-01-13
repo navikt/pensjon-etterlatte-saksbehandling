@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup
-import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import kotlin.time.DurationUnit
@@ -72,7 +71,6 @@ class BrevbakerException(
 
 class BrevbakerPdfResponse(
     val file: String,
-    val letterMetadata: LetterMetadata,
 )
 
 private fun BrevbakerRequest.toJsonNode(): JsonNode = objectMapper.readTree(toJson())

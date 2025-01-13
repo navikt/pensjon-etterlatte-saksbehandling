@@ -79,7 +79,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup
-import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -833,12 +832,6 @@ internal class VedtaksbrevServiceTest {
     private fun opprettBrevbakerResponse() =
         BrevbakerPdfResponse(
             "",
-            LetterMetadata(
-                "Testtitle",
-                isSensitiv = false,
-                LetterMetadata.Distribusjonstype.VEDTAK,
-                LetterMetadata.Brevtype.VEDTAKSBREV,
-            ),
         ).let { Base64.getDecoder().decode(it.file) }
             .let { Pdf(it) }
 

@@ -168,9 +168,7 @@ class DollyMock : DollyInterface {
     override fun hentTestGruppeId(
         brukerId: String,
         accessToken: String,
-    ): Long? {
-        return 0 // Her kan du legge til din egen gruppeId
-    }
+    ): Long = 0
 
     override fun hentFamilier(
         gruppeId: Long,

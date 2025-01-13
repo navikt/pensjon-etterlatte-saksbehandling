@@ -167,10 +167,10 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                 {sakType === SakType.OMSTILLINGSSTOENAD && (
                   <>
                     <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
-                      Informasjon om aktivitetsplikt ved 4 måneder
+                      Informasjon om aktivitetsplikt ved 6 måneder
                     </option>
                     <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND}>
-                      Informasjon om aktivitetsplikt ved 6 måneder - varig unntak
+                      Informasjon ved 6 måneder - varig unntak for aktivitetsplikt
                     </option>
                     <option value={FormType.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL_INNHOLD}>
                       Informasjon om dødsfall

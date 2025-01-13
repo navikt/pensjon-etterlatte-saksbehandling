@@ -13,7 +13,6 @@ export const enum FeatureToggle {
   validere_aarsintnekt_neste_aar = 'validere_aarsintnekt_neste_aar',
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',
   notater = 'notater',
-  kun_en_registrert_juridisk_forelder = 'kun-en-registrert-juridisk-forelder',
   kopier_trygdetidsgrunnlag = 'kopier-trygdetidsgrunnlag',
   opprette_generell_oppgave = 'opprette-generell-oppgave',
   pensjon_etterlatte_klage_delvis_omgjoering = 'pensjon-etterlatte.klage-delvis-omgjoering',
@@ -46,10 +45,6 @@ const overstyr_beregning_knapp: Toggle = {
   enabled: false,
 }
 const notater: Toggle = { togglename: FeatureToggle.notater, enabled: false }
-const kun_en_registrert_juridisk_forelder: Toggle = {
-  togglename: FeatureToggle.kun_en_registrert_juridisk_forelder,
-  enabled: false,
-}
 const kopier_trygdetidsgrunnlag: Toggle = {
   togglename: FeatureToggle.kopier_trygdetidsgrunnlag,
   enabled: false,
@@ -77,7 +72,6 @@ export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.aktivitetsplikt_ny_vurdering]: aktivitetsplikt_ny_vurdering,
   [FeatureToggle.validere_aarsintnekt_neste_aar]: validere_aarsintnekt_neste_aar,
   [FeatureToggle.notater]: notater,
-  [FeatureToggle.kun_en_registrert_juridisk_forelder]: kun_en_registrert_juridisk_forelder,
   [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,
   [FeatureToggle.opprette_generell_oppgave]: opprette_generell_oppgave,
   [FeatureToggle.pensjon_etterlatte_klage_delvis_omgjoering]: pensjon_etterlatte_klage_delvis_omgjoering,

@@ -490,7 +490,7 @@ class BrevKanIkkeEndres(
     msg: String? = "",
 ) : UgyldigForespoerselException(
         code = "BREV_KAN_IKKE_ENDRES",
-        detail = "Brevet kan ikke endres siden det har status ${brev.status.name.lowercase()} $msg",
+        detail = "Brevet kan ikke endres siden det har status ${brev.status.name.lowercase()}, $msg",
         meta =
             mapOf(
                 "brevId" to brev.id,

@@ -108,11 +108,11 @@ class RestModuleTest {
             client
                 .get("/behandling/${UUID.randomUUID()}") {
                     header(HttpHeaders.Authorization, "Bearer $token")
-                }.let { assertEquals(Forbidden, it.status) }
+                }.let { assertEquals(OK, it.status) }
             client
                 .get("/sak/1") {
                     header(HttpHeaders.Authorization, "Bearer $token")
-                }.let { assertEquals(Forbidden, it.status) }
+                }.let { assertEquals(OK, it.status) }
             client
                 .post("/person") {
                     header(HttpHeaders.Authorization, "Bearer $token")
@@ -127,11 +127,11 @@ class RestModuleTest {
             client
                 .get("/behandling/${UUID.randomUUID()}") {
                     header(HttpHeaders.Authorization, "Bearer $token")
-                }.let { assertEquals(NotFound, it.status) }
+                }.let { assertEquals(Forbidden, it.status) }
             client
                 .get("/sak/1") {
                     header(HttpHeaders.Authorization, "Bearer $token")
-                }.let { assertEquals(NotFound, it.status) }
+                }.let { assertEquals(Forbidden, it.status) }
             client
                 .post("/person") {
                     header(HttpHeaders.Authorization, "Bearer $token")

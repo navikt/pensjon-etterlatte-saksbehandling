@@ -1,0 +1,79 @@
+{{> ../_fragments/header }}
+
+<div>
+    <h1>{{beskrivelse}}</h1>
+    <div>
+        <h2>Familier</h2>
+        <div hx-get="/{{path}}/hent-familier" hx-trigger="load" hx-swap="innerHTML"></div>
+    </div>
+
+    <form class="border rounded p-4 mt-4">
+        <h3>Opprett familie &#129328;</h3>
+        <div class="mb-3">
+            En standard familie består av en avdød, en gjenlevende og et barn som vil gå gjennom fordeleren.
+        </div>
+
+        <h4 class="mb-0">Gjenlevende (søker hvis OMS)</h4>
+        <div class="mb-3 col-md-3 form-group">
+            <label for="gjenlevendeAlder" class="form-label">Alder</label>
+            <input type="number"
+                   pattern="[0-9]+"
+                   minlength="11"
+                   maxlength="11"
+                   name="gjenlevendeAlder"
+                   id="gjenlevendeAlder"
+                   class="form-control"
+                   value=0
+                   required
+            />
+        </div>
+
+        <h4 class="mb-0">Barn (Søker hvis BP)</h4>
+        <small class="form-text text-muted mb-3">Du kan legge til variasjoner av søsken til barnet.</small>
+
+        <div class="row mt-3">
+            <div class="mb-3 col-md-3 form-group">
+                <label for="barnOver18" class="form-label">Er barn/søker over 18?</label>
+                <input type="checkbox"
+                       name="barnOver18"
+                       id="barnOver18"
+                />
+            </div>
+
+            <div class="mb-3 col-md-3 form-group">
+                <label for="helsoesken" class="form-label">Helsøsken</label>
+                <input type="number"
+                       pattern="[0-9]+"
+                       minlength="11"
+                       maxlength="11"
+                       name="helsoesken"
+                       id="helsoesken"
+                       class="form-control"
+                       value=0
+                       required
+                />
+            </div>
+
+            <div class="mb-3 col-md-3 form-group">
+                <label for="halvsoeskenAvdoed" class="form-label">Halvsøsken (avdød)</label>
+                <input type="number"
+                       pattern="[0-9]+"
+                       minlength="11"
+                       maxlength="11"
+                       name="halvsoeskenAvdoed"
+                       id="halvsoeskenAvdoed"
+                       class="form-control"
+                       value=0
+                       required
+                />
+            </div>
+        </div>
+
+        <button hx-post="{{path}}/opprett" hx-target="#OpprettResult" hx-swap="innerHTML" class="btn btn-primary">
+            Opprett ny familie
+        </button>
+        <div id="OpprettResult"></div>
+    </form>
+</div>
+
+{{> ../_fragments/footer }}

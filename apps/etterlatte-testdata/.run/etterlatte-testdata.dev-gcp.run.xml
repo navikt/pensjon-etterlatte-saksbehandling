@@ -2,11 +2,11 @@
   <configuration default="false" name="etterlatte-testdata.dev-gcp" type="JetRunConfigurationType">
     <envs>
       <env name="DEV" value="true" />
-      <env name="LOGBACK_APPENDER" value="STDOUT" />
-      <env name="KAFKA_BROKERS" value="0.0.0.0:9092" />
-      <env name="KAFKA_TARGET_TOPIC" value="etterlatte" />
       <env name="DOLLY_CLIENT_ID" value="1" />
       <env name="DOLLY_RESOURCE_URL" value="http://localhost" />
+      <env name="KAFKA_BROKERS" value="0.0.0.0:9092" />
+      <env name="KAFKA_TARGET_TOPIC" value="etterlatte.doedsmelding" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="TESTNAV_CLIENT_ID" value="dev-gcp.dolly.testnav-person-service" />
       <env name="TESTNAV_RESOURCE_URL" value="https://testnav-person-service.intern.dev.nav.no/api/v2" />
     </envs>

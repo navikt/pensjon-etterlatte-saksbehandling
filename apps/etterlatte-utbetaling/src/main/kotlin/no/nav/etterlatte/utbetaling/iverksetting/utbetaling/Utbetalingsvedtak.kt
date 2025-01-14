@@ -47,7 +47,7 @@ data class Utbetalingsvedtak(
                                 ),
                             beloep = it.beloep,
                             type = it.type.toUtbetalingsperiodeType(),
-                            regelverk = it.regelverk,
+                            regelverk = it.regelverk ?: throw Exception("Mangler regelverk i utbetalingsperiode"),
                         )
                     },
                 vedtakFattet =
@@ -99,7 +99,7 @@ data class Utbetalingsperiode(
     val periode: Periode,
     val beloep: BigDecimal?,
     val type: UtbetalingsperiodeType,
-    val regelverk: Regelverk?,
+    val regelverk: Regelverk,
 )
 
 data class VedtakFattet(

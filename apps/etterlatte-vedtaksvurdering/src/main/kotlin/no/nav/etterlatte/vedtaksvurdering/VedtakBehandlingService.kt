@@ -554,7 +554,7 @@ class VedtakBehandlingService(
                             opprettUtbetalingsperioder(
                                 vedtakType = vedtakType,
                                 beregningOgAvkorting = beregningOgAvkorting,
-                                behandling.sakType,
+                                sakType = behandling.sakType,
                                 opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         revurderingInfo = behandling.revurderingInfo,
@@ -633,7 +633,8 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.utbetaltBeloep.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
-                                    regelverk = it.regelverk,
+                                    // TODO i en overgangsperiode vil det finnes en del vedtak uten regelverk satt - kompenserer for dette her (https://jira.adeo.no/browse/EY-4564)
+                                    regelverk = it.regelverk ?: Regelverk.fraDato(it.datoFOM.atDay(1)),
                                 )
                             }
                         }
@@ -677,15 +678,7 @@ class VedtakBehandlingService(
                         periode = Periode(opphoerFraOgMed, null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
-                        regelverk =
-                            if (perioderMedUtbetaling.any { it.regelverk != null }) {
-                                // Regelverk er satt på periodene - for at det skal bli konsistent mot utbetaling
-                                Regelverk.fraDato(
-                                    opphoerFraOgMed.atDay(1),
-                                )
-                            } else {
-                                null
-                            },
+                        regelverk = Regelverk.fraDato(opphoerFraOgMed.atDay(1)),
                     ),
                 )
             } else {

@@ -49,6 +49,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
             erGjenoppretting: Boolean,
             erMigrertYrkesskade: Boolean,
             erSluttbehandling: Boolean,
+            erYrkesskade: Boolean,
         ): BarnepensjonInnvilgelseForeldreloes =
             BarnepensjonInnvilgelseForeldreloes(
                 innhold = innhold.innhold(),
@@ -60,6 +61,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         grunnbeloep,
                         trygdetid,
                         erForeldreloes = true,
+                        erYrkesskade,
                     ),
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,

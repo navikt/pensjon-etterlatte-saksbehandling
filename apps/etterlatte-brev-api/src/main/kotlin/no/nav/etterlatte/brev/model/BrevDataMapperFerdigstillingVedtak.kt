@@ -307,6 +307,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
 
         val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
+        val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
 
         val datoVedtakOmgjoering =
             klage
@@ -329,6 +330,7 @@ class BrevDataMapperFerdigstillingVedtak(
             avdoede,
             datoVedtakOmgjoering,
             erMigrertYrkesskade.await(),
+            erYrkesskade = vilkaarsvurdering.await().isYrkesskade(),
         )
     }
 
@@ -357,6 +359,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
+        val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
         val behandling = async { behandlingService.hentBehandling(behandlingId, bruker) }.await()
 
         if (erForeldreloes) {
@@ -373,6 +376,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
                 erSluttbehandling = behandling.erSluttbehandling,
+                erYrkesskade = vilkaarsvurdering.await().isYrkesskade(),
             )
         } else {
             BarnepensjonInnvilgelse.fra(
@@ -387,6 +391,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
                 erSluttbehandling = behandling.erSluttbehandling,
+                erYrkesskade = vilkaarsvurdering.await().isYrkesskade(),
             )
         }
     }

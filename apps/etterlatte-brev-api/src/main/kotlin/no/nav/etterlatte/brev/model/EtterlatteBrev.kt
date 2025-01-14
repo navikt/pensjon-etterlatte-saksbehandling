@@ -37,6 +37,7 @@ data class BarnepensjonBeregning(
     val trygdetid: List<TrygdetidMedBeregningsmetode>,
     val erForeldreloes: Boolean,
     val forskjelligTrygdetid: ForskjelligTrygdetid?,
+    val erYrkesskade: Boolean,
 ) : HarVedlegg
 
 data class BarnepensjonBeregningsperiode(
@@ -76,6 +77,7 @@ data class OmstillingsstoenadBeregning(
     val trygdetid: TrygdetidMedBeregningsmetode,
     val oppphoersdato: LocalDate?,
     val opphoerNesteAar: Boolean,
+    val erYrkesskade: Boolean,
 ) : HarVedlegg
 
 data class OmstillingsstoenadBeregningRedigerbartUtfall(

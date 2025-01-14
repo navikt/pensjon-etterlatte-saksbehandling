@@ -10,12 +10,12 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerUnntakForBehandling, slettUnntakForBehandling } from '~shared/api/aktivitetsplikt'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { setAktivitetspliktVurdering } from '~store/reducers/AktivitetsplikReducer'
 import { UnntakRedigeringsKnapper } from '~components/aktivitetsplikt/vurdering/unntak/RedigerbarUnntakOppgave'
 import {
   IOpprettAktivitetspliktUnntak,
   LagreUnntakForm,
 } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
+import { setVurderingBehandling } from '~store/reducers/AktivitetspliktBehandlingReducer'
 
 export function RedigerbarUnntakBehandling({
   unntak,
@@ -43,14 +43,14 @@ export function RedigerbarUnntakBehandling({
         unntakId: unntak.id,
       },
       (data) => {
-        dispatch(setAktivitetspliktVurdering(data))
+        dispatch(setVurderingBehandling(data))
         setRedigerer(false)
       }
     )
   }
 
   function oppdaterStateEtterRedigertUnntak(data: IAktivitetspliktVurderingNyDto) {
-    dispatch(setAktivitetspliktVurdering(data))
+    dispatch(setVurderingBehandling(data))
     setRedigerer(false)
     resetSlettStatus()
   }

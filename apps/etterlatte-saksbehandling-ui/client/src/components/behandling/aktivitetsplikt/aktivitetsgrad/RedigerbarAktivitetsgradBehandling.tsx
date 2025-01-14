@@ -5,7 +5,6 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { setAktivitetspliktVurdering } from '~store/reducers/AktivitetsplikReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerAktivitetsgradForBehandling, slettAktivitetsgradForBehandling } from '~shared/api/aktivitetsplikt'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -16,6 +15,7 @@ import {
   RedigerAktivitetsgrad,
   RedigerbarAktivtetsGradForm,
 } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradForm'
+import { setVurderingBehandling } from '~store/reducers/AktivitetspliktBehandlingReducer'
 
 export function RedigerbarAktivitetsgradBehandling({
   aktivitet,
@@ -37,7 +37,7 @@ export function RedigerbarAktivitetsgradBehandling({
 
   function oppdaterTilstandLagretVurdering(data: IAktivitetspliktVurderingNyDto) {
     setRedigerer(false)
-    dispatch(setAktivitetspliktVurdering(data))
+    dispatch(setVurderingBehandling(data))
   }
 
   function slettAktivitetsgradIBehandling(aktivitet: IAktivitetspliktAktivitetsgrad) {
@@ -48,7 +48,7 @@ export function RedigerbarAktivitetsgradBehandling({
         aktivitetsgradId: aktivitet.id,
       },
       (data) => {
-        dispatch(setAktivitetspliktVurdering(data))
+        dispatch(setVurderingBehandling(data))
         setRedigerer(false)
       }
     )

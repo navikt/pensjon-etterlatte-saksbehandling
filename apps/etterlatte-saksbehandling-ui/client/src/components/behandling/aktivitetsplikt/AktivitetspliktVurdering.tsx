@@ -1,10 +1,7 @@
 import { BodyShort, Box, Button, Heading, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  AktivitetspliktOppgaveVurderingType,
-  IAktivitetspliktVurderingNyDto,
-} from '~shared/types/Aktivitetsplikt'
+import { AktivitetspliktOppgaveVurderingType, IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
 import {
   hentAktivitspliktVurderingForBehandling,
   opprettAktivitspliktAktivitetsgradOgUnntakForBehandling,
@@ -17,12 +14,15 @@ import {
   NyVurderingAktivitetsgradOgUnntak,
   VurderingAktivitetsgradOgUnntak,
 } from '~components/aktivitetsplikt/vurdering/VurderingAktivitetsgradOgUnntak'
-import { setAktivitetspliktVurdering } from '~store/reducers/AktivitetsplikReducer'
 import { useDispatch } from 'react-redux'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { UnntakTabellBehandling } from '~components/behandling/aktivitetsplikt/unntak/UnntakTabellBehandling'
 import { AktivitetsgradTabellBehandling } from '~components/behandling/aktivitetsplikt/aktivitetsgrad/AktivitetsgradTabellBehandling'
+import {
+  setVurderingBehandling,
+  useAktivitetspliktBehandlingState,
+} from '~store/reducers/AktivitetspliktBehandlingReducer'
 
 export const AktivitetspliktVurdering = ({
   behandling,
@@ -33,24 +33,22 @@ export const AktivitetspliktVurdering = ({
   resetManglerAktivitetspliktVurdering: () => void
   doedsdato?: Date
 }) => {
-  //TODO: denne må være på nytt format med denne endringen.. ny dto skal bli IAktivitetspliktVurderingNyDto
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurderingNyDto>()
-  //TODO: kun denne skal brukes og den skal lagre både aktivitetsgrad og unntak
   const [hentet, hent] = useApiCall(hentAktivitspliktVurderingForBehandling)
-  //TODO: hentet res her må legges slik at det kan vises i visningen
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-
+  const dispatch = useDispatch()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
-
+  const updated = useAktivitetspliktBehandlingState()
   useEffect(() => {
     if (!vurdering) {
       hent(
         { sakId: behandling.sakId, behandlingId: behandling.id },
         (result) => {
+          dispatch(setVurderingBehandling(result))
           setVurdering(result)
           if (result) resetManglerAktivitetspliktVurdering()
         },
@@ -62,12 +60,15 @@ export const AktivitetspliktVurdering = ({
       )
     }
   }, [])
+  //TODO: usikker på om vi vil løse det sånn
+  useEffect(() => {
+    setVurdering(updated)
+  }, [updated])
 
   if (isPending(hentet)) {
     return <Spinner label="Henter aktivitetspliktsvurdering" />
   }
 
-  //TODO: ingen av visningene her har sletting eller redigering og det MÅ på plass
   return (
     <Box maxWidth="120rem" paddingBlock="4 0" borderWidth="1 0 0 0">
       <VStack gap="6">
@@ -99,7 +100,7 @@ function VurderAktivitetspliktWrapper(props: { doedsdato?: Date; behandling: IDe
   const dispatch = useDispatch()
 
   function oppdaterStateVedLagring(data: IAktivitetspliktVurderingNyDto) {
-    dispatch(setAktivitetspliktVurdering(data)) //TODO: må verfisere at denne legger seg riktig i state for visning her
+    dispatch(setVurderingBehandling(data))
     setLeggerTilVurdering(false)
   }
 

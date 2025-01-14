@@ -51,7 +51,6 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
-    private val rapidService: VedtaksvurderingRapidService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

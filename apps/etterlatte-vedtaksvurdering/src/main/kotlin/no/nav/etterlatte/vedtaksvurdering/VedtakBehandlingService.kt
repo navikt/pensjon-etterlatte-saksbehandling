@@ -566,13 +566,9 @@ class VedtakBehandlingService(
         VedtakType.AVSLAG -> behandling.opphoerFraOgMed
         else -> {
             if (virkningstidspunkt == behandling.opphoerFraOgMed) {
-                // TODO Det burde være en løsning for å kunne fjerne et opphør uten en revurdering med samme virk som opphøret?
-                null
+                throw VirkningstidspunktOgOpphoerFomPaaSammeDatoException()
             } else if (behandling.opphoerFraOgMed != null && virkningstidspunkt > behandling.opphoerFraOgMed) {
-                throw UgyldigForespoerselException(
-                    code = "VIRKNINGSTIDSPUNKT_ETTER_OPPHOER",
-                    detail = "Virkningstidspunkt kan ikke være senere enn opphør fra og med",
-                )
+                throw VirkningstidspunktEtterOpphoerException()
             } else {
                 behandling.opphoerFraOgMed
             }
@@ -781,4 +777,16 @@ class ManglerAvkortetYtelse :
         code = "VEDTAKSVURDERING_MANGLER_AVKORTET_YTELSE",
         detail =
             "Det må legges til inntektsavkorting selv om mottaker ikke har inntekt. Legg inn \"0\" kr i alle felter.",
+    )
+
+class VirkningstidspunktEtterOpphoerException :
+    UgyldigForespoerselException(
+        code = "VIRKNINGSTIDSPUNKT_ETTER_OPPHOER",
+        detail = "Virkningstidspunkt kan ikke være senere enn opphør fra og med",
+    )
+
+class VirkningstidspunktOgOpphoerFomPaaSammeDatoException :
+    UgyldigForespoerselException(
+        code = "VIRKNINGSTIDSPUNKT_OG_OPPHOER_FRA_OG_MED_PAA_SAMME_DATO",
+        detail = "Virkningstidspunkt og opphør fra og med kan ikke være på samme dato",
     )

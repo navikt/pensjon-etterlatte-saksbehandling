@@ -202,7 +202,7 @@ internal class VedtakBehandlingServiceTest(
     }
 
     @Test
-    fun `vedtak skal nullstille opphoer fom hvis revurderes fra og med opphoer fom`() {
+    fun `vedtak med opphoer fom foer virkningstidspunkt skal kaste exception`() {
         val behandlingId = randomUUID()
         val virkningstidspunkt = YearMonth.of(2023, 3)
 
@@ -210,8 +210,8 @@ internal class VedtakBehandlingServiceTest(
             mockBehandling(
                 virkningstidspunkt,
                 behandlingId,
-                revurderingAarsak = Revurderingaarsak.REGULERING,
-                opphoerFom = YearMonth.of(2023, 3),
+                revurderingAarsak = Revurderingaarsak.ANNEN,
+                opphoerFom = virkningstidspunkt.minusMonths(1),
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
@@ -228,9 +228,14 @@ internal class VedtakBehandlingServiceTest(
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
-        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
-
-        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe null
+        assertThrows<VirkningstidspunktEtterOpphoerException> {
+            runBlocking {
+                service.opprettEllerOppdaterVedtak(
+                    behandlingId,
+                    saksbehandler,
+                )
+            }
+        }
     }
 
     @Test
@@ -451,7 +456,7 @@ internal class VedtakBehandlingServiceTest(
     }
 
     @Test
-    fun `vedtak som oppdateres fra opphoer til endring med virk fom samme som opphoer fom skal nullstile opphoer fom`() {
+    fun `vedtak som oppdateres fra opphoer til endring med virk fom samme som opphoer fom skal kaste exception`() {
         val behandlingId = randomUUID()
         val virkningstidspunkt = YearMonth.of(2023, 3)
         val opphoerFom = YearMonth.of(2023, 3)
@@ -483,9 +488,9 @@ internal class VedtakBehandlingServiceTest(
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
-        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
-
-        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe null
+        assertThrows<VirkningstidspunktOgOpphoerFomPaaSammeDatoException> {
+            runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+        }
     }
 
     @Test

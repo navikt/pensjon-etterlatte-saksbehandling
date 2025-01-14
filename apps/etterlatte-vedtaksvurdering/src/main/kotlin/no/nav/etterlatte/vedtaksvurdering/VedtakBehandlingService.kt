@@ -633,7 +633,6 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.utbetaltBeloep.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
-                                    // TODO i en overgangsperiode vil det finnes en del vedtak uten regelverk satt - kompenserer for dette her (https://jira.adeo.no/browse/EY-4564)
                                     regelverk = it.regelverk ?: Regelverk.fraDato(it.datoFOM.atDay(1)),
                                 )
                             }
@@ -691,7 +690,7 @@ class VedtakBehandlingService(
     private fun hentRegelverkFraBeregningForPeriode(
         beregningsperioder: List<Beregningsperiode>,
         fom: YearMonth,
-    ): Regelverk? {
+    ): Regelverk {
         val samsvarendeBeregningsperiode =
             beregningsperioder
                 .sortedBy { it.datoFOM }
@@ -699,6 +698,7 @@ class VedtakBehandlingService(
                 ?: throw InternfeilException("Fant ingen beregningsperioder som samsvarte med avkortingsperiode $fom")
 
         return samsvarendeBeregningsperiode.regelverk
+            ?: Regelverk.fraDato(samsvarendeBeregningsperiode.datoFOM.atDay(1))
     }
 
     private suspend fun hentDataForVedtak(

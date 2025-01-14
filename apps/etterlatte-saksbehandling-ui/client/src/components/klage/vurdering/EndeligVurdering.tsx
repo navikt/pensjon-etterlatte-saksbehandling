@@ -1,4 +1,4 @@
-import { Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -15,7 +15,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
@@ -104,6 +104,25 @@ export function EndeligVurdering(props: { klage: Klage }) {
 
   const valgtUtfall = watch('utfall')
 
+  function lagreVurdering(skjema: FormdataVurdering) {
+    if (!klage) {
+      return
+    }
+    if (!erSkjemaUtfylt(skjema)) {
+      // Gjør noe bedre håndtering her
+      throw new Error('Ufullstendig validering av skjemadata i RHF')
+    }
+    if (!isDirty) {
+      // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
+      // Beskjed?
+    }
+
+    const utfall = mapFraFormdataTilKlageUtfall(skjema)
+    lagreUtfall({ klageId: klage.id, utfall }, (oppdatertKlage) => {
+      dispatch(addKlage(oppdatertKlage))
+    })
+  }
+
   function sendInnVurdering(skjema: FormdataVurdering) {
     if (!klage) {
       return
@@ -161,7 +180,22 @@ export function EndeligVurdering(props: { klage: Klage }) {
             errorMessage:
               'Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
           })}
-
+          {!!watch('utfall') && (
+            <>
+              <Box>
+                <Button size="small" onClick={() => lagreVurdering(watch())} loading={isPending(lagreUtfallStatus)}>
+                  Lagre {teksterLagring[watch('utfall')!!].toLowerCase()}
+                </Button>
+              </Box>
+              {isSuccess(lagreUtfallStatus) && (
+                <Box maxWidth="fit-content">
+                  <Alert size="small" variant="success">
+                    Utfall er lagret!
+                  </Alert>
+                </Box>
+              )}
+            </>
+          )}
           <HStack gap="4" justify="center">
             <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
               Gå tilbake
@@ -174,4 +208,12 @@ export function EndeligVurdering(props: { klage: Klage }) {
       </form>
     </>
   )
+}
+
+const teksterLagring: Record<Utfall, string> = {
+  AVVIST: 'avvist klage',
+  AVVIST_MED_OMGJOERING: 'avvisning med omgjøring',
+  DELVIS_OMGJOERING: 'delvis omgjøring',
+  OMGJOERING: 'omgjøring',
+  STADFESTE_VEDTAK: 'innstilling',
 }

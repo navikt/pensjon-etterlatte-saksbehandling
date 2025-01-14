@@ -79,7 +79,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
       <>
         {redigeres ? (
           <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
-            <VStack gap="4" width="30rem">
+            <VStack gap="4" width="41.5rem">
               <ControlledRadioGruppe
                 name="utfall"
                 control={control}

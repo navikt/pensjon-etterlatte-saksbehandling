@@ -440,6 +440,7 @@ class AktivitetspliktService(
         return AktivitetspliktVurdering(aktivitetsgrad, unntak)
     }
 
+    @Deprecated("Slettes når 4 mnd ny flyt er godkjent")
     fun hentVurderingForBehandling(behandlingId: UUID): AktivitetspliktVurdering? {
         val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
         val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
@@ -504,7 +505,7 @@ class AktivitetspliktService(
         }
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
-        aktivitetspliktUnntakDao.slettUnntakForBehandling(behandlingId, unntakId)
+        aktivitetspliktUnntakDao.slettUnntakForBehandling(unntakId = unntakId, behandlingId = behandlingId)
         return hentVurderingForBehandlingNy(behandlingId)
     }
 
@@ -533,15 +534,6 @@ class AktivitetspliktService(
 
         return hentVurderingForBehandlingNy(behandlingId)
     }
-
-    // TODO: skal fases helt bort men kun etter at 4 mnd aks er godkjent kan den slettes.. samme med AktivitetspliktVurderingGammel obj
-    fun hentVurderingForBehandlingGammel(behandlingId: UUID): AktivitetspliktVurderingGammel? =
-        hentVurderingForBehandling(behandlingId)?.let {
-            AktivitetspliktVurderingGammel(
-                aktivitet = it.aktivitet.firstOrNull(),
-                unntak = it.unntak.firstOrNull(),
-            )
-        }
 
     fun hentVurderingForSak(sakId: SakId): AktivitetspliktVurdering =
         hentVurderingForSakHelper(aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, sakId)

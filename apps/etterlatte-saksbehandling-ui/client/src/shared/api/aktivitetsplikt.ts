@@ -108,7 +108,7 @@ export const slettAktivitetspliktUnntakForOppgave = async (args: {
 export const hentAktivitspliktVurderingForBehandling = async (args: {
   sakId: number
   behandlingId: string
-}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
+}): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
   apiClient.get(`/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering`)
 
 export const opprettAktivitspliktAktivitetsgradOgUnntakForBehandling = async (args: {
@@ -135,7 +135,7 @@ export const slettAktivitetsgradForBehandling = async (args: {
   aktivitetsgradId: string
 }): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
   apiClient.delete(
-    `/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering/${args.aktivitetsgradId}`
+    `/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering/aktivitetsgrad/${args.aktivitetsgradId}`
   )
 
 export const redigerUnntakForBehandling = async (args: {
@@ -152,7 +152,9 @@ export const slettUnntakForBehandling = async (args: {
   behandlingId: string
   unntakId: string
 }): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
-  apiClient.delete(`/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering/${args.unntakId}`)
+  apiClient.delete(
+    `/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering/unntak/${args.unntakId}`
+  )
 
 export const hentAktivitetspliktOppgaveVurdering = async (args: {
   oppgaveId: string

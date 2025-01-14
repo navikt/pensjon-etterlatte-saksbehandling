@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   AktivitetspliktOppgaveVurderingType,
-  IAktivitetspliktVurdering,
   IAktivitetspliktVurderingNyDto,
 } from '~shared/types/Aktivitetsplikt'
 import {
@@ -35,7 +34,7 @@ export const AktivitetspliktVurdering = ({
   doedsdato?: Date
 }) => {
   //TODO: denne må være på nytt format med denne endringen.. ny dto skal bli IAktivitetspliktVurderingNyDto
-  const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
+  const [vurdering, setVurdering] = useState<IAktivitetspliktVurderingNyDto>()
   //TODO: kun denne skal brukes og den skal lagre både aktivitetsgrad og unntak
   const [hentet, hent] = useApiCall(hentAktivitspliktVurderingForBehandling)
   //TODO: hentet res her må legges slik at det kan vises i visningen
@@ -78,10 +77,12 @@ export const AktivitetspliktVurdering = ({
         </VStack>
         {isSuccess(hentet) && (
           <>
-            {vurdering?.aktivitet && (
-              <AktivitetsgradTabellBehandling behandling={behandling} aktiviteter={[vurdering?.aktivitet]} />
+            {vurdering && (
+              <>
+                <AktivitetsgradTabellBehandling behandling={behandling} aktiviteter={vurdering?.aktivitet} />
+                <UnntakTabellBehandling behandling={behandling} unntak={vurdering?.unntak} />
+              </>
             )}
-            {vurdering?.unntak && <UnntakTabellBehandling behandling={behandling} unntak={[vurdering?.unntak]} />}
           </>
         )}
         {redigerbar && <VurderAktivitetspliktWrapper doedsdato={doedsdato} behandling={behandling} />}
@@ -90,7 +91,7 @@ export const AktivitetspliktVurdering = ({
   )
 }
 
-//TODO egen komponent
+//TODO flytte ut
 function VurderAktivitetspliktWrapper(props: { doedsdato?: Date; behandling: IDetaljertBehandling }) {
   const { doedsdato, behandling } = props
   const [lagreStatus, lagreVurdering] = useApiCall(opprettAktivitspliktAktivitetsgradOgUnntakForBehandling)

@@ -113,7 +113,9 @@ class AktivitetspliktUnntakDao(
             stmt.setObject(1, unntakId)
             stmt.setObject(2, behandlingId)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+
+            logger.info("Slettet $endret unntak for behandlingId=$behandlingId")
         }
     }
 

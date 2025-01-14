@@ -86,6 +86,7 @@ export function VurderingAktivitetsgradForm(props: {
   )
 }
 
+//TODO: flytt i felles katalog
 export const RedigerbarAktivtetsGradForm = ({
   aktivitet,
   typeVurdering,

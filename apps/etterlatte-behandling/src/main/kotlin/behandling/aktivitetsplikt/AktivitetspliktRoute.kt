@@ -384,8 +384,7 @@ internal fun Route.aktivitetspliktRoutes(
         get {
             logger.info("Henter aktivitetsplikt vurdering for behandlingId=$behandlingId")
             val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForBehandlingGammel(behandlingId) }
-                    ?: throw VurderingIkkeFunnetException(sakId, behandlingId)
+                inTransaction { aktivitetspliktService.hentVurderingForBehandlingNy(behandlingId) }
             call.respond(vurdering)
         }
 
@@ -435,8 +434,7 @@ internal fun Route.aktivitetspliktRoutes(
             }
         }
 
-        // TODO suffiks med aktivitetsgrad eller ikke?
-        delete("{$AKTIVITETSGRAD_ID_CALL_PARAMETER}") {
+        delete("/aktivitetsgrad/{$AKTIVITETSGRAD_ID_CALL_PARAMETER}") {
             kunSkrivetilgang {
                 logger.info("Sletter aktivitetsgrad med id=$aktivitetsgradId for behandlingId=$behandlingId i sak=$sakId")
                 val vurdering =
@@ -469,21 +467,20 @@ internal fun Route.aktivitetspliktRoutes(
                     call.respond(aktivitetspliktVurdering)
                 }
             }
-        }
-
-        delete("{$UNNTAK_ID_CALL_PARAMETER}") {
-            kunSkrivetilgang {
-                logger.info("Sletter unntak med id=$unntakId for sakId=$sakId og behandlingId=$behandlingId")
-                val vurdering =
-                    inTransaction {
-                        aktivitetspliktService.slettUnntakForBehandling(
-                            behandlingId = behandlingId,
-                            sakId = sakId,
-                            unntakId = unntakId,
-                            brukerTokenInfo = brukerTokenInfo,
-                        )
-                    }
-                call.respond(vurdering)
+            delete("{$UNNTAK_ID_CALL_PARAMETER}") {
+                kunSkrivetilgang {
+                    logger.info("Sletter unntak med id=$unntakId for sakId=$sakId og behandlingId=$behandlingId")
+                    val vurdering =
+                        inTransaction {
+                            aktivitetspliktService.slettUnntakForBehandling(
+                                behandlingId = behandlingId,
+                                sakId = sakId,
+                                unntakId = unntakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(vurdering)
+                }
             }
         }
     }

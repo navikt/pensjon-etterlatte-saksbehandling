@@ -11,7 +11,7 @@ export const UnntakTabellBehandling = ({
   unntak,
   behandling,
 }: {
-  unntak: IAktivitetspliktUnntak[] | undefined
+  unntak: IAktivitetspliktUnntak[]
   behandling: IDetaljertBehandling
 }) => {
   return (
@@ -40,7 +40,7 @@ export const UnntakTabellBehandling = ({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!!unntak?.length ? (
+          {unntak?.length ? (
             <>
               {unntak.map((unntak) => (
                 <Table.ExpandableRow

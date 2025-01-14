@@ -13,31 +13,65 @@
             <td>
                 {{avdoed}}
                 {{#ibruk}}
-                    <span class="badge text-bg-warning">Brukt</span>
+                    <span class="badge text-bg-warning">Brukt BP</span>
                 {{/ibruk}}
             </td>
             <td>{{gjenlevende}}</td>
             <td>{{barn}}</td>
             <td style="text-align: right">
-                <button class="btn me-1 btn-primary"
-                        hx-post="{{path}}/send-soeknad"
-                        hx-vals='{"type": "BARNEPENSJON", "avdoed": "{{avdoed}}", "gjenlevende": "{{gjenlevende}}", "barnListe": {{barn}}}'
-                        hx-target="#sendSoknadResult"
-                        hx-swap="innerHTML"
-                >
-                    BP
-                </button>
-                <button class="btn me-1 btn-info"
-                        hx-post="{{path}}/send-soeknad"
-                        hx-vals='{"type": "OMSTILLINGSSTOENAD", "avdoed": "{{avdoed}}", "gjenlevende": "{{gjenlevende}}" }'
-                        hx-target="#sendSoknadResult"
-                        hx-swap="innerHTML"
-                >
-                    OMS
-                </button>
+                <button class="btn me-1 btn-info" onclick="document.getElementById('modal-{{avdoed}}').showModal()">Søknad</button>
             </td>
         </tr>
     {{/familier}}
     </tbody>
 </table>
-<div id="sendSoknadResult"></div>
+
+{{#familier}}
+    <dialog id="modal-{{avdoed}}">
+        <h4>Søknad for avdød {{avdoed}}</h4>
+        <form>
+
+            <div class="mb-3">
+                <label for="ytelse" class="form-label">Ytelse:</label>
+                <select name="ytelse"
+                        id="ytelse"
+                        class="form-select"
+                        required
+                >
+                    <option value=""></option>
+                    <option value="BARNEPENSJON">Barnepensjon</option>
+                    <option value="OMSTILLINGSSTOENAD">Omstillingstønad</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="behandlingssteg" class="form-label">Behandlingssteg (valgfritt):</label>
+                <select name="behandlingssteg"
+                        id="behandlingssteg"
+                        class="form-select"
+                        required
+                >
+                    <option value="KLAR">Klar</option>
+                    <option value="BEHANDLING_OPPRETTA" selected="selected">Behandling opprettet</option>
+                    <option value="VILKAARSVURDERT">Vilkaarsvurdert</option>
+                    <option value="TRYGDETID_OPPRETTA">Trygdetid opprettet</option>
+                    <option value="BEREGNA">Beregnet</option>
+                    <option value="AVKORTA">Avkortet</option>
+                    <option value="VEDTAK_FATTA">Vedtak fattet</option>
+                    <option value="IVERKSATT">Iverksatt</option>
+                </select>
+            </div>
+
+            <button class="btn me-1 btn-info"
+                    hx-post="{{path}}/send-soeknad"
+                    hx-vals='{"avdoed": "{{avdoed}}", "gjenlevende": "{{gjenlevende}}", "barnListe": {{barn}}}'
+                    hx-swap="innerHTML"
+                    hx-target="#sendSoknadResult-{{avdoed}}"
+            >
+                Send
+            </button>
+        </form>
+        <button class="btn" onclick="document.getElementById('modal-{{avdoed}}').close()">Lukk</button>
+        <div id="sendSoknadResult-{{avdoed}}"></div>
+    </dialog>
+{{/familier}}

@@ -181,6 +181,12 @@ class DollyMock : DollyInterface {
                 gjenlevende = "321",
                 barn = listOf("444", "555"),
             ),
+            ForenkletFamilieModell(
+                ibruk = true,
+                avdoed = "678",
+                gjenlevende = "777",
+                barn = listOf("888", "999"),
+            ),
         )
 
     override fun opprettBestilling(

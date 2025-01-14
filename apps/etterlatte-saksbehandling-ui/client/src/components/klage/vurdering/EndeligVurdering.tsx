@@ -104,44 +104,31 @@ export function EndeligVurdering(props: { klage: Klage }) {
 
   const valgtUtfall = watch('utfall')
 
-  function lagreVurdering(skjema: FormdataVurdering) {
+  function haandterLagringVurdering(skjema: FormdataVurdering, naviger: boolean) {
     if (!klage) {
       return
     }
     if (!erSkjemaUtfylt(skjema)) {
-      // Gjør noe bedre håndtering her
       throw new Error('Ufullstendig validering av skjemadata i RHF')
     }
     if (!isDirty) {
       // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
-      // Beskjed?
+      if (naviger) {
+        navigate(nesteSteg(skjema.utfall, klage.id))
+      }
+      return
     }
 
     const utfall = mapFraFormdataTilKlageUtfall(skjema)
     lagreUtfall({ klageId: klage.id, utfall }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))
+      if (naviger) {
+        navigate(nesteSteg(valgtUtfall, klage.id))
+      }
     })
   }
-
-  function sendInnVurdering(skjema: FormdataVurdering) {
-    if (!klage) {
-      return
-    }
-    if (!erSkjemaUtfylt(skjema)) {
-      // Gjør noe bedre håndtering her
-      throw new Error('Ufullstendig validering av skjemadata i RHF')
-    }
-    if (!isDirty) {
-      // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
-      navigate(nesteSteg(skjema.utfall, klage.id))
-    }
-
-    const utfall = mapFraFormdataTilKlageUtfall(skjema)
-    lagreUtfall({ klageId: klage.id, utfall }, (oppdatertKlage) => {
-      dispatch(addKlage(oppdatertKlage))
-      navigate(nesteSteg(valgtUtfall, klage.id))
-    })
-  }
+  const skjemaLagring = (skjema: FormdataVurdering) => haandterLagringVurdering(skjema, true)
+  const mellomLagring = () => haandterLagringVurdering(watch(), false)
 
   return (
     <>
@@ -149,7 +136,7 @@ export function EndeligVurdering(props: { klage: Klage }) {
         Endelig vurdering
       </Heading>
 
-      <form onSubmit={handleSubmit(sendInnVurdering)}>
+      <form onSubmit={handleSubmit(skjemaLagring)}>
         <VStack gap="4">
           <ControlledRadioGruppe
             name="utfall"
@@ -180,11 +167,11 @@ export function EndeligVurdering(props: { klage: Klage }) {
             errorMessage:
               'Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
           })}
-          {!!watch('utfall') && (
+          {!!valgtUtfall && (
             <>
               <Box>
-                <Button size="small" onClick={() => lagreVurdering(watch())} loading={isPending(lagreUtfallStatus)}>
-                  Lagre {teksterLagring[watch('utfall')!!].toLowerCase()}
+                <Button size="small" onClick={mellomLagring} loading={isPending(lagreUtfallStatus)}>
+                  {teksterLagring[valgtUtfall].toLowerCase()}
                 </Button>
               </Box>
               {isSuccess(lagreUtfallStatus) && (
@@ -211,9 +198,9 @@ export function EndeligVurdering(props: { klage: Klage }) {
 }
 
 const teksterLagring: Record<Utfall, string> = {
-  AVVIST: 'avvist klage',
-  AVVIST_MED_OMGJOERING: 'avvisning med omgjøring',
-  DELVIS_OMGJOERING: 'delvis omgjøring',
-  OMGJOERING: 'omgjøring',
-  STADFESTE_VEDTAK: 'innstilling',
+  AVVIST: 'Lagre avvist klage',
+  AVVIST_MED_OMGJOERING: 'Lagre avvisning med omgjøring',
+  DELVIS_OMGJOERING: 'Lagre delvis omgjøring',
+  OMGJOERING: 'Lagre omgjøring',
+  STADFESTE_VEDTAK: 'Lagre innstilling',
 }

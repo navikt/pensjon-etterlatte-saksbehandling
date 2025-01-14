@@ -46,11 +46,12 @@ data class BarnepensjonInnvilgelse(
             erGjenoppretting: Boolean,
             erMigrertYrkesskade: Boolean,
             erSluttbehandling: Boolean,
+            erYrkesskade: Boolean,
         ): BarnepensjonInnvilgelse =
             BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning =
-                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, trygdetid),
+                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, trygdetid, erYrkesskade = erYrkesskade),
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 erGjenoppretting = erGjenoppretting,

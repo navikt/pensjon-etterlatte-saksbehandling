@@ -94,6 +94,7 @@ data class OmstillingsstoenadInnvilgelse(
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =
                             beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        erYrkesskade = vilkaarsVurdering.isYrkesskade(),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
                     doedsdatoEllerOpphoertPleieforhold

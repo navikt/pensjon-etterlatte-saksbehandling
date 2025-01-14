@@ -2,23 +2,24 @@ import { IAktivitetspliktUnntak, IAktivitetspliktVurderingNyDto } from '~shared/
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { slettAktivitetspliktUnntak } from '~shared/api/aktivitetsplikt'
+import { slettAktivitetspliktUnntakForOppgave } from '~shared/api/aktivitetsplikt'
 import { useDispatch } from 'react-redux'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
-import { setAktivitetspliktVurdering } from '~store/reducers/Aktivitetsplikt12mnd'
-import { UnntakAktivitetspliktOppgaveMedForm } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
+import { setAktivitetspliktVurdering } from '~store/reducers/AktivitetsplikReducer'
+import { VelgOgLagreUnntakAktivitetspliktOppgave } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
 import { BodyShort, Button, HStack, Label, VStack } from '@navikt/ds-react'
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending, Result } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 
-export function VisUnntak(props: { unntak: IAktivitetspliktUnntak }) {
-  const { unntak } = props
-  const { oppgave } = useAktivitetspliktOppgaveVurdering()
-  const [redigerer, setRedigerer] = useState(false)
-  const [slettUnntakStatus, slettSpesifiktUnntak, resetSlettStatus] = useApiCall(slettAktivitetspliktUnntak)
+export function RedigerbarUnntakOppgave(props: { unntak: IAktivitetspliktUnntak }) {
   const dispatch = useDispatch()
-  const oppgaveErRedigerbar = erOppgaveRedigerbar(oppgave.status)
+  const { unntak } = props
+  const [redigerer, setRedigerer] = useState(false)
+
+  const { oppgave } = useAktivitetspliktOppgaveVurdering()
+  const [slettUnntakStatus, slettSpesifiktUnntak, resetSlettStatus] = useApiCall(slettAktivitetspliktUnntakForOppgave)
+  const redigerbar = erOppgaveRedigerbar(oppgave.status)
 
   function slettUnntak(unntak: IAktivitetspliktUnntak) {
     slettSpesifiktUnntak(
@@ -42,14 +43,39 @@ export function VisUnntak(props: { unntak: IAktivitetspliktUnntak }) {
 
   if (redigerer) {
     return (
-      <UnntakAktivitetspliktOppgaveMedForm
-        onSuccess={oppdaterStateEtterRedigertUnntak}
+      <VelgOgLagreUnntakAktivitetspliktOppgave
+        oppdaterStateEtterRedigertUnntak={oppdaterStateEtterRedigertUnntak}
         onAvbryt={() => setRedigerer(false)}
         unntak={unntak}
       />
     )
   }
 
+  return (
+    <UnntakRedigeringsKnapper
+      redigerbar={redigerbar}
+      unntak={unntak}
+      slettUnntakStatus={slettUnntakStatus}
+      setRedigerer={setRedigerer}
+      slettUnntak={slettUnntak}
+    />
+  )
+}
+
+//TODO flytte ut?
+export const UnntakRedigeringsKnapper = ({
+  unntak,
+  slettUnntakStatus,
+  redigerbar,
+  setRedigerer,
+  slettUnntak,
+}: {
+  unntak: IAktivitetspliktUnntak
+  slettUnntakStatus: Result<IAktivitetspliktVurderingNyDto>
+  redigerbar: boolean
+  setRedigerer: (arg: boolean) => void
+  slettUnntak: (unntak: IAktivitetspliktUnntak) => void
+}) => {
   return (
     <VStack gap="6">
       <VStack gap="2">
@@ -61,7 +87,7 @@ export function VisUnntak(props: { unntak: IAktivitetspliktUnntak }) {
         <ApiErrorAlert>Kunne ikke slette unntaket, på grunn av feil: {slettUnntakStatus.error.detail}</ApiErrorAlert>
       )}
 
-      {oppgaveErRedigerbar && (
+      {redigerbar && (
         <HStack gap="4">
           <Button
             size="xsmall"

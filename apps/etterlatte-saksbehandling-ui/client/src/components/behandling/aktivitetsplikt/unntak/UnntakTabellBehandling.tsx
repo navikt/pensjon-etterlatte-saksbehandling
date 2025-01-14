@@ -1,20 +1,33 @@
-import React from 'react'
-import { tekstAktivitetspliktUnntakType } from '~shared/types/Aktivitetsplikt'
-import { BodyShort, Box, Detail, ReadMore, Table, VStack } from '@navikt/ds-react'
+import { IAktivitetspliktUnntak, tekstAktivitetspliktUnntakType } from '~shared/types/Aktivitetsplikt'
+import { BodyShort, Box, Detail, Heading, HStack, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
-import { RedigerbarUnntakOppgave } from '~components/aktivitetsplikt/vurdering/unntak/RedigerbarUnntakOppgave'
+import React from 'react'
+import { HandShakeHeartIcon } from '@navikt/aksel-icons'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { RedigerbarUnntakBehandling } from '~components/behandling/aktivitetsplikt/unntak/RedigerbarUnntakBehandling'
 
-/*
-todo: burde merges med Unntak.tsx
- */
-export function UnntakIOppgave() {
-  const { vurdering } = useAktivitetspliktOppgaveVurdering()
-  const unntaker = vurdering.unntak
-
+export const UnntakTabellBehandling = ({
+  unntak,
+  behandling,
+}: {
+  unntak: IAktivitetspliktUnntak[] | undefined
+  behandling: IDetaljertBehandling
+}) => {
   return (
     <VStack gap="4">
+      <HStack gap="4" align="center">
+        <HandShakeHeartIcon fontSize="1.5rem" aria-hidden />
+        <Heading size="small">Unntak</Heading>
+      </HStack>
+
+      <Box maxWidth="42.5rem">
+        <ReadMore header="Dette menes med unntak">
+          I oversikten over unntak ser du hvilke unntak som er satt på den gjenlevende. Det finnes både midlertidige og
+          varige unntak
+        </ReadMore>
+      </Box>
+
       <Table size="small">
         <Table.Header>
           <Table.Row>
@@ -27,10 +40,13 @@ export function UnntakIOppgave() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!!unntaker?.length ? (
+          {!!unntak?.length ? (
             <>
-              {unntaker.map((unntak) => (
-                <Table.ExpandableRow key={unntak.id} content={<RedigerbarUnntakOppgave unntak={unntak} />}>
+              {unntak.map((unntak) => (
+                <Table.ExpandableRow
+                  key={unntak.id}
+                  content={<RedigerbarUnntakBehandling behandling={behandling} unntak={unntak} />}
+                >
                   <Table.DataCell>{tekstAktivitetspliktUnntakType[unntak.unntak]}</Table.DataCell>
                   <Table.DataCell>
                     <AktivitetspliktUnntakTypeTag unntak={unntak.unntak} />
@@ -51,13 +67,6 @@ export function UnntakIOppgave() {
           )}
         </Table.Body>
       </Table>
-
-      <Box maxWidth="42.5rem">
-        <ReadMore header="Dette menes med unntak">
-          I oversikten over unntak ser du hvilke unntak som er satt på den gjenlevende. Det finnes både midlertidige og
-          varige unntak
-        </ReadMore>
-      </Box>
     </VStack>
   )
 }

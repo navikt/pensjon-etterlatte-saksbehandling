@@ -4,7 +4,8 @@ import { BodyShort, Box, Detail, Heading, HStack, Label, ReadMore, Table, VStack
 import { ClockDashedIcon } from '@navikt/aksel-icons'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 
-export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktAktivitetsgrad[] | undefined }) => {
+// TODO: burde merges med AktivitetsgradIOppgave, se kommentar der.
+export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktAktivitetsgrad[] }) => {
   return (
     <VStack gap="4">
       <HStack gap="4" align="center">
@@ -32,7 +33,7 @@ export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktA
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!!aktiviteter?.length ? (
+          {aktiviteter?.length ? (
             <>
               {aktiviteter.map((aktivitet) => (
                 <Table.ExpandableRow

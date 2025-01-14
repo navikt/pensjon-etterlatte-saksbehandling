@@ -17,7 +17,7 @@ export const setAktivitetspliktVurdering = createAction<IAktivitetspliktVurderin
 )
 export const setAktivitetspliktOppgave = createAction<OppgaveDTO>('set/AktivitetspliktOppgaveVurdering/oppgave')
 
-export const aktivitetsplikt12mndReducer = createReducer(initialState, (builder) => {
+export const aktivitetspliktReducer = createReducer(initialState, (builder) => {
   builder.addCase(setStartdata, (_, action) => action.payload)
   builder.addCase(setAktivtetspliktbrevdata, (state, action) => {
     if (state) {
@@ -42,5 +42,5 @@ export const aktivitetsplikt12mndReducer = createReducer(initialState, (builder)
 })
 
 export function useAktivitetspliktOppgaveVurderingState(): AktivitetspliktOppgaveVurdering {
-  return useAppSelector((state) => state.aktivitetsplikt12mndReducer)
+  return useAppSelector((state) => state.aktivitetspliktReducer)
 }

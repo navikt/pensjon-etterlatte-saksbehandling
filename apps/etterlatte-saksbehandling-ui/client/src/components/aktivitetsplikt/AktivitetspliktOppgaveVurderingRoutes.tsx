@@ -9,7 +9,7 @@ import {
 import { VurderAktivitet } from '~components/aktivitetsplikt/vurdering/VurderAktivitet'
 import { VurderingInfoBrevOgOppsummering } from '~components/aktivitetsplikt/brev/VurderingInfoBrevOgOppsummering'
 import { AktivitetspliktOppgaveVurdering } from '~shared/types/Aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurderingState } from '~store/reducers/Aktivitetsplikt12mnd'
+import { useAktivitetspliktOppgaveVurderingState } from '~store/reducers/AktivitetsplikReducer'
 import { ValgForInfobrev } from '~components/aktivitetsplikt/brev/ValgForInfobrev'
 import { Box, HStack } from '@navikt/ds-react'
 

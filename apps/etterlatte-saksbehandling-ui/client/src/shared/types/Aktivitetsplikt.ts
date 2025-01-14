@@ -143,14 +143,6 @@ export enum AktivitetspliktOppgaveVurderingType {
   TOLV_MAANEDER = 'TOLV_MAANEDER',
 }
 
-export interface IOpprettAktivitetspliktUnntak {
-  id: string | undefined
-  unntak: AktivitetspliktUnntakType
-  fom: string
-  tom?: string
-  beskrivelse: string
-}
-
 export interface AktivitetspliktVurderingValues {
   aktivitetsplikt: JaNei | null
   aktivitetsgrad: AktivitetspliktVurderingType | ''
@@ -172,15 +164,10 @@ export const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValu
 }
 
 export interface AktivitetspliktOppgaveVurdering {
-  vurderingType: AktivitetspliktOppgaveType
+  vurderingType: AktivitetspliktOppgaveVurderingType
   oppgave: OppgaveDTO
   sak: ISak
   vurdering: IAktivitetspliktVurderingNyDto
   aktivtetspliktbrevdata?: IBrevAktivitetspliktDto
   sistEndret?: string
-}
-
-export enum AktivitetspliktOppgaveType {
-  SEKS_MAANEDER = 'SEKS_MAANEDER',
-  TOLV_MAANEDER = 'TOLV_MAANEDER',
 }

@@ -1,5 +1,5 @@
 import {
-  AktivitetspliktOppgaveType,
+  AktivitetspliktOppgaveVurderingType,
   AktivitetspliktUnntakType,
   IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNyDto,
@@ -11,12 +11,13 @@ import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDa
 import { FloppydiskIcon } from '@navikt/aksel-icons'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { opprettAktivitetspliktUnntak } from '~shared/api/aktivitetsplikt'
+import { redigerAktivitetspliktUnntakForOppgave } from '~shared/api/aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending, Result } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { startOfMonth } from 'date-fns'
 
+//TODO: flytte til domain fil
 export interface IOpprettAktivitetspliktUnntak {
   id: string | undefined
   unntak: AktivitetspliktUnntakType
@@ -25,19 +26,13 @@ export interface IOpprettAktivitetspliktUnntak {
   beskrivelse: string
 }
 
-export function UnntakAktivitetspliktOppgaveMedForm(props: {
-  unntak?: IAktivitetspliktUnntak
-  onSuccess: (data: IAktivitetspliktVurderingNyDto) => void
-  onAvbryt?: () => void
+export function VelgOgLagreUnntakAktivitetspliktOppgave(props: {
+  unntak: IAktivitetspliktUnntak
+  oppdaterStateEtterRedigertUnntak: (data: IAktivitetspliktVurderingNyDto) => void
+  onAvbryt: () => void
 }) {
-  const { oppgave } = useAktivitetspliktOppgaveVurdering()
-
-  const methods = useForm<IOpprettAktivitetspliktUnntak>({
-    defaultValues: props.unntak ?? { fom: startOfMonth(new Date()).toISOString() },
-  })
-  const { handleSubmit } = methods
-  const [lagreUnntakStatus, lagreUnntak] = useApiCall(opprettAktivitetspliktUnntak)
-
+  const { oppgave, vurderingType } = useAktivitetspliktOppgaveVurdering()
+  const [lagreUnntakStatus, lagreUnntak] = useApiCall(redigerAktivitetspliktUnntakForOppgave)
   const sendInn = (formdata: Partial<IOpprettAktivitetspliktUnntak>) => {
     lagreUnntak(
       {
@@ -52,18 +47,48 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
         },
       },
       (data) => {
-        props.onSuccess(data)
+        props.oppdaterStateEtterRedigertUnntak(data)
       }
     )
   }
 
   return (
+    <LagreUnntakForm
+      lagreUnntakStatus={lagreUnntakStatus}
+      sendInn={sendInn}
+      unntak={props.unntak}
+      vurderingType={vurderingType}
+      onAvbryt={props.onAvbryt}
+    />
+  )
+}
+
+//TODO: flytte ut?
+export const LagreUnntakForm = ({
+  unntak,
+  vurderingType,
+  sendInn,
+  onAvbryt,
+  lagreUnntakStatus,
+}: {
+  unntak: IAktivitetspliktUnntak
+  vurderingType: AktivitetspliktOppgaveVurderingType
+  sendInn: (formdata: Partial<IOpprettAktivitetspliktUnntak>) => void
+  onAvbryt: () => void
+  lagreUnntakStatus: Result<IAktivitetspliktVurderingNyDto>
+}) => {
+  const methods = useForm<IOpprettAktivitetspliktUnntak>({
+    defaultValues: unntak ?? { fom: startOfMonth(new Date()).toISOString() },
+  })
+  const { handleSubmit } = methods
+
+  return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(sendInn)}>
-        <UnntakAktivitetspliktOppgave />
+        <UnntakAktivitetspliktOppgave vurderingType={vurderingType} />
         <HStack gap="4">
-          {!!props.onAvbryt && (
-            <Button variant="secondary" onClick={props.onAvbryt}>
+          {!!onAvbryt && (
+            <Button variant="secondary" onClick={onAvbryt}>
               Avbryt
             </Button>
           )}
@@ -84,24 +109,18 @@ export function UnntakAktivitetspliktOppgaveMedForm(props: {
   )
 }
 
-export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?: string }) {
-  const { vurderingType } = useAktivitetspliktOppgaveVurdering()
-  const er6mndVurdering = vurderingType !== AktivitetspliktOppgaveType.TOLV_MAANEDER
+function UnntakAktivitetspliktOppgave({ vurderingType }: { vurderingType: AktivitetspliktOppgaveVurderingType }) {
+  const er6mndVurdering = vurderingType === AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
   const { register, control } = useFormContext()
   return (
     <Box maxWidth="40rem">
       <VStack gap="4">
         <HStack gap="4">
-          <ControlledDatoVelger name={`${formPrefix}fom`} label="Unntak fra og med" control={control} />
-          <ControlledDatoVelger
-            name={`${formPrefix}tom`}
-            label="Unntak til og med"
-            required={false}
-            control={control}
-          />
+          <ControlledDatoVelger name="fom" label="Unntak fra og med" control={control} />
+          <ControlledDatoVelger name="tom" label="Unntak til og med" required={false} control={control} />
         </HStack>
         <Select
-          {...register(`${formPrefix}unntak`, {
+          {...register('unntak', {
             required: {
               value: true,
               message: 'Du må velge type unntak.',
@@ -131,7 +150,7 @@ export function UnntakAktivitetspliktOppgave({ formPrefix = '' }: { formPrefix?:
           )}
         </Select>
 
-        <Textarea {...register(`${formPrefix}beskrivelse`)} label="Vurdering av unntak" />
+        <Textarea {...register('beskrivelse')} label="Vurdering av unntak" />
       </VStack>
     </Box>
   )

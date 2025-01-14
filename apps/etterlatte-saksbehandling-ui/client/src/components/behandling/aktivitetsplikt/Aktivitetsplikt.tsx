@@ -1,4 +1,4 @@
-import { Alert, BodyLong, BodyShort, Box, Button, Detail, Heading, List, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, BodyShort, Box, Button, Detail, Heading, List, ReadMore, VStack } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
@@ -88,17 +88,18 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           <Heading level="1" spacing size="medium">
             Gjenlevende sin situasjon
           </Heading>
-          <BodyLong spacing>
-            Det stilles ulike krav til aktivitet basert på tiden som har gått etter dødsfallet. Seks måneder etter
-            dødsfallet må den gjenlevende være i minst 50 % aktivitet for å ha rett til omstillingsstønad. Videre kan
-            det kreves 100 % aktivitet etter tolv måneder. I enkelte tilfeller kan man likevel ha rett til
-            omstillingsstønad, selv om aktivitetskravet ikke er oppfylt.
-          </BodyLong>
-          <BodyLong spacing>
-            Selv om det ikke stilles aktivitetskrav de første seks månedene, er det viktig å kartlegge brukerens
-            situasjon tidlig. Dette gjør det mulig å gi riktig oppfølging og bedre forberede brukerne på å oppfylle
-            kravene som gjelder etter seks og tolv måneder.
-          </BodyLong>
+          <ReadMore header="Slik vurderer du gjenlevendes situasjon">
+            <BodyLong spacing>
+              Det stilles ulike krav til aktivitet basert på tiden som har gått etter dødsfallet. Seks måneder etter
+              dødsfallet må den gjenlevende være i minst 50 % aktivitet for å ha rett til omstillingsstønad. Videre kan
+              det kreves 100 % aktivitet etter tolv måneder. I enkelte tilfeller kan man likevel ha rett til
+              omstillingsstønad, selv om aktivitetskravet ikke er oppfylt.
+            </BodyLong>
+            <BodyLong spacing>
+              Selv om de første seks månedene er fritatt, er det viktig å kartlegge situasjonen tidlig for å sikre
+              riktig oppfølging og forberede brukeren på kravene som følger
+            </BodyLong>
+          </ReadMore>
         </TekstWrapper>
 
         {isValidDateOfDeath(avdoedesDoedsdato!!) && ( // todo denne valideringen burde skje et annet sted vel og si noe om den ikke er gyldig
@@ -109,21 +110,19 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             <AktivitetspliktTidslinje behandling={behandling} doedsdato={avdoedesDoedsdato!!} />
           </>
         )}
-        {isBefore(avdoedesDoedsdato!!, subMonths(Date.now(), 7)) && (
+        {isBefore(avdoedesDoedsdato!!, subMonths(Date.now(), 4)) && (
           <Box maxWidth="42.5rem">
             <Alert variant="info">
-              Vi ser at det har gått noe tid siden dødsfallet. Vær oppmerksom på at det stilles krav til aktivitet
-              avhengig av tid etter dødsfall.
+              Det har gått mer enn 4 måneder siden dødsfallet, det har derfor ikke blitt opprettet oppgave om
+              aktivtetsplikt ved 6 måneder. Vurder om du må manuelt sende informasjonsbrev og følg opp svar fra bruker.
             </Alert>
           </Box>
         )}
 
-        <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
-          <AktivitetspliktVurdering
-            behandling={behandling}
-            resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
-          />
-        </Box>
+        <AktivitetspliktVurdering
+          behandling={behandling}
+          resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
+        />
 
         {aktivitetOppfolging && (
           <div>

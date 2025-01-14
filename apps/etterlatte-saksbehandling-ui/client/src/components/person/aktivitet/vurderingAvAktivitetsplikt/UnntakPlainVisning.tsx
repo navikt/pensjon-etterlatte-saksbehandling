@@ -5,7 +5,10 @@ import { HandShakeHeartIcon } from '@navikt/aksel-icons'
 import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 
-export const Unntak = ({ unntaker }: { unntaker: IAktivitetspliktUnntak[] | undefined }) => {
+/*
+todo: burde merges med UnntakIOppgave.tsx
+ */
+export const UnntakPlainVisning = ({ unntaker }: { unntaker: IAktivitetspliktUnntak[] | undefined }) => {
   return (
     <VStack gap="4">
       <HStack gap="4" align="center">

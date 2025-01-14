@@ -13,7 +13,7 @@ import { sjekklisteReducer } from '~store/reducers/SjekklisteReducer'
 import { behandlingsidemenyReducer } from '~store/reducers/BehandlingSidemenyReducer'
 import { oppgaveReducer } from '~store/reducers/OppgaveReducer'
 import { personopplysningerReducer } from '~store/reducers/PersonopplysningerReducer'
-import { aktivitetsplikt12mndReducer } from '~store/reducers/Aktivitetsplikt12mnd'
+import { aktivitetspliktReducer } from '~store/reducers/AktivitetsplikReducer'
 import { unleashReducer } from '~store/reducers/UnleashReducer'
 import { personReducer } from '~store/reducers/PersonReducer'
 
@@ -31,7 +31,7 @@ const reducer = {
   sjekklisteReducer: sjekklisteReducer,
   personReducer: personReducer,
   personopplysningerReducer: personopplysningerReducer,
-  aktivitetsplikt12mndReducer: aktivitetsplikt12mndReducer,
+  aktivitetspliktReducer: aktivitetspliktReducer,
   unleashReducer: unleashReducer,
 }
 export const store = configureStore({

@@ -1,18 +1,17 @@
-import { tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
+import { IAktivitetspliktAktivitetsgrad, tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Box, Detail, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 import React from 'react'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
-import { RedigerbarAktivitetsgrad } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivitetsgrad'
+import { RedigerbarAktivitetsgradBehandling } from '~components/behandling/aktivitetsplikt/aktivitetsgrad/RedigerbarAktivitetsgradBehandling'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-/*TODO:
-   Denne burde få inn vurdering.aktiviteter fra useAktivitetspliktOppgaveVurdering
-  slik at denne og Aktivitetsgrad.tsx kan brukes som en standard visning av aktiviteter
- */
-export function AktivitetsgradIOppgave() {
-  const { vurdering } = useAktivitetspliktOppgaveVurdering()
-  const aktiviteter = vurdering.aktivitet
-
+export function AktivitetsgradTabellBehandling({
+  aktiviteter,
+  behandling,
+}: {
+  aktiviteter: IAktivitetspliktAktivitetsgrad[]
+  behandling: IDetaljertBehandling
+}) {
   return (
     <VStack gap="4">
       <Box maxWidth="42.5rem">
@@ -39,7 +38,7 @@ export function AktivitetsgradIOppgave() {
               {aktiviteter.map((aktivitet) => (
                 <Table.ExpandableRow
                   key={aktivitet.id}
-                  content={<RedigerbarAktivitetsgrad aktivitet={aktivitet} key={aktivitet.id} />}
+                  content={<RedigerbarAktivitetsgradBehandling aktivitet={aktivitet} behandling={behandling} />}
                 >
                   <Table.DataCell>{tekstAktivitetspliktVurderingType[aktivitet.aktivitetsgrad]}</Table.DataCell>
                   <Table.DataCell>{formaterDatoMedFallback(aktivitet.fom, '-')}</Table.DataCell>

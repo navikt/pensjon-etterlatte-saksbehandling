@@ -27,7 +27,7 @@ class AktivitetspliktAktivitetsgradDao(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun upsertAktivitetsgradForOppgave(
+    fun upsertAktivitetsgradForOppgaveEllerBehandling(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,

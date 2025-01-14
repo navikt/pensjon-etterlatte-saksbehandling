@@ -7,12 +7,12 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
-import { velgDoedsdato } from '~components/person/aktivitet/Aktivitet'
+import { velgDoedsdato } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useNavigate } from 'react-router'
 import { AktivitetspliktSteg } from '~components/aktivitetsplikt/stegmeny/AktivitetspliktStegmeny'
 import { AktivitetspliktVurderingOversikt } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingOversikt'
-import { AktivitetspliktOppgaveType } from '~shared/types/Aktivitetsplikt'
+import { AktivitetspliktOppgaveVurderingType } from '~shared/types/Aktivitetsplikt'
 
 export function VurderAktivitet() {
   const { sak } = useAktivitetspliktOppgaveVurdering()
@@ -54,7 +54,7 @@ function NesteKnapp() {
     setFeilmeldingAktiviteter('')
     if (aktiviteter?.length) {
       if (
-        vurderingType === AktivitetspliktOppgaveType.TOLV_MAANEDER &&
+        vurderingType === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER &&
         aktiviteter.every((aktivitet) => !aktivitet.vurdertFra12Mnd)
       ) {
         setFeilmeldingAktiviteter('Du må gjøre en ny vurdering fra 12 måneder for å gå videre')

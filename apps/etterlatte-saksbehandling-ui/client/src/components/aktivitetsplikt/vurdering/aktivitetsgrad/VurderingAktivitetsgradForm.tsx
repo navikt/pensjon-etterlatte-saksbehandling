@@ -10,17 +10,17 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { opprettAktivitetspliktAktivitetsgrad } from '~shared/api/aktivitetsplikt'
+import { redigerAktivitetsgradForOppgave } from '~shared/api/aktivitetsplikt'
 import { useForm } from 'react-hook-form'
 import { Alert, Box, Button, ErrorMessage, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending, Result } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { JaNei } from '~shared/types/ISvar'
 
-interface RedigerAktivitetsgrad {
+export interface RedigerAktivitetsgrad {
   typeVurdering: AktivitetspliktOppgaveVurderingType
   vurderingAvAktivitet: IOpprettAktivitetspliktAktivitetsgrad
   harUnntak?: JaNei
@@ -41,25 +41,14 @@ export function VurderingAktivitetsgradForm(props: {
 }) {
   const { aktivitet, onSuccess, onAvbryt } = props
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
-  const [feilmelding, setFeilmelding] = useState('')
   const typeVurdering =
     oppgave.type === 'AKTIVITETSPLIKT'
       ? AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
       : AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
 
-  const [lagreStatus, lagreVurdering, reset] = useApiCall(opprettAktivitetspliktAktivitetsgrad)
+  const [lagreStatus, redigerAktivitetsgrad] = useApiCall(redigerAktivitetsgradForOppgave)
 
-  const { handleSubmit, register, watch, control } = useForm<RedigerAktivitetsgrad>({
-    defaultValues: {
-      typeVurdering: typeVurdering,
-      vurderingAvAktivitet: aktivitet,
-    },
-  })
-
-  useEffect(() => {
-    reset()
-  }, [aktivitet])
-
+  const [feilmelding, setFeilmelding] = useState('')
   function lagreOgOppdater(formdata: RedigerAktivitetsgrad) {
     setFeilmelding('')
     if (!formdata.vurderingAvAktivitet?.aktivitetsgrad || !formdata.vurderingAvAktivitet.fom) {
@@ -67,7 +56,7 @@ export function VurderingAktivitetsgradForm(props: {
       return
     }
 
-    lagreVurdering(
+    redigerAktivitetsgrad(
       {
         sakId: oppgave.sakId,
         oppgaveId: oppgave.id,
@@ -84,6 +73,40 @@ export function VurderingAktivitetsgradForm(props: {
       onSuccess
     )
   }
+
+  return (
+    <RedigerbarAktivtetsGradForm
+      aktivitet={aktivitet}
+      typeVurdering={typeVurdering}
+      lagreOgOppdater={lagreOgOppdater}
+      lagreStatus={lagreStatus}
+      onAvbryt={onAvbryt}
+      feilmelding={feilmelding}
+    />
+  )
+}
+
+export const RedigerbarAktivtetsGradForm = ({
+  aktivitet,
+  typeVurdering,
+  lagreOgOppdater,
+  lagreStatus,
+  onAvbryt,
+  feilmelding,
+}: {
+  aktivitet: IAktivitetspliktAktivitetsgrad
+  typeVurdering: AktivitetspliktOppgaveVurderingType
+  lagreOgOppdater: (formdata: RedigerAktivitetsgrad) => void
+  lagreStatus: Result<IAktivitetspliktVurderingNyDto>
+  onAvbryt: () => void
+  feilmelding: string
+}) => {
+  const { handleSubmit, register, watch, control } = useForm<RedigerAktivitetsgrad>({
+    defaultValues: {
+      typeVurdering: typeVurdering,
+      vurderingAvAktivitet: aktivitet,
+    },
+  })
 
   const svarAktivitetsgrad = watch('vurderingAvAktivitet.aktivitetsgrad')
 

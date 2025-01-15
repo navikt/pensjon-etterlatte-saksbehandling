@@ -93,7 +93,6 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         utbetalingsinfo,
                         grunnbeloep,
                         trygdetid,
-                        erYrkesskade = false,
                     ),
                 frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
                 erBosattUtlandet =

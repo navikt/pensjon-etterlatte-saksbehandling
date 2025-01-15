@@ -33,7 +33,6 @@ internal fun barnepensjonBeregning(
     grunnbeloep: Grunnbeloep,
     trygdetid: List<TrygdetidDto>,
     erForeldreloes: Boolean = false,
-    erYrkesskade: Boolean,
 ): BarnepensjonBeregning {
     val beregningsperioder =
         barnepensjonBeregningsperioder(utbetalingsinfo, erForeldreloes)
@@ -47,6 +46,8 @@ internal fun barnepensjonBeregning(
             avdoede,
             trygdetid.first().behandlingId,
         )
+
+    val erYrkesskade = trygdetid.any { it.beregnetTrygdetid?.resultat?.yrkesskade == true }
 
     return BarnepensjonBeregning(
         innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),

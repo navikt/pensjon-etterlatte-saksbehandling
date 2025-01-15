@@ -85,7 +85,6 @@ class BrevDataMapperFerdigstillVarsel(
                         request.bruker,
                     )
                 }
-            val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, request.bruker) }
 
             barnepensjonBeregning(
                 innhold = request.innholdMedVedlegg,
@@ -94,7 +93,6 @@ class BrevDataMapperFerdigstillVarsel(
                 grunnbeloep = grunnbeloep.await(),
                 trygdetid = krevIkkeNull(trygdetid.await()) { "Fant ingen trygdetid for behandling $behandlingId" },
                 erForeldreloes = request.erForeldreloes,
-                erYrkesskade = vilkaarsvurdering.await().isYrkesskade(),
             )
         }
 }

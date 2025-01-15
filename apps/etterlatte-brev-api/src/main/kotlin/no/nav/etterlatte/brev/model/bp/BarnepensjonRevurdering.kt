@@ -55,7 +55,6 @@ data class BarnepensjonRevurdering(
             avdoede: List<Avdoed>,
             datoVedtakOmgjoering: LocalDate?,
             erMigrertYrkesskade: Boolean,
-            erYrkesskade: Boolean,
         ): BarnepensjonRevurdering {
             val feilutbetaling =
                 krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
@@ -72,7 +71,6 @@ data class BarnepensjonRevurdering(
                         grunnbeloep,
                         trygdetid,
                         erForeldreloes,
-                        erYrkesskade,
                     ),
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,

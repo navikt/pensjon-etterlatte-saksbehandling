@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -35,7 +34,6 @@ import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -439,9 +437,7 @@ class AktivitetspliktAktivitetsgradDaoTest(
             dao.upsertAktivitetsgradForOppgaveEllerBehandling(aktivitetsgrad, sak.id, kilde, null, opprettBehandling.id)
 
             val aktivitet = dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single()
-            assertThrows<InternfeilException> {
-                dao.slettAktivitetsgradForBehandling(aktivitet.id, UUID.randomUUID())
-            }
+            dao.slettAktivitetsgradForBehandling(aktivitet.id, UUID.randomUUID())
 
             dao.hentAktivitetsgradForBehandling(opprettBehandling.id).single().asClue {
                 it.id shouldBe aktivitet.id

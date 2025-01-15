@@ -68,8 +68,8 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setString(11, aktivitetsgrad.skjoennsmessigVurdering?.name)
             stmt.setBoolean(12, aktivitetsgrad.vurdertFra12Mnd)
 
-            val upserted = stmt.executeUpdate()
-            krev(upserted == 1) {
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
                 "Endret eller satt ikke inn vurdering for sakid: $sakId oppgaveId: $oppgaveId behandlingId: $behandlingId"
             }
         }
@@ -236,8 +236,8 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(2, behandlingId)
 
             val slettet = stmt.executeUpdate()
-            krev(slettet == 1) {
-                "Kunne ikke slette aktivitetsgrad for behandlingid: $behandlingId aktivitetId: $aktivitetId"
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetsgrad for behandlingid: $behandlingId aktivitetId: $aktivitetId")
             }
         }
     }
@@ -257,8 +257,8 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(1, aktivitetId)
             stmt.setObject(2, oppgaveId)
             val slettet = stmt.executeUpdate()
-            krev(slettet == 1) {
-                "Kunne ikke slette aktivitetsgrad for oppgaveId: $oppgaveId aktivitetId: $aktivitetId"
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetsgrad for oppgaveId: $oppgaveId aktivitetId: $aktivitetId")
             }
         }
     }

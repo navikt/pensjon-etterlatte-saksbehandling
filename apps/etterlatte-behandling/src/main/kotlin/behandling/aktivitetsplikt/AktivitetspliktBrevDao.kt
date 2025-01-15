@@ -11,11 +11,14 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class AktivitetspliktBrevDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun hentBrevdata(oppgaveId: UUID): AktivitetspliktInformasjonBrevdata? =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
@@ -116,8 +119,8 @@ class AktivitetspliktBrevDao(
             stmt.setJsonb(1, kilde)
             stmt.setObject(2, oppgaveId)
             val slettet = stmt.executeUpdate()
-            krev(slettet == 1) {
-                "Kunne ikke slette brevid for oppgaveId: $oppgaveId"
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette brevid for oppgaveId: $oppgaveId")
             }
         }
     }

@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -23,6 +24,8 @@ import java.util.UUID
 class AktivitetspliktDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun finnSenesteAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -237,8 +240,8 @@ class AktivitetspliktDao(
             stmt.setObject(2, behandlingId)
 
             val slettet = stmt.executeUpdate()
-            krev(slettet == 1) {
-                "Kunne ikke slette aktivitetId: $aktivitetId for behandlingId: $behandlingId"
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetId: $aktivitetId for behandlingId: $behandlingId")
             }
         }
     }
@@ -259,8 +262,8 @@ class AktivitetspliktDao(
             stmt.setSakId(2, sakId)
 
             val slettet = stmt.executeUpdate()
-            krev(slettet == 1) {
-                "Kunne ikke slette aktivitetId: $aktivitetId for sakId: $sakId"
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetId: $aktivitetId for sakId: $sakId")
             }
         }
     }

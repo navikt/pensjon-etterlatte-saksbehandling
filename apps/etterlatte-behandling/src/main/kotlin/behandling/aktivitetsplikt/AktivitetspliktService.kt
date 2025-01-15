@@ -43,11 +43,11 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.oppgave.OppgaveService
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -63,6 +63,8 @@ class AktivitetspliktService(
     private val aktivitetspliktKopierService: AktivitetspliktKopierService,
     private val oppgaveService: OppgaveService,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
         aktivitetspliktDao.finnSenesteAktivitetspliktOppfolging(behandlingId)
 

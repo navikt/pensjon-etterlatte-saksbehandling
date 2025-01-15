@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setJsonb
@@ -92,7 +93,10 @@ class AktivitetspliktBrevDao(
                 )
             stmt.setLong(1, brevId)
             stmt.setObject(2, oppgaveId)
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Kunne ikke endre brevid: $brevId oppgaveId: $oppgaveId"
+            }
         }
     }
 
@@ -111,7 +115,10 @@ class AktivitetspliktBrevDao(
                 )
             stmt.setJsonb(1, kilde)
             stmt.setObject(2, oppgaveId)
-            stmt.executeUpdate()
+            val slettet = stmt.executeUpdate()
+            krev(slettet == 1) {
+                "Kunne ikke slette brevid for oppgaveId: $oppgaveId"
+            }
         }
     }
 }

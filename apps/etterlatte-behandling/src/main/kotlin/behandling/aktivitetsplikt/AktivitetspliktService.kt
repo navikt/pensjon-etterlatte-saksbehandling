@@ -203,7 +203,7 @@ class AktivitetspliktService(
                 throw SakidTilhoererIkkeBehandlingException()
             }
             if (aktivitet.id != null) {
-                aktivitetspliktDao.oppdaterAktivitet(behandlingId, aktivitet, kilde)
+                aktivitetspliktDao.oppdaterAktivitetForBehandling(behandlingId, aktivitet, kilde)
             } else {
                 aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
             }

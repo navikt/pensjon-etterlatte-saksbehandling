@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.aktivitetsplikt
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -119,17 +120,17 @@ class AktivitetspliktServiceTest {
             service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
 
             coVerify { aktivitetspliktDao.opprettAktivitet(behandling.id, aktivitet, any()) }
-            coVerify(exactly = 0) { aktivitetspliktDao.oppdaterAktivitet(any(), any(), any()) }
+            coVerify(exactly = 0) { aktivitetspliktDao.oppdaterAktivitetForBehandling(any(), any(), any()) }
         }
 
         @Test
         fun `Skal oppdatere en aktivitet`() {
             val aktivitet = aktivitet.copy(id = UUID.randomUUID())
-            every { aktivitetspliktDao.oppdaterAktivitet(behandling.id, aktivitet, any()) } returns 1
+            every { aktivitetspliktDao.oppdaterAktivitetForBehandling(behandling.id, aktivitet, any()) } returns 1
 
             service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
 
-            coVerify { aktivitetspliktDao.oppdaterAktivitet(behandling.id, aktivitet, any()) }
+            coVerify { aktivitetspliktDao.oppdaterAktivitetForBehandling(behandling.id, aktivitet, any()) }
             coVerify(exactly = 0) { aktivitetspliktDao.opprettAktivitet(any(), any(), any()) }
         }
 
@@ -171,7 +172,7 @@ class AktivitetspliktServiceTest {
 
         @Test
         fun `Skal slette en aktivitet`() {
-            every { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) } returns 1
+            every { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) } just Runs
             every { behandlingService.hentBehandling(behandling.id) } returns
                 behandling.apply {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT
@@ -214,7 +215,7 @@ class AktivitetspliktServiceTest {
                     any(),
                     oppgaveId,
                 )
-            } returns 1
+            } just Runs
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) } returns
                 listOf(
                     AktivitetspliktAktivitetsgrad(

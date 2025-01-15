@@ -8,6 +8,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.UnntakFraAktivitetsplikt
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -88,8 +89,9 @@ class AktivitetspliktUnntakDao(
             stmt.setObject(2, behandlingId)
 
             val endret = stmt.executeUpdate()
-
-            logger.info("Slettet $endret unntak for behandlingId=$behandlingId")
+            krev(endret == 1) {
+                "Fant ingen unntak for behandlingId: $behandlingId unntakid: $unntakId"
+            }
         }
     }
 
@@ -110,7 +112,9 @@ class AktivitetspliktUnntakDao(
                 stmt.setObject(2, oppgaveId)
 
                 val endret = stmt.executeUpdate()
-                logger.info("Slettet $endret unntak for oppgaveId=$oppgaveId")
+                krev(endret == 1) {
+                    "Fant ingen unntak for oppgaveId: $oppgaveId unntakid: $unntakId"
+                }
             }
         }
     }

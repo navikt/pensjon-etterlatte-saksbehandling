@@ -10,12 +10,10 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerUnntakForBehandling, slettUnntakForBehandling } from '~shared/api/aktivitetsplikt'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { UnntakRedigeringsKnapper } from '~components/aktivitetsplikt/vurdering/unntak/RedigerbarUnntakOppgave'
-import {
-  IOpprettAktivitetspliktUnntak,
-  LagreUnntakForm,
-} from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
+import { IOpprettAktivitetspliktUnntak } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
 import { setVurderingBehandling } from '~store/reducers/AktivitetspliktBehandlingReducer'
+import { UnntakRedigeringsKnapper } from '~components/aktivitetsplikt/vurdering/unntak/UnntakRedigeringsKnapper'
+import { LagreUnntakForm } from '~components/aktivitetsplikt/vurdering/unntak/LagreUnntakForm'
 
 export function RedigerbarUnntakBehandling({
   unntak,

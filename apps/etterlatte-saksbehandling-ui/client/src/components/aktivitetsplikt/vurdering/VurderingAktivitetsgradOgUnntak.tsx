@@ -11,7 +11,7 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { addMonths, startOfMonth } from 'date-fns'
-import { maanederForVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradForm'
+import { maanederForVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradWrapperOppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettAktivitetspliktAktivitetsgradOgUnntakForOppgave } from '~shared/api/aktivitetsplikt'
 import { JaNei } from '~shared/types/ISvar'

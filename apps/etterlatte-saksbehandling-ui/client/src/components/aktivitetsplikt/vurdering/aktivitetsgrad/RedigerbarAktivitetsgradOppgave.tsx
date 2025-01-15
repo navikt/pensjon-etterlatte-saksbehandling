@@ -10,13 +10,13 @@ import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { setAktivitetspliktVurdering } from '~store/reducers/AktivitetsplikReducer'
-import { VurderingAktivitetsgradForm } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradForm'
+import { VurderingAktivitetsgradWrapperOppgave } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradWrapperOppgave'
 import { BodyShort, Button, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import { isFailure, isPending, Result } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-export function RedigerbarAktivitetsgrad(props: { aktivitet: IAktivitetspliktAktivitetsgrad }) {
+export function RedigerbarAktivitetsgradOppgave(props: { aktivitet: IAktivitetspliktAktivitetsgrad }) {
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
   const [slettStatus, slettAktivitetsgrad] = useApiCall(slettAktivitetsgradForOppgave)
   const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
@@ -46,7 +46,7 @@ export function RedigerbarAktivitetsgrad(props: { aktivitet: IAktivitetspliktAkt
 
   if (redigerer) {
     return (
-      <VurderingAktivitetsgradForm
+      <VurderingAktivitetsgradWrapperOppgave
         onSuccess={oppdaterTilstandLagretVurdering}
         onAvbryt={() => setRedigerer(false)}
         aktivitet={aktivitet}

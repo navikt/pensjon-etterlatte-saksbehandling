@@ -7,10 +7,7 @@ import { useDispatch } from 'react-redux'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { setAktivitetspliktVurdering } from '~store/reducers/AktivitetsplikReducer'
 import { VelgOgLagreUnntakAktivitetspliktOppgave } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
-import { BodyShort, Button, HStack, Label, VStack } from '@navikt/ds-react'
-import { isFailure, isPending, Result } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
+import { UnntakRedigeringsKnapper } from '~components/aktivitetsplikt/vurdering/unntak/UnntakRedigeringsKnapper'
 
 export function RedigerbarUnntakOppgave(props: { unntak: IAktivitetspliktUnntak }) {
   const dispatch = useDispatch()
@@ -59,55 +56,5 @@ export function RedigerbarUnntakOppgave(props: { unntak: IAktivitetspliktUnntak 
       setRedigerer={setRedigerer}
       slettUnntak={slettUnntak}
     />
-  )
-}
-
-//TODO flytte ut?
-export const UnntakRedigeringsKnapper = ({
-  unntak,
-  slettUnntakStatus,
-  redigerbar,
-  setRedigerer,
-  slettUnntak,
-}: {
-  unntak: IAktivitetspliktUnntak
-  slettUnntakStatus: Result<IAktivitetspliktVurderingNyDto>
-  redigerbar: boolean
-  setRedigerer: (arg: boolean) => void
-  slettUnntak: (unntak: IAktivitetspliktUnntak) => void
-}) => {
-  return (
-    <VStack gap="6">
-      <VStack gap="2">
-        <Label>Beskrivelse</Label>
-        <BodyShort>{unntak.beskrivelse}</BodyShort>
-      </VStack>
-
-      {isFailure(slettUnntakStatus) && (
-        <ApiErrorAlert>Kunne ikke slette unntaket, på grunn av feil: {slettUnntakStatus.error.detail}</ApiErrorAlert>
-      )}
-
-      {redigerbar && (
-        <HStack gap="4">
-          <Button
-            size="xsmall"
-            variant="secondary"
-            icon={<PencilIcon aria-hidden />}
-            onClick={() => setRedigerer(true)}
-          >
-            Rediger
-          </Button>
-          <Button
-            size="xsmall"
-            variant="secondary"
-            icon={<TrashIcon aria-hidden />}
-            onClick={() => slettUnntak(unntak)}
-            loading={isPending(slettUnntakStatus)}
-          >
-            Slett
-          </Button>
-        </HStack>
-      )}
-    </VStack>
   )
 }

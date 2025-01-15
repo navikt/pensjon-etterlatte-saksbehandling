@@ -8,14 +8,12 @@ import { useDispatch } from 'react-redux'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerAktivitetsgradForBehandling, slettAktivitetsgradForBehandling } from '~shared/api/aktivitetsplikt'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { RedigerbarAktivitsgradKnapper } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivitetsgrad'
+import { RedigerbarAktivitsgradKnapper } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivitetsgradOppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import {
-  RedigerAktivitetsgrad,
-  RedigerbarAktivtetsGradForm,
-} from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradForm'
+import { RedigerAktivitetsgrad } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradWrapperOppgave'
 import { setVurderingBehandling } from '~store/reducers/AktivitetspliktBehandlingReducer'
+import { RedigerbarAktivtetsgradForm } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivtetsgradForm'
 
 export function RedigerbarAktivitetsgradBehandling({
   aktivitet,
@@ -115,7 +113,7 @@ const RedigerbarAktivitetsgrad = ({
   }
 
   return (
-    <RedigerbarAktivtetsGradForm
+    <RedigerbarAktivtetsgradForm
       aktivitet={aktivitet}
       typeVurdering={AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER}
       lagreOgOppdater={lagreOgOppdater}

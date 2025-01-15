@@ -189,6 +189,8 @@ fun TrygdetidDto.fromDto(
     ident = this.ident,
 )
 
+fun TrygdetidDto.erYrkesskade() = beregnetTrygdetid?.resultat?.yrkesskade ?: false
+
 enum class FeilutbetalingType {
     FEILUTBETALING_UTEN_VARSEL,
     FEILUTBETALING_4RG_UTEN_VARSEL,

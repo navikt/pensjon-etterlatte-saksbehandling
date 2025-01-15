@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManglerAvdoedBruktTilTrygdetid
 import no.nav.etterlatte.brev.model.OverstyrtTrygdetidManglerAvdoed
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
+import no.nav.etterlatte.brev.model.erYrkesskade
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -47,7 +48,7 @@ internal fun barnepensjonBeregning(
             trygdetid.first().behandlingId,
         )
 
-    val erYrkesskade = trygdetid.any { it.beregnetTrygdetid?.resultat?.yrkesskade == true }
+    val erYrkesskade = trygdetid.any { it.erYrkesskade() }
 
     return BarnepensjonBeregning(
         innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),

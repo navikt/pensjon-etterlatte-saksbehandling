@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -35,6 +36,7 @@ import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -275,7 +277,9 @@ class AktivitetspliktUnntakDaoTest(
             dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
             val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
-            dao.slettUnntakForBehandling(unntak.id, UUID.randomUUID())
+            assertThrows<InternfeilException> {
+                dao.slettUnntakForBehandling(unntak.id, UUID.randomUUID())
+            }
 
             dao.hentUnntakForBehandling(opprettBehandling.id).single().asClue {
                 it.id shouldBe unntak.id

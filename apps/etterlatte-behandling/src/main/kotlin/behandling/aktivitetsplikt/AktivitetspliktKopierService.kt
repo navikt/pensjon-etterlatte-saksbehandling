@@ -48,7 +48,7 @@ class AktivitetspliktKopierService(
                 behandlingId,
             )
         }
-        nyesteVurdering.unntak.forEach { aktivitetspliktUnntakDao.kopierUnntakTilBehandling(it.id, behandlingId) }
+        nyesteVurdering.unntak.forEach { aktivitetspliktUnntakDao.kopierUnntakTilBehandling(it.id, behandlingId = behandlingId) }
     }
 
     fun kopierVurderingTilOppgave(
@@ -68,6 +68,6 @@ class AktivitetspliktKopierService(
                 oppgaveId,
             )
         }
-        nyesteVurdering.unntak.forEach { aktivitetspliktUnntakDao.kopierUnntakTilOppgave(it.id, oppgaveId) }
+        nyesteVurdering.unntak.forEach { aktivitetspliktUnntakDao.kopierUnntakTilOppgave(it.id, oppgaveId = oppgaveId) }
     }
 }

@@ -240,51 +240,6 @@ class AktivitetspliktUnntakDaoTest(
     }
 
     @Nested
-    inner class OppdaterUnntak {
-        @Test
-        fun `Oppdatere unntak`() {
-            val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-            val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
-            val opprettBehandling =
-                opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    sakId = sak.id,
-                )
-            behandlingDao.opprettBehandling(opprettBehandling)
-            val lagreUnntak =
-                LagreAktivitetspliktUnntak(
-                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
-                    beskrivelse = "Beskrivelse",
-                    fom = LocalDate.now(),
-                    tom = LocalDate.now().plusMonths(6),
-                )
-
-            dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
-
-            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
-
-            val lagreUnntakMedId =
-                LagreAktivitetspliktUnntak(
-                    id = unntak.id,
-                    unntak = AktivitetspliktUnntakType.MANGLENDE_TILSYNSORDNING_SYKDOM,
-                    beskrivelse = "Beskrivelse er oppdatert",
-                    fom = LocalDate.now(),
-                    tom = LocalDate.now().plusMonths(6),
-                )
-
-            dao.oppdaterUnntak(lagreUnntakMedId, kilde, opprettBehandling.id)
-
-            dao.hentUnntakForBehandling(opprettBehandling.id).single().asClue {
-                it.sakId shouldBe sak.id
-                it.behandlingId shouldBe opprettBehandling.id
-                it.unntak shouldBe lagreUnntakMedId.unntak
-                it.endret shouldBe kilde
-                it.beskrivelse shouldBe lagreUnntakMedId.beskrivelse
-            }
-        }
-    }
-
-    @Nested
     inner class SlettAktivitet {
         private val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         private val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)

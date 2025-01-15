@@ -72,32 +72,6 @@ class AktivitetspliktUnntakDao(
         }
     }
 
-    fun oppdaterUnntak(
-        unntak: LagreAktivitetspliktUnntak,
-        kilde: Grunnlagsopplysning.Kilde,
-        behandlingId: UUID,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
-                        UPDATE aktivitetsplikt_unntak
-                        SET  unntak = ?, fom = ?, tom = ?, endret = ?, beskrivelse = ? 
-                        WHERE id = ? AND behandling_id = ?
-                    """.trimMargin(),
-                )
-            stmt.setString(1, unntak.unntak.name)
-            stmt.setDate(2, unntak.fom?.let { tom -> Date.valueOf(tom) })
-            stmt.setDate(3, unntak.tom?.let { tom -> Date.valueOf(tom) })
-            stmt.setString(4, kilde.toJson())
-            stmt.setString(5, unntak.beskrivelse)
-            stmt.setObject(6, krevIkkeNull(unntak.id) { "" })
-            stmt.setObject(7, behandlingId)
-
-            stmt.executeUpdate()
-        }
-    }
-
     fun slettUnntakForBehandling(
         unntakId: UUID,
         behandlingId: UUID,

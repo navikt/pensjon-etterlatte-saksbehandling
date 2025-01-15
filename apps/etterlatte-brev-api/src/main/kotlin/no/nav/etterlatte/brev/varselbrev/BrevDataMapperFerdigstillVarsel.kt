@@ -85,7 +85,6 @@ class BrevDataMapperFerdigstillVarsel(
                         request.bruker,
                     )
                 }
-
             barnepensjonBeregning(
                 innhold = request.innholdMedVedlegg,
                 avdoede = request.avdoede,

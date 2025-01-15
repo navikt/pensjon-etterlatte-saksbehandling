@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
+import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -170,6 +171,25 @@ internal class BeregningRepositoryTest(
         beregningRepository.deaktiverOverstyrtBeregning(sakId)
         val overstyrBeregningSlettet = beregningRepository.hentOverstyrBeregning(sakId)
         assertNull(overstyrBeregningSlettet)
+    }
+
+    @Test
+    fun `skal lagre og hente en beregningsperiode uten har_foreldreloessats satt`() {
+        val beregning =
+            beregning()
+                .copy(
+                    beregningsperioder =
+                        listOf(
+                            beregningsperiode()
+                                .copy(harForeldreloessats = null),
+                        ),
+                )
+
+        beregningRepository.lagreEllerOppdaterBeregning(beregning)
+
+        val beregningHentet = beregningRepository.hent(beregning.behandlingId)
+
+        assertTrue(beregningHentet!!.beregningsperioder.all { it.harForeldreloessats == null })
     }
 
     private fun beregning(

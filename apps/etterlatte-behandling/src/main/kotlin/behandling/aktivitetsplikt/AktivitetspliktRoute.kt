@@ -396,10 +396,6 @@ internal fun Route.aktivitetspliktRoutes(
             call.respond(vurdering)
         }
 
-        /*
-        TODO: dette endepunktet må verifiseres og endre suffix?
-         * må også ha egne endepunkter som sletter aktivitetsgrad og unntak på en behandling
-         */
         post("/aktivitetsgrad-unntak") {
             kunSkrivetilgang {
                 logger.info("Oppretter aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")

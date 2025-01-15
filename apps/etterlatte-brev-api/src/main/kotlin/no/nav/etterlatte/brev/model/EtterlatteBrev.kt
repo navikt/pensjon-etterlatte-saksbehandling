@@ -242,10 +242,3 @@ class ManglerBrevutfall(
         detail = "Behandling mangler brevutfall, som er påkrevd. Legg til dette ved å lagre Valg av utfall i brev.",
         meta = mapOf("behandlingId" to behandlingId.toString()),
     )
-
-// TODO (EY-4381) Fjern når alle beregninger på åpne behandlinger er gjort med harForeldreloessats
-class ManglerHarForeldreloessats :
-    UgyldigForespoerselException(
-        "MANGLER_HAR_FORELDRELOESSATS",
-        "Beklager, men saken må beregnes på nytt på grunn av en teknisk endring i Gjenny",
-    )

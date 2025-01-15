@@ -37,11 +37,13 @@ class BrevutsendelseService(
             logger.info("Starter å prosessering brevutsendelse av type ${brevutsendelse.type.name} for sak ${brevutsendelse.sakId}")
 
             val sak = hentSak(brevutsendelse)
-            val gyldigBrevMottakerResultat = sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak, brukerTokenInfo)
+            val gyldigBrevMottakerResultat =
+                sjekkBrevMottakerService.sjekkOmPersonErGyldigBrevmottaker(sak, brukerTokenInfo)
 
             if (gyldigBrevMottakerResultat == GYLDIG_MOTTAKER) {
                 // TODO: lagre ned status på brev?
                 val brevStatusResponse = sendBrev(sak, brevutsendelse, brukerTokenInfo)
+                logger.info("Fikk respons ${brevStatusResponse.status} fra brevutsendelse med id=${brevutsendelse.id}")
 
                 // TODO hvis noe feiler her, må manuell oppgave opprettes
             } else {

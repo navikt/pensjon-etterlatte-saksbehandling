@@ -1,19 +1,11 @@
-import { BodyShort, Box, Button, Heading, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { AktivitetspliktOppgaveVurderingType, IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
-import {
-  hentAktivitspliktVurderingForBehandling,
-  opprettAktivitspliktAktivitetsgradOgUnntakForBehandling,
-} from '~shared/api/aktivitetsplikt'
+import { hentAktivitspliktVurderingForBehandling } from '~shared/api/aktivitetsplikt'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { PlusIcon } from '@navikt/aksel-icons'
-import {
-  NyVurderingAktivitetsgradOgUnntak,
-  VurderingAktivitetsgradOgUnntak,
-} from '~components/aktivitetsplikt/vurdering/VurderingAktivitetsgradOgUnntak'
 import { useDispatch } from 'react-redux'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -23,6 +15,8 @@ import {
   setVurderingBehandling,
   useAktivitetspliktBehandlingState,
 } from '~store/reducers/AktivitetspliktBehandlingReducer'
+import { VurderAktivitetspliktWrapperBehandling } from '~components/behandling/aktivitetsplikt/VurderAktivitetspliktWrapperBehandling'
+import { isBefore, subMonths } from 'date-fns'
 
 export const AktivitetspliktVurdering = ({
   behandling,
@@ -31,7 +25,7 @@ export const AktivitetspliktVurdering = ({
 }: {
   behandling: IDetaljertBehandling
   resetManglerAktivitetspliktVurdering: () => void
-  doedsdato?: Date
+  doedsdato: Date
 }) => {
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurderingNyDto>()
   const [hentet, hent] = useApiCall(hentAktivitspliktVurderingForBehandling)
@@ -60,7 +54,7 @@ export const AktivitetspliktVurdering = ({
       )
     }
   }, [])
-  //TODO: usikker på om vi vil løse det sånn
+
   useEffect(() => {
     setVurdering(updated)
   }, [updated])
@@ -80,70 +74,26 @@ export const AktivitetspliktVurdering = ({
           <>
             {vurdering && (
               <>
-                <AktivitetsgradTabellBehandling behandling={behandling} aktiviteter={vurdering?.aktivitet} />
+                <AktivitetsgradTabellBehandling
+                  behandling={behandling}
+                  aktiviteter={vurdering?.aktivitet}
+                  typeVurdering={typeVurderingFraDoedsdato(doedsdato)}
+                />
                 <UnntakTabellBehandling behandling={behandling} unntak={vurdering?.unntak} />
               </>
             )}
           </>
         )}
-        {redigerbar && <VurderAktivitetspliktWrapper doedsdato={doedsdato} behandling={behandling} />}
+        {redigerbar && <VurderAktivitetspliktWrapperBehandling doedsdato={doedsdato} behandling={behandling} />}
       </VStack>
     </Box>
   )
 }
 
-//TODO flytte ut
-function VurderAktivitetspliktWrapper(props: { doedsdato?: Date; behandling: IDetaljertBehandling }) {
-  const { doedsdato, behandling } = props
-  const [lagreStatus, lagreVurdering] = useApiCall(opprettAktivitspliktAktivitetsgradOgUnntakForBehandling)
-  const [leggerTilVurdering, setLeggerTilVurdering] = useState(false)
-  const dispatch = useDispatch()
-
-  function oppdaterStateVedLagring(data: IAktivitetspliktVurderingNyDto) {
-    dispatch(setVurderingBehandling(data))
-    setLeggerTilVurdering(false)
+export function typeVurderingFraDoedsdato(doedsdato: Date): AktivitetspliktOppgaveVurderingType {
+  if (isBefore(doedsdato, subMonths(Date.now(), 10))) {
+    return AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
+  } else {
+    return AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
   }
-
-  if (!leggerTilVurdering) {
-    return (
-      <Box>
-        <Button size="small" icon={<PlusIcon aria-hidden />} onClick={() => setLeggerTilVurdering(true)}>
-          Legg til ny vurdering av aktivitetsplikt
-        </Button>
-      </Box>
-    )
-  }
-
-  function lagreOgOppdater(formdata: NyVurderingAktivitetsgradOgUnntak) {
-    lagreVurdering(
-      {
-        sakId: behandling.sakId,
-        behandlingId: behandling.id,
-        request: {
-          aktivitetsgrad: {
-            id: undefined,
-            //TODO: denne skal kanskje ikke sjekkes på? kan evt bare sette den til false? evt basere på dagens dato diff mot dødsdato
-            vurdertFra12Mnd: formdata.typeVurdering === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER,
-            skjoennsmessigVurdering: formdata.vurderingAvAktivitet.skjoennsmessigVurdering,
-            aktivitetsgrad: formdata.vurderingAvAktivitet.aktivitetsgrad,
-            fom: formdata.vurderingAvAktivitet.fom,
-            beskrivelse: formdata.vurderingAvAktivitet.beskrivelse || '',
-          },
-          unntak: formdata.unntak,
-        },
-      },
-      oppdaterStateVedLagring
-    )
-  }
-
-  // typeVurdering skal sb kunne velge typeVurdering? eller skal den være basert på hvor lenge avdødeds dødsdato var?
-  return (
-    <VurderingAktivitetsgradOgUnntak
-      lagreStatus={lagreStatus}
-      onSubmit={lagreOgOppdater}
-      typeVurdering={AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER}
-      doedsdato={doedsdato}
-      onAvbryt={() => {}}
-    />
-  )
 }

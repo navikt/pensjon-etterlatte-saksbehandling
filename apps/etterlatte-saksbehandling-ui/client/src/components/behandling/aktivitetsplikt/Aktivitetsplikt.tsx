@@ -122,6 +122,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         <AktivitetspliktVurdering
           behandling={behandling}
           resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
+          doedsdato={avdoedesDoedsdato!!}
         />
 
         {aktivitetOppfolging && (

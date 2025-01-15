@@ -1,4 +1,8 @@
-import { IAktivitetspliktAktivitetsgrad, tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
+import {
+  AktivitetspliktOppgaveVurderingType,
+  IAktivitetspliktAktivitetsgrad,
+  tekstAktivitetspliktVurderingType,
+} from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Box, Detail, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 import React from 'react'
@@ -8,9 +12,11 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 export function AktivitetsgradTabellBehandling({
   aktiviteter,
   behandling,
+  typeVurdering,
 }: {
   aktiviteter: IAktivitetspliktAktivitetsgrad[]
   behandling: IDetaljertBehandling
+  typeVurdering: AktivitetspliktOppgaveVurderingType
 }) {
   return (
     <VStack gap="4">
@@ -38,7 +44,13 @@ export function AktivitetsgradTabellBehandling({
               {aktiviteter.map((aktivitet) => (
                 <Table.ExpandableRow
                   key={aktivitet.id}
-                  content={<RedigerbarAktivitetsgradBehandling aktivitet={aktivitet} behandling={behandling} />}
+                  content={
+                    <RedigerbarAktivitetsgradBehandling
+                      aktivitet={aktivitet}
+                      behandling={behandling}
+                      typeVurdering={typeVurdering}
+                    />
+                  }
                 >
                   <Table.DataCell>{tekstAktivitetspliktVurderingType[aktivitet.aktivitetsgrad]}</Table.DataCell>
                   <Table.DataCell>{formaterDatoMedFallback(aktivitet.fom, '-')}</Table.DataCell>

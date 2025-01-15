@@ -18,9 +18,11 @@ import { RedigerbarAktivtetsgradForm } from '~components/aktivitetsplikt/vurderi
 export function RedigerbarAktivitetsgradBehandling({
   aktivitet,
   behandling,
+  typeVurdering,
 }: {
   aktivitet: IAktivitetspliktAktivitetsgrad
   behandling: IDetaljertBehandling
+  typeVurdering: AktivitetspliktOppgaveVurderingType
 }) {
   const [redigerer, setRedigerer] = useState<boolean>(false)
   const dispatch = useDispatch()
@@ -59,6 +61,7 @@ export function RedigerbarAktivitetsgradBehandling({
         onAvbryt={() => setRedigerer(false)}
         aktivitet={aktivitet}
         behandling={behandling}
+        typeVurdering={typeVurdering}
       />
     )
   }
@@ -79,11 +82,13 @@ const RedigerbarAktivitetsgrad = ({
   onSuccess,
   aktivitet,
   behandling,
+  typeVurdering,
 }: {
   onAvbryt: () => void
   onSuccess: (data: IAktivitetspliktVurderingNyDto) => void
   aktivitet: IAktivitetspliktAktivitetsgrad
   behandling: IDetaljertBehandling
+  typeVurdering: AktivitetspliktOppgaveVurderingType
 }) => {
   const [feilmelding, setFeilmelding] = useState('')
   const [lagreStatus, redigerAktivitetsgrad] = useApiCall(redigerAktivitetsgradForBehandling)
@@ -100,7 +105,7 @@ const RedigerbarAktivitetsgrad = ({
         behandlingId: behandling.id,
         request: {
           id: aktivitet?.id,
-          vurdertFra12Mnd: false,
+          vurdertFra12Mnd: typeVurdering === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER,
           skjoennsmessigVurdering: formdata.vurderingAvAktivitet.skjoennsmessigVurdering,
           aktivitetsgrad: formdata.vurderingAvAktivitet.aktivitetsgrad,
           fom: formdata.vurderingAvAktivitet.fom,
@@ -115,7 +120,7 @@ const RedigerbarAktivitetsgrad = ({
   return (
     <RedigerbarAktivtetsgradForm
       aktivitet={aktivitet}
-      typeVurdering={AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER}
+      typeVurdering={typeVurdering}
       lagreOgOppdater={lagreOgOppdater}
       lagreStatus={lagreStatus}
       onAvbryt={onAvbryt}

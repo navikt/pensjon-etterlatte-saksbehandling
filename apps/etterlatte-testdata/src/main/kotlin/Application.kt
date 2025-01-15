@@ -55,7 +55,9 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.firstValidTokenClaims
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.OpprettOgBehandle
 import no.nav.etterlatte.no.nav.etterlatte.testdata.features.automatisk.Familieoppretter
+import no.nav.etterlatte.no.nav.etterlatte.testdata.features.opprettFamilie.OpprettFamilie
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
+import no.nav.etterlatte.testdata.dolly.DollyMock
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.dolly.TestnavClient
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
@@ -106,6 +108,14 @@ val features: List<TestDataFeature> =
         OpprettSoeknadFeature,
         DollyFeature(dollyService),
         OpprettOgBehandle(dollyService, Familieoppretter(dollyService)),
+        OpprettFamilie(
+            dollyService =
+                when (localDevelopment) {
+                    true -> DollyMock()
+                    false -> dollyService
+                },
+            dev = localDevelopment,
+        ),
     )
 
 fun main() {
@@ -142,6 +152,7 @@ fun main() {
 
                 if (localDevelopment) {
                     routing {
+                        staticResources("/static", "static")
                         api()
                     }
                 } else {

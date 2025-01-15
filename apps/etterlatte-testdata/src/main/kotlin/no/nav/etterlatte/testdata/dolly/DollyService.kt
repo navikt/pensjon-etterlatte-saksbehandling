@@ -130,6 +130,7 @@ class DollyService(
                         gjenlevendeFnr = request.gjenlevende,
                         avdoedFnr = request.avdoed,
                         barn = request.barn,
+                        soeker = request.soeker,
                         behandlingssteg = behandlingssteg,
                     ).toJson(),
                 mapOf("NavIdent" to (navIdent!!.toByteArray())),

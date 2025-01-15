@@ -124,14 +124,20 @@ class OpprettFamilie(
                     val behandlingssteg = Behandlingssteg.valueOf(params["behandlingssteg"]!!)
                     val gjenlevende = params["gjenlevende"]!!
                     val avdoed = params["avdoed"]!!
-                    val barn = params["barnListe"]?.split(",") ?: emptyList()
+                    val barnListe = params["barnListe"]?.split(",") ?: emptyList()
+                    val soeker =
+                        when (ytelse) {
+                            SoeknadType.BARNEPENSJON -> params["barn"]!!
+                            SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
+                        }
 
                     val request =
                         NySoeknadRequest(
                             ytelse,
                             avdoed,
                             gjenlevende,
-                            barn,
+                            barnListe,
+                            soeker = soeker,
                         )
 
                     val brukerId =
@@ -140,11 +146,6 @@ class OpprettFamilie(
                             false -> brukerTokenInfo.ident()
                         }
 
-                    val soeker =
-                        when (ytelse) {
-                            SoeknadType.BARNEPENSJON -> barn.first()
-                            SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
-                        }
                     val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
 
                     call.respond(

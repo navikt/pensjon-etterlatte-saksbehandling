@@ -19,7 +19,9 @@
             <td>{{gjenlevende}}</td>
             <td>{{barn}}</td>
             <td style="text-align: right">
-                <button class="btn me-1 btn-info" onclick="document.getElementById('modal-{{avdoed}}').showModal()">Søknad</button>
+                <button class="btn me-1 btn-info" onclick="document.getElementById('modal-{{avdoed}}').showModal()">
+                    Søknad
+                </button>
             </td>
         </tr>
     {{/familier}}
@@ -45,7 +47,7 @@
             </div>
 
             <div class="mb-3">
-                <label for="behandlingssteg" class="form-label">Behandlingssteg (valgfritt):</label>
+                <label for="behandlingssteg" class="form-label">Behandlingssteg</label>
                 <select name="behandlingssteg"
                         id="behandlingssteg"
                         class="form-select"
@@ -62,9 +64,37 @@
                 </select>
             </div>
 
+            <div class="mb-3">
+                <label for="gjenlevende" class="form-label">Gjenlevende (søker hvis OMS)</label>
+                <input type="number"
+                       pattern="[0-9]+"
+                       minlength="11"
+                       maxlength="11"
+                       name="gjenlevende"
+                       class="form-control"
+                       value={{gjenlevende}}
+                       required
+                />
+            </div>
+
+
+            <div class="mb-3">
+                <label for="barn" class="form-label">Barn (søker hvis BP)</label>
+                <select name="barn"
+                        id="barn"
+                        class="form-select"
+                        required
+                >
+                    {{#barn}}
+                        <option value="{{.}}">{{.}}</option>
+                    {{/barn}}
+                </select>
+
+            </div>
+
             <button class="btn me-1 btn-info"
                     hx-post="{{path}}/send-soeknad"
-                    hx-vals='{"avdoed": "{{avdoed}}", "gjenlevende": "{{gjenlevende}}", "barnListe": {{barn}}}'
+                    hx-vals='{"avdoed": "{{avdoed}}", "barnListe": {{barn}}}'
                     hx-swap="innerHTML"
                     hx-target="#sendSoknadResult-{{avdoed}}"
             >

@@ -40,6 +40,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class GrunnlagsendringshendelseService(
@@ -296,6 +297,12 @@ class GrunnlagsendringshendelseService(
                                 oppgaveService.opprettOppgave(
                                     referanse = hendelseId.toString(),
                                     sakId = sakId,
+                                    frist =
+                                        when (type) {
+                                            // Bør behandles fortløpende hvis evnt reduksjon skal motregnes mot etterbetaling av uføretrygd.
+                                            GrunnlagsendringsType.UFOERETRYGD -> now().plus(1, ChronoUnit.DAYS)
+                                            else -> null
+                                        },
                                     kilde = OppgaveKilde.HENDELSE,
                                     type = OppgaveType.VURDER_KONSEKVENS,
                                     merknad = hendelse.beskrivelse(),

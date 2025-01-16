@@ -10,16 +10,12 @@ fun generererBestilling(bestilling: BestillingRequest): String {
             helsoesken = true,
             erOver18 = bestilling.erOver18,
             kjoenn = vilkaarligKjoenn(),
-            alderSoeskenUnder18 = alderUnder18(),
-            alderSoeskenOver18 = alder18Til20(),
         )
     val helsoesken =
         List(bestilling.helsoesken) {
             soeskenTemplate(
                 true,
                 kjoenn = vilkaarligKjoenn(),
-                alderSoeskenUnder18 = alderUnder18(),
-                alderSoeskenOver18 = alder18Til20(),
             )
         }
     val halvsoeskenAvdoed =
@@ -27,8 +23,6 @@ fun generererBestilling(bestilling: BestillingRequest): String {
             soeskenTemplate(
                 false,
                 kjoenn = vilkaarligKjoenn(),
-                alderSoeskenUnder18 = alderUnder18(),
-                alderSoeskenOver18 = alder18Til20(),
             )
         }
 
@@ -37,7 +31,11 @@ fun generererBestilling(bestilling: BestillingRequest): String {
     return bestillingTemplateStart(
         Random.nextInt(20, 60),
         bestilling.antall,
-    ) + barnListe + bestillingTemplateEnd(LocalDateTime.now().minusDays(bestilling.antallDagerSidenDoedsfall.toLong()))
+    ) + barnListe +
+        bestillingTemplateEnd(
+            LocalDateTime.now().minusDays(bestilling.antallDagerSidenDoedsfall.toLong()),
+            bestilling.gjenlevendeAlder,
+        )
 }
 
 private fun alder18Til20() = Random.nextInt(18, 20)
@@ -97,8 +95,10 @@ fun bestillingTemplateStart(
       ],
       "forelderBarnRelasjon": """
 
-fun bestillingTemplateEnd(doedsdato: LocalDateTime) =
-    """,
+fun bestillingTemplateEnd(
+    doedsdato: LocalDateTime,
+    gjenlevendeAlder: Int? = null,
+) = """,
       "sivilstand": [
         {
           "id": null,
@@ -115,7 +115,7 @@ fun bestillingTemplateEnd(doedsdato: LocalDateTime) =
             "kjoenn": null,
             "foedtEtter": null,
             "foedtFoer": null,
-            "alder": null,
+            "alder": $gjenlevendeAlder,
             "syntetisk": true,
             "nyttNavn": {
               "hasMellomnavn": false
@@ -164,8 +164,6 @@ private fun soeskenTemplate(
     helsoesken: Boolean,
     erOver18: Boolean = false,
     kjoenn: String,
-    alderSoeskenUnder18: Int,
-    alderSoeskenOver18: Int,
 ) = """
 {
   "id": null,
@@ -184,8 +182,8 @@ private fun soeskenTemplate(
     "foedtFoer": null,
     "alder": ${
     when (erOver18) {
-        true -> "$alderSoeskenOver18"
-        false -> "$alderSoeskenUnder18"
+        true -> "${alder18Til20()}"
+        false -> "${alderUnder18()}"
     }
 },
     "syntetisk": true,

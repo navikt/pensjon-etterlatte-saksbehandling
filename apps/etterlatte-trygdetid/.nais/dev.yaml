@@ -76,6 +76,10 @@ spec:
       value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-grunnlag
+    - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_VEDTAKSVURDERING_URL
+      value: http://etterlatte-vedtaksvurdering
     - name: PEN_URL
       value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen
     - name: PEN_CLIENT_ID
@@ -99,6 +103,7 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-grunnlag
+        - application: etterlatte-vedtaksvurdering
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io

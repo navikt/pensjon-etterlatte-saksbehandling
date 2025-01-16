@@ -39,7 +39,8 @@ export const grunnlagsendringsBeskrivelse: Record<GrunnlagendringshendelseSamsva
   INSTITUSJONSOPPHOLD: 'institusjonsopphold',
   ADRESSE: 'fått ny geografisk tilknytning men saken kunne ikke flyttes på grunn av åpen behandling',
   FOLKEREGISTERIDENTIFIKATOR: 'endring av folkeregisteridentifikator',
-  UFOERETRYGD: 'et nytt vedtak om uføretrygd',
+  UFOERETRYGD:
+    'et nytt vedtak om uføretrygd. Vurder reduksjon av barnepensjon og motregning i etterbetaling av uføretrygd.',
 }
 
 export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType): string => {
@@ -94,7 +95,7 @@ export const formaterRolle = (sakType: SakType, rolle: Saksrolle) => {
     case 'INNSENDER':
       return 'Innsender av søknaden'
     case 'SOEKER':
-      return 'Søker'
+      return 'Søker/mottaker'
     case 'SOESKEN':
       return `${sakType === SakType.BARNEPENSJON ? 'Søsken' : 'barn'} til søker`
     case 'UKJENT':

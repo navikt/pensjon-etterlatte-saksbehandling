@@ -1,0 +1,43 @@
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Avdød</th>
+        <th>Gjenlevende</th>
+        <th>Barn</th>
+        <th style="text-align: right">Send søknad</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#familier}}
+        <tr>
+            <td>
+                {{avdoed}}
+                {{#ibruk}}
+                    <span class="badge text-bg-warning">Brukt</span>
+                {{/ibruk}}
+            </td>
+            <td>{{gjenlevende}}</td>
+            <td>{{barn}}</td>
+            <td style="text-align: right">
+                <button class="btn me-1 btn-primary"
+                        hx-post="{{path}}/send-soeknad"
+                        hx-vals='{"type": "BARNEPENSJON", "avdoed": "{{avdoed}}", "gjenlevende": "{{gjenlevende}}", "barnListe": {{barn}}}'
+                        hx-target="#sendSoknadResult"
+                        hx-swap="innerHTML"
+                >
+                    BP
+                </button>
+                <button class="btn me-1 btn-info"
+                        hx-post="{{path}}/send-soeknad"
+                        hx-vals='{"type": "OMSTILLINGSSTOENAD", "avdoed": "{{avdoed}}", "gjenlevende": "{{gjenlevende}}" }'
+                        hx-target="#sendSoknadResult"
+                        hx-swap="innerHTML"
+                >
+                    OMS
+                </button>
+            </td>
+        </tr>
+    {{/familier}}
+    </tbody>
+</table>
+<div id="sendSoknadResult"></div>

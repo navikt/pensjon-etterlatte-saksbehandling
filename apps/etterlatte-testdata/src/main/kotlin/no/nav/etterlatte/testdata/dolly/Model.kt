@@ -101,8 +101,9 @@ data class BestillingRequest(
     val erOver18: Boolean = false,
     val helsoesken: Int,
     val halvsoeskenAvdoed: Int,
-    val halvsoeskenGjenlevende: Int,
+    val halvsoeskenGjenlevende: Int = 0,
     val gruppeId: Long,
     val antall: Int,
     val antallDagerSidenDoedsfall: Int = 7,
+    val gjenlevendeAlder: Int? = null,
 )

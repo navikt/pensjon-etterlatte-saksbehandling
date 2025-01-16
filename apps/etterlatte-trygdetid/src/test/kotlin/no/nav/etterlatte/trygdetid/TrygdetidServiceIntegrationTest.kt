@@ -32,6 +32,7 @@ import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlient
+import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -62,6 +63,7 @@ internal class TrygdetidServiceIntegrationTest(
 
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val avtaleService = mockk<AvtaleService>()
+    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
 
     @BeforeAll
     fun beforeAll() {
@@ -75,6 +77,7 @@ internal class TrygdetidServiceIntegrationTest(
                 TrygdetidBeregningService,
                 mockk<PesysKlient>(),
                 avtaleService,
+                vedtaksvurderingKlient,
             )
     }
 

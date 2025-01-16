@@ -45,7 +45,7 @@
       <env name="PDLTJENESTER_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
       <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
       <env name="PEN_CLIENT_ID" value="ddd52335-cfe8-4ee9-9e68-416a5ab26efa" />
-      <env name="PEN_URL" value="https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi" />
+      <env name="PEN_URL" value="https://pensjon-pen-q2.dev-fss-pub.nais.io/api" />
       <env name="KRR_ENDPOINT_URL" value="https://digdir-krr-proxy.intern.dev.nav.no" />
       <env name="KRR_SCOPE" value="api://dev-gcp.team-rocket.digdir-krr-proxy/.default" />
       <env name="AXSYS_URL" value="https://axsys.dev-fss-pub.nais.io" />

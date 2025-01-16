@@ -218,7 +218,7 @@ const MottakerInnholdKompakt = ({ mottaker }: { mottaker: Mottaker }) => {
         )}
         <br />
         {foedselsnummer && foedselsnummer.value}
-        {orgnummer && orgnummer}
+        {!!orgnummer && orgnummer}
       </BodyShort>
 
       <BodyShort as="div">

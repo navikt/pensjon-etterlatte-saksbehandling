@@ -16,6 +16,7 @@ import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.PesysKlientImpl
+import no.nav.etterlatte.trygdetid.klienter.VedtaksvurderingKlientImpl
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -30,6 +31,7 @@ class ApplicationContext {
     private val avtaleRepository = AvtaleRepository(dataSource)
 
     val behandlingKlient = BehandlingKlient(config, httpClient())
+    val vedtaksvurderingKlient = VedtaksvurderingKlientImpl(config, httpClient())
     val avtaleService = AvtaleService(avtaleRepository)
 
     val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
@@ -42,6 +44,7 @@ class ApplicationContext {
             beregnTrygdetidService = TrygdetidBeregningService,
             pesysKlient = PesysKlientImpl(config, httpClient()),
             avtaleService = avtaleService,
+            vedtaksvurderingKlient = vedtaksvurderingKlient,
         )
 }
 

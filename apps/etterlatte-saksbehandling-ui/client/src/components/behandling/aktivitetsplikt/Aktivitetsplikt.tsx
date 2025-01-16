@@ -102,7 +102,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </ReadMore>
         </TekstWrapper>
 
-        {isValidDateOfDeath(avdoedesDoedsdato!!) && ( // todo denne valideringen burde skje et annet sted vel og si noe om den ikke er gyldig
+        {isValidDateOfDeath(avdoedesDoedsdato!!) && ( // https://jira.adeo.no/browse/EY-4939 todo denne valideringen burde skje et annet sted vel og si noe om den ikke er gyldig
           <>
             <Heading spacing level="1" size="medium">
               Gjenlevende sin tidslinje

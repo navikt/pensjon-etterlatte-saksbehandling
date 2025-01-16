@@ -61,7 +61,6 @@ export const Resultat = (props: Props) => {
     slettTotalVurderingCall(behandlingId, (res) => {
       oppdaterVilkaar(res)
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
-      reset()
     })
 
   const lagreVilkaarsvurderingResultat = () => {
@@ -89,12 +88,6 @@ export const Resultat = (props: Props) => {
     return vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT
       ? 'Ja, vilkår er oppfylt'
       : 'Nei, vilkår er ikke oppfylt'
-  }
-
-  const reset = () => {
-    setSvar(undefined)
-    setRadioError(undefined)
-    setKommentar('')
   }
 
   const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'

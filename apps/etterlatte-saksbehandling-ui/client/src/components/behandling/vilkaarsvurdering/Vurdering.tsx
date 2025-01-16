@@ -1,12 +1,6 @@
 import { BodyShort, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import {
-  IVilkaarsvurdering,
-  slettVurdering,
-  Vilkaar,
-  VurderingsResultat,
-  vurderVilkaar,
-} from '~shared/api/vilkaarsvurdering'
+import { IVilkaarsvurdering, Vilkaar, VurderingsResultat, vurderVilkaar } from '~shared/api/vilkaarsvurdering'
 import styled from 'styled-components'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -52,7 +46,6 @@ export const Vurdering = ({
   const [unntakRadioError, setUnntakRadioError] = useState<string>()
   const [kommentarError, setKommentarError] = useState<string>()
   const [, postVurderVilkaar] = useApiCall(vurderVilkaar)
-  const [, postSlettVurdering] = useApiCall(slettVurdering)
   const vilkaarSpoersmaal = vilkaar.hovedvilkaar.spoersmaal
     ? vilkaar.hovedvilkaar.spoersmaal
     : 'Er hovedvilkår oppfylt?' // TODO denne burde vi kunne bli kvitt når BP får spørsmål som en del av vilkår
@@ -118,13 +111,6 @@ export const Vurdering = ({
     )
   }
 
-  const slettVurderingAvVilkaar = (onSuccess?: () => void) =>
-    postSlettVurdering({ behandlingId: behandlingId, type: vilkaar.id }, (data) => {
-      oppdaterVilkaar(data)
-      onSuccess?.()
-      setVilkaarutkast({ resultat: null, kommentar: '', vilkaarsUnntakType: '' })
-    })
-
   const reset = (onSuccess?: () => void) => {
     setRadioError(undefined)
     setKommentarError(undefined)
@@ -184,7 +170,6 @@ export const Vurdering = ({
         kommentar={vilkaarutkast?.kommentar}
         defaultRediger={!vilkaar.vurdering}
         redigerbar={redigerbar}
-        slett={(callback) => slettVurderingAvVilkaar(callback)}
         lagreklikk={(callback) => (valider(vilkaarutkast) ? vilkaarVurdert(vilkaarutkast, callback) : {})}
         avbrytklikk={reset}
         visAvbryt={!!vilkaar.vurdering}

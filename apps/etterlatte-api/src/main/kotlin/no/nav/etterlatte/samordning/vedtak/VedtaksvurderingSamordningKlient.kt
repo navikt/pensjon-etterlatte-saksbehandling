@@ -22,11 +22,11 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class VedtaksvurderingKlient(
+class VedtaksvurderingSamordningKlient(
     config: Config,
     private val httpClient: HttpClient,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
+    private val logger = LoggerFactory.getLogger(VedtaksvurderingSamordningKlient::class.java)
 
     private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/api/samordning/vedtak"
 
@@ -41,7 +41,10 @@ class VedtaksvurderingKlient(
                 .get {
                     url("$vedtaksvurderingUrl/$vedtakId")
                     if (callerContext is MaskinportenTpContext) {
-                        header("orgnr", callerContext.organisasjonsnr).also { logger.info("Henter vedtak med orgnr $it") }
+                        header(
+                            "orgnr",
+                            callerContext.organisasjonsnr,
+                        ).also { logger.info("Henter vedtak med orgnr $it") }
                     }
                 }.body()
         } catch (e: ClientRequestException) {
@@ -68,7 +71,10 @@ class VedtaksvurderingKlient(
                     parameter("sakstype", sakType)
                     parameter("fomDato", fomDato)
                     if (callerContext is MaskinportenTpContext) {
-                        header("orgnr", callerContext.organisasjonsnr).also { logger.info("Henter vedtaksliste med orgnr $it") }
+                        header(
+                            "orgnr",
+                            callerContext.organisasjonsnr,
+                        ).also { logger.info("Henter vedtaksliste med orgnr $it") }
                     }
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(fnr))

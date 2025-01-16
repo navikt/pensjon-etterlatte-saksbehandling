@@ -173,27 +173,28 @@ data class TilbakekrevingVedtakLagretDto(
     val dato: LocalDate,
 )
 
-// TODO kun EESSI eller generelt?
-data class OffentligVedtakRequest(
+data class VedtakForPersonRequest(
     val fnr: String,
 )
 
-data class VedtakOffentligDto(
-    val vedtak: List<VedtakOffentlig>,
+data class VedtakForEksterntDto(
+    val vedtak: List<VedtakForEkstern>,
 )
 
-data class VedtakOffentlig(
+data class VedtakForEkstern(
     val virkningstidspunkt: YearMonth,
-    // TODO kun ytelsesvedtak? Ikke klage, tilvakekreving, etc?
-    // TODO Endringer?
-    val type: VedtakType,
-    // TODO beløp - periodisert?
-    val utbetaling: List<VedtakOffentligUtbetalingDto>,
+    val type: VedtakTypeForEkstern,
+    val utbetaling: List<VedtakForEksternUtbetaling>,
 )
 
-data class VedtakOffentligUtbetalingDto(
+enum class VedtakTypeForEkstern {
+    INNVILGELSE,
+    OPPHOER,
+    AVSLAG,
+    ENDRING,
+}
+
+data class VedtakForEksternUtbetaling(
     val periode: Periode,
     val beloep: BigDecimal?,
-    // val type: UtbetalingsperiodeType, TODO
-    // val regelverk: Regelverk?,
 )

@@ -12,7 +12,8 @@ import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.samordning.vedtak.SamordningVedtakService
 import no.nav.etterlatte.samordning.vedtak.TjenestepensjonKlient
-import no.nav.etterlatte.samordning.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.samordning.vedtak.VedtaksvurderingSamordningKlient
+import no.nav.etterlatte.vedtak.VedtaksvurderingKlient
 
 class ApplicationContext(
     env: Miljoevariabler,
@@ -28,7 +29,7 @@ class ApplicationContext(
             azureAppScope = config.getString("vedtak.outbound"),
         )
     }
-    private val vedtaksvurderingKlient = VedtaksvurderingKlient(config, vedtaksvurderingHttpClient)
+    private val vedtaksvurderingSamordningKlient = VedtaksvurderingSamordningKlient(config, vedtaksvurderingHttpClient)
 
     private val tpHttpClient =
         httpClientClientCredentials(
@@ -39,7 +40,7 @@ class ApplicationContext(
         )
     private val tpKlient = TjenestepensjonKlient(config, tpHttpClient)
 
-    val samordningVedtakService = SamordningVedtakService(vedtaksvurderingKlient, tpKlient)
+    val samordningVedtakService = SamordningVedtakService(vedtaksvurderingSamordningKlient, tpKlient)
 
     private val behandlingHttpClient =
         httpClientClientCredentials(
@@ -50,4 +51,6 @@ class ApplicationContext(
         )
     private val behandlingKlient = BehandlingKlient(config, behandlingHttpClient)
     val behandlingService = BehandlingService(behandlingKlient)
+
+    val vedtakKlient = VedtaksvurderingKlient(config, vedtaksvurderingHttpClient)
 }

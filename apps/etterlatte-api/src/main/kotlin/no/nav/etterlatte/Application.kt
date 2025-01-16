@@ -11,6 +11,7 @@ import no.nav.etterlatte.samordning.serverRequestLoggerPlugin
 import no.nav.etterlatte.samordning.userIdMdcPlugin
 import no.nav.etterlatte.samordning.vedtak.barnepensjonVedtakRoute
 import no.nav.etterlatte.samordning.vedtak.samordningVedtakRoute
+import no.nav.etterlatte.vedtak.vedtakRoute
 
 fun main() {
     Server(ApplicationContext(Miljoevariabler.systemEnv())).run()
@@ -41,6 +42,11 @@ class Server(
 
             behandlingSakRoutes(
                 behandlingService = applicationContext.behandlingService,
+                config = applicationContext.config,
+            )
+
+            vedtakRoute(
+                applicationContext.vedtakKlient,
                 config = applicationContext.config,
             )
 

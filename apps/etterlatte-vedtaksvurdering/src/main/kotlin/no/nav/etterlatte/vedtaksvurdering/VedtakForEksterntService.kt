@@ -1,32 +1,29 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.vedtak.VedtakOffentlig
-import no.nav.etterlatte.libs.common.vedtak.VedtakOffentligDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakOffentligUtbetalingDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakForEkstern
+import no.nav.etterlatte.libs.common.vedtak.VedtakForEksternUtbetaling
+import no.nav.etterlatte.libs.common.vedtak.VedtakForEksterntDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakTypeForEkstern
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 
-class OffentligVedtakService(
+class VedtakForEksterntService(
     private val repository: VedtaksvurderingRepository,
 ) {
-    fun hentVedtak(fnr: String): VedtakOffentligDto {
+    fun hentVedtak(fnr: String): VedtakForEksterntDto {
         val folkeregisteridentifikator = Folkeregisteridentifikator.of(fnr)
         val vedtak = repository.hentFerdigstilteVedtak(folkeregisteridentifikator)
-
-        // TODO må noe mer filtreres?
-
-        return VedtakOffentligDto(
+        return VedtakForEksterntDto(
             vedtak =
-                vedtak.map {
-                    // TODO kun behandlignsvedtak?
+                vedtak.filter { it.type.vanligBehandling }.map {
                     val vedtakInnhold = (it.innhold as VedtakInnhold.Behandling)
-                    VedtakOffentlig(
+                    VedtakForEkstern(
                         virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
-                        type = it.type,
+                        type = VedtakTypeForEkstern.valueOf(it.type.name),
                         utbetaling =
                             vedtakInnhold.utbetalingsperioder.map { utbetaling ->
-                                VedtakOffentligUtbetalingDto(
+                                VedtakForEksternUtbetaling(
                                     periode = utbetaling.periode,
                                     beloep = utbetaling.beloep,
                                 )

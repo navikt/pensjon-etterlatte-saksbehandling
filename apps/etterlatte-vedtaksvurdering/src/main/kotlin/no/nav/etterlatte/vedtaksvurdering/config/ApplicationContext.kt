@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.ktor.AppConfig.ELECTOR_PATH
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.route.logger
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakForEksterntService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
@@ -100,6 +101,7 @@ class ApplicationContext {
         VedtakSamordningService(
             repository = VedtaksvurderingRepository(dataSource),
         )
+    val vedtakForEksterntService = VedtakForEksterntService(VedtaksvurderingRepository(dataSource))
     val automatiskBehandlingService =
         AutomatiskBehandlingService(
             vedtakBehandlingService,

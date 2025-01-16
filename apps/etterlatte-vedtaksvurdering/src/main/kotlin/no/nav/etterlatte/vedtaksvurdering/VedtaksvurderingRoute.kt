@@ -19,9 +19,9 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.vedtak.OffentligVedtakRequest
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakForPersonRequest
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -31,7 +31,7 @@ import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.OffentligVedtakService
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakForEksterntService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
@@ -310,11 +310,11 @@ fun Route.samordningSystembrukerVedtakRoute(vedtakSamordningService: VedtakSamor
     }
 }
 
-fun Route.offentligVedtakInfo(offentligVedtakService: OffentligVedtakService) {
-    route("/api/offentlig/vedtak") {
+fun Route.vedtakForEksternt(vedtakForEksterntService: VedtakForEksterntService) {
+    route("/api/vedtak/for/eksternt") {
         post {
-            val request = call.receive<OffentligVedtakRequest>()
-            val vedtak = offentligVedtakService.hentVedtak(request.fnr)
+            val request = call.receive<VedtakForPersonRequest>()
+            val vedtak = vedtakForEksterntService.hentVedtak(request.fnr)
             call.respond(vedtak)
         }
     }

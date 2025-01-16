@@ -1,5 +1,5 @@
 import { useKlage, useKlageRedigerbar } from '~components/klage/useKlage'
-import { Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
+import { BodyShort, Box, Detail, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { KlageStatus, teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
 import { formaterDato } from '~utils/formatering/dato'
@@ -20,6 +20,7 @@ import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandli
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { SakTypeTag } from '~shared/tags/SakTypeTag'
 import { RedigerMottattDato } from '~components/klage/sidemeny/RedigerMottattDato'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 export function KlageSidemeny() {
   const klage = useKlage()
@@ -51,23 +52,17 @@ export function KlageSidemeny() {
   return (
     <Sidebar>
       <SidebarPanel $border>
-        <Heading size="small">Klage</Heading>
-        <Heading size="xsmall" spacing>
-          {teksterKlagestatus[klage.status]}
-        </Heading>
-
-        {klage.kabalStatus && (
-          <>
-            <Heading size="small">Status Kabal</Heading>
-            <Heading size="xsmall">{teksterKabalstatus[klage.kabalStatus]}</Heading>
-          </>
-        )}
-
+        <HStack width="100%">
+          <Heading size="small">Klage</Heading>
+        </HStack>
         <VStack gap="2">
-          <div>
-            <SakTypeTag sakType={klage.sak.sakType} />
-          </div>
+          <BodyShort>{teksterKlagestatus[klage.status]}</BodyShort>
 
+          {klage.kabalStatus && <Info label="Status Kabal" tekst={teksterKabalstatus[klage.kabalStatus]} />}
+
+          <Box>
+            <SakTypeTag sakType={klage.sak.sakType}></SakTypeTag>
+          </Box>
           <HStack gap="4">
             <div>
               <Label size="small">Klager</Label>

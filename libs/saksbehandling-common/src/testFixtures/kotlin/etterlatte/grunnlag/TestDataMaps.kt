@@ -27,9 +27,11 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.firesifretAarstallFraTosifret
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
@@ -67,6 +69,52 @@ val ADRESSE_DEFAULT =
             gyldigTilOgMed = null,
         ),
     )
+
+fun Folkeregisteridentifikator.getBirthDate(): LocalDate {
+    val fnrMonth = value.slice(2 until 4).toInt()
+
+    val fnrDay = value.slice(0 until 2).toInt()
+    val day = if (isDNumber()) fnrDay - 40 else fnrDay
+
+    val month =
+        if (isTestNorgeNumber()) {
+            fnrMonth - 80
+        } else if (isHNumber()) {
+            fnrMonth - 40
+        } else {
+            fnrMonth
+        }
+
+    return LocalDate.of(this.getYearOfBirth(), month, day)
+}
+
+/**
+ * Sjekker om fødselsnummeret er av typen "Hjelpenummer".
+ *
+ * H-nummer er et hjelpenummer, en virksomhetsintern, unik identifikasjon av en person som
+ * ikke har fødselsnummer eller D-nummer eller hvor dette er ukjent.
+ *
+ * Brukes også for identer i test som er opprettet som "NAV syntetisk" i Dolly
+ */
+private fun Folkeregisteridentifikator.isHNumber(): Boolean = Character.getNumericValue(value[2]) in 4..7
+
+/**
+ * Sjekker om fødselsnummeret er av typen "Syntetisk bruker fra Skatteetaten".
+ */
+private fun Folkeregisteridentifikator.isTestNorgeNumber(): Boolean = Character.getNumericValue(value[2]) >= 8
+
+/**
+ * Calculates year of birth using the individual number.
+ *
+ * @return 4 digit year of birth as [Int]
+ */
+@Deprecated("Denne er feil og må fases ut til fordel for å hente foedselsdato direkte fra PDL")
+private fun Folkeregisteridentifikator.getYearOfBirth(): Int {
+    val year = value.slice(4 until 6).toInt()
+    val individnummer = value.slice(6 until 9).toInt()
+
+    return firesifretAarstallFraTosifret(year, individnummer)
+}
 
 internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
     mapOf(

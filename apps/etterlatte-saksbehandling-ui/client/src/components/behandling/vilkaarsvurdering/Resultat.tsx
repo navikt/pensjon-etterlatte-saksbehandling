@@ -8,14 +8,14 @@ import {
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { BodyShort, Box, Button, Heading, HStack, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
-import { svarTilTotalResultat, totalResultatTilSvar } from './utils'
-import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
+import { svarTilTotalResultat } from './utils'
+import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterDato } from '~utils/formatering/dato'
 import { ISvar } from '~shared/types/ISvar'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useAppDispatch } from '~store/Store'
-import { oppdaterBehandlingsstatus, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { isPending } from '~shared/api/apiUtils'
@@ -139,28 +139,9 @@ export const Resultat = (props: Props) => {
                   }}
                   variant="tertiary"
                   size="small"
-                  icon={<TrashIcon aria-hidden />}
-                >
-                  Slett vurdering
-                </Button>
-              )}
-              {redigerbar && (
-                <Button
-                  onClick={() => {
-                    setKommentar(vilkaarsvurdering?.resultat?.kommentar || '')
-                    if (vilkaarsvurdering.resultat?.utfall) {
-                      setSvar(totalResultatTilSvar(vilkaarsvurdering.resultat?.utfall))
-                    }
-                    setRedigerTotalvurdering(true)
-                    const vilkaarsvurderingUtenResultat = { ...vilkaarsvurdering, resultat: undefined }
-                    dispatch(updateVilkaarsvurdering(vilkaarsvurderingUtenResultat))
-                  }}
-                  variant="tertiary"
-                  size="small"
                   icon={<PencilWritingIcon aria-hidden />}
-                  loading={isPending(totalVurderingStatus)}
                 >
-                  Rediger totalvurdering
+                  Rediger vurdering
                 </Button>
               )}
             </HStack>

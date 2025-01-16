@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
@@ -36,17 +34,16 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.hentAlder
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -55,7 +52,6 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -440,26 +436,19 @@ class BehandlingFactory(
         } else if (sak.sakType == SakType.BARNEPENSJON) {
             "${persongalleri.soesken.size} søsken"
         } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
-            val aldre =
+            val soesken: AvdoedesBarn =
                 runBlocking {
-                    coroutineScope {
-                        persongalleri.soesken
-                            .map {
-                                async {
-                                    grunnlagService.finnPersonOpplysning(
-                                        behandlingId,
-                                        Opplysningstype.FOEDSELSDATO,
-                                        brukerTokenInfo = brukerTokenInfo,
-                                    )
-                                }
-                            }.awaitAll()
-                            .mapNotNull { it }
-                            .map { objectMapper.readValue(it.opplysning.toJson(), LocalDate::class.java) }
-                            .map { it.hentAlder() }
-                    }
+                    grunnlagService
+                        .hentGrunnlagForBehandling(
+                            behandlingId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        ).hentSoeskenNy()!!
+                        .verdi
                 }
 
-            val barnUnder20 = aldre.count { it < 20 }
+            val aldre = soesken.avdoedesBarn?.map { it.foedselsdato?.hentAlder() }?.mapNotNull { it }
+
+            val barnUnder20 = aldre?.count { it < 20 }
 
             "$barnUnder20 barn u/20år"
         } else {

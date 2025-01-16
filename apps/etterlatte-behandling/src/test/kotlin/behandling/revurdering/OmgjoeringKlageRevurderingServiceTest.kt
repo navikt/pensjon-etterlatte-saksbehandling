@@ -48,7 +48,7 @@ import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
-    val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
 
     @BeforeAll
     fun start() {

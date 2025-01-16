@@ -64,7 +64,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
         ).also {
             resetDatabase()
         }
-        user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
         val saksbehandlerMedRoller =
             mockk<SaksbehandlerMedRoller> {
                 every { harRolleStrengtFortrolig() } returns false

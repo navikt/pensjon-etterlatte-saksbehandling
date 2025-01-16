@@ -210,6 +210,7 @@ fun mockSaksbehandler(
             }
         every { name() } returns ident
         every { enheter() } returns enheter
+        every { brukerTokenInfo } returns mockk()
     }
 
 fun opprettBehandling(
@@ -219,7 +220,6 @@ fun opprettBehandling(
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     virkningstidspunkt: Virkningstidspunkt? = null,
     revurderingAarsak: Revurderingaarsak? = null,
-    fritekstAarsak: String? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     opphoerFraOgMed: YearMonth? = null,

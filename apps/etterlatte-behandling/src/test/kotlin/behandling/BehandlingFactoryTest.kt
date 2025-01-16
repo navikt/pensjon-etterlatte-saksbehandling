@@ -76,7 +76,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BehandlingFactoryTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
     private val behandlingDaoMock = mockk<BehandlingDao>(relaxUnitFun = true)
     private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>(relaxUnitFun = true)

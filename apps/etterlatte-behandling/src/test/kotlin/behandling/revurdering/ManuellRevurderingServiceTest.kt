@@ -69,7 +69,7 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
-    val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
 
     @BeforeAll
     fun start() {

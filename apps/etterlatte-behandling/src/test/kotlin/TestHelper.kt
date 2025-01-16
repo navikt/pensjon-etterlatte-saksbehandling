@@ -59,6 +59,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -402,7 +403,7 @@ fun grunnlagsOpplysningMedPersonopplysning(personopplysning: Person) =
         kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1"),
         opplysningType = Opplysningstype.DOEDSDATO,
         meta = ObjectMapper().createObjectNode(),
-        opplysning = personopplysning,
+        opplysning = personopplysning.toJsonNode(),
         attestering = null,
         fnr = null,
         periode = null,

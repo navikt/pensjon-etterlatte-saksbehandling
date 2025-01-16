@@ -600,7 +600,6 @@ internal class ApplicationContext(
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             vilkaarsvurderingService = vilkaarsvurderingService,
             behandlingInfoService = behandlingInfoService,
-            pdlTjenester = pdlTjenesterKlient,
         )
 
     val migreringService =

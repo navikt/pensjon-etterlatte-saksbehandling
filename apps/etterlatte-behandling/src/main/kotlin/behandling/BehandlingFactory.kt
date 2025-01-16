@@ -14,7 +14,6 @@ import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -37,16 +36,17 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.hentAlder
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
@@ -55,6 +55,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -71,7 +72,6 @@ class BehandlingFactory(
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val behandlingInfoService: BehandlingInfoService,
-    private val pdlTjenester: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -128,6 +128,7 @@ class BehandlingFactory(
                     request.mottattDato,
                     request.kilde ?: Vedtaksloesning.GJENNY,
                     request = hentDataForOpprettBehandling(sak.id),
+                    brukerTokenInfo = brukerTokenInfo,
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService
@@ -192,6 +193,7 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
         request: DataHentetForOpprettBehandling,
+        brukerTokenInfo: BrukerTokenInfo,
     ): BehandlingOgOppgave {
         logger.info("Starter behandling i sak $sakId")
         val prosessType = Prosesstype.MANUELL
@@ -242,6 +244,7 @@ class BehandlingFactory(
                     HardkodaSystembruker.opprettGrunnlag,
                 )
             }
+
             val oppgave =
                 opprettOppgaveForFoerstegangsbehandling(
                     referanse = behandling.id.toString(),
@@ -255,7 +258,7 @@ class BehandlingFactory(
                     merknad =
                         when (kilde) {
                             Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
-                            else -> opprettMerknad(request.sak, persongalleri)
+                            else -> opprettMerknad(request.sak, persongalleri, behandling.id, brukerTokenInfo)
                         },
                     gruppeId = persongalleri.avdoed.firstOrNull(),
                 )
@@ -429,33 +432,34 @@ class BehandlingFactory(
     private fun opprettMerknad(
         sak: Sak,
         persongalleri: Persongalleri,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
     ): String? =
         if (persongalleri.soesken.isEmpty()) {
             null
         } else if (sak.sakType == SakType.BARNEPENSJON) {
             "${persongalleri.soesken.size} søsken"
         } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
-            val foedselsdatoForSoesken =
+            val aldre =
                 runBlocking {
                     coroutineScope {
                         persongalleri.soesken
                             .map {
                                 async {
-                                    pdlTjenester
-                                        .hentPdlModellForSaktype(
-                                            it,
-                                            PersonRolle.BARN,
-                                            sak.sakType,
-                                        ).foedselsdato
-                                        ?.verdi
+                                    grunnlagService.finnPersonOpplysning(
+                                        behandlingId,
+                                        Opplysningstype.FOEDSELSDATO,
+                                        brukerTokenInfo = brukerTokenInfo,
+                                    )
                                 }
                             }.awaitAll()
                             .mapNotNull { it }
+                            .map { objectMapper.readValue(it.opplysning.toJson(), LocalDate::class.java) }
                             .map { it.hentAlder() }
                     }
                 }
 
-            val barnUnder20 = foedselsdatoForSoesken.count { it < 20 }
+            val barnUnder20 = aldre.count { it < 20 }
 
             "$barnUnder20 barn u/20år"
         } else {

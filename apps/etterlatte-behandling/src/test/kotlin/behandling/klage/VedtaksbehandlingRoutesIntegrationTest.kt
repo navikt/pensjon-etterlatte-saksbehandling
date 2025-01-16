@@ -201,8 +201,9 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
+                        user.brukerTokenInfo,
                     )
-            }?.behandling
+            }.behandling
 
         return Pair(sak, behandling as Foerstegangsbehandling)
     }

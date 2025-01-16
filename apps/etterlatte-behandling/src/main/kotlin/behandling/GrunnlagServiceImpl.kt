@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -77,11 +79,23 @@ interface GrunnlagService {
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): YearMonth
+
+    suspend fun finnPersonOpplysning(
+        behandlingId: UUID,
+        opplysningsType: Opplysningstype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlagsopplysning<JsonNode>?
 }
 
 class GrunnlagServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
 ) : GrunnlagService {
+    override suspend fun finnPersonOpplysning(
+        behandlingId: UUID,
+        opplysningsType: Opplysningstype,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlagsopplysning<JsonNode>? = grunnlagKlient.finnPersonOpplysning(behandlingId, opplysningsType, brukerTokenInfo)
+
     override suspend fun grunnlagFinnes(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,

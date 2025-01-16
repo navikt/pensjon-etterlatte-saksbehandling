@@ -69,9 +69,10 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
+    val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+
     @BeforeAll
     fun start() {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         val saksbehandlerMedRoller =
             mockk<SaksbehandlerMedRoller> {
                 every { harRolleStrengtFortrolig() } returns false
@@ -109,6 +110,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
+                        user.brukerTokenInfo,
                     )
             }.also { it.sendMeldingForHendelse() }.behandling
 
@@ -316,7 +318,6 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
                 kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
                 behandlingInfoService = mockk(),
-                pdlTjenester = mockk(),
             )
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -971,6 +972,5 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             behandlingInfoService = mockk(),
-            pdlTjenester = mockk(),
         )
 }

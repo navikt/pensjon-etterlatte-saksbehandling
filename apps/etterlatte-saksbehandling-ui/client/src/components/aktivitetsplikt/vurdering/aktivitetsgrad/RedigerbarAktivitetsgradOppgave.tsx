@@ -5,26 +5,25 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { slettAktivitetspliktVurdering } from '~shared/api/aktivitetsplikt'
+import { slettAktivitetsgradForOppgave } from '~shared/api/aktivitetsplikt'
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
-import { setAktivitetspliktVurdering } from '~store/reducers/Aktivitetsplikt12mnd'
-import { VurderingAktivitetsgradForm } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradForm'
+import { setAktivitetspliktVurdering } from '~store/reducers/AktivitetsplikReducer'
+import { VurderingAktivitetsgradWrapperOppgave } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradWrapperOppgave'
 import { BodyShort, Button, Heading, HStack, Label, VStack } from '@navikt/ds-react'
 import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending, Result } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-export function VisAktivitetsgrad(props: { aktivitet: IAktivitetspliktAktivitetsgrad }) {
-  const { aktivitet } = props
+export function RedigerbarAktivitetsgradOppgave(props: { aktivitet: IAktivitetspliktAktivitetsgrad }) {
   const { oppgave } = useAktivitetspliktOppgaveVurdering()
-
-  const [slettStatus, slettSpesifikkAktivitet] = useApiCall(slettAktivitetspliktVurdering)
-  const [redigerer, setRedigerer] = useState<boolean>(false)
-
-  const dispatch = useDispatch()
+  const [slettStatus, slettAktivitetsgrad] = useApiCall(slettAktivitetsgradForOppgave)
   const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
+
+  const { aktivitet } = props
+  const [redigerer, setRedigerer] = useState<boolean>(false)
+  const dispatch = useDispatch()
 
   function oppdaterTilstandLagretVurdering(data: IAktivitetspliktVurderingNyDto) {
     setRedigerer(false)
@@ -32,11 +31,11 @@ export function VisAktivitetsgrad(props: { aktivitet: IAktivitetspliktAktivitets
   }
 
   function slettAktivitetsgradIOppgave(aktivitet: IAktivitetspliktAktivitetsgrad) {
-    slettSpesifikkAktivitet(
+    slettAktivitetsgrad(
       {
         sakId: aktivitet.sakId,
         oppgaveId: oppgave.id,
-        vurderingId: aktivitet.id,
+        aktivitetsgradId: aktivitet.id,
       },
       (data) => {
         dispatch(setAktivitetspliktVurdering(data))
@@ -44,9 +43,10 @@ export function VisAktivitetsgrad(props: { aktivitet: IAktivitetspliktAktivitets
       }
     )
   }
+
   if (redigerer) {
     return (
-      <VurderingAktivitetsgradForm
+      <VurderingAktivitetsgradWrapperOppgave
         onSuccess={oppdaterTilstandLagretVurdering}
         onAvbryt={() => setRedigerer(false)}
         aktivitet={aktivitet}
@@ -54,6 +54,30 @@ export function VisAktivitetsgrad(props: { aktivitet: IAktivitetspliktAktivitets
     )
   }
 
+  return (
+    <RedigerbarAktivitsgradKnapper
+      erRedigerbar={erRedigerbar}
+      aktivitet={aktivitet}
+      setRedigerer={setRedigerer}
+      slettStatus={slettStatus}
+      slettAktivitetsgrad={slettAktivitetsgradIOppgave}
+    />
+  )
+}
+
+export const RedigerbarAktivitsgradKnapper = ({
+  aktivitet,
+  erRedigerbar,
+  setRedigerer,
+  slettStatus,
+  slettAktivitetsgrad,
+}: {
+  aktivitet: IAktivitetspliktAktivitetsgrad
+  erRedigerbar: boolean
+  setRedigerer: (redigerer: boolean) => void
+  slettStatus: Result<IAktivitetspliktVurderingNyDto>
+  slettAktivitetsgrad: (aktivitet: IAktivitetspliktAktivitetsgrad) => void
+}) => {
   return (
     <VStack gap="6" maxWidth="50rem">
       <Heading size="small">
@@ -86,7 +110,7 @@ export function VisAktivitetsgrad(props: { aktivitet: IAktivitetspliktAktivitets
             variant="secondary"
             icon={<TrashIcon aria-hidden />}
             loading={isPending(slettStatus)}
-            onClick={() => slettAktivitetsgradIOppgave(aktivitet)}
+            onClick={() => slettAktivitetsgrad(aktivitet)}
           >
             Slett
           </Button>

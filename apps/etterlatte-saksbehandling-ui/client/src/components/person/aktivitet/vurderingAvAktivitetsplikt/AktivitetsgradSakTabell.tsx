@@ -1,17 +1,18 @@
-import { tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
-import { BodyShort, Box, Detail, ReadMore, Table, VStack } from '@navikt/ds-react'
-import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 import React from 'react'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
-import { RedigerbarAktivitetsgradOppgave } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivitetsgradOppgave'
+import { IAktivitetspliktAktivitetsgrad, tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
+import { BodyShort, Box, Detail, Heading, HStack, Label, ReadMore, Table, VStack } from '@navikt/ds-react'
+import { ClockDashedIcon } from '@navikt/aksel-icons'
+import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 
-//lesemodus variant av AktivitetsgradIOppgave
-export function AktivitetsgradIOppgave() {
-  const { vurdering } = useAktivitetspliktOppgaveVurdering()
-  const aktiviteter = vurdering.aktivitet
-
+//Redigerbar variant av AktivitetsgradIOppgave
+export const AktivitetsgradSakTabell = ({ aktiviteter }: { aktiviteter: IAktivitetspliktAktivitetsgrad[] }) => {
   return (
     <VStack gap="4">
+      <HStack gap="4" align="center">
+        <ClockDashedIcon fontSize="1.5rem" aria-hidden />
+        <Heading size="small">Aktivitetsgrad</Heading>
+      </HStack>
+
       <Box maxWidth="42.5rem">
         <ReadMore header="Dette menes med aktivitetsgrad">
           I oversikten over aktivitetsgrad kan du se hvilken aktivitetsgrad brukeren har hatt. For å motta
@@ -20,6 +21,7 @@ export function AktivitetsgradIOppgave() {
           opp til 100 % aktivitet. Vær oppmerksom på at det finnes unntak.
         </ReadMore>
       </Box>
+
       <Table size="small">
         <Table.Header>
           <Table.Row>
@@ -36,7 +38,12 @@ export function AktivitetsgradIOppgave() {
               {aktiviteter.map((aktivitet) => (
                 <Table.ExpandableRow
                   key={aktivitet.id}
-                  content={<RedigerbarAktivitetsgradOppgave aktivitet={aktivitet} key={aktivitet.id} />}
+                  content={
+                    <Box maxWidth="42.5rem">
+                      <Label>Beskrivelse</Label>
+                      <BodyShort>{aktivitet.beskrivelse}</BodyShort>
+                    </Box>
+                  }
                 >
                   <Table.DataCell>{tekstAktivitetspliktVurderingType[aktivitet.aktivitetsgrad]}</Table.DataCell>
                   <Table.DataCell>{formaterDatoMedFallback(aktivitet.fom, '-')}</Table.DataCell>

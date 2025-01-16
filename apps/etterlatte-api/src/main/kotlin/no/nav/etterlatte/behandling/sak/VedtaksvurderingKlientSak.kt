@@ -6,11 +6,11 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.samordning.vedtak.VedtakvurderingIkkeFunnetException
+import no.nav.etterlatte.samordning.vedtak.VedtakvurderingManglendeTilgangException
+import no.nav.etterlatte.samordning.vedtak.VedtakvurderingUgyldigForesporselException
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -23,15 +23,15 @@ class VedtaksvurderingKlientSak(
     private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/api/vedtak"
 
     suspend fun hentLoependeVedtak(sakId: SakId): LoependeYtelseDTO {
-        val date = LocalDate.now()
-        logger.info("Henter lopende vedtak, date=$date")
+        val dato = LocalDate.now()
+        logger.info("Henter lopende vedtak, date=$dato")
         return try {
             httpClient
-                .get("$vedtaksvurderingUrl/loepende/${sakId.sakId}?dato=$date")
+                .get("$vedtaksvurderingUrl/loepende/${sakId.sakId}?dato=$dato")
                 .body()
         } catch (e: ClientRequestException) {
-            logger.error("Det oppstod feil i kall til lopende vedtak API", e)
-            when (e.response.status) { // TODO: Håndter dette på en annen måte
+            logger.error("Det oppstod feil i kall til vedtak API", e)
+            when (e.response.status) {
                 HttpStatusCode.Unauthorized -> throw VedtakvurderingManglendeTilgangException("Vedtak: Ikke tilgang")
                 HttpStatusCode.BadRequest -> throw VedtakvurderingUgyldigForesporselException("Vedtak: Ugyldig forespørsel")
                 HttpStatusCode.NotFound -> throw VedtakvurderingIkkeFunnetException("Vedtak: Ressurs ikke funnet")
@@ -40,24 +40,3 @@ class VedtaksvurderingKlientSak(
         }
     }
 }
-
-class VedtakvurderingManglendeTilgangException(
-    detail: String,
-) : IkkeTillattException(
-        code = "020-VEDTAK-TILGANG",
-        detail = detail,
-    )
-
-class VedtakvurderingUgyldigForesporselException(
-    detail: String,
-) : UgyldigForespoerselException(
-        code = "020-VEDTAK-FORESPOERSEL",
-        detail = detail,
-    )
-
-class VedtakvurderingIkkeFunnetException(
-    detail: String,
-) : IkkeFunnetException(
-        code = "020-VEDTAK-IKKE-FUNNET",
-        detail = detail,
-    )

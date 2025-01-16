@@ -129,6 +129,9 @@ class AktivitetspliktService(
         sakId: SakId,
         aktivitetspliktDato: LocalDate,
     ): Boolean {
+        if (harVarigUnntak(sakId)) {
+            return true
+        }
         val nyesteVurdering = hentVurderingForSak(sakId)
 
         // TODO("se på å heller ha en tom på vurderinger")

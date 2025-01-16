@@ -41,27 +41,31 @@ object SoeknadMapper {
         avdoedFnr: String,
         barn: List<String> = emptyList(),
         behandlingssteg: Behandlingssteg,
+        soeker: String? = null,
     ): JsonMessage =
         when (type) {
-            SoeknadType.OMSTILLINGSSTOENAD ->
+            SoeknadType.OMSTILLINGSSTOENAD -> {
+                val soekerFnr = soeker ?: gjenlevendeFnr
                 JsonMessage.newMessage(
                     mutableMapOf(
                         SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagParMedEventNameKey(),
                         "@skjema_info" to
                             opprettOmstillingsstoenadSoeknad(
-                                soekerFnr = gjenlevendeFnr,
+                                soekerFnr = soekerFnr,
                                 avdoedFnr = avdoedFnr,
                                 barn = barn,
                             ).toObjectNode(),
                         "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
                         "@template" to "soeknad",
-                        "@fnr_soeker" to gjenlevendeFnr,
+                        "@fnr_soeker" to soekerFnr,
                         "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
                         Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )
+            }
 
-            SoeknadType.BARNEPENSJON ->
+            SoeknadType.BARNEPENSJON -> {
+                val soekerFnr = soeker ?: barn.first()
                 JsonMessage.newMessage(
                     mutableMapOf(
                         SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagParMedEventNameKey(),
@@ -69,8 +73,8 @@ object SoeknadMapper {
                             opprettBarnepensjonSoeknad(
                                 gjenlevendeFnr = gjenlevendeFnr,
                                 avdoedFnr = avdoedFnr,
-                                barnFnr = barn.first(),
-                                soesken = barn.drop(1),
+                                barnFnr = soekerFnr,
+                                soesken = barn.filter { it != soeker },
                             ).toObjectNode(),
                         "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
                         "@template" to "soeknad",
@@ -79,6 +83,7 @@ object SoeknadMapper {
                         Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )
+            }
 
             else -> {
                 throw Exception("Ukjent soknad type: '$type'")

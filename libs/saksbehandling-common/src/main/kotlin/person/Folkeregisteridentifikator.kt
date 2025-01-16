@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 /**
  * Norwegian national identity number
@@ -52,8 +51,10 @@ class Folkeregisteridentifikator private constructor(
 
     /**
      * @return birthdate as [LocalDate]
+     * Denne er feil ref https://nav-it.slack.com/archives/C020Q1K6EAY/p1727427982821959?thread_ts=1727351673.938029&cid=C020Q1K6EAY
      */
-    fun getBirthDate(): LocalDate {
+    @Deprecated("Denne blir feil for alle fødselsnummere")
+    fun getBirthDte(): LocalDate {
         val fnrMonth = value.slice(2 until 4).toInt()
 
         val fnrDay = value.slice(0 until 2).toInt()
@@ -72,11 +73,6 @@ class Folkeregisteridentifikator private constructor(
     }
 
     /**
-     * @return the birthdate as a ISO 8601 [String]
-     */
-    fun getBirthDateAsIso() = getBirthDate().toString()
-
-    /**
      * Checks if the identity number is of type D-number.
      *
      * A D-number consists of 11 digits, of which the first six digits show the date of birth,
@@ -89,14 +85,13 @@ class Folkeregisteridentifikator private constructor(
      *
      * @return 4 digit year of birth as [Int]
      */
+    @Deprecated("Denne er feil og må fases ut til fordel for å hente foedselsdato direkte fra PDL")
     private fun getYearOfBirth(): Int {
         val year = value.slice(4 until 6).toInt()
         val individnummer = value.slice(6 until 9).toInt()
 
         return firesifretAarstallFraTosifret(year, individnummer)
     }
-
-    fun getAge(): Int = ChronoUnit.YEARS.between(getBirthDate(), LocalDate.now()).toInt()
 
     /**
      * Sjekker om fødselsnummeret er av typen "Hjelpenummer".

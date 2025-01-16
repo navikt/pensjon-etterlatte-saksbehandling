@@ -316,6 +316,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
                 kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
                 behandlingInfoService = mockk(),
+                pdlTjenester = mockk(),
             )
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -970,5 +971,6 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             behandlingInfoService = mockk(),
+            pdlTjenester = mockk(),
         )
 }

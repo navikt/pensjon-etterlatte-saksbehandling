@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
@@ -12,6 +14,7 @@ import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -37,7 +40,8 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.hentAlder
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -67,6 +71,7 @@ class BehandlingFactory(
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val behandlingInfoService: BehandlingInfoService,
+    private val pdlTjenester: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -430,7 +435,27 @@ class BehandlingFactory(
         } else if (sak.sakType == SakType.BARNEPENSJON) {
             "${persongalleri.soesken.size} søsken"
         } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
-            val barnUnder20 = persongalleri.soesken.count { Folkeregisteridentifikator.of(it).getAge() < 20 }
+            val foedselsdatoForSoesken =
+                runBlocking {
+                    coroutineScope {
+                        persongalleri.soesken
+                            .map {
+                                async {
+                                    pdlTjenester
+                                        .hentPdlModellForSaktype(
+                                            it,
+                                            PersonRolle.BARN,
+                                            sak.sakType,
+                                        ).foedselsdato
+                                        ?.verdi
+                                }
+                            }.awaitAll()
+                            .mapNotNull { it }
+                            .map { it.hentAlder() }
+                    }
+                }
+
+            val barnUnder20 = foedselsdatoForSoesken.count { it < 20 }
 
             "$barnUnder20 barn u/20år"
         } else {

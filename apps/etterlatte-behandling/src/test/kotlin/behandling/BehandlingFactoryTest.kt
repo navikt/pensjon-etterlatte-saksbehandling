@@ -129,6 +129,7 @@ internal class BehandlingFactoryTest {
             vilkaarsvurderingService = vilkaarsvurderingService,
             kommerBarnetTilGodeService = kommerBarnetTilGodeServiceMock,
             behandlingInfoService = mockk(),
+            pdlTjenester = mockk(),
         )
 
     @BeforeEach

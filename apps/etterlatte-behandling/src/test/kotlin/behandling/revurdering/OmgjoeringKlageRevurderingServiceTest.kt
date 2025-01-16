@@ -257,5 +257,6 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             behandlingInfoService = mockk(),
+            pdlTjenester = mockk(),
         )
 }

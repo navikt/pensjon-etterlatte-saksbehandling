@@ -435,6 +435,7 @@ class AktivitetspliktServiceTest {
             val foerst = Grunnlagsopplysning.Saksbehandler.create("Z123455")
             val sist = Grunnlagsopplysning.Saksbehandler.create("Z123455")
             val behId = UUID.randomUUID()
+
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
                 listOf(
                     mockk {
@@ -444,6 +445,7 @@ class AktivitetspliktServiceTest {
                         every { sakId } returns aktivitet.sakId
                         every { behandlingId } returns behId
                         every { oppgaveId } returns null
+                        every { unntak } returns mockk<AktivitetspliktUnntakType>()
                     },
                 )
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
@@ -464,6 +466,27 @@ class AktivitetspliktServiceTest {
         }
 
         @Test
+        fun `Skal returnere true hvis det finnes varig unntak for aktivitetsplikt`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns emptyList()
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
+                listOf(
+                    mockk {
+                        every { fom } returns null
+                        every { tom } returns LocalDate.now().minusYears(1)
+                        every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
+                        every { sakId } returns aktivitet.sakId
+                        every { behandlingId } returns UUID.randomUUID()
+                        every { oppgaveId } returns null
+                        every { unntak } returns AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                    },
+                )
+
+            val result = service.oppfyllerAktivitetsplikt6mnd(aktivitet.sakId, aktivitet.fom)
+
+            result shouldBe true
+        }
+
+        @Test
         fun `Skal returnere false hvis aktivitetsplikt ikke er oppfylt og unntaket er utgaatt`() {
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns emptyList()
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
@@ -475,6 +498,7 @@ class AktivitetspliktServiceTest {
                         every { sakId } returns aktivitet.sakId
                         every { behandlingId } returns UUID.randomUUID()
                         every { oppgaveId } returns null
+                        every { unntak } returns mockk<AktivitetspliktUnntakType>()
                     },
                 )
 

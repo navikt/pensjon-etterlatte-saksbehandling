@@ -3,6 +3,7 @@ import {
   AktivitetspliktUnntakType,
   IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNyDto,
+  IOpprettAktivitetspliktUnntak,
   tekstAktivitetspliktUnntakType,
 } from '~shared/types/Aktivitetsplikt'
 import { isFailure, isPending, Result } from '~shared/api/apiUtils'
@@ -13,7 +14,6 @@ import { FloppydiskIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import React from 'react'
-import { IOpprettAktivitetspliktUnntak } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
 
 export const LagreUnntakForm = ({
   unntak,

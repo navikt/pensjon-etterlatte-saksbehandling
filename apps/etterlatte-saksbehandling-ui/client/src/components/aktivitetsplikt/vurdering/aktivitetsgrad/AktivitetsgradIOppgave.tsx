@@ -5,10 +5,7 @@ import React from 'react'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { RedigerbarAktivitetsgradOppgave } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/RedigerbarAktivitetsgradOppgave'
 
-/*TODO:
-   Denne burde få inn vurdering.aktiviteter fra useAktivitetspliktOppgaveVurdering
-  slik at denne og Aktivitetsgrad.tsx kan brukes som en standard visning av aktiviteter
- */
+//lesemodus variant av AktivitetsgradIOppgave
 export function AktivitetsgradIOppgave() {
   const { vurdering } = useAktivitetspliktOppgaveVurdering()
   const aktiviteter = vurdering.aktivitet

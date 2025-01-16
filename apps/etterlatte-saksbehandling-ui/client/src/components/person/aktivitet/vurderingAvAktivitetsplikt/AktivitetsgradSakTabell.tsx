@@ -4,8 +4,8 @@ import { BodyShort, Box, Detail, Heading, HStack, Label, ReadMore, Table, VStack
 import { ClockDashedIcon } from '@navikt/aksel-icons'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 
-// TODO: burde merges med AktivitetsgradIOppgave, se kommentar der.
-export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktAktivitetsgrad[] }) => {
+//Redigerbar variant av AktivitetsgradIOppgave
+export const AktivitetsgradSakTabell = ({ aktiviteter }: { aktiviteter: IAktivitetspliktAktivitetsgrad[] }) => {
   return (
     <VStack gap="4">
       <HStack gap="4" align="center">

@@ -7,11 +7,11 @@ import {
   IAktivitetspliktVurderingNyDto,
   IOpprettAktivitet,
   IOpprettAktivitetspliktAktivitetsgrad,
+  IOpprettAktivitetspliktUnntak,
 } from '~shared/types/Aktivitetsplikt'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { Spraak } from '~shared/types/Brev'
-import { IOpprettAktivitetspliktUnntak } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
 
 export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string

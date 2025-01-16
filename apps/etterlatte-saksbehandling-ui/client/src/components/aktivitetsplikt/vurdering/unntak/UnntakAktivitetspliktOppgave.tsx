@@ -1,7 +1,7 @@
 import {
-  AktivitetspliktUnntakType,
   IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNyDto,
+  IOpprettAktivitetspliktUnntak,
 } from '~shared/types/Aktivitetsplikt'
 
 import React from 'react'
@@ -9,15 +9,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerAktivitetspliktUnntakForOppgave } from '~shared/api/aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { LagreUnntakForm } from '~components/aktivitetsplikt/vurdering/unntak/LagreUnntakForm'
-
-//TODO: flytte til domain fil
-export interface IOpprettAktivitetspliktUnntak {
-  id: string | undefined
-  unntak: AktivitetspliktUnntakType
-  fom: string
-  tom?: string
-  beskrivelse: string
-}
 
 export function VelgOgLagreUnntakAktivitetspliktOppgave(props: {
   unntak: IAktivitetspliktUnntak

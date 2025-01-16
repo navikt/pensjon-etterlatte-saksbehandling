@@ -5,6 +5,7 @@ import {
   AktivitetspliktVurderingType,
   IAktivitetspliktVurderingNyDto,
   IOpprettAktivitetspliktAktivitetsgrad,
+  IOpprettAktivitetspliktUnntak,
   tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
   teksterAktivitetspliktSkjoennsmessigVurdering,
@@ -15,7 +16,6 @@ import { maanederForVurdering } from '~components/aktivitetsplikt/vurdering/akti
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettAktivitetspliktAktivitetsgradOgUnntakForOppgave } from '~shared/api/aktivitetsplikt'
 import { JaNei } from '~shared/types/ISvar'
-import { IOpprettAktivitetspliktUnntak } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
 import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import { Alert, Box, Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'

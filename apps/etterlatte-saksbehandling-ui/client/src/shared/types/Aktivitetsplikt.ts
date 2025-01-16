@@ -171,3 +171,11 @@ export interface AktivitetspliktOppgaveVurdering {
   aktivtetspliktbrevdata?: IBrevAktivitetspliktDto
   sistEndret?: string
 }
+
+export interface IOpprettAktivitetspliktUnntak {
+  id: string | undefined
+  unntak: AktivitetspliktUnntakType
+  fom: string
+  tom?: string
+  beskrivelse: string
+}

@@ -2,6 +2,7 @@ import {
   AktivitetspliktOppgaveVurderingType,
   IAktivitetspliktUnntak,
   IAktivitetspliktVurderingNyDto,
+  IOpprettAktivitetspliktUnntak,
 } from '~shared/types/Aktivitetsplikt'
 import { useDispatch } from 'react-redux'
 import React, { useState } from 'react'
@@ -10,7 +11,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerUnntakForBehandling, slettUnntakForBehandling } from '~shared/api/aktivitetsplikt'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { IOpprettAktivitetspliktUnntak } from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
 import { setVurderingBehandling } from '~store/reducers/AktivitetspliktBehandlingReducer'
 import { UnntakRedigeringsKnapper } from '~components/aktivitetsplikt/vurdering/unntak/UnntakRedigeringsKnapper'
 import { LagreUnntakForm } from '~components/aktivitetsplikt/vurdering/unntak/LagreUnntakForm'

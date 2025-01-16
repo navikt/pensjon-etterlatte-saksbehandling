@@ -6,9 +6,7 @@ import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { RedigerbarUnntakOppgave } from '~components/aktivitetsplikt/vurdering/unntak/RedigerbarUnntakOppgave'
 
-/*
-todo: burde merges med Unntak.tsx
- */
+//lesemodus versjon UnntakPlainVisning
 export function UnntakIOppgave() {
   const { vurdering } = useAktivitetspliktOppgaveVurdering()
   const unntaker = vurdering.unntak

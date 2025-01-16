@@ -108,7 +108,6 @@ private fun Folkeregisteridentifikator.isTestNorgeNumber(): Boolean = Character.
  *
  * @return 4 digit year of birth as [Int]
  */
-@Deprecated("Denne er feil og må fases ut til fordel for å hente foedselsdato direkte fra PDL")
 private fun Folkeregisteridentifikator.getYearOfBirth(): Int {
     val year = value.slice(4 until 6).toInt()
     val individnummer = value.slice(6 until 9).toInt()

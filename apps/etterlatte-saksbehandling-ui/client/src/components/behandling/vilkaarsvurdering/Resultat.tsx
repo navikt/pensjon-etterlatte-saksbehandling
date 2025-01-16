@@ -8,7 +8,7 @@ import {
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { BodyShort, Box, Button, Heading, HStack, Radio, RadioGroup, Textarea, VStack } from '@navikt/ds-react'
-import { svarTilTotalResultat } from './utils'
+import { svarTilTotalResultat, totalResultatTilSvar } from './utils'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterDato } from '~utils/formatering/dato'
@@ -61,6 +61,10 @@ export const Resultat = (props: Props) => {
     slettTotalVurderingCall(behandlingId, (res) => {
       oppdaterVilkaar(res)
       dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
+      setKommentar(vilkaarsvurdering?.resultat?.kommentar || '')
+      if (vilkaarsvurdering.resultat?.utfall) {
+        setSvar(totalResultatTilSvar(vilkaarsvurdering.resultat?.utfall))
+      }
     })
 
   const lagreVilkaarsvurderingResultat = () => {

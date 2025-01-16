@@ -19,6 +19,15 @@ export const svarTilTotalResultat = (svar: ISvar) => {
   }
 }
 
+export const totalResultatTilSvar = (totalResultat: VilkaarsvurderingResultat): ISvar => {
+  switch (totalResultat) {
+    case VilkaarsvurderingResultat.IKKE_OPPFYLT:
+      return ISvar.NEI
+    case VilkaarsvurderingResultat.OPPFYLT:
+      return ISvar.JA
+  }
+}
+
 export function formaterVurderingsResultat(vurderingsResultat?: VurderingsResultat | null): string {
   switch (vurderingsResultat) {
     case VurderingsResultat.OPPFYLT:

@@ -21,8 +21,6 @@ fun Route.vedtakRoute(vedtaksvurderingKlient: VedtaksvurderingKlient) {
             issuers = setOf(Issuer.AZURE.issuerName)
         }
 
-        // swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml") TODO
-
         post {
             try {
                 val request = call.receive<VedtakForPersonRequest>()

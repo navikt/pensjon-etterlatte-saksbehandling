@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.distribusjon
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.brev.distribusjon.Adresse as DistAdresse
@@ -27,7 +28,10 @@ internal class DistribusjonServiceImpl(
         runBlocking {
             val request =
                 DistribuerJournalpostRequest(
-                    journalpostId = checkNotNull(mottaker.journalpostId) { "JournalpostID mangler på mottaker=${mottaker.id}" },
+                    journalpostId =
+                        krevIkkeNull(mottaker.journalpostId) {
+                            "JournalpostID mangler på mottaker=${mottaker.id}"
+                        },
                     bestillendeFagsystem = Fagsaksystem.EY.navn,
                     distribusjonstype = type,
                     adresse =

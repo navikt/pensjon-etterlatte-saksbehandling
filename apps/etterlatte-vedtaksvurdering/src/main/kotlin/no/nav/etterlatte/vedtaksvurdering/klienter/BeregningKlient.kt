@@ -4,9 +4,11 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -22,6 +24,8 @@ interface BeregningKlient {
         brukerTokenInfo: BrukerTokenInfo,
         saktype: SakType,
     ): BeregningOgAvkorting
+
+    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo): Grunnbeloep
 }
 
 class BeregningKlientException(
@@ -55,6 +59,14 @@ class BeregningKlientImpl(
                     null
                 },
         )
+
+    override suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo): Grunnbeloep =
+        downstreamResourceClient
+            .get(resource = Resource(clientId, "$resourceUrl/api/beregning/grunnbeloep"), brukerTokenInfo)
+            .mapBoth(
+                success = { deserialize(it.response.toString()) },
+                failure = { throw it },
+            )
 
     private suspend fun hentBeregning(
         behandlingId: UUID,

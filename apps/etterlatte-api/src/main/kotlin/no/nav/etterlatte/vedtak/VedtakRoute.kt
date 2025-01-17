@@ -3,7 +3,6 @@ package no.nav.etterlatte.vedtak
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.install
-import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
@@ -22,7 +21,7 @@ fun Route.vedtakRoute(vedtaksvurderingKlient: VedtaksvurderingKlient) {
             issuers = setOf(Issuer.AZURE.issuerName)
         }
 
-        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
+        // swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml") TODO
 
         post {
             try {

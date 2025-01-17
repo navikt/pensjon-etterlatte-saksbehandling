@@ -12,8 +12,6 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import java.math.BigDecimal
@@ -45,6 +43,8 @@ data class VedtakForEksterntDto(
 )
 
 data class VedtakEksternt(
+    val sakId: Long,
+    val sakType: String,
     val virkningstidspunkt: YearMonth,
     val type: VedtakTypeEksternt,
     val utbetaling: List<VedtakEksterntUtbetaling>,
@@ -61,18 +61,3 @@ data class VedtakEksterntUtbetaling(
     val periode: Periode,
     val beloep: BigDecimal?,
 )
-
-fun VedtakDto.toEksternDto(): VedtakEksternt {
-    val vedtakInnhold = (innhold as VedtakInnholdDto.VedtakBehandlingDto)
-    return VedtakEksternt(
-        virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
-        type = VedtakTypeEksternt.valueOf(type.name),
-        utbetaling =
-            vedtakInnhold.utbetalingsperioder.map { utbetaling ->
-                VedtakEksterntUtbetaling(
-                    periode = utbetaling.periode,
-                    beloep = utbetaling.beloep,
-                )
-            },
-    )
-}

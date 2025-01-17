@@ -8,6 +8,7 @@ import kotliquery.using
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.model.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -146,7 +147,7 @@ class NotatRepository(
                     ).asUpdateAndReturnGeneratedKey,
                 )
 
-            checkNotNull(id) { "Kunne ikke lagre notat i databasen!" }
+            krevIkkeNull(id) { "Kunne ikke lagre notat i databasen!" }
 
             tx.lagreHendelse(id, notat.toJson(), bruker)
 
@@ -168,7 +169,7 @@ class NotatRepository(
                     ),
                 ).asUpdate,
             ).also { oppdatert ->
-                checkNotNull(oppdatert == 1) { "Kunne ikke lagre tittel! for id $id" }
+                krevIkkeNull(oppdatert == 1) { "Kunne ikke lagre tittel! for id $id" }
             }
 
         tx.lagreHendelse(id, tittel.toJson(), bruker)

@@ -198,7 +198,10 @@ class OversendelseBrevServiceImpl(
                     "siden det har feil brevtype",
             )
         }
-        val behandlingId = checkNotNull(brev.behandlingId)
+        val behandlingId =
+            krevIkkeNull(brev.behandlingId) {
+                "Brev ${brev.id} mangler behandlingId"
+            }
 
         val klage =
             runBlocking {
@@ -271,7 +274,7 @@ data class OversendelseBrevFerdigstillingData(
                 sakType = request.sakType,
                 klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
                 vedtakDato =
-                    checkNotNull(
+                    krevIkkeNull(
                         klage.formkrav
                             ?.formkrav
                             ?.vedtaketKlagenGjelder

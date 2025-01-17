@@ -1,11 +1,19 @@
-import React from 'react'
 import { IAktivitetspliktUnntak, tekstAktivitetspliktUnntakType } from '~shared/types/Aktivitetsplikt'
-import { BodyShort, Box, Detail, Heading, HStack, Label, ReadMore, Table, VStack } from '@navikt/ds-react'
-import { HandShakeHeartIcon } from '@navikt/aksel-icons'
+import { BodyShort, Box, Detail, Heading, HStack, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
+import React from 'react'
+import { HandShakeHeartIcon } from '@navikt/aksel-icons'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { RedigerbarUnntakBehandling } from '~components/behandling/aktivitetsplikt/unntak/RedigerbarUnntakBehandling'
 
-export const Unntak = ({ unntaker }: { unntaker: IAktivitetspliktUnntak[] | undefined }) => {
+export const UnntakTabellBehandling = ({
+  unntak,
+  behandling,
+}: {
+  unntak: IAktivitetspliktUnntak[]
+  behandling: IDetaljertBehandling
+}) => {
   return (
     <VStack gap="4">
       <HStack gap="4" align="center">
@@ -32,17 +40,12 @@ export const Unntak = ({ unntaker }: { unntaker: IAktivitetspliktUnntak[] | unde
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!!unntaker?.length ? (
+          {unntak?.length ? (
             <>
-              {unntaker.map((unntak) => (
+              {unntak.map((unntak) => (
                 <Table.ExpandableRow
                   key={unntak.id}
-                  content={
-                    <Box maxWidth="42.5rem">
-                      <Label>Beskrivelse</Label>
-                      <BodyShort>{unntak.beskrivelse}</BodyShort>
-                    </Box>
-                  }
+                  content={<RedigerbarUnntakBehandling behandling={behandling} unntak={unntak} />}
                 >
                   <Table.DataCell>{tekstAktivitetspliktUnntakType[unntak.unntak]}</Table.DataCell>
                   <Table.DataCell>

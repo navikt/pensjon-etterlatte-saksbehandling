@@ -7,6 +7,7 @@ import no.nav.etterlatte.hendelserufoere.UfoereHendelse
 import no.nav.etterlatte.hendelserufoere.UfoereHendelseFordeler
 import no.nav.etterlatte.kafka.Kafkakonsument
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -26,10 +27,16 @@ class UfoerehendelseKonsument(
         stream { hendelser ->
             runBlocking {
                 val ventbareHendelser =
-                    hendelser.map {
+                    hendelser.map { hendelse ->
                         async(context = Dispatchers.Default) {
-                            val ufoereHendelse: UfoereHendelse = deserialize(it.value())
-                            ufoereHendelseFordeler.haandterHendelse(ufoereHendelse)
+                            try {
+                                val ufoereHendelse: UfoereHendelse = deserialize(hendelse.value())
+                                ufoereHendelseFordeler.haandterHendelse(ufoereHendelse)
+                            } catch (e: Exception) {
+                                logger.error("Feilet ved innlesing av uførehendelse. Se sikkerlogg for detaljer.")
+                                sikkerlogger().error("Feilet ved innlesing av uførehendelse: ${hendelse.value()}")
+                                throw e
+                            }
                         }
                     }
                 ventbareHendelser.forEach { it.await() }

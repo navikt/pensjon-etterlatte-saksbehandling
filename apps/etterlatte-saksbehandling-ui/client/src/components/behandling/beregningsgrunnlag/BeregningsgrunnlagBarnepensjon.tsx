@@ -27,6 +27,7 @@ import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types
 import {
   Beregning,
   BeregningsMetodeBeregningsgrunnlagForm,
+  tilBeregningsMetodeBeregningsgrunnlag,
   LagreBeregningsGrunnlagDto,
   toLagreBeregningsGrunnlagDto,
 } from '~shared/types/Beregning'
@@ -110,7 +111,7 @@ const BeregningsgrunnlagBarnepensjon = () => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
       ...toLagreBeregningsGrunnlagDto(behandling.beregningsGrunnlag),
       beregningsMetodeFlereAvdoede: undefined,
-      beregningsMetode: beregningsMetodeForm,
+      beregningsMetode: tilBeregningsMetodeBeregningsgrunnlag(beregningsMetodeForm),
       kunEnJuridiskForelder: kunEnJuridiskForelderPersongalleri
         ? periodisertBeregningsgrunnlagTilDto({
             data: {},

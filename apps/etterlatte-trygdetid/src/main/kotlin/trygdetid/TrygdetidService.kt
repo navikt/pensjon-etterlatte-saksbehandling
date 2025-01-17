@@ -160,7 +160,7 @@ fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
     TrygdetidPeriodePesys(
         isoCode = land!!,
         fra = fomDato,
-        til = fomDato,
+        til = tomDato,
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
@@ -437,9 +437,9 @@ class TrygdetidServiceImpl(
             periode = trygdetidsperiode.fraPesystilVanlig(),
             kilde = trygdetidsperiode.kilde,
             beregnetTrygdetid = null,
-            poengUtAar = trygdetidsperiode.poengUtAar ?: false,
-            poengInnAar = trygdetidsperiode.poengInnAar ?: false,
-            prorata = trygdetidsperiode.prorata ?: false,
+            poengUtAar = trygdetidsperiode.poengUtAar == true,
+            poengInnAar = trygdetidsperiode.poengInnAar == true,
+            prorata = trygdetidsperiode.prorata == true,
             begrunnelse = null,
         )
     }

@@ -28,7 +28,7 @@ import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 import NotatOversikt from '~components/person/notat/NotatOversikt'
 import { usePersonLocationState } from '~components/person/lenker/usePersonLocationState'
-import { Aktivitet } from '~components/person/aktivitet/Aktivitet'
+import { AktivitetspliktSakoversikt } from '~components/person/aktivitet/AktivitetspliktSakoversikt'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -124,7 +124,7 @@ export const Person = () => {
           <SamordningSak fnr={fnr} sakResult={sakResult} />
         </Tabs.Panel>
         <Tabs.Panel value={PersonOversiktFane.AKTIVITET}>
-          <Aktivitet fnr={fnr} sakResult={sakResult} />
+          <AktivitetspliktSakoversikt fnr={fnr} sakResult={sakResult} />
         </Tabs.Panel>
       </Tabs>
     </>

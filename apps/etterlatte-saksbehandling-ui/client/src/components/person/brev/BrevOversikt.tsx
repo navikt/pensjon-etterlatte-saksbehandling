@@ -29,7 +29,7 @@ const kanEndres = (brev: IBrev) => brev.status !== BrevStatus.DISTRIBUERT && gyl
 export const gyldigbrevkode = (brevkoder: string): boolean =>
   ![
     'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD',
-    'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD',
+    'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD',
   ].includes(brevkoder)
 
 const handlingKnapp = (brev: IBrev) => {

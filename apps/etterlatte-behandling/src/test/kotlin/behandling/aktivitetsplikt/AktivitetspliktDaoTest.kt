@@ -9,6 +9,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -16,6 +17,7 @@ import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.util.UUID
@@ -75,7 +77,7 @@ class AktivitetspliktDaoTest(
                     tom = LocalDate.now(),
                     beskrivelse = "Ny beskrivelse",
                 )
-            dao.oppdaterAktivitet(
+            dao.oppdaterAktivitetForBehandling(
                 behandlingId,
                 oppdaterAktivitet,
                 kilde.copy("Z1111111"),
@@ -109,11 +111,14 @@ class AktivitetspliktDaoTest(
                     tom = LocalDate.now(),
                     beskrivelse = "Ny beskrivelse",
                 )
-            dao.oppdaterAktivitet(
-                UUID.randomUUID(),
-                oppdaterAktivitet,
-                kilde.copy("Z1111111"),
-            ) shouldBe 0
+
+            assertThrows<InternfeilException> {
+                dao.oppdaterAktivitetForBehandling(
+                    UUID.randomUUID(),
+                    oppdaterAktivitet,
+                    kilde.copy("Z1111111"),
+                )
+            }
         }
     }
 
@@ -136,9 +141,6 @@ class AktivitetspliktDaoTest(
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
-            val aktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
-
-            dao.slettAktivitet(aktivitet.id, UUID.randomUUID())
 
             dao.hentAktiviteterForBehandling(behandlingId) shouldHaveSize 1
         }

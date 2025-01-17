@@ -22,11 +22,6 @@ export const vurderVilkaar = async (args: {
 }): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.post(`/vilkaarsvurdering/${args.behandlingId}`, { ...args.request })
 
-export const slettVurdering = async (args: {
-  behandlingId: string
-  type: string
-}): Promise<ApiResponse<IVilkaarsvurdering>> => apiClient.delete(`/vilkaarsvurdering/${args.behandlingId}/${args.type}`)
-
 export const slettTotalVurdering = async (behandlingId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
   apiClient.delete(`/vilkaarsvurdering/resultat/${behandlingId}`)
 

@@ -33,6 +33,7 @@ import no.nav.etterlatte.oppgave.OppgaveKanIkkeEndres
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgave.lagNyOppgave
 import no.nav.etterlatte.sak.SakService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -63,9 +64,13 @@ class AktivitetspliktOppgaveServiceTest {
             enhet = Enheter.defaultEnhet.enhetNr,
         )
 
-    @BeforeEach
-    fun setupMocks() {
+    @AfterEach
+    fun afterEach() {
         clearAllMocks()
+    }
+
+    @BeforeEach
+    fun beforeEach() {
         every { sakService.finnSak(sak.id) } returns sak
     }
 
@@ -304,7 +309,6 @@ class AktivitetspliktOppgaveServiceTest {
             mockk {
                 every { aktivitet } returns listOf(aksgrad)
             }
-        every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, any()) } returns 1
 
         val skalSendeBrev =
             AktivitetspliktInformasjonBrevdata(
@@ -318,10 +322,13 @@ class AktivitetspliktOppgaveServiceTest {
                 spraak = Spraak.NB,
             )
         every { aktivitetspliktBrevDao.hentBrevdata(oppgaveId) } returns skalSendeBrev
+        val brevId = 1L
         coEvery { brevApiKlient.opprettSpesifiktBrev(any(), any(), any()) } returns
             mockk {
-                every { id } returns 1L
+                every { id } returns brevId
             }
+        every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, brevId) } just Runs
+
         service.opprettBrevHvisKraveneErOppfyltOgDetIkkeFinnes(oppgaveId, simpleSaksbehandler)
         verify(exactly = 1) { aktivitetspliktBrevDao.lagreBrevId(any(), any()) }
         verify(exactly = 1) { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
@@ -358,7 +365,7 @@ class AktivitetspliktOppgaveServiceTest {
             mockk {
                 every { aktivitet } returns listOf(aksgrad)
             }
-        every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, any()) } returns 1
+        every { aktivitetspliktBrevDao.lagreBrevId(oppgaveId, any()) }
 
         val skalSendeBrev =
             AktivitetspliktInformasjonBrevdata(
@@ -541,7 +548,7 @@ class AktivitetspliktOppgaveServiceTest {
                 kilde = kilde,
                 spraak = Spraak.NB,
             )
-        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
+        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } just Runs
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
 
@@ -575,7 +582,7 @@ class AktivitetspliktOppgaveServiceTest {
                 kilde = kilde,
                 spraak = Spraak.NB,
             )
-        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
+        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(false)
 
@@ -609,7 +616,7 @@ class AktivitetspliktOppgaveServiceTest {
                 kilde = kilde,
                 spraak = Spraak.NB,
             )
-        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) } returns 1
+        every { aktivitetspliktBrevDao.fjernBrevId(oppgaveId, any()) }
         coEvery { brevApiKlient.slettBrev(any(), any(), any()) } just Runs
         val aktivitetspliktInformasjonBrevdataRequest = AktivitetspliktInformasjonBrevdataRequest(true)
 

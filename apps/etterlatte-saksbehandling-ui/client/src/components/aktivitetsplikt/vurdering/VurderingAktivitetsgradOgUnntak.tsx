@@ -1,27 +1,26 @@
 import {
   AktivitetspliktOppgaveVurderingType,
   AktivitetspliktSkjoennsmessigVurdering,
+  AktivitetspliktUnntakType,
   AktivitetspliktVurderingType,
   IAktivitetspliktVurderingNyDto,
   IOpprettAktivitetspliktAktivitetsgrad,
+  IOpprettAktivitetspliktUnntak,
+  tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
   teksterAktivitetspliktSkjoennsmessigVurdering,
 } from '~shared/types/Aktivitetsplikt'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 import { addMonths, startOfMonth } from 'date-fns'
-import { maanederForVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradForm'
+import { maanederForVurdering } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradWrapperOppgave'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { opprettAktivitetspliktAktivitetsgradOgUnntak } from '~shared/api/aktivitetsplikt'
+import { opprettAktivitetspliktAktivitetsgradOgUnntakForOppgave } from '~shared/api/aktivitetsplikt'
 import { JaNei } from '~shared/types/ISvar'
-import {
-  IOpprettAktivitetspliktUnntak,
-  UnntakAktivitetspliktOppgave,
-} from '~components/aktivitetsplikt/vurdering/unntak/UnntakAktivitetspliktOppgave'
-import { FormProvider, useForm } from 'react-hook-form'
-import { Alert, Box, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { FormProvider, useForm, useFormContext } from 'react-hook-form'
+import { Alert, Box, Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isFailure, isPending, Result } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
 
@@ -32,7 +31,7 @@ export interface NyVurderingAktivitetsgradOgUnntak {
   unntak?: IOpprettAktivitetspliktUnntak
 }
 
-export function VurderingAktivitetsgradOgUnntak(props: {
+export function VurderAktivitetspliktWrapper(props: {
   doedsdato?: Date
   onAvbryt?: () => void
   onSuccess: (data: IAktivitetspliktVurderingNyDto) => void
@@ -44,28 +43,7 @@ export function VurderingAktivitetsgradOgUnntak(props: {
       ? AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
       : AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
 
-  const defaultFom = doedsdato
-    ? startOfMonth(addMonths(doedsdato, maanederForVurdering(typeVurdering)))
-    : startOfMonth(new Date())
-
-  const [lagreStatus, lagreVurdering] = useApiCall(opprettAktivitetspliktAktivitetsgradOgUnntak)
-
-  const methods = useForm<NyVurderingAktivitetsgradOgUnntak>({
-    defaultValues: {
-      typeVurdering: typeVurdering,
-      vurderingAvAktivitet: { fom: defaultFom.toISOString() },
-    },
-  })
-
-  const { handleSubmit, register, watch, control } = methods
-
-  const svarAktivitetsgrad = watch('vurderingAvAktivitet.aktivitetsgrad')
-  // 12 mnd krever unntak for alt under 100% mens 6 mnd krever unntak for kun under 50 % aktivitetsgrad
-  const skalViseUnntak =
-    typeVurdering === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
-      ? svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 ||
-        svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50
-      : svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50
+  const [lagreStatus, lagreVurdering] = useApiCall(opprettAktivitetspliktAktivitetsgradOgUnntakForOppgave)
 
   function lagreOgOppdater(formdata: NyVurderingAktivitetsgradOgUnntak) {
     lagreVurdering(
@@ -89,8 +67,49 @@ export function VurderingAktivitetsgradOgUnntak(props: {
   }
 
   return (
+    <VurderingAktivitetsgradOgUnntak
+      onSubmit={lagreOgOppdater}
+      doedsdato={doedsdato}
+      typeVurdering={typeVurdering}
+      onAvbryt={onAvbryt}
+      lagreStatus={lagreStatus}
+    />
+  )
+}
+
+export function VurderingAktivitetsgradOgUnntak(props: {
+  doedsdato?: Date
+  onAvbryt?: () => void
+  onSubmit: (data: NyVurderingAktivitetsgradOgUnntak) => void
+  typeVurdering: AktivitetspliktOppgaveVurderingType
+  lagreStatus: Result<IAktivitetspliktVurderingNyDto>
+}) {
+  const { onSubmit, onAvbryt, doedsdato, typeVurdering, lagreStatus } = props
+
+  const defaultFom = doedsdato
+    ? startOfMonth(addMonths(doedsdato, maanederForVurdering(typeVurdering)))
+    : startOfMonth(new Date())
+
+  const methods = useForm<NyVurderingAktivitetsgradOgUnntak>({
+    defaultValues: {
+      typeVurdering: typeVurdering,
+      vurderingAvAktivitet: { fom: defaultFom.toISOString() },
+    },
+  })
+
+  const { handleSubmit, register, watch, control } = methods
+
+  const svarAktivitetsgrad = watch('vurderingAvAktivitet.aktivitetsgrad')
+  // 12 mnd krever unntak for alt under 100% mens 6 mnd krever unntak for kun under 50 % aktivitetsgrad
+  const skalViseUnntak =
+    typeVurdering === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
+      ? svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 ||
+        svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50
+      : svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_UNDER_50
+
+  return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(lagreOgOppdater)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <VStack gap="6">
           <ControlledRadioGruppe
             control={control}
@@ -143,10 +162,8 @@ export function VurderingAktivitetsgradOgUnntak(props: {
               errorVedTomInput="Du må svare om bruker har unntak"
             />
           )}
-
-          {watch('harUnntak') === JaNei.JA && <UnntakAktivitetspliktOppgave formPrefix="unntak." />}
-
-          {watch('typeVurdering') === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER &&
+          {watch('harUnntak') === JaNei.JA && <UnntakValg vurderingType={typeVurdering} />}
+          {typeVurdering === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER &&
             svarAktivitetsgrad === AktivitetspliktVurderingType.AKTIVITET_OVER_50 && (
               <ControlledRadioGruppe
                 control={control}
@@ -215,5 +232,52 @@ export function VurderingAktivitetsgradOgUnntak(props: {
         </VStack>
       </form>
     </FormProvider>
+  )
+}
+
+const UnntakValg = (props: { vurderingType: AktivitetspliktOppgaveVurderingType }) => {
+  const { register, control } = useFormContext()
+  const { vurderingType } = props
+  const er6mndVurdering = vurderingType === AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
+  return (
+    <Box maxWidth="40rem">
+      <VStack gap="4">
+        <HStack gap="4">
+          <ControlledDatoVelger name="unntak.fom" label="Unntak fra og med" control={control} />
+          <ControlledDatoVelger name="unntak.tom" label="Unntak til og med" required={false} control={control} />
+        </HStack>
+        <Select
+          {...register('unntak.unntak', {
+            required: {
+              value: true,
+              message: 'Du må velge type unntak.',
+            },
+          })}
+          label="Hvilket unntak er det?"
+        >
+          <option value={AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM}>
+            {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM]}
+          </option>
+          <option value={AktivitetspliktUnntakType.MANGLENDE_TILSYNSORDNING_SYKDOM}>
+            {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.MANGLENDE_TILSYNSORDNING_SYKDOM]}
+          </option>
+          <option value={AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM}>
+            {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM]}
+          </option>
+          <option value={AktivitetspliktUnntakType.OMSORG_BARN_UNDER_ETT_AAR}>
+            {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.OMSORG_BARN_UNDER_ETT_AAR]}
+          </option>
+          <option value={AktivitetspliktUnntakType.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE}>
+            {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE]}
+          </option>
+          {er6mndVurdering && (
+            <option value={AktivitetspliktUnntakType.GRADERT_UFOERETRYGD}>
+              {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.GRADERT_UFOERETRYGD]}
+            </option>
+          )}
+        </Select>
+        <Textarea {...register('unntak.beskrivelse')} label="Vurdering av unntak" />
+      </VStack>
+    </Box>
   )
 }

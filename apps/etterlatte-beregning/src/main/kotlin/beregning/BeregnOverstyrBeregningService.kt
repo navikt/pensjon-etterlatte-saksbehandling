@@ -148,6 +148,7 @@ class BeregnOverstyrBeregningService(
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 0,
                                 trygdetid = 0,
+                                foreldreloessats = null,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
@@ -227,6 +228,7 @@ class BeregnOverstyrBeregningService(
                                 utbetaltBeloep =
                                     periodisertResultat.resultat.verdi.utbetaltBeloep
                                         .toInt(),
+                                harForeldreloessats = periodisertResultat.resultat.verdi.foreldreloessats,
                                 institusjonsopphold = null,
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,

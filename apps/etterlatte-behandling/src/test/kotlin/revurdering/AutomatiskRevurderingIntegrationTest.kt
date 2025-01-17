@@ -44,11 +44,12 @@ import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
+    val testUser = mockSaksbehandler("User")
+
     @BeforeAll
     fun start() {
         startServer()
-
-        nyKontekstMedBrukerOgDatabase(mockSaksbehandler("User"), applicationContext.dataSource)
+        nyKontekstMedBrukerOgDatabase(testUser, applicationContext.dataSource)
     }
 
     @AfterAll
@@ -69,6 +70,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         request = applicationContext.behandlingFactory.hentDataForOpprettBehandling(sak.id),
+                        testUser.brukerTokenInfo,
                     ).behandling
             Pair(sak, behandling as Foerstegangsbehandling)
         }

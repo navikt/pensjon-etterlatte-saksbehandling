@@ -4,8 +4,9 @@ import { BodyShort, Box, Detail, ReadMore, Table, VStack } from '@navikt/ds-reac
 import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
-import { VisUnntak } from '~components/aktivitetsplikt/vurdering/unntak/VisUnntak'
+import { RedigerbarUnntakOppgave } from '~components/aktivitetsplikt/vurdering/unntak/RedigerbarUnntakOppgave'
 
+//lesemodus versjon UnntakPlainVisning
 export function UnntakIOppgave() {
   const { vurdering } = useAktivitetspliktOppgaveVurdering()
   const unntaker = vurdering.unntak
@@ -27,7 +28,7 @@ export function UnntakIOppgave() {
           {!!unntaker?.length ? (
             <>
               {unntaker.map((unntak) => (
-                <Table.ExpandableRow key={unntak.id} content={<VisUnntak unntak={unntak} />}>
+                <Table.ExpandableRow key={unntak.id} content={<RedigerbarUnntakOppgave unntak={unntak} />}>
                   <Table.DataCell>{tekstAktivitetspliktUnntakType[unntak.unntak]}</Table.DataCell>
                   <Table.DataCell>
                     <AktivitetspliktUnntakTypeTag unntak={unntak.unntak} />

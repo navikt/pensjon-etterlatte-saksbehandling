@@ -4,86 +4,40 @@ import {
   AktivitetspliktVurderingType,
   IAktivitetspliktAktivitetsgrad,
   IAktivitetspliktVurderingNyDto,
-  IOpprettAktivitetspliktAktivitetsgrad,
   tekstAktivitetspliktVurderingType,
   teksterAktivitetspliktSkjoennsmessigVurdering,
 } from '~shared/types/Aktivitetsplikt'
-import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { opprettAktivitetspliktAktivitetsgrad } from '~shared/api/aktivitetsplikt'
+import { isFailure, isPending, Result } from '~shared/api/apiUtils'
 import { useForm } from 'react-hook-form'
 import { Alert, Box, Button, ErrorMessage, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
-import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { isFailure, isPending } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import React, { useEffect, useState } from 'react'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { JaNei } from '~shared/types/ISvar'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import React from 'react'
+import { RedigerAktivitetsgrad } from '~components/aktivitetsplikt/vurdering/aktivitetsgrad/VurderingAktivitetsgradWrapperOppgave'
 
-interface RedigerAktivitetsgrad {
-  typeVurdering: AktivitetspliktOppgaveVurderingType
-  vurderingAvAktivitet: IOpprettAktivitetspliktAktivitetsgrad
-  harUnntak?: JaNei
-}
-
-export function maanederForVurdering(typeVurdering: AktivitetspliktOppgaveVurderingType): number {
-  if (typeVurdering === AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER) {
-    return 6
-  } else {
-    return 12
-  }
-}
-
-export function VurderingAktivitetsgradForm(props: {
+export const RedigerbarAktivtetsgradForm = ({
+  aktivitet,
+  typeVurdering,
+  lagreOgOppdater,
+  lagreStatus,
+  onAvbryt,
+  feilmelding,
+}: {
   aktivitet: IAktivitetspliktAktivitetsgrad
+  typeVurdering: AktivitetspliktOppgaveVurderingType
+  lagreOgOppdater: (formdata: RedigerAktivitetsgrad) => void
+  lagreStatus: Result<IAktivitetspliktVurderingNyDto>
   onAvbryt: () => void
-  onSuccess: (data: IAktivitetspliktVurderingNyDto) => void
-}) {
-  const { aktivitet, onSuccess, onAvbryt } = props
-  const { oppgave } = useAktivitetspliktOppgaveVurdering()
-  const [feilmelding, setFeilmelding] = useState('')
-  const typeVurdering =
-    oppgave.type === 'AKTIVITETSPLIKT'
-      ? AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
-      : AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
-
-  const [lagreStatus, lagreVurdering, reset] = useApiCall(opprettAktivitetspliktAktivitetsgrad)
-
+  feilmelding: string
+}) => {
   const { handleSubmit, register, watch, control } = useForm<RedigerAktivitetsgrad>({
     defaultValues: {
       typeVurdering: typeVurdering,
       vurderingAvAktivitet: aktivitet,
     },
   })
-
-  useEffect(() => {
-    reset()
-  }, [aktivitet])
-
-  function lagreOgOppdater(formdata: RedigerAktivitetsgrad) {
-    setFeilmelding('')
-    if (!formdata.vurderingAvAktivitet?.aktivitetsgrad || !formdata.vurderingAvAktivitet.fom) {
-      setFeilmelding('Du må fylle ut vurderingen av aktivitetsgraden.')
-      return
-    }
-
-    lagreVurdering(
-      {
-        sakId: oppgave.sakId,
-        oppgaveId: oppgave.id,
-        request: {
-          id: aktivitet?.id,
-          vurdertFra12Mnd: formdata.typeVurdering === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER,
-          skjoennsmessigVurdering: formdata.vurderingAvAktivitet.skjoennsmessigVurdering,
-          aktivitetsgrad: formdata.vurderingAvAktivitet.aktivitetsgrad,
-          fom: formdata.vurderingAvAktivitet.fom,
-          tom: formdata.vurderingAvAktivitet.tom,
-          beskrivelse: formdata.vurderingAvAktivitet.beskrivelse || '',
-        },
-      },
-      onSuccess
-    )
-  }
 
   const svarAktivitetsgrad = watch('vurderingAvAktivitet.aktivitetsgrad')
 

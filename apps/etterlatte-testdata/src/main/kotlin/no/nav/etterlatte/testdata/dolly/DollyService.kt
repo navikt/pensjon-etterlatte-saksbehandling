@@ -130,6 +130,7 @@ class DollyService(
                         gjenlevendeFnr = request.gjenlevende,
                         avdoedFnr = request.avdoed,
                         barn = request.barn,
+                        soeker = request.soeker,
                         behandlingssteg = behandlingssteg,
                     ).toJson(),
                 mapOf("NavIdent" to (navIdent!!.toByteArray())),
@@ -180,6 +181,12 @@ class DollyMock : DollyInterface {
                 avdoed = "123",
                 gjenlevende = "321",
                 barn = listOf("444", "555"),
+            ),
+            ForenkletFamilieModell(
+                ibruk = true,
+                avdoed = "678",
+                gjenlevende = "777",
+                barn = listOf("888", "999"),
             ),
         )
 

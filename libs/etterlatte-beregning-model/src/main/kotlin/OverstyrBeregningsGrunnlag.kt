@@ -12,6 +12,7 @@ data class OverstyrBeregningGrunnlagDao(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val utbetaltBeloep: Long,
+    val foreldreloessats: Boolean?,
     val trygdetid: Long,
     val trygdetidForIdent: String?,
     val prorataBroekTeller: Long?,
@@ -25,6 +26,7 @@ data class OverstyrBeregningGrunnlagDao(
 
 data class OverstyrBeregningGrunnlagData(
     val utbetaltBeloep: Long,
+    val foreldreloessats: Boolean?,
     val trygdetid: Long,
     val trygdetidForIdent: String?,
     val prorataBroekTeller: Long?,

@@ -16,6 +16,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import no.nav.etterlatte.behandling.sakId1
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -99,7 +100,6 @@ internal class VedtakBehandlingServiceTest(
                 behandlingKlient = behandlingKlientMock,
                 samordningsKlient = samordningsKlientMock,
                 trygdetidKlient = trygdetidKlientMock,
-                rapidService = mockk(),
             )
     }
 
@@ -202,7 +202,7 @@ internal class VedtakBehandlingServiceTest(
     }
 
     @Test
-    fun `vedtak skal nullstille opphoer fom hvis revurderes fra og med opphoer fom`() {
+    fun `vedtak med opphoer fom foer virkningstidspunkt skal kaste exception`() {
         val behandlingId = randomUUID()
         val virkningstidspunkt = YearMonth.of(2023, 3)
 
@@ -210,8 +210,8 @@ internal class VedtakBehandlingServiceTest(
             mockBehandling(
                 virkningstidspunkt,
                 behandlingId,
-                revurderingAarsak = Revurderingaarsak.REGULERING,
-                opphoerFom = YearMonth.of(2023, 3),
+                revurderingAarsak = Revurderingaarsak.ANNEN,
+                opphoerFom = virkningstidspunkt.minusMonths(1),
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
@@ -228,9 +228,14 @@ internal class VedtakBehandlingServiceTest(
             )
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
-        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
-
-        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe null
+        assertThrows<VirkningstidspunktEtterOpphoerException> {
+            runBlocking {
+                service.opprettEllerOppdaterVedtak(
+                    behandlingId,
+                    saksbehandler,
+                )
+            }
+        }
     }
 
     @Test
@@ -451,7 +456,7 @@ internal class VedtakBehandlingServiceTest(
     }
 
     @Test
-    fun `vedtak som oppdateres fra opphoer til endring med virk fom samme som opphoer fom skal nullstile opphoer fom`() {
+    fun `vedtak som oppdateres fra opphoer til endring med virk fom samme som opphoer fom skal kaste exception`() {
         val behandlingId = randomUUID()
         val virkningstidspunkt = YearMonth.of(2023, 3)
         val opphoerFom = YearMonth.of(2023, 3)
@@ -483,9 +488,9 @@ internal class VedtakBehandlingServiceTest(
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
-        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
-
-        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe null
+        assertThrows<VirkningstidspunktOgOpphoerFomPaaSammeDatoException> {
+            runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+        }
     }
 
     @Test
@@ -1361,7 +1366,12 @@ internal class VedtakBehandlingServiceTest(
             val oppretta =
                 repository
                     .opprettVedtak(opprettVedtak(behandlingId = behandlingId))
-                    .let { repository.fattVedtak(behandlingId, VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now())) }
+                    .let {
+                        repository.fattVedtak(
+                            behandlingId,
+                            VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
+                        )
+                    }
             Assertions.assertEquals(oppretta.status, VedtakStatus.FATTET_VEDTAK)
             val tilbakestilt = service.tilbakestillIkkeIverksatteVedtak(behandlingId)
             Assertions.assertEquals(tilbakestilt!!.status, VedtakStatus.RETURNERT)
@@ -1596,7 +1606,13 @@ internal class VedtakBehandlingServiceTest(
             oppdatertVedtak.vedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
 
             coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
-            coVerify(exactly = 0) { samordningsKlientMock.samordneVedtak(any(), false, attestant) }
+            coVerify(exactly = 0) {
+                samordningsKlientMock.samordneVedtak(
+                    any(),
+                    EtterbetalingResultat(false, false),
+                    attestant,
+                )
+            }
         }
     }
 
@@ -1629,22 +1645,25 @@ internal class VedtakBehandlingServiceTest(
     @Test
     fun `skal kalle SAM for aa samordne, ikke oppdatere vedtaksstatus`() {
         mockkStatic(Vedtak::erVedtakMedEtterbetaling)
-        every { any<Vedtak>().erVedtakMedEtterbetaling(repository) } returns true
+        val grunnbeloep = mockk<Grunnbeloep> { every { grunnbeloep } returns 150000 }
+        val etterbetalingResultat = EtterbetalingResultat(erEtterbetaling = true)
+        every { any<Vedtak>().erVedtakMedEtterbetaling(repository, grunnbeloep) } returns etterbetalingResultat
+        coEvery { beregningKlientMock.hentGrunnbeloep(any()) } returns grunnbeloep
 
         val behandlingId = randomUUID()
 
-        coEvery { samordningsKlientMock.samordneVedtak(any(), true, attestant) } returns true
+        coEvery { samordningsKlientMock.samordneVedtak(any(), any(), attestant) } returns true
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.TIL_SAMORDNING))
 
             service.samordne(behandlingId, attestant) shouldBe true
 
-            coVerify(exactly = 1) { samordningsKlientMock.samordneVedtak(any(), true, attestant) }
+            coVerify(exactly = 1) { samordningsKlientMock.samordneVedtak(any(), etterbetalingResultat, attestant) }
             coVerify(exactly = 0) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
         }
 
-        verify { any<Vedtak>().erVedtakMedEtterbetaling(repository) }
+        verify { any<Vedtak>().erVedtakMedEtterbetaling(repository, grunnbeloep) }
     }
 
     @Test
@@ -1662,7 +1681,13 @@ internal class VedtakBehandlingServiceTest(
 
             service.samordne(behandlingId, attestant) shouldBe false
 
-            coVerify(exactly = 0) { samordningsKlientMock.samordneVedtak(any(), true, attestant) }
+            coVerify(exactly = 0) {
+                samordningsKlientMock.samordneVedtak(
+                    vedtak = any(),
+                    etterbetaling = any(),
+                    brukerTokenInfo = attestant,
+                )
+            }
         }
     }
 
@@ -1691,7 +1716,7 @@ internal class VedtakBehandlingServiceTest(
 
             coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
             coVerify(exactly = 1) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
-            coVerify(exactly = 0) { samordningsKlientMock.samordneVedtak(any(), false, attestant) }
+            coVerify(exactly = 0) { samordningsKlientMock.samordneVedtak(any(), any(), attestant) }
         }
     }
 
@@ -1765,16 +1790,28 @@ internal class VedtakBehandlingServiceTest(
                         behandlingId,
                         beregningsperioder =
                             listOf(
-                                mockBeregningsperiode(fom = YearMonth.of(2024, Month.APRIL), tom = YearMonth.of(2024, Month.APRIL)),
-                                mockBeregningsperiode(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2025, Month.JANUARY)),
+                                mockBeregningsperiode(
+                                    fom = YearMonth.of(2024, Month.APRIL),
+                                    tom = YearMonth.of(2024, Month.APRIL),
+                                ),
+                                mockBeregningsperiode(
+                                    fom = YearMonth.of(2024, Month.MAY),
+                                    tom = YearMonth.of(2025, Month.JANUARY),
+                                ),
                             ),
                     ),
                 avkorting =
                     mockAvkorting(
                         avkortetYtelse =
                             listOf(
-                                mockAvkortetYtelse(fom = YearMonth.of(2024, Month.APRIL), tom = YearMonth.of(2024, Month.APRIL)),
-                                mockAvkortetYtelse(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2024, Month.DECEMBER)),
+                                mockAvkortetYtelse(
+                                    fom = YearMonth.of(2024, Month.APRIL),
+                                    tom = YearMonth.of(2024, Month.APRIL),
+                                ),
+                                mockAvkortetYtelse(
+                                    fom = YearMonth.of(2024, Month.MAY),
+                                    tom = YearMonth.of(2024, Month.DECEMBER),
+                                ),
                                 mockAvkortetYtelse(fom = YearMonth.of(2025, Month.JANUARY), tom = null),
                             ),
                     ),

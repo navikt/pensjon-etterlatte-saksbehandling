@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.YearMonth
 import java.util.UUID
 
 open class Grunnlagsopplysning<T>(
@@ -25,24 +24,6 @@ open class Grunnlagsopplysning<T>(
     val periode: Periode? = null,
 ) {
     companion object {
-        fun empty(
-            opplysningType: Opplysningstype,
-            kilde: Kilde,
-            fnr: Folkeregisteridentifikator,
-            fom: YearMonth?,
-            tom: YearMonth? = null,
-        ): Grunnlagsopplysning<out Any?> =
-            Grunnlagsopplysning(
-                id = UUID.randomUUID(),
-                kilde = kilde,
-                opplysningType = opplysningType,
-                meta = objectMapper.createObjectNode(),
-                opplysning = null,
-                attestering = null,
-                fnr = fnr,
-                periode = fom?.let { Periode(it, tom) },
-            )
-
         val automatiskSaksbehandler = Saksbehandler.create(ident = "Gjenny")
     }
 

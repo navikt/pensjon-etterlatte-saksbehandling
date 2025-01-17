@@ -9,7 +9,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
-import { VurderingAvAktivitetsplikt } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/VurderingAvAktivitetsplikt'
+import { VurderingAvAktivitetspliktSak } from '~components/person/aktivitet/vurderingAvAktivitetsplikt/VurderingAvAktivitetspliktSak'
 import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktStatusOgGyldig'
 import { harVurdering } from '~shared/types/Aktivitetsplikt'
 
@@ -22,7 +22,13 @@ export const velgDoedsdato = (avdoede: Familiemedlem[] | []): Date => {
     ).doedsdato!!
 }
 
-export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<SakMedBehandlinger> }): ReactNode => {
+export const AktivitetspliktSakoversikt = ({
+  fnr,
+  sakResult,
+}: {
+  fnr: string
+  sakResult: Result<SakMedBehandlinger>
+}): ReactNode => {
   const [hentAktivitetspliktVurderingForSakResult, hentAktivitetspliktVurderingForSakRequest] = useApiCall(
     hentAktivitspliktVurderingForSak
   )
@@ -63,7 +69,7 @@ export const Aktivitet = ({ fnr, sakResult }: { fnr: string; sakResult: Result<S
               <hr style={{ width: '100%' }} />
 
               {harVurdering(aktivitetspliktVurdering) ? (
-                <VurderingAvAktivitetsplikt aktivitetspliktVurdering={aktivitetspliktVurdering} />
+                <VurderingAvAktivitetspliktSak aktivitetspliktVurdering={aktivitetspliktVurdering} />
               ) : (
                 <BodyShort>Ingen vurdering</BodyShort>
               )}

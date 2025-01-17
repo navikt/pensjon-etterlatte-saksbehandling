@@ -16,6 +16,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import {
   Beregning,
   BeregningsMetodeBeregningsgrunnlagForm,
+  tilBeregningsMetodeBeregningsgrunnlag,
   LagreBeregningsGrunnlagDto,
   toLagreBeregningsGrunnlagDto,
 } from '~shared/types/Beregning'
@@ -68,11 +69,11 @@ const BeregningsgrunnlagOmstillingsstoenad = () => {
     })
   }
 
-  const oppdaterBeregningsMetode = (beregningsMetode: BeregningsMetodeBeregningsgrunnlagForm) => {
+  const oppdaterBeregningsMetode = (beregningsMetodeForm: BeregningsMetodeBeregningsgrunnlagForm) => {
     const grunnlag: LagreBeregningsGrunnlagDto = {
       ...toLagreBeregningsGrunnlagDto(behandling?.beregningsGrunnlag),
       beregningsMetodeFlereAvdoede: undefined,
-      beregningsMetode: beregningsMetode,
+      beregningsMetode: tilBeregningsMetodeBeregningsgrunnlag(beregningsMetodeForm),
     }
     lagreBeregningsGrunnlagRequest(
       {

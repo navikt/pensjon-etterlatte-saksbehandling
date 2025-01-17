@@ -1,17 +1,25 @@
-import React from 'react'
-import { IAktivitetspliktAktivitetsgrad, tekstAktivitetspliktVurderingType } from '~shared/types/Aktivitetsplikt'
-import { BodyShort, Box, Detail, Heading, HStack, Label, ReadMore, Table, VStack } from '@navikt/ds-react'
-import { ClockDashedIcon } from '@navikt/aksel-icons'
+import {
+  AktivitetspliktOppgaveVurderingType,
+  IAktivitetspliktAktivitetsgrad,
+  tekstAktivitetspliktVurderingType,
+} from '~shared/types/Aktivitetsplikt'
+import { BodyShort, Box, Detail, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
+import React from 'react'
+import { RedigerbarAktivitetsgradBehandling } from '~components/behandling/aktivitetsplikt/aktivitetsgrad/RedigerbarAktivitetsgradBehandling'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
-export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktAktivitetsgrad[] | undefined }) => {
+export function AktivitetsgradTabellBehandling({
+  aktiviteter,
+  behandling,
+  typeVurdering,
+}: {
+  aktiviteter: IAktivitetspliktAktivitetsgrad[]
+  behandling: IDetaljertBehandling
+  typeVurdering: AktivitetspliktOppgaveVurderingType
+}) {
   return (
     <VStack gap="4">
-      <HStack gap="4" align="center">
-        <ClockDashedIcon fontSize="1.5rem" aria-hidden />
-        <Heading size="small">Aktivitetsgrad</Heading>
-      </HStack>
-
       <Box maxWidth="42.5rem">
         <ReadMore header="Dette menes med aktivitetsgrad">
           I oversikten over aktivitetsgrad kan du se hvilken aktivitetsgrad brukeren har hatt. For å motta
@@ -20,7 +28,6 @@ export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktA
           opp til 100 % aktivitet. Vær oppmerksom på at det finnes unntak.
         </ReadMore>
       </Box>
-
       <Table size="small">
         <Table.Header>
           <Table.Row>
@@ -32,16 +39,17 @@ export const Aktivitetsgrad = ({ aktiviteter }: { aktiviteter: IAktivitetspliktA
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!!aktiviteter?.length ? (
+          {aktiviteter?.length ? (
             <>
               {aktiviteter.map((aktivitet) => (
                 <Table.ExpandableRow
                   key={aktivitet.id}
                   content={
-                    <Box maxWidth="42.5rem">
-                      <Label>Beskrivelse</Label>
-                      <BodyShort>{aktivitet.beskrivelse}</BodyShort>
-                    </Box>
+                    <RedigerbarAktivitetsgradBehandling
+                      aktivitet={aktivitet}
+                      behandling={behandling}
+                      typeVurdering={typeVurdering}
+                    />
                   }
                 >
                   <Table.DataCell>{tekstAktivitetspliktVurderingType[aktivitet.aktivitetsgrad]}</Table.DataCell>

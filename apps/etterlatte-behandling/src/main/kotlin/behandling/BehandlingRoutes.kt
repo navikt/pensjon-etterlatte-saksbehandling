@@ -449,6 +449,7 @@ internal fun Route.behandlingRoutes(
                                 behandlingsBehov.mottattDato,
                                 Vedtaksloesning.GJENNY,
                                 request = request,
+                                brukerTokenInfo = brukerTokenInfo,
                             )
                         }
                     behandlingOgOppgave.sendMeldingForHendelse()

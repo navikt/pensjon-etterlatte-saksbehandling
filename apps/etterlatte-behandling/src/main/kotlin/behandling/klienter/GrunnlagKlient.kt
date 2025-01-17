@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.klienter
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -20,7 +21,6 @@ import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.toJson
@@ -46,7 +46,7 @@ interface GrunnlagKlient : Pingable {
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlagsopplysning<Person>?
+    ): Grunnlagsopplysning<JsonNode>?
 
     suspend fun hentPersongalleri(
         behandlingId: UUID,
@@ -157,7 +157,7 @@ class GrunnlagKlientImpl(
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlagsopplysning<Person>? {
+    ): Grunnlagsopplysning<JsonNode>? {
         try {
             logger.info("Henter opplysning ($opplysningsType) fra grunnlag for behandling med id=$behandlingId")
 

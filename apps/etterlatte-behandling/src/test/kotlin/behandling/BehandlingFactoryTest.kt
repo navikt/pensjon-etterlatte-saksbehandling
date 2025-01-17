@@ -76,7 +76,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BehandlingFactoryTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
     private val behandlingDaoMock = mockk<BehandlingDao>(relaxUnitFun = true)
     private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>(relaxUnitFun = true)
@@ -222,6 +222,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    user.brukerTokenInfo,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -319,6 +320,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    user.brukerTokenInfo,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -414,8 +416,8 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
-                )!!
-                .also { it.sendMeldingForHendelse() }
+                    user.brukerTokenInfo,
+                ).also { it.sendMeldingForHendelse() }
                 .behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
@@ -432,6 +434,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    user.brukerTokenInfo,
                 )
         }
         verify(exactly = 2) {
@@ -792,8 +795,8 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
-                )!!
-                .also { it.sendMeldingForHendelse() }
+                    user.brukerTokenInfo,
+                ).also { it.sendMeldingForHendelse() }
                 .behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
@@ -853,6 +856,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    user.brukerTokenInfo,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -962,6 +966,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    user.brukerTokenInfo,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
 
@@ -1023,6 +1028,7 @@ internal class BehandlingFactoryTest {
                     datoNaa.toString(),
                     Vedtaksloesning.GJENNY,
                     behandlingFactory.hentDataForOpprettBehandling(sakId1),
+                    user.brukerTokenInfo,
                 ).also { it.sendMeldingForHendelse() }
                 .behandling
         Assertions.assertTrue(revurderingsBehandling is Revurdering)

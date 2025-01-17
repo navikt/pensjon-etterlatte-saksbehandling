@@ -22,7 +22,6 @@ class BehandlingMetrics(
         behandlingerMetrikkerDao.hent().forEach { tellBehandlinger(it) }
         gjenopprettingDao.gjenopprettinger().forEach { tellGjenopprettinger(it) }
         gjenopprettingDao.avbruttGrunnetSoeknad().forEach { tellAvbruttGrunnetSoeknad(it) }
-        tellGjenopprettingerOver20(gjenopprettingDao.over20())
     }
 
     private fun tellOppgaver(it: OppgaveAntall) =
@@ -72,10 +71,4 @@ class BehandlingMetrics(
             .description("Antall gjenopprettinger avbrutt på grunn av søknad")
             .register(registry)
     }
-
-    private fun tellGjenopprettingerOver20(it: List<String>): Gauge =
-        Gauge
-            .builder("etterlatte_gjenopprettinger_over_20") { it.size.toDouble() }
-            .description("Alle iverksatte saker med søker over 20 uten opphør")
-            .register(registry)
 }

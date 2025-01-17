@@ -149,7 +149,7 @@ class BeregningsGrunnlagService(
             else -> null
         }
 
-    private suspend fun validerSoeskenMedIBeregning(
+    private fun validerSoeskenMedIBeregning(
         behandlingId: UUID,
         barnepensjonBeregningsGrunnlag: LagreBeregningsGrunnlag,
         grunnlag: Grunnlag,

@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -90,18 +89,7 @@ internal object BarnepensjonUthenter {
                             )
                         }
 
-                    JaNeiVetIkke.NEI ->
-                        hentAvdoedForelder(barnepensjonssoknad)?.foedselsnummer?.svar?.let { avdoedFnr ->
-                            listOf(
-                                Grunnlagsopplysning.empty(
-                                    Opplysningstype.UTENLANDSOPPHOLD,
-                                    kilde,
-                                    avdoedFnr.toFolkeregisteridentifikator(),
-                                    YearMonth.from(Folkeregisteridentifikator.of(avdoedFnr.value).getBirthDate()),
-                                ),
-                            )
-                        }
-
+                    JaNeiVetIkke.NEI -> emptyList()
                     JaNeiVetIkke.VET_IKKE -> emptyList()
                 }
             } ?: emptyList()

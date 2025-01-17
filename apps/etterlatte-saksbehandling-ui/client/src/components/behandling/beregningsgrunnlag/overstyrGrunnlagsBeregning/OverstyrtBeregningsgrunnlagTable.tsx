@@ -92,6 +92,7 @@ export const OverstyrtBeregningsgrunnlagTable = ({ behandling }: { behandling: I
                     !periodeRedigeringModus.redigerPeriode ? (
                       <OverstyrBeregningsgrunnlagExpandableRowContent
                         overtyrBeregningsgrunnlagPeriode={overstyrBeregningsgrunnlagPeriode}
+                        sakType={behandling.sakType}
                       />
                     ) : (
                       <OverstyrBeregningsgrunnlagPeriodeSkjema

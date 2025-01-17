@@ -38,6 +38,7 @@ import {
 } from '~components/behandling/beregningsgrunnlag/overstyrGrunnlagsBeregning/utils'
 import { JaNei } from '~shared/types/ISvar'
 import { formaterTilISOString } from '~utils/formatering/dato'
+import { SakType } from '~shared/types/sak'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -157,13 +158,15 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
                 label="Utbetalt beløp"
                 error={errors.data?.utbetaltBeloep?.message}
               />
-              <Box width="fit-content">
-                <CheckboxGroup legend="Foreldreløssats">
-                  <Checkbox {...register('data.foreldreloessats')} value="">
-                    Har foreldreløssats
-                  </Checkbox>
-                </CheckboxGroup>
-              </Box>
+              {behandling.sakType == SakType.BARNEPENSJON && (
+                <Box width="fit-content">
+                  <CheckboxGroup legend="Foreldreløssats">
+                    <Checkbox {...register('data.foreldreloessats')} value="">
+                      Har foreldreløssats
+                    </Checkbox>
+                  </CheckboxGroup>
+                </Box>
+              )}
             </HStack>
           </Box>
 

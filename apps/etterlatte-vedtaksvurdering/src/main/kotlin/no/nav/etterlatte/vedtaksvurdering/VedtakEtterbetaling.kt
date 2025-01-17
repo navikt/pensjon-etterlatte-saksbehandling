@@ -32,14 +32,14 @@ internal fun Vedtak.erVedtakMedEtterbetaling(
                     tidligereVedtakTidslinje
                         .filter { it.innhold is VedtakInnhold.Behandling }
                         .flatMap { (it.innhold as VedtakInnhold.Behandling).utbetalingsperioder }
-                        .flatMap { it.flatUtPeriode() }
+                        .flatMap { it.tilIndividuelleMaaneder() }
                         .filter { it.periode.fom < now }
 
                 // Finn tidligere utbetalingsperiode som matcher ny(e)
                 // og sjekk om det er endring i beløp, hvis ny er høyere så er det etterbetaling
                 val perioderMedEtterbetaling =
                     innhold.utbetalingsperioder
-                        .flatMap { it.flatUtPeriode() }
+                        .flatMap { it.tilIndividuelleMaaneder() }
                         .filter { it.periode.fom < now }
                         .associateWith { nyPeriode -> tidligereUtbetalingsperioder.find { it.overlapper(nyPeriode) } }
                         .filter { (nyPeriode, tidligerePeriode) ->
@@ -63,10 +63,10 @@ private fun Utbetalingsperiode.beloepErMindreEnn(that: Utbetalingsperiode): Bool
     this.beloep.toNonNullBeloep() < that.beloep.toNonNullBeloep()
 
 /**
- * Flater ut en gitt periode i flere perioder for å enklere sjekke etter overlapp
+ * Deler opp en gitt periode i individuelle måneder for å enklere sjekke etter overlapp.
  * Eks. et objekt Periode(fom=2024-01, tom=2024-03) blir da 3 perioder, en for hver måned.
  **/
-fun Utbetalingsperiode.flatUtPeriode(): List<Utbetalingsperiode> {
+private fun Utbetalingsperiode.tilIndividuelleMaaneder(): List<Utbetalingsperiode> {
     val perioder = mutableListOf<Utbetalingsperiode>()
     val tom = this.periode.tom ?: YearMonth.now().minusMonths(1)
 

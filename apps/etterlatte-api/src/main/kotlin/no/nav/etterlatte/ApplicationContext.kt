@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.samordning.vedtak.SamordningVedtakService
 import no.nav.etterlatte.samordning.vedtak.TjenestepensjonKlient
 import no.nav.etterlatte.samordning.vedtak.VedtaksvurderingSamordningKlient
+import no.nav.etterlatte.vedtak.VedtakService
 import no.nav.etterlatte.vedtak.VedtaksvurderingKlient
 
 class ApplicationContext(
@@ -53,4 +54,5 @@ class ApplicationContext(
     val behandlingService = BehandlingService(behandlingKlient)
 
     val vedtakKlient = VedtaksvurderingKlient(config, vedtaksvurderingHttpClient)
+    val vedtakService = VedtakService(vedtakKlient)
 }

@@ -9,7 +9,6 @@ import no.nav.etterlatte.vedtaksvurdering.config.ApplicationContext
 import no.nav.etterlatte.vedtaksvurdering.klagevedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.samordningSystembrukerVedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
-import no.nav.etterlatte.vedtaksvurdering.vedtakForEksternt
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 
 fun main() {
@@ -42,7 +41,6 @@ class Server(
                 )
                 automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
                 samordningSystembrukerVedtakRoute(vedtakSamordningService)
-                vedtakForEksternt(vedtakForEksterntService)
                 tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 klagevedtakRoute(vedtakKlageService, behandlingKlient)
             }

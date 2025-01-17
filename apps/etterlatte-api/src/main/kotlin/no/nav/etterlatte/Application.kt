@@ -45,7 +45,7 @@ class Server(
                 config = applicationContext.config,
             )
 
-            vedtakRoute(applicationContext.vedtakKlient)
+            vedtakRoute(vedtakService = applicationContext.vedtakService)
 
             install(userIdMdcPlugin)
             install(serverRequestLoggerPlugin)

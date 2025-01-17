@@ -126,32 +126,32 @@ spec:
           cluster: prod-fss
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: pensjon-selvbetjening-soknad-alder-backend
           namespace: pensjonselvbetjening
           cluster: prod-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: alderspensjon-endringssoknad-backend
           namespace: pensjonselvbetjening
           cluster: prod-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: pensjonskalkulator-backend
           namespace: pensjonskalkulator
           cluster: prod-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
           cluster: prod-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: eessi-pensjon-journalforing
           namespace: eessipensjon
           cluster: prod-gcp

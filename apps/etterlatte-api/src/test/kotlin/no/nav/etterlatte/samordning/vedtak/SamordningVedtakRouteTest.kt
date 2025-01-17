@@ -245,7 +245,7 @@ class SamordningVedtakRouteTest {
                         parameter("fomDato", virkFom)
                         header("fnr", fnr)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer ${systembrukerToken("les-oms-vedtak")}")
+                        header(HttpHeaders.Authorization, "Bearer ${systembrukerToken("les-oms-samordning-vedtak")}")
                     }
 
                 response.status shouldBe HttpStatusCode.OK

@@ -204,6 +204,20 @@ spec:
             roles:
               - les-oms-sak
               - les-bp-sak
+        - application: eessi-pensjon-prefill-q1
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+        - application: eessi-pensjon-journalforing-q1
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
         - application: eessi-pensjon-prefill-q2
           namespace: eessipensjon
           cluster: dev-gcp

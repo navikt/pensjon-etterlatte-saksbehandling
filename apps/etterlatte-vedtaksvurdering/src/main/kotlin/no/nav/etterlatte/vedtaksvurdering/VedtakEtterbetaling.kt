@@ -60,7 +60,7 @@ internal fun Vedtak.erVedtakMedEtterbetaling(
 }
 
 private fun Utbetalingsperiode.beloepErMindreEnn(that: Utbetalingsperiode): Boolean =
-    this.beloep?.compareTo(that.beloep.toNonNullBeloep()) == -1
+    this.beloep.toNonNullBeloep() < that.beloep.toNonNullBeloep()
 
 /**
  * Flater ut en gitt periode i flere perioder for å enklere sjekke etter overlapp
@@ -94,7 +94,7 @@ private fun skalHaUtvidetFrist(
     val totalForrigePerioder = perioderMedEtterbetaling.mapNotNull { it.value?.beloep }.sumOf { it }
     val totalNyePerioder = perioderMedEtterbetaling.mapNotNull { it.key.beloep }.sumOf { it }
 
-    return (totalNyePerioder - totalForrigePerioder).compareTo(enHalvG) == 1
+    return (totalNyePerioder - totalForrigePerioder) > enHalvG
 }
 
 private fun BigDecimal?.toNonNullBeloep(): BigDecimal = this ?: BigDecimal.valueOf(0)

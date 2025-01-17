@@ -74,6 +74,7 @@ export interface Beregningsperiode {
 // TODO: Burde speile backend DTO-en
 export interface OverstyrBeregningsperiode {
   utbetaltBeloep: string
+  foreldreloessats: boolean | undefined
   trygdetid: string
   trygdetidForIdent: string | undefined
   prorataBroekTeller: string | undefined

@@ -564,6 +564,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoFOM = LocalDate.now().minusYears(12L),
                     datoTOM = LocalDate.now().minusYears(6L),
                     utbetaltBeloep = 123L,
+                    foreldreloessats = false,
                     trygdetid = 10L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
@@ -583,6 +584,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoFOM = LocalDate.now().minusYears(6L),
                     datoTOM = null,
                     utbetaltBeloep = 456L,
+                    foreldreloessats = false,
                     trygdetid = 20L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = 10,
@@ -675,6 +677,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoFOM = LocalDate.now().minusYears(12L),
                     datoTOM = LocalDate.now().minusYears(6L),
                     utbetaltBeloep = 123L,
+                    foreldreloessats = false,
                     trygdetid = 10L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
@@ -694,6 +697,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoFOM = LocalDate.now().minusYears(6L),
                     datoTOM = null,
                     utbetaltBeloep = 456L,
+                    foreldreloessats = false,
                     trygdetid = 20L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
@@ -727,6 +731,7 @@ internal class BeregningsGrunnlagRoutesTest {
                                         data =
                                             OverstyrBeregningGrunnlagData(
                                                 utbetaltBeloep = 123L,
+                                                foreldreloessats = false,
                                                 trygdetid = 10L,
                                                 trygdetidForIdent = null,
                                                 prorataBroekTeller = null,
@@ -741,6 +746,7 @@ internal class BeregningsGrunnlagRoutesTest {
                                         data =
                                             OverstyrBeregningGrunnlagData(
                                                 utbetaltBeloep = 456L,
+                                                foreldreloessats = false,
                                                 trygdetid = 20L,
                                                 trygdetidForIdent = null,
                                                 prorataBroekTeller = null,

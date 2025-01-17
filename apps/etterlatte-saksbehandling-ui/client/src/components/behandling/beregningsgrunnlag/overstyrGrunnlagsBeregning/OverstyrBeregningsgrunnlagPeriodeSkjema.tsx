@@ -1,5 +1,18 @@
 import React from 'react'
-import { BodyShort, Box, Button, HGrid, HStack, Label, Select, Textarea, TextField, VStack } from '@navikt/ds-react'
+import {
+  BodyShort,
+  Box,
+  Button,
+  Checkbox,
+  CheckboxGroup,
+  HGrid,
+  HStack,
+  Label,
+  Select,
+  Textarea,
+  TextField,
+  VStack,
+} from '@navikt/ds-react'
 import { useForm } from 'react-hook-form'
 import { OverstyrBeregningsperiode, OverstyrtAarsak } from '~shared/types/Beregning'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
@@ -134,16 +147,26 @@ export const OverstyrBeregningsgrunnlagPeriodeSkjema = ({
             }}
           />
           <Box width="fit-content">
-            <TextField
-              {...register('data.utbetaltBeloep', {
-                valueAsNumber: true,
-                required: { value: true, message: 'Må settes' },
-                validate: validerStringNumber,
-              })}
-              label="Utbetalt beløp"
-              error={errors.data?.utbetaltBeloep?.message}
-            />
+            <HStack gap="3" align="center">
+              <TextField
+                {...register('data.utbetaltBeloep', {
+                  valueAsNumber: true,
+                  required: { value: true, message: 'Må settes' },
+                  validate: validerStringNumber,
+                })}
+                label="Utbetalt beløp"
+                error={errors.data?.utbetaltBeloep?.message}
+              />
+              <Box width="fit-content">
+                <CheckboxGroup legend="Foreldreløssats">
+                  <Checkbox {...register('data.foreldreloessats')} value="">
+                    Har foreldreløssats
+                  </Checkbox>
+                </CheckboxGroup>
+              </Box>
+            </HStack>
           </Box>
+
           <TextField
             {...register('data.trygdetid', {
               valueAsNumber: true,

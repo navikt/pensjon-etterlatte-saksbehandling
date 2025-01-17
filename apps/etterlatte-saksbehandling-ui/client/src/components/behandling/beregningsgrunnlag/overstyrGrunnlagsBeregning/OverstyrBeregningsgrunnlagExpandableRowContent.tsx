@@ -22,6 +22,10 @@ export const OverstyrBeregningsgrunnlagExpandableRowContent = ({
         <Label>Prorata brøk</Label>
         <BodyShort>{`${overtyrBeregningsgrunnlagPeriode.data.prorataBroekTeller ?? '-'} / ${overtyrBeregningsgrunnlagPeriode.data.prorataBroekNevner ?? '-'}`}</BodyShort>
       </div>
+      <div>
+        <Label>Foreldreløssats</Label>
+        <BodyShort>{`${overtyrBeregningsgrunnlagPeriode.data.foreldreloessats ? 'Ja' : overtyrBeregningsgrunnlagPeriode.data.foreldreloessats === false ? 'Nei' : 'Ikke besvart'}`}</BodyShort>
+      </div>
       <Box maxWidth="7rem">
         <Label>Beskrivelse</Label>
         <BodyShort>{overtyrBeregningsgrunnlagPeriode.data.beskrivelse}</BodyShort>

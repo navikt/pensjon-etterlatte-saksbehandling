@@ -182,3 +182,12 @@ export const OverstyrtAarsak: OverstyrtAarsakType = {
   AVKORTET_FENGSEL: 'Avkortet pga fengsel',
   ANNET: 'Annet',
 }
+
+export function tilBeregningsMetodeBeregningsgrunnlag(
+  formdata: BeregningsMetodeBeregningsgrunnlagForm
+): BeregningsMetodeBeregningsgrunnlag {
+  return {
+    begrunnelse: formdata.begrunnelse,
+    beregningsMetode: formdata.beregningsMetode,
+  }
+}

@@ -13,8 +13,8 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.vedtak.VedtakForEksterntDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakForPersonRequest
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import org.slf4j.LoggerFactory
 
 class VedtaksvurderingKlient(
@@ -25,8 +25,8 @@ class VedtaksvurderingKlient(
 
     private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/api/vedtak/for/eksternt"
 
-    suspend fun hentVedtak(request: VedtakForPersonRequest): VedtakForEksterntDto {
-        sikkerlogger().info("Henter vedtak med fnr=${request.fnr}")
+    suspend fun hentVedtak(request: Folkeregisteridentifikator): List<VedtakDto> {
+        sikkerlogger().info("Henter vedtak med fnr=$request")
 
         return try {
             httpClient

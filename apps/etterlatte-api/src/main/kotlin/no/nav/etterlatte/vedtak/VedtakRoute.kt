@@ -10,10 +10,16 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
-import no.nav.etterlatte.libs.common.vedtak.VedtakForPersonRequest
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Issuer
+import java.math.BigDecimal
+import java.time.YearMonth
 
-fun Route.vedtakRoute(vedtaksvurderingKlient: VedtaksvurderingKlient) {
+fun Route.vedtakRoute(vedtakService: VedtakService) {
     // Tiltenkt for eksternt for etterlatte men internt i Nav. Initelt gjelder dette EESSI.
     route("api/v1/vedtak") {
         install(AuthorizationPlugin) {
@@ -23,12 +29,50 @@ fun Route.vedtakRoute(vedtaksvurderingKlient: VedtaksvurderingKlient) {
 
         post {
             try {
-                val request = call.receive<VedtakForPersonRequest>()
-                val vedtak = vedtaksvurderingKlient.hentVedtak(request)
+                val request = call.receive<FoedselsnummerDTO>()
+                val fnr = Folkeregisteridentifikator.of(request.foedselsnummer)
+                val vedtak = vedtakService.hentVedtak(fnr)
                 call.respond(vedtak)
             } catch (e: IllegalArgumentException) {
                 call.respondNullable(HttpStatusCode.BadRequest, e.message)
             }
         }
     }
+}
+
+data class VedtakForEksterntDto(
+    val vedtak: List<VedtakEksternt>,
+)
+
+data class VedtakEksternt(
+    val virkningstidspunkt: YearMonth,
+    val type: VedtakTypeEksternt,
+    val utbetaling: List<VedtakEksterntUtbetaling>,
+)
+
+enum class VedtakTypeEksternt {
+    INNVILGELSE,
+    OPPHOER,
+    AVSLAG,
+    ENDRING,
+}
+
+data class VedtakEksterntUtbetaling(
+    val periode: Periode,
+    val beloep: BigDecimal?,
+)
+
+fun VedtakDto.toEksternDto(): VedtakEksternt {
+    val vedtakInnhold = (innhold as VedtakInnholdDto.VedtakBehandlingDto)
+    return VedtakEksternt(
+        virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
+        type = VedtakTypeEksternt.valueOf(type.name),
+        utbetaling =
+            vedtakInnhold.utbetalingsperioder.map { utbetaling ->
+                VedtakEksterntUtbetaling(
+                    periode = utbetaling.periode,
+                    beloep = utbetaling.beloep,
+                )
+            },
+    )
 }

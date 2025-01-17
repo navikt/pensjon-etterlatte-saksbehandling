@@ -172,29 +172,3 @@ data class TilbakekrevingVedtakLagretDto(
     val enhet: Enhetsnummer,
     val dato: LocalDate,
 )
-
-data class VedtakForPersonRequest(
-    val fnr: Folkeregisteridentifikator,
-)
-
-data class VedtakForEksterntDto(
-    val vedtak: List<VedtakForEkstern>,
-)
-
-data class VedtakForEkstern(
-    val virkningstidspunkt: YearMonth,
-    val type: VedtakTypeForEkstern,
-    val utbetaling: List<VedtakForEksternUtbetaling>,
-)
-
-enum class VedtakTypeForEkstern {
-    INNVILGELSE,
-    OPPHOER,
-    AVSLAG,
-    ENDRING,
-}
-
-data class VedtakForEksternUtbetaling(
-    val periode: Periode,
-    val beloep: BigDecimal?,
-)

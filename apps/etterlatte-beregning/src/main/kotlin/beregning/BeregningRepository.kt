@@ -215,7 +215,12 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
             regelverk = stringOrNull(BeregningsperiodeDatabaseColumns.Regelverk.navn)?.let { Regelverk.valueOf(it) },
             kilde = stringOrNull(BeregningsperiodeDatabaseColumns.Kilde.navn)?.let { objectMapper.readValue(it) },
             kunEnJuridiskForelder = boolean(BeregningsperiodeDatabaseColumns.KunEnJuridiskForelder.navn),
-            harForeldreloessats = boolean(BeregningsperiodeDatabaseColumns.HarForeldreloessats.navn),
+            harForeldreloessats =
+                if (anyOrNull(BeregningsperiodeDatabaseColumns.HarForeldreloessats.navn) != null) {
+                    boolean(BeregningsperiodeDatabaseColumns.HarForeldreloessats.navn)
+                } else {
+                    null
+                },
         )
     }
 
@@ -418,5 +423,5 @@ private data class BeregningsperiodeDAO(
     val regelverk: Regelverk? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
     val kunEnJuridiskForelder: Boolean = false,
-    val harForeldreloessats: Boolean = false,
+    val harForeldreloessats: Boolean? = null,
 )

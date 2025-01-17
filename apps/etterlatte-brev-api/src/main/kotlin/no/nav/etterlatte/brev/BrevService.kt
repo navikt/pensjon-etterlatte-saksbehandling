@@ -383,7 +383,7 @@ class BrevService(
         val brev = sjekkOmBrevKanEndres(id)
         if (listOf(
                 Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
-                Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
+                Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
             ).contains(brev.brevkoder)
         ) {
             throw BrevKanIkkeEndres(brev, "brevkoden er feil, er ${brev.brevkoder}")

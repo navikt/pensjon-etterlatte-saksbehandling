@@ -37,6 +37,7 @@ data class BarnepensjonBeregning(
     val trygdetid: List<TrygdetidMedBeregningsmetode>,
     val erForeldreloes: Boolean,
     val forskjelligTrygdetid: ForskjelligTrygdetid?,
+    val erYrkesskade: Boolean,
 ) : HarVedlegg
 
 data class BarnepensjonBeregningsperiode(
@@ -76,6 +77,7 @@ data class OmstillingsstoenadBeregning(
     val trygdetid: TrygdetidMedBeregningsmetode,
     val oppphoersdato: LocalDate?,
     val opphoerNesteAar: Boolean,
+    val erYrkesskade: Boolean,
 ) : HarVedlegg
 
 data class OmstillingsstoenadBeregningRedigerbartUtfall(
@@ -187,6 +189,8 @@ fun TrygdetidDto.fromDto(
     ident = this.ident,
 )
 
+fun TrygdetidDto.erYrkesskade() = beregnetTrygdetid?.resultat?.yrkesskade ?: false
+
 enum class FeilutbetalingType {
     FEILUTBETALING_UTEN_VARSEL,
     FEILUTBETALING_4RG_UTEN_VARSEL,
@@ -241,11 +245,4 @@ class ManglerBrevutfall(
         code = "BEHANDLING_MANGLER_BREVUTFALL",
         detail = "Behandling mangler brevutfall, som er påkrevd. Legg til dette ved å lagre Valg av utfall i brev.",
         meta = mapOf("behandlingId" to behandlingId.toString()),
-    )
-
-// TODO (EY-4381) Fjern når alle beregninger på åpne behandlinger er gjort med harForeldreloessats
-class ManglerHarForeldreloessats :
-    UgyldigForespoerselException(
-        "MANGLER_HAR_FORELDRELOESSATS",
-        "Beklager, men saken må beregnes på nytt på grunn av en teknisk endring i Gjenny",
     )

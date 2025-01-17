@@ -149,7 +149,7 @@ class BeregningsGrunnlagService(
             else -> null
         }
 
-    private suspend fun validerSoeskenMedIBeregning(
+    private fun validerSoeskenMedIBeregning(
         behandlingId: UUID,
         barnepensjonBeregningsGrunnlag: LagreBeregningsGrunnlag,
         grunnlag: Grunnlag,
@@ -322,6 +322,7 @@ class BeregningsGrunnlagService(
                                 data =
                                     OverstyrBeregningGrunnlagData(
                                         utbetaltBeloep = periode.utbetaltBeloep,
+                                        foreldreloessats = periode.foreldreloessats,
                                         trygdetid = periode.trygdetid,
                                         trygdetidForIdent = periode.trygdetidForIdent,
                                         prorataBroekTeller = periode.prorataBroekTeller,
@@ -364,6 +365,7 @@ class BeregningsGrunnlagService(
                         datoFOM = it.fom,
                         datoTOM = it.tom,
                         utbetaltBeloep = it.data.utbetaltBeloep,
+                        foreldreloessats = it.data.foreldreloessats,
                         trygdetid = it.data.trygdetid,
                         trygdetidForIdent = it.data.trygdetidForIdent,
                         prorataBroekTeller = it.data.prorataBroekTeller,

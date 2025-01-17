@@ -40,7 +40,9 @@ class Grunnlag(
         replaceWith =
             ReplaceWith("hentAvdoede().flatMap { it.barn }"),
     )
-    fun hentSoesken() = familie.filter { it.hentPersonrolle()?.verdi in listOf(PersonRolle.BARN, PersonRolle.TILKNYTTET_BARN) }
+    fun hentSoeskenGammel() = familie.filter { it.hentPersonrolle()?.verdi in listOf(PersonRolle.BARN, PersonRolle.TILKNYTTET_BARN) }
+
+    fun hentSoeskenNy() = this.hentAvdoede().first().hentAvdoedesbarn()
 
     private fun hentFamiliemedlemNullable(personRolle: PersonRolle): Grunnlagsdata<JsonNode>? {
         val aktuellePersoner = folkMedRolle(personRolle)

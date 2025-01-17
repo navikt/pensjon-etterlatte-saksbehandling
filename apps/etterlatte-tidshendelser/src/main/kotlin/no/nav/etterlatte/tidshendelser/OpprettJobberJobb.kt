@@ -59,11 +59,13 @@ class OpprettJobb(
     enum class FasteJobber(
         val jobbType: JobbType,
         val dagIMaaned: Int,
+        // Merk at justering av behandlingMaaned kan medføre uønsket oppførsel (f.eks. har løpende ytelse sjekker feil måned)
         val behandlingMaanedJustering: Long,
     ) {
         OMS_DOED_4MND(JobbType.OMS_DOED_4MND, 1, 0),
         OMS_DOED_6MND(JobbType.OMS_DOED_6MND, 1, 0),
         OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK(JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK, 8, 0),
-        OMS_DOED_12MND(JobbType.OMS_DOED_12MND, 1, -2),
+        OMS_DOED_12MND(JobbType.OMS_DOED_12MND, 1, 0),
+        OMS_DOED_10MND(JobbType.OMS_DOED_10MND, 1, 0),
     }
 }

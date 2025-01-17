@@ -159,7 +159,7 @@ spec:
     - name: ETTERLATTE_MIGRERING_OUTBOUND_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-migrering/.default
     - name: PEN_URL
-      value: https://pensjon-pen.prod-fss-pub.nais.io/pen/springapi
+      value: https://pensjon-pen.prod-fss-pub.nais.io/api
     - name: PEN_CLIENT_ID
       value: 53eaf67f-d7b2-46e9-8ffe-3da7cf0ac955
     - name: KRR_ENDPOINT_URL

@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import { Box, Button, Heading, VStack } from '@navikt/ds-react'
 import { PlusIcon } from '@navikt/aksel-icons'
 import { useDispatch } from 'react-redux'
-import { AktivitetspliktOppgaveType, IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
-import { setAktivitetspliktVurdering } from '~store/reducers/Aktivitetsplikt12mnd'
-import { VurderingAktivitetsgradOgUnntak } from '~components/aktivitetsplikt/vurdering/VurderingAktivitetsgradOgUnntak'
+import { AktivitetspliktOppgaveVurderingType, IAktivitetspliktVurderingNyDto } from '~shared/types/Aktivitetsplikt'
+import { setAktivitetspliktVurdering } from '~store/reducers/AktivitetsplikReducer'
+import { VurderAktivitetspliktWrapper } from '~components/aktivitetsplikt/vurdering/VurderingAktivitetsgradOgUnntak'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
 
 export function LeggTilNyVurdering(props: { doedsdato?: Date }) {
@@ -31,11 +31,11 @@ export function LeggTilNyVurdering(props: { doedsdato?: Date }) {
     <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
       <VStack gap="6">
         <Heading size="medium">
-          {vurderingType === AktivitetspliktOppgaveType.TOLV_MAANEDER
+          {vurderingType === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER
             ? 'Vurdering av brukers aktivitet ved 12 måneder'
             : 'Vurdering av brukers aktivitet ved 6 måneder'}
         </Heading>
-        <VurderingAktivitetsgradOgUnntak
+        <VurderAktivitetspliktWrapper
           doedsdato={props.doedsdato}
           onSuccess={oppdaterStateVedLagring}
           onAvbryt={() => setLeggerTilVurdering(false)}

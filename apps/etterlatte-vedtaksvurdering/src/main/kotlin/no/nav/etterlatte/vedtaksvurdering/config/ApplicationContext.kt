@@ -83,7 +83,6 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             samordningsKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
-            rapidService = vedtaksvurderingRapidService,
         )
 
     val vedtakTilbakekrevingService =

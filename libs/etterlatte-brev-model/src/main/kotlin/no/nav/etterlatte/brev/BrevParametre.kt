@@ -51,6 +51,7 @@ sealed class BrevParametre {
             AktivitetspliktInformasjon10mndBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
     }
 
+    // Denne brukes kun til varig unntak som har egen manuel flyt
     @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND")
     data class AktivitetspliktInformasjon6Mnd(
         override val spraak: Spraak,

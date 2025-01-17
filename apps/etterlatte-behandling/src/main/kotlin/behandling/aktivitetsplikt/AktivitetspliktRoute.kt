@@ -384,8 +384,7 @@ internal fun Route.aktivitetspliktRoutes(
         get {
             logger.info("Henter aktivitetsplikt vurdering for behandlingId=$behandlingId")
             val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForBehandlingGammel(behandlingId) }
-                    ?: throw VurderingIkkeFunnetException(sakId, behandlingId)
+                inTransaction { aktivitetspliktService.hentVurderingForBehandlingNy(behandlingId) }
             call.respond(vurdering)
         }
 
@@ -397,36 +396,87 @@ internal fun Route.aktivitetspliktRoutes(
             call.respond(vurdering)
         }
 
-        post("/aktivitetsgrad") {
+        post("/aktivitetsgrad-unntak") {
             kunSkrivetilgang {
                 logger.info("Oppretter aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
-                val aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>()
-                val vurderingGammel =
+                val aktivitetsgradOgUnntak = call.receive<AktivitetspliktAktivitetsgradOgUnntak>()
+                val vurderingForBehandling =
                     inTransaction {
-                        aktivitetspliktService.upsertAktivitetsgradForBehandling(
-                            aktivitetsgrad = aktivitetsgrad,
+                        aktivitetspliktService.upsertAktivitetsgradOgUnntakForBehandling(
+                            aktivitetsgradOgUnntak = aktivitetsgradOgUnntak,
                             behandlingId = behandlingId,
                             sakId = sakId,
                             brukerTokenInfo = brukerTokenInfo,
                         )
                     }
-                call.respond(vurderingGammel)
+                call.respond(vurderingForBehandling)
             }
         }
 
-        post("/unntak") {
+        post("/aktivitetsgrad") {
             kunSkrivetilgang {
-                logger.info("Oppretter unntak for sakId=$sakId og behandlingId=$behandlingId")
-                val unntak = call.receive<LagreAktivitetspliktUnntak>()
-                inTransaction {
-                    aktivitetspliktService.upsertUnntakForBehandling(
-                        unntak = unntak,
-                        behandlingId = behandlingId,
-                        sakId = sakId,
-                        brukerTokenInfo = brukerTokenInfo,
-                    )
+                logger.info("Redigerer aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
+                val aktivitetsgradOgUnntak = call.receive<LagreAktivitetspliktAktivitetsgrad>()
+                val vurderingForBehandling =
+                    inTransaction {
+                        aktivitetspliktService.upsertAktivitetsgradForBehandling(
+                            aktivitetsgrad = aktivitetsgradOgUnntak,
+                            behandlingId = behandlingId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(vurderingForBehandling)
+            }
+        }
+
+        delete("/aktivitetsgrad/{$AKTIVITETSGRAD_ID_CALL_PARAMETER}") {
+            kunSkrivetilgang {
+                logger.info("Sletter aktivitetsgrad med id=$aktivitetsgradId for behandlingId=$behandlingId i sak=$sakId")
+                val vurdering =
+                    inTransaction {
+                        aktivitetspliktService.slettAktivitetsgradForBehandling(
+                            behandlingId = behandlingId,
+                            aktivitetsgradId = aktivitetsgradId,
+                            sakId = sakId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                call.respond(vurdering)
+            }
+        }
+
+        route("/unntak") {
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter unntak for sakId=$sakId og behandlingId=$behandlingId")
+                    val unntak = call.receive<LagreAktivitetspliktUnntak>()
+                    val aktivitetspliktVurdering =
+                        inTransaction {
+                            aktivitetspliktService.upsertUnntakForBehandling(
+                                unntak = unntak,
+                                behandlingId = behandlingId,
+                                sakId = sakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(aktivitetspliktVurdering)
                 }
-                call.respond(HttpStatusCode.Created)
+            }
+            delete("{$UNNTAK_ID_CALL_PARAMETER}") {
+                kunSkrivetilgang {
+                    logger.info("Sletter unntak med id=$unntakId for sakId=$sakId og behandlingId=$behandlingId")
+                    val vurdering =
+                        inTransaction {
+                            aktivitetspliktService.slettUnntakForBehandling(
+                                behandlingId = behandlingId,
+                                sakId = sakId,
+                                unntakId = unntakId,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    call.respond(vurdering)
+                }
             }
         }
     }

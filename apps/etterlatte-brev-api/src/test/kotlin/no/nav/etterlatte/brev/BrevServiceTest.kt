@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.MottakerType
+import no.nav.etterlatte.brev.model.OpprettJournalfoerOgDistribuerRequest
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.tomMottaker
@@ -29,6 +30,7 @@ import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
@@ -477,6 +479,80 @@ internal class BrevServiceTest {
             every { db.hentBrev(any()) } returns brev
 
             brevService.slett(brev.id, bruker)
+
+            verify {
+                db.hentBrev(brev.id)
+                db.settBrevSlettet(brev.id, bruker)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `Brev som ikke lenger er under arbeid skal IKKE kunne slettes`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<BrevKanIkkeEndres> {
+                brevService.slett(brev.id, bruker)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+            verify(exactly = 0) {
+                db.settBrevSlettet(any(), any())
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class)
+        fun `Skal ikke kunne slette vedtaksbrev, uavhengig av status`(status: Status) {
+            val behandlingId = UUID.randomUUID()
+            val brev = opprettBrev(status, BrevProsessType.MANUELL, behandlingId)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<Exception> {
+                brevService.slett(brev.id, bruker)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+    }
+
+    @Nested
+    inner class OpprettingAvJournalpost {
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Sletting av brev som er under arbeid skal virke`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+            every { brevDataFacade.hentGenerellBrevData(any(), any(), any()) }
+
+            runBlocking {
+                brevService.opprettJournalfoerOgDistribuerRiver(
+                    bruker,
+                    OpprettJournalfoerOgDistribuerRequest(
+                        brevKode = Brevkoder.BP_VARSEL,
+                        brevParametereAutomatisk =
+                            BrevParametereAutomatisk.BarnepensjonInformasjonDoedsfallRedigerbar(
+                                false,
+                                "",
+                                false,
+                            ),
+                        avsenderRequest =
+                            SaksbehandlerOgAttestant(
+                                saksbehandlerIdent = "arcu",
+                                attestantIdent = null,
+                            ),
+                        sakId = SakId(sakId = 9218),
+                    ),
+                )
+            }
 
             verify {
                 db.hentBrev(brev.id)

@@ -63,6 +63,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 123L,
                                 trygdetid = 20L,
+                                foreldreloessats = false,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
@@ -76,6 +77,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 456,
                                 trygdetid = 10L,
+                                foreldreloessats = false,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
@@ -111,6 +113,7 @@ internal class BeregnOverstyrServiceTest {
                 beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe 123
+                    harForeldreloessats shouldBe false
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
                     grunnbelop shouldBe 99858
@@ -141,6 +144,7 @@ internal class BeregnOverstyrServiceTest {
                         GrunnlagMedPeriode(
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 123L,
+                                foreldreloessats = true,
                                 trygdetid = 20L,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = 10,
@@ -154,6 +158,7 @@ internal class BeregnOverstyrServiceTest {
                         GrunnlagMedPeriode(
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 456,
+                                foreldreloessats = true,
                                 trygdetid = 10L,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = 10,
@@ -190,6 +195,7 @@ internal class BeregnOverstyrServiceTest {
                 beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe 123
+                    harForeldreloessats shouldBe true
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
                     grunnbelop shouldBe 99858
@@ -227,6 +233,7 @@ internal class BeregnOverstyrServiceTest {
                         GrunnlagMedPeriode(
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 123L,
+                                foreldreloessats = null,
                                 trygdetid = 20L,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = null,
@@ -240,6 +247,7 @@ internal class BeregnOverstyrServiceTest {
                         GrunnlagMedPeriode(
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 456,
+                                foreldreloessats = null,
                                 trygdetid = 10L,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = null,
@@ -276,6 +284,7 @@ internal class BeregnOverstyrServiceTest {
                 beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe 123
+                    harForeldreloessats shouldBe null
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
                     grunnbelop shouldBe 99858
@@ -313,6 +322,7 @@ internal class BeregnOverstyrServiceTest {
                         GrunnlagMedPeriode(
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 123L,
+                                foreldreloessats = null,
                                 trygdetid = 20L,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = null,
@@ -326,6 +336,7 @@ internal class BeregnOverstyrServiceTest {
                         GrunnlagMedPeriode(
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 456,
+                                foreldreloessats = null,
                                 trygdetid = 10L,
                                 trygdetidForIdent = null,
                                 prorataBroekTeller = null,
@@ -362,6 +373,7 @@ internal class BeregnOverstyrServiceTest {
                 beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe 0
+                    harForeldreloessats shouldBe null
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
                     grunnbelop shouldBe 99858

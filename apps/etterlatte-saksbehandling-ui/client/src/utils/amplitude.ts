@@ -46,6 +46,7 @@ export enum ClickEvent {
 
   // Generelt
   VIS_VARSLINGER = 'vis varslinger',
+  VIS_BEHANDLING_HISTORIKK = 'vis behandling historikk',
 }
 
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined

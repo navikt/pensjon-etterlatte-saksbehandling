@@ -632,8 +632,8 @@ internal class ApplicationContext(
         DoedsmeldingJob(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
-            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(20, ChronoUnit.MINUTES),
+            if (isProd()) Duration.of(3, ChronoUnit.MINUTES).toMillis() else Duration.of(20, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(2, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

@@ -174,7 +174,7 @@ data class TilbakekrevingVedtakLagretDto(
 )
 
 data class VedtakForPersonRequest(
-    val fnr: String,
+    val fnr: Folkeregisteridentifikator,
 )
 
 data class VedtakForEksterntDto(

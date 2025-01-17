@@ -11,9 +11,8 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 class VedtakForEksterntService(
     private val repository: VedtaksvurderingRepository,
 ) {
-    fun hentVedtak(fnr: String): VedtakForEksterntDto {
-        val folkeregisteridentifikator = Folkeregisteridentifikator.of(fnr)
-        val vedtak = repository.hentFerdigstilteVedtak(folkeregisteridentifikator)
+    fun hentVedtak(fnr: Folkeregisteridentifikator): VedtakForEksterntDto {
+        val vedtak = repository.hentFerdigstilteVedtak(fnr)
         return VedtakForEksterntDto(
             vedtak =
                 vedtak.filter { it.type.vanligBehandling }.map {

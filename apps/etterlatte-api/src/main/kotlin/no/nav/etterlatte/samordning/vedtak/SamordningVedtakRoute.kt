@@ -29,7 +29,8 @@ fun Route.samordningVedtakRoute(
 ) {
     route("api/vedtak") {
         install(MaskinportenScopeAuthorizationPlugin) {
-            scopes = setOf("nav:etterlatteytelser:vedtaksinformasjon.read", "nav:etterlatteytelser/vedtaksinformasjon.read")
+            scopes =
+                setOf("nav:etterlatteytelser:vedtaksinformasjon.read", "nav:etterlatteytelser/vedtaksinformasjon.read")
         }
 
         get("{vedtakId}") {
@@ -119,7 +120,8 @@ fun Route.samordningVedtakRoute(
 
     route("api/pensjon/vedtak") {
         install(AuthorizationPlugin) {
-            accessPolicyRolesEllerAdGrupper = setOf("les-oms-vedtak", config.getString("roller.pensjon-saksbehandler"))
+            accessPolicyRolesEllerAdGrupper =
+                setOf("les-oms-samordning-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf(Issuer.AZURE.issuerName)
         }
         install(selvbetjeningAuthorizationPlugin(appname)) {

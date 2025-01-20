@@ -25,6 +25,7 @@ import { isFailure, isInitial, isPending, mapFailure } from '~shared/api/apiUtil
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ClickEvent, trackClick } from '~utils/amplitude'
+import { Tilbakemelding } from '~shared/tilbakemelding/Tilbakemelding'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -95,6 +96,8 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
           Vilkårsvurdering
         </Heading>
       </Box>
+
+      <Tilbakemelding />
 
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
         <>

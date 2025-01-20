@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.oppgave
 import no.nav.etterlatte.brev.behandlingklient.OppgaveKlient
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
-import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -19,17 +18,48 @@ class OppgaveService(
         sakId: SakId,
         brevID: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OppgaveIntern {
+    ) {
+        // TODO: denne må bli mer granulert når automatiske inntektsbrev skal inn
+        val oppgaveKilde = OppgaveKilde.DOEDSHENDELSE
+        val oppgaveType = OppgaveType.MANUELL_UTSENDING_BREV
+
+        if (oppgaveFinnesAllerede(sakId, brevID, oppgaveKilde, oppgaveType, brukerTokenInfo)) {
+            logger.info("Oppretter ikke oppgave for brev som feilet (sakId=$sakId, brevID=$brevID). Den finnes fra før")
+            return
+        }
+
         logger.info("Oppretter oppgave for brev som feilet (sakId=$sakId, brevID=$brevID)")
-
-        val nyOppgave =
+        val merknad =
+            when (oppgaveKilde) {
+                OppgaveKilde.DOEDSHENDELSE -> "Kunne ikke sende informasjonsbrev automatisk for dødshendelse."
+                else -> "Kunne ikke sende informasjonsbrev automatisk."
+            }
+        oppgaveKlient.opprettOppgave(
+            sakId,
             NyOppgaveDto(
-                oppgaveKilde = OppgaveKilde.DOEDSHENDELSE, // TODO: denne må bli mer granulert når automatiske inntektsbrev skal inn
-                oppgaveType = OppgaveType.MANUELL_UTSENDING_BREV,
-                merknad = "Kunne ikke sende informasjonsbrev automatisk for dødshendelse.",
+                oppgaveKilde = oppgaveKilde,
+                oppgaveType = oppgaveType,
+                merknad = merknad,
                 referanse = brevID.toString(),
-            )
+            ),
+            brukerTokenInfo,
+        )
+    }
 
-        return oppgaveKlient.opprettOppgave(sakId, nyOppgave, brukerTokenInfo)
+    private suspend fun oppgaveFinnesAllerede(
+        sakId: SakId,
+        brevID: BrevID,
+        oppgaveKilde: OppgaveKilde,
+        oppgaveType: OppgaveType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        val oppgaverForSak = oppgaveKlient.hentOppgaverForSak(sakId, brukerTokenInfo)
+        val finnesAllerede =
+            oppgaverForSak.any {
+                it.referanse == brevID.toString() &&
+                    it.kilde == oppgaveKilde &&
+                    it.type == oppgaveType
+            }
+        return finnesAllerede
     }
 }

@@ -6,14 +6,9 @@ import { TrashIcon } from '@navikt/aksel-icons'
 import { isPending } from '~shared/api/apiUtils'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
 import { ClickEvent, trackClick } from '~utils/amplitude'
-import { gyldigbrevkode } from '~components/person/brev/BrevOversikt'
 
 const kanSlettes = (brev: IBrev) => {
-  return (
-    !brev.behandlingId &&
-    [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status) &&
-    gyldigbrevkode(brev.brevkoder)
-  )
+  return !brev.behandlingId && [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(brev.status)
 }
 
 /**

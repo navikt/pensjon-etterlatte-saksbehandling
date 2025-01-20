@@ -124,7 +124,7 @@ class BeregningService(
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkortingsinfo =
-        checkNotNull(
+        krevIkkeNull(
             finnAvkortingsinfoNullable(
                 behandlingId,
                 sakType,

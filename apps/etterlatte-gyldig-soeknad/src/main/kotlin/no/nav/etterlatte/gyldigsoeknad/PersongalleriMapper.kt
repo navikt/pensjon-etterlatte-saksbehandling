@@ -1,6 +1,7 @@
 package no.nav.etterlatte.gyldigsoeknad
 
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
@@ -43,7 +44,7 @@ object PersongalleriMapper {
         logger.info("Hent persongalleri fra søknad")
 
         val soekerFnr =
-            checkNotNull(
+            krevIkkeNull(
                 soeknad.soeker.foedselsnummer
                     ?.svar
                     ?.value,

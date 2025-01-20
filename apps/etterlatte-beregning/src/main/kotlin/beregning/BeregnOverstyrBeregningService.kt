@@ -13,6 +13,7 @@ import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -248,6 +249,7 @@ class BeregnOverstyrBeregningService(
                                         .takeIf { broek != null }
                                         ?.toInt(),
                                 broek = broek,
+                                regelverk = Regelverk.fraDato(periodisertResultat.periode.fraDato),
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
                                 kilde =

@@ -16,6 +16,7 @@ import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -124,6 +125,7 @@ internal class BeregnOverstyrServiceTest {
                     samletNorskTrygdetid shouldBe 20
                     samletTeoretiskTrygdetid shouldBe null
                     broek shouldBe null
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                 }
@@ -206,6 +208,7 @@ internal class BeregnOverstyrServiceTest {
                     samletNorskTrygdetid shouldBe null
                     samletTeoretiskTrygdetid shouldBe 20
                     broek shouldBe IntBroek(10, 20)
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                 }
@@ -295,6 +298,7 @@ internal class BeregnOverstyrServiceTest {
                     samletNorskTrygdetid shouldBe 20
                     samletTeoretiskTrygdetid shouldBe null
                     broek shouldBe null
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                 }
@@ -384,6 +388,7 @@ internal class BeregnOverstyrServiceTest {
                     samletNorskTrygdetid shouldBe 0
                     samletTeoretiskTrygdetid shouldBe null
                     broek shouldBe null
+                    regelverk shouldBe Regelverk.REGELVERK_TOM_DES_2023
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                 }

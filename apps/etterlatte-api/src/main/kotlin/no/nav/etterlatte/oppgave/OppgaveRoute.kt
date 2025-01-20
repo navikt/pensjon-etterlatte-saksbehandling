@@ -3,6 +3,7 @@ package no.nav.etterlatte.oppgave
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.request.receive
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -22,15 +23,18 @@ fun Route.oppgaveRoute(oppgaveService: OppgaveService) {
             post {
                 val request = call.receive<OpprettJournalfoeringOppgave>()
 
-                oppgaveService.opprettOppgave(
-                    sakId = request.sakId,
-                    NyOppgaveDto(
-                        oppgaveKilde = OppgaveKilde.EESSI,
-                        oppgaveType = OppgaveType.JOURNALFOERING,
-                        merknad = request.beskrivelse,
-                        referanse = request.journalpostId,
-                    ),
-                )
+                val oppgave =
+                    oppgaveService.opprettOppgave(
+                        sakId = request.sakId,
+                        NyOppgaveDto(
+                            oppgaveKilde = OppgaveKilde.EESSI,
+                            oppgaveType = OppgaveType.JOURNALFOERING,
+                            merknad = request.beskrivelse,
+                            referanse = request.journalpostId,
+                        ),
+                    )
+
+                call.respondText(oppgave.id.toString())
             }
         }
     }

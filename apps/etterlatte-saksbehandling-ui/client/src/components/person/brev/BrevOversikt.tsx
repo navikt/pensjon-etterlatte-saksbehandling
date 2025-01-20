@@ -34,9 +34,10 @@ export const gyldigbrevkode = (brevkoder: string): boolean =>
 
 const handlingKnapp = (brev: IBrev) => {
   if (kanEndres(brev)) {
-    const href = brev.behandlingId
-      ? `/behandling/${brev.behandlingId}/brev`
-      : `/person/sak/${brev.sakId}/brev/${brev.id}`
+    const href =
+      brev.behandlingId && brev.status !== BrevStatus.JOURNALFOERT
+        ? `/behandling/${brev.behandlingId}/brev`
+        : `/person/sak/${brev.sakId}/brev/${brev.id}`
 
     return (
       <Button as="a" href={href} variant="secondary" title="Rediger" icon={<DocPencilIcon aria-hidden />} size="small">

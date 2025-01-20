@@ -695,6 +695,7 @@ internal class BeregningsGrunnlagServiceTest {
                     datoFOM = LocalDate.now().minusYears(12L),
                     datoTOM = LocalDate.now().minusYears(6L),
                     utbetaltBeloep = 123L,
+                    foreldreloessats = false,
                     trygdetid = 10L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
@@ -715,6 +716,7 @@ internal class BeregningsGrunnlagServiceTest {
                     datoFOM = LocalDate.now().minusYears(6L),
                     datoTOM = null,
                     utbetaltBeloep = 456L,
+                    foreldreloessats = false,
                     trygdetid = 20L,
                     trygdetidForIdent = null,
                     prorataBroekTeller = null,
@@ -786,6 +788,7 @@ internal class BeregningsGrunnlagServiceTest {
                                     data =
                                         OverstyrBeregningGrunnlagData(
                                             utbetaltBeloep = 12L,
+                                            foreldreloessats = false,
                                             trygdetid = 25L,
                                             trygdetidForIdent = null,
                                             prorataBroekTeller = null,
@@ -1082,6 +1085,7 @@ internal class BeregningsGrunnlagServiceTest {
         datoFOM = datoFOM,
         datoTOM = datoTOM,
         utbetaltBeloep = utbetaltBeloep,
+        foreldreloessats = false,
         trygdetid = 0,
         trygdetidForIdent = "",
         prorataBroekTeller = null,

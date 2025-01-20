@@ -48,9 +48,10 @@ import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
+    val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
+
     @BeforeAll
     fun start() {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         val saksbehandlerMedRoller =
             mockk<SaksbehandlerMedRoller> {
                 every { harRolleStrengtFortrolig() } returns false
@@ -88,8 +89,9 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
+                        user.brukerTokenInfo,
                     )
-            }?.also { it.sendMeldingForHendelse() }?.behandling
+            }.also { it.sendMeldingForHendelse() }.behandling
 
         return Pair(sak, behandling as Foerstegangsbehandling)
     }

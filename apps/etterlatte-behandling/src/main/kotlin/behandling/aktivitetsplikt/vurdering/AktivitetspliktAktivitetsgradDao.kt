@@ -27,7 +27,7 @@ class AktivitetspliktAktivitetsgradDao(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun upsertAktivitetsgradForOppgave(
+    fun upsertAktivitetsgradForOppgaveEllerBehandling(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         sakId: SakId,
         kilde: Grunnlagsopplysning.Kilde,
@@ -68,7 +68,10 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setString(11, aktivitetsgrad.skjoennsmessigVurdering?.name)
             stmt.setBoolean(12, aktivitetsgrad.vurdertFra12Mnd)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Endret eller satt ikke inn vurdering for sakid: $sakId oppgaveId: $oppgaveId behandlingId: $behandlingId"
+            }
         }
     }
 
@@ -103,7 +106,10 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(8, aktivitetsgrad.id)
             stmt.setObject(9, behandlingId)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Oppdaterte ikke aktivitetsgrad for behandlingId: $behandlingId aktivitetsgradid: ${aktivitetsgrad.id}"
+            }
         }
     }
 
@@ -229,7 +235,10 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(1, aktivitetId)
             stmt.setObject(2, behandlingId)
 
-            stmt.executeUpdate()
+            val slettet = stmt.executeUpdate()
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetsgrad for behandlingid: $behandlingId aktivitetId: $aktivitetId")
+            }
         }
     }
 
@@ -248,7 +257,9 @@ class AktivitetspliktAktivitetsgradDao(
             stmt.setObject(1, aktivitetId)
             stmt.setObject(2, oppgaveId)
             val slettet = stmt.executeUpdate()
-            logger.info("Slettet $slettet aktivitetsgrader for oppgave $oppgaveId")
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetsgrad for oppgaveId: $oppgaveId aktivitetId: $aktivitetId")
+            }
         }
     }
 

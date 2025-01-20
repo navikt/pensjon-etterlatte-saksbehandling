@@ -140,60 +140,60 @@ spec:
           cluster: dev-fss
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: pensjon-pen-q1
           namespace: pensjon-q1
           cluster: dev-fss
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: pensjon-pen-q2
           namespace: pensjon-q2
           cluster: dev-fss
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: pensjon-pen-q5
           namespace: pensjon-q5
           cluster: dev-fss
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: pensjon-selvbetjening-soknad-alder-backend
           namespace: pensjonselvbetjening
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: alderspensjon-endringssoknad-backend-q2
           namespace: pensjonselvbetjening
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: pensjonskalkulator-backend
           namespace: pensjonskalkulator
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
+              - les-oms-samordning-vedtak
         - application: azure-token-generator
           namespace: aura
           cluster: dev-gcp
           permissions:
             roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
+              - les-oms-samordning-vedtak
+              - les-bp-samordning-vedtak
         - application: tokenx-token-generator
           namespace: aura
           cluster: dev-gcp
@@ -204,6 +204,35 @@ spec:
             roles:
               - les-oms-sak
               - les-bp-sak
+        - application: eessi-pensjon-prefill-q1
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+        - application: eessi-pensjon-journalforing-q1
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+              - opprett-jfr-oppgave
+        - application: eessi-pensjon-prefill-q2
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+        - application: eessi-pensjon-journalforing-q2
+          namespace: eessipensjon
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
               - opprett-jfr-oppgave
     outbound:
       rules:

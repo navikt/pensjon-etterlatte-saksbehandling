@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
+import no.nav.etterlatte.brev.model.erYrkesskade
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -94,6 +95,7 @@ data class OmstillingsstoenadInnvilgelse(
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =
                             beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        erYrkesskade = trygdetid.erYrkesskade(),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
                     doedsdatoEllerOpphoertPleieforhold

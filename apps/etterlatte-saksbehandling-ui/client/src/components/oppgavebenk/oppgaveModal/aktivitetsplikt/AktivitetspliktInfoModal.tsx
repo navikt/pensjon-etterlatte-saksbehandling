@@ -31,8 +31,8 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import {
   hentAktivitspliktVurderingForOppgave,
-  opprettAktivitetspliktAktivitetsgrad,
-  opprettAktivitetspliktUnntak,
+  redigerAktivitetsgradForOppgave,
+  redigerAktivitetspliktUnntakForOppgave,
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { Toast } from '~shared/alerts/Toast'
@@ -56,8 +56,8 @@ export const AktivitetspliktInfoModal = ({
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
 
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
-  const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitetspliktAktivitetsgrad)
-  const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitetspliktUnntak)
+  const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(redigerAktivitetsgradForOppgave)
+  const [opprettetUnntak, opprettUnntak] = useApiCall(redigerAktivitetspliktUnntakForOppgave)
   const [hentet, hent] = useApiCall(hentAktivitspliktVurderingForOppgave)
   const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
 

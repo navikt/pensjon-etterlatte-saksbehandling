@@ -79,7 +79,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
       <>
         {redigeres ? (
           <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
-            <VStack gap="4" width="30rem">
+            <VStack gap="4" width="41.5rem">
               <ControlledRadioGruppe
                 name="utfall"
                 control={control}
@@ -129,11 +129,11 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
         {klage.initieltUtfall?.utfallMedBegrunnelse?.utfall === Utfall.STADFESTE_VEDTAK && !klage.utfall && (
           <Alert variant="info">
             <Heading level="2" size="small">
-              Du må sende brev til klager
+              Informer om saksbehandlingstid
             </Heading>
             <BodyLong spacing>
-              Siden vurderingen er satt til {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]} må du opprette et manuelt
-              kvitteringsbrev til klager for å opplyse om saksbehandlingstid.
+              Siden vurderingen er satt til &quot;{teksterKlageutfall[Utfall.STADFESTE_VEDTAK].toLowerCase()}&quot; må
+              du manuelt informere klager om saksbehandlingstid hvis den går ut over 4 uker.
             </BodyLong>
             <ButtonNavigerTilBrev klage={klage} />
           </Alert>

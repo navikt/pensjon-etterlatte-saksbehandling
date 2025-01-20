@@ -47,6 +47,6 @@ internal class StartUthentingFraSoeknadRiverTest {
 
         assertEquals(1, inspector.message(0).get(SAK_ID_KEY).intValue())
         assertEquals("f525f2f7-e246-43d7-b61a-5f0757472916", inspector.message(0).get(BEHANDLING_ID_KEY).asText())
-        assertEquals(11, inspector.message(0).get(OPPLYSNING_KEY).size())
+        assertEquals(10, inspector.message(0).get(OPPLYSNING_KEY).size())
     }
 }

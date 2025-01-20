@@ -8,12 +8,14 @@ import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.toList
+import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -22,6 +24,8 @@ import java.util.UUID
 class AktivitetspliktDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun finnSenesteAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -161,7 +165,7 @@ class AktivitetspliktDao(
         }
     }
 
-    fun oppdaterAktivitet(
+    fun oppdaterAktivitetForBehandling(
         behandlingId: UUID,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
@@ -183,7 +187,11 @@ class AktivitetspliktDao(
             stmt.setObject(6, krevIkkeNull(aktivitet.id) { "Aktivitet id mangler" })
             stmt.setObject(7, behandlingId)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Kunne ikke endre aktivitet for behandlingId: $behandlingId id: ${aktivitet.id}"
+            }
+            endret
         }
     }
 
@@ -209,7 +217,10 @@ class AktivitetspliktDao(
             stmt.setObject(6, krevIkkeNull(aktivitet.id) { "Aktivitet id mangler" })
             stmt.setSakId(7, sakId)
 
-            stmt.executeUpdate()
+            val endret = stmt.executeUpdate()
+            krev(endret == 1) {
+                "Kunne ikke endre aktivitet for sakId: $sakId id: ${aktivitet.id}"
+            }
         }
     }
 
@@ -228,7 +239,10 @@ class AktivitetspliktDao(
             stmt.setObject(1, aktivitetId)
             stmt.setObject(2, behandlingId)
 
-            stmt.executeUpdate()
+            val slettet = stmt.executeUpdate()
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetId: $aktivitetId for behandlingId: $behandlingId")
+            }
         }
     }
 
@@ -247,7 +261,10 @@ class AktivitetspliktDao(
             stmt.setObject(1, aktivitetId)
             stmt.setSakId(2, sakId)
 
-            stmt.executeUpdate()
+            val slettet = stmt.executeUpdate()
+            if (slettet != 1) {
+                logger.warn("Kunne ikke slette aktivitetId: $aktivitetId for sakId: $sakId")
+            }
         }
     }
 

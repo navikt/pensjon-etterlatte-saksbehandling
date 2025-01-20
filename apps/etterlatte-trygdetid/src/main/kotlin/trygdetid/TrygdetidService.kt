@@ -328,7 +328,7 @@ class TrygdetidServiceImpl(
             avdoede
                 .map { avdoed ->
                     val fnr =
-                        requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                        krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                             "Kunne ikke hente identifikator for avdød til trygdetid i " +
                                 "behandlingen med id=$behandlingId"
                         }
@@ -375,7 +375,7 @@ class TrygdetidServiceImpl(
         return avdoede
             .map { avdoed ->
                 val fnr =
-                    requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                    krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                         "Kunne ikke hente identifikator for avdød til trygdetid i " +
                             "behandlingen med id=$behandlingId"
                     }

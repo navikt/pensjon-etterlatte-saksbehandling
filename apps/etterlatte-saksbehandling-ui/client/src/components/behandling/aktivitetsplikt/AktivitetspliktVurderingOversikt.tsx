@@ -2,7 +2,7 @@ import { BodyShort, Box, Heading, VStack } from '@navikt/ds-react'
 import React from 'react'
 import { AktivitetspliktStatusTagOgGyldig } from '~shared/tags/AktivitetspliktStatusOgGyldig'
 import { useAktivitetspliktOppgaveVurdering } from '~components/aktivitetsplikt/AktivitetspliktOppgaveVurderingRoutes'
-import { AktivitetspliktOppgaveType } from '~shared/types/Aktivitetsplikt'
+import { AktivitetspliktOppgaveVurderingType } from '~shared/types/Aktivitetsplikt'
 
 export const AktivitetspliktVurderingOversikt = () => {
   const { vurdering, vurderingType } = useAktivitetspliktOppgaveVurdering()
@@ -12,7 +12,7 @@ export const AktivitetspliktVurderingOversikt = () => {
         <VStack gap="4">
           <Heading level="1" size="large">
             Infobrev om aktivitetsplikt{' '}
-            {vurderingType === AktivitetspliktOppgaveType.TOLV_MAANEDER ? 'ved 12 måneder' : 'ved 6 måneder'}
+            {vurderingType === AktivitetspliktOppgaveVurderingType.TOLV_MAANEDER ? 'ved 12 måneder' : 'ved 6 måneder'}
           </Heading>
           <Heading size="medium" level="2">
             Du skal nå vurdere brukers aktivitetsgrad

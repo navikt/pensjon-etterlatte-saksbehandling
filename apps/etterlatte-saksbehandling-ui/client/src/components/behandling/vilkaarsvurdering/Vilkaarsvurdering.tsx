@@ -138,9 +138,14 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
               redigerbar={redigerbar && !vilkaarsvurdering.resultat && !redigerTotalvurdering}
             />
           ))}
-          <Box paddingInline="16">
-            <Tilbakemelding />
-          </Box>
+          {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+            <Box paddingInline="16">
+              <Tilbakemelding
+                spoersmaal="Hvor fornøyd er du med informasjonen fra bruker i søknaden?"
+                clickEvent={ClickEvent.TILBAKEMELDING_INFORMASJON_FRA_BRUKER}
+              />
+            </Box>
+          )}
 
           <Resultat
             setRedigerTotalvurdering={setRedigerTotalvurdering}

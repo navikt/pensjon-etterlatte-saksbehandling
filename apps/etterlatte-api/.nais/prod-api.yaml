@@ -127,31 +127,37 @@ spec:
           permissions:
             roles:
               - les-oms-samordning-vedtak
+              - les-oms-vedtak
               - les-bp-samordning-vedtak
+              - les-bp-vedtak
         - application: pensjon-selvbetjening-soknad-alder-backend
           namespace: pensjonselvbetjening
           cluster: prod-gcp
           permissions:
             roles:
               - les-oms-samordning-vedtak
+              - les-oms-vedtak
         - application: alderspensjon-endringssoknad-backend
           namespace: pensjonselvbetjening
           cluster: prod-gcp
           permissions:
             roles:
               - les-oms-samordning-vedtak
+              - les-oms-vedtak
         - application: pensjonskalkulator-backend
           namespace: pensjonskalkulator
           cluster: prod-gcp
           permissions:
             roles:
               - les-oms-samordning-vedtak
+              - les-oms-vedtak
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
           cluster: prod-gcp
           permissions:
             roles:
               - les-oms-samordning-vedtak
+              - les-oms-vedtak
         - application: eessi-pensjon-journalforing
           namespace: eessipensjon
           cluster: prod-gcp

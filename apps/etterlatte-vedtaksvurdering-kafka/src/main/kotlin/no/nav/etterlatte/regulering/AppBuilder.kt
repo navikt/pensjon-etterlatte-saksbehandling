@@ -12,6 +12,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
@@ -26,9 +27,9 @@ import no.nav.etterlatte.regulering.VedtakKafkaKey.ETTERLATTE_VEDTAK_URL
 class AppBuilder(
     props: Miljoevariabler,
 ) {
-    private val vedtakUrl = requireNotNull(props[ETTERLATTE_VEDTAK_URL]) { "Mangler vedtak url " }
-    private val utbetalingUrl = requireNotNull(props[ETTERLATTE_UTBETALING_URL]) { "Mangler utbetaling url " }
-    private val brevUrl = requireNotNull(props[ETTERLATTE_BREV_API_URL]) { "Mangler brev-api url " }
+    private val vedtakUrl = krevIkkeNull(props[ETTERLATTE_VEDTAK_URL]) { "Mangler vedtak url " }
+    private val utbetalingUrl = krevIkkeNull(props[ETTERLATTE_UTBETALING_URL]) { "Mangler utbetaling url " }
+    private val brevUrl = krevIkkeNull(props[ETTERLATTE_BREV_API_URL]) { "Mangler brev-api url " }
     private val env = Miljoevariabler.systemEnv()
 
     fun lagVedtakKlient(): VedtakServiceImpl = VedtakServiceImpl(vedtakHttpKlient, vedtakUrl)

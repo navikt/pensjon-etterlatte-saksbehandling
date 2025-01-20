@@ -102,7 +102,10 @@ fun Route.notatRoute(
 
         route("/referanse/{referanse}") {
             get {
-                val referanse = checkNotNull(call.parameters["referanse"])
+                val referanse =
+                    krevIkkeNull(call.parameters["referanse"]) {
+                        "Kan ikke hente notat uten referanse"
+                    }
 
                 val notater = nyNotatService.hentForReferanse(referanse)
                 call.respond(notater)

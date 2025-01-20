@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.objectMapper
@@ -101,8 +102,8 @@ class BeregningRepository(
         if (overstyrBeregning.status == OverstyrBeregningStatus.IKKE_AKTIV) {
             return null
         }
-        return checkNotNull(hentOverstyrBeregning(overstyrBeregning.sakId)) {
-            "Vi opprettet en overstyrt beregning på sakId=${overstyrBeregning.sakId} akkurat nå men den finnes ikke >:("
+        return krevIkkeNull(hentOverstyrBeregning(overstyrBeregning.sakId)) {
+            "Vi opprettet en overstyrt beregning på sakId=${overstyrBeregning.sakId} akkurat nå men den finnes ikke"
         }
     }
 

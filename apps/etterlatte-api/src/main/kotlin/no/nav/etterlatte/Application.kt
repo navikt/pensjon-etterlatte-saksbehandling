@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import io.ktor.server.application.install
+import io.ktor.server.plugins.swagger.swaggerUI
 import no.nav.etterlatte.behandling.sak.behandlingSakRoutes
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.appName
@@ -28,6 +29,9 @@ class Server(
         initEmbeddedServer(
             httpPort = applicationContext.httpPort,
             applicationConfig = applicationContext.config,
+            routes = {
+                swaggerUI(path = "api/v1/vedtak/swagger", swaggerFile = "vedtakSwaggerV1.yaml")
+            },
         ) {
             samordningVedtakRoute(
                 samordningVedtakService = applicationContext.samordningVedtakService,

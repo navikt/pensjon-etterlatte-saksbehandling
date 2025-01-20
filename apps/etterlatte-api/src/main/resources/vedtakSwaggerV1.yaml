@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: Etterlatte Vedtak API
+  description: API for enkel informasjon om vedtak for Barnepensjon og Omstillingsstønad
+  version: 1.0.0
+
+servers:
+  - url: https://etterlatte-api.intern.dev.nav.no/api/v1/vedtak/swagger
+  - url: https://etterlatte-api.intern.prod.nav.no/api/v1/vedtak/swagger
+
+paths:
+  /api/v1/vedtak:
+    post:
+      summary: Liste med vedtak for person
+      description: Liste med vedtak av type innvilgelse, avslag, endring og opphør for en person
+      requestBody:
+        description: Fødselsnummer til person vedtak gjelder
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FoedselsnummerDTO"
+      responses:
+        "200": # status code
+          description: Liste med vedtak for person
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VedtakDto'
+
+components:
+  schemas:
+
+    FoedselsnummerDTO:
+      type: object
+      properties:
+        foedselsnummer:
+          type: string
+    
+    VedtakDto:
+      type: object
+      properties:
+        vedtak:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vedtak'
+
+    Vedtak:
+      type: object
+      properties:
+        sakId:
+          type: integer
+          format: int64
+        sakType:
+          type: string
+        virkningstidspunkt:
+          type: string
+          format: year-month
+          example: "2025-01"
+        type:
+          $ref: '#/components/schemas/VedtakType'
+        utbetaling:
+          type: array
+          items:
+            $ref: '#/components/schemas/VedtakUtbetaling'
+
+    VedtakType:
+      type: string
+      enum:
+        - INNVILGELSE
+        - OPPHOER
+        - AVSLAG
+        - ENDRING
+
+    VedtakUtbetaling:
+      type: object
+      properties:
+        periode:
+          $ref: '#/components/schemas/Periode'
+        beloep:
+          type: string
+          format: decimal
+
+    Periode:
+      type: object
+      properties:
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date

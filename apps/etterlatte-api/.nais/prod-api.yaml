@@ -159,6 +159,20 @@ spec:
             roles:
               - les-oms-sak
               - les-bp-sak
+        - application: eessi-pensjon-prefill
+          namespace: eessipensjon
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
+        - application: eessi-pensjon-journalforing
+          namespace: eessipensjon
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+              - les-bp-vedtak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

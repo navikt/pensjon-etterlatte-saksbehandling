@@ -1,10 +1,12 @@
 package no.nav.etterlatte.brev.behandlingklient
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.retry
@@ -51,4 +53,26 @@ class OppgaveKlient(
                 }
             }
         }
+
+    suspend fun hentOppgaverForSak(
+        sakId: SakId,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<OppgaveIntern> {
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/oppgaver/sak/${sakId.sakId}/oppgaver",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Henting av oppgaver for sak med id=$sakId feilet", e)
+        }
+    }
 }

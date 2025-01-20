@@ -93,7 +93,7 @@ class BrevService(
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
             logger.error(
-                "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
+                "Feil oppsto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
                 e,
             )
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)

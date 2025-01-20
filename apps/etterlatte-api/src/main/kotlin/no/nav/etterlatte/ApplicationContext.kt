@@ -5,7 +5,7 @@ import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.behandling.sak.BehandlingKlient
 import no.nav.etterlatte.behandling.sak.BehandlingService
-import no.nav.etterlatte.behandling.sak.VedtaksvurderingKlientSak
+import no.nav.etterlatte.behandling.sak.VedtaksvurderingSakKlient
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
@@ -32,7 +32,7 @@ class ApplicationContext(
         )
     }
     private val vedtaksvurderingSamordningKlient = VedtaksvurderingSamordningKlient(config, vedtaksvurderingHttpClient)
-    private val vedtaksvurderingKlientSak = VedtaksvurderingKlientSak(config, vedtaksvurderingHttpClient)
+    private val vedtaksvurderingSakKlient = VedtaksvurderingSakKlient(config, vedtaksvurderingHttpClient)
 
     private val tpHttpClient =
         httpClientClientCredentials(
@@ -54,7 +54,7 @@ class ApplicationContext(
         )
     private val behandlingKlient = BehandlingKlient(config, behandlingHttpClient)
 
-    val behandlingService = BehandlingService(behandlingKlient, vedtaksvurderingKlientSak)
+    val behandlingService = BehandlingService(behandlingKlient, vedtaksvurderingSakKlient)
     val vedtakKlient = VedtaksvurderingKlient(config, vedtaksvurderingHttpClient)
     val vedtakService = VedtakService(vedtakKlient)
 }

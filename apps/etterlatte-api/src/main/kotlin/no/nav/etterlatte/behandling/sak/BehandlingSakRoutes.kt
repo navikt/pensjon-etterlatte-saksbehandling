@@ -52,7 +52,7 @@ fun Route.behandlingSakRoutes(
             }
         }
 
-        route("oms/har_loepende_sak") {
+        route("oms/har-loepende-sak") {
             install(AuthorizationPlugin) {
                 accessPolicyRolesEllerAdGrupper = setOf("les-oms-sak")
             }

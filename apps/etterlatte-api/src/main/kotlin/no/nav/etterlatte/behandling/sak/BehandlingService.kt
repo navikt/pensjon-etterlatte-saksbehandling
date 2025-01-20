@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
-    private val vedtaksvurderingKlientSak: VedtaksvurderingKlientSak,
+    private val vedtaksvurderingKlientSak: VedtaksvurderingSakKlient,
 ) {
     suspend fun hentSakforPerson(ident: FoedselsnummerDTO): List<SakId> = behandlingKlient.hentSakForPerson(ident)
 

@@ -14,11 +14,11 @@ import no.nav.etterlatte.samordning.vedtak.VedtakvurderingUgyldigForesporselExce
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class VedtaksvurderingKlientSak(
+class VedtaksvurderingSakKlient(
     config: Config,
     private val httpClient: HttpClient,
 ) {
-    private val logger = LoggerFactory.getLogger(VedtaksvurderingKlientSak::class.java)
+    private val logger = LoggerFactory.getLogger(VedtaksvurderingSakKlient::class.java)
 
     private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/api/vedtak"
 

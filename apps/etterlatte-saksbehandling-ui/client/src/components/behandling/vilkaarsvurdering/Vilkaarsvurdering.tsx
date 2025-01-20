@@ -97,8 +97,6 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
         </Heading>
       </Box>
 
-      <Tilbakemelding />
-
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
         <>
           {visHarGammelVilkaarsvurdering() && (
@@ -140,6 +138,9 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
               redigerbar={redigerbar && !vilkaarsvurdering.resultat && !redigerTotalvurdering}
             />
           ))}
+          <Box paddingInline="16">
+            <Tilbakemelding />
+          </Box>
 
           <Resultat
             setRedigerTotalvurdering={setRedigerTotalvurdering}

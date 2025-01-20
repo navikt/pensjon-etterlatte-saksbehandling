@@ -3,8 +3,8 @@ export const EkstatiskEmoji = () => {
     <svg
       aria-hidden
       role="img"
-      width="48"
-      height="47"
+      width="40"
+      height="37"
       viewBox="0 0 48 47"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

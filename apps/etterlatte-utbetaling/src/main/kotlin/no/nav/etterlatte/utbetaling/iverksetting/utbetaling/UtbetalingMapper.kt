@@ -96,6 +96,7 @@ class UtbetalingMapper(
             when (utbetalingsperiode.regelverk) {
                 Regelverk.REGELVERK_TOM_DES_2023 -> OppdragKlassifikasjonskode.BARNEPEFOER2024_OPTP
                 Regelverk.REGELVERK_FOM_JAN_2024 -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
+                else -> throw Exception("Mangler regelverk i utbetalingsperiode")
             }
         }
     }

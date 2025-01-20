@@ -10,11 +10,11 @@ import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.common.sak.SakId
 
 fun Route.oppgaveRoute(oppgaveService: OppgaveService) {
     route("/api/v1/oppgave") {
-        route("/ep-journalfoering") {
+        route("/journalfoering") {
             install(AuthorizationPlugin) {
                 accessPolicyRolesEllerAdGrupper = setOf("opprett-jfr-oppgave")
             }
@@ -23,11 +23,11 @@ fun Route.oppgaveRoute(oppgaveService: OppgaveService) {
                 val request = call.receive<OpprettJournalfoeringOppgave>()
 
                 oppgaveService.opprettOppgave(
-                    sakId,
+                    sakId = request.sakId,
                     NyOppgaveDto(
                         oppgaveKilde = OppgaveKilde.EESSI,
                         oppgaveType = OppgaveType.JOURNALFOERING,
-                        merknad = request.merknad,
+                        merknad = request.beskrivelse,
                         referanse = request.journalpostId,
                     ),
                 )
@@ -37,6 +37,7 @@ fun Route.oppgaveRoute(oppgaveService: OppgaveService) {
 }
 
 internal data class OpprettJournalfoeringOppgave(
+    val sakId: SakId,
     val journalpostId: String,
-    val merknad: String,
+    val beskrivelse: String,
 )

@@ -25,11 +25,12 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 
 ## API
 
-| Endepunkt                      | Headers                           | Body                             | Responstype           | Beskrivelse                                                                                                                         |
-|:-------------------------------|-----------------------------------|----------------------------------|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| /api/vedtak?fomDato=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }``` | Samordningsvedtak[]   | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
-| /api/vedtak?virkFom=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }``` | Samordningsvedtak[]   | **DEPRECATED** Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                   |
-| /api/vedtak/{nav-vedtak-id}    | tpnr                              |                                  | Samordningsvedtak     | Henter ut informasjon om et spesifikt vedtak. VedtaksIDen kommer fra samordningskøen hvor det varsles løpende om vedtak som gjøres. |
+| Endepunkt                      | Headers                           | Body                                                              | Responstype           | Beskrivelse                                                                                                                         |
+|:-------------------------------|-----------------------------------|-------------------------------------------------------------------|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| /api/vedtak?fomDato=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }```                                  | Samordningsvedtak[]   | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
+| /api/vedtak?virkFom=YYYY-MM-DD | fnr(fases ut, se body) <br/> tpnr | ```{ foedselsnummer: String }```                                  | Samordningsvedtak[]   | **DEPRECATED** Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                   |
+| /api/vedtak/{nav-vedtak-id}    | tpnr                              |                                                                   | Samordningsvedtak     | Henter ut informasjon om et spesifikt vedtak. VedtaksIDen kommer fra samordningskøen hvor det varsles løpende om vedtak som gjøres. |
+| /api/v1/oppgave/journalfoering |                                   | ```{ sakId: Long, journalpostId: String, beskrivelse: String }``` | arst | Oppretter journalføringsoppgave i Gjenny                                                                                            |
 
 | Header                                 | Beskrivelse                      |
 |----------------------------------------|----------------------------------|

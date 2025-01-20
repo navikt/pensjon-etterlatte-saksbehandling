@@ -38,10 +38,11 @@ class OppgaveKlient(
                     setBody(oppgave)
                 }.body<OppgaveIntern>()
         } catch (e: ClientRequestException) {
-            logger.error("Det oppstod en feil ved opprettelse av oppgave")
+            logger.error("Det oppstod en feil ved opprettelse av oppgave for sak $sakId")
+
             when (e.response.status) {
-                HttpStatusCode.Unauthorized -> throw BehandlingManglendeTilgang("Behandling: Ikke tilgang")
-                HttpStatusCode.BadRequest -> throw BehandlingUgyldigForespoersel("Behandling: Ugyldig forespørsel")
+                HttpStatusCode.Unauthorized -> throw BehandlingManglendeTilgang("Oppgave: Ikke tilgang")
+                HttpStatusCode.BadRequest -> throw BehandlingUgyldigForespoersel("Oppgave: Ugyldig forespørsel")
                 else -> throw e
             }
         }

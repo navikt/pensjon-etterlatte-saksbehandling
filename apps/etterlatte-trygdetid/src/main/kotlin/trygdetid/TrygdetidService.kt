@@ -1020,7 +1020,7 @@ class TrygdetidServiceImpl(
                     Kilde: ${trygdetiderMaal.joinToString { it.ident }}
                     """,
                 )
-                "Trygdetidene gjelder forskjellige avdøde"
+                "Trygdetidene gjelder forskjellige avdøde. Se sikkerlogg for detaljer."
             }
 
             // TODO Hva om trygdetid har f.x. overstyrt poengår fra før?

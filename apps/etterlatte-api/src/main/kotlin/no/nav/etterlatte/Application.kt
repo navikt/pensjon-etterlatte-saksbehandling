@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.appName
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.initialisering.run
+import no.nav.etterlatte.oppgave.oppgaveRoute
 import no.nav.etterlatte.samordning.serverRequestLoggerPlugin
 import no.nav.etterlatte.samordning.userIdMdcPlugin
 import no.nav.etterlatte.samordning.vedtak.barnepensjonVedtakRoute
@@ -46,6 +47,8 @@ class Server(
             )
 
             vedtakRoute(vedtakService = applicationContext.vedtakService)
+
+            oppgaveRoute(applicationContext.oppgaveService)
 
             install(userIdMdcPlugin)
             install(serverRequestLoggerPlugin)

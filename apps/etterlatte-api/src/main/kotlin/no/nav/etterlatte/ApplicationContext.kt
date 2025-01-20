@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.oppgave.OppgaveKlient
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.samordning.vedtak.SamordningVedtakService
 import no.nav.etterlatte.samordning.vedtak.TjenestepensjonKlient
 import no.nav.etterlatte.samordning.vedtak.VedtaksvurderingSamordningKlient
@@ -57,4 +59,7 @@ class ApplicationContext(
     val behandlingService = BehandlingService(behandlingKlient, vedtaksvurderingSakKlient)
     val vedtakKlient = VedtaksvurderingKlient(config, vedtaksvurderingHttpClient)
     val vedtakService = VedtakService(vedtakKlient)
+
+    private val oppgaveKlient = OppgaveKlient(config, behandlingHttpClient)
+    val oppgaveService = OppgaveService(oppgaveKlient)
 }

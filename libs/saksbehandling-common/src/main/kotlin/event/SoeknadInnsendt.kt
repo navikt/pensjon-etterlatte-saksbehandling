@@ -6,7 +6,6 @@ interface ISoeknadInnsendt {
     val templateKey get() = "@template"
     val lagretSoeknadIdKey get() = "@lagret_soeknad_id"
     val hendelseGyldigTilKey get() = "@hendelse_gyldig_til"
-    val adressebeskyttelseKey get() = "@adressebeskyttelse"
     val fnrSoekerKey get() = "@fnr_soeker"
     val dokarkivReturKey get() = "@dokarkivRetur"
 }

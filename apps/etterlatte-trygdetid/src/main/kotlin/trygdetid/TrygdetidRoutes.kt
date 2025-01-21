@@ -48,7 +48,7 @@ private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
     get() =
         try {
             this.call.uuid(TRYGDETIDID_CALL_PARAMETER)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             throw UgyldigForespoerselException(
                 "MANGLER_TRYGDETID_ID",
                 "Kunne ikke lese ut parameteret trygdetidId",
@@ -426,8 +426,20 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto =
                         tidspunkt = kilde.tidspunkt.toString(),
                         ident = kilde.type,
                     )
+                is Grunnlagsopplysning.Ufoeretrygd ->
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.type,
+                    )
+                is Grunnlagsopplysning.Alderspensjon ->
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.type,
+                    )
 
-                else -> throw UnsupportedOperationException("Kilde for trygdetid maa vaere saksbehandler eller pesys")
+                else -> throw UnsupportedOperationException(
+                    "Kilde for trygdetid maa vaere saksbehandler, Ufoeretrygd, Alderspensjon eller pesys, var $kilde",
+                )
             },
         begrunnelse = begrunnelse,
         poengInnAar = poengInnAar,

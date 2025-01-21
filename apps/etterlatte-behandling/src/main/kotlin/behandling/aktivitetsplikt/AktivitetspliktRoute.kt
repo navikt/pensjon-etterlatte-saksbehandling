@@ -20,9 +20,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -277,21 +275,6 @@ internal fun Route.aktivitetspliktRoutes(
     }
 
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
-        get {
-            logger.info("Henter aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
-            val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForOppgaveGammel(oppgaveId) }
-                    ?: throw VurderingIkkeFunnetException(sakId, oppgaveId)
-            call.respond(vurdering)
-        }
-
-        get("/ny") {
-            logger.info("Henter ny aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
-            val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForOppgave(oppgaveId) }
-            call.respond(vurdering)
-        }
-
         route("/aktivitetsgrad") {
             post {
                 kunSkrivetilgang {
@@ -388,14 +371,6 @@ internal fun Route.aktivitetspliktRoutes(
             call.respond(vurdering)
         }
 
-        get("/ny") {
-            logger.info("Henter ny aktivitetsplikt vurdering for behandlingId=$behandlingId")
-            val vurdering =
-                inTransaction { aktivitetspliktService.hentVurderingForBehandling(behandlingId) }
-                    ?: throw VurderingIkkeFunnetException(sakId, behandlingId)
-            call.respond(vurdering)
-        }
-
         post("/aktivitetsgrad-unntak") {
             kunSkrivetilgang {
                 logger.info("Oppretter aktivitetsgrad og unntak for sakId=$sakId og behandlingId=$behandlingId")
@@ -485,8 +460,3 @@ internal fun Route.aktivitetspliktRoutes(
 data class BrevIdDto(
     val brevId: BrevID? = null,
 )
-
-class VurderingIkkeFunnetException(
-    sakId: SakId,
-    referanse: UUID,
-) : IkkeFunnetException("VURDERING_IKKE_FUNNET", "Fant ikke vurdering i sak=$sakId med referanse=$referanse")

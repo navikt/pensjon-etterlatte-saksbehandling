@@ -1,5 +1,4 @@
 import { KildeSaksbehandler } from '~shared/types/kilde'
-import { JaNei } from '~shared/types/ISvar'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { ISak } from '~shared/types/sak'
 import { IBrevAktivitetspliktDto } from '~shared/api/aktivitetsplikt'
@@ -141,26 +140,6 @@ export interface IOpprettAktivitetspliktAktivitetsgrad {
 export enum AktivitetspliktOppgaveVurderingType {
   SEKS_MAANEDER = 'SEKS_MAANEDER',
   TOLV_MAANEDER = 'TOLV_MAANEDER',
-}
-
-export interface AktivitetspliktVurderingValues {
-  aktivitetsplikt: JaNei | null
-  aktivitetsgrad: AktivitetspliktVurderingType | ''
-  unntak: JaNei | null
-  midlertidigUnntak: AktivitetspliktUnntakType | ''
-  fom?: Date | null
-  tom?: Date | null
-  beskrivelse: string
-}
-
-export const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
-  aktivitetsplikt: null,
-  aktivitetsgrad: '',
-  unntak: null,
-  midlertidigUnntak: '',
-  fom: new Date(),
-  tom: undefined,
-  beskrivelse: '',
 }
 
 export interface AktivitetspliktOppgaveVurdering {

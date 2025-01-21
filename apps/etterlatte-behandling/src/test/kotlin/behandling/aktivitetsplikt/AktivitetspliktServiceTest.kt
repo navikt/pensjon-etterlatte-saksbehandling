@@ -372,21 +372,6 @@ class AktivitetspliktServiceTest {
                 service.upsertUnntakForOppgave(unntak, behandlingId, sakId, brukerTokenInfo)
             }
         }
-
-        @Test
-        fun `Skal hente en vurdering med unntak basert paa behandlingId`() {
-            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns emptyList()
-            every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns listOf(mockk())
-
-            val vurdering = service.hentVurderingForBehandling(behandlingId)
-
-            vurdering shouldNotBe null
-            vurdering?.aktivitet shouldBe emptyList()
-            vurdering?.unntak?.isEmpty() shouldBe false
-
-            verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) }
-            verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
-        }
     }
 
     @Nested

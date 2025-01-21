@@ -80,6 +80,7 @@ components:
         beloep:
           type: string
           format: decimal
+          description: BigDecimal
 
     Periode:
       type: object

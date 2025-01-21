@@ -98,9 +98,10 @@ data class OmstillingsstoenadInnvilgelse(
                         erYrkesskade = trygdetid.erYrkesskade(),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
-                    doedsdatoEllerOpphoertPleieforhold
-                        .plusMonths(4)
-                        .isAfter(avkortingsinfo.virkningsdato),
+                    avkortingsinfo.virkningsdato.isBefore(
+                        doedsdatoEllerOpphoertPleieforhold
+                            .plusMonths(4),
+                    ),
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,

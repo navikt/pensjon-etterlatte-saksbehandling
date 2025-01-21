@@ -1,27 +1,37 @@
 # Etterlatte API
 
-App som tilbyr endepunkter til eksterne tjenester. 
+App som tilbyr endepunkter til eksterne tjenester.
+
+## Vedtak API
+
+[Dokumentert med swagger](src/main/resources/vedtakSwaggerV1.yaml)
 
 
 
 ---
+
 # samordning-vedtak-api
 
-Omstillingsstønad er en samordningspliktig ytelse. Applikasjonen tilbyr tjenester for å understøtte informasjonsbehovet til tjenestepensjonsleverandørene (KLP, SPK, m.fl.), slik at de kan gjøre sine vurderinger.
-
+Omstillingsstønad er en samordningspliktig ytelse. Applikasjonen tilbyr tjenester for å understøtte informasjonsbehovet
+til tjenestepensjonsleverandørene (KLP, SPK, m.fl.), slik at de kan gjøre sine vurderinger.
 
 ## Autentisering
+
 #### Maskinporten
+
 Nytt scope for etterlatte-api med Maskinporten _nav:etterlatteytelser/vedtaksinformasjon.read_
 
-etterlatte-samordning-vedtak(gammel og skal saneres) krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:vedtaksinformasjon.read_
+etterlatte-samordning-vedtak(gammel og skal saneres) krever token utstedt av Maskinporten med scope _nav:
+etterlatteytelser:vedtaksinformasjon.read_
 
 #### Azure & Tokenx
+
 For interne må det legges inn i yaml filene slik som beskrevet her https://docs.nais.io/auth/entra-id/
 
 ### Autorisasjon
 
-Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregisteret som gjelder kallende leverandør, personen vedtaket gjelder og på vedtakets virkningsdato.
+Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregisteret som gjelder kallende leverandør,
+personen vedtaket gjelder og på vedtakets virkningsdato.
 
 ## API
 
@@ -37,21 +47,20 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 | tpnr                                   | kallende tjenestepensjonsordning |
 | **DEPRECATED(skal sendes i body)** fnr | fødselsnummer til aktuell person |
 
-
 #### Informasjonsmodell
 
 ##### Samordningsvedtak
 
-| Felt             | Type        | Beskrivelse               |
-|:-----------------|:------------|:--------------------------|
-| vedtakId         | int         | Vedtakets unike id        |
-| sakstype         | string      | OMS                       |
-| virkningsdato    | YYYY-MM-DD  | Dato vedtaket gjelder fra |
-| opphoersdato     | YYYY-MM-DD  | Eventuell sluttdato       |
-| type             | string      | START/ENDRING/OPPHOER     |
-| arsak*           | string      | INNTEKT/REGULERING/ANNET  |
-| anvendtTrygdetid | int         | Avdødes trygdetid         |
-| perioder         | Periode[]   | Periodiserte beløp        |
+| Felt             | Type       | Beskrivelse               |
+|:-----------------|:-----------|:--------------------------|
+| vedtakId         | int        | Vedtakets unike id        |
+| sakstype         | string     | OMS                       |
+| virkningsdato    | YYYY-MM-DD | Dato vedtaket gjelder fra |
+| opphoersdato     | YYYY-MM-DD | Eventuell sluttdato       |
+| type             | string     | START/ENDRING/OPPHOER     |
+| arsak*           | string     | INNTEKT/REGULERING/ANNET  |
+| anvendtTrygdetid | int        | Avdødes trygdetid         |
+| perioder         | Periode[]  | Periodiserte beløp        |
 
 ##### Periode
 
@@ -72,10 +81,10 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 | prod-nav      | etterlatte-api.intern.nav.no      |
 
 **deprecated** (fjernes 1 mars 2025)
-| Miljø | Ingress                                         |
+| Miljø | Ingress |
 |:------|:------------------------------------------------|
-| dev   | etterlatte-samordning-vedtak.ekstern.dev.nav.no |
-| prod  | etterlatte-samordning-vedtak.nav.no             |    
+| dev | etterlatte-samordning-vedtak.ekstern.dev.nav.no |
+| prod | etterlatte-samordning-vedtak.nav.no |
 
 ## Feilkoder
 
@@ -115,30 +124,37 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, men da på `/api/pensjon/vedtak` osv.
 
 ### Løpende omstillingsstønad
-Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før angitt dato, eller starter måneden etterpå så vil svaret være _nei_. **NB!** Merk at denne tjenesten _ikke gjør noe tolkning av faktisk utbetaling_ for å gi svaret, kun om ytelsen er innvilget. Så for eksempel om ytelsen er fullstendig avkortet, så vil svaret likevel være ja. 
-- `GET /api/pensjon/vedtak/har-loepende-oms?paaDato=YYYY-MM-DD` 
-  - fnr i body:
-  
-    ```{ foedselsnummer: String }```
-  - svarformat: 
-     ```
-     {
-       "omstillingsstoenad": true
-     }
-    ```
-    
+
+Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før
+angitt dato, eller starter måneden etterpå så vil svaret være _nei_. **NB!** Merk at denne tjenesten _ikke gjør noe
+tolkning av faktisk utbetaling_ for å gi svaret, kun om ytelsen er innvilget. Så for eksempel om ytelsen er fullstendig
+avkortet, så vil svaret likevel være ja.
+
+- `GET /api/pensjon/vedtak/har-loepende-oms?paaDato=YYYY-MM-DD`
+    - fnr i body:
+
+      ```{ foedselsnummer: String }```
+    - svarformat:
+       ```
+       {
+         "omstillingsstoenad": true
+       }
+      ```
+
 ### Løpende barnepensjon
+
 Som for omstillingsstønad.
+
 - `POST /api/barnepensjon/har-loepende-bp?paaDato=YYYY-MM-DD`
-  - fnr i body:
-  
-    ```{ foedselsnummer: String }```
-  - svarformat:
-     ```
-     {
-       "barnepensjon": true
-     }
-    ```
+    - fnr i body:
+
+      ```{ foedselsnummer: String }```
+    - svarformat:
+       ```
+       {
+         "barnepensjon": true
+       }
+      ```
 
 ## Kom i gang
 
@@ -146,13 +162,13 @@ Som for omstillingsstønad.
 
 Les [README](../../README.md) på rot i prosjektet.
 
-
 ## Bygg og deploy
 
 Appen bygges og deployes automatisk ved commits til `apps/etterlatte-api/**`.
 
 - Deployes både til dev og prod automatisk ved merge til main.
-- For å trigge manuell deploy (miljø kan velges) kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
+- For å trigge manuell deploy (miljø kan velges) kan du gå
+  til `Actions -> (velg workflow) -> Run workflow from <branch>`
 
 ## Henvendelser
 

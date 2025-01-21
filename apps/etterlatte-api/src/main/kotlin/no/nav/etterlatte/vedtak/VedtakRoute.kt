@@ -38,26 +38,26 @@ fun Route.vedtakRoute(vedtakService: VedtakService) {
     }
 }
 
-data class VedtakForEksterntDto(
-    val vedtak: List<VedtakEksternt>,
+data class VedtakTilPerson(
+    val vedtak: List<Vedtak>,
 )
 
-data class VedtakEksternt(
+data class Vedtak(
     val sakId: Long,
     val sakType: String,
     val virkningstidspunkt: YearMonth,
-    val type: VedtakTypeEksternt,
-    val utbetaling: List<VedtakEksterntUtbetaling>,
+    val type: VedtakType,
+    val utbetaling: List<VedtakUtbetaling>,
 )
 
-enum class VedtakTypeEksternt {
+enum class VedtakType {
     INNVILGELSE,
     OPPHOER,
     AVSLAG,
     ENDRING,
 }
 
-data class VedtakEksterntUtbetaling(
+data class VedtakUtbetaling(
     val periode: Periode,
     val beloep: BigDecimal?,
 )

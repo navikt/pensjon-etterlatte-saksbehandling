@@ -41,7 +41,8 @@ spec:
       claims:
         groups:
           # AD-gruppe for utviklere på Team Etterlatte (etterlatte@nav.no)
-          - id: 650684ff-8107-4ae4-98fc-e18b5cf3188b
+          - id: 650684ff-8107-4ae4-98fc-e18b5cf3188b # etterlatte
+          - id: 1a424f32-16a4-4b97-9d77-3e9e781a887e # (DG) NAV Team Etterlatte
     sidecar:
       enabled: true
       autoLogin: true

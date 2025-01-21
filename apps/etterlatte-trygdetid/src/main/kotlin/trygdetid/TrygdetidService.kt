@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -160,7 +161,7 @@ fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
     TrygdetidPeriodePesys(
         isoCode = land!!,
         fra = fomDato,
-        til = fomDato,
+        til = tomDato,
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
@@ -328,7 +329,7 @@ class TrygdetidServiceImpl(
             avdoede
                 .map { avdoed ->
                     val fnr =
-                        requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                        krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                             "Kunne ikke hente identifikator for avdød til trygdetid i " +
                                 "behandlingen med id=$behandlingId"
                         }
@@ -375,7 +376,7 @@ class TrygdetidServiceImpl(
         return avdoede
             .map { avdoed ->
                 val fnr =
-                    requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                    krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                         "Kunne ikke hente identifikator for avdød til trygdetid i " +
                             "behandlingen med id=$behandlingId"
                     }
@@ -437,9 +438,9 @@ class TrygdetidServiceImpl(
             periode = trygdetidsperiode.fraPesystilVanlig(),
             kilde = trygdetidsperiode.kilde,
             beregnetTrygdetid = null,
-            poengUtAar = trygdetidsperiode.poengUtAar ?: false,
-            poengInnAar = trygdetidsperiode.poengInnAar ?: false,
-            prorata = trygdetidsperiode.prorata ?: false,
+            poengUtAar = trygdetidsperiode.poengUtAar == true,
+            poengInnAar = trygdetidsperiode.poengInnAar == true,
+            prorata = trygdetidsperiode.prorata == true,
             begrunnelse = null,
         )
     }
@@ -1006,11 +1007,20 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<TrygdetidDto> =
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            logger.info("Kopierer trygdetidsgrunnlag for behandling $behandlingId fra behandling $kildeBehandlingId")
             val trygdetiderKilde = trygdetidRepository.hentTrygdetiderForBehandling(kildeBehandlingId)
             val trygdetiderMaal = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
 
             krev(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
-                "Trygdetidene gjelder forskjellige avdøde"
+                sikkerlogger().error(
+                    """
+                    Trygdetidene gjelder forskjellige avdøde ved kopiering av trygdetidsgrunnlag 
+                    fra $kildeBehandlingId til $behandlingId
+                    Mål: ${trygdetiderKilde.joinToString { it.ident }}
+                    Kilde: ${trygdetiderMaal.joinToString { it.ident }}
+                    """,
+                )
+                "Trygdetidene gjelder forskjellige avdøde. Se sikkerlogg for detaljer."
             }
 
             // TODO Hva om trygdetid har f.x. overstyrt poengår fra før?

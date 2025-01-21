@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.testdata.pdl
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentAdressebeskyttelse
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
@@ -27,7 +28,7 @@ fun personTestData(opplysningsmap: Map<Opplysningstype, Opplysning<JsonNode>>): 
         fornavn = opplysningsmap.hentNavn()?.verdi?.fornavn ?: "TEST",
         etternavn = opplysningsmap.hentNavn()?.verdi?.etternavn ?: "PERSON",
         foedselsnummer =
-            requireNotNull(opplysningsmap.hentFoedselsnummer()) {
+            krevIkkeNull(opplysningsmap.hentFoedselsnummer()) {
                 "Mangler opplysning fødselsnummer for en testperson"
             }.verdi,
         foedselsdato = opplysningsmap.hentFoedselsdato()?.verdi,

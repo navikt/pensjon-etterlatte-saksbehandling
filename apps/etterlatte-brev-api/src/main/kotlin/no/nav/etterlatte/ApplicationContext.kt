@@ -68,6 +68,7 @@ import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_OUTBOUND_SCOPE
@@ -237,7 +238,11 @@ internal class ApplicationContext {
                 it.install(Auth) {
                     clientCredential {
                         config =
-                            env.append(AZURE_APP_OUTBOUND_SCOPE) { requireNotNull(it.get(scope)) }
+                            env.append(AZURE_APP_OUTBOUND_SCOPE) { variabler ->
+                                krevIkkeNull(variabler[scope]) {
+                                    "Mangler outbound scope"
+                                }
+                            }
                     }
                 }
                 it.install(HttpTimeout)

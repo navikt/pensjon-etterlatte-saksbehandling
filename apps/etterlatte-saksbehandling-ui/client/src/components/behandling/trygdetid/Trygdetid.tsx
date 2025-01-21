@@ -166,7 +166,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           <>
             {mapResult(sjekkOmAvodedHarTTIPesysStatus, {
               initial: null,
-              pending: <Spinner label="Sjekker om avdøed har trygdetidsgrunnlag i Pesys" />,
+              pending: <Spinner label="Sjekker om avdøde har trygdetidsgrunnlag i Pesys" />,
               error: () => <Alert variant="warning">Kunne ikke sjekke trygdetidsgrunnag i Pesys</Alert>,
               success: (harTrygdetidsgrunnlagIPesys) => {
                 return (

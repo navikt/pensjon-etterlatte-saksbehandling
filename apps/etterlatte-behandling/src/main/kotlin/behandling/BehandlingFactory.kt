@@ -37,7 +37,8 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.AvdoedesBarn
+import no.nav.etterlatte.libs.common.person.hentAlder
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -123,6 +124,7 @@ class BehandlingFactory(
                     request.mottattDato,
                     request.kilde ?: Vedtaksloesning.GJENNY,
                     request = hentDataForOpprettBehandling(sak.id),
+                    brukerTokenInfo = brukerTokenInfo,
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService
@@ -187,6 +189,7 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
         request: DataHentetForOpprettBehandling,
+        brukerTokenInfo: BrukerTokenInfo,
     ): BehandlingOgOppgave {
         logger.info("Starter behandling i sak $sakId")
         val prosessType = Prosesstype.MANUELL
@@ -237,6 +240,7 @@ class BehandlingFactory(
                     HardkodaSystembruker.opprettGrunnlag,
                 )
             }
+
             val oppgave =
                 opprettOppgaveForFoerstegangsbehandling(
                     referanse = behandling.id.toString(),
@@ -250,7 +254,7 @@ class BehandlingFactory(
                     merknad =
                         when (kilde) {
                             Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
-                            else -> opprettMerknad(request.sak, persongalleri)
+                            else -> opprettMerknad(request.sak, persongalleri, behandling.id, brukerTokenInfo)
                         },
                     gruppeId = persongalleri.avdoed.firstOrNull(),
                 )
@@ -424,13 +428,27 @@ class BehandlingFactory(
     private fun opprettMerknad(
         sak: Sak,
         persongalleri: Persongalleri,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
     ): String? =
         if (persongalleri.soesken.isEmpty()) {
             null
         } else if (sak.sakType == SakType.BARNEPENSJON) {
             "${persongalleri.soesken.size} søsken"
         } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
-            val barnUnder20 = persongalleri.soesken.count { Folkeregisteridentifikator.of(it).getAge() < 20 }
+            val soesken: AvdoedesBarn =
+                runBlocking {
+                    grunnlagService
+                        .hentGrunnlagForBehandling(
+                            behandlingId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        ).hentSoeskenNy()!!
+                        .verdi
+                }
+
+            val aldre = soesken.avdoedesBarn?.map { it.foedselsdato?.hentAlder() }?.mapNotNull { it }
+
+            val barnUnder20 = aldre?.count { it < 20 }
 
             "$barnUnder20 barn u/20år"
         } else {

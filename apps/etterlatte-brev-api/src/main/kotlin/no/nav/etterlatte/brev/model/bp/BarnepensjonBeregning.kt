@@ -12,9 +12,11 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManglerAvdoedBruktTilTrygdetid
 import no.nav.etterlatte.brev.model.OverstyrtTrygdetidManglerAvdoed
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
+import no.nav.etterlatte.brev.model.erYrkesskade
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.sikkerLogg
@@ -47,6 +49,8 @@ internal fun barnepensjonBeregning(
             trygdetid.first().behandlingId,
         )
 
+    val erYrkesskade = trygdetid.any { it.erYrkesskade() }
+
     return BarnepensjonBeregning(
         innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
         antallBarn = utbetalingsinfo.antallBarn,
@@ -60,6 +64,7 @@ internal fun barnepensjonBeregning(
             mappedeTrygdetider.find { it.ident == sisteBeregningsperiode.trygdetidForIdent }
                 ?: throw ManglerAvdoedBruktTilTrygdetid(),
         forskjelligTrygdetid = forskjelligTrygdetid,
+        erYrkesskade = erYrkesskade,
     )
 }
 
@@ -126,18 +131,18 @@ fun finnForskjelligTrygdetid(
 
     // Hvis vi har anvendt forskjellige trygdetider over beregningen må vi ha forskjeller i avdøde
     val forskjelligAvdoedPeriode =
-        checkNotNull(finnEventuellForskjelligAvdoedPeriode(avdoede, utbetalingsinfo)) {
+        krevIkkeNull(finnEventuellForskjelligAvdoedPeriode(avdoede, utbetalingsinfo)) {
             "Vi har anvendt forskjellige trygdetider, men vi har ikke forskjellige perioder for hvilke" +
                 "avdøde vi har brukt i beregningen. Dette bør ikke være mulig. " +
                 "BehandlingId=$behandlingId"
         }
 
     val trygdetidForFoersteAvdoed =
-        checkNotNull(trygdetid.find { it.ident == forskjelligAvdoedPeriode.foersteAvdoed.fnr.value }) {
+        krevIkkeNull(trygdetid.find { it.ident == forskjelligAvdoedPeriode.foersteAvdoed.fnr.value }) {
             "Fant ikke trygdetiden som er brukt i første beregningsperiode i behandlingId=$behandlingId"
         }
     val trygdetidBruktSenere =
-        checkNotNull(trygdetid.find { it.ident == sisteBeregningsperiode.trygdetidForIdent }) {
+        krevIkkeNull(trygdetid.find { it.ident == sisteBeregningsperiode.trygdetidForIdent }) {
             "Fant ikke trygdetiden som er brukt i siste beregningsperiode i behandlingId=$behandlingId"
         }
 

@@ -39,6 +39,7 @@ import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandli
 import { OppgaveEndring } from './OppgaveEndring'
 import { NotatPanel } from '~components/behandling/sidemeny/NotatPanel'
 import { BehandlingRouteContext } from '~components/behandling/BehandlingRoutes'
+import { ClickEvent, trackClick } from '~utils/amplitude'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -172,7 +173,14 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
               icon={<DocPencilIcon title="sjekkliste" />}
             />
           )}
-          <Tabs.Tab value={BehandlingFane.HISTORIKK} label="Historikk" icon={<ClockDashedIcon />} />
+          <Tabs.Tab
+            value={BehandlingFane.HISTORIKK}
+            label="Historikk"
+            icon={<ClockDashedIcon />}
+            onClick={() => {
+              trackClick(ClickEvent.VIS_BEHANDLING_HISTORIKK)
+            }}
+          />
         </Tabs.List>
 
         <Tabs.Panel value={BehandlingFane.DOKUMENTER}>

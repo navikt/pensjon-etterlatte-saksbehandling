@@ -373,22 +373,11 @@ class BrevService(
             brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 
-    /*NB må kun brukes av route endepunktet for ferdigstilling med mindre sjekken mot brevkoder under flyttes et annet sted som ikke påvirker den flyten.
-    der brukes i dag routen ferdigstill-journalfoer-og-distribuer som kaller rett på lagrePdfOgFerdigstillBrev
-     */
     suspend fun ferdigstill(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) {
         val brev = sjekkOmBrevKanEndres(id)
-        if (listOf(
-                Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD,
-                Brevkoder.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
-            ).contains(brev.brevkoder)
-        ) {
-            throw BrevKanIkkeEndres(brev, "brevkoden er feil, er ${brev.brevkoder}")
-            // se https://jira.adeo.no/browse/FAGSYSTEM-363686?atlLinkOrigin=c2xhY2staW50ZWdyYXRpb258aXNzdWU%3D
-        }
 
         if (brev.mottakere.size !in 1..2) {
             logger.error("Brev ${brev.id} har ${brev.mottakere.size} mottakere. Dette skal ikke være mulig...")

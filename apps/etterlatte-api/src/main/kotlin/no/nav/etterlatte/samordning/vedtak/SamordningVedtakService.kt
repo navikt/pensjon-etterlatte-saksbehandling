@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class SamordningVedtakService(
-    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
+    private val vedtaksvurderingKlient: VedtaksvurderingSamordningKlient,
     private val tjenestepensjonKlient: TjenestepensjonKlient,
 ) {
     private val logger = LoggerFactory.getLogger(SamordningVedtakService::class.java)
@@ -49,7 +49,12 @@ class SamordningVedtakService(
         fnr: Folkeregisteridentifikator,
         context: CallerContext,
     ): List<SamordningVedtakDto> {
-        if (context is MaskinportenTpContext && !tjenestepensjonKlient.harTpYtelseOnDate(fnr.value, context.tpnr, fomDato)
+        if (context is MaskinportenTpContext &&
+            !tjenestepensjonKlient.harTpYtelseOnDate(
+                fnr.value,
+                context.tpnr,
+                fomDato,
+            )
         ) {
             logger.info("Avslår forespørsel, manglende/ikke gyldig TP-ytelse")
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpytelse")

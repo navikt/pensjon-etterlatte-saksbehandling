@@ -125,7 +125,11 @@ class VedtaksvurderingRepository(
                     if (opprettVedtak.innhold is VedtakInnhold.Behandling) {
                         opprettUtbetalingsperioder(vedtakId, opprettVedtak.innhold.utbetalingsperioder, this)
                         opprettVedtak.innhold.avkorting?.let {
-                            opprettAvkortetYtelsePerioder(vedtakId, deserialize<AvkortingDto>(it.toString()).avkortetYtelse, this)
+                            opprettAvkortetYtelsePerioder(
+                                vedtakId,
+                                deserialize<AvkortingDto>(it.toString()).avkortetYtelse,
+                                this,
+                            )
                         }
                     }
                 } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
@@ -149,10 +153,12 @@ class VedtaksvurderingRepository(
                             "revurderinginfo" to oppdatertVedtak.innhold.revurderingInfo?.toJson(),
                             "opphoer_fom" to oppdatertVedtak.innhold.opphoerFraOgMed?.atDay(1),
                         )
+
                     is VedtakInnhold.Tilbakekreving ->
                         mapOf(
                             "tilbakekreving" to oppdatertVedtak.innhold.tilbakekreving.toJson(),
                         )
+
                     is VedtakInnhold.Klage ->
                         mapOf(
                             "klage" to oppdatertVedtak.innhold.klage.toJson(),
@@ -181,7 +187,11 @@ class VedtaksvurderingRepository(
                 opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.innhold.utbetalingsperioder, this)
                 slettAvkortetYtelsePerioder(oppdatertVedtak.id, this)
                 oppdatertVedtak.innhold.avkorting?.let {
-                    opprettAvkortetYtelsePerioder(oppdatertVedtak.id, deserialize<AvkortingDto>(it.toString()).avkortetYtelse, this)
+                    opprettAvkortetYtelsePerioder(
+                        oppdatertVedtak.id,
+                        deserialize<AvkortingDto>(it.toString()).avkortetYtelse,
+                        this,
+                    )
                 }
             }
             return@session hentVedtak(oppdatertVedtak.behandlingId, this)
@@ -338,6 +348,12 @@ class VedtaksvurderingRepository(
         fnr: Folkeregisteridentifikator,
         sakType: SakType,
         tx: TransactionalSession? = null,
+    ): List<Vedtak> = hentFerdigstilteVedtak(fnr, listOf(sakType), tx)
+
+    fun hentFerdigstilteVedtak(
+        fnr: Folkeregisteridentifikator,
+        sakType: List<SakType> = listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+        tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
@@ -345,7 +361,7 @@ class VedtaksvurderingRepository(
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom
             FROM vedtak  
             WHERE fnr = :fnr 
-            AND saktype = :saktype   
+            AND saktype in (:saktype)
             AND vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
             """
         return tx.session {
@@ -354,7 +370,7 @@ class VedtaksvurderingRepository(
                 params = {
                     mapOf(
                         "fnr" to fnr.value,
-                        "saktype" to sakType.name,
+                        "saktype" to sakType.joinToString { it.name },
                     )
                 },
             ) {

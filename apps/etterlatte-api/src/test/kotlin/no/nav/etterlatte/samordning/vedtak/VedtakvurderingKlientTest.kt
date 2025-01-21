@@ -42,7 +42,7 @@ class VedtakvurderingKlientTest {
                     else -> error("Unhandled ${request.url.fullPath}")
                 }
             }
-        val vedtaksvurderingKlient = VedtaksvurderingKlient(config, client)
+        val vedtaksvurderingKlient = VedtaksvurderingSamordningKlient(config, client)
         runBlocking {
             vedtaksvurderingKlient.hentVedtak(vedtakId, MaskinportenTpContext(Tjenestepensjonnummer(""), "orgnr"))
         }
@@ -71,7 +71,7 @@ class VedtakvurderingKlientTest {
                 }
             }
 
-        val vedtaksvurderingKlient = VedtaksvurderingKlient(config, client)
+        val vedtaksvurderingKlient = VedtaksvurderingSamordningKlient(config, client)
 
         runBlocking {
             vedtaksvurderingKlient.hentVedtaksliste(

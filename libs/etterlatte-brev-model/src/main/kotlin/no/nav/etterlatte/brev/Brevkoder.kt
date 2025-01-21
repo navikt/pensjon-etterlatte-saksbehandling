@@ -187,6 +187,8 @@ enum class Brevkoder(
                 Spraak.EN to "Information about the activity requirement for adjustment allowance",
             ),
     ),
+
+    // Denne brukes kun til varig unntak som har egen manuel flyt
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD(
         EtterlatteBrevKode.AKTIVITETSPLIKT_INFORMASJON_6MND_INNHOLD,
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,

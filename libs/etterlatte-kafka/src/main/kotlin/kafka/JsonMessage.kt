@@ -10,6 +10,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.NaisKey
 import no.nav.etterlatte.libs.common.NaisKey.NAIS_APP_NAME
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.net.InetAddress
@@ -103,7 +104,7 @@ open class JsonMessage(
     }
 
     operator fun get(key: String): JsonNode =
-        requireNotNull(recognizedKeys[key]) {
+        krevIkkeNull(recognizedKeys[key]) {
             "$key is unknown; keys must be declared as required, forbidden, or interesting"
         }
 

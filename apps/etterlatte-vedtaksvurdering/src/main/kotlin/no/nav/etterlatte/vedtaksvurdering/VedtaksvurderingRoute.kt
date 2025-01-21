@@ -252,6 +252,12 @@ fun Route.vedtaksvurderingRoute(
     }
 
     route("/vedtak") {
+        post("fnr") {
+            val request = call.receive<Folkeregisteridentifikator>()
+            val vedtak = vedtakService.hentVedtak(request).map { it.toDto() }
+            call.respond(vedtak)
+        }
+
         route("/samordnet") {
             post("/{vedtakId}") {
                 val vedtakId =

@@ -223,10 +223,10 @@ class RealGrunnlagService(
 
     private fun Persongalleri.inkluderer(it: Grunnlagsopplysning<JsonNode>) =
         when (it.opplysningType) {
-            AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr.value) } ?: false
-            GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr.value) } ?: false
-            SOEKER_PDL_V1 -> it.fnr?.let { fnr -> soeker == fnr.value } ?: false
-            INNSENDER_PDL_V1 -> it.fnr?.let { fnr -> innsender == fnr.value } ?: false
+            AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr.value) } == true
+            GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr.value) } == true
+            SOEKER_PDL_V1 -> it.fnr?.let { fnr -> soeker == fnr.value } == true
+            INNSENDER_PDL_V1 -> it.fnr?.let { fnr -> innsender == fnr.value } == true
             else -> false
         }
 

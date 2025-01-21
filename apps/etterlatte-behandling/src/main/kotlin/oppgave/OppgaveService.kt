@@ -359,7 +359,7 @@ class OppgaveService(
         merknad: String? = null,
     ): OppgaveIntern {
         val oppgave =
-            checkNotNull(oppgaveDao.hentOppgave(id)) {
+            krevIkkeNull(oppgaveDao.hentOppgave(id)) {
                 "Oppgave med id=$id finnes ikke – avbryter ferdigstilling av oppgaven"
             }
         ferdigstillOppgave(oppgave, saksbehandler, merknad)
@@ -543,7 +543,7 @@ class OppgaveService(
                     .hentOppgaverForReferanse(referanse)
                     .singleOrNull { !it.erAvsluttet() }
 
-            checkNotNull(oppgaveUnderbehandling) {
+            krevIkkeNull(oppgaveUnderbehandling) {
                 "Fant ingen oppgave under behandling med referanse=$referanse"
             }
 

@@ -7,6 +7,7 @@ import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
@@ -77,11 +78,21 @@ interface GrunnlagService {
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): YearMonth
+
+    suspend fun hentGrunnlagForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag
 }
 
 class GrunnlagServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
 ) : GrunnlagService {
+    override suspend fun hentGrunnlagForBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag = grunnlagKlient.hentGrunnlagForBehandling(behandlingId, brukerTokenInfo)
+
     override suspend fun grunnlagFinnes(
         sakId: SakId,
         brukerTokenInfo: BrukerTokenInfo,

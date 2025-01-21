@@ -30,7 +30,7 @@ fun Grunnlag.doedsdato(
     }
 
     Saksrolle.SOESKEN -> {
-        hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentDoedsdato()
+        hentSoeskenGammel().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentDoedsdato()
     }
 
     else -> throw GrunnlagRolleException(
@@ -55,7 +55,7 @@ fun Grunnlag.bostedsadresse(
     }
 
     Saksrolle.SOESKEN -> {
-        hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentBostedsadresse()
+        hentSoeskenGammel().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentBostedsadresse()
     }
 
     else -> throw GrunnlagRolleException(
@@ -72,7 +72,7 @@ fun Grunnlag.ansvarligeForeldre(
     }
 
     Saksrolle.SOESKEN -> {
-        hentSoesken()
+        hentSoeskenGammel()
             .find { it.hentFoedselsnummer()?.verdi?.value == fnr }
             ?.hentFamilierelasjon()
             ?.verdi
@@ -107,7 +107,7 @@ fun Grunnlag.utland(
         soeker.hentUtland()?.verdi
     }
     Saksrolle.SOESKEN -> {
-        hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentUtland()?.verdi
+        hentSoeskenGammel().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentUtland()?.verdi
     }
     Saksrolle.AVDOED -> {
         hentAvdoede().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentUtland()?.verdi

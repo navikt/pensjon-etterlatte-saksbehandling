@@ -10,6 +10,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.logger
@@ -46,14 +47,14 @@ object EgendefinertMeldingFeature : TestDataFeature {
                 kunEtterlatteUtvikling {
                     try {
                         val navIdent =
-                            requireNotNull(brukerTokenInfo.ident()) {
+                            krevIkkeNull(brukerTokenInfo.ident()) {
                                 "Nav ident mangler. Du må være innlogget for å sende søknad."
                             }
 
                         val params = call.receiveParameters()
-                        val key = requireNotNull(params["key"])
-                        val hendelseType = requireNotNull(params["hendelseType"])
-                        val json = requireNotNull(params["json"])
+                        val key = krevIkkeNull(params["key"]) { "Parameter key mangler" }
+                        val hendelseType = krevIkkeNull(params["hendelseType"]) { "Parameter hendelseType mangler" }
+                        val json = krevIkkeNull(params["json"]) { "Parameter json mangler" }
 
                         if (hendelseType == "omregning") {
                             val jsonNode = objectMapper.readTree(json)

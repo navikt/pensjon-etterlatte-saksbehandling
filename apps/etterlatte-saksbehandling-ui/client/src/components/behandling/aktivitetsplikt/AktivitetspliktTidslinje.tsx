@@ -25,7 +25,7 @@ import { AktivitetspliktType, IAktivitetHendelse, IAktivitetPeriode } from '~sha
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { NyAktivitetHendelse } from '~components/behandling/aktivitetsplikt/AktivitetOgHendelse'
+import { AktivitetOgHendelse } from '~components/behandling/aktivitetsplikt/AktivitetOgHendelse'
 
 interface Props {
   behandling?: IDetaljertBehandling
@@ -219,7 +219,7 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
       </Timeline>
 
       <HStack align="center" justify="space-between">
-        <NyAktivitetHendelse
+        <AktivitetOgHendelse
           key={redigerAktivitet?.id}
           behandling={behandling}
           oppdaterAktiviteter={oppdaterAktiviteter}

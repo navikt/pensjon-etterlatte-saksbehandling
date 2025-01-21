@@ -4,13 +4,13 @@ import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { formatISO } from 'date-fns'
 import { isFailure, isPending } from '~shared/api/apiUtils'
-import { Alert, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
-import { AktivitetspliktType, IAktivitetPeriode, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
+import { Alert, Box, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
+import { AktivitetspliktType, IAktivitetPeriode, SkrivAktivitet } from '~shared/types/Aktivitetsplikt'
 import { opprettAktivitet, opprettAktivitetForSak } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { mapAktivitetstypeProps } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
-function dtoTilSkjema(periode: IAktivitetPeriode): AktivitetSkjemaValue {
+function dtoTilSkjema(periode: IAktivitetPeriode): NyAktivitetPeriode {
   return {
     id: periode.id,
     type: periode.type,
@@ -22,7 +22,7 @@ function dtoTilSkjema(periode: IAktivitetPeriode): AktivitetSkjemaValue {
   }
 }
 
-interface AktivitetSkjemaValue {
+interface NyAktivitetPeriode {
   id?: string
   type?: AktivitetspliktType
   datoFom?: Date
@@ -36,18 +36,18 @@ export const NyAktivitet = ({
   oppdaterAktiviteter,
   sakId,
   avbryt,
-  redigerAktivitet,
+  aktivitetTilRedigering,
   behandling = undefined,
 }: {
   oppdaterAktiviteter: (aktiviteter: IAktivitetPeriode[]) => void
   sakId: number
   avbryt: () => void
-  redigerAktivitet: IAktivitetPeriode | undefined
+  aktivitetTilRedigering: IAktivitetPeriode | undefined
   behandling?: IBehandlingReducer
 }) => {
   const [opprettAktivitetResponse, opprettAktivitetRequest] = useApiCall(opprettAktivitet)
   const [opprettAktivitetForSakResponse, opprettAktivitetForSakRequest] = useApiCall(opprettAktivitetForSak)
-  const defaultValue: AktivitetSkjemaValue = { sakId, behandlingId: behandling?.id }
+  const defaultValue: NyAktivitetPeriode = { sakId, behandlingId: behandling?.id }
   const {
     getValues,
     register,
@@ -55,20 +55,20 @@ export const NyAktivitet = ({
     control,
     reset,
     formState: { errors },
-  } = useForm<AktivitetSkjemaValue>({
-    defaultValues: redigerAktivitet ? dtoTilSkjema(redigerAktivitet) : defaultValue,
+  } = useForm<NyAktivitetPeriode>({
+    defaultValues: aktivitetTilRedigering ? dtoTilSkjema(aktivitetTilRedigering) : defaultValue,
   })
 
   useEffect(() => {
-    if (redigerAktivitet) {
-      reset(dtoTilSkjema(redigerAktivitet))
+    if (aktivitetTilRedigering) {
+      reset(dtoTilSkjema(aktivitetTilRedigering))
     }
-  }, [redigerAktivitet])
+  }, [aktivitetTilRedigering])
 
-  const submitAktivitet = (data: AktivitetSkjemaValue) => {
+  const submitAktivitet = (data: NyAktivitetPeriode) => {
     const { id, type, datoFom, datoTom, beskrivelse } = data
 
-    const opprettAktivitet: IOpprettAktivitet = {
+    const opprettAktivitet: SkrivAktivitet = {
       id: id,
       sakId: behandling ? behandling.sakId : sakId!!,
       type: type as AktivitetspliktType,
@@ -126,15 +126,16 @@ export const NyAktivitet = ({
                 </option>
               ))}
             </Select>
+          </HStack>
+          <Box width="630px">
             <Textarea
-              style={{ width: '630px' }}
               {...register('beskrivelse', {
                 required: { value: true, message: 'Må fylles ut' },
               })}
               label="Beskrivelse"
               error={errors.beskrivelse?.message}
             />
-          </HStack>
+          </Box>
           <HStack gap="4">
             <Button
               size="small"

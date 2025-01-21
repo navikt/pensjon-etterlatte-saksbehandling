@@ -3,13 +3,13 @@ import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Alert, Button, Heading, HStack, Textarea, VStack } from '@navikt/ds-react'
-import { IAktivitetHendelse, IOpprettHendelse } from '~shared/types/Aktivitetsplikt'
+import { IAktivitetHendelse, SkrivHendelse } from '~shared/types/Aktivitetsplikt'
 import { opprettHendelse, opprettHendelseForSak } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { formatISO } from 'date-fns'
 
-interface HendelseSkjemaValue {
+interface NyAktivitetHendelse {
   id?: string
   dato?: Date
   beskrivelse?: string
@@ -17,7 +17,7 @@ interface HendelseSkjemaValue {
   behandlingId?: string
 }
 
-function dtoTilSkjema(rediger: IAktivitetHendelse): HendelseSkjemaValue {
+function dtoTilSkjema(rediger: IAktivitetHendelse): NyAktivitetHendelse {
   return {
     id: rediger.id,
     dato: new Date(rediger.dato),
@@ -42,7 +42,7 @@ export const NyHendelse = ({
 }) => {
   const [opprettHendelseResponse, opprettHendelseRequest] = useApiCall(opprettHendelse)
   const [opprettHendelseForSakResponse, opprettHendelseForSakRequest] = useApiCall(opprettHendelseForSak)
-  const defaultValue: HendelseSkjemaValue = { sakId, behandlingId: behandling?.id }
+  const defaultValue: NyAktivitetHendelse = { sakId, behandlingId: behandling?.id }
 
   const {
     getValues,
@@ -51,7 +51,7 @@ export const NyHendelse = ({
     control,
     reset,
     formState: { errors },
-  } = useForm<HendelseSkjemaValue>({
+  } = useForm<NyAktivitetHendelse>({
     defaultValues: redigerHendelse ? dtoTilSkjema(redigerHendelse) : defaultValue,
   })
 
@@ -61,8 +61,8 @@ export const NyHendelse = ({
     }
   }, [redigerHendelse])
 
-  const submitHendelse = (opprettHendelse: HendelseSkjemaValue) => {
-    const request: IOpprettHendelse = {
+  const submitHendelse = (opprettHendelse: NyAktivitetHendelse) => {
+    const request: SkrivHendelse = {
       beskrivelse: opprettHendelse.beskrivelse!,
       dato: formatISO(opprettHendelse.dato!, { representation: 'date' }),
       id: opprettHendelse.id,
@@ -102,9 +102,8 @@ export const NyHendelse = ({
           <HStack gap="4">
             <ControlledDatoVelger name="dato" label="Dato" control={control} errorVedTomInput="Obligatorisk" />
           </HStack>
-          <HStack>
+          <HStack width="630px">
             <Textarea
-              style={{ width: '630px' }}
               {...register('beskrivelse', {
                 required: { value: true, message: 'Må fylles ut' },
               })}

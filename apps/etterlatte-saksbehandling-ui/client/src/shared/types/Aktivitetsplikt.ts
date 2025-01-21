@@ -38,7 +38,7 @@ export interface IAktivitetHendelse {
   beskrivelse: string
 }
 
-export interface IOpprettAktivitet {
+export interface SkrivAktivitet {
   id: string | undefined
   sakId: number
   type: AktivitetspliktType
@@ -47,7 +47,7 @@ export interface IOpprettAktivitet {
   beskrivelse: string
 }
 
-export interface IOpprettHendelse {
+export interface SkrivHendelse {
   id: string | undefined
   sakId: number
   dato: string

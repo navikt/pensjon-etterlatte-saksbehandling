@@ -8,7 +8,13 @@ import { IAktivitetHendelse, IAktivitetPeriode } from '~shared/types/Aktivitetsp
 import { NyHendelse } from '~components/behandling/aktivitetsplikt/NyHendelse'
 import { NyAktivitet } from '~components/behandling/aktivitetsplikt/NyAktivitet'
 
-export const NyAktivitetHendelse = ({
+enum Skjemavisning {
+  INGEN = 'INGEN',
+  AKTIVITET = 'AKTIVITET',
+  HENDELSE = 'HENDELSE',
+}
+
+export const AktivitetOgHendelse = ({
   oppdaterAktiviteter,
   redigerAktivitet,
   redigerHendelse,
@@ -25,7 +31,7 @@ export const NyAktivitetHendelse = ({
   sakId: number
   behandling?: IBehandlingReducer
 }) => {
-  const [visForm, setVisForm] = useState<false | 'AKTIVITET' | 'HENDELSE'>(false)
+  const [visForm, setVisForm] = useState<Skjemavisning>(Skjemavisning.INGEN)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandling
@@ -34,40 +40,40 @@ export const NyAktivitetHendelse = ({
 
   useEffect(() => {
     if (redigerAktivitet) {
-      setVisForm('AKTIVITET')
+      setVisForm(Skjemavisning.AKTIVITET)
     }
     if (redigerHendelse) {
-      setVisForm('HENDELSE')
+      setVisForm(Skjemavisning.HENDELSE)
     }
   }, [redigerAktivitet, redigerHendelse])
 
   function avbryt() {
     avbrytRedigering()
-    setVisForm(false)
+    setVisForm(Skjemavisning.INGEN)
   }
 
   function oppdaterHendelser(hendelser: IAktivitetHendelse[]) {
-    setVisForm(false)
+    setVisForm(Skjemavisning.INGEN)
     setHendelser(hendelser)
   }
 
   function oppdaterAktiviteterOgSkjema(aktiviteter: IAktivitetPeriode[]) {
-    setVisForm(false)
+    setVisForm(Skjemavisning.INGEN)
     oppdaterAktiviteter(aktiviteter)
   }
 
   return (
     <>
-      {visForm === 'AKTIVITET' && (
+      {visForm === Skjemavisning.AKTIVITET && (
         <NyAktivitet
           oppdaterAktiviteter={oppdaterAktiviteterOgSkjema}
-          redigerAktivitet={redigerAktivitet}
+          aktivitetTilRedigering={redigerAktivitet}
           sakId={sakId}
           avbryt={avbryt}
           behandling={behandling}
         ></NyAktivitet>
       )}
-      {visForm === 'HENDELSE' && (
+      {visForm === Skjemavisning.HENDELSE && (
         <NyHendelse
           redigerHendelse={redigerHendelse}
           sakId={sakId}
@@ -76,7 +82,7 @@ export const NyAktivitetHendelse = ({
           behandling={behandling}
         />
       )}
-      {!visForm && redigerbar && (
+      {visForm === Skjemavisning.INGEN && redigerbar && (
         <HStack gap="4">
           <Button
             size="small"
@@ -84,7 +90,7 @@ export const NyAktivitetHendelse = ({
             icon={<PlusIcon aria-hidden fontSize="1.5rem" />}
             onClick={(e) => {
               e.preventDefault()
-              setVisForm('AKTIVITET')
+              setVisForm(Skjemavisning.AKTIVITET)
             }}
           >
             Legg til aktivitet
@@ -95,7 +101,7 @@ export const NyAktivitetHendelse = ({
             icon={<PlusIcon aria-hidden fontSize="1.5rem" />}
             onClick={(e) => {
               e.preventDefault()
-              setVisForm('HENDELSE')
+              setVisForm(Skjemavisning.HENDELSE)
             }}
           >
             Legg til Hendelse

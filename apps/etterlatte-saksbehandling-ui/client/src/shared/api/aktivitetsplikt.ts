@@ -6,11 +6,11 @@ import {
   IAktivitetHendelse,
   IAktivitetspliktVurdering,
   IAktivitetspliktVurderingNyDto,
-  IOpprettAktivitet,
+  SkrivAktivitet,
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
   IAktivitetPerioderOgHendelser,
-  IOpprettHendelse,
+  SkrivHendelse,
 } from '~shared/types/Aktivitetsplikt'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { OppgaveDTO } from '~shared/types/oppgave'
@@ -27,13 +27,13 @@ export const hentAktiviteterForBehandling = async (args: {
 
 export const opprettAktivitet = async (args: {
   behandlingId: string
-  request: IOpprettAktivitet
+  request: SkrivAktivitet
 }): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`, { ...args.request })
 
 export const opprettHendelse = async (args: {
   behandlingId: string
-  request: IOpprettHendelse
+  request: SkrivHendelse
 }): Promise<ApiResponse<IAktivitetHendelse[]>> =>
   apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse`, { ...args.request })
 
@@ -62,13 +62,13 @@ export const hentAktiviteterForSak = async (args: { sakId: number }): Promise<Ap
 
 export const opprettAktivitetForSak = async (args: {
   sakId: number
-  request: IOpprettAktivitet
+  request: SkrivAktivitet
 }): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`, { ...args.request })
 
 export const opprettHendelseForSak = async (args: {
   sakId: number
-  request: IOpprettHendelse
+  request: SkrivHendelse
 }): Promise<ApiResponse<IAktivitetHendelse[]>> =>
   apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/hendelse`, { ...args.request })
 

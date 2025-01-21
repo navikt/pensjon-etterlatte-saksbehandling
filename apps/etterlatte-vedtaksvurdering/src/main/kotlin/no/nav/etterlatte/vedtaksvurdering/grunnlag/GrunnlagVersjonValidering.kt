@@ -23,7 +23,7 @@ object GrunnlagVersjonValidering {
         ) {
             logger.info(
                 "Behandling ${behandling.id} skal ikke ha trygdetid ved avslag da " +
-                    "avdøeds trygdeavtale ikke skal vurderes(ingen avhuking). Har trygdetid ${trygdetider.isNotEmpty()}",
+                    "avdødes trygdeavtale ikke skal vurderes(ingen avhuking). Har trygdetid ${trygdetider.isNotEmpty()}",
             )
             // TODO: Vil vi egentlig at vedtak skal slette tt her?
         } else {

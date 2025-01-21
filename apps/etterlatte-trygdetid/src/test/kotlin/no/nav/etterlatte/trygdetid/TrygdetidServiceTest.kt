@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
@@ -1954,6 +1955,34 @@ internal class TrygdetidServiceTest {
             }
             coVerify(exactly = 1) {
                 behandlingKlient.hentBehandling(annenBehandling.id, saksbehandler)
+            }
+        }
+
+        @Test
+        fun `kopierTrygdetidsgrunnlag skal feile hvis trygdetidene gjelder forskjellige avdøde`() {
+            val behandlingId = randomUUID()
+            val kildeBehandlingId = randomUUID()
+            every { repository.hentTrygdetiderForBehandling(behandlingId) } returns
+                listOf(
+                    trygdetid(
+                        behandlingId,
+                        ident = "01019012345",
+                    ),
+                )
+            every { repository.hentTrygdetiderForBehandling(kildeBehandlingId) } returns
+                listOf(
+                    trygdetid(behandlingId, ident = "01019012345"),
+                    trygdetid(behandlingId, ident = "24128512345"),
+                )
+            assertThrows<InternfeilException> {
+                runBlocking {
+                    service.kopierTrygdetidsgrunnlag(behandlingId, kildeBehandlingId, saksbehandler)
+                }
+            }
+            coVerify(exactly = 1) {
+                behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
+                repository.hentTrygdetiderForBehandling(behandlingId)
+                repository.hentTrygdetiderForBehandling(kildeBehandlingId)
             }
         }
 

@@ -281,10 +281,6 @@ fun Route.trygdetid(
             post("/kopier-grunnlag/{kildeBehandlingId}") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     withUuidParam("kildeBehandlingId") { kildeBehandlingId ->
-                        logger.info(
-                            "Kopierer trygdetidsgrunnlag fra behandling $behandlingId " +
-                                "til behandling $kildeBehandlingId",
-                        )
                         call.respond(
                             trygdetidService.kopierTrygdetidsgrunnlag(
                                 behandlingId = behandlingId,

@@ -26,57 +26,64 @@ interface Props {
 }
 
 export const Tilbakemelding = ({ spoersmaal, clickEvent, behandlingId }: Props) => {
-  const [harSvart, setHarSvart] = useState<boolean>(tilbakemeldingForBehandlingEksisterer({ behandlingId, clickEvent }))
+  const [tilbakemeldingAlleredeGitt, setTilbakemeldingAlleredeGitt] = useState<boolean>(
+    tilbakemeldingForBehandlingEksisterer({ behandlingId, clickEvent })
+  )
+  const [harGittTilbakemelding, setHarGittTilbakemelding] = useState<boolean>(false)
 
   const trackTilbakemelding = (svar: TilbakemeldingSvar) => {
     trackClickMedSvar(clickEvent, svar)
-    leggTilbakemeldingGittILocalStorage({ behandlingId, clickEvent })
+    setHarGittTilbakemelding(true)
     setTimeout(() => {
-      setHarSvart(true)
-    }, 500)
+      leggTilbakemeldingGittILocalStorage({ behandlingId, clickEvent })
+      setTilbakemeldingAlleredeGitt(true)
+    }, 3000)
   }
 
   return (
-    !tilbakemeldingForBehandlingEksisterer({ behandlingId, clickEvent }) &&
-    !harSvart && (
+    !tilbakemeldingAlleredeGitt && (
       <Box borderRadius="large" width="fit-content" background="surface-subtle">
         <VStack padding="8" width="fit-content">
           <Heading size="medium" spacing>
             {spoersmaal}
           </Heading>
 
-          <HStack justify="center" gap="6" width="fit-content">
-            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.VELDIG_MISFORNOEYD)}>
-              <VStack gap="1-alt" align="center">
-                <SinnaEmoji />
-                Veldig misfornøyd
-              </VStack>
-            </Button>
-            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.MISFORNOEYD)}>
-              <VStack gap="2" align="center">
-                <LeiEmoji />
-                Misfornøyd
-              </VStack>
-            </Button>
-            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.NOEYTRAL)}>
-              <VStack gap="2" align="center">
-                <NoeytralEmoji />
-                Nøytral
-              </VStack>
-            </Button>
-            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.FORNOYED)}>
-              <VStack gap="2" align="center">
-                <GladEmoji />
-                Fornøyd
-              </VStack>
-            </Button>
-            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.VELDIG_FORNOYED)}>
-              <VStack gap="2" align="center">
-                <EkstatiskEmoji />
-                Veldig fornøyd
-              </VStack>
-            </Button>
-          </HStack>
+          {harGittTilbakemelding ? (
+            <Heading size="medium">Takk for din tilbakemelding!</Heading>
+          ) : (
+            <HStack justify="center" gap="6" width="fit-content">
+              <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.VELDIG_MISFORNOEYD)}>
+                <VStack gap="1-alt" align="center">
+                  <SinnaEmoji />
+                  Veldig misfornøyd
+                </VStack>
+              </Button>
+              <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.MISFORNOEYD)}>
+                <VStack gap="2" align="center">
+                  <LeiEmoji />
+                  Misfornøyd
+                </VStack>
+              </Button>
+              <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.NOEYTRAL)}>
+                <VStack gap="2" align="center">
+                  <NoeytralEmoji />
+                  Nøytral
+                </VStack>
+              </Button>
+              <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.FORNOYED)}>
+                <VStack gap="2" align="center">
+                  <GladEmoji />
+                  Fornøyd
+                </VStack>
+              </Button>
+              <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.VELDIG_FORNOYED)}>
+                <VStack gap="2" align="center">
+                  <EkstatiskEmoji />
+                  Veldig fornøyd
+                </VStack>
+              </Button>
+            </HStack>
+          )}
         </VStack>
       </Box>
     )

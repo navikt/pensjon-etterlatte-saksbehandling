@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import java.util.UUID
 
-class DelvilkaarRepository {
+class DelvilkaarDao {
     internal fun oppdaterDelvilkaar(
         vurdertVilkaar: VurdertVilkaar,
         tx: Session,

@@ -17,9 +17,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -37,8 +36,8 @@ class MigrertYrkesskadeTest(
 ) {
     @Test
     fun `er migrert yrkesskadefordel`() {
-        val delvilkaarRepository = DelvilkaarRepository()
-        val repository = VilkaarsvurderingRepository(ConnectionAutoclosingTest(dataSource), delvilkaarRepository = delvilkaarRepository)
+        val delvilkaarDao = DelvilkaarDao()
+        val dao = VilkaarsvurderingDao(ConnectionAutoclosingTest(dataSource), delvilkaarDao = delvilkaarDao)
         val sakId = SakId(10L)
         val behandlingService =
             mockk<BehandlingService> {
@@ -50,7 +49,7 @@ class MigrertYrkesskadeTest(
             }
         val service =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryWrapperDatabase(repository),
+                dao,
                 behandlingService,
                 grunnlagKlient = mockk(),
                 mockk(),
@@ -80,7 +79,7 @@ class MigrertYrkesskadeTest(
                 virkningstidspunkt = YearMonth.now(),
                 vilkaar = listOf(vilkaarMigrertYrkesskade),
             )
-        repository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        dao.opprettVilkaarsvurdering(vilkaarsvurdering)
         runBlocking {
             Assertions.assertFalse(service.erMigrertYrkesskadefordel(behandlingId))
             dataSource.insert("migrert_yrkesskade", params = {

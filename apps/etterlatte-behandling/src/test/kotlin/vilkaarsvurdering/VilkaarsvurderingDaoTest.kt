@@ -16,8 +16,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -27,7 +27,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VilkaarsvurderingRepositoryTest(
+internal class VilkaarsvurderingDaoTest(
     ds: DataSource,
 ) {
     companion object {
@@ -52,7 +52,7 @@ internal class VilkaarsvurderingRepositoryTest(
             )
     }
 
-    private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository())
+    private val vilkaarsvurderingDao = VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao())
 
     @AfterEach
     fun afterEach() {
@@ -61,19 +61,20 @@ internal class VilkaarsvurderingRepositoryTest(
 
     @Test
     fun `skal opprette vilkaarsvurdering`() {
-        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettetVilkaarsvurdering = vilkaarsvurderingDao.opprettVilkaarsvurdering(vilkaarsvurdering)
 
         opprettetVilkaarsvurdering shouldNotBe null
     }
 
     @Test
     fun `skal kun slette vilkaarsvurdering for en gitt behandlingId`() {
-        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettetVilkaarsvurdering = vilkaarsvurderingDao.opprettVilkaarsvurdering(vilkaarsvurdering)
         val opprettVilkaarsvurderingMedResultat =
-            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
+            vilkaarsvurderingDao.lagreVilkaarsvurderingResultat(
+                opprettetVilkaarsvurdering.behandlingId,
+                opprettetVilkaarsvurdering.id,
                 vilkaarsvurdering.virkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
-                opprettetVilkaarsvurdering,
             )
 
         val nyVilkaarsvurdering =
@@ -82,38 +83,38 @@ internal class VilkaarsvurderingRepositoryTest(
                 id = UUID.randomUUID(),
                 vilkaar = vilkaarsvurdering.vilkaar.map { it.copy(id = UUID.randomUUID()) },
             )
-        vilkaarsvurderingRepository.opprettVilkaarsvurdering(nyVilkaarsvurdering)
         val revurdertVilkaarsvurdering =
-            vilkaarsvurderingRepository.kopierVilkaarsvurdering(
+            vilkaarsvurderingDao.kopierVilkaarsvurdering(
                 nyVilkaarsvurdering,
                 opprettetVilkaarsvurdering.id,
             )
 
-        vilkaarsvurderingRepository.hent(revurdertVilkaarsvurdering.behandlingId) shouldNotBe null
-        vilkaarsvurderingRepository.slettVilkaarvurdering(revurdertVilkaarsvurdering.id) shouldBe true
-        vilkaarsvurderingRepository.hent(revurdertVilkaarsvurdering.behandlingId) shouldBe null
-        vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering.behandlingId) shouldNotBe null
+        vilkaarsvurderingDao.hent(revurdertVilkaarsvurdering.behandlingId) shouldNotBe null
+        vilkaarsvurderingDao.slettVilkaarvurdering(revurdertVilkaarsvurdering.id) shouldBe true
+        vilkaarsvurderingDao.hent(revurdertVilkaarsvurdering.behandlingId) shouldBe null
+        vilkaarsvurderingDao.hent(opprettetVilkaarsvurdering.behandlingId) shouldNotBe null
     }
 
     @Test
     fun `skal hente vilkaarsvurdering`() {
-        vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        vilkaarsvurderingDao.opprettVilkaarsvurdering(vilkaarsvurdering)
 
-        val hentetVilkaarsvurdering = vilkaarsvurderingRepository.hent(vilkaarsvurdering.behandlingId)
+        val hentetVilkaarsvurdering = vilkaarsvurderingDao.hent(vilkaarsvurdering.behandlingId)
 
         hentetVilkaarsvurdering shouldNotBe null
     }
 
     @Test
     fun `skal oppdatere virkningstidspunkt og sette resultat paa vilkaarsvurdering`() {
-        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettetVilkaarsvurdering = vilkaarsvurderingDao.opprettVilkaarsvurdering(vilkaarsvurdering)
         val nyttVirkningstidspunkt = opprettetVilkaarsvurdering.virkningstidspunkt.minusYears(1)
 
         val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
+            vilkaarsvurderingDao.lagreVilkaarsvurderingResultat(
+                opprettetVilkaarsvurdering.behandlingId,
+                opprettetVilkaarsvurdering.id,
                 nyttVirkningstidspunkt.atDay(1),
                 vilkaarsvurderingResultat,
-                opprettetVilkaarsvurdering,
             )
 
         oppdatertVilkaarsvurdering.virkningstidspunkt shouldBe nyttVirkningstidspunkt
@@ -127,22 +128,23 @@ internal class VilkaarsvurderingRepositoryTest(
 
     @Test
     fun `skal sette resultat paa vilkaarsvurdering og slette det`() {
-        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettetVilkaarsvurdering = vilkaarsvurderingDao.opprettVilkaarsvurdering(vilkaarsvurdering)
 
-        vilkaarsvurderingRepository.lagreVilkaarsvurderingResultatvanlig(
+        vilkaarsvurderingDao.lagreVilkaarsvurderingResultat(
+            opprettetVilkaarsvurdering.behandlingId,
+            opprettetVilkaarsvurdering.id,
             vilkaarsvurdering.virkningstidspunkt.atDay(1),
             vilkaarsvurderingResultat,
-            opprettetVilkaarsvurdering,
         )
         val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(opprettetVilkaarsvurdering.behandlingId)
+            vilkaarsvurderingDao.slettVilkaarsvurderingResultat(opprettetVilkaarsvurdering.behandlingId)
 
         oppdatertVilkaarsvurdering.resultat shouldBe null
     }
 
     @Test
     fun `skal sette resultat paa vilkaar`() {
-        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettetVilkaarsvurdering = vilkaarsvurderingDao.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_ALDER_BARN)
         val vurdertVilkaar =
             VurdertVilkaar(
@@ -163,7 +165,7 @@ internal class VilkaarsvurderingRepositoryTest(
             )
 
         val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
+            vilkaarsvurderingDao.oppdaterVurderingPaaVilkaar(
                 opprettetVilkaarsvurdering.behandlingId,
                 vurdertVilkaar,
             )
@@ -183,7 +185,7 @@ internal class VilkaarsvurderingRepositoryTest(
 
     @Test
     fun `skal slette resultat paa vilkaar`() {
-        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettetVilkaarsvurdering = vilkaarsvurderingDao.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_ALDER_BARN)
         val vurdertVilkaar =
             VurdertVilkaar(
@@ -203,13 +205,13 @@ internal class VilkaarsvurderingRepositoryTest(
                     },
             )
 
-        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
+        vilkaarsvurderingDao.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaar,
         )
 
         val oppdatertVilkaarsvurdering =
-            vilkaarsvurderingRepository.slettVilkaarResultat(
+            vilkaarsvurderingDao.slettVilkaarResultat(
                 opprettetVilkaarsvurdering.behandlingId,
                 requireNotNull(vilkaar.id),
             )
@@ -225,7 +227,7 @@ internal class VilkaarsvurderingRepositoryTest(
 
     @Test
     fun `naar vi setter et ikke-oppfylt vilkaar oppfylt, skal resultatet fjernes fra alle unntakene`() {
-        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettetVilkaarsvurdering = vilkaarsvurderingDao.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)
         val vurdertVilkaarIkkeOppfylt =
             VurdertVilkaar(
@@ -243,7 +245,7 @@ internal class VilkaarsvurderingRepositoryTest(
                         Utfall.OPPFYLT,
                     ),
             )
-        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
+        vilkaarsvurderingDao.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaarIkkeOppfylt,
         )
@@ -260,13 +262,13 @@ internal class VilkaarsvurderingRepositoryTest(
                 hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
                 unntaksvilkaar = null,
             )
-        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
+        vilkaarsvurderingDao.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaarOppfylt,
         )
 
         val resultatVilkaar =
-            vilkaarsvurderingRepository
+            vilkaarsvurderingDao
                 .hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
                 .vilkaar
                 .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
@@ -277,7 +279,7 @@ internal class VilkaarsvurderingRepositoryTest(
 
     @Test
     fun `naar vi setter et vilkaar til ikke oppfylt, og ingen unntak treffer, setter alle unntak til ikke oppfylt`() {
-        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettetVilkaarsvurdering = vilkaarsvurderingDao.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)
         val vurdertVilkaarIkkeOppfylt =
             VurdertVilkaar(
@@ -291,13 +293,13 @@ internal class VilkaarsvurderingRepositoryTest(
                 hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
                 unntaksvilkaar = null,
             )
-        vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(
+        vilkaarsvurderingDao.oppdaterVurderingPaaVilkaar(
             opprettetVilkaarsvurdering.behandlingId,
             vurdertVilkaarIkkeOppfylt,
         )
 
         val resultatVilkaar =
-            vilkaarsvurderingRepository
+            vilkaarsvurderingDao
                 .hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
                 .vilkaar
                 .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }

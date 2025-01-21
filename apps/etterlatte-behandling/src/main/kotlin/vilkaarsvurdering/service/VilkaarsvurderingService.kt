@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.VilkaartypePair
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapper
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
@@ -37,22 +37,22 @@ class VirkningstidspunktIkkeSattException(
 ) : RuntimeException("Virkningstidspunkt ikke satt for behandling $behandlingId")
 
 class VilkaarsvurderingService(
-    private val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper,
+    private val repository: VilkaarsvurderingDao,
     private val behandlingService: BehandlingService,
     private val grunnlagKlient: GrunnlagKlient,
     private val behandlingStatus: BehandlingStatusService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = vilkaarsvurderingRepositoryWrapper.hent(behandlingId)
+    fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = repository.hent(behandlingId)
 
     fun erMigrertYrkesskadefordel(behandlingId: UUID): Boolean {
         val hentBehandling = behandlingService.hentBehandling(behandlingId)!!
-        return vilkaarsvurderingRepositoryWrapper.hentMigrertYrkesskadefordel(hentBehandling.id, hentBehandling.sak.id)
+        return repository.hentMigrertYrkesskadefordel(hentBehandling.sak.id)
     }
 
     fun harRettUtenTidsbegrensning(behandlingId: UUID): Boolean =
-        vilkaarsvurderingRepositoryWrapper
+        repository
             .hent(behandlingId)
             ?.vilkaar
             ?.filter { it.hovedvilkaar.type == VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING }
@@ -71,20 +71,22 @@ class VilkaarsvurderingService(
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
+            val vilkaarsvurdering = hentVilkaarsvurdering(behandlingId) ?: throw VilkaarsvurderingIkkeFunnet()
             val virkningstidspunkt =
                 behandling.virkningstidspunkt?.dato?.atDay(1)
                     ?: throw IllegalStateException("Virkningstidspunkt må være satt for å sette en vurdering")
-            val vilkaarsvurdering =
-                vilkaarsvurderingRepositoryWrapper.lagreVilkaarsvurderingResultat(
+            val oppdatertVilkaarsvurdering =
+                repository.lagreVilkaarsvurderingResultat(
                     behandlingId = behandlingId,
+                    vilkaarsvurderingId = vilkaarsvurdering.id,
                     virkningstidspunkt = virkningstidspunkt,
                     resultat = resultat,
                 )
             if (vilkaarsvurdering.grunnlagVersjon != grunnlag.metadata.versjon) {
-                vilkaarsvurderingRepositoryWrapper.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
+                repository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
             }
             behandlingStatus.settVilkaarsvurdert(behandlingId, brukerTokenInfo, false)
-            VilkaarsvurderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, grunnlag.metadata.versjon)
+            VilkaarsvurderingMedBehandlingGrunnlagsversjon(oppdatertVilkaarsvurdering, grunnlag.metadata.versjon)
         }
 
     fun slettTotalVurdering(
@@ -92,7 +94,7 @@ class VilkaarsvurderingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Vilkaarsvurdering {
         behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true)
-        val vilkaarsvurdering = vilkaarsvurderingRepositoryWrapper.slettVilkaarsvurderingResultat(behandlingId)
+        val vilkaarsvurdering = repository.slettVilkaarsvurderingResultat(behandlingId)
         behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false)
         return vilkaarsvurdering
     }
@@ -103,14 +105,14 @@ class VilkaarsvurderingService(
         vurdertVilkaar: VurdertVilkaar,
     ): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val vilkaarsvurdering = vilkaarsvurderingRepositoryWrapper.hent(behandlingId)
+            val vilkaarsvurdering = repository.hent(behandlingId)
             if (vilkaarsvurdering?.resultat != null) {
                 throw VilkaarsvurderingTilstandException(
                     "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering som har et resultat. ",
                     vilkaarsvurdering,
                 )
             }
-            vilkaarsvurderingRepositoryWrapper.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
+            repository.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
         }
 
     fun slettVurderingPaaVilkaar(
@@ -119,7 +121,7 @@ class VilkaarsvurderingService(
         vilkaarId: UUID,
     ): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            val vilkaarsvurdering = vilkaarsvurderingRepositoryWrapper.hent(behandlingId)
+            val vilkaarsvurdering = repository.hent(behandlingId)
             if (vilkaarsvurdering?.resultat != null) {
                 throw VilkaarsvurderingTilstandException(
                     "Kan ikke slette et vilkår ($vilkaarId) på en vilkårsvurdering som har et resultat. ",
@@ -127,7 +129,7 @@ class VilkaarsvurderingService(
                 )
             }
 
-            vilkaarsvurderingRepositoryWrapper.slettVilkaarResultat(behandlingId, vilkaarId)
+            repository.slettVilkaarResultat(behandlingId, vilkaarId)
         }
 
     private fun validerTidligereVilkaarsvurdering(tidligereVilkaarsvurdering: Vilkaarsvurdering) {
@@ -154,7 +156,7 @@ class VilkaarsvurderingService(
             logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
             val tidligereVilkaarsvurdering =
-                vilkaarsvurderingRepositoryWrapper.hent(kopierFraBehandling)
+                repository.hent(kopierFraBehandling)
                     ?: throw NullPointerException("Fant ikke vilkårsvurdering fra behandling $kopierFraBehandling")
 
             val virkningstidspunkt =
@@ -176,7 +178,7 @@ class VilkaarsvurderingService(
                 }
 
             val nyVilkaarsvurdering =
-                vilkaarsvurderingRepositoryWrapper.kopierVilkaarsvurdering(
+                repository.kopierVilkaarsvurdering(
                     nyVilkaarsvurdering =
                         Vilkaarsvurdering(
                             behandlingId = behandlingId,
@@ -200,7 +202,7 @@ class VilkaarsvurderingService(
                 )
             ) {
                 VilkaarsvurderingMedBehandlingGrunnlagsversjon(
-                    vilkaarsvurderingRepositoryWrapper.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId),
+                    repository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId),
                     grunnlag.metadata.versjon,
                 )
             } else {
@@ -246,7 +248,7 @@ class VilkaarsvurderingService(
         kopierVedRevurdering: Boolean = true,
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            vilkaarsvurderingRepositoryWrapper.hent(behandlingId)?.let {
+            repository.hent(behandlingId)?.let {
                 throw IllegalArgumentException("Vilkårsvurdering finnes allerede for behandling $behandlingId")
             }
 
@@ -297,9 +299,9 @@ class VilkaarsvurderingService(
     ) {
         behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, true)
         val vilkaarsvurdering =
-            vilkaarsvurderingRepositoryWrapper.hent(behandlingId)
+            repository.hent(behandlingId)
                 ?: throw IllegalStateException("Vilkårsvurderingen eksisterer ikke")
-        vilkaarsvurderingRepositoryWrapper.slettVilkaarvurdering(behandlingId, vilkaarsvurdering.id)
+        repository.slettVilkaarvurdering(vilkaarsvurdering.id)
         behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, false)
     }
 
@@ -316,7 +318,7 @@ class VilkaarsvurderingService(
                 behandling.sak.sakType,
             )
 
-        return vilkaarsvurderingRepositoryWrapper.opprettVilkaarsvurdering(
+        return repository.opprettVilkaarsvurdering(
             Vilkaarsvurdering(
                 behandlingId = behandlingId,
                 vilkaar = vilkaar,
@@ -360,7 +362,7 @@ class VilkaarsvurderingService(
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             val behandling = oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
             val vilkaarsvurdering =
-                vilkaarsvurderingRepositoryWrapper.hent(behandlingId)
+                repository.hent(behandlingId)
                     ?: throw VilkaarsvurderingIkkeFunnet()
 
             val virkningstidspunktFraBehandling =
@@ -390,7 +392,7 @@ class VilkaarsvurderingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
         val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
-        vilkaarsvurderingRepositoryWrapper.oppdaterGrunnlagsversjon(
+        repository.oppdaterGrunnlagsversjon(
             behandlingId = behandlingId,
             grunnlagVersjon = grunnlag.metadata.versjon,
         )

@@ -36,9 +36,9 @@ fun Session.oppdater(
     .let { this.run(it.asUpdate) }
     .also { ekstra?.invoke(this) }
 
-class VilkaarsvurderingRepository(
+class VilkaarsvurderingDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
-    private val delvilkaarRepository: DelvilkaarRepository,
+    private val delvilkaarDao: DelvilkaarDao,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -75,27 +75,29 @@ class VilkaarsvurderingRepository(
         return hentNonNull(vilkaarsvurdering.behandlingId)
     }
 
-    fun lagreVilkaarsvurderingResultatvanlig(
+    fun lagreVilkaarsvurderingResultat(
+        behandlingId: UUID,
+        vilkaarsvurderingId: UUID,
         virkningstidspunkt: LocalDate,
         resultat: VilkaarsvurderingResultat,
-        vilkaarsvurdering: Vilkaarsvurdering,
     ): Vilkaarsvurdering {
         connectionAutoclosing.hentKotliquerySession { session ->
-            vilkaarsvurderingResultatQuery(vilkaarsvurdering.id, virkningstidspunkt, resultat).let {
+            vilkaarsvurderingResultatQuery(vilkaarsvurderingId, virkningstidspunkt, resultat).let {
                 session.run(
                     it.asExecute,
                 )
             }
         }
 
-        return hentNonNull(vilkaarsvurdering.behandlingId)
+        return hentNonNull(behandlingId)
     }
 
     fun kopierVilkaarsvurdering(
-        nyVilkaarsvurdering: Vilkaarsvurdering, // TODO ny eller gammel?
+        nyVilkaarsvurdering: Vilkaarsvurdering,
         kopiertFraId: UUID,
     ): Vilkaarsvurdering {
         connectionAutoclosing.hentKotliquerySession { session ->
+            opprettVilkaarsvurdering(nyVilkaarsvurdering, session)
             lagreVilkaarsvurderingResultatKopiering(nyVilkaarsvurdering, session)
             opprettVilkaarsvurderingKilde(nyVilkaarsvurdering.id, kopiertFraId, session)
         }
@@ -152,7 +154,7 @@ class VilkaarsvurderingRepository(
                                 .toTimestamp(),
                         "resultat_saksbehandler" to vurdertVilkaar.vurdering.saksbehandler,
                     ),
-                ekstra = { delvilkaarRepository.oppdaterDelvilkaar(vurdertVilkaar, session) },
+                ekstra = { delvilkaarDao.oppdaterDelvilkaar(vurdertVilkaar, session) },
             )
         }
         return hentNonNull(behandlingId)
@@ -167,7 +169,7 @@ class VilkaarsvurderingRepository(
                 queryOf(Queries.SLETT_VILKAAR_RESULTAT, mapOf("id" to vilkaarId))
                     .let { session.run(it.asUpdate) }
 
-                delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, session)
+                delvilkaarDao.slettDelvilkaarResultat(vilkaarId, session)
             }.let { hentNonNull(behandlingId) }
 
     fun slettVilkaarvurdering(vilkaarsvurderingId: UUID) =
@@ -185,7 +187,7 @@ class VilkaarsvurderingRepository(
         val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
         vilkaarsvurdering.vilkaar.forEach { vilkaar ->
             val vilkaarId = lagreVilkaar(vilkaarsvurderingId, vilkaar, tx)
-            delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
+            delvilkaarDao.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
         }
     }
 

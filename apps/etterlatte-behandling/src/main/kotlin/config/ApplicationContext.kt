@@ -146,10 +146,8 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapper
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration
@@ -317,10 +315,7 @@ internal class ApplicationContext(
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
     val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
-    val vilkaarsvurderingDao = VilkaarsvurderingRepository(autoClosingDatabase, DelvilkaarRepository())
-
-    val vilkaarsvurderingRepositoryWrapper: VilkaarsvurderingRepositoryWrapper =
-        VilkaarsvurderingRepositoryWrapperDatabase(vilkaarsvurderingDao)
+    val vilkaarsvurderingDao = VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao())
 
     // Klient
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
@@ -580,7 +575,7 @@ internal class ApplicationContext(
 
     val vilkaarsvurderingService =
         VilkaarsvurderingService(
-            vilkaarsvurderingRepositoryWrapper,
+            vilkaarsvurderingDao,
             behandlingService,
             grunnlagKlientImpl,
             behandlingsStatusService,

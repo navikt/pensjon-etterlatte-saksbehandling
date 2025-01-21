@@ -20,6 +20,7 @@ import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnla
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -321,6 +322,7 @@ fun beregningsperiode(
     trygdetid = trygdetid,
     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
     regelVersjon = "1",
+    regelverk = Regelverk.fraDato(datoFOM.atDay(1)),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
 )
 

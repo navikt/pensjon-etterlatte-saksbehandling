@@ -426,6 +426,16 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto =
                         tidspunkt = kilde.tidspunkt.toString(),
                         ident = kilde.type,
                     )
+                is Grunnlagsopplysning.Ufoeretrygd ->
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.type,
+                    )
+                is Grunnlagsopplysning.Alderspensjon ->
+                    TrygdetidGrunnlagKildeDto(
+                        tidspunkt = kilde.tidspunkt.toString(),
+                        ident = kilde.type,
+                    )
 
                 else -> throw UnsupportedOperationException("Kilde for trygdetid maa vaere saksbehandler eller pesys")
             },

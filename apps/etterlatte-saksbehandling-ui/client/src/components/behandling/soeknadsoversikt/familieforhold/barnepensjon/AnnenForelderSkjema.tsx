@@ -137,7 +137,7 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
                 {tekstAnnenForelderVurdering(AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER)}
               </Checkbox>
               <ReadMore header="Når skal du bruke Kun én registrert juridisk forelder?">
-                Kryss her hvis det er fastsatt kun én juridisk forelder (f.eks. assistert befruktning) og hen er død.
+                Kryss av her hvis det er fastsatt kun én juridisk forelder (f.eks. assistert befruktning) og hen er død.
                 Det gis da barnepensjon som foreldreløs. Dokumentasjon må foreligge. Ikke kryss av her hvis en eller
                 begge foreldrene er ukjent (f.eks. at det ikke kan dokumenteres hvem som er mor eller far, og om hen er
                 død).

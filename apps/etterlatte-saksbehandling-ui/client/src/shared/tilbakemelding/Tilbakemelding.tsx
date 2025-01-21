@@ -6,6 +6,10 @@ import { GladEmoji } from '~shared/tilbakemelding/emoji/GladEmoji'
 import { EkstatiskEmoji } from '~shared/tilbakemelding/emoji/EkstatiskEmoji'
 import { ClickEvent, trackClickMedSvar } from '~utils/amplitude'
 import { useState } from 'react'
+import {
+  leggTilbakemeldingGittILocalStorage,
+  tilbakemeldingForBehandlingEksisterer,
+} from '~shared/tilbakemelding/tilbakemeldingLocalStorage'
 
 enum TilbakemeldingSvar {
   VELDIG_MISFORNOEYD = 'veldig misfornøyd',
@@ -18,26 +22,29 @@ enum TilbakemeldingSvar {
 interface Props {
   spoersmaal: string
   clickEvent: ClickEvent
+  behandlingId: string
 }
 
-export const Tilbakemelding = ({ spoersmaal, clickEvent }: Props) => {
-  const [harGittTilbakemelding, setHarGittTilbakemelding] = useState<boolean>(false)
+export const Tilbakemelding = ({ spoersmaal, clickEvent, behandlingId }: Props) => {
+  const [harSvart, setHarSvart] = useState<boolean>(tilbakemeldingForBehandlingEksisterer({ behandlingId, clickEvent }))
 
   const trackTilbakemelding = (svar: TilbakemeldingSvar) => {
     trackClickMedSvar(clickEvent, svar)
-    setHarGittTilbakemelding(true)
+    leggTilbakemeldingGittILocalStorage({ behandlingId, clickEvent })
+    setTimeout(() => {
+      setHarSvart(true)
+    }, 500)
   }
 
   return (
-    <Box borderRadius="large" width="fit-content" background="surface-subtle">
-      <VStack padding="8" width="fit-content">
-        <Heading size="medium" spacing>
-          {spoersmaal}
-        </Heading>
+    !tilbakemeldingForBehandlingEksisterer({ behandlingId, clickEvent }) &&
+    !harSvart && (
+      <Box borderRadius="large" width="fit-content" background="surface-subtle">
+        <VStack padding="8" width="fit-content">
+          <Heading size="medium" spacing>
+            {spoersmaal}
+          </Heading>
 
-        {harGittTilbakemelding ? (
-          <Heading size="medium">Takk for din tilbakemelding!</Heading>
-        ) : (
           <HStack justify="center" gap="6" width="fit-content">
             <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.VELDIG_MISFORNOEYD)}>
               <VStack gap="1-alt" align="center">
@@ -70,8 +77,8 @@ export const Tilbakemelding = ({ spoersmaal, clickEvent }: Props) => {
               </VStack>
             </Button>
           </HStack>
-        )}
-      </VStack>
-    </Box>
+        </VStack>
+      </Box>
+    )
   )
 }

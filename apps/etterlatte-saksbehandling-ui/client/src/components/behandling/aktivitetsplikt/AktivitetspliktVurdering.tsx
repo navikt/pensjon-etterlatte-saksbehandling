@@ -125,6 +125,7 @@ export const AktivitetspliktVurdering = ({
     return <Spinner label="Henter aktivitetspliktsvurdering" />
   }
 
+  const typeVurdering6eller12MndVurdering = typeVurderingFraDoedsdato(doedsdato)
   return (
     <Box maxWidth="120rem" paddingBlock="4 0" borderWidth="1 0 0 0">
       <VStack gap="6">
@@ -178,7 +179,11 @@ export const AktivitetspliktVurdering = ({
             </Box>
           )}
           {isSuccess(hentetVurdering) && vurdering && harVarigUnntak(vurdering) && harAktivitetsplikt === JaNei.NEI && (
-            <UnntakTabellBehandling behandling={behandling} unntak={vurdering?.unntak} />
+            <UnntakTabellBehandling
+              behandling={behandling}
+              unntak={vurdering?.unntak}
+              typeVurdering={typeVurdering6eller12MndVurdering}
+            />
           )}
         </VStack>
         {valgHarAktivitetsplikt && isSuccess(hentetVurdering) && (
@@ -188,9 +193,13 @@ export const AktivitetspliktVurdering = ({
                 <AktivitetsgradTabellBehandling
                   behandling={behandling}
                   aktiviteter={vurdering?.aktivitet}
-                  typeVurdering={typeVurderingFraDoedsdato(doedsdato)}
+                  typeVurdering={typeVurdering6eller12MndVurdering}
                 />
-                <UnntakTabellBehandling behandling={behandling} unntak={vurdering?.unntak} />
+                <UnntakTabellBehandling
+                  behandling={behandling}
+                  unntak={vurdering?.unntak}
+                  typeVurdering={typeVurdering6eller12MndVurdering}
+                />
               </>
             )}
             {redigerbar && <VurderAktivitetspliktWrapperBehandling doedsdato={doedsdato} behandling={behandling} />}

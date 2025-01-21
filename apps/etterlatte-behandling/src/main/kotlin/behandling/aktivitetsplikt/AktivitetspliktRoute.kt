@@ -398,7 +398,7 @@ internal fun Route.aktivitetspliktRoutes(
 
         post("/aktivitetsgrad-unntak") {
             kunSkrivetilgang {
-                logger.info("Oppretter aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
+                logger.info("Oppretter aktivitetsgrad og unntak for sakId=$sakId og behandlingId=$behandlingId")
                 val aktivitetsgradOgUnntak = call.receive<AktivitetspliktAktivitetsgradOgUnntak>()
                 val vurderingForBehandling =
                     inTransaction {

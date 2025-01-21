@@ -98,9 +98,8 @@ data class OmstillingsstoenadInnvilgelse(
                         erYrkesskade = trygdetid.erYrkesskade(),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
-                    avkortingsinfo.virkningsdato.isBefore(
-                        doedsdatoEllerOpphoertPleieforhold
-                            .plusMonths(4),
+                    innvilgetMindreEnnFireMndEtterDoedsfall(
+                        doedsdatoEllerOpphoertPleieforhold = doedsdatoEllerOpphoertPleieforhold,
                     ),
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
@@ -112,6 +111,11 @@ data class OmstillingsstoenadInnvilgelse(
                 tidligereFamiliepleier = erTidligereFamiliepleier,
             )
         }
+
+        fun innvilgetMindreEnnFireMndEtterDoedsfall(
+            innvilgelsesDato: LocalDate = LocalDate.now(),
+            doedsdatoEllerOpphoertPleieforhold: LocalDate,
+        ): Boolean = innvilgelsesDato.isBefore(doedsdatoEllerOpphoertPleieforhold.plusMonths(4))
     }
 }
 

@@ -2,12 +2,15 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import {
   AktivitetspliktOppfolging,
   AktivitetspliktOppgaveVurdering,
-  IAktivitet,
+  IAktivitetPeriode,
+  IAktivitetHendelse,
   IAktivitetspliktVurdering,
   IAktivitetspliktVurderingNyDto,
-  IOpprettAktivitet,
+  SkrivAktivitet,
   IOpprettAktivitetspliktAktivitetsgrad,
   IOpprettAktivitetspliktUnntak,
+  IAktivitetPerioderOgHendelser,
+  SkrivHendelse,
 } from '~shared/types/Aktivitetsplikt'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { OppgaveDTO } from '~shared/types/oppgave'
@@ -19,34 +22,67 @@ export const hentAktivitetspliktOppfolging = async (args: {
 
 export const hentAktiviteterForBehandling = async (args: {
   behandlingId: string
-}): Promise<ApiResponse<IAktivitet[]>> => apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`)
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
+  apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`)
 
 export const opprettAktivitet = async (args: {
   behandlingId: string
-  request: IOpprettAktivitet
-}): Promise<ApiResponse<IAktivitet[]>> =>
+  request: SkrivAktivitet
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`, { ...args.request })
+
+export const opprettHendelse = async (args: {
+  behandlingId: string
+  request: SkrivHendelse
+}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
+  apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse`, { ...args.request })
+
+export const slettAktivitetHendelse = async (args: {
+  behandlingId: string
+  hendelseId: string
+}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
+  apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/hendelse/${args.hendelseId}`)
 
 export const slettAktivitet = async (args: {
   behandlingId: string
   aktivitetId: string
-}): Promise<ApiResponse<IAktivitet[]>> =>
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet/${args.aktivitetId}`)
 
-export const hentAktiviteterForSak = async (args: { sakId: number }): Promise<ApiResponse<IAktivitet[]>> =>
+export const hentAktiviteterOgHendelser = async (args: {
+  sakId: number
+  behandlingId?: string
+}): Promise<ApiResponse<IAktivitetPerioderOgHendelser>> => {
+  const parameter = args.behandlingId ? `?behandlingId=${args.behandlingId}` : ''
+  return apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/aktivitet-og-hendelser${parameter}`)
+}
+
+export const hentAktiviteterForSak = async (args: { sakId: number }): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`)
 
 export const opprettAktivitetForSak = async (args: {
   sakId: number
-  request: IOpprettAktivitet
-}): Promise<ApiResponse<IAktivitet[]>> =>
+  request: SkrivAktivitet
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`, { ...args.request })
+
+export const opprettHendelseForSak = async (args: {
+  sakId: number
+  request: SkrivHendelse
+}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
+  apiClient.post(`/sak/${args.sakId}/aktivitetsplikt/hendelse`, { ...args.request })
 
 export const slettAktivitetForSak = async (args: {
   sakId: number
   aktivitetId: string
-}): Promise<ApiResponse<IAktivitet[]>> =>
+}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
   apiClient.delete(`/sak/${args.sakId}/aktivitetsplikt/aktivitet/${args.aktivitetId}`)
+
+export const slettAktivitetHendelseForSak = async (args: {
+  sakId: number
+  hendelseId: string
+}): Promise<ApiResponse<IAktivitetHendelse[]>> =>
+  apiClient.delete(`/sak/${args.sakId}/aktivitetsplikt/hendelse/${args.hendelseId}`)
 
 export const hentAktivitspliktVurderingForSak = async (args: {
   sakId: number

@@ -37,11 +37,19 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 const val AKTIVITET_ID_CALL_PARAMETER = "id"
+const val HENDELSE_ID_CALL_PARAMETER = "hendelseId"
 inline val PipelineContext<*, ApplicationCall>.aktivitetId: UUID
     get() =
         call.parameters[AKTIVITET_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
             "MANGLER_AKTIVITET_ID",
             "Aktivitet id er ikke i path params",
+        )
+
+inline val PipelineContext<*, ApplicationCall>.hendelseId: UUID
+    get() =
+        call.parameters[HENDELSE_ID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw UgyldigForespoerselException(
+            "MANGLER_HENDELSE_ID",
+            "Hendelse id er ikke i path params",
         )
 
 const val AKTIVITETSGRAD_ID_CALL_PARAMETER = "aktivitetsgradId"
@@ -167,6 +175,67 @@ internal fun Route.aktivitetspliktRoutes(
                             }
 
                         call.respond(aktiviteter)
+                    }
+                }
+            }
+        }
+
+        route("/aktivitet-og-hendelser") {
+            get {
+                val behandlingId =
+                    call.parameters[BEHANDLINGID_CALL_PARAMETER]?.let {
+                        UUID.fromString(it)
+                    }
+                logger.info("Henter aktiviteter og hendelser for sak=$sakId")
+                call.respond(inTransaction { aktivitetspliktService.hentAktiviteterHendelser(sakId = sakId, behandlingId = behandlingId) })
+            }
+        }
+
+        route("hendelse") {
+            get {
+                kunSaksbehandler {
+                    val behandlingId =
+                        call.parameters[BEHANDLINGID_CALL_PARAMETER]?.let {
+                            UUID.fromString(it)
+                        }
+                    logger.info("Henter hendelser for sak $sakId")
+                    val dto =
+                        inTransaction {
+                            runBlocking {
+                                aktivitetspliktService.hentHendelser(
+                                    sakId = sakId,
+                                    behandlingId = behandlingId,
+                                )
+                            }
+                        }
+                    call.respond(dto)
+                }
+            }
+            post {
+                kunSkrivetilgang {
+                    logger.info("Oppretter eller oppdaterer hendelser for sakId=$sakId")
+                    val hendelse = call.receive<LagreAktivitetspliktHendelse>()
+                    val hendelser =
+                        inTransaction {
+                            aktivitetspliktService.upsertHendelse(hendelse, brukerTokenInfo, sakId = sakId)
+                            aktivitetspliktService.hentHendelser(sakId = sakId)
+                        }
+                    call.respond(hendelser)
+                }
+            }
+
+            route("/{$AKTIVITET_ID_CALL_PARAMETER}") {
+                delete {
+                    kunSkrivetilgang {
+                        logger.info("Sletter hendelse $hendelseId for sakId $sakId")
+
+                        val hendelser =
+                            inTransaction {
+                                aktivitetspliktService.slettHendelse(hendelseId, brukerTokenInfo, sakId = sakId)
+                                aktivitetspliktService.hentHendelser(sakId = sakId)
+                            }
+
+                        call.respond(hendelser)
                     }
                 }
             }

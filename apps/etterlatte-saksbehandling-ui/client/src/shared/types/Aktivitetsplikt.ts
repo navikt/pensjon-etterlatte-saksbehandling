@@ -11,10 +11,15 @@ export interface AktivitetspliktOppfolging {
   opprettetAv: string
 }
 
-export interface IAktivitet {
+export interface IAktivitetPerioderOgHendelser {
+  perioder: IAktivitetPeriode[]
+  hendelser: IAktivitetHendelse[]
+}
+
+export interface IAktivitetPeriode {
   id: string
   sakId: number
-  behandlingId: string
+  behandlingId?: string
   type: AktivitetspliktType
   fom: string
   tom?: string
@@ -23,12 +28,29 @@ export interface IAktivitet {
   beskrivelse: string
 }
 
-export interface IOpprettAktivitet {
+export interface IAktivitetHendelse {
+  id: string
+  sakId: number
+  behandlingId?: string
+  dato: string
+  opprettet: KildeSaksbehandler
+  endret: KildeSaksbehandler
+  beskrivelse: string
+}
+
+export interface SkrivAktivitet {
   id: string | undefined
   sakId: number
   type: AktivitetspliktType
   fom: string
   tom?: string
+  beskrivelse: string
+}
+
+export interface SkrivHendelse {
+  id: string | undefined
+  sakId: number
+  dato: string
   beskrivelse: string
 }
 

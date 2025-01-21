@@ -44,12 +44,14 @@ export const Tilbakemelding = ({ spoersmaal, clickEvent, behandlingId }: Props) 
     !tilbakemeldingAlleredeGitt && (
       <Box borderRadius="large" width="fit-content" background="surface-subtle">
         <VStack padding="8" width="fit-content">
-          <Heading size="medium" spacing>
+          <Heading size="medium" level="2" spacing>
             {spoersmaal}
           </Heading>
 
           {harGittTilbakemelding ? (
-            <Heading size="medium">Takk for din tilbakemelding!</Heading>
+            <Heading size="medium" level="3">
+              Takk for din tilbakemelding!
+            </Heading>
           ) : (
             <HStack justify="center" gap="6" width="fit-content">
               <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.VELDIG_MISFORNOEYD)}>

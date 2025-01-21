@@ -97,6 +97,7 @@ class SendEndretEnhet(
                         enhet = oppgaveOgEnhet.enhet,
                         overstyrtTekniskTid = tidspunktForEndring,
                     )
+                    oppgaveEnhetEndretDao.oppdaterSendtMelding(oppgaveOgEnhet.oppgaveId)
                 }
             } catch (e: Exception) {
                 logger.warn(

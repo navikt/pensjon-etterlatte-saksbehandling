@@ -24,19 +24,14 @@ const mapAdresse = (mottaker: Mottaker) => {
   return `${adresselinje}, ${postlinje}`
 }
 
-const kanEndres = (brev: IBrev) => brev.status !== BrevStatus.DISTRIBUERT && gyldigbrevkode(brev.brevkoder)
-
-export const gyldigbrevkode = (brevkoder: string): boolean =>
-  ![
-    'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_10MND_INNHOLD',
-    'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD',
-  ].includes(brevkoder)
+const kanEndres = (brev: IBrev) => brev.status !== BrevStatus.DISTRIBUERT
 
 const handlingKnapp = (brev: IBrev) => {
   if (kanEndres(brev)) {
-    const href = brev.behandlingId
-      ? `/behandling/${brev.behandlingId}/brev`
-      : `/person/sak/${brev.sakId}/brev/${brev.id}`
+    const href =
+      brev.behandlingId && brev.status !== BrevStatus.JOURNALFOERT
+        ? `/behandling/${brev.behandlingId}/brev`
+        : `/person/sak/${brev.sakId}/brev/${brev.id}`
 
     return (
       <Button as="a" href={href} variant="secondary" title="Rediger" icon={<DocPencilIcon aria-hidden />} size="small">

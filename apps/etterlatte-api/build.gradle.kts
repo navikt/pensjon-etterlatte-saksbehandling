@@ -6,6 +6,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-beregning-model"))
+    implementation(project(":libs:etterlatte-oppgave-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-sporingslogg"))
 

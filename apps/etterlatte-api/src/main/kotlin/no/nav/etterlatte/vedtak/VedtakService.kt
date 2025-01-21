@@ -7,24 +7,24 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 class VedtakService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
 ) {
-    suspend fun hentVedtak(fnr: Folkeregisteridentifikator): VedtakForEksterntDto {
+    suspend fun hentVedtak(fnr: Folkeregisteridentifikator): VedtakTilPerson {
         val vedtak = vedtaksvurderingKlient.hentVedtak(fnr)
-        return VedtakForEksterntDto(
-            vedtak = vedtak.filter { it.type.vanligBehandling }.map { it.toEksternDto() },
+        return VedtakTilPerson(
+            vedtak = vedtak.filter { it.type.vanligBehandling }.map { it.fromDto() },
         )
     }
 }
 
-fun VedtakDto.toEksternDto(): VedtakEksternt {
+fun VedtakDto.fromDto(): Vedtak {
     val vedtakInnhold = (innhold as VedtakInnholdDto.VedtakBehandlingDto)
-    return VedtakEksternt(
+    return Vedtak(
         sakId = sak.id.sakId,
         sakType = sak.sakType.name,
         virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
-        type = VedtakTypeEksternt.valueOf(type.name),
+        type = VedtakType.valueOf(type.name),
         utbetaling =
             vedtakInnhold.utbetalingsperioder.map { utbetaling ->
-                VedtakEksterntUtbetaling(
+                VedtakUtbetaling(
                     periode = utbetaling.periode,
                     beloep = utbetaling.beloep,
                 )

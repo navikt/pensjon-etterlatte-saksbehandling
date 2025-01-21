@@ -125,16 +125,14 @@ export const AktivitetspliktVurdering = ({
     return <Spinner label="Henter aktivitetspliktsvurdering" />
   }
 
-  console.log('valgHarAktivitetsplikt: ', valgHarAktivitetsplikt, ' harAktivitetsplikt: ', harAktivitetsplikt)
-
   return (
     <Box maxWidth="120rem" paddingBlock="4 0" borderWidth="1 0 0 0">
       <VStack gap="6">
         <VStack gap="3">
           <Heading size="medium">Vurdering av aktivitetsplikt</Heading>
           <BodyShort>Følgende vurderinger av aktiviteten er registrert.</BodyShort>
-          {manglerVurdering && redigerbar && (
-            <Box maxWidth="32rem">
+          {redigerbar && manglerVurdering && (
+            <Box maxWidth="32.5rem">
               <RadioGroupWrapper>
                 <RadioGroup
                   disabled={!redigerbar}
@@ -157,7 +155,7 @@ export const AktivitetspliktVurdering = ({
                   </HStack>
                 </RadioGroup>
               </RadioGroupWrapper>
-              {harAktivitetsplikt === JaNei.NEI && (
+              {harAktivitetsplikt === JaNei.NEI && vurdering && !harVarigUnntak(vurdering) && (
                 <>
                   <Box maxWidth="60rem" paddingBlock="2 2">
                     <Textarea
@@ -179,7 +177,7 @@ export const AktivitetspliktVurdering = ({
               )}
             </Box>
           )}
-          {isSuccess(hentetVurdering) && vurdering && harVarigUnntak(vurdering) && (
+          {isSuccess(hentetVurdering) && vurdering && harVarigUnntak(vurdering) && harAktivitetsplikt === JaNei.NEI && (
             <UnntakTabellBehandling behandling={behandling} unntak={vurdering?.unntak} />
           )}
         </VStack>

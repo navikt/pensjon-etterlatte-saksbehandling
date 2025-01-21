@@ -83,6 +83,30 @@ open class Grunnlagsopplysning<T>(
         override fun toString(): String = "pesys"
     }
 
+    sealed class PesysYtelseKilde(
+        nytype: String,
+    ) : Kilde(nytype)
+
+    data class Alderspensjon(
+        val tidspunkt: Tidspunkt,
+    ) : PesysYtelseKilde("alderspensjon") {
+        companion object {
+            fun create() = Alderspensjon(Tidspunkt.now())
+        }
+
+        override fun toString(): String = "alderspensjon"
+    }
+
+    data class Ufoeretrygd(
+        val tidspunkt: Tidspunkt,
+    ) : PesysYtelseKilde("ufoeretrygd") {
+        companion object {
+            fun create() = Ufoeretrygd(Tidspunkt.now())
+        }
+
+        override fun toString(): String = "ufoeretrygd"
+    }
+
     data class Gjenoppretting(
         val tidspunkt: Tidspunkt,
     ) : Kilde("gjenoppretting") {

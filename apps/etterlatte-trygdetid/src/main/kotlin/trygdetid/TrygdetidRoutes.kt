@@ -48,7 +48,7 @@ private inline val PipelineContext<*, ApplicationCall>.trygdetidId: UUID
     get() =
         try {
             this.call.uuid(TRYGDETIDID_CALL_PARAMETER)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             throw UgyldigForespoerselException(
                 "MANGLER_TRYGDETID_ID",
                 "Kunne ikke lese ut parameteret trygdetidId",

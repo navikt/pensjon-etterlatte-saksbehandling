@@ -437,7 +437,9 @@ private fun TrygdetidGrunnlag.toDto(): TrygdetidGrunnlagDto =
                         ident = kilde.type,
                     )
 
-                else -> throw UnsupportedOperationException("Kilde for trygdetid maa vaere saksbehandler eller pesys")
+                else -> throw UnsupportedOperationException(
+                    "Kilde for trygdetid maa vaere saksbehandler, Ufoeretrygd, Alderspensjon eller pesys, var $kilde",
+                )
             },
         begrunnelse = begrunnelse,
         poengInnAar = poengInnAar,

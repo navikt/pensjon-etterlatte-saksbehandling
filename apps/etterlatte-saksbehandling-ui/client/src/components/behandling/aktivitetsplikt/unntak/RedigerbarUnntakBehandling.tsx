@@ -107,7 +107,7 @@ const RedigerbartUnntak = (props: {
       lagreUnntakStatus={lagreUnntakStatus}
       sendInn={sendInn}
       unntak={unntak}
-      vurderingType={AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER}
+      vurderingType={AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER} //TODO: dette er feil
       onAvbryt={onAvbryt}
     />
   )

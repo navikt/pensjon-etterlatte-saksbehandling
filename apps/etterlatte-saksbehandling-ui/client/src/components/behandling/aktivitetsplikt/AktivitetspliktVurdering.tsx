@@ -29,6 +29,15 @@ const vurderingHarInnhold = (vurdering: IAktivitetspliktVurderingNyDto): boolean
   return !!vurdering.unntak.length || !!vurdering.aktivitet.length
 }
 
+const harVarigUnntak = (vurdering: IAktivitetspliktVurderingNyDto): boolean => {
+  return (
+    !!vurdering.unntak.length &&
+    !!vurdering.unntak.find(
+      (unntak) => unntak.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+    )
+  )
+}
+
 export const AktivitetspliktVurdering = ({
   behandling,
   resetManglerAktivitetspliktVurdering,
@@ -59,12 +68,17 @@ export const AktivitetspliktVurdering = ({
         (result) => {
           dispatch(setVurderingBehandling(result))
           setVurdering(result)
-          if (vurderingHarInnhold(result)) {
+          if (harVarigUnntak(result)) {
             setManglerVurdering(false)
-            setHarAktivitetsplikt(JaNei.JA)
-            resetManglerAktivitetspliktVurdering()
+            setHarAktivitetsplikt(JaNei.NEI)
           } else {
-            setManglerVurdering(true)
+            if (vurderingHarInnhold(result)) {
+              setManglerVurdering(false)
+              setHarAktivitetsplikt(JaNei.JA)
+              resetManglerAktivitetspliktVurdering()
+            } else {
+              setManglerVurdering(true)
+            }
           }
         },
         (error) => {
@@ -110,6 +124,8 @@ export const AktivitetspliktVurdering = ({
   if (isPending(hentetVurdering)) {
     return <Spinner label="Henter aktivitetspliktsvurdering" />
   }
+
+  console.log('valgHarAktivitetsplikt: ', valgHarAktivitetsplikt, ' harAktivitetsplikt: ', harAktivitetsplikt)
 
   return (
     <Box maxWidth="120rem" paddingBlock="4 0" borderWidth="1 0 0 0">
@@ -162,6 +178,9 @@ export const AktivitetspliktVurdering = ({
                 </>
               )}
             </Box>
+          )}
+          {isSuccess(hentetVurdering) && vurdering && harVarigUnntak(vurdering) && (
+            <UnntakTabellBehandling behandling={behandling} unntak={vurdering?.unntak} />
           )}
         </VStack>
         {valgHarAktivitetsplikt && isSuccess(hentetVurdering) && (

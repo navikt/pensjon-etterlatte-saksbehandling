@@ -7,6 +7,14 @@ import { EkstatiskEmoji } from '~shared/tilbakemelding/emoji/EkstatiskEmoji'
 import { ClickEvent, trackClickMedSvar } from '~utils/amplitude'
 import { useState } from 'react'
 
+enum TilbakemeldingSvar {
+  VELDIG_MISFORNOEYD = 'veldig misfornøyd',
+  MISFORNOEYD = 'misfornøyd',
+  NOEYTRAL = 'nøytral',
+  FORNOYED = 'fornøyd',
+  VELDIG_FORNOYED = 'veldig fornøyd',
+}
+
 interface Props {
   spoersmaal: string
   clickEvent: ClickEvent
@@ -15,7 +23,7 @@ interface Props {
 export const Tilbakemelding = ({ spoersmaal, clickEvent }: Props) => {
   const [harGittTilbakemelding, setHarGittTilbakemelding] = useState<boolean>(false)
 
-  const trackTilbakemelding = (svar: string) => {
+  const trackTilbakemelding = (svar: TilbakemeldingSvar) => {
     trackClickMedSvar(clickEvent, svar)
     setHarGittTilbakemelding(true)
   }
@@ -31,31 +39,31 @@ export const Tilbakemelding = ({ spoersmaal, clickEvent }: Props) => {
           <Heading size="medium">Takk for din tilbakemelding!</Heading>
         ) : (
           <HStack justify="center" gap="6" width="fit-content">
-            <Button variant="tertiary" onClick={() => trackTilbakemelding('veldig misfornøyd')}>
+            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.VELDIG_MISFORNOEYD)}>
               <VStack gap="1-alt" align="center">
                 <SinnaEmoji />
                 Veldig misfornøyd
               </VStack>
             </Button>
-            <Button variant="tertiary" onClick={() => trackTilbakemelding('misfornøyd')}>
+            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.MISFORNOEYD)}>
               <VStack gap="2" align="center">
                 <LeiEmoji />
                 Misfornøyd
               </VStack>
             </Button>
-            <Button variant="tertiary" onClick={() => trackTilbakemelding('nøytral')}>
+            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.NOEYTRAL)}>
               <VStack gap="2" align="center">
                 <NoeytralEmoji />
                 Nøytral
               </VStack>
             </Button>
-            <Button variant="tertiary" onClick={() => trackTilbakemelding('fornøyd')}>
+            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.FORNOYED)}>
               <VStack gap="2" align="center">
                 <GladEmoji />
                 Fornøyd
               </VStack>
             </Button>
-            <Button variant="tertiary" onClick={() => trackTilbakemelding('veldig fornøyd')}>
+            <Button variant="tertiary" onClick={() => trackTilbakemelding(TilbakemeldingSvar.VELDIG_FORNOYED)}>
               <VStack gap="2" align="center">
                 <EkstatiskEmoji />
                 Veldig fornøyd

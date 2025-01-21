@@ -90,10 +90,17 @@ export const BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER: Array<Hjemmel> = B
   ]
 )
 
-export const BP_FORELDRELOES_HJEMLER: Array<Hjemmel> = [
-  { lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-5', tittel: 'Folketrygdloven § 18-5' },
-  { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12', tittel: '§ 22-12 første ledd' },
-]
+export const BP_BEREGNING_AV_BARNEPENSJON = {
+  lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-5',
+  tittel: 'Folketrygdloven § 18-5',
+}
+
+export const UTBETALING_NAAR_YTELSE_OPPHOERER = {
+  lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12',
+  tittel: '§ 22-12 første ledd',
+}
+
+export const BP_FORELDRELOES_HJEMLER: Array<Hjemmel> = [BP_BEREGNING_AV_BARNEPENSJON, UTBETALING_NAAR_YTELSE_OPPHOERER]
 
 export const BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE =
   'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før den måneden søknaden er satt fram. \n\nHvis bosatt utland: bruk kravdato i bostedslandet, eventuelt landet søker sist var medlem.'

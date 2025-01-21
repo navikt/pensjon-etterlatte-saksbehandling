@@ -207,6 +207,7 @@ export const BeregningsMetodeRadForAvdoed = ({ behandling, trygdetid, redigerbar
                     label="Til og med dato for kun én juridisk forelder(Valgfritt)"
                     description="Siste måneden med kun én juridisk forelder"
                     control={control}
+                    fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
                   />
                 )}
 

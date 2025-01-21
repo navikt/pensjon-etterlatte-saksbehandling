@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
+import no.nav.etterlatte.brev.model.erYrkesskade
 import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -94,11 +95,12 @@ data class OmstillingsstoenadInnvilgelse(
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =
                             beregningsperioderOpphoer.forventetOpphoerDato?.year == (behandling.virkningstidspunkt().dato.year + 1),
+                        erYrkesskade = trygdetid.erYrkesskade(),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
-                    doedsdatoEllerOpphoertPleieforhold
-                        .plusMonths(4)
-                        .isAfter(avkortingsinfo.virkningsdato),
+                    innvilgetMindreEnnFireMndEtterDoedsfall(
+                        doedsdatoEllerOpphoertPleieforhold = doedsdatoEllerOpphoertPleieforhold,
+                    ),
                 omsRettUtenTidsbegrensning = omsRettUtenTidsbegrensning.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
@@ -109,6 +111,11 @@ data class OmstillingsstoenadInnvilgelse(
                 tidligereFamiliepleier = erTidligereFamiliepleier,
             )
         }
+
+        fun innvilgetMindreEnnFireMndEtterDoedsfall(
+            innvilgelsesDato: LocalDate = LocalDate.now(),
+            doedsdatoEllerOpphoertPleieforhold: LocalDate,
+        ): Boolean = innvilgelsesDato.isBefore(doedsdatoEllerOpphoertPleieforhold.plusMonths(4))
     }
 }
 

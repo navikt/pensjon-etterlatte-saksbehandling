@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
@@ -482,7 +483,7 @@ class KlageServiceImpl(
 
         sjekkAtSaksbehandlerHarOppgaven(klageId, saksbehandler, "attestere vedtak")
 
-        checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
+        krevIkkeNull(klage.utfall as? KlageUtfallMedData.Avvist) {
             "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
         }
 

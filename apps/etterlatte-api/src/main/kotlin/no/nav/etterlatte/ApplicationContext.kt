@@ -5,14 +5,19 @@ import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.EnvKey.HTTP_PORT
 import no.nav.etterlatte.behandling.sak.BehandlingKlient
 import no.nav.etterlatte.behandling.sak.BehandlingService
+import no.nav.etterlatte.behandling.sak.VedtaksvurderingSakKlient
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_CLIENT_ID
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_JWK
 import no.nav.etterlatte.libs.ktor.AzureEnums.AZURE_APP_WELL_KNOWN_URL
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.oppgave.OppgaveKlient
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.samordning.vedtak.SamordningVedtakService
 import no.nav.etterlatte.samordning.vedtak.TjenestepensjonKlient
-import no.nav.etterlatte.samordning.vedtak.VedtaksvurderingKlient
+import no.nav.etterlatte.samordning.vedtak.VedtaksvurderingSamordningKlient
+import no.nav.etterlatte.vedtak.VedtakService
+import no.nav.etterlatte.vedtak.VedtaksvurderingKlient
 
 class ApplicationContext(
     env: Miljoevariabler,
@@ -28,7 +33,8 @@ class ApplicationContext(
             azureAppScope = config.getString("vedtak.outbound"),
         )
     }
-    private val vedtaksvurderingKlient = VedtaksvurderingKlient(config, vedtaksvurderingHttpClient)
+    private val vedtaksvurderingSamordningKlient = VedtaksvurderingSamordningKlient(config, vedtaksvurderingHttpClient)
+    private val vedtaksvurderingSakKlient = VedtaksvurderingSakKlient(config, vedtaksvurderingHttpClient)
 
     private val tpHttpClient =
         httpClientClientCredentials(
@@ -39,7 +45,7 @@ class ApplicationContext(
         )
     private val tpKlient = TjenestepensjonKlient(config, tpHttpClient)
 
-    val samordningVedtakService = SamordningVedtakService(vedtaksvurderingKlient, tpKlient)
+    val samordningVedtakService = SamordningVedtakService(vedtaksvurderingSamordningKlient, tpKlient)
 
     private val behandlingHttpClient =
         httpClientClientCredentials(
@@ -49,5 +55,11 @@ class ApplicationContext(
             azureAppScope = config.getString("behandling.outbound"),
         )
     private val behandlingKlient = BehandlingKlient(config, behandlingHttpClient)
-    val behandlingService = BehandlingService(behandlingKlient)
+
+    val behandlingService = BehandlingService(behandlingKlient, vedtaksvurderingSakKlient)
+    val vedtakKlient = VedtaksvurderingKlient(config, vedtaksvurderingHttpClient)
+    val vedtakService = VedtakService(vedtakKlient)
+
+    private val oppgaveKlient = OppgaveKlient(config, behandlingHttpClient)
+    val oppgaveService = OppgaveService(oppgaveKlient)
 }

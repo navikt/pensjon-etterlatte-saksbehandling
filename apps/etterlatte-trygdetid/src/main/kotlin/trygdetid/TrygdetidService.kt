@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -153,10 +154,10 @@ data class TrygdetidPeriodePesys(
     val poengInnAar: Boolean?,
     val poengUtAar: Boolean?,
     val prorata: Boolean?,
-    val kilde: Grunnlagsopplysning.Pesys = Grunnlagsopplysning.Pesys.create(), // GrunnlagKildeCode i Pesys
+    val kilde: Grunnlagsopplysning.PesysYtelseKilde, // GrunnlagKildeCode i Pesys
 )
 
-fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
+private fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(kilde: Grunnlagsopplysning.PesysYtelseKilde): TrygdetidPeriodePesys =
     TrygdetidPeriodePesys(
         isoCode = land!!,
         fra = fomDato,
@@ -164,10 +165,10 @@ fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
-        kilde = Grunnlagsopplysning.Pesys.create(),
+        kilde = kilde,
     )
 
-fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
+private fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
     TrygdetidPeriode(
         fra = fra,
         til = til,
@@ -328,7 +329,7 @@ class TrygdetidServiceImpl(
             avdoede
                 .map { avdoed ->
                     val fnr =
-                        requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                        krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                             "Kunne ikke hente identifikator for avdød til trygdetid i " +
                                 "behandlingen med id=$behandlingId"
                         }
@@ -375,7 +376,7 @@ class TrygdetidServiceImpl(
         return avdoede
             .map { avdoed ->
                 val fnr =
-                    requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                    krevIkkeNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                         "Kunne ikke hente identifikator for avdød til trygdetid i " +
                             "behandlingen med id=$behandlingId"
                     }
@@ -411,25 +412,28 @@ class TrygdetidServiceImpl(
     private fun mapTrygdetidsgrunnlagFraPesys(
         pesysTrygdetidsgrunnlag: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
     ): List<TrygdetidGrunnlag> {
-        val mappedAlderspensjonTt =
+        val mappedAlderspensjonTrygdetidsgrunnlag =
             pesysTrygdetidsgrunnlag.trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
-                mapPesysTrygdetidsgrunnlag(it)
+                mapPesysTrygdetidsgrunnlag(it, Grunnlagsopplysning.Alderspensjon.create())
             } ?: emptyList()
 
-        val mappedUfoeretrygdTt =
+        val mappedUfoereTrygdetidsgrunnlag =
             pesysTrygdetidsgrunnlag.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
-                mapPesysTrygdetidsgrunnlag(it)
+                mapPesysTrygdetidsgrunnlag(it, Grunnlagsopplysning.Ufoeretrygd.create())
             } ?: emptyList()
-        if (mappedAlderspensjonTt.isNotEmpty() && mappedUfoeretrygdTt.isNotEmpty()) {
+        if (mappedAlderspensjonTrygdetidsgrunnlag.isNotEmpty() && mappedUfoereTrygdetidsgrunnlag.isNotEmpty()) {
             logger.error(
                 "Vi fikk trygdetidsgrunnlag for både alderspensjon og uføretrygd, vi må sjekke om dette gir mening eller om det blir feil.",
             )
         }
-        return mappedAlderspensjonTt + mappedUfoeretrygdTt
+        return mappedAlderspensjonTrygdetidsgrunnlag + mappedUfoereTrygdetidsgrunnlag
     }
 
-    private fun mapPesysTrygdetidsgrunnlag(tt: Trygdetidsgrunnlag): TrygdetidGrunnlag {
-        val trygdetidsperiode = tt.tilTrygdetidsPeriode()
+    private fun mapPesysTrygdetidsgrunnlag(
+        tt: Trygdetidsgrunnlag,
+        kilde: Grunnlagsopplysning.PesysYtelseKilde,
+    ): TrygdetidGrunnlag {
+        val trygdetidsperiode = tt.tilTrygdetidsPeriode(kilde)
         return TrygdetidGrunnlag(
             id = UUID.randomUUID(),
             type = TrygdetidType.FAKTISK,
@@ -1006,11 +1010,20 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<TrygdetidDto> =
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            logger.info("Kopierer trygdetidsgrunnlag for behandling $behandlingId fra behandling $kildeBehandlingId")
             val trygdetiderKilde = trygdetidRepository.hentTrygdetiderForBehandling(kildeBehandlingId)
             val trygdetiderMaal = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
 
             krev(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
-                "Trygdetidene gjelder forskjellige avdøde"
+                sikkerlogger().error(
+                    """
+                    Trygdetidene gjelder forskjellige avdøde ved kopiering av trygdetidsgrunnlag 
+                    fra $kildeBehandlingId til $behandlingId
+                    Mål: ${trygdetiderKilde.joinToString { it.ident }}
+                    Kilde: ${trygdetiderMaal.joinToString { it.ident }}
+                    """,
+                )
+                "Trygdetidene gjelder forskjellige avdøde. Se sikkerlogg for detaljer."
             }
 
             // TODO Hva om trygdetid har f.x. overstyrt poengår fra før?

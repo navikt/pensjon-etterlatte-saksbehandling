@@ -1,19 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  hentTrygdetider,
-  ITrygdetid,
-  opprettTrygdetider,
-  hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon,
-  sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys,
-} from '~shared/api/trygdetid'
+import { hentTrygdetider, ITrygdetid, opprettTrygdetider } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { Alert, BodyShort, Box, Button, Heading, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { isFailure, isPending, mapResult } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
@@ -47,15 +41,8 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const dispatch = useAppDispatch()
 
   const kopierTrygdetidsgrunnlagEnabled = useFeaturetoggle(FeatureToggle.kopier_trygdetidsgrunnlag)
-  const kanHenteTrygdetidFraPesys = useFeaturetoggle(FeatureToggle.trygdetid_fra_pesys)
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
-  const [hentTTPesysStatus, hentOgOppdaterDataFraPesys] = useApiCall(
-    hentOgLeggInnTrygdetidsGrunnlagForUfoeretrygdOgAlderspensjon
-  )
-  const [sjekkOmAvodedHarTTIPesysStatus, sjekkOmAvdoedHarTTIPesysHent] = useApiCall(
-    sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys
-  )
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
@@ -110,12 +97,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     })
   }
 
-  const oppdaterTrygdetidMedPesysData = () => {
-    hentOgOppdaterDataFraPesys(behandling.id, (trygdetider: ITrygdetid[]) => {
-      oppdaterTrygdetider(trygdetider)
-    })
-  }
-
   useEffect(() => {
     if (!behandling?.id) {
       setBehandlingsIdMangler(true)
@@ -126,11 +107,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       setLandListe(sorterLand(landListe))
     })
   }, [])
-  useEffect(() => {
-    if (kanHenteTrygdetidFraPesys) {
-      sjekkOmAvdoedHarTTIPesysHent(behandling.id)
-    }
-  }, [kanHenteTrygdetidFraPesys])
 
   if (harPilotTrygdetid) {
     return (
@@ -160,39 +136,8 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           mapNavn={mapNavn}
         />
       )}
-      <VStack gap="12">
+      <VStack gap="11">
         {skalViseTrygdeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
-        {kanHenteTrygdetidFraPesys && (
-          <>
-            {mapResult(sjekkOmAvodedHarTTIPesysStatus, {
-              initial: null,
-              pending: <Spinner label="Sjekker om avdøed har trygdetidsgrunnlag i Pesys" />,
-              error: () => <Alert variant="warning">Kunne ikke sjekke trygdetidsgrunnag i Pesys</Alert>,
-              success: (harTrygdetidsgrunnlagIPesys) => {
-                return (
-                  <>
-                    {harTrygdetidsgrunnlagIPesys && (
-                      <>
-                        <Box maxWidth="fit-content">
-                          <BodyShort>
-                            Her kan du hente trygdetid registrert i avdødes uføretrygd eller alderspensjon.
-                          </BodyShort>
-                          <Button onClick={oppdaterTrygdetidMedPesysData} loading={isPending(hentTTPesysStatus)}>
-                            Hent
-                          </Button>
-                        </Box>
-                        {isFailure(hentTTPesysStatus) && (
-                          <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>
-                        )}
-                        {isPending(hentTTPesysStatus) && <Spinner label="Henter trygdetid i Pesys" />}
-                      </>
-                    )}
-                  </>
-                )
-              },
-            })}
-          </>
-        )}
         {landListe && (
           <>
             {trygdetider.length == 1 && (
@@ -203,6 +148,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                 landListe={landListe}
                 virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
                 fetchTrygdetider={fetchTrygdetider}
+                setTrygdetider={setTrygdetider}
               />
             )}
             {trygdetider.length > 1 && (
@@ -227,6 +173,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                           landListe={landListe}
                           virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
                           fetchTrygdetider={fetchTrygdetider}
+                          setTrygdetider={setTrygdetider}
                         />
                       </Box>
                     </Tabs.Panel>

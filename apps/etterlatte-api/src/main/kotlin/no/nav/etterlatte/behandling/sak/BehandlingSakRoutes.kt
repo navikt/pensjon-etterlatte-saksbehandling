@@ -52,6 +52,18 @@ fun Route.behandlingSakRoutes(
             }
         }
 
+        route("oms/har-loepende-sak") {
+            install(AuthorizationPlugin) {
+                accessPolicyRolesEllerAdGrupper = setOf("les-oms-sak")
+            }
+            post {
+                val foedselsnummer = call.receive<FoedselsnummerDTO>()
+                val harLopendeSak = behandlingService.hentLopendeSakForPerson(foedselsnummer)
+
+                call.respond(HarOMSSakIGjenny(harLopendeSak))
+            }
+        }
+
         route("/{$SAKID_CALL_PARAMETER}") {
             install(AuthorizationPlugin) {
                 accessPolicyRolesEllerAdGrupper = setOf("les-bp-sak", "les-oms-sak")

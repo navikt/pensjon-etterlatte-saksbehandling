@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
@@ -189,7 +190,7 @@ class SanksjonService(
         }
 
         val virkningstidspunkt =
-            checkNotNull(behandling.virkningstidspunkt) {
+            krevIkkeNull(behandling.virkningstidspunkt) {
                 "Behandling (id=$behandlingId) man prøver å slette sanksjon (id=$sanksjonId) i har ikke virkningstidspunkt"
             }.dato
         if (sanksjonSomSkalSlettes.fom < virkningstidspunkt) {

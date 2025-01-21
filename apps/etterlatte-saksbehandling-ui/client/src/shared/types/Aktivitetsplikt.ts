@@ -93,7 +93,7 @@ export const tekstAktivitetspliktUnntakType: Record<AktivitetspliktUnntakType, s
   SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE: 'Bruker har sykdom, redusert arbeidsevne, AAP',
   GRADERT_UFOERETRYGD: 'Gradert uføretrygd',
   MIDLERTIDIG_SYKDOM: 'Midlertidig sykdom',
-  FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT: 'Nei, bruker er født i 1963 eller tidligere og har lav inntekt',
+  FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT: 'Bruker er født i 1963 eller tidligere og har lav inntekt',
 }
 
 export interface IAktivitetspliktVurdering {
@@ -165,14 +165,6 @@ export enum AktivitetspliktOppgaveVurderingType {
   TOLV_MAANEDER = 'TOLV_MAANEDER',
 }
 
-export interface IOpprettAktivitetspliktUnntak {
-  id: string | undefined
-  unntak: AktivitetspliktUnntakType
-  fom: string
-  tom?: string
-  beskrivelse: string
-}
-
 export interface AktivitetspliktVurderingValues {
   aktivitetsplikt: JaNei | null
   aktivitetsgrad: AktivitetspliktVurderingType | ''
@@ -194,7 +186,7 @@ export const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValu
 }
 
 export interface AktivitetspliktOppgaveVurdering {
-  vurderingType: AktivitetspliktOppgaveType
+  vurderingType: AktivitetspliktOppgaveVurderingType
   oppgave: OppgaveDTO
   sak: ISak
   vurdering: IAktivitetspliktVurderingNyDto
@@ -202,7 +194,10 @@ export interface AktivitetspliktOppgaveVurdering {
   sistEndret?: string
 }
 
-export enum AktivitetspliktOppgaveType {
-  SEKS_MAANEDER = 'SEKS_MAANEDER',
-  TOLV_MAANEDER = 'TOLV_MAANEDER',
+export interface IOpprettAktivitetspliktUnntak {
+  id: string | undefined
+  unntak: AktivitetspliktUnntakType
+  fom: string
+  tom?: string
+  beskrivelse: string
 }

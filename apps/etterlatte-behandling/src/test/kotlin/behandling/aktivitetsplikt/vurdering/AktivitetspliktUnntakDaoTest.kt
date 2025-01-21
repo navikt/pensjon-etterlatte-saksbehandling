@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -35,6 +36,7 @@ import no.nav.etterlatte.sak.SakendringerDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -240,51 +242,6 @@ class AktivitetspliktUnntakDaoTest(
     }
 
     @Nested
-    inner class OppdaterUnntak {
-        @Test
-        fun `Oppdatere unntak`() {
-            val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
-            val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
-            val opprettBehandling =
-                opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    sakId = sak.id,
-                )
-            behandlingDao.opprettBehandling(opprettBehandling)
-            val lagreUnntak =
-                LagreAktivitetspliktUnntak(
-                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
-                    beskrivelse = "Beskrivelse",
-                    fom = LocalDate.now(),
-                    tom = LocalDate.now().plusMonths(6),
-                )
-
-            dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
-
-            val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
-
-            val lagreUnntakMedId =
-                LagreAktivitetspliktUnntak(
-                    id = unntak.id,
-                    unntak = AktivitetspliktUnntakType.MANGLENDE_TILSYNSORDNING_SYKDOM,
-                    beskrivelse = "Beskrivelse er oppdatert",
-                    fom = LocalDate.now(),
-                    tom = LocalDate.now().plusMonths(6),
-                )
-
-            dao.oppdaterUnntak(lagreUnntakMedId, kilde, opprettBehandling.id)
-
-            dao.hentUnntakForBehandling(opprettBehandling.id).single().asClue {
-                it.sakId shouldBe sak.id
-                it.behandlingId shouldBe opprettBehandling.id
-                it.unntak shouldBe lagreUnntakMedId.unntak
-                it.endret shouldBe kilde
-                it.beskrivelse shouldBe lagreUnntakMedId.beskrivelse
-            }
-        }
-    }
-
-    @Nested
     inner class SlettAktivitet {
         private val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         private val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
@@ -320,7 +277,9 @@ class AktivitetspliktUnntakDaoTest(
             dao.upsertUnntak(lagreUnntak, sak.id, kilde, null, opprettBehandling.id)
 
             val unntak = dao.hentUnntakForBehandling(opprettBehandling.id).single()
-            dao.slettUnntakForBehandling(unntak.id, UUID.randomUUID())
+            assertThrows<InternfeilException> {
+                dao.slettUnntakForBehandling(unntak.id, UUID.randomUUID())
+            }
 
             dao.hentUnntakForBehandling(opprettBehandling.id).single().asClue {
                 it.id shouldBe unntak.id

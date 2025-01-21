@@ -120,17 +120,24 @@ class OpprettFamilie(
                 try {
 
                     val params = call.receiveParameters()
-                    val type = SoeknadType.valueOf(params["type"]!!)
+                    val ytelse = SoeknadType.valueOf(params["ytelse"]!!)
+                    val behandlingssteg = Behandlingssteg.valueOf(params["behandlingssteg"]!!)
                     val gjenlevende = params["gjenlevende"]!!
                     val avdoed = params["avdoed"]!!
-                    val barn = params["barnListe"]?.split(",") ?: emptyList()
+                    val barnListe = params["barnListe"]?.split(",") ?: emptyList()
+                    val soeker =
+                        when (ytelse) {
+                            SoeknadType.BARNEPENSJON -> params["barn"]!!
+                            SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
+                        }
 
                     val request =
                         NySoeknadRequest(
-                            type,
+                            ytelse,
                             avdoed,
                             gjenlevende,
-                            barn,
+                            barnListe,
+                            soeker = soeker,
                         )
 
                     val brukerId =
@@ -139,17 +146,12 @@ class OpprettFamilie(
                             false -> brukerTokenInfo.ident()
                         }
 
-                    val soeker =
-                        when (type) {
-                            SoeknadType.BARNEPENSJON -> barn.first()
-                            SoeknadType.OMSTILLINGSSTOENAD -> gjenlevende
-                        }
-                    val noekkel = dollyService.sendSoeknad(request, brukerId, Behandlingssteg.BEHANDLING_OPPRETTA)
+                    val noekkel = dollyService.sendSoeknad(request, brukerId, behandlingssteg)
 
                     call.respond(
                         """
                         <div>
-                        Søknad($type) for $soeker er innsendt og registrert med nøkkel: $noekkel}
+                        Søknad($ytelse) for $soeker er innsendt og registrert med nøkkel: $noekkel}
                         </div>
                         """.trimIndent(),
                     )

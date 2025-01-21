@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Kilde
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.time.YearMonth
 import java.util.UUID
 
 open class Grunnlagsopplysning<T>(
@@ -25,25 +25,9 @@ open class Grunnlagsopplysning<T>(
     val periode: Periode? = null,
 ) {
     companion object {
-        fun empty(
-            opplysningType: Opplysningstype,
-            kilde: Kilde,
-            fnr: Folkeregisteridentifikator,
-            fom: YearMonth?,
-            tom: YearMonth? = null,
-        ): Grunnlagsopplysning<out Any?> =
-            Grunnlagsopplysning(
-                id = UUID.randomUUID(),
-                kilde = kilde,
-                opplysningType = opplysningType,
-                meta = objectMapper.createObjectNode(),
-                opplysning = null,
-                attestering = null,
-                fnr = fnr,
-                periode = fom?.let { Periode(it, tom) },
-            )
-
         val automatiskSaksbehandler = Saksbehandler.create(ident = "Gjenny")
+        const val ALDERSPENSJONNAME = "alderspensjon"
+        const val UFOERETRYGDNAME = "ufoeretrygd"
     }
 
     override fun toString(): String = "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning. Id: $id"
@@ -63,6 +47,8 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = Pesys::class, name = "pesys"),
         JsonSubTypes.Type(value = UkjentInnsender::class, name = "ukjentinnsender"),
         JsonSubTypes.Type(value = Gjenny::class, name = "gjenny"),
+        JsonSubTypes.Type(value = Alderspensjon::class, name = ALDERSPENSJONNAME),
+        JsonSubTypes.Type(value = Ufoeretrygd::class, name = UFOERETRYGDNAME),
     )
     sealed class Kilde(
         val type: String,
@@ -100,6 +86,30 @@ open class Grunnlagsopplysning<T>(
         }
 
         override fun toString(): String = "pesys"
+    }
+
+    sealed class PesysYtelseKilde(
+        type: String,
+    ) : Kilde(type)
+
+    data class Alderspensjon(
+        val tidspunkt: Tidspunkt,
+    ) : PesysYtelseKilde(ALDERSPENSJONNAME) {
+        companion object {
+            fun create() = Alderspensjon(Tidspunkt.now())
+        }
+
+        override fun toString(): String = ALDERSPENSJONNAME
+    }
+
+    data class Ufoeretrygd(
+        val tidspunkt: Tidspunkt,
+    ) : PesysYtelseKilde(UFOERETRYGDNAME) {
+        companion object {
+            fun create() = Ufoeretrygd(Tidspunkt.now())
+        }
+
+        override fun toString(): String = UFOERETRYGDNAME
     }
 
     data class Gjenoppretting(
@@ -163,7 +173,7 @@ val objectMapperKilde =
 
 fun <T : Any> lagOpplysning(
     opplysningsType: Opplysningstype,
-    kilde: Grunnlagsopplysning.Kilde,
+    kilde: Kilde,
     opplysning: T,
     periode: Periode? = null,
 ): Grunnlagsopplysning<T> =

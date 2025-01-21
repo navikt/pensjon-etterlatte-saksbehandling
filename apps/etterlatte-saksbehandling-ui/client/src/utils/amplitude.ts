@@ -44,8 +44,12 @@ export enum ClickEvent {
   // Trygdetid
   KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
 
+  // Tilbakemeldinger
+  TILBAKEMELDING_INFORMASJON_FRA_BRUKER = 'tilbakemelding informasjon fra bruker',
+
   // Generelt
   VIS_VARSLINGER = 'vis varslinger',
+  VIS_BEHANDLING_HISTORIKK = 'vis behandling historikk',
 }
 
 let amplitudeInstance: amplitude.Types.BrowserClient | undefined = undefined

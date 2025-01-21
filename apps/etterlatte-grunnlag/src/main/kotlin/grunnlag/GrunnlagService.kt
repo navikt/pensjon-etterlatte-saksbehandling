@@ -223,10 +223,10 @@ class RealGrunnlagService(
 
     private fun Persongalleri.inkluderer(it: Grunnlagsopplysning<JsonNode>) =
         when (it.opplysningType) {
-            AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr.value) } ?: false
-            GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr.value) } ?: false
-            SOEKER_PDL_V1 -> it.fnr?.let { fnr -> soeker == fnr.value } ?: false
-            INNSENDER_PDL_V1 -> it.fnr?.let { fnr -> innsender == fnr.value } ?: false
+            AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr.value) } == true
+            GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr.value) } == true
+            SOEKER_PDL_V1 -> it.fnr?.let { fnr -> soeker == fnr.value } == true
+            INNSENDER_PDL_V1 -> it.fnr?.let { fnr -> innsender == fnr.value } == true
             else -> false
         }
 
@@ -637,8 +637,10 @@ private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
                 tidspunkt = this.tidspunkt,
                 detalj = this.ident,
             )
-        is Grunnlagsopplysning.UkjentInnsender -> GenerellKilde(this.type, this.tidspunkt, detalj = null)
-        is Grunnlagsopplysning.Gjenny -> GenerellKilde(this.type, this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.UkjentInnsender -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Gjenny -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Alderspensjon -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Ufoeretrygd -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
     }
 
 data class GrunnlagsopplysningerPersonPdl(

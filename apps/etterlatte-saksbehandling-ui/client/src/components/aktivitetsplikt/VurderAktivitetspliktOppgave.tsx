@@ -9,7 +9,7 @@ import { AktivitetspliktOppgaveVurderingRoutes } from '~components/aktivitetspli
 import { Link } from '@navikt/ds-react'
 import { hentAktivitetspliktOppgaveVurdering } from '~shared/api/aktivitetsplikt'
 import { useDispatch } from 'react-redux'
-import { setStartdata, useAktivitetspliktOppgaveVurderingState } from '~store/reducers/Aktivitetsplikt12mnd'
+import { setStartdata, useAktivitetspliktOppgaveVurderingState } from '~store/reducers/AktivitetsplikReducer'
 
 export function VurderAktivitetspliktOppgave() {
   useSidetittel('Vurder aktivitetsplikt')

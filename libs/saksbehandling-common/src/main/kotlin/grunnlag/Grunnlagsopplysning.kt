@@ -44,6 +44,8 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = Pesys::class, name = "pesys"),
         JsonSubTypes.Type(value = UkjentInnsender::class, name = "ukjentinnsender"),
         JsonSubTypes.Type(value = Gjenny::class, name = "gjenny"),
+        JsonSubTypes.Type(value = Alderspensjon::class, name = "alderpensjon"),
+        JsonSubTypes.Type(value = Ufoeretrygd::class, name = "ufoeretrygd"),
     )
     sealed class Kilde(
         val type: String,

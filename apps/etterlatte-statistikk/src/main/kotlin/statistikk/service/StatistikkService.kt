@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class StatistikkService(
@@ -546,11 +547,17 @@ class StatistikkService(
             )
             null
         } else {
+            val tekniskTidForOppdatertEnhet =
+                if (sisteRadForReferanse.tekniskTid >= tekniskTid.toTidspunkt()) {
+                    sisteRadForReferanse.tekniskTid.plus(1, ChronoUnit.SECONDS)
+                } else {
+                    tekniskTid.toTidspunkt()
+                }
             val nyRad =
                 sisteRadForReferanse.copy(
                     ansvarligEnhet = nyEnhet,
                     status = BehandlingHendelseType.ENDRET_ENHET.name,
-                    tekniskTid = tekniskTid.toTidspunkt(),
+                    tekniskTid = tekniskTidForOppdatertEnhet,
                 )
             return sakRepository.lagreRad(nyRad)
         }

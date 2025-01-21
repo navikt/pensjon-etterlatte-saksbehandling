@@ -59,7 +59,7 @@ class OutboxService(
     }
 }
 
-internal fun VedtakInnhold.Behandling.isRegulering() = Revurderingaarsak.REGULERING == this.revurderingAarsak
+internal fun VedtakInnhold.Behandling.isRegulering() = Revurderingaarsak.REGULERING.name == this.revurderingAarsak
 
 internal fun Vedtak.typeToEksternApi(): String {
     if ((this.innhold as VedtakInnhold.Behandling).isRegulering()) {

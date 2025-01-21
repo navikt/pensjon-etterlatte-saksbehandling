@@ -29,7 +29,7 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.BehandlingLagretHosVedtak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -139,8 +139,8 @@ internal class OpprettJournalfoerOgDistribuer {
             innhold =
                 VedtakInnholdDto.VedtakBehandlingDto(
                     virkningstidspunkt = YearMonth.now(),
-                    behandling =
-                        Behandling(
+                    behandlingLagretHosVedtak =
+                        BehandlingLagretHosVedtak(
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
                             id = behandlingId,
                             revurderingsaarsak = null,

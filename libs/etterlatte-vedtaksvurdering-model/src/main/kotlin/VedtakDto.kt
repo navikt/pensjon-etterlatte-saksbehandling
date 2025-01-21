@@ -2,12 +2,11 @@ package no.nav.etterlatte.libs.common.vedtak
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -49,7 +48,7 @@ sealed class VedtakInnholdDto {
     @JsonTypeName("BEHANDLING")
     data class VedtakBehandlingDto(
         val virkningstidspunkt: YearMonth,
-        val behandling: Behandling,
+        val behandlingLagretHosVedtak: BehandlingLagretHosVedtak,
         val utbetalingsperioder: List<Utbetalingsperiode>,
         val opphoerFraOgMed: YearMonth?,
     ) : VedtakInnholdDto()
@@ -75,11 +74,11 @@ enum class VedtakStatus {
     IVERKSATT,
 }
 
-data class Behandling(
+data class BehandlingLagretHosVedtak(
     val type: BehandlingType,
     val id: UUID,
-    val revurderingsaarsak: Revurderingaarsak? = null,
-    val revurderingInfo: RevurderingInfo? = null,
+    val revurderingsaarsak: String? = null,
+    val revurderingInfo: JsonNode? = null,
 )
 
 data class Periode(
@@ -138,7 +137,7 @@ data class VedtakSamordningDto(
     val status: VedtakStatus,
     val virkningstidspunkt: YearMonth,
     val sak: VedtakSak,
-    val behandling: Behandling,
+    val behandlingLagretHosVedtak: BehandlingLagretHosVedtak,
     val type: VedtakType,
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,

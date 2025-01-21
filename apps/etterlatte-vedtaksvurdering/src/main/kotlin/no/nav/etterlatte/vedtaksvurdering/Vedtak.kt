@@ -1,16 +1,15 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.BehandlingLagretHosVedtak
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
@@ -58,8 +57,8 @@ data class Vedtak(
                     is VedtakInnhold.Behandling ->
                         VedtakInnholdDto.VedtakBehandlingDto(
                             virkningstidspunkt = innhold.virkningstidspunkt,
-                            behandling =
-                                Behandling(
+                            behandlingLagretHosVedtak =
+                                BehandlingLagretHosVedtak(
                                     innhold.behandlingType,
                                     behandlingId,
                                     innhold.revurderingAarsak,
@@ -88,13 +87,13 @@ data class Vedtak(
 sealed interface VedtakInnhold {
     data class Behandling(
         val behandlingType: BehandlingType,
-        val revurderingAarsak: Revurderingaarsak?,
+        val revurderingAarsak: String?,
+        val revurderingInfo: JsonNode? = null,
         val virkningstidspunkt: YearMonth,
         val beregning: ObjectNode?,
         val avkorting: ObjectNode?,
         val vilkaarsvurdering: ObjectNode?,
         val utbetalingsperioder: List<Utbetalingsperiode>,
-        val revurderingInfo: RevurderingInfo? = null,
         val opphoerFraOgMed: YearMonth? = null,
     ) : VedtakInnhold
 

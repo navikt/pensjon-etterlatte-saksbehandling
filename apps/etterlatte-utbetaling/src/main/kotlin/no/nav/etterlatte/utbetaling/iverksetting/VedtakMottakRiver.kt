@@ -81,7 +81,7 @@ class VedtakMottakRiver(
                 is UtbetalingForVedtakEksisterer -> {
                     val feilmelding =
                         "Vedtak med vedtakId=${vedtak.vedtakId} eksisterer fra før. " +
-                            "behandlingId for nytt vedtak: ${vedtak.behandling.id} - " +
+                            "behandlingId for nytt vedtak: ${vedtak.behandlingLagretHosVedtak.id} - " +
                             "behandlingId for tidligere utbetaling: " +
                             "${resultat.eksisterendeUtbetaling.behandlingId.value}"
                     feilmelding.let {
@@ -89,7 +89,7 @@ class VedtakMottakRiver(
                         sendUtbetalingFeiletEvent(
                             context,
                             vedtak.vedtakId,
-                            vedtak.behandling.id,
+                            vedtak.behandlingLagretHosVedtak.id,
                             it,
                         )
                     }
@@ -104,7 +104,7 @@ class VedtakMottakRiver(
                         sendUtbetalingFeiletEvent(
                             context,
                             vedtak.vedtakId,
-                            vedtak.behandling.id,
+                            vedtak.behandlingLagretHosVedtak.id,
                             it,
                         )
                     }

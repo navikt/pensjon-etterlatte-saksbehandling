@@ -74,6 +74,7 @@ enum class VedtakStatus {
     IVERKSATT,
 }
 
+// TODO: denne burde bare bli hentet rett fra Behandling...
 data class BehandlingLagretHosVedtak(
     val type: BehandlingType,
     val id: UUID,

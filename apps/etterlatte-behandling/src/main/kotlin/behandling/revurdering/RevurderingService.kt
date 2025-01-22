@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.util.Locale
 import java.util.UUID
 
 class MaksEnAktivOppgavePaaBehandling(
@@ -247,7 +248,16 @@ class RevurderingService(
                                 sakId = sakId,
                                 kilde = OppgaveKilde.BEHANDLING,
                                 type = OppgaveType.REVURDERING,
-                                merknad = begrunnelse,
+                                merknad =
+                                    begrunnelse ?: revurderingAarsak.name.lowercase().replaceFirstChar { char ->
+                                        if (char.isLowerCase()) {
+                                            char.titlecase(
+                                                Locale.getDefault(),
+                                            )
+                                        } else {
+                                            char.toString()
+                                        }
+                                    },
                                 frist = frist,
                                 gruppeId = persongalleri.avdoed.firstOrNull(),
                             )

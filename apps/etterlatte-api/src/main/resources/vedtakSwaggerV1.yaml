@@ -57,8 +57,9 @@ components:
           type: string
         virkningstidspunkt:
           type: string
-          format: year-month
-          example: "2025-01"
+          format: date
+          example: "2025-01-01"
+          description: "Vil alltid være 1. i måned"
         type:
           $ref: '#/components/schemas/VedtakType'
         utbetaling:
@@ -77,19 +78,17 @@ components:
     VedtakUtbetaling:
       type: object
       properties:
-        periode:
-          $ref: '#/components/schemas/Periode'
+        fraOgMed:
+          type: string
+          format: date
+          example: "2025-01-01"
+          description: "Vil alltid være 1. i måned"
+        tilOgMed:
+          type: string
+          format: date
+          example: "2025-01-31"
+          description: "Vil alltid være siste dag i måned"
         beloep:
           type: string
           format: decimal
           description: BigDecimal
-
-    Periode:
-      type: object
-      properties:
-        start:
-          type: string
-          format: date
-        end:
-          type: string
-          format: date

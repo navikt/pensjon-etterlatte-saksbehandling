@@ -55,8 +55,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarDao
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.BehandlingstilstandException
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingManglerResultat
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService

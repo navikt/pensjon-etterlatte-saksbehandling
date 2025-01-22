@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vilkaarsvurdering.ektedao
+package no.nav.etterlatte.vilkaarsvurdering.dao
 
 import kotliquery.Row
 import kotliquery.Session

@@ -53,8 +53,8 @@ import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarDao
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

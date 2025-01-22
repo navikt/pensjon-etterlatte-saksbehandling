@@ -146,8 +146,8 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarDao
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import java.time.Duration

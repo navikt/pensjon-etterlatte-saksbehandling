@@ -16,8 +16,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarDao
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test

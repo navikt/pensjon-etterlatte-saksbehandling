@@ -163,7 +163,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.REVURDERING,
-                merknad = null,
+                merknad = revurdering.revurderingsaarsak?.lesbar(),
                 gruppeId = "avdoed",
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
@@ -271,7 +271,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     sakId = sak.id,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.REVURDERING,
-                    merknad = null,
+                    merknad = revurdering.revurderingsaarsak?.lesbar(),
                     gruppeId = "avdoed",
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
@@ -403,7 +403,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     sakId = sak.id,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.REVURDERING,
-                    merknad = null,
+                    merknad = revurdering.revurderingsaarsak?.lesbar(),
                     gruppeId = "avdoed",
                 )
                 oppgaveService.opprettOppgave(
@@ -411,7 +411,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     sakId = sak.id,
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.REVURDERING,
-                    merknad = null,
+                    merknad = revurdering.revurderingsaarsak?.lesbar(),
                     gruppeId = "avdoed",
                 )
                 oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any())
@@ -485,7 +485,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 sakId = sak.id,
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.REVURDERING,
-                merknad = null,
+                merknad = revurdering.revurderingsaarsak?.lesbar(),
                 gruppeId = "avdoed",
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")

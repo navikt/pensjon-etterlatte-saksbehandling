@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtak
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.samordning.vedtak.atStartOfMonth
 
 class VedtakService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -20,12 +21,13 @@ fun VedtakDto.fromDto(): Vedtak {
     return Vedtak(
         sakId = sak.id.sakId,
         sakType = sak.sakType.name,
-        virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
+        virkningstidspunkt = vedtakInnhold.virkningstidspunkt.atStartOfMonth(),
         type = VedtakType.valueOf(type.name),
         utbetaling =
             vedtakInnhold.utbetalingsperioder.map { utbetaling ->
                 VedtakUtbetaling(
-                    periode = utbetaling.periode,
+                    fraOgMed = utbetaling.periode.fom.atStartOfMonth(),
+                    tilOgMed = utbetaling.periode.fom.atEndOfMonth(),
                     beloep = utbetaling.beloep,
                 )
             },

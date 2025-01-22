@@ -115,11 +115,11 @@ class AktivitetspliktServiceTest {
     inner class OpprettEllerOppdaterAktivitet {
         @Test
         fun `Skal opprette en aktivitet`() {
-            every { aktivitetspliktDao.opprettAktivitet(behandling.id, aktivitet, any()) } returns 1
+            every { aktivitetspliktDao.opprettAktivitetForBehandling(behandling.id, aktivitet, any()) } returns 1
 
             service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
 
-            coVerify { aktivitetspliktDao.opprettAktivitet(behandling.id, aktivitet, any()) }
+            coVerify { aktivitetspliktDao.opprettAktivitetForBehandling(behandling.id, aktivitet, any()) }
             coVerify(exactly = 0) { aktivitetspliktDao.oppdaterAktivitetForBehandling(any(), any(), any()) }
         }
 
@@ -131,7 +131,7 @@ class AktivitetspliktServiceTest {
             service.upsertAktivitet(aktivitet, brukerTokenInfo, behandling.id)
 
             coVerify { aktivitetspliktDao.oppdaterAktivitetForBehandling(behandling.id, aktivitet, any()) }
-            coVerify(exactly = 0) { aktivitetspliktDao.opprettAktivitet(any(), any(), any()) }
+            coVerify(exactly = 0) { aktivitetspliktDao.opprettAktivitetForBehandling(any(), any(), any()) }
         }
 
         @Test
@@ -172,7 +172,7 @@ class AktivitetspliktServiceTest {
 
         @Test
         fun `Skal slette en aktivitet`() {
-            every { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) } just Runs
+            every { aktivitetspliktDao.slettAktivitetForBehandling(aktivitetId, behandling.id) } just Runs
             every { behandlingService.hentBehandling(behandling.id) } returns
                 behandling.apply {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT
@@ -180,7 +180,7 @@ class AktivitetspliktServiceTest {
 
             service.slettAktivitet(aktivitetId, brukerTokenInfo, behandling.id)
 
-            coVerify { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) }
+            coVerify { aktivitetspliktDao.slettAktivitetForBehandling(aktivitetId, behandling.id) }
         }
 
         @Test

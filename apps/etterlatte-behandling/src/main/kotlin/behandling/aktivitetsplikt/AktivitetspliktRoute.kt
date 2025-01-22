@@ -17,7 +17,6 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspli
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -73,32 +72,15 @@ internal fun Route.aktivitetspliktRoutes(
     val logger = LoggerFactory.getLogger("AktivitetspliktRoute")
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt") {
+        /*
+            Denne ligger her for å hente ut data som ble vurdert på gammel flyt
+         */
         get {
             val result = inTransaction { aktivitetspliktService.hentAktivitetspliktOppfolging(behandlingId) }
             call.respond(result ?: HttpStatusCode.NoContent)
         }
 
-        post {
-            kunSkrivetilgang {
-                val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
-                val result =
-                    inTransaction {
-                        aktivitetspliktService.lagreAktivitetspliktOppfolging(
-                            behandlingId,
-                            oppfolging,
-                            brukerTokenInfo.ident(),
-                        )
-                    }
-                call.respond(result)
-            }
-        }
-
         route("/aktivitet") {
-            get {
-                logger.info("Henter aktiviteter for behandlingId=$behandlingId")
-                call.respond(inTransaction { aktivitetspliktService.hentAktiviteter(behandlingId) })
-            }
-
             post {
                 kunSkrivetilgang {
                     logger.info("Oppretter eller oppdaterer aktivitet for behandlingId=$behandlingId")
@@ -133,20 +115,6 @@ internal fun Route.aktivitetspliktRoutes(
 
     route("/api/sak/{${SAKID_CALL_PARAMETER}}/aktivitetsplikt") {
         route("aktivitet") {
-            get {
-                kunSaksbehandler {
-                    logger.info("Henter aktiviteter for sak $sakId")
-                    val dto =
-                        inTransaction {
-                            runBlocking {
-                                aktivitetspliktService.hentAktiviteter(
-                                    sakId = sakId,
-                                )
-                            }
-                        }
-                    call.respond(dto)
-                }
-            }
             post {
                 kunSkrivetilgang {
                     logger.info("Oppretter eller oppdaterer aktivitet for sakId=$sakId")

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.aktivitetsplikt.vurdering
 
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -94,6 +95,43 @@ class AktivitetspliktUnntakDaoTest(
     }
 
     @Test
+    fun `Skal slette unntak for oppgave`() {
+        val behandlingId = null
+        val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
+        val unntak =
+            LagreAktivitetspliktUnntak(
+                unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                beskrivelse = "Beskrivelse",
+                fom = LocalDate.now(),
+                tom = LocalDate.now().plusMonths(6),
+            )
+
+        dao.upsertUnntak(unntak, sak.id, kilde, oppgave.id, behandlingId)
+
+        val hentetUnntakSomSkalSlettes = dao.hentUnntakForOppgave(oppgave.id).single()
+        hentetUnntakSomSkalSlettes.asClue {
+            it.sakId shouldBe sak.id
+            it.behandlingId shouldBe behandlingId
+            it.oppgaveId shouldBe oppgave.id
+            it.unntak shouldBe unntak.unntak
+            it.fom shouldBe unntak.fom
+            it.tom shouldBe unntak.tom
+            it.opprettet shouldBe kilde
+            it.endret shouldBe kilde
+            it.beskrivelse shouldBe unntak.beskrivelse
+        }
+
+        dao.upsertUnntak(unntak.copy(unntak = MIDLERTIDIG_SYKDOM), sak.id, kilde, oppgave.id, behandlingId)
+
+        dao.slettUnntakForOppgave(oppgave.id, hentetUnntakSomSkalSlettes.id)
+        val hentetUnntakForOppgave = dao.hentUnntakForOppgave(oppgave.id)
+        hentetUnntakForOppgave.size shouldBe 1
+        hentetUnntakForOppgave.first().id shouldNotBe hentetUnntakSomSkalSlettes.id
+    }
+
+    @Test
     fun `skal kunne oppdatere et eksisterende unntak for oppgave`() {
         val behandlingId = null
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
@@ -114,7 +152,7 @@ class AktivitetspliktUnntakDaoTest(
         val oppdatertUnntak =
             unntak.copy(
                 id = lagretUnntak.id,
-                unntak = AktivitetspliktUnntakType.MIDLERTIDIG_SYKDOM,
+                unntak = MIDLERTIDIG_SYKDOM,
                 fom = unntak.fom?.plusMonths(1L),
                 tom = unntak.tom?.plusMonths(1L),
                 beskrivelse = "Ny beskrivelse",

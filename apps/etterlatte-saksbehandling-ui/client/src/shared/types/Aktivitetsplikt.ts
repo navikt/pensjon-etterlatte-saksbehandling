@@ -95,11 +95,6 @@ export const tekstAktivitetspliktUnntakType: Record<AktivitetspliktUnntakType, s
   FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT: 'Bruker er født i 1963 eller tidligere og har lav inntekt',
 }
 
-export interface IAktivitetspliktVurdering {
-  aktivitet?: IAktivitetspliktAktivitetsgrad
-  unntak?: IAktivitetspliktUnntak
-}
-
 export interface IAktivitetspliktVurderingNyDto {
   aktivitet: IAktivitetspliktAktivitetsgrad[]
   unntak: IAktivitetspliktUnntak[]

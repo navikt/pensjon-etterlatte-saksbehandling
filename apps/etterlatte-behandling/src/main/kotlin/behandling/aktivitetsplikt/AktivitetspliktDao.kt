@@ -7,7 +7,6 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetType
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
-import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -57,27 +56,6 @@ class AktivitetspliktDao(
             }
         }
 
-    fun lagre(
-        behandlingId: UUID,
-        nyOppfolging: OpprettAktivitetspliktOppfolging,
-        navIdent: String,
-    ) = connectionAutoclosing.hentConnection {
-        with(it) {
-            val stmt =
-                prepareStatement(
-                    """
-            |INSERT INTO aktivitetsplikt_oppfolging(behandling_id, aktivitet, opprettet_av) 
-            |VALUES (?, ?, ?)
-                    """.trimMargin(),
-                )
-            stmt.setObject(1, behandlingId)
-            stmt.setString(2, nyOppfolging.aktivitet)
-            stmt.setString(3, navIdent)
-
-            stmt.executeUpdate()
-        }
-    }
-
     fun hentAktiviteterForBehandling(behandlingId: UUID): List<AktivitetspliktAktivitetPeriode> =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -112,7 +90,7 @@ class AktivitetspliktDao(
             }
         }
 
-    fun opprettAktivitet(
+    fun opprettAktivitetForBehandling(
         behandlingId: UUID,
         aktivitet: LagreAktivitetspliktAktivitet,
         kilde: Grunnlagsopplysning.Kilde,
@@ -224,7 +202,7 @@ class AktivitetspliktDao(
         }
     }
 
-    fun slettAktivitet(
+    fun slettAktivitetForBehandling(
         aktivitetId: UUID,
         behandlingId: UUID,
     ) = connectionAutoclosing.hentConnection {

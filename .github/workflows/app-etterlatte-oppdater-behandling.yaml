@@ -1,4 +1,4 @@
-name: etterlatte-oppdater-behandling
+name: etterlatte-behandling-kafka
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
@@ -15,7 +15,7 @@ on:
     branches:
       - main
     paths:
-      - apps/etterlatte-oppdater-behandling/**
+      - apps/etterlatte-behandling-kafka/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**
@@ -32,8 +32,8 @@ on:
     branches:
       - main
     paths:
-      - apps/etterlatte-oppdater-behandling/**
-      - "!apps/etterlatte-oppdater-behandling/.nais/*"
+      - apps/etterlatte-behandling-kafka/**
+      - "!apps/etterlatte-behandling-kafka/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**

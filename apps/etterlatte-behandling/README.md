@@ -58,7 +58,7 @@ for behandlingen vedtakshendelsen gjelder.
 
 ### Sjekker om det finnes saker for grunnlagsendringshendelser
 
-Når en grunnlagsendringshendelse er plukket opp i applikasjonen `etterlatte-oppdater-behandling` kalles det på
+Når en grunnlagsendringshendelse er plukket opp i applikasjonen `etterlatte-behandling-kafka` kalles det på
 endepunktet `/grunnlagsendringshendelse/{hendelsetype}` hvor `{hendelsetype}` er typen hendelse som er plukket opp.
 Her sjekkes det om det finnes en sak tilhørende personen man har mottatt en hendelse for. På nåværende tidspunkt
 lyttes det kun til hendelser om dødsfall hos søker.

@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.BehandlingLagretHosVedtak
+import no.nav.etterlatte.libs.common.vedtak.ForenkletRevurderingInfo
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -39,8 +39,8 @@ fun vedtak(
         ),
     ident: String = "12345678913",
     sakId: SakId = sakId1,
-    behandlingLagretHosVedtak: BehandlingLagretHosVedtak =
-        BehandlingLagretHosVedtak(
+    forenkletRevurderingInfo: ForenkletRevurderingInfo =
+        ForenkletRevurderingInfo(
             id = UUID.randomUUID(),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
@@ -49,7 +49,7 @@ fun vedtak(
     opphoerFraOgMed: YearMonth? = null,
 ) = VedtakDto(
     id = vedtakId,
-    behandlingId = behandlingLagretHosVedtak.id,
+    behandlingId = forenkletRevurderingInfo.id,
     status = VedtakStatus.ATTESTERT,
     sak =
         VedtakSak(
@@ -72,7 +72,7 @@ fun vedtak(
         ),
     innhold =
         VedtakInnholdDto.VedtakBehandlingDto(
-            behandlingLagretHosVedtak = behandlingLagretHosVedtak,
+            forenkletRevurderingInfo = forenkletRevurderingInfo,
             virkningstidspunkt = virkningstidspunkt ?: YearMonth.of(2022, 1),
             utbetalingsperioder = utbetalingsperioder,
             opphoerFraOgMed = opphoerFraOgMed,
@@ -81,15 +81,15 @@ fun vedtak(
 
 fun ugyldigVedtakTilUtbetaling(
     vedtakId: Long = 1,
-    behandlingLagretHosVedtak: BehandlingLagretHosVedtak =
-        BehandlingLagretHosVedtak(
+    forenkletRevurderingInfo: ForenkletRevurderingInfo =
+        ForenkletRevurderingInfo(
             id = UUID.randomUUID(),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
     saktype: SakType = SakType.BARNEPENSJON,
 ) = VedtakDto(
     id = vedtakId,
-    behandlingId = behandlingLagretHosVedtak.id,
+    behandlingId = forenkletRevurderingInfo.id,
     status = VedtakStatus.ATTESTERT,
     sak =
         VedtakSak(
@@ -107,7 +107,7 @@ fun ugyldigVedtakTilUtbetaling(
         ),
     innhold =
         VedtakInnholdDto.VedtakBehandlingDto(
-            behandlingLagretHosVedtak = behandlingLagretHosVedtak,
+            forenkletRevurderingInfo = forenkletRevurderingInfo,
             virkningstidspunkt = YearMonth.of(2022, 1),
             utbetalingsperioder =
                 listOf(

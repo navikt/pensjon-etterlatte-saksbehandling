@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.BehandlingLagretHosVedtak
+import no.nav.etterlatte.libs.common.vedtak.ForenkletRevurderingInfo
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
@@ -57,8 +57,8 @@ data class Vedtak(
                     is VedtakInnhold.Behandling ->
                         VedtakInnholdDto.VedtakBehandlingDto(
                             virkningstidspunkt = innhold.virkningstidspunkt,
-                            behandlingLagretHosVedtak =
-                                BehandlingLagretHosVedtak(
+                            forenkletRevurderingInfo =
+                                ForenkletRevurderingInfo(
                                     innhold.behandlingType,
                                     behandlingId,
                                     innhold.revurderingAarsak,
@@ -84,6 +84,7 @@ data class Vedtak(
     fun underArbeid(): Boolean = status in listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT)
 }
 
+// TODO: All info her som sendes videre burde vel strengt talt bare bli hentet fra sin respektive app for å få det strukturert?
 sealed interface VedtakInnhold {
     data class Behandling(
         val behandlingType: BehandlingType,

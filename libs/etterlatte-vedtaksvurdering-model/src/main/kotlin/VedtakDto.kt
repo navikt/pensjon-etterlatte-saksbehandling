@@ -48,7 +48,7 @@ sealed class VedtakInnholdDto {
     @JsonTypeName("BEHANDLING")
     data class VedtakBehandlingDto(
         val virkningstidspunkt: YearMonth,
-        val behandlingLagretHosVedtak: BehandlingLagretHosVedtak,
+        val forenkletRevurderingInfo: ForenkletRevurderingInfo,
         val utbetalingsperioder: List<Utbetalingsperiode>,
         val opphoerFraOgMed: YearMonth?,
     ) : VedtakInnholdDto()
@@ -75,8 +75,8 @@ enum class VedtakStatus {
 }
 
 // TODO: denne burde bare bli hentet rett fra Behandling...
-data class BehandlingLagretHosVedtak(
-    val type: BehandlingType,
+data class ForenkletRevurderingInfo(
+    val type: BehandlingType, // /Basically unused
     val id: UUID,
     val revurderingsaarsak: String? = null,
     val revurderingInfo: JsonNode? = null,
@@ -138,7 +138,7 @@ data class VedtakSamordningDto(
     val status: VedtakStatus,
     val virkningstidspunkt: YearMonth,
     val sak: VedtakSak,
-    val behandlingLagretHosVedtak: BehandlingLagretHosVedtak,
+    val forenkletRevurderingInfo: ForenkletRevurderingInfo,
     val type: VedtakType,
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,

@@ -140,11 +140,11 @@ class BrevdataFacade(
                         virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
                         revurderingInfo =
                             objectMapper.treeToValue(
-                                vedtakInnhold.behandlingLagretHosVedtak.revurderingInfo,
+                                vedtakInnhold.forenkletRevurderingInfo.revurderingInfo,
                                 RevurderingInfo::class.java,
                             ),
                         klage =
-                            if (vedtakInnhold.behandlingLagretHosVedtak.revurderingsaarsak ==
+                            if (vedtakInnhold.forenkletRevurderingInfo.revurderingsaarsak ==
                                 Revurderingaarsak.OMGJOERING_ETTER_KLAGE.name
                             ) {
                                 val klageId = UUID.fromString(relatertKlageId)

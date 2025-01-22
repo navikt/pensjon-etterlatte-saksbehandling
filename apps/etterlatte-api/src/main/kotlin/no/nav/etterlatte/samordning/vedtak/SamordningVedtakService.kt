@@ -92,10 +92,10 @@ class SamordningVedtakService(
             opphoersdato = virkningstidspunkt.takeIf { type == VedtakType.OPPHOER }?.atStartOfMonth(),
             type = type.toSamordningsvedtakType(),
             aarsak =
-                if (behandlingLagretHosVedtak.revurderingsaarsak !=
+                if (forenkletRevurderingInfo.revurderingsaarsak !=
                     null
                 ) {
-                    Revurderingaarsak.valueOf(behandlingLagretHosVedtak.revurderingsaarsak!!).toSamordningsvedtakAarsak()
+                    Revurderingaarsak.valueOf(forenkletRevurderingInfo.revurderingsaarsak!!).toSamordningsvedtakAarsak()
                 } else {
                     null
                 },

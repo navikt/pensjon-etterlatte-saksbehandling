@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
-import no.nav.etterlatte.libs.common.vedtak.BehandlingLagretHosVedtak
+import no.nav.etterlatte.libs.common.vedtak.ForenkletRevurderingInfo
 import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.OppdragForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.OppdragslinjeForKonsistensavstemming
@@ -68,8 +68,8 @@ fun utbetalingsvedtak(
     sakType: Saktype = Saktype.BARNEPENSJON,
 ) = Utbetalingsvedtak(
     vedtakId = vedtakId,
-    behandlingLagretHosVedtak =
-        BehandlingLagretHosVedtak(
+    forenkletRevurderingInfo =
+        ForenkletRevurderingInfo(
             id = UUID.randomUUID(),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             revurderingsaarsak = null,

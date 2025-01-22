@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.BehandlingLagretHosVedtak
+import no.nav.etterlatte.libs.common.vedtak.ForenkletRevurderingInfo
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -394,7 +394,7 @@ fun vedtak(
         status = VedtakStatus.ATTESTERT,
         virkningstidspunkt = virkningstidspunkt,
         sak = VedtakSak(ident = "123", sakstype, id = randomSakId()),
-        behandlingLagretHosVedtak = BehandlingLagretHosVedtak(id = UUID.randomUUID(), type = BehandlingType.FØRSTEGANGSBEHANDLING),
+        forenkletRevurderingInfo = ForenkletRevurderingInfo(id = UUID.randomUUID(), type = BehandlingType.FØRSTEGANGSBEHANDLING),
         type = VedtakType.INNVILGELSE,
         vedtakFattet = null,
         attestasjon = null,

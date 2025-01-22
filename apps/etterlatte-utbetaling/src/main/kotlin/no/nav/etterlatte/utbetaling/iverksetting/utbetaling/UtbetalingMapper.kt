@@ -33,8 +33,8 @@ class UtbetalingMapper(
             sakType = vedtak.sak.sakType,
             behandlingId =
                 BehandlingId(
-                    vedtak.behandlingLagretHosVedtak.id,
-                    vedtak.behandlingLagretHosVedtak.id.toUUID30(),
+                    vedtak.forenkletRevurderingInfo.id,
+                    vedtak.forenkletRevurderingInfo.id.toUUID30(),
                 ),
             vedtakId = VedtakId(vedtak.vedtakId),
             opprettet = opprettet,
@@ -78,7 +78,7 @@ class UtbetalingMapper(
                 erstatterId = finnErstatterId(utbetalingslinjeId = it.id),
                 klassifikasjonskode = klassifikasjonskode(saktype, it),
                 kjoereplan =
-                    when (vedtak.behandlingLagretHosVedtak.revurderingsaarsak) {
+                    when (vedtak.forenkletRevurderingInfo.revurderingsaarsak) {
                         Revurderingaarsak.REGULERING.name -> Kjoereplan.NESTE_PLANLAGTE_UTBETALING
                         else -> Kjoereplan.MED_EN_GANG
                     },

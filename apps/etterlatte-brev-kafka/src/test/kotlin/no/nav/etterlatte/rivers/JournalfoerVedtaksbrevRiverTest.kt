@@ -28,7 +28,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.BehandlingLagretHosVedtak
+import no.nav.etterlatte.libs.common.vedtak.ForenkletRevurderingInfo
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -134,7 +134,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
             innhold =
                 VedtakInnholdDto.VedtakBehandlingDto(
                     virkningstidspunkt = YearMonth.now(),
-                    behandlingLagretHosVedtak = BehandlingLagretHosVedtak(behandlingType, behandlingId),
+                    forenkletRevurderingInfo = ForenkletRevurderingInfo(behandlingType, behandlingId),
                     utbetalingsperioder = emptyList(),
                     opphoerFraOgMed = null,
                 ),

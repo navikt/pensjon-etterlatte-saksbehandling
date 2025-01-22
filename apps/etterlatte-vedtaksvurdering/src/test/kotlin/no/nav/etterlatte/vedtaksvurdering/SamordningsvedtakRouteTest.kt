@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.BehandlingLagretHosVedtak
+import no.nav.etterlatte.libs.common.vedtak.ForenkletRevurderingInfo
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -117,7 +117,7 @@ private fun samordningVedtak() =
         status = VedtakStatus.IVERKSATT,
         virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
         sak = VedtakSak(FNR_2, SakType.OMSTILLINGSSTOENAD, id = randomSakId()),
-        behandlingLagretHosVedtak = BehandlingLagretHosVedtak(BehandlingType.REVURDERING, id = UUID.randomUUID()),
+        forenkletRevurderingInfo = ForenkletRevurderingInfo(BehandlingType.REVURDERING, id = UUID.randomUUID()),
         type = VedtakType.ENDRING,
         vedtakFattet = VedtakFattet("SBH", ENHET_1, Tidspunkt.now().minus(2, ChronoUnit.DAYS)),
         attestasjon = Attestasjon("SBH", ENHET_1, Tidspunkt.now().minus(1, ChronoUnit.DAYS)),

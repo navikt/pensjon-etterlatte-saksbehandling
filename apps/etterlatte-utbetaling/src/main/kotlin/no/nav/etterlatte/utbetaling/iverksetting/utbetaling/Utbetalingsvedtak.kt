@@ -3,7 +3,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.vedtak.BehandlingLagretHosVedtak
+import no.nav.etterlatte.libs.common.vedtak.ForenkletRevurderingInfo
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.mq.Prioritet
@@ -14,7 +14,7 @@ import java.time.YearMonth
 data class Utbetalingsvedtak(
     val vedtakId: Long,
     val sak: Sak,
-    val behandlingLagretHosVedtak: BehandlingLagretHosVedtak,
+    val forenkletRevurderingInfo: ForenkletRevurderingInfo,
     val pensjonTilUtbetaling: List<Utbetalingsperiode>,
     val vedtakFattet: VedtakFattet,
     val attestasjon: Attestasjon,
@@ -29,12 +29,12 @@ data class Utbetalingsvedtak(
             return Utbetalingsvedtak(
                 vedtakId = vedtak.id,
                 sak = Sak(vedtak.sak.ident, vedtak.sak.id.sakId, Saktype.valueOf(vedtak.sak.sakType.toString())),
-                behandlingLagretHosVedtak =
-                    BehandlingLagretHosVedtak(
-                        type = innhold.behandlingLagretHosVedtak.type,
-                        id = innhold.behandlingLagretHosVedtak.id,
-                        revurderingsaarsak = innhold.behandlingLagretHosVedtak.revurderingsaarsak,
-                        revurderingInfo = innhold.behandlingLagretHosVedtak.revurderingInfo,
+                forenkletRevurderingInfo =
+                    ForenkletRevurderingInfo(
+                        type = innhold.forenkletRevurderingInfo.type,
+                        id = innhold.forenkletRevurderingInfo.id,
+                        revurderingsaarsak = innhold.forenkletRevurderingInfo.revurderingsaarsak,
+                        revurderingInfo = innhold.forenkletRevurderingInfo.revurderingInfo,
                     ),
                 pensjonTilUtbetaling =
                     innhold.utbetalingsperioder.map {
@@ -70,7 +70,7 @@ data class Utbetalingsvedtak(
 
     fun finnPrioritet(): Prioritet =
         if (SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER == vedtakFattet.ansvarligSaksbehandler &&
-            behandlingLagretHosVedtak.revurderingsaarsak?.equals(Revurderingaarsak.REGULERING) == true
+            forenkletRevurderingInfo.revurderingsaarsak?.equals(Revurderingaarsak.REGULERING) == true
         ) {
             Prioritet.LAV
         } else {

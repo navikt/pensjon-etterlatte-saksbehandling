@@ -249,15 +249,7 @@ class RevurderingService(
                                 kilde = OppgaveKilde.BEHANDLING,
                                 type = OppgaveType.REVURDERING,
                                 merknad =
-                                    begrunnelse ?: revurderingAarsak.name.lowercase().replaceFirstChar { char ->
-                                        if (char.isLowerCase()) {
-                                            char.titlecase(
-                                                Locale.getDefault(),
-                                            )
-                                        } else {
-                                            char.toString()
-                                        }
-                                    },
+                                    begrunnelse ?: revurderingAarsak.lesbar(),
                                 frist = frist,
                                 gruppeId = persongalleri.avdoed.firstOrNull(),
                             )
@@ -356,6 +348,11 @@ data class RevurderingOgOppfoelging(
 
     fun sakType() = revurdering.sak.sakType
 }
+
+fun Revurderingaarsak.lesbar(): String =
+    this.name.lowercase().replace("_", " ").replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+    }
 
 class FeilRevurderingAarsakForFritekstLagring(
     revurdering: Revurdering,

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.testdata.features.soeknad
 
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ArbeidOgUtdanningOMS
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoedeOMS
@@ -49,16 +50,16 @@ object SoeknadMapper {
                 JsonMessage.newMessage(
                     mutableMapOf(
                         SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagParMedEventNameKey(),
-                        "@skjema_info" to
+                        SoeknadInnsendt.skjemaInfoKey to
                             opprettOmstillingsstoenadSoeknad(
                                 soekerFnr = soekerFnr,
                                 avdoedFnr = avdoedFnr,
                                 barn = barn,
                             ).toObjectNode(),
-                        "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
-                        "@template" to "soeknad",
-                        "@fnr_soeker" to soekerFnr,
-                        "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
+                        SoeknadInnsendt.lagretSoeknadIdKey to "TEST-${UUID.randomUUID()}",
+                        SoeknadInnsendt.templateKey to "soeknad",
+                        SoeknadInnsendt.fnrSoekerKey to soekerFnr,
+                        SoeknadInnsendt.hendelseGyldigTilKey to OffsetDateTime.now().plusMinutes(60L),
                         Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )
@@ -69,17 +70,17 @@ object SoeknadMapper {
                 JsonMessage.newMessage(
                     mutableMapOf(
                         SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagParMedEventNameKey(),
-                        "@skjema_info" to
+                        SoeknadInnsendt.skjemaInfoKey to
                             opprettBarnepensjonSoeknad(
                                 gjenlevendeFnr = gjenlevendeFnr,
                                 avdoedFnr = avdoedFnr,
                                 barnFnr = soekerFnr,
                                 soesken = barn.filter { it != soeker },
                             ).toObjectNode(),
-                        "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
-                        "@template" to "soeknad",
-                        "@fnr_soeker" to barn.first(),
-                        "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
+                        SoeknadInnsendt.lagretSoeknadIdKey to "TEST-${UUID.randomUUID()}",
+                        SoeknadInnsendt.templateKey to "soeknad",
+                        SoeknadInnsendt.fnrSoekerKey to barn.first(),
+                        SoeknadInnsendt.hendelseGyldigTilKey to OffsetDateTime.now().plusMinutes(60L),
                         Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )

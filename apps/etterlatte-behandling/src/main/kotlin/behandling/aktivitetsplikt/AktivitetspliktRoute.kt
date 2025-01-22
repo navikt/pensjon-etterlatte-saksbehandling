@@ -161,7 +161,7 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
 
-            route("/{$HENDELSE_ID_CALL_PARAMETER}") {
+            route("/{$AKTIVITET_ID_CALL_PARAMETER}") {
                 delete {
                     kunSkrivetilgang {
                         logger.info("Sletter aktivitet $aktivitetId for sakId $sakId")
@@ -222,7 +222,7 @@ internal fun Route.aktivitetspliktRoutes(
                 }
             }
 
-            route("/{$AKTIVITET_ID_CALL_PARAMETER}") {
+            route("/{$HENDELSE_ID_CALL_PARAMETER}") {
                 delete {
                     kunSkrivetilgang {
                         logger.info("Sletter hendelse $hendelseId for sakId $sakId")

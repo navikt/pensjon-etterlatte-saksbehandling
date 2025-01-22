@@ -35,7 +35,8 @@
             "tom": null
           },
           "beloep": 2000,
-          "type": "UTBETALING"
+          "type": "UTBETALING",
+          "regelverk": "REGELVERK_TOM_DES_2023"
         }
       ]
     }

@@ -5,11 +5,11 @@ info:
   version: 1.0.0
 
 servers:
-  - url: https://etterlatte-api.intern.dev.nav.no/api/v1/vedtak/swagger
-  - url: https://etterlatte-api.intern.prod.nav.no/api/v1/vedtak/swagger
+  - url: https://etterlatte-api.intern.dev.nav.no/api/v1
+  - url: https://etterlatte-api.intern.prod.nav.no/api/v1
 
 paths:
-  /api/v1/vedtak:
+  /vedtak:
     post:
       summary: Liste med vedtak for person
       description: Liste med vedtak av type innvilgelse, avslag, endring og opphør for en person

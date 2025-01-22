@@ -1,7 +1,9 @@
 openapi: 3.0.0
 info:
   title: Etterlatte Vedtak API
-  description: API for enkel informasjon om vedtak for Barnepensjon og Omstillingsstønad
+  description:
+    API for enkel informasjon om vedtak for Barnepensjon og Omstillingsstønad. <br>
+    Det kreves tilganger for å bruke APIet. Ta kontakt med Team Etterlatte for tilgang.
   version: 1.0.0
 
 servers:

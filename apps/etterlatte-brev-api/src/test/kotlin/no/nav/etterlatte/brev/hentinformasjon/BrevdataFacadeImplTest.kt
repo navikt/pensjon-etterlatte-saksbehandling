@@ -203,7 +203,6 @@ internal class BrevdataFacadeImplTest {
                     every { forenkletBehandling.id } returns BEHANDLING_ID
                     every { virkningstidspunkt } returns YearMonth.now()
                     every { forenkletBehandling.revurderingsaarsak } returns null
-                    every { forenkletBehandling.revurderingInfo } returns null
                     every { forenkletBehandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 }
         }

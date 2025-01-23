@@ -15,7 +15,6 @@ import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.objectMapper
@@ -138,11 +137,6 @@ class BrevdataFacade(
                         attestantIdent,
                         vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
                         virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
-                        revurderingInfo =
-                            objectMapper.treeToValue(
-                                vedtakInnhold.forenkletBehandling.revurderingInfo,
-                                RevurderingInfo::class.java,
-                            ),
                         klage =
                             if (vedtakInnhold.forenkletBehandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
                                 val klageId = UUID.fromString(relatertKlageId)

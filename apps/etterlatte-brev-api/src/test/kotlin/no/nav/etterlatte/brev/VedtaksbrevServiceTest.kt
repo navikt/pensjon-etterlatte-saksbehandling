@@ -804,7 +804,6 @@ internal class VedtaksbrevServiceTest {
                     attestantIdent = null,
                     vedtaksdato = null,
                     virkningstidspunkt = YearMonth.now(),
-                    revurderingInfo = null,
                 ),
             spraak = Spraak.NB,
             systemkilde = systemkilde,

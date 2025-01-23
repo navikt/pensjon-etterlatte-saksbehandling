@@ -62,7 +62,6 @@ internal class DistribuerBrevRiverTest {
                 every { forenkletBehandling.id } returns behandlingId
                 every { virkningstidspunkt } returns YearMonth.now()
                 every { forenkletBehandling.revurderingsaarsak } returns null
-                every { forenkletBehandling.revurderingInfo } returns null
                 every { forenkletBehandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { utbetalingsperioder } returns emptyList()
                 every { opphoerFraOgMed } returns mockk()

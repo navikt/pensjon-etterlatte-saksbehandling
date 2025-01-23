@@ -143,8 +143,6 @@ internal class OpprettJournalfoerOgDistribuer {
                         ForenkletBehandling(
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
                             id = behandlingId,
-                            revurderingsaarsak = null,
-                            revurderingInfo = null,
                         ),
                     utbetalingsperioder = listOf(),
                     opphoerFraOgMed = null,

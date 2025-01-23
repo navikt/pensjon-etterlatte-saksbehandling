@@ -1,5 +1,5 @@
 import { FloppydiskIcon, PencilIcon, TrashIcon } from '@navikt/aksel-icons'
-import { BodyShort, Box, Button, Checkbox, Heading, HStack, Textarea } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Checkbox, Heading, HStack, ReadMore, Textarea, VStack } from '@navikt/ds-react'
 import {
   AnnenForelder,
   AnnenForelderVurdering,
@@ -11,6 +11,8 @@ import { useForm } from 'react-hook-form'
 import { isPending } from '~shared/api/apiUtils'
 import { redigerAnnenForelder, slettAnnenForelder } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { BP_BEREGNING_AV_BARNEPENSJON } from '~components/behandling/virkningstidspunkt/utils'
+import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 
 type Props = {
   behandlingId: string
@@ -124,21 +126,32 @@ export const AnnenForelderSkjema = ({ behandlingId, personopplysninger }: Props)
       )}
       {redigerModus && (
         <form onSubmit={handleSubmit(onLagreAnnenForelder)}>
-          <Checkbox
-            value={AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER}
-            {...register('vurdering')}
-            readOnly={!!watch('vurdering')}
-            required={true}
-          >
-            {tekstAnnenForelderVurdering(AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER)}
-          </Checkbox>
-          <Textarea
-            {...register('begrunnelse', {
-              required: { value: true, message: 'Må fylles ut' },
-            })}
-            label="Begrunnelse"
-            error={errors.begrunnelse?.message}
-          />
+          <VStack gap="2">
+            <Box>
+              <Checkbox
+                value={AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER}
+                {...register('vurdering')}
+                readOnly={!!watch('vurdering')}
+                required={true}
+              >
+                {tekstAnnenForelderVurdering(AnnenForelderVurdering.KUN_EN_REGISTRERT_JURIDISK_FORELDER)}
+              </Checkbox>
+              <ReadMore header="Når skal du bruke Kun én registrert juridisk forelder?">
+                Kryss av her hvis det er fastsatt kun én juridisk forelder (f.eks. assistert befruktning) og hen er død.
+                Det gis da barnepensjon som foreldreløs. Dokumentasjon må foreligge. Ikke kryss av her hvis en eller
+                begge foreldrene er ukjent (f.eks. at det ikke kan dokumenteres hvem som er mor eller far, og om hen er
+                død).
+                <HjemmelLenke {...BP_BEREGNING_AV_BARNEPENSJON} />
+              </ReadMore>
+            </Box>
+            <Textarea
+              {...register('begrunnelse', {
+                required: { value: true, message: 'Må fylles ut' },
+              })}
+              label="Begrunnelse"
+              error={errors.begrunnelse?.message}
+            />
+          </VStack>
           <HStack gap="4" paddingBlock="2 0">
             <Button size="small" icon={<FloppydiskIcon aria-hidden />} loading={isPending(redigerStatus)}>
               Lagre

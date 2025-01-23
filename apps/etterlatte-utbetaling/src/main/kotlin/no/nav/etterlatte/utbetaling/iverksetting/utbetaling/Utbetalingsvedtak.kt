@@ -34,7 +34,6 @@ data class Utbetalingsvedtak(
                         type = innhold.behandling.type,
                         id = innhold.behandling.id,
                         revurderingsaarsak = innhold.behandling.revurderingsaarsak,
-                        revurderingInfo = innhold.behandling.revurderingInfo,
                     ),
                 pensjonTilUtbetaling =
                     innhold.utbetalingsperioder.map {

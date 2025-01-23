@@ -1,8 +1,8 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -63,7 +63,6 @@ data class Vedtak(
                                     innhold.behandlingType,
                                     behandlingId,
                                     innhold.revurderingAarsak,
-                                    innhold.revurderingInfo,
                                 ),
                             utbetalingsperioder = innhold.utbetalingsperioder,
                             opphoerFraOgMed = innhold.opphoerFraOgMed,
@@ -89,12 +88,12 @@ sealed interface VedtakInnhold {
     data class Behandling(
         val behandlingType: BehandlingType,
         val revurderingAarsak: Revurderingaarsak?,
+        val revurderingInfo: JsonNode? = null,
         val virkningstidspunkt: YearMonth,
         val beregning: ObjectNode?,
         val avkorting: ObjectNode?,
         val vilkaarsvurdering: ObjectNode?,
         val utbetalingsperioder: List<Utbetalingsperiode>,
-        val revurderingInfo: RevurderingInfo? = null,
         val opphoerFraOgMed: YearMonth? = null,
     ) : VedtakInnhold
 

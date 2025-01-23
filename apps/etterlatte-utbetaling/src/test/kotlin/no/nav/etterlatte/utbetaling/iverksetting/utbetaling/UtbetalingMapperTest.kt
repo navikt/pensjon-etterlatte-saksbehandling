@@ -50,11 +50,14 @@ class UtbetalingMapperTest {
                         utbetalingsperioder =
                             listOf(
                                 utbetalingsperiode(
-                                    YearMonth.of(2023, Month.JANUARY),
-                                    YearMonth.of(2023, Month.DECEMBER),
+                                    fom = YearMonth.of(2023, Month.JANUARY),
+                                    tom = YearMonth.of(2023, Month.DECEMBER),
+                                    regelverk = Regelverk.REGELVERK_TOM_DES_2023,
                                 ),
                                 utbetalingsperiode(
-                                    YearMonth.of(2024, Month.JANUARY),
+                                    fom = YearMonth.of(2024, Month.JANUARY),
+                                    tom = null,
+                                    regelverk = Regelverk.REGELVERK_FOM_JAN_2024,
                                 ),
                             ),
                         sakType = Saktype.BARNEPENSJON,
@@ -95,7 +98,7 @@ class UtbetalingMapperTest {
     private fun utbetalingsperiode(
         fom: YearMonth,
         tom: YearMonth? = null,
-        regelverk: Regelverk? = null,
+        regelverk: Regelverk,
     ) = Utbetalingsperiode(
         id = 1,
         periode = Periode(fom = fom, tom),

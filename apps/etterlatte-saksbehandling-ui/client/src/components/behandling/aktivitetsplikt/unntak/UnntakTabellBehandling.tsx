@@ -1,4 +1,8 @@
-import { IAktivitetspliktUnntak, tekstAktivitetspliktUnntakType } from '~shared/types/Aktivitetsplikt'
+import {
+  AktivitetspliktOppgaveVurderingType,
+  IAktivitetspliktUnntak,
+  tekstAktivitetspliktUnntakType,
+} from '~shared/types/Aktivitetsplikt'
 import { BodyShort, Box, Detail, Heading, HStack, ReadMore, Table, VStack } from '@navikt/ds-react'
 import { AktivitetspliktUnntakTypeTag } from '~shared/tags/AktivitetspliktUnntakTypeTag'
 import { formaterDato, formaterDatoMedFallback } from '~utils/formatering/dato'
@@ -10,9 +14,11 @@ import { RedigerbarUnntakBehandling } from '~components/behandling/aktivitetspli
 export const UnntakTabellBehandling = ({
   unntak,
   behandling,
+  typeVurdering,
 }: {
   unntak: IAktivitetspliktUnntak[]
   behandling: IDetaljertBehandling
+  typeVurdering: AktivitetspliktOppgaveVurderingType
 }) => {
   return (
     <VStack gap="4">
@@ -45,7 +51,9 @@ export const UnntakTabellBehandling = ({
               {unntak.map((unntak) => (
                 <Table.ExpandableRow
                   key={unntak.id}
-                  content={<RedigerbarUnntakBehandling behandling={behandling} unntak={unntak} />}
+                  content={
+                    <RedigerbarUnntakBehandling behandling={behandling} unntak={unntak} typeVurdering={typeVurdering} />
+                  }
                 >
                   <Table.DataCell>{tekstAktivitetspliktUnntakType[unntak.unntak]}</Table.DataCell>
                   <Table.DataCell>

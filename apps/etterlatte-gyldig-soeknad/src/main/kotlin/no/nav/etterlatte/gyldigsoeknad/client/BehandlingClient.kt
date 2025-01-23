@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakMedBehandlinger
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -74,17 +73,6 @@ class BehandlingClient(
                     setBody(FoedselsnummerDTO(fnr))
                 }.body()
         }
-
-    fun lagreGyldighetsVurdering(
-        behandlingId: UUID,
-        gyldighet: GyldighetsResultat,
-    ) = runBlocking {
-        sakOgBehandlingApp
-            .post("$url/behandlinger/$behandlingId/gyldigfremsatt") {
-                contentType(ContentType.Application.Json)
-                setBody(gyldighet)
-            }.body<String>()
-    }
 
     fun hentSakMedBehandlinger(sakId: SakId): SakMedBehandlinger =
         runBlocking {

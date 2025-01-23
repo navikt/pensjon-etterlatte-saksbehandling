@@ -7,13 +7,9 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -41,14 +37,6 @@ internal class OpprettBehandlingRiver(
             val soeknad = packet.soeknad()
 
             val personGalleri = PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad)
-
-            // Skal vurderes manuelt av saksbehandler
-            val gyldighetsVurdering =
-                GyldighetsResultat(
-                    KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-                    emptyList(),
-                    Tidspunkt.now().toLocalDatetimeUTC(),
-                )
 
             val sakType =
                 when (soeknad.type) {
@@ -79,8 +67,6 @@ internal class OpprettBehandlingRiver(
                         aapenBehandling.id
                     }
                 }
-
-            behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
 
             logger.info("Behandling $behandlingId startet på sak ${sak.id}")
 

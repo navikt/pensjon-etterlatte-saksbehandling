@@ -93,6 +93,12 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
 
+    suspend fun slettPesysTrygdetidGrunnlagForTrygdetid(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
     suspend fun overstyrNorskPoengaaarForTrygdetid(
         trygdetidId: UUID,
         behandlingId: UUID,
@@ -154,10 +160,10 @@ data class TrygdetidPeriodePesys(
     val poengInnAar: Boolean?,
     val poengUtAar: Boolean?,
     val prorata: Boolean?,
-    val kilde: Grunnlagsopplysning.Pesys = Grunnlagsopplysning.Pesys.create(), // GrunnlagKildeCode i Pesys
+    val kilde: Grunnlagsopplysning.PesysYtelseKilde, // GrunnlagKildeCode i Pesys
 )
 
-fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
+private fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(kilde: Grunnlagsopplysning.PesysYtelseKilde): TrygdetidPeriodePesys =
     TrygdetidPeriodePesys(
         isoCode = land!!,
         fra = fomDato,
@@ -165,10 +171,10 @@ fun Trygdetidsgrunnlag.tilTrygdetidsPeriode(): TrygdetidPeriodePesys =
         poengInnAar = poengIInnAr,
         poengUtAar = poengIUtAr,
         prorata = ikkeProRata?.not(),
-        kilde = Grunnlagsopplysning.Pesys.create(),
+        kilde = kilde,
     )
 
-fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
+private fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
     TrygdetidPeriode(
         fra = fra,
         til = til,
@@ -412,25 +418,28 @@ class TrygdetidServiceImpl(
     private fun mapTrygdetidsgrunnlagFraPesys(
         pesysTrygdetidsgrunnlag: TrygdetidsgrunnlagUfoeretrygdOgAlderspensjon,
     ): List<TrygdetidGrunnlag> {
-        val mappedAlderspensjonTt =
+        val mappedAlderspensjonTrygdetidsgrunnlag =
             pesysTrygdetidsgrunnlag.trygdetidAlderspensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
-                mapPesysTrygdetidsgrunnlag(it)
+                mapPesysTrygdetidsgrunnlag(it, Grunnlagsopplysning.Alderspensjon.create())
             } ?: emptyList()
 
-        val mappedUfoeretrygdTt =
+        val mappedUfoereTrygdetidsgrunnlag =
             pesysTrygdetidsgrunnlag.trygdetidUfoeretrygdpensjon?.trygdetidsgrunnlagListe?.trygdetidsgrunnlagListe?.map {
-                mapPesysTrygdetidsgrunnlag(it)
+                mapPesysTrygdetidsgrunnlag(it, Grunnlagsopplysning.Ufoeretrygd.create())
             } ?: emptyList()
-        if (mappedAlderspensjonTt.isNotEmpty() && mappedUfoeretrygdTt.isNotEmpty()) {
+        if (mappedAlderspensjonTrygdetidsgrunnlag.isNotEmpty() && mappedUfoereTrygdetidsgrunnlag.isNotEmpty()) {
             logger.error(
                 "Vi fikk trygdetidsgrunnlag for både alderspensjon og uføretrygd, vi må sjekke om dette gir mening eller om det blir feil.",
             )
         }
-        return mappedAlderspensjonTt + mappedUfoeretrygdTt
+        return mappedAlderspensjonTrygdetidsgrunnlag + mappedUfoereTrygdetidsgrunnlag
     }
 
-    private fun mapPesysTrygdetidsgrunnlag(tt: Trygdetidsgrunnlag): TrygdetidGrunnlag {
-        val trygdetidsperiode = tt.tilTrygdetidsPeriode()
+    private fun mapPesysTrygdetidsgrunnlag(
+        tt: Trygdetidsgrunnlag,
+        kilde: Grunnlagsopplysning.PesysYtelseKilde,
+    ): TrygdetidGrunnlag {
+        val trygdetidsperiode = tt.tilTrygdetidsPeriode(kilde)
         return TrygdetidGrunnlag(
             id = UUID.randomUUID(),
             type = TrygdetidType.FAKTISK,
@@ -553,6 +562,30 @@ class TrygdetidServiceImpl(
                     ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
             oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
+        }
+
+    override suspend fun slettPesysTrygdetidGrunnlagForTrygdetid(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid =
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            val trygdetid =
+                trygdetidRepository
+                    .hentTrygdetidMedId(behandlingId, trygdetidId)
+                    ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
+
+            val altUnntattPesysKildeGrunnlag =
+                trygdetid.copy(
+                    trygdetidGrunnlag =
+                        trygdetid.trygdetidGrunnlag.filter {
+                            when (it.kilde) {
+                                is Grunnlagsopplysning.PesysYtelseKilde -> false
+                                else -> true
+                            }
+                        },
+                )
+            oppdaterBeregnetTrygdetid(behandlingId, altUnntattPesysKildeGrunnlag, brukerTokenInfo)
         }
 
     override suspend fun kopierSisteTrygdetidberegninger(

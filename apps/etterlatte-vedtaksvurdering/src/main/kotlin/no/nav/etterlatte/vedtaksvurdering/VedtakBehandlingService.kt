@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -524,7 +525,7 @@ class VedtakBehandlingService(
                                 opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         revurderingAarsak = behandling.revurderingsaarsak,
-                        revurderingInfo = behandling.revurderingInfo,
+                        revurderingInfo = behandling.revurderingInfo?.toJsonNode(),
                         opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
@@ -554,10 +555,10 @@ class VedtakBehandlingService(
                             opprettUtbetalingsperioder(
                                 vedtakType = vedtakType,
                                 beregningOgAvkorting = beregningOgAvkorting,
-                                behandling.sakType,
+                                sakType = behandling.sakType,
                                 opphoerFraOgMed = opphoerFraOgMed,
                             ),
-                        revurderingInfo = behandling.revurderingInfo,
+                        revurderingInfo = behandling.revurderingInfo?.toJsonNode(),
                         opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
@@ -633,7 +634,7 @@ class VedtakBehandlingService(
                                         ),
                                     beloep = it.utbetaltBeloep.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
-                                    regelverk = it.regelverk,
+                                    regelverk = it.regelverk ?: Regelverk.fraDato(it.datoFOM.atDay(1)),
                                 )
                             }
                         }
@@ -677,15 +678,7 @@ class VedtakBehandlingService(
                         periode = Periode(opphoerFraOgMed, null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
-                        regelverk =
-                            if (perioderMedUtbetaling.any { it.regelverk != null }) {
-                                // Regelverk er satt på periodene - for at det skal bli konsistent mot utbetaling
-                                Regelverk.fraDato(
-                                    opphoerFraOgMed.atDay(1),
-                                )
-                            } else {
-                                null
-                            },
+                        regelverk = Regelverk.fraDato(opphoerFraOgMed.atDay(1)),
                     ),
                 )
             } else {
@@ -698,7 +691,7 @@ class VedtakBehandlingService(
     private fun hentRegelverkFraBeregningForPeriode(
         beregningsperioder: List<Beregningsperiode>,
         fom: YearMonth,
-    ): Regelverk? {
+    ): Regelverk {
         val samsvarendeBeregningsperiode =
             beregningsperioder
                 .sortedBy { it.datoFOM }
@@ -706,6 +699,7 @@ class VedtakBehandlingService(
                 ?: throw InternfeilException("Fant ingen beregningsperioder som samsvarte med avkortingsperiode $fom")
 
         return samsvarendeBeregningsperiode.regelverk
+            ?: Regelverk.fraDato(samsvarendeBeregningsperiode.datoFOM.atDay(1))
     }
 
     private suspend fun hentDataForVedtak(
@@ -760,10 +754,7 @@ class VedtakBehandlingService(
         this.innhold is VedtakInnhold.Behandling &&
             Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
 
-    fun hentVedtakForBehandling(
-        behandlingId: UUID,
-        info: BrukerTokenInfo,
-    ): Vedtak? = repository.hentVedtak(behandlingId)
+    fun hentVedtakForBehandling(behandlingId: UUID): Vedtak? = repository.hentVedtak(behandlingId)
 }
 
 class VedtakTilstandException(

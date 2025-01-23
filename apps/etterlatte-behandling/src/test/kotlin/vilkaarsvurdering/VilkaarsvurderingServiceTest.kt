@@ -55,9 +55,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
+import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.BehandlingstilstandException
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingManglerResultat
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
@@ -88,7 +87,7 @@ internal class VilkaarsvurderingServiceTest(
     }
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
-    private lateinit var repository: VilkaarsvurderingRepository
+    private lateinit var repository: VilkaarsvurderingDao
     private val behandlingService = mockk<BehandlingService>()
     private val behandlingStatus: BehandlingStatusService = mockk<BehandlingStatusServiceImpl>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
@@ -126,12 +125,10 @@ internal class VilkaarsvurderingServiceTest(
                 every { revurderingsaarsak() } returns null
             }
 
-        repository = VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository())
+        repository = VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao())
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryWrapperDatabase(
-                    VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository()),
-                ),
+                VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingService,
                 grunnlagKlient,
                 behandlingStatus,
@@ -818,8 +815,9 @@ internal class VilkaarsvurderingServiceTest(
             )
         }
 
-        return repository.lagreVilkaarsvurderingResultatvanlig(
-            vilkaarsvurdering = opprettetVilkaarsvudering,
+        return repository.lagreVilkaarsvurderingResultat(
+            behandlingId = opprettetVilkaarsvudering.behandlingId,
+            vilkaarsvurderingId = opprettetVilkaarsvudering.id,
             virkningstidspunkt = LocalDate.of(2024, 1, 1),
             resultat =
                 VilkaarsvurderingResultat(

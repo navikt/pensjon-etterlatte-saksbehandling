@@ -33,10 +33,12 @@ export const LagreUnntakForm = ({
   })
   const { handleSubmit } = methods
 
+  const erVarigUnntak = unntak.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(sendInn)}>
-        <UnntakAktivitetspliktOppgave vurderingType={vurderingType} />
+        <UnntakAktivitetsplikt vurderingType={vurderingType} erVarigUnntak={erVarigUnntak} />
         <HStack gap="4">
           {!!onAvbryt && (
             <Button variant="secondary" onClick={onAvbryt}>
@@ -60,7 +62,13 @@ export const LagreUnntakForm = ({
   )
 }
 
-function UnntakAktivitetspliktOppgave({ vurderingType }: { vurderingType: AktivitetspliktOppgaveVurderingType }) {
+function UnntakAktivitetsplikt({
+  vurderingType,
+  erVarigUnntak,
+}: {
+  vurderingType: AktivitetspliktOppgaveVurderingType
+  erVarigUnntak: boolean
+}) {
   const er6mndVurdering = vurderingType === AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER
   const { register, control } = useFormContext()
   return (
@@ -97,6 +105,11 @@ function UnntakAktivitetspliktOppgave({ vurderingType }: { vurderingType: Aktivi
           {er6mndVurdering && (
             <option value={AktivitetspliktUnntakType.GRADERT_UFOERETRYGD}>
               {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.GRADERT_UFOERETRYGD]}
+            </option>
+          )}
+          {erVarigUnntak && (
+            <option value={AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT}>
+              {tekstAktivitetspliktUnntakType[AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT]}
             </option>
           )}
         </Select>

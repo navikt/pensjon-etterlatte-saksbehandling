@@ -43,6 +43,12 @@ export const slettTrygdetidsgrunnlag = async (args: {
     `/trygdetid_v2/${args.behandlingId}/${args.trygdetidId}/grunnlag/${args.trygdetidGrunnlagId}`
   )
 
+export const slettTrygdetidsgrunnlagKildePesys = async (args: {
+  behandlingId: string
+  trygdetidId: string
+}): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.delete<ITrygdetid>(`/trygdetid_v2/${args.behandlingId}/${args.trygdetidId}/grunnlag/slett-pesys`)
+
 export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
   apiClient.post(`/trygdetid_v2/${behandlingId}/oppdater-status`, {})
 

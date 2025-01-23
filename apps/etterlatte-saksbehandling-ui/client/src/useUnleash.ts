@@ -9,7 +9,7 @@ import { logger } from '~utils/logger'
 
 export const enum FeatureToggle {
   sanksjon = 'sanksjon',
-  aktivitetsplikt_ny_vurdering = 'aktivitetsplikt.ny-vurdering',
+  tillate_tidlig_virkningstidspunkt = 'tillate-tidlig-virkningstidspunkt',
   validere_aarsintnekt_neste_aar = 'validere_aarsintnekt_neste_aar',
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',
   notater = 'notater',
@@ -32,8 +32,9 @@ const trygdetid_fra_pesys: Toggle = {
 }
 
 const sanksjon: Toggle = { togglename: FeatureToggle.sanksjon, enabled: false }
-const aktivitetsplikt_ny_vurdering: Toggle = {
-  togglename: FeatureToggle.aktivitetsplikt_ny_vurdering,
+
+const tillate_tidlig_virkningstidspunkt: Toggle = {
+  togglename: FeatureToggle.tillate_tidlig_virkningstidspunkt,
   enabled: false,
 }
 const validere_aarsintnekt_neste_aar: Toggle = {
@@ -69,7 +70,7 @@ const pensjon_etterlatte_oppdater_ident_paa_sak: Toggle = {
 export const unleashStartState: Record<string, Toggle> = {
   [FeatureToggle.trygdetid_fra_pesys]: trygdetid_fra_pesys,
   [FeatureToggle.sanksjon]: sanksjon,
-  [FeatureToggle.aktivitetsplikt_ny_vurdering]: aktivitetsplikt_ny_vurdering,
+  [FeatureToggle.tillate_tidlig_virkningstidspunkt]: tillate_tidlig_virkningstidspunkt,
   [FeatureToggle.validere_aarsintnekt_neste_aar]: validere_aarsintnekt_neste_aar,
   [FeatureToggle.notater]: notater,
   [FeatureToggle.kopier_trygdetidsgrunnlag]: kopier_trygdetidsgrunnlag,

@@ -637,8 +637,10 @@ private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
                 tidspunkt = this.tidspunkt,
                 detalj = this.ident,
             )
-        is Grunnlagsopplysning.UkjentInnsender -> GenerellKilde(this.type, this.tidspunkt, detalj = null)
-        is Grunnlagsopplysning.Gjenny -> GenerellKilde(this.type, this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.UkjentInnsender -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Gjenny -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Alderspensjon -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Ufoeretrygd -> GenerellKilde(this.type, tidspunkt = this.tidspunkt, detalj = null)
     }
 
 data class GrunnlagsopplysningerPersonPdl(

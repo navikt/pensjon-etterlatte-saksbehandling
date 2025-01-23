@@ -11,11 +11,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.AuthorizationPlugin
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Issuer
 import java.math.BigDecimal
-import java.time.YearMonth
+import java.time.LocalDate
 
 fun Route.vedtakRoute(vedtakService: VedtakService) {
     // Tiltenkt for eksternt for etterlatte men internt i Nav. Initelt gjelder dette EESSI.
@@ -45,7 +44,7 @@ data class VedtakTilPerson(
 data class Vedtak(
     val sakId: Long,
     val sakType: String,
-    val virkningstidspunkt: YearMonth,
+    val virkningstidspunkt: LocalDate,
     val type: VedtakType,
     val utbetaling: List<VedtakUtbetaling>,
 )
@@ -58,6 +57,7 @@ enum class VedtakType {
 }
 
 data class VedtakUtbetaling(
-    val periode: Periode,
+    val fraOgMed: LocalDate,
+    val tilOgMed: LocalDate,
     val beloep: BigDecimal?,
 )

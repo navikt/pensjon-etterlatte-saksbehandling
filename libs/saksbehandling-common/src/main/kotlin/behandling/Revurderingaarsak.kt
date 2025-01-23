@@ -29,7 +29,10 @@ private sealed class KanBrukesIMiljoe {
     }
 }
 
-// Disse må ha en oversettelse i frontend Revurderingaarsak.ts
+/*
+    Disse må ha en oversettelse i frontend Revurderingaarsak.ts
+    Endring av enumnavnet her må også hensynta at det ligger lagret i vedtaksbasen og parses med objectmapper der til denne klassen.
+ */
 enum class Revurderingaarsak(
     private val gyldigFor: List<SakType>,
     private val miljoe: KanBrukesIMiljoe,

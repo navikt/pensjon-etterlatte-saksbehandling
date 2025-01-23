@@ -73,6 +73,7 @@ export function RedigerbarAktivitetsgradBehandling({
       setRedigerer={setRedigerer}
       slettStatus={slettStatus}
       slettAktivitetsgrad={slettAktivitetsgradIBehandling}
+      erBehandling={true}
     />
   )
 }

@@ -47,7 +47,6 @@ internal class NySoeknadRiver(
             validate { it.requireKey(SoeknadInnsendt.lagretSoeknadIdKey) }
             validate { it.requireKey(SoeknadInnsendt.hendelseGyldigTilKey) }
             validate { it.requireKey(SoeknadInnsendt.fnrSoekerKey) }
-            validate { it.rejectKey(SoeknadInnsendt.adressebeskyttelseKey) }
             validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
             validate { it.rejectKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.rejectKey(FordelerFordelt.soeknadFordeltKey) }

@@ -45,7 +45,7 @@ class AutomatiskBehandlingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakOgRapid {
         logger.info("Håndterer behandling $behandlingId")
-        val vedtak = service.hentVedtakForBehandling(behandlingId, brukerTokenInfo)
+        val vedtak = service.hentVedtakForBehandling(behandlingId)
         if (vedtak != null) {
             logger.warn(
                 "Skal opprette og fatte vedtak, men har allerede et vedtak for behandlingen" +

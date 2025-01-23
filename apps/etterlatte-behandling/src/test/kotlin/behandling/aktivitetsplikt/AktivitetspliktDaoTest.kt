@@ -31,25 +31,16 @@ class AktivitetspliktDaoTest(
     private val sakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(ds)) { mockk() })
 
     @Test
-    fun `skal hente aktiviteter for behandling`() {
-        val behandlingId = UUID.randomUUID()
-        val nyAktivtet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
-        dao.opprettAktivitet(behandlingId, nyAktivtet, kilde)
-        dao.opprettAktivitet(UUID.randomUUID(), nyAktivtet, kilde)
-
-        val aktiviteter = dao.hentAktiviteterForBehandling(behandlingId)
-
-        aktiviteter.size shouldBe 1
-    }
-
-    @Test
-    fun `skal opprette ny aktivetet`() {
+    fun `skal opprette ny aktivitet for behandling`() {
         val behandlingId = UUID.randomUUID()
         val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
 
-        dao.opprettAktivitet(behandlingId, nyAktivitet, kilde) shouldBe 1
+        dao.opprettAktivitetForBehandling(behandlingId, nyAktivitet, kilde) shouldBe 1
+        dao.opprettAktivitetForBehandling(UUID.randomUUID(), nyAktivitet, kilde)
 
         val hentAktiviteter = dao.hentAktiviteterForBehandling(behandlingId)
+        hentAktiviteter.size shouldBe 1
+
         hentAktiviteter.first().asClue { aktivitet ->
             aktivitet.sakId shouldBe nyAktivitet.sakId
             aktivitet.type shouldBe nyAktivitet.type
@@ -61,13 +52,104 @@ class AktivitetspliktDaoTest(
         }
     }
 
+    @Test
+    fun `skal opprette ny aktivitet for sak`() {
+        val sak =
+            sakSkrivDao.opprettSak(
+                "Person1",
+                SakType.OMSTILLINGSSTOENAD,
+                Enheter.defaultEnhet.enhetNr,
+            )
+        val nyAktivitet = opprettAktivitet(sak)
+        dao.opprettAktivitetForSak(sak.id, nyAktivitet, kilde) shouldBe 1
+        dao.hentAktiviteterForSak(sak.id).asClue { aktiviteter ->
+            aktiviteter.size shouldBe 1
+            aktiviteter.first().asClue { aktivitet ->
+                aktivitet.sakId shouldBe sak.id
+                aktivitet.type shouldBe nyAktivitet.type
+                aktivitet.fom shouldBe nyAktivitet.fom
+                aktivitet.tom shouldBe nyAktivitet.tom
+                aktivitet.opprettet shouldBe kilde
+            }
+        }
+    }
+
+    @Test
+    fun `skal opprette ny hendelse`() {
+        val behandlingId = UUID.randomUUID()
+        val nyHendelse = opprettHendelse(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
+
+        dao.upsertHendelse(behandlingId, nyHendelse, kilde) shouldBe 1
+
+        val hentHendelser = dao.hentHendelserForBehandling(behandlingId)
+        hentHendelser.first().asClue { hendelse ->
+            hendelse.sakId shouldBe nyHendelse.sakId
+            hendelse.dato shouldBe nyHendelse.dato
+            hendelse.opprettet shouldBe kilde
+            hendelse.endret shouldBe kilde
+            hendelse.beskrivelse shouldBe nyHendelse.beskrivelse
+            hendelse.behandlingId shouldBe behandlingId
+        }
+    }
+
+    @Test
+    fun `skal opprette ny hendelse for Sak`() {
+        val sak = sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr)
+        val nyHendelse = opprettHendelse(sak)
+
+        dao.upsertHendelse(null, nyHendelse, kilde) shouldBe 1
+
+        val hentHendelser = dao.hentHendelserForSak(sak.id)
+        hentHendelser.first().asClue { hendelse ->
+            hendelse.sakId shouldBe nyHendelse.sakId
+            hendelse.dato shouldBe nyHendelse.dato
+            hendelse.opprettet shouldBe kilde
+            hendelse.endret shouldBe kilde
+            hendelse.beskrivelse shouldBe nyHendelse.beskrivelse
+            hendelse.behandlingId shouldBe null
+        }
+    }
+
+    @Nested
+    inner class OppdaterHendelse {
+        @Test
+        fun `skal oppdatere eksisterende hendelse`() {
+            val behandlingId = UUID.randomUUID()
+            val nyHendelse = opprettHendelse(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
+            dao.upsertHendelse(behandlingId, nyHendelse, kilde)
+            val gammelHendelse = dao.hentHendelserForBehandling(behandlingId).first()
+            val oppdaterHendelse =
+                nyHendelse.copy(
+                    id = gammelHendelse.id,
+                    dato = gammelHendelse.dato.plusYears(1),
+                    beskrivelse = "Ny beskrivelse",
+                )
+            dao.upsertHendelse(
+                behandlingId,
+                oppdaterHendelse,
+                kilde.copy("Z1111111"),
+            ) shouldBe 1
+
+            val hendelser = dao.hentHendelserForBehandling(behandlingId)
+            hendelser shouldHaveSize 1
+            hendelser.first().asClue { oppdatertAktivitet ->
+                oppdatertAktivitet.id shouldBe gammelHendelse.id
+                oppdatertAktivitet.sakId shouldBe gammelHendelse.sakId
+                oppdatertAktivitet.dato shouldBe oppdaterHendelse.dato
+                oppdatertAktivitet.opprettet shouldBe gammelHendelse.opprettet
+                oppdatertAktivitet.endret shouldNotBe gammelHendelse.endret
+                oppdatertAktivitet.beskrivelse shouldBe oppdaterHendelse.beskrivelse
+            }
+        }
+    }
+
     @Nested
     inner class OppdaterAktivitet {
         @Test
         fun `skal oppdatere eksisterende aktivitet`() {
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
-            dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
+            dao.opprettAktivitetForBehandling(behandlingId, nyAktivitet, kilde)
             val gammelAktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
             val oppdaterAktivitet =
                 nyAktivitet.copy(
@@ -101,7 +183,7 @@ class AktivitetspliktDaoTest(
         fun `skal ikke oppdatere eksisterende aktivitet hvis behandling id ikke stemmer`() {
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
-            dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
+            dao.opprettAktivitetForBehandling(behandlingId, nyAktivitet, kilde)
             val gammelAktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
             val oppdaterAktivitet =
                 nyAktivitet.copy(
@@ -128,10 +210,10 @@ class AktivitetspliktDaoTest(
         fun `skal slette aktivitet`() {
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
-            dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
+            dao.opprettAktivitetForBehandling(behandlingId, nyAktivitet, kilde)
             val aktivitet = dao.hentAktiviteterForBehandling(behandlingId).first()
 
-            dao.slettAktivitet(aktivitet.id, behandlingId)
+            dao.slettAktivitetForBehandling(aktivitet.id, behandlingId)
 
             dao.hentAktiviteterForBehandling(behandlingId) shouldHaveSize 0
         }
@@ -140,9 +222,24 @@ class AktivitetspliktDaoTest(
         fun `skal ikke slette aktivitet hvis behandling id ikke stemmer`() {
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
-            dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
+            dao.opprettAktivitetForBehandling(behandlingId, nyAktivitet, kilde)
 
             dao.hentAktiviteterForBehandling(behandlingId) shouldHaveSize 1
+        }
+    }
+
+    @Nested
+    inner class SlettHendelse {
+        @Test
+        fun `skal slette hendelse`() {
+            val behandlingId = UUID.randomUUID()
+            val nyHendelse = opprettHendelse(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
+            dao.upsertHendelse(behandlingId, nyHendelse, kilde)
+            val hendelse = dao.hentHendelserForBehandling(behandlingId).first()
+
+            dao.slettHendelse(hendelse.id)
+
+            dao.hentHendelserForBehandling(behandlingId) shouldHaveSize 0
         }
     }
 
@@ -153,9 +250,9 @@ class AktivitetspliktDaoTest(
             val forrigeBehandling = UUID.randomUUID()
             val nyBehandling = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
-            dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
-            dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
-            dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
+            dao.opprettAktivitetForBehandling(forrigeBehandling, nyAktivitet, kilde)
+            dao.opprettAktivitetForBehandling(forrigeBehandling, nyAktivitet, kilde)
+            dao.opprettAktivitetForBehandling(forrigeBehandling, nyAktivitet, kilde)
             dao.hentAktiviteterForBehandling(forrigeBehandling) shouldHaveSize 3
             dao.hentAktiviteterForBehandling(nyBehandling) shouldHaveSize 0
 
@@ -176,12 +273,47 @@ class AktivitetspliktDaoTest(
         }
     }
 
+    @Nested
+    inner class KopierHendelser {
+        @Test
+        fun `skal kopiere hendelser fra tidligere behandling`() {
+            val forrigeBehandling = UUID.randomUUID()
+            val nyBehandling = UUID.randomUUID()
+            val nyHendelse = opprettHendelse(sakSkrivDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr))
+            dao.upsertHendelse(forrigeBehandling, nyHendelse, kilde)
+            dao.upsertHendelse(forrigeBehandling, nyHendelse, kilde)
+            dao.upsertHendelse(forrigeBehandling, nyHendelse, kilde)
+            dao.hentHendelserForBehandling(forrigeBehandling) shouldHaveSize 3
+            dao.hentHendelserForBehandling(nyBehandling) shouldHaveSize 0
+
+            dao.kopierHendelser(forrigeBehandling, nyBehandling) shouldBe 3
+
+            dao.hentHendelserForBehandling(nyBehandling).asClue {
+                it shouldHaveSize 3
+                it.forEach { aktivitet ->
+                    aktivitet.sakId shouldBe nyHendelse.sakId
+                    aktivitet.dato shouldBe nyHendelse.dato
+                    aktivitet.opprettet shouldBe kilde
+                    aktivitet.endret shouldBe kilde
+                    aktivitet.beskrivelse shouldBe nyHendelse.beskrivelse
+                }
+            }
+        }
+    }
+
     companion object {
         fun opprettAktivitet(sak: Sak) =
             LagreAktivitetspliktAktivitet(
                 sakId = sak.id,
                 type = AktivitetspliktAktivitetType.ARBEIDSTAKER,
                 fom = LocalDate.now(),
+                beskrivelse = "Beskrivelse",
+            )
+
+        fun opprettHendelse(sak: Sak) =
+            LagreAktivitetspliktHendelse(
+                sakId = sak.id,
+                dato = LocalDate.now(),
                 beskrivelse = "Beskrivelse",
             )
 

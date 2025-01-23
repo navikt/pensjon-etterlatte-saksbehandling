@@ -137,7 +137,6 @@ class BrevdataFacade(
                         attestantIdent,
                         vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
                         virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
-                        revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
                         klage =
                             if (vedtakInnhold.behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
                                 val klageId = UUID.fromString(relatertKlageId)

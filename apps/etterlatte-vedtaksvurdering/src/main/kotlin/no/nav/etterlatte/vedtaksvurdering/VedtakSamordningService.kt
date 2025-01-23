@@ -59,7 +59,7 @@ private fun Vedtak.toSamordningsvedtakDto(avkortetYtelsePerioder: List<AvkortetY
         type = type,
         vedtakFattet = vedtakFattet,
         attestasjon = attestasjon,
-        forenkletBehandling =
+        behandling =
             Behandling(
                 innhold.behandlingType,
                 behandlingId,

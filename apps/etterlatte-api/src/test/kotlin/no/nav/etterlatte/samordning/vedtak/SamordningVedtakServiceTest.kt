@@ -394,7 +394,7 @@ fun vedtak(
         status = VedtakStatus.ATTESTERT,
         virkningstidspunkt = virkningstidspunkt,
         sak = VedtakSak(ident = "123", sakstype, id = randomSakId()),
-        forenkletBehandling = Behandling(id = UUID.randomUUID(), type = BehandlingType.FØRSTEGANGSBEHANDLING),
+        behandling = Behandling(id = UUID.randomUUID(), type = BehandlingType.FØRSTEGANGSBEHANDLING),
         type = VedtakType.INNVILGELSE,
         vedtakFattet = null,
         attestasjon = null,

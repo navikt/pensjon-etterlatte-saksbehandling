@@ -59,10 +59,10 @@ internal class DistribuerBrevRiverTest {
         val behandlingId = UUID.randomUUID()
         val test =
             mockk<VedtakInnholdDto.VedtakBehandlingDto> {
-                every { forenkletBehandling.id } returns behandlingId
+                every { behandling.id } returns behandlingId
                 every { virkningstidspunkt } returns YearMonth.now()
-                every { forenkletBehandling.revurderingsaarsak } returns null
-                every { forenkletBehandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { behandling.revurderingsaarsak } returns null
+                every { behandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { utbetalingsperioder } returns emptyList()
                 every { opphoerFraOgMed } returns mockk()
             }

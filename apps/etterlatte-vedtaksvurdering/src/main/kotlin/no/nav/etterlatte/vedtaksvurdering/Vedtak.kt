@@ -58,7 +58,7 @@ data class Vedtak(
                     is VedtakInnhold.Behandling ->
                         VedtakInnholdDto.VedtakBehandlingDto(
                             virkningstidspunkt = innhold.virkningstidspunkt,
-                            forenkletBehandling =
+                            behandling =
                                 Behandling(
                                     innhold.behandlingType,
                                     behandlingId,

@@ -117,7 +117,7 @@ private fun samordningVedtak() =
         status = VedtakStatus.IVERKSATT,
         virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
         sak = VedtakSak(FNR_2, SakType.OMSTILLINGSSTOENAD, id = randomSakId()),
-        forenkletBehandling = Behandling(BehandlingType.REVURDERING, id = UUID.randomUUID()),
+        behandling = Behandling(BehandlingType.REVURDERING, id = UUID.randomUUID()),
         type = VedtakType.ENDRING,
         vedtakFattet = VedtakFattet("SBH", ENHET_1, Tidspunkt.now().minus(2, ChronoUnit.DAYS)),
         attestasjon = Attestasjon("SBH", ENHET_1, Tidspunkt.now().minus(1, ChronoUnit.DAYS)),

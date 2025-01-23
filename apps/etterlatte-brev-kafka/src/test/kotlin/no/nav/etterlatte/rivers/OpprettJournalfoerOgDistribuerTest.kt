@@ -139,7 +139,7 @@ internal class OpprettJournalfoerOgDistribuer {
             innhold =
                 VedtakInnholdDto.VedtakBehandlingDto(
                     virkningstidspunkt = YearMonth.now(),
-                    forenkletBehandling =
+                    behandling =
                         Behandling(
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
                             id = behandlingId,

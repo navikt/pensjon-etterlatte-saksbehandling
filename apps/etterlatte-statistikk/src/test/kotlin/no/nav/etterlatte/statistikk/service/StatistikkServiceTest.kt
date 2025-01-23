@@ -483,7 +483,7 @@ fun vedtak(
     innhold =
         VedtakInnholdDto.VedtakBehandlingDto(
             virkningstidspunkt = virk,
-            forenkletBehandling = Behandling(type = behandlingType, id = behandlingId),
+            behandling = Behandling(type = behandlingType, id = behandlingId),
             utbetalingsperioder = pensjonTilUtbetaling ?: emptyList(),
             opphoerFraOgMed = opphoerFom,
         ),

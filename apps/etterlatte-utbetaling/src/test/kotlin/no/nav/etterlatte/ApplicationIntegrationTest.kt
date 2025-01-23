@@ -85,7 +85,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             attestertvedtakEvent(
                 vedtak(
-                    forenkletBehandling =
+                    behandling =
                         Behandling(
                             id = behandlingId,
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -136,7 +136,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             attestertvedtakEvent(
                 vedtak(
-                    forenkletBehandling =
+                    behandling =
                         Behandling(
                             id = behandlingIdForste,
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -147,7 +147,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             attestertvedtakEvent(
                 vedtak(
-                    forenkletBehandling =
+                    behandling =
                         Behandling(
                             id = behandlingIdAndre,
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -187,7 +187,7 @@ class ApplicationIntegrationTest {
             attestertvedtakEvent(
                 vedtak(
                     vedtakId = 2,
-                    forenkletBehandling =
+                    behandling =
                         Behandling(
                             BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
@@ -219,7 +219,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             attestertvedtakEvent(
                 vedtak(
-                    forenkletBehandling =
+                    behandling =
                         Behandling(
                             BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
@@ -269,7 +269,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             attestertvedtakEvent(
                 vedtak(
-                    forenkletBehandling =
+                    behandling =
                         Behandling(
                             BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
@@ -303,7 +303,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(
             attestertvedtakEvent(
                 vedtak(
-                    forenkletBehandling =
+                    behandling =
                         Behandling(
                             BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,

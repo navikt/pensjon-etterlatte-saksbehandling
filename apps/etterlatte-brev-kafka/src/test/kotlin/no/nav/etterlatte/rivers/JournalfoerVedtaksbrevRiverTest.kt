@@ -134,7 +134,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
             innhold =
                 VedtakInnholdDto.VedtakBehandlingDto(
                     virkningstidspunkt = YearMonth.now(),
-                    forenkletBehandling = Behandling(behandlingType, behandlingId),
+                    behandling = Behandling(behandlingType, behandlingId),
                     utbetalingsperioder = emptyList(),
                     opphoerFraOgMed = null,
                 ),

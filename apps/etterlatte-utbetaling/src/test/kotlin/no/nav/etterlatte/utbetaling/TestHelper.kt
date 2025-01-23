@@ -68,7 +68,7 @@ fun utbetalingsvedtak(
     sakType: Saktype = Saktype.BARNEPENSJON,
 ) = Utbetalingsvedtak(
     vedtakId = vedtakId,
-    forenkletBehandling =
+    behandling =
         Behandling(
             id = UUID.randomUUID(),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,

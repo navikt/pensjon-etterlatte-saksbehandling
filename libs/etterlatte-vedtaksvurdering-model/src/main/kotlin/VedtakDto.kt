@@ -48,7 +48,7 @@ sealed class VedtakInnholdDto {
     @JsonTypeName("BEHANDLING")
     data class VedtakBehandlingDto(
         val virkningstidspunkt: YearMonth,
-        val forenkletBehandling: Behandling,
+        val behandling: Behandling,
         val utbetalingsperioder: List<Utbetalingsperiode>,
         val opphoerFraOgMed: YearMonth?,
     ) : VedtakInnholdDto()
@@ -136,7 +136,7 @@ data class VedtakSamordningDto(
     val status: VedtakStatus,
     val virkningstidspunkt: YearMonth,
     val sak: VedtakSak,
-    val forenkletBehandling: Behandling,
+    val behandling: Behandling,
     val type: VedtakType,
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,

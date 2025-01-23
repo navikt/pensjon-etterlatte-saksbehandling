@@ -115,7 +115,7 @@ class VedtaksverifisererTest(
     ): Pair<Utbetalingsvedtak, Utbetaling> {
         val behandlingId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        val forenkletBehandling =
+        val behandling =
             Behandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 id = behandlingId,
@@ -138,8 +138,8 @@ class VedtaksverifisererTest(
                     Utbetalingsvedtak(
                         vedtakId = vedtakTeller,
                         sak = sak,
-                        forenkletBehandling =
-                        forenkletBehandling,
+                        behandling =
+                        behandling,
                         pensjonTilUtbetaling = listOf(),
                         vedtakFattet =
                             VedtakFattet(
@@ -175,7 +175,7 @@ class VedtaksverifisererTest(
             Utbetalingsvedtak(
                 vedtakId = vedtakTeller,
                 sak = sak,
-                forenkletBehandling = forenkletBehandling,
+                behandling = behandling,
                 pensjonTilUtbetaling =
                     linjer.map {
                         Utbetalingsperiode(

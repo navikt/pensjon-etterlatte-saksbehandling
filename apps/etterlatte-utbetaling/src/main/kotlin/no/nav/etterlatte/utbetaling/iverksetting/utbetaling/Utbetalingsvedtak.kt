@@ -14,7 +14,7 @@ import java.time.YearMonth
 data class Utbetalingsvedtak(
     val vedtakId: Long,
     val sak: Sak,
-    val forenkletBehandling: Behandling,
+    val behandling: Behandling,
     val pensjonTilUtbetaling: List<Utbetalingsperiode>,
     val vedtakFattet: VedtakFattet,
     val attestasjon: Attestasjon,
@@ -29,11 +29,11 @@ data class Utbetalingsvedtak(
             return Utbetalingsvedtak(
                 vedtakId = vedtak.id,
                 sak = Sak(vedtak.sak.ident, vedtak.sak.id.sakId, Saktype.valueOf(vedtak.sak.sakType.toString())),
-                forenkletBehandling =
+                behandling =
                     Behandling(
-                        type = innhold.forenkletBehandling.type,
-                        id = innhold.forenkletBehandling.id,
-                        revurderingsaarsak = innhold.forenkletBehandling.revurderingsaarsak,
+                        type = innhold.behandling.type,
+                        id = innhold.behandling.id,
+                        revurderingsaarsak = innhold.behandling.revurderingsaarsak,
                     ),
                 pensjonTilUtbetaling =
                     innhold.utbetalingsperioder.map {
@@ -69,7 +69,7 @@ data class Utbetalingsvedtak(
 
     fun finnPrioritet(): Prioritet =
         if (SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER == vedtakFattet.ansvarligSaksbehandler &&
-            forenkletBehandling.revurderingsaarsak?.equals(Revurderingaarsak.REGULERING) == true
+            behandling.revurderingsaarsak?.equals(Revurderingaarsak.REGULERING) == true
         ) {
             Prioritet.LAV
         } else {

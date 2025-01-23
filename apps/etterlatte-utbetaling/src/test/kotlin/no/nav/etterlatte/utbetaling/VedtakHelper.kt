@@ -39,7 +39,7 @@ fun vedtak(
         ),
     ident: String = "12345678913",
     sakId: SakId = sakId1,
-    forenkletBehandling: Behandling =
+    behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -49,7 +49,7 @@ fun vedtak(
     opphoerFraOgMed: YearMonth? = null,
 ) = VedtakDto(
     id = vedtakId,
-    behandlingId = forenkletBehandling.id,
+    behandlingId = behandling.id,
     status = VedtakStatus.ATTESTERT,
     sak =
         VedtakSak(
@@ -72,7 +72,7 @@ fun vedtak(
         ),
     innhold =
         VedtakInnholdDto.VedtakBehandlingDto(
-            forenkletBehandling = forenkletBehandling,
+            behandling = behandling,
             virkningstidspunkt = virkningstidspunkt ?: YearMonth.of(2022, 1),
             utbetalingsperioder = utbetalingsperioder,
             opphoerFraOgMed = opphoerFraOgMed,
@@ -81,7 +81,7 @@ fun vedtak(
 
 fun ugyldigVedtakTilUtbetaling(
     vedtakId: Long = 1,
-    forenkletBehandling: Behandling =
+    behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -89,7 +89,7 @@ fun ugyldigVedtakTilUtbetaling(
     saktype: SakType = SakType.BARNEPENSJON,
 ) = VedtakDto(
     id = vedtakId,
-    behandlingId = forenkletBehandling.id,
+    behandlingId = behandling.id,
     status = VedtakStatus.ATTESTERT,
     sak =
         VedtakSak(
@@ -107,7 +107,7 @@ fun ugyldigVedtakTilUtbetaling(
         ),
     innhold =
         VedtakInnholdDto.VedtakBehandlingDto(
-            forenkletBehandling = forenkletBehandling,
+            behandling = behandling,
             virkningstidspunkt = YearMonth.of(2022, 1),
             utbetalingsperioder =
                 listOf(

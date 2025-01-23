@@ -141,6 +141,7 @@ open class Grunnlagsopplysning<T>(
         val registersReferanse: String?,
         val opplysningId: String?,
     ) : Kilde(PDLNAME) {
+        // Brukes i frontend
         val navn = PDLNAME
 
         override fun toString(): String = PDLNAME

@@ -7,6 +7,7 @@ import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -570,7 +571,7 @@ class VedtaksvurderingRepository(
                             beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
                             avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
                             utbetalingsperioder = utbetalingsperioder,
-                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { objectMapper.readValue(it) },
+                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { Revurderingaarsak.valueOf(it) },
                             revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
                             opphoerFraOgMed = sqlDateOrNull("opphoer_fom")?.toLocalDate()?.let { YearMonth.from(it) },
                         )

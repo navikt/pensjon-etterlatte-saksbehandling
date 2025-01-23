@@ -44,9 +44,9 @@ object BrevDataMapperRedigerbartUtfallVarsel {
                     }
 
                 val virk = detaljertBehandling!!.virkningstidspunkt?.dato
-                val er6mndvarsel = virk!!.isAfter(YearMonth.from(doedsdatoEllerOpphoertPleieforhold!!.plusMonths(12)))
+                val er12mndvarsel = virk!!.isAfter(YearMonth.from(doedsdatoEllerOpphoertPleieforhold!!.plusMonths(12)))
 
-                OmstillingsstoenadAktivitetspliktVarselUtfall(er6mndvarsel)
+                OmstillingsstoenadAktivitetspliktVarselUtfall(er12mndvarsel)
             } else {
                 ManueltBrevData()
             }

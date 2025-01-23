@@ -10,5 +10,5 @@ data class OmstillingsstoenadAktivitetspliktVarsel(
 ) : BrevDataFerdigstilling
 
 class OmstillingsstoenadAktivitetspliktVarselUtfall(
-    val er6mndVarsel: Boolean,
+    val er12MndVarsel: Boolean,
 ) : BrevDataRedigerbar

@@ -2,7 +2,6 @@ package no.nav.etterlatte.libs.common.vedtak
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
@@ -79,7 +78,6 @@ data class ForenkletBehandling(
     val type: BehandlingType,
     val id: UUID,
     val revurderingsaarsak: Revurderingaarsak? = null,
-    val revurderingInfo: JsonNode? = null,
 )
 
 data class Periode(

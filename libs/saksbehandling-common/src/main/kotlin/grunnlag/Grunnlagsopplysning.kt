@@ -141,6 +141,8 @@ open class Grunnlagsopplysning<T>(
         val registersReferanse: String?,
         val opplysningId: String?,
     ) : Kilde(PDLNAME) {
+        val navn = PDLNAME
+
         override fun toString(): String = PDLNAME
     }
 
@@ -149,6 +151,8 @@ open class Grunnlagsopplysning<T>(
         val registersReferanse: String?,
         val opplysningId: String?,
     ) : Kilde(PERSONDATANAME) {
+        val navn = PERSONDATANAME
+
         override fun toString(): String = PERSONDATANAME
     }
 

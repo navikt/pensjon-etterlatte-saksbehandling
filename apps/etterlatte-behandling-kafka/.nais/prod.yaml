@@ -43,7 +43,6 @@ spec:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY
-      #sette tilbake til none senere
       value: latest
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default

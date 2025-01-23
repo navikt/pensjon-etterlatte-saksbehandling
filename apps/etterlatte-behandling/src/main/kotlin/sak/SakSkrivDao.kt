@@ -14,6 +14,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.ktor.route.logger
+import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_ADRESSEBESKYTTELSE
+import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_ENHET
+import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_IDENT
+import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_SKJERMING
+import no.nav.etterlatte.sak.Saksendring.Endringstype.OPPRETT_SAK
 import java.sql.ResultSet
 
 class SakSkrivDao(
@@ -32,7 +37,7 @@ class SakSkrivDao(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int =
-        sakendringerDao.lagreEndringerPaaSak(sakId, "oppdaterAdresseBeskyttelse") { connection ->
+        sakendringerDao.oppdaterSaker(sakId, ENDRE_ADRESSEBESKYTTELSE) { connection ->
             with(connection) {
                 val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
                 statement.setString(1, adressebeskyttelseGradering.name)
@@ -53,7 +58,7 @@ class SakSkrivDao(
         type: SakType,
         enhet: Enhetsnummer,
     ): Sak =
-        sakendringerDao.opprettSak("opprettSak") { connection ->
+        sakendringerDao.opprettSak(OPPRETT_SAK) { connection ->
             with(connection) {
                 val statement =
                     prepareStatement(
@@ -75,7 +80,7 @@ class SakSkrivDao(
         sakId: SakId,
         nyIdent: Folkeregisteridentifikator,
     ) {
-        sakendringerDao.lagreEndringerPaaSak(sakId, "oppdaterIdent") {
+        sakendringerDao.oppdaterSaker(sakId, ENDRE_IDENT) {
             it
                 .prepareStatement(
                     """
@@ -91,7 +96,7 @@ class SakSkrivDao(
     }
 
     fun oppdaterEnheterPaaSaker(saker: List<SakMedEnhet>) {
-        sakendringerDao.lagreEndringerPaaSaker(saker.map { it.id }, "oppdaterEnheterPaaSaker") {
+        sakendringerDao.oppdaterSaker(saker.map { it.id }, ENDRE_ENHET) {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -113,7 +118,7 @@ class SakSkrivDao(
     fun markerSakerMedSkjerming(
         sakIder: List<SakId>,
         skjermet: Boolean,
-    ) = sakendringerDao.lagreEndringerPaaSaker(sakIder, "markerSakerMedSkjerming") {
+    ) = sakendringerDao.oppdaterSaker(sakIder, ENDRE_SKJERMING) {
         with(it) {
             val statement =
                 prepareStatement(

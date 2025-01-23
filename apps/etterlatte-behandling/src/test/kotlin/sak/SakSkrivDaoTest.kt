@@ -470,9 +470,8 @@ internal class SakSkrivDaoTest(
                     .prepareStatement(
                         """
                         SELECT foer, etter
-                        FROM endringer
-                        WHERE tabell = 'sak'
-                        AND foer ->> 'id' = '${sak.id}' 
+                        FROM saksendring
+                        WHERE foer ->> 'id' = '${sak.id}'
                         """.trimIndent(),
                     ).executeQuery()
                     .toList {
@@ -480,9 +479,9 @@ internal class SakSkrivDaoTest(
                     }
             }
 
-        endringer.size shouldBe 1
-
         endringer.single().let { (foer, etter) ->
+            foer.id shouldBe sak.id
+
             foer.id shouldBe etter.id
             foer.enhet shouldBe etter.enhet
             foer.sakType shouldBe etter.sakType

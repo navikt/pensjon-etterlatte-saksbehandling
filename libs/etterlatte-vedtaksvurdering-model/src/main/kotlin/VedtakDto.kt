@@ -114,7 +114,7 @@ data class Utbetalingsperiode(
     val periode: Periode,
     val beloep: BigDecimal?,
     val type: UtbetalingsperiodeType,
-    val regelverk: Regelverk?,
+    val regelverk: Regelverk,
 )
 
 enum class UtbetalingsperiodeType {

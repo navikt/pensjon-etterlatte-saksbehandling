@@ -20,7 +20,6 @@ import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
-import { AktivitetspliktOppgaveHandling } from '~components/oppgavebenk/components/AktivitetspliktOppgaveHandling'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -156,9 +155,8 @@ export const HandlingerForOppgave = ({
           </Button>
         )
       )
-    case Oppgavetype.AKTIVITETSPLIKT:
-      return <AktivitetspliktOppgaveHandling oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
     case Oppgavetype.AKTIVITETSPLIKT_12MND:
+    case Oppgavetype.AKTIVITETSPLIKT:
       return (
         <Button size="small" as="a" href={`/aktivitet-vurdering/${id}/${AktivitetspliktSteg.VURDERING}`}>
           Gå til vurdering

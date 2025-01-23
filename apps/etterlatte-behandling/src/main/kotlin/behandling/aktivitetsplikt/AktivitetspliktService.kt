@@ -497,36 +497,9 @@ class AktivitetspliktService(
         return AktivitetspliktVurdering(aktivitetsgrad, unntak)
     }
 
-    fun hentVurderingForOppgaveGammel(oppgaveId: UUID): AktivitetspliktVurderingGammel? {
-        val vurdering = hentVurderingForOppgave(oppgaveId)
-        // Denne må returnere null for at frontend skal fungere riktig
-        return if (vurdering.erTom()) {
-            null
-        } else {
-            vurdering.let {
-                AktivitetspliktVurderingGammel(
-                    aktivitet = it.aktivitet.firstOrNull(),
-                    unntak = it.unntak.firstOrNull(),
-                )
-            }
-        }
-    }
-
     fun hentVurderingForBehandlingNy(behandlingId: UUID): AktivitetspliktVurdering {
         val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
         val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
-
-        return AktivitetspliktVurdering(aktivitetsgrad, unntak)
-    }
-
-    @Deprecated("Slettes når 4 mnd ny flyt er godkjent")
-    fun hentVurderingForBehandling(behandlingId: UUID): AktivitetspliktVurdering? {
-        val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
-        val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
-
-        if (aktivitetsgrad.isEmpty() && unntak.isEmpty()) {
-            return null
-        }
 
         return AktivitetspliktVurdering(aktivitetsgrad, unntak)
     }
@@ -909,7 +882,7 @@ fun hentVurderingForSakHelper(
         // Vi har hentet både fra vurdering og unntak, men vi har hentet fra forskjellige oppgaver / behandlinger.
         // For å hente riktig i dette tilfellet må vi finne hvilken som er nyest, og bruke den id'en til å hente
         // den andre
-        val nyesteEndringAktivitet = aktivitet.maxOf { it.endret?.endretDatoOrNull() ?: Tidspunkt.MIN }
+        val nyesteEndringAktivitet = aktivitet.maxOf { it.endret.endretDatoOrNull() ?: Tidspunkt.MIN }
         val nyesteEndringUnntak = unntak.maxOf { it.endret?.endretDatoOrNull() ?: Tidspunkt.MIN }
 
         if (nyesteEndringUnntak > nyesteEndringAktivitet) {
@@ -947,11 +920,6 @@ fun hentVurderingForSakHelper(
 
     return AktivitetspliktVurdering(aktivitet, unntak)
 }
-
-data class AktivitetspliktVurderingGammel(
-    val aktivitet: AktivitetspliktAktivitetsgrad?,
-    val unntak: AktivitetspliktUnntak?,
-)
 
 data class AktivitetspliktVurdering(
     val aktivitet: List<AktivitetspliktAktivitetsgrad>,

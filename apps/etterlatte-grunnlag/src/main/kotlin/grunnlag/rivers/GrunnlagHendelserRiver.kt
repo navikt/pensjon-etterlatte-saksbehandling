@@ -28,8 +28,7 @@ class GrunnlagHendelserRiver(
     private val grunnlagService: GrunnlagService,
 ) : ListenerMedLogging() {
     init {
-        initialiserRiverUtenEventName(rapidsConnection) {
-            validate { it.interestedIn(EVENT_NAME_KEY) }
+        initialiserRiver(rapidsConnection, EventNames.NY_OPPLYSNING) {
             validate { it.interestedIn(FNR_KEY) }
             validate { it.requireKey(OPPLYSNING_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
@@ -44,32 +43,28 @@ class GrunnlagHendelserRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val eventName = packet[EVENT_NAME_KEY].asText()
+        val sakId = packet[SAK_ID_KEY].asLong().let { SakId(it) }
+        val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
 
-        if (eventName == EventNames.NY_OPPLYSNING.eventname) {
-            val sakId = packet[SAK_ID_KEY].asLong().let { SakId(it) }
-            val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
+        val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
+            objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
 
-            val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
-                objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
-
-            val fnr = packet[FNR_KEY].textValue()
-            if (fnr == null) {
-                grunnlagService.lagreNyeSaksopplysninger(
-                    sakId,
-                    behandlingId,
-                    opplysninger,
-                )
-            } else {
-                grunnlagService.lagreNyePersonopplysninger(
-                    sakId,
-                    behandlingId,
-                    Folkeregisteridentifikator.of(fnr),
-                    opplysninger,
-                )
-            }
-            packet.eventName = GRUNNLAG_OPPDATERT
-            context.publish(packet.toJson())
+        val fnr = packet[FNR_KEY].textValue()
+        if (fnr == null) {
+            grunnlagService.lagreNyeSaksopplysninger(
+                sakId,
+                behandlingId,
+                opplysninger,
+            )
+        } else {
+            grunnlagService.lagreNyePersonopplysninger(
+                sakId,
+                behandlingId,
+                Folkeregisteridentifikator.of(fnr),
+                opplysninger,
+            )
         }
+        packet.eventName = GRUNNLAG_OPPDATERT
+        context.publish(packet.toJson())
     }
 }

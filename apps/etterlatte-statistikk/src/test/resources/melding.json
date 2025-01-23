@@ -63,7 +63,8 @@
             "tom": null
           },
           "beloep": 9290,
-          "type": "UTBETALING"
+          "type": "UTBETALING",
+          "regelverk": "REGELVERK_FOM_JAN_2024"
         }
       ]
     }

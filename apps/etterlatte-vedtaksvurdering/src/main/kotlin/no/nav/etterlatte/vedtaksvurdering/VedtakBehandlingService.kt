@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -524,7 +525,7 @@ class VedtakBehandlingService(
                                 opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         revurderingAarsak = behandling.revurderingsaarsak,
-                        revurderingInfo = behandling.revurderingInfo,
+                        revurderingInfo = behandling.revurderingInfo?.toJsonNode(),
                         opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
@@ -557,7 +558,7 @@ class VedtakBehandlingService(
                                 sakType = behandling.sakType,
                                 opphoerFraOgMed = opphoerFraOgMed,
                             ),
-                        revurderingInfo = behandling.revurderingInfo,
+                        revurderingInfo = behandling.revurderingInfo?.toJsonNode(),
                         opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
@@ -753,10 +754,7 @@ class VedtakBehandlingService(
         this.innhold is VedtakInnhold.Behandling &&
             Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
 
-    fun hentVedtakForBehandling(
-        behandlingId: UUID,
-        info: BrukerTokenInfo,
-    ): Vedtak? = repository.hentVedtak(behandlingId)
+    fun hentVedtakForBehandling(behandlingId: UUID): Vedtak? = repository.hentVedtak(behandlingId)
 }
 
 class VedtakTilstandException(

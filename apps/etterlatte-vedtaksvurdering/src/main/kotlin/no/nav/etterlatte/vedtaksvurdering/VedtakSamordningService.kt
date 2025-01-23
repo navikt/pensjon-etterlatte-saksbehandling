@@ -64,7 +64,6 @@ private fun Vedtak.toSamordningsvedtakDto(avkortetYtelsePerioder: List<AvkortetY
                 innhold.behandlingType,
                 behandlingId,
                 innhold.revurderingAarsak,
-                innhold.revurderingInfo,
             ),
         virkningstidspunkt = innhold.virkningstidspunkt,
         beregning = innhold.beregning,

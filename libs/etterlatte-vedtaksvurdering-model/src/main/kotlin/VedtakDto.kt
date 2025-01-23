@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
@@ -79,7 +78,6 @@ data class Behandling(
     val type: BehandlingType,
     val id: UUID,
     val revurderingsaarsak: Revurderingaarsak? = null,
-    val revurderingInfo: RevurderingInfo? = null,
 )
 
 data class Periode(

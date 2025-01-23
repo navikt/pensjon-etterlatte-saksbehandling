@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Mottaker
@@ -142,6 +143,7 @@ class VarselbrevTest(
                 coEvery { it.hentSak(sak.id, any()) } returns sak
                 coEvery { it.hentBehandling(any(), any()) } returns
                     mockk<DetaljertBehandling> {
+                        every { id } returns UUID.randomUUID()
                         every { utlandstilknytning } returns
                             Utlandstilknytning(
                                 UtlandstilknytningType.NASJONAL,
@@ -150,6 +152,11 @@ class VarselbrevTest(
                             )
                         every { revurderingsaarsak } returns Revurderingaarsak.AKTIVITETSPLIKT
                     }
+            }
+
+        val grunnlagKlient =
+            mockk<GrunnlagKlient>().also {
+                coEvery { it.hentGrunnlag(any(), any()) } returns mockk()
             }
 
         val innholdTilRedigerbartBrevHenter =
@@ -162,7 +169,7 @@ class VarselbrevTest(
                 innholdTilRedigerbartBrevHenter,
             )
         val pdfGenerator = mockk<PDFGenerator>()
-        service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk())
+        service = VarselbrevService(brevRepository, brevoppretter, behandlingService, pdfGenerator, mockk(), grunnlagKlient)
     }
 
     @Test

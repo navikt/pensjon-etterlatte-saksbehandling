@@ -39,7 +39,7 @@ export const AktivitetspliktSakoversikt = ({
       hentAktivitetspliktVurderingForSakRequest({ sakId: sakResult.data.sak.id })
       familieOpplysningerFetch({ ident: fnr, sakType: sakResult.data.sak.sakType })
     }
-  }, [])
+  }, [sakResult])
 
   return (
     <Box padding="8" maxWidth="70rem">

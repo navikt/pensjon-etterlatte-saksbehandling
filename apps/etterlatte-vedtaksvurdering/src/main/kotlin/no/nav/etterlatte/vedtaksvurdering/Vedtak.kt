@@ -63,7 +63,6 @@ data class Vedtak(
                                     innhold.behandlingType,
                                     behandlingId,
                                     innhold.revurderingAarsak,
-                                    innhold.revurderingInfo,
                                 ),
                             utbetalingsperioder = innhold.utbetalingsperioder,
                             opphoerFraOgMed = innhold.opphoerFraOgMed,

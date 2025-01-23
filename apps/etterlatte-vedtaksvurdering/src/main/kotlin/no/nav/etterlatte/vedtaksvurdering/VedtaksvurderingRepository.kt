@@ -570,7 +570,7 @@ class VedtaksvurderingRepository(
                             beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
                             avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
                             utbetalingsperioder = utbetalingsperioder,
-                            revurderingAarsak = stringOrNull("revurderingsaarsak"),
+                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { objectMapper.readValue(it) },
                             revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
                             opphoerFraOgMed = sqlDateOrNull("opphoer_fom")?.toLocalDate()?.let { YearMonth.from(it) },
                         )

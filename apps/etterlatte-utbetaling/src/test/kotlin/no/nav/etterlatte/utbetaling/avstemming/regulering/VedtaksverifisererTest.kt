@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.ForenkletRevurderingInfo
+import no.nav.etterlatte.libs.common.vedtak.ForenkletBehandling
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.utbetaling.DatabaseExtension
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
@@ -115,8 +115,8 @@ class VedtaksverifisererTest(
     ): Pair<Utbetalingsvedtak, Utbetaling> {
         val behandlingId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        val forenkletRevurderingInfo =
-            ForenkletRevurderingInfo(
+        val forenkletBehandling =
+            ForenkletBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 id = behandlingId,
             )
@@ -138,8 +138,8 @@ class VedtaksverifisererTest(
                     Utbetalingsvedtak(
                         vedtakId = vedtakTeller,
                         sak = sak,
-                        forenkletRevurderingInfo =
-                        forenkletRevurderingInfo,
+                        forenkletBehandling =
+                        forenkletBehandling,
                         pensjonTilUtbetaling = listOf(),
                         vedtakFattet =
                             VedtakFattet(
@@ -175,7 +175,7 @@ class VedtaksverifisererTest(
             Utbetalingsvedtak(
                 vedtakId = vedtakTeller,
                 sak = sak,
-                forenkletRevurderingInfo = forenkletRevurderingInfo,
+                forenkletBehandling = forenkletBehandling,
                 pensjonTilUtbetaling =
                     linjer.map {
                         Utbetalingsperiode(

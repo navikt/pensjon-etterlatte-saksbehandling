@@ -17,7 +17,7 @@ internal class UtbetalingsvedtakTest {
                 "id": 78,
                 "sakType": "BARNEPENSJON"
               },
-              "forenkletRevurderingInfo": {
+              "forenkletBehandling": {
                 "type": "FØRSTEGANGSBEHANDLING",
                 "id": "7b555144-0ea8-481a-8075-a0faa7a87876"
               },
@@ -57,7 +57,7 @@ internal class UtbetalingsvedtakTest {
                 "id": 78,
                 "sakType": "OMSTILLINGSSTOENAD"
               },
-              "forenkletRevurderingInfo": {
+              "forenkletBehandling": {
                 "type": "FØRSTEGANGSBEHANDLING",
                 "id": "7b555144-0ea8-481a-8075-a0faa7a87876"
               },

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -48,7 +49,7 @@ sealed class VedtakInnholdDto {
     @JsonTypeName("BEHANDLING")
     data class VedtakBehandlingDto(
         val virkningstidspunkt: YearMonth,
-        val forenkletRevurderingInfo: ForenkletRevurderingInfo,
+        val forenkletBehandling: ForenkletBehandling,
         val utbetalingsperioder: List<Utbetalingsperiode>,
         val opphoerFraOgMed: YearMonth?,
     ) : VedtakInnholdDto()
@@ -74,11 +75,10 @@ enum class VedtakStatus {
     IVERKSATT,
 }
 
-// TODO: denne burde bare bli hentet rett fra Behandling...
-data class ForenkletRevurderingInfo(
-    val type: BehandlingType, // /Basically unused
+data class ForenkletBehandling(
+    val type: BehandlingType,
     val id: UUID,
-    val revurderingsaarsak: String? = null,
+    val revurderingsaarsak: Revurderingaarsak? = null,
     val revurderingInfo: JsonNode? = null,
 )
 
@@ -138,7 +138,7 @@ data class VedtakSamordningDto(
     val status: VedtakStatus,
     val virkningstidspunkt: YearMonth,
     val sak: VedtakSak,
-    val forenkletRevurderingInfo: ForenkletRevurderingInfo,
+    val forenkletBehandling: ForenkletBehandling,
     val type: VedtakType,
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,

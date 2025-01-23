@@ -3,13 +3,14 @@ package no.nav.etterlatte.vedtaksvurdering
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.ForenkletRevurderingInfo
+import no.nav.etterlatte.libs.common.vedtak.ForenkletBehandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
@@ -57,8 +58,8 @@ data class Vedtak(
                     is VedtakInnhold.Behandling ->
                         VedtakInnholdDto.VedtakBehandlingDto(
                             virkningstidspunkt = innhold.virkningstidspunkt,
-                            forenkletRevurderingInfo =
-                                ForenkletRevurderingInfo(
+                            forenkletBehandling =
+                                ForenkletBehandling(
                                     innhold.behandlingType,
                                     behandlingId,
                                     innhold.revurderingAarsak,
@@ -84,11 +85,10 @@ data class Vedtak(
     fun underArbeid(): Boolean = status in listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT)
 }
 
-// TODO: All info her som sendes videre burde vel strengt talt bare bli hentet fra sin respektive app for å få det strukturert?
 sealed interface VedtakInnhold {
     data class Behandling(
         val behandlingType: BehandlingType,
-        val revurderingAarsak: String?,
+        val revurderingAarsak: Revurderingaarsak?,
         val revurderingInfo: JsonNode? = null,
         val virkningstidspunkt: YearMonth,
         val beregning: ObjectNode?,

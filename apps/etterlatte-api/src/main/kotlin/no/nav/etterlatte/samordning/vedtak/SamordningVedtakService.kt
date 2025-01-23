@@ -91,14 +91,7 @@ class SamordningVedtakService(
             virkningsdato = virkningstidspunkt.atStartOfMonth(),
             opphoersdato = virkningstidspunkt.takeIf { type == VedtakType.OPPHOER }?.atStartOfMonth(),
             type = type.toSamordningsvedtakType(),
-            aarsak =
-                if (forenkletRevurderingInfo.revurderingsaarsak !=
-                    null
-                ) {
-                    Revurderingaarsak.valueOf(forenkletRevurderingInfo.revurderingsaarsak!!).toSamordningsvedtakAarsak()
-                } else {
-                    null
-                },
+            aarsak = forenkletBehandling.revurderingsaarsak?.toSamordningsvedtakAarsak(),
             anvendtTrygdetid = beregning?.beregningsperioder?.first()?.trygdetid ?: 0,
             perioder =
                 perioder

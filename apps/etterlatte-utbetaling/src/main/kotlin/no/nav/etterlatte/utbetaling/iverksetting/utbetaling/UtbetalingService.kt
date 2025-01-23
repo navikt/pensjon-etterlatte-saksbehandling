@@ -51,7 +51,7 @@ class UtbetalingService(
                     .oppdragFraUtbetaling(
                         utbetaling = utbetaling,
                         erFoersteUtbetalingPaaSak = utbetalingMapper.tidligereUtbetalinger.isEmpty(),
-                        erGRegulering = vedtak.forenkletRevurderingInfo.revurderingsaarsak == Revurderingaarsak.REGULERING.name,
+                        erGRegulering = vedtak.forenkletBehandling.revurderingsaarsak == Revurderingaarsak.REGULERING,
                     ).also {
                         utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))
                         oppdragSender.sendOppdrag(it, vedtak.finnPrioritet())

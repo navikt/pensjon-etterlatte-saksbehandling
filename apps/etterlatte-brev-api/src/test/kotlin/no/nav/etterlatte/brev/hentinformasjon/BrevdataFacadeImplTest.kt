@@ -200,11 +200,11 @@ internal class BrevdataFacadeImplTest {
             every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
             every { innhold } returns
                 mockk<VedtakInnholdDto.VedtakBehandlingDto> {
-                    every { forenkletRevurderingInfo.id } returns BEHANDLING_ID
+                    every { forenkletBehandling.id } returns BEHANDLING_ID
                     every { virkningstidspunkt } returns YearMonth.now()
-                    every { forenkletRevurderingInfo.revurderingsaarsak } returns null
-                    every { forenkletRevurderingInfo.revurderingInfo } returns null
-                    every { forenkletRevurderingInfo.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                    every { forenkletBehandling.revurderingsaarsak } returns null
+                    every { forenkletBehandling.revurderingInfo } returns null
+                    every { forenkletBehandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 }
         }
 

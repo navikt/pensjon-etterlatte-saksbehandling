@@ -206,7 +206,7 @@ internal class VedtaksvurderingRouteTest {
                 with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
                     val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakInnhold.Behandling
                     virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
-                    forenkletRevurderingInfo.type shouldBe opprettetVedtakInnhold.behandlingType
+                    forenkletBehandling.type shouldBe opprettetVedtakInnhold.behandlingType
                     utbetalingsperioder shouldHaveSize 1
                     with(utbetalingsperioder.first()) {
                         id shouldBe 1L
@@ -261,7 +261,7 @@ internal class VedtaksvurderingRouteTest {
                 (innhold as VedtakInnholdDto.VedtakBehandlingDto).let {
                     val opprettVedtakInnhold = opprettetVedtak.innhold as VedtakInnhold.Behandling
                     it.virkningstidspunkt shouldBe opprettVedtakInnhold.virkningstidspunkt
-                    it.forenkletRevurderingInfo.type shouldBe opprettVedtakInnhold.behandlingType
+                    it.forenkletBehandling.type shouldBe opprettVedtakInnhold.behandlingType
                     it.utbetalingsperioder shouldHaveSize 1
                     with(it.utbetalingsperioder.first()) {
                         id shouldBe 1L
@@ -448,7 +448,7 @@ internal class VedtaksvurderingRouteTest {
                 val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakInnhold.Behandling
                 with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
                     virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
-                    forenkletRevurderingInfo.type shouldBe opprettetVedtakInnhold.behandlingType
+                    forenkletBehandling.type shouldBe opprettetVedtakInnhold.behandlingType
                     utbetalingsperioder shouldHaveSize 1
                     with(utbetalingsperioder.first()) {
                         id shouldBe 1L
@@ -512,7 +512,7 @@ internal class VedtaksvurderingRouteTest {
                 with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
                     val fattetVedtakInnhold = fattetVedtak.innhold as VedtakInnhold.Behandling
                     virkningstidspunkt shouldBe fattetVedtakInnhold.virkningstidspunkt
-                    forenkletRevurderingInfo.type shouldBe fattetVedtakInnhold.behandlingType
+                    forenkletBehandling.type shouldBe fattetVedtakInnhold.behandlingType
                     utbetalingsperioder shouldHaveSize 1
                     with(utbetalingsperioder.first()) {
                         id shouldBe 1L
@@ -580,7 +580,7 @@ internal class VedtaksvurderingRouteTest {
                 with(vedtakDto.innhold as VedtakInnholdDto.VedtakBehandlingDto) {
                     val attestertVedtakInnhold = attestertVedtak.innhold as VedtakInnhold.Behandling
                     virkningstidspunkt shouldBe attestertVedtakInnhold.virkningstidspunkt
-                    forenkletRevurderingInfo.type shouldBe attestertVedtakInnhold.behandlingType
+                    forenkletBehandling.type shouldBe attestertVedtakInnhold.behandlingType
                     utbetalingsperioder shouldHaveSize 1
                     with(utbetalingsperioder.first()) {
                         id shouldBe 1L
@@ -648,7 +648,7 @@ internal class VedtaksvurderingRouteTest {
                 with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
                     val underkjentVedtakInnhold = underkjentVedtak.innhold as VedtakInnhold.Behandling
                     virkningstidspunkt shouldBe underkjentVedtakInnhold.virkningstidspunkt
-                    forenkletRevurderingInfo.type shouldBe underkjentVedtakInnhold.behandlingType
+                    forenkletBehandling.type shouldBe underkjentVedtakInnhold.behandlingType
                     utbetalingsperioder shouldHaveSize 1
                     with(utbetalingsperioder.first()) {
                         id shouldBe 1L

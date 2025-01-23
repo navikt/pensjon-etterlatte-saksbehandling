@@ -524,7 +524,7 @@ class VedtakBehandlingService(
                                 behandling.sakType,
                                 opphoerFraOgMed = opphoerFraOgMed,
                             ),
-                        revurderingAarsak = behandling.revurderingsaarsak?.name,
+                        revurderingAarsak = behandling.revurderingsaarsak,
                         revurderingInfo = behandling.revurderingInfo?.toJsonNode(),
                         opphoerFraOgMed = opphoerFraOgMed,
                     ),
@@ -759,7 +759,7 @@ class VedtakBehandlingService(
 
     private fun Vedtak.isRegulering() =
         this.innhold is VedtakInnhold.Behandling &&
-            Revurderingaarsak.REGULERING.name == this.innhold.revurderingAarsak
+            Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
 
     fun hentVedtakForBehandling(behandlingId: UUID): Vedtak? = repository.hentVedtak(behandlingId)
 }

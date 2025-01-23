@@ -6,13 +6,16 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.feilhaandtering.TimeoutForespoerselException
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import org.slf4j.LoggerFactory
+import java.net.SocketTimeoutException
 import java.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
@@ -41,6 +44,12 @@ class BrevbakerKlient(
                 logger.info("Fullført brevbaker pdf OK (${duration.toString(DurationUnit.SECONDS, 2)})")
                 result
             }
+        } catch (ex: SocketTimeoutException) {
+            logger.warn("Timeout mot brevbakeren: ", ex)
+            throw TimeoutForespoerselException(
+                code = "BREVBAKER_TIMEOUT",
+                detail = "Generering av PDF tok for lang tid. Prøv igjen.",
+            )
         } catch (ex: Exception) {
             sikkerlogg.error("Brevbaker pdfgen feilet. Request body: ${brevRequest.toJson()}", ex)
             throw BrevbakerException("Feil ved kall til brevbaker (se sikkerlogg)", ex)
@@ -58,6 +67,12 @@ class BrevbakerKlient(
                 logger.info("Fullført brevbaker JSON OK (${duration.toString(DurationUnit.SECONDS, 2)})")
                 result
             }
+        } catch (ex: SocketTimeoutException) {
+            logger.warn("Timeout mot brevbakeren: ", ex)
+            throw TimeoutForespoerselException(
+                code = "BREVBAKER_TIMEOUT",
+                detail = "Opprettelse av redigerbart innhold til brev tok for lang tid. Prøv igjen.",
+            )
         } catch (ex: Exception) {
             sikkerlogg.error("Feila ved generer json-kall mot brevbakeren. Requesten var $brevRequest", ex)
             throw BrevbakerException("Feil ved kall til brevbaker", ex)

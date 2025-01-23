@@ -74,7 +74,7 @@ Automatisk behandling av inntektsendring har egen logikk noen av stegene:
   populert
   med [Inntektsjustering](./src/main/kotlin/no.nav.etterlatte.libs.inntektsjustering/MottattInntektsjustering.kt).
 * Behandling skal bruke brev derfor blir brevutfall satt
-  i [OmregningsHendelserBehandlingRiver](../../apps/etterlatte-oppdater-behandling/src/main/kotlin/regulering/OmregningsHendelserBehandlingRiver.kt).
+  i [OmregningsHendelserBehandlingRiver](../../apps/etterlatte-behandling-kafka/src/main/kotlin/regulering/OmregningsHendelserBehandlingRiver.kt).
 * Ny inntekt blir anvendt i
   beregningsteg ([OmregningsHendelserBehandlingRiver](../../apps/etterlatte-beregning-kafka/src/main/kotlin/no/nav/etterlatte/beregningkafka/OmregningHendelserBeregningRiver.kt))
   ved å
@@ -99,7 +99,7 @@ flowchart LR
         START_INNTEKTSJUSTERING_JOBB
         kafka-omregning(OMREGNING:KLAR_FOR_OMREGNING)
     end
-    subgraph etterlatte-oppdater-behandling
+    subgraph etterlatte-behandling-kafka
         AarligInntektsjusteringJobbRiver
     end
     subgraph etterlatte-behandling
@@ -131,7 +131,7 @@ ved å bruke [omregningsflyten](../etterlatte-omregning-model/README.md).
 Automatisk behandling av inntektsendring har egen logikk noen av stegene:
 
 * Behandling skal bruke brev derfor blir brevutfall satt
-  i [OmregningsHendelserBehandlingRiver](../../apps/etterlatte-oppdater-behandling/src/main/kotlin/regulering/OmregningsHendelserBehandlingRiver.kt).
+  i [OmregningsHendelserBehandlingRiver](../../apps/etterlatte-behandling-kafka/src/main/kotlin/regulering/OmregningsHendelserBehandlingRiver.kt).
 * I
   beregningsteg ([OmregningsHendelserBehandlingRiver](../../apps/etterlatte-beregning-kafka/src/main/kotlin/no/nav/etterlatte/beregningkafka/OmregningHendelserBeregningRiver.kt))
   videreføres siste oppgitte inntekt til neste år ved å
@@ -156,5 +156,5 @@ Hvis det feiler i et steg i flyten vil status settes til FEILA med begrunnelse.
 ### Brev og distribuering
 
 Når automatisk behandling er iverksatt og brev distribuert
-vil [OmregningBrevDistribusjonRiver](../../apps/etterlatte-oppdater-behandling/src/main/kotlin/regulering/OmregningBrevDistribusjonRiver.kt)
+vil [OmregningBrevDistribusjonRiver](../../apps/etterlatte-behandling-kafka/src/main/kotlin/regulering/OmregningBrevDistribusjonRiver.kt)
 fange det opp og oppatere omregningskjoering ved å sette feltet distribuert_brev til true.

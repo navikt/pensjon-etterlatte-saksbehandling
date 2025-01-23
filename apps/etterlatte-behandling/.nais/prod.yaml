@@ -206,7 +206,7 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-gyldig-soeknad
-        - application: etterlatte-oppdater-behandling
+        - application: etterlatte-behandling-kafka
         - application: etterlatte-hendelser-joark
         - application: etterlatte-hendelser-ufoere
         - application: etterlatte-statistikk

@@ -11,7 +11,7 @@ flowchart
         VEDTAK:FATTET
         VEDTAK:ATTESTERT
     end
-    subgraph etterlatte-oppdater-behandling
+    subgraph etterlatte-behandling-kafka
         OmregningsHendelserBehandlingRiver
     end
     subgraph etterlatte-behandling
@@ -77,7 +77,7 @@ flowchart LR
     subgraph Kafka
         VEDTAK:ATTESTERT
     end
-    subgraph etterlatte-oppdater-behandling
+    subgraph etterlatte-behandling-kafka
         VedtakAttestertRiver
     end
     subgraph etterlatte-behandling
@@ -94,7 +94,7 @@ flowchart LR
     subgraph Kafka
         VEDTAK:FATTET
     end
-    subgraph etterlatte-oppdater-behandling
+    subgraph etterlatte-behandling-kafka
         VedtakAttestertRiver
     end
     subgraph etterlatte-behandling

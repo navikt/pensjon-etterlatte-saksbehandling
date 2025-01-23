@@ -580,8 +580,8 @@ class TrygdetidServiceImpl(
                     trygdetidGrunnlag =
                         trygdetid.trygdetidGrunnlag.filter {
                             when (it.kilde) {
-                                is Grunnlagsopplysning.PesysYtelseKilde -> true
-                                else -> false
+                                is Grunnlagsopplysning.PesysYtelseKilde -> false
+                                else -> true
                             }
                         },
                 )

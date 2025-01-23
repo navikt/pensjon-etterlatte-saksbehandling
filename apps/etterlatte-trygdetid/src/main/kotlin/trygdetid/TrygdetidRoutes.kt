@@ -254,6 +254,26 @@ fun Route.trygdetid(
                         }
                     }
                 }
+
+                delete("/grunnlag/slett-pesys") {
+                    withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                        logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
+                        trygdetidService.slettPesysTrygdetidGrunnlagForTrygdetid(
+                            behandlingId,
+                            trygdetidId,
+                            brukerTokenInfo,
+                        )
+                        call.respond(
+                            trygdetidService
+                                .hentTrygdetidIBehandlingMedId(
+                                    behandlingId,
+                                    trygdetidId,
+                                    brukerTokenInfo,
+                                )!!
+                                .toDto(),
+                        )
+                    }
+                }
             }
 
             post("/oppdater-status") {

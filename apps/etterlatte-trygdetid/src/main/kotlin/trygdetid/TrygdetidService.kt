@@ -93,6 +93,12 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
 
+    suspend fun slettPesysTrygdetidGrunnlagForTrygdetid(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
     suspend fun overstyrNorskPoengaaarForTrygdetid(
         trygdetidId: UUID,
         behandlingId: UUID,
@@ -556,6 +562,30 @@ class TrygdetidServiceImpl(
                     ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
             oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo)
+        }
+
+    override suspend fun slettPesysTrygdetidGrunnlagForTrygdetid(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid =
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            val trygdetid =
+                trygdetidRepository
+                    .hentTrygdetidMedId(behandlingId, trygdetidId)
+                    ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
+
+            val pesyskildeTrygdetidsgrunnlag =
+                trygdetid.copy(
+                    trygdetidGrunnlag =
+                        trygdetid.trygdetidGrunnlag.filter {
+                            when (it.kilde) {
+                                is Grunnlagsopplysning.PesysYtelseKilde -> true
+                                else -> false
+                            }
+                        },
+                )
+            oppdaterBeregnetTrygdetid(behandlingId, pesyskildeTrygdetidsgrunnlag, brukerTokenInfo)
         }
 
     override suspend fun kopierSisteTrygdetidberegninger(

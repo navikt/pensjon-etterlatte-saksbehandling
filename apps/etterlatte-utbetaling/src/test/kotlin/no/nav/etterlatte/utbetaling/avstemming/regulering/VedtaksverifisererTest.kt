@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.ForenkletBehandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.utbetaling.DatabaseExtension
 import no.nav.etterlatte.utbetaling.avstemming.vedtak.Vedtaksverifiserer
@@ -116,7 +116,7 @@ class VedtaksverifisererTest(
         val behandlingId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
         val forenkletBehandling =
-            ForenkletBehandling(
+            Behandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 id = behandlingId,
             )

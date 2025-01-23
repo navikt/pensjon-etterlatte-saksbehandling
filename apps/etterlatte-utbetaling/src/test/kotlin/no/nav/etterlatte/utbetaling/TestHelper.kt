@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
-import no.nav.etterlatte.libs.common.vedtak.ForenkletBehandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.utbetaling.avstemming.Konsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.OppdragForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.avstemming.OppdragslinjeForKonsistensavstemming
@@ -69,7 +69,7 @@ fun utbetalingsvedtak(
 ) = Utbetalingsvedtak(
     vedtakId = vedtakId,
     forenkletBehandling =
-        ForenkletBehandling(
+        Behandling(
             id = UUID.randomUUID(),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             revurderingsaarsak = null,

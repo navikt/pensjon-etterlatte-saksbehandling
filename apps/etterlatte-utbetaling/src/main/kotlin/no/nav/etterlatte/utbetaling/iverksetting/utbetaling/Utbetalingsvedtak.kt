@@ -3,7 +3,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.vedtak.ForenkletBehandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.mq.Prioritet
@@ -14,7 +14,7 @@ import java.time.YearMonth
 data class Utbetalingsvedtak(
     val vedtakId: Long,
     val sak: Sak,
-    val forenkletBehandling: ForenkletBehandling,
+    val forenkletBehandling: Behandling,
     val pensjonTilUtbetaling: List<Utbetalingsperiode>,
     val vedtakFattet: VedtakFattet,
     val attestasjon: Attestasjon,
@@ -30,7 +30,7 @@ data class Utbetalingsvedtak(
                 vedtakId = vedtak.id,
                 sak = Sak(vedtak.sak.ident, vedtak.sak.id.sakId, Saktype.valueOf(vedtak.sak.sakType.toString())),
                 forenkletBehandling =
-                    ForenkletBehandling(
+                    Behandling(
                         type = innhold.forenkletBehandling.type,
                         id = innhold.forenkletBehandling.id,
                         revurderingsaarsak = innhold.forenkletBehandling.revurderingsaarsak,

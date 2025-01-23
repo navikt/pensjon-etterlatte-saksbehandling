@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
-import no.nav.etterlatte.libs.common.vedtak.ForenkletBehandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.mq.DummyJmsConnectionFactory
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.DatabaseExtension
@@ -86,7 +86,7 @@ class ApplicationIntegrationTest {
             attestertvedtakEvent(
                 vedtak(
                     forenkletBehandling =
-                        ForenkletBehandling(
+                        Behandling(
                             id = behandlingId,
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         ),
@@ -137,7 +137,7 @@ class ApplicationIntegrationTest {
             attestertvedtakEvent(
                 vedtak(
                     forenkletBehandling =
-                        ForenkletBehandling(
+                        Behandling(
                             id = behandlingIdForste,
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         ),
@@ -148,7 +148,7 @@ class ApplicationIntegrationTest {
             attestertvedtakEvent(
                 vedtak(
                     forenkletBehandling =
-                        ForenkletBehandling(
+                        Behandling(
                             id = behandlingIdAndre,
                             type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         ),
@@ -188,7 +188,7 @@ class ApplicationIntegrationTest {
                 vedtak(
                     vedtakId = 2,
                     forenkletBehandling =
-                        ForenkletBehandling(
+                        Behandling(
                             BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
                         ),
@@ -220,7 +220,7 @@ class ApplicationIntegrationTest {
             attestertvedtakEvent(
                 vedtak(
                     forenkletBehandling =
-                        ForenkletBehandling(
+                        Behandling(
                             BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
                         ),
@@ -270,7 +270,7 @@ class ApplicationIntegrationTest {
             attestertvedtakEvent(
                 vedtak(
                     forenkletBehandling =
-                        ForenkletBehandling(
+                        Behandling(
                             BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
                         ),
@@ -304,7 +304,7 @@ class ApplicationIntegrationTest {
             attestertvedtakEvent(
                 vedtak(
                     forenkletBehandling =
-                        ForenkletBehandling(
+                        Behandling(
                             BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
                         ),

@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.ForenkletBehandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -39,8 +39,8 @@ fun vedtak(
         ),
     ident: String = "12345678913",
     sakId: SakId = sakId1,
-    forenkletBehandling: ForenkletBehandling =
-        ForenkletBehandling(
+    forenkletBehandling: Behandling =
+        Behandling(
             id = UUID.randomUUID(),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
@@ -81,8 +81,8 @@ fun vedtak(
 
 fun ugyldigVedtakTilUtbetaling(
     vedtakId: Long = 1,
-    forenkletBehandling: ForenkletBehandling =
-        ForenkletBehandling(
+    forenkletBehandling: Behandling =
+        Behandling(
             id = UUID.randomUUID(),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),

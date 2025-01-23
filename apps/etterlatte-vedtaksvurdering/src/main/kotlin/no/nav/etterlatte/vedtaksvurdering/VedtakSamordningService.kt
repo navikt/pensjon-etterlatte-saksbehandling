@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.AvkortetYtelsePeriode
-import no.nav.etterlatte.libs.common.vedtak.ForenkletBehandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
@@ -60,7 +60,7 @@ private fun Vedtak.toSamordningsvedtakDto(avkortetYtelsePerioder: List<AvkortetY
         vedtakFattet = vedtakFattet,
         attestasjon = attestasjon,
         forenkletBehandling =
-            ForenkletBehandling(
+            Behandling(
                 innhold.behandlingType,
                 behandlingId,
                 innhold.revurderingAarsak,

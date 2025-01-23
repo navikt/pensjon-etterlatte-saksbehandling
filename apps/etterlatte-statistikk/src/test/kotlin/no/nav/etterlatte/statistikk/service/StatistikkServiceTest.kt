@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.ForenkletBehandling
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
@@ -483,7 +483,7 @@ fun vedtak(
     innhold =
         VedtakInnholdDto.VedtakBehandlingDto(
             virkningstidspunkt = virk,
-            forenkletBehandling = ForenkletBehandling(type = behandlingType, id = behandlingId),
+            forenkletBehandling = Behandling(type = behandlingType, id = behandlingId),
             utbetalingsperioder = pensjonTilUtbetaling ?: emptyList(),
             opphoerFraOgMed = opphoerFom,
         ),

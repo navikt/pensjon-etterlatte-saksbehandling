@@ -1,15 +1,17 @@
 openapi: 3.0.0
 info:
   title: Etterlatte Vedtak API
-  description: API for enkel informasjon om vedtak for Barnepensjon og Omstillingsstønad
+  description:
+    API for enkel informasjon om vedtak for Barnepensjon og Omstillingsstønad. <br>
+    Det kreves tilganger for å bruke APIet. Ta kontakt med Team Etterlatte for tilgang.
   version: 1.0.0
 
 servers:
-  - url: https://etterlatte-api.intern.dev.nav.no/api/v1/vedtak/swagger
-  - url: https://etterlatte-api.intern.prod.nav.no/api/v1/vedtak/swagger
+  - url: https://etterlatte-api.intern.dev.nav.no/api/v1
+  - url: https://etterlatte-api.intern.prod.nav.no/api/v1
 
 paths:
-  /api/v1/vedtak:
+  /vedtak:
     post:
       summary: Liste med vedtak for person
       description: Liste med vedtak av type innvilgelse, avslag, endring og opphør for en person
@@ -55,8 +57,9 @@ components:
           type: string
         virkningstidspunkt:
           type: string
-          format: year-month
-          example: "2025-01"
+          format: date
+          example: "2025-01-01"
+          description: "Vil alltid være 1. i måned"
         type:
           $ref: '#/components/schemas/VedtakType'
         utbetaling:
@@ -75,19 +78,17 @@ components:
     VedtakUtbetaling:
       type: object
       properties:
-        periode:
-          $ref: '#/components/schemas/Periode'
+        fraOgMed:
+          type: string
+          format: date
+          example: "2025-01-01"
+          description: "Vil alltid være 1. i måned"
+        tilOgMed:
+          type: string
+          format: date
+          example: "2025-01-31"
+          description: "Vil alltid være siste dag i måned"
         beloep:
           type: string
           format: decimal
           description: BigDecimal
-
-    Periode:
-      type: object
-      properties:
-        start:
-          type: string
-          format: date
-        end:
-          type: string
-          format: date

@@ -48,10 +48,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
-import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
-import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
@@ -188,22 +184,10 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 }
 
             client
-                .post("/behandlinger/$behandlingId/gyldigfremsatt") {
+                .post("/api/behandling/$behandlingId/gyldigfremsatt") {
                     addAuthToken(tokenSaksbehandler)
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(
-                        GyldighetsResultat(
-                            VurderingsResultat.OPPFYLT,
-                            listOf(
-                                VurdertGyldighet(
-                                    GyldighetsTyper.INNSENDER_ER_FORELDER,
-                                    VurderingsResultat.OPPFYLT,
-                                    "innsenderFnr",
-                                ),
-                            ),
-                            Tidspunkt.now().toLocalDatetimeUTC(),
-                        ),
-                    )
+                    contentType(ContentType.Application.Json)
+                    setBody(JaNeiMedBegrunnelse(JaNei.JA, "Alt ser bra ut"))
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }

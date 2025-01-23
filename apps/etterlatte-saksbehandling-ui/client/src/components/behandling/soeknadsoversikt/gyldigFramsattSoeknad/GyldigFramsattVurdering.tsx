@@ -142,7 +142,7 @@ export const GyldigFramsattVurdering = ({
   )
 }
 
-function finnVurdering(gyldigFramsatt: IGyldighetResultat | undefined, type: GyldigFramsattType) {
+export function finnVurdering(gyldigFramsatt: IGyldighetResultat | undefined, type: GyldigFramsattType) {
   return gyldigFramsatt?.vurderinger.find((g: IGyldighetproving) => g.navn === type)
 }
 

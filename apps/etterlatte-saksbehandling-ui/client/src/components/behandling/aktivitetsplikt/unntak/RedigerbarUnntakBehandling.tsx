@@ -18,9 +18,11 @@ import { LagreUnntakForm } from '~components/aktivitetsplikt/vurdering/unntak/La
 export function RedigerbarUnntakBehandling({
   unntak,
   behandling,
+  typeVurdering,
 }: {
   unntak: IAktivitetspliktUnntak
   behandling: IDetaljertBehandling
+  typeVurdering: AktivitetspliktOppgaveVurderingType
 }) {
   const dispatch = useDispatch()
   const [redigerer, setRedigerer] = useState(false)
@@ -60,6 +62,7 @@ export function RedigerbarUnntakBehandling({
         onAvbryt={() => setRedigerer(false)}
         unntak={unntak}
         oppdaterStateEtterRedigertUnntak={oppdaterStateEtterRedigertUnntak}
+        typeVurdering={typeVurdering}
       />
     )
   }
@@ -80,8 +83,9 @@ const RedigerbartUnntak = (props: {
   oppdaterStateEtterRedigertUnntak: (data: IAktivitetspliktVurderingNyDto) => void
   onAvbryt: () => void
   behandling: IDetaljertBehandling
+  typeVurdering: AktivitetspliktOppgaveVurderingType
 }) => {
-  const { unntak, oppdaterStateEtterRedigertUnntak, onAvbryt, behandling } = props
+  const { unntak, oppdaterStateEtterRedigertUnntak, onAvbryt, behandling, typeVurdering } = props
   const [lagreUnntakStatus, lagreUnntak] = useApiCall(redigerUnntakForBehandling)
   const sendInn = (formdata: Partial<IOpprettAktivitetspliktUnntak>) => {
     lagreUnntak(
@@ -107,7 +111,7 @@ const RedigerbartUnntak = (props: {
       lagreUnntakStatus={lagreUnntakStatus}
       sendInn={sendInn}
       unntak={unntak}
-      vurderingType={AktivitetspliktOppgaveVurderingType.SEKS_MAANEDER}
+      vurderingType={typeVurdering}
       onAvbryt={onAvbryt}
     />
   )

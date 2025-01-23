@@ -107,7 +107,11 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             <Heading spacing level="1" size="medium">
               Gjenlevende sin tidslinje
             </Heading>
-            <AktivitetspliktTidslinje behandling={behandling} doedsdato={avdoedesDoedsdato!!} />
+            <AktivitetspliktTidslinje
+              behandling={behandling}
+              doedsdato={avdoedesDoedsdato!!}
+              sakId={behandling.sakId}
+            />
           </>
         )}
         {isBefore(avdoedesDoedsdato!!, subMonths(Date.now(), 4)) && (

@@ -54,9 +54,8 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
-import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingRepositoryWrapperDatabase
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.DelvilkaarRepository
-import no.nav.etterlatte.vilkaarsvurdering.ektedao.VilkaarsvurderingRepository
+import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
+import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.BehandlingstilstandException
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -105,9 +104,7 @@ internal class VilkaarsvurderingRoutesTest(
 
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryWrapperDatabase(
-                    VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository()),
-                ),
+                VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingService,
                 grunnlagKlient,
                 behandlingStatus,
@@ -720,9 +717,7 @@ internal class VilkaarsvurderingRoutesTest(
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryWrapperDatabase(
-                    VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository()),
-                ),
+                VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingServiceLocal,
                 grunnlagKlient,
                 behandlingStatusServiceLocal,
@@ -754,9 +749,7 @@ internal class VilkaarsvurderingRoutesTest(
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryWrapperDatabase(
-                    VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository()),
-                ),
+                VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingService,
                 grunnlagKlient,
                 behandlingStatusService,
@@ -786,9 +779,7 @@ internal class VilkaarsvurderingRoutesTest(
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
-                VilkaarsvurderingRepositoryWrapperDatabase(
-                    VilkaarsvurderingRepository(ConnectionAutoclosingTest(ds), DelvilkaarRepository()),
-                ),
+                VilkaarsvurderingDao(ConnectionAutoclosingTest(ds), DelvilkaarDao()),
                 behandlingService,
                 grunnlagKlient,
                 behandlingStatusService,

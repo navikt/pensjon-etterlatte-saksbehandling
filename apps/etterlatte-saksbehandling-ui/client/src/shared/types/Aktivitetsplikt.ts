@@ -1,5 +1,4 @@
 import { KildeSaksbehandler } from '~shared/types/kilde'
-import { JaNei } from '~shared/types/ISvar'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { ISak } from '~shared/types/sak'
 import { IBrevAktivitetspliktDto } from '~shared/api/aktivitetsplikt'
@@ -11,10 +10,15 @@ export interface AktivitetspliktOppfolging {
   opprettetAv: string
 }
 
-export interface IAktivitet {
+export interface IAktivitetPerioderOgHendelser {
+  perioder: IAktivitetPeriode[]
+  hendelser: IAktivitetHendelse[]
+}
+
+export interface IAktivitetPeriode {
   id: string
   sakId: number
-  behandlingId: string
+  behandlingId?: string
   type: AktivitetspliktType
   fom: string
   tom?: string
@@ -23,12 +27,29 @@ export interface IAktivitet {
   beskrivelse: string
 }
 
-export interface IOpprettAktivitet {
+export interface IAktivitetHendelse {
+  id: string
+  sakId: number
+  behandlingId?: string
+  dato: string
+  opprettet: KildeSaksbehandler
+  endret: KildeSaksbehandler
+  beskrivelse: string
+}
+
+export interface SkrivAktivitet {
   id: string | undefined
   sakId: number
   type: AktivitetspliktType
   fom: string
   tom?: string
+  beskrivelse: string
+}
+
+export interface SkrivHendelse {
+  id: string | undefined
+  sakId: number
+  dato: string
   beskrivelse: string
 }
 
@@ -71,12 +92,7 @@ export const tekstAktivitetspliktUnntakType: Record<AktivitetspliktUnntakType, s
   SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE: 'Bruker har sykdom, redusert arbeidsevne, AAP',
   GRADERT_UFOERETRYGD: 'Gradert uføretrygd',
   MIDLERTIDIG_SYKDOM: 'Midlertidig sykdom',
-  FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT: 'Nei, bruker er født i 1963 eller tidligere og har lav inntekt',
-}
-
-export interface IAktivitetspliktVurdering {
-  aktivitet?: IAktivitetspliktAktivitetsgrad
-  unntak?: IAktivitetspliktUnntak
+  FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT: 'Bruker er født i 1963 eller tidligere og har lav inntekt',
 }
 
 export interface IAktivitetspliktVurderingNyDto {
@@ -141,26 +157,6 @@ export interface IOpprettAktivitetspliktAktivitetsgrad {
 export enum AktivitetspliktOppgaveVurderingType {
   SEKS_MAANEDER = 'SEKS_MAANEDER',
   TOLV_MAANEDER = 'TOLV_MAANEDER',
-}
-
-export interface AktivitetspliktVurderingValues {
-  aktivitetsplikt: JaNei | null
-  aktivitetsgrad: AktivitetspliktVurderingType | ''
-  unntak: JaNei | null
-  midlertidigUnntak: AktivitetspliktUnntakType | ''
-  fom?: Date | null
-  tom?: Date | null
-  beskrivelse: string
-}
-
-export const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
-  aktivitetsplikt: null,
-  aktivitetsgrad: '',
-  unntak: null,
-  midlertidigUnntak: '',
-  fom: new Date(),
-  tom: undefined,
-  beskrivelse: '',
 }
 
 export interface AktivitetspliktOppgaveVurdering {

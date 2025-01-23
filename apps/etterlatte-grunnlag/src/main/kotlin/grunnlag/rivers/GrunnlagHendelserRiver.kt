@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -30,9 +28,7 @@ class GrunnlagHendelserRiver(
     private val grunnlagService: GrunnlagService,
 ) : ListenerMedLogging() {
     init {
-        initialiserRiverUtenEventName(rapidsConnection) {
-            validate { it.interestedIn(EVENT_NAME_KEY) }
-            validate { it.interestedIn(BEHOV_NAME_KEY) }
+        initialiserRiver(rapidsConnection, EventNames.NY_OPPLYSNING) {
             validate { it.interestedIn(FNR_KEY) }
             validate { it.requireKey(OPPLYSNING_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
@@ -47,37 +43,28 @@ class GrunnlagHendelserRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val eventName = packet[EVENT_NAME_KEY].asText()
-        val opplysningType = packet[BEHOV_NAME_KEY].asText()
+        val sakId = packet[SAK_ID_KEY].asLong().let { SakId(it) }
+        val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
 
-        if (eventName == EventNames.NY_OPPLYSNING.eventname || opplysningType in OPPLYSNING_TYPER) {
-            val sakId = packet[SAK_ID_KEY].asLong().let { SakId(it) }
-            val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
+        val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
+            objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
 
-            val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
-                objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
-
-            val fnr = packet[FNR_KEY].textValue()
-            if (fnr == null) {
-                grunnlagService.lagreNyeSaksopplysninger(
-                    sakId,
-                    behandlingId,
-                    opplysninger,
-                )
-            } else {
-                grunnlagService.lagreNyePersonopplysninger(
-                    sakId,
-                    behandlingId,
-                    Folkeregisteridentifikator.of(fnr),
-                    opplysninger,
-                )
-            }
-            packet.eventName = GRUNNLAG_OPPDATERT
-            context.publish(packet.toJson())
+        val fnr = packet[FNR_KEY].textValue()
+        if (fnr == null) {
+            grunnlagService.lagreNyeSaksopplysninger(
+                sakId,
+                behandlingId,
+                opplysninger,
+            )
+        } else {
+            grunnlagService.lagreNyePersonopplysninger(
+                sakId,
+                behandlingId,
+                Folkeregisteridentifikator.of(fnr),
+                opplysninger,
+            )
         }
-    }
-
-    companion object {
-        private val OPPLYSNING_TYPER = Opplysningstype.entries.map { it.name }
+        packet.eventName = GRUNNLAG_OPPDATERT
+        context.publish(packet.toJson())
     }
 }

@@ -36,7 +36,7 @@ enum class GrunnlagsendringsType {
     fun beskrivelse(): String =
         when (this) {
             DOEDSFALL -> "Dødsfall"
-            UTFLYTTING -> "Utflytting fra Norge"
+            UTFLYTTING -> "Utflytting til / fra Norge"
             FORELDER_BARN_RELASJON -> "Forelder- / barn-relasjon"
             VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> "Vergemål / fremtidsfullmakt"
             SIVILSTAND -> "Sivilstand"

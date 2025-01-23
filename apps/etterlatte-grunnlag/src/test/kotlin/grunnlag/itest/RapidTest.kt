@@ -11,7 +11,6 @@ import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -74,26 +73,6 @@ internal class RapidTest(
                 .newMessage(
                     mapOf(
                         EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
-                        OPPLYSNING_KEY to listOf(nyOpplysning),
-                        FNR_KEY to fnr,
-                        SAK_ID_KEY to 1,
-                        BEHANDLING_ID_KEY to UUID.randomUUID(),
-                    ),
-                ).toJson()
-
-        @Test
-        fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
-            assertOpplysningBlirLagret(melding = melding, expectedOpplysning = nyOpplysning)
-        }
-    }
-
-    @Nested
-    inner class Opplysningsbehov {
-        private val melding =
-            JsonMessage
-                .newMessage(
-                    mapOf(
-                        BEHOV_NAME_KEY to Opplysningstype.SOEKER_PDL_V1,
                         OPPLYSNING_KEY to listOf(nyOpplysning),
                         FNR_KEY to fnr,
                         SAK_ID_KEY to 1,

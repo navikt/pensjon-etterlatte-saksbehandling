@@ -25,11 +25,13 @@ interface Props {
   virkningstidspunktEtterNyRegelDato: boolean
   landListe: ILand[]
   fetchTrygdetider: (behandlingId: string) => void
+  setTrygdetider: (trygdetider: ITrygdetid[]) => void
 }
 
 export const EnkelPersonTrygdetid = (props: Props) => {
   const dispatch = useAppDispatch()
-  const { redigerbar, behandling, virkningstidspunktEtterNyRegelDato, landListe, fetchTrygdetider } = props
+  const { redigerbar, behandling, virkningstidspunktEtterNyRegelDato, landListe, fetchTrygdetider, setTrygdetider } =
+    props
   const [trygdetid, setTrygdetid] = useState<ITrygdetid | undefined>()
   const [overstyrTrygdetidRequest, requestOverstyrTrygdetid] = useApiCall(overstyrTrygdetid)
   const [oppdaterYrkesskadeRequest, requestOppdaterYrkesskade] = useApiCall(setTrygdetidYrkesskade)
@@ -107,6 +109,8 @@ export const EnkelPersonTrygdetid = (props: Props) => {
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
             landListe={landListe}
             redigerbar={redigerbar}
+            behandling={behandling}
+            setTrygdetider={setTrygdetider}
           />
 
           <TrygdetidPerioder
@@ -115,6 +119,8 @@ export const EnkelPersonTrygdetid = (props: Props) => {
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
             landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
             redigerbar={redigerbar}
+            behandling={behandling}
+            setTrygdetider={setTrygdetider}
           />
 
           <OverstyrtTrygdetid

@@ -74,11 +74,8 @@ class AktivitetspliktService(
         behandlingId: UUID?,
     ): AktivitetspliktDto {
         val faktiskBehandlingId =
-            behandlingId ?: behandlingService.hentSisteIverksatte(sakId)?.id ?: throw InternfeilException(
-                "Kunne ikke hente ut aktivitetspliktDto for sakId=$sakId, siden vi ikke mottok behandlingId " +
-                    "aktivitetspliktvurderingen er knyttet til, og det ligger heller ingen iverksatte " +
-                    "behandlinger i saken.",
-            )
+            behandlingId ?: behandlingService.hentSisteIverksatte(sakId)?.id
+                ?: throw ManglerBehandlingIdEllerIverksattBehandlingException(sakId)
 
         val grunnlag = grunnlagKlient.hentGrunnlagForBehandling(faktiskBehandlingId, bruker)
         val avdoedDoedsdato =
@@ -304,7 +301,8 @@ class AktivitetspliktService(
         sakId: SakId,
     ) {
         val hendelseForSak =
-            aktivitetspliktDao.hentHendelserForSak(sakId).firstOrNull { it.id == hendelseId } ?: throw GenerellIkkeFunnetException()
+            aktivitetspliktDao.hentHendelserForSak(sakId).firstOrNull { it.id == hendelseId }
+                ?: throw GenerellIkkeFunnetException()
 
         if (hendelseForSak.behandlingId != null) {
             val behandling =
@@ -331,7 +329,12 @@ class AktivitetspliktService(
         sjekkOppgaveTilhoererSakOgErRedigerbar(oppgave, sakId)
         sjekkOmAktivitetsgradErGyldig(aktivitetsgrad)
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-        aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgaveEllerBehandling(aktivitetsgrad, sakId, kilde, oppgaveId = oppgaveId)
+        aktivitetspliktAktivitetsgradDao.upsertAktivitetsgradForOppgaveEllerBehandling(
+            aktivitetsgrad,
+            sakId,
+            kilde,
+            oppgaveId = oppgaveId,
+        )
 
         runBlocking { sendDtoTilStatistikk(sakId, brukerTokenInfo, null) }
 
@@ -650,7 +653,8 @@ class AktivitetspliktService(
         }
 
     private fun hentBehandlingOgSjekkOmRedigerbar(behandlingId: UUID): Behandling {
-        val behandling = behandlingService.hentBehandling(behandlingId) ?: throw BehandlingNotFoundException(behandlingId)
+        val behandling =
+            behandlingService.hentBehandling(behandlingId) ?: throw BehandlingNotFoundException(behandlingId)
         if (!behandling.status.kanEndres()) {
             throw BehandlingKanIkkeEndres()
         }
@@ -738,6 +742,9 @@ class AktivitetspliktService(
             statistikkKafkaProducer.sendMeldingOmAktivitetsplikt(dto)
         } catch (e: ManglerDoedsdatoUnderBehandlingException) {
             // Dette er ikke kritisk og vi vil bare logge en advarsel
+            logger.warn(e.detail, e)
+        } catch (e: ManglerBehandlingIdEllerIverksattBehandlingException) {
+            // Dette er heller ikke kritisk og vi vil bare logge en advarsel
             logger.warn(e.detail, e)
         } catch (e: Exception) {
             logger.error(
@@ -947,4 +954,11 @@ class BehandlingNotFoundException(
 ) : IkkeFunnetException(
         code = "FANT_IKKE_BEHANDLING",
         detail = "Kunne ikke finne ønsket behandling, id: $behandlingId",
+    )
+
+class ManglerBehandlingIdEllerIverksattBehandlingException(
+    sakId: SakId,
+) : InternfeilException(
+        "Fant ikke behandlingId eller iverksatt behandling for sakId=$sakId, " +
+            "for uthenting av aktivitetspliktDto til statistikk",
     )

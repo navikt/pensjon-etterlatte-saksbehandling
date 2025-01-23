@@ -13,10 +13,6 @@ data class AktivitetspliktOppfolging(
     val opprettetAv: String,
 )
 
-data class OpprettAktivitetspliktOppfolging(
-    val aktivitet: String,
-)
-
 data class OpprettRevurderingForAktivitetspliktDto(
     val sakId: SakId,
     val frist: Tidspunkt,

@@ -4,7 +4,6 @@ import {
   AktivitetspliktOppgaveVurdering,
   IAktivitetPeriode,
   IAktivitetHendelse,
-  IAktivitetspliktVurdering,
   IAktivitetspliktVurderingNyDto,
   SkrivAktivitet,
   IOpprettAktivitetspliktAktivitetsgrad,
@@ -16,14 +15,12 @@ import { KildeSaksbehandler } from '~shared/types/kilde'
 import { OppgaveDTO } from '~shared/types/oppgave'
 import { Spraak } from '~shared/types/Brev'
 
+/*
+    Denne ligger her for å hente ut data som ble vurdert på gammel flyt
+ */
 export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string
 }): Promise<ApiResponse<AktivitetspliktOppfolging>> => apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt`)
-
-export const hentAktiviteterForBehandling = async (args: {
-  behandlingId: string
-}): Promise<ApiResponse<IAktivitetPeriode[]>> =>
-  apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`)
 
 export const opprettAktivitet = async (args: {
   behandlingId: string
@@ -57,9 +54,6 @@ export const hentAktiviteterOgHendelser = async (args: {
   return apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/aktivitet-og-hendelser${parameter}`)
 }
 
-export const hentAktiviteterForSak = async (args: { sakId: number }): Promise<ApiResponse<IAktivitetPeriode[]>> =>
-  apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/aktivitet`)
-
 export const opprettAktivitetForSak = async (args: {
   sakId: number
   request: SkrivAktivitet
@@ -88,12 +82,6 @@ export const hentAktivitspliktVurderingForSak = async (args: {
   sakId: number
 }): Promise<ApiResponse<IAktivitetspliktVurderingNyDto>> =>
   apiClient.get(`/sak/${args.sakId}/aktivitetsplikt/vurdering`)
-
-export const hentAktivitspliktVurderingForOppgave = async (args: {
-  sakId: number
-  oppgaveId: string
-}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
-  apiClient.get(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering`)
 
 export const redigerAktivitetsgradForOppgave = async (args: {
   sakId: number

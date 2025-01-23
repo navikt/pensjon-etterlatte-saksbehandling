@@ -15,8 +15,6 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.database.setSakId
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -25,8 +23,6 @@ import java.util.UUID
 class AktivitetspliktUnntakDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
-
     fun upsertUnntak(
         unntak: LagreAktivitetspliktUnntak,
         sakId: SakId,

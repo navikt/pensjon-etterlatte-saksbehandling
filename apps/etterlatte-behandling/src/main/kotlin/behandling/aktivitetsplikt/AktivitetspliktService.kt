@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktDto
 import no.nav.etterlatte.libs.common.behandling.OpprettOppgaveForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
@@ -68,15 +67,6 @@ class AktivitetspliktService(
 
     fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
         aktivitetspliktDao.finnSenesteAktivitetspliktOppfolging(behandlingId)
-
-    fun lagreAktivitetspliktOppfolging(
-        behandlingId: UUID,
-        nyOppfolging: OpprettAktivitetspliktOppfolging,
-        navIdent: String,
-    ): AktivitetspliktOppfolging {
-        aktivitetspliktDao.lagre(behandlingId, nyOppfolging, navIdent)
-        return hentAktivitetspliktOppfolging(behandlingId)!!
-    }
 
     suspend fun hentAktivitetspliktDto(
         sakId: SakId,
@@ -229,7 +219,7 @@ class AktivitetspliktService(
             if (aktivitet.id != null) {
                 aktivitetspliktDao.oppdaterAktivitetForBehandling(behandlingId, aktivitet, kilde)
             } else {
-                aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
+                aktivitetspliktDao.opprettAktivitetForBehandling(behandlingId, aktivitet, kilde)
             }
             runBlocking { sendDtoTilStatistikk(aktivitet.sakId, brukerTokenInfo, behandlingId) }
         } else if (sakId != null) {
@@ -255,7 +245,7 @@ class AktivitetspliktService(
     ) {
         if (behandlingId != null) {
             val behandling = hentBehandlingOgSjekkOmRedigerbar(behandlingId)
-            aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
+            aktivitetspliktDao.slettAktivitetForBehandling(aktivitetId, behandlingId)
             runBlocking { sendDtoTilStatistikk(behandling.sak.id, brukerTokenInfo, behandlingId) }
         } else if (sakId != null) {
             aktivitetspliktDao.slettAktivitetForSak(aktivitetId, sakId)

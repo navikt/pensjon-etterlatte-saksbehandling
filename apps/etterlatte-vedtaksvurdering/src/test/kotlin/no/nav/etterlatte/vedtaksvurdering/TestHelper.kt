@@ -60,7 +60,7 @@ fun opprettVedtak(
     innhold =
         VedtakInnhold.Behandling(
             behandlingType = behandlingType,
-            revurderingAarsak = revurderingAarsak?.name,
+            revurderingAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt,
             beregning = beregning,
             avkorting = avkorting,
@@ -147,7 +147,7 @@ fun vedtak(
                             regelverk = Regelverk.fraDato(virkningstidspunkt.atDay(1)),
                         ),
                     ),
-            revurderingAarsak = revurderingAarsak?.name,
+            revurderingAarsak = revurderingAarsak,
         ),
 )
 

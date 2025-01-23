@@ -9,6 +9,7 @@ import { logger } from '~utils/logger'
 
 export const enum FeatureToggle {
   sanksjon = 'sanksjon',
+  tillate_tidlig_virkningstidspunkt = 'tillate-tidlig-virkningstidspunkt',
   aktivitetsplikt_ny_vurdering = 'aktivitetsplikt.ny-vurdering',
   validere_aarsintnekt_neste_aar = 'validere_aarsintnekt_neste_aar',
   overstyr_beregning_knapp = 'overstyr-beregning-knapp',

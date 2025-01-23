@@ -575,7 +575,7 @@ class TrygdetidServiceImpl(
                     .hentTrygdetidMedId(behandlingId, trygdetidId)
                     ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
-            val pesyskildeTrygdetidsgrunnlag =
+            val altUnntattPesysKildeGrunnlag =
                 trygdetid.copy(
                     trygdetidGrunnlag =
                         trygdetid.trygdetidGrunnlag.filter {
@@ -585,7 +585,7 @@ class TrygdetidServiceImpl(
                             }
                         },
                 )
-            oppdaterBeregnetTrygdetid(behandlingId, pesyskildeTrygdetidsgrunnlag, brukerTokenInfo)
+            oppdaterBeregnetTrygdetid(behandlingId, altUnntattPesysKildeGrunnlag, brukerTokenInfo)
         }
 
     override suspend fun kopierSisteTrygdetidberegninger(

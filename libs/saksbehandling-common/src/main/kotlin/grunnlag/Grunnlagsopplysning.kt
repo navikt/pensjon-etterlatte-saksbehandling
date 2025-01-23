@@ -28,6 +28,15 @@ open class Grunnlagsopplysning<T>(
         val automatiskSaksbehandler = Saksbehandler.create(ident = "Gjenny")
         const val ALDERSPENSJONNAME = "alderspensjon"
         const val UFOERETRYGDNAME = "ufoeretrygd"
+        const val SAKSBEHANDLERNAME = "saksbehandler"
+        const val PRIVATPERSONNAME = "privatperson"
+        const val GJENNYNAME = "gjenny"
+        const val PESYSNAME = "pesys"
+        const val GJENOPPRETTINGNAME = "gjenoppretting"
+        const val PDLNAME = "pdl"
+        const val PERSONDATANAME = "persondata"
+        const val REGELNAME = "regel"
+        const val UKJENTINNSENDERNAME = "ukjentinnsender"
     }
 
     override fun toString(): String = "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning. Id: $id"
@@ -38,15 +47,15 @@ open class Grunnlagsopplysning<T>(
         property = "type",
     )
     @JsonSubTypes(
-        JsonSubTypes.Type(value = Saksbehandler::class, name = "saksbehandler"),
-        JsonSubTypes.Type(value = Privatperson::class, name = "privatperson"),
-        JsonSubTypes.Type(value = Pdl::class, name = "pdl"),
-        JsonSubTypes.Type(value = Persondata::class, name = "persondata"),
-        JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
-        JsonSubTypes.Type(value = Gjenoppretting::class, name = "gjenoppretting"),
-        JsonSubTypes.Type(value = Pesys::class, name = "pesys"),
-        JsonSubTypes.Type(value = UkjentInnsender::class, name = "ukjentinnsender"),
-        JsonSubTypes.Type(value = Gjenny::class, name = "gjenny"),
+        JsonSubTypes.Type(value = Saksbehandler::class, name = SAKSBEHANDLERNAME),
+        JsonSubTypes.Type(value = Privatperson::class, name = PRIVATPERSONNAME),
+        JsonSubTypes.Type(value = Pdl::class, name = PDLNAME),
+        JsonSubTypes.Type(value = Persondata::class, name = PERSONDATANAME),
+        JsonSubTypes.Type(value = RegelKilde::class, name = REGELNAME),
+        JsonSubTypes.Type(value = Gjenoppretting::class, name = GJENOPPRETTINGNAME),
+        JsonSubTypes.Type(value = Pesys::class, name = PESYSNAME),
+        JsonSubTypes.Type(value = UkjentInnsender::class, name = UKJENTINNSENDERNAME),
+        JsonSubTypes.Type(value = Gjenny::class, name = GJENNYNAME),
         JsonSubTypes.Type(value = Alderspensjon::class, name = ALDERSPENSJONNAME),
         JsonSubTypes.Type(value = Ufoeretrygd::class, name = UFOERETRYGDNAME),
     )
@@ -59,33 +68,33 @@ open class Grunnlagsopplysning<T>(
     data class Saksbehandler(
         val ident: String,
         val tidspunkt: Tidspunkt,
-    ) : Kilde("saksbehandler") {
+    ) : Kilde(SAKSBEHANDLERNAME) {
         companion object {
             fun create(ident: String) = Saksbehandler(ident, Tidspunkt.now())
         }
 
-        override fun toString(): String = "saksbehandler $ident"
+        override fun toString(): String = "$SAKSBEHANDLERNAME $ident"
     }
 
     data class Gjenny(
         val ident: String,
         val tidspunkt: Tidspunkt,
-    ) : Kilde("gjenny") {
+    ) : Kilde(GJENNYNAME) {
         companion object {
             fun create(ident: String) = Saksbehandler(ident, Tidspunkt.now())
         }
 
-        override fun toString(): String = "gjenny $ident"
+        override fun toString(): String = "$GJENNYNAME $ident"
     }
 
     data class Pesys(
         val tidspunkt: Tidspunkt,
-    ) : Kilde("pesys") {
+    ) : Kilde(PESYSNAME) {
         companion object {
             fun create() = Pesys(Tidspunkt.now())
         }
 
-        override fun toString(): String = "pesys"
+        override fun toString(): String = PESYSNAME
     }
 
     sealed class PesysYtelseKilde(
@@ -114,50 +123,46 @@ open class Grunnlagsopplysning<T>(
 
     data class Gjenoppretting(
         val tidspunkt: Tidspunkt,
-    ) : Kilde("gjenoppretting") {
+    ) : Kilde(GJENOPPRETTINGNAME) {
         companion object {
             fun create() = Gjenoppretting(Tidspunkt.now())
         }
 
-        override fun toString(): String = "gjenoppretting"
+        override fun toString(): String = GJENOPPRETTINGNAME
     }
 
     data class Privatperson(
         val fnr: String,
         val mottatDato: Tidspunkt,
-    ) : Kilde("privatperson")
+    ) : Kilde(PRIVATPERSONNAME)
 
     data class Pdl(
         val tidspunktForInnhenting: Tidspunkt,
         val registersReferanse: String?,
         val opplysningId: String?,
-    ) : Kilde("pdl") {
-        val navn = "pdl"
-
-        override fun toString(): String = navn
+    ) : Kilde(PDLNAME) {
+        override fun toString(): String = PDLNAME
     }
 
     data class Persondata(
         val tidspunktForInnhenting: Tidspunkt,
         val registersReferanse: String?,
         val opplysningId: String?,
-    ) : Kilde("persondata") {
-        val navn = "persondata"
-
-        override fun toString(): String = navn
+    ) : Kilde(PERSONDATANAME) {
+        override fun toString(): String = PERSONDATANAME
     }
 
     data class RegelKilde(
         val navn: String,
         val ts: Tidspunkt,
         val versjon: String,
-    ) : Kilde("regel") {
+    ) : Kilde(REGELNAME) {
         override fun toString(): String = "beregningsregel  $navn"
     }
 
     data class UkjentInnsender(
         val tidspunkt: Tidspunkt,
-    ) : Kilde("ukjentinnsender") {
+    ) : Kilde(UKJENTINNSENDERNAME) {
         companion object {
             fun create() = UkjentInnsender(Tidspunkt.now())
         }

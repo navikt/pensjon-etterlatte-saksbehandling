@@ -5,6 +5,7 @@ import {
   ITrygdetidGrunnlagType,
   sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys,
   slettTrygdetidsgrunnlag,
+  slettTrygdetidsgrunnlagKildePesys,
 } from '~shared/api/trygdetid'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Alert, BodyShort, Box, Button, Heading, HStack, VStack } from '@navikt/ds-react'
@@ -18,12 +19,13 @@ import { TrygdetidPerioderTable } from '~components/behandling/trygdetid/trygdet
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 import { ILand } from '~utils/kodeverk'
-import { isFailure, isPending, mapResult } from '~shared/api/apiUtils'
+import { isFailure, isPending, isSuccess, mapFailure, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch } from '~store/Store'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface Props {
   trygdetid: ITrygdetid
@@ -51,6 +53,10 @@ export const TrygdetidPerioder = ({
   const [sjekkOmAvodedHarTTIPesysStatus, sjekkOmAvdoedHarTTIPesysHent] = useApiCall(
     sjekkOmAvdoedHarTrygdetidsgrunnlagIPesys
   )
+  const [slettTrygdetidsgrunnlagStatus, slettTrygdetidsgrunnlagKildePesysFetch] = useApiCall(
+    slettTrygdetidsgrunnlagKildePesys
+  )
+
   useEffect(() => {
     if (kanHenteTrygdetidFraPesys) {
       sjekkOmAvdoedHarTTIPesysHent(behandling.id)
@@ -70,14 +76,15 @@ export const TrygdetidPerioder = ({
     })
   }
 
-  const trygdetidPerioder = trygdetid.trygdetidGrunnlag
-    .filter((trygdetid) => trygdetid.type === trygdetidGrunnlagType)
-    .sort((a, b) => (a.periodeFra > b.periodeFra ? 1 : -1))
-
-  const kanLeggeTilNyPeriode =
-    redigerbar &&
-    !visLeggTilTrygdetidPeriode &&
-    !(trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG && trygdetidPerioder.length > 0)
+  const tilbakestillTrygdetider = () => {
+    slettTrygdetidsgrunnlagKildePesysFetch(
+      {
+        behandlingId: behandling.id,
+        trygdetidId: trygdetid.id,
+      },
+      oppdaterTrygdetid
+    )
+  }
 
   const slettTrygdetid = (trygdetidGrunnlagId: string) => {
     slettTrygdetidsgrunnlagRequest(
@@ -89,6 +96,15 @@ export const TrygdetidPerioder = ({
       oppdaterTrygdetid
     )
   }
+
+  const trygdetidPerioder = trygdetid.trygdetidGrunnlag
+    .filter((trygdetid) => trygdetid.type === trygdetidGrunnlagType)
+    .sort((a, b) => (a.periodeFra > b.periodeFra ? 1 : -1))
+
+  const kanLeggeTilNyPeriode =
+    redigerbar &&
+    !visLeggTilTrygdetidPeriode &&
+    !(trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG && trygdetidPerioder.length > 0)
 
   const faktiskTrygdetid = trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK
   return (
@@ -153,16 +169,36 @@ export const TrygdetidPerioder = ({
                       {harTrygdetidsgrunnlagIPesys && (
                         <>
                           <Box maxWidth="fit-content">
+                            <Heading size="small">Legg inn trygdetidsgrunnlag</Heading>
                             <BodyShort>
                               Avdøed har trygdetidsgrunnlag registrert på uføretrygd eller alderspensjon.
                             </BodyShort>
-                            <Button
-                              size="small"
-                              onClick={oppdaterTrygdetidMedPesysData}
-                              loading={isPending(hentTTPesysStatus)}
-                            >
-                              Legg inn trygdetidsgrunnlag fra pesys
-                            </Button>
+                            {isSuccess(hentTTPesysStatus) && !isSuccess(slettTrygdetidsgrunnlagStatus) && (
+                              <>
+                                {mapFailure(slettTrygdetidsgrunnlagStatus, (error) => (
+                                  <ApiErrorAlert>Kunne ikke ferdigstille oppgave: {error.detail}</ApiErrorAlert>
+                                ))}
+
+                                <Button
+                                  variant="secondary"
+                                  size="small"
+                                  onClick={tilbakestillTrygdetider}
+                                  loading={isPending(hentTTPesysStatus)}
+                                >
+                                  Tilbakestill trygdetidsgrunnlag
+                                </Button>
+                              </>
+                            )}
+
+                            {(!isSuccess(hentTTPesysStatus) || isSuccess(slettTrygdetidsgrunnlagStatus)) && (
+                              <Button
+                                size="small"
+                                onClick={oppdaterTrygdetidMedPesysData}
+                                loading={isPending(hentTTPesysStatus)}
+                              >
+                                Legg inn
+                              </Button>
+                            )}
                           </Box>
                           {isFailure(hentTTPesysStatus) && (
                             <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>

@@ -61,6 +61,7 @@ export function RedigerbarAktivitetsgradOppgave(props: { aktivitet: IAktivitetsp
       setRedigerer={setRedigerer}
       slettStatus={slettStatus}
       slettAktivitetsgrad={slettAktivitetsgradIOppgave}
+      erBehandling={false}
     />
   )
 }
@@ -71,17 +72,21 @@ export const RedigerbarAktivitsgradKnapper = ({
   setRedigerer,
   slettStatus,
   slettAktivitetsgrad,
+  erBehandling,
 }: {
   aktivitet: IAktivitetspliktAktivitetsgrad
   erRedigerbar: boolean
   setRedigerer: (redigerer: boolean) => void
   slettStatus: Result<IAktivitetspliktVurderingNyDto>
   slettAktivitetsgrad: (aktivitet: IAktivitetspliktAktivitetsgrad) => void
+  erBehandling: boolean
 }) => {
   return (
     <VStack gap="6" maxWidth="50rem">
       <Heading size="small">
-        Vurdering gjort for aktiviteten fra {aktivitet.vurdertFra12Mnd ? '12 måneder' : '6 måneder'}
+        {erBehandling
+          ? 'Vurdering av aktivitetsplikten'
+          : `Vurdering gjort for aktiviteten fra ${aktivitet.vurdertFra12Mnd ? '12 måneder' : '6 måneder'}`}
       </Heading>
       <VStack gap="2">
         <Label>Beskrivelse</Label>

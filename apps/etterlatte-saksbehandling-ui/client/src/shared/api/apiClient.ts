@@ -137,6 +137,18 @@ async function errorFrom(response: Response): Promise<JsonError> {
   try {
     return JSON.parse(responseContent)
   } catch {
+    if (response.status === 502) {
+      return { status: response.status, detail: `Fikk feil i kall mot backend(bad gateway) Url: ${response.url}` }
+    }
+    if (response.status === 503) {
+      return {
+        status: response.status,
+        detail: `Fikk feil i kall mot backend(Service Unavailable) Url: ${response.url}`,
+      }
+    }
+    if (response.status === 504) {
+      return { status: response.status, detail: `Fikk feil i kall mot backend(Gateway Timeout) Url: ${response.url}` }
+    }
     logger.generalWarning({
       msg:
         `${responseContent} $Url: ${response.url}` ||

@@ -173,7 +173,7 @@ export const TrygdetidPerioder = ({
                             <BodyShort>
                               Avdøed har trygdetidsgrunnlag registrert på uføretrygd eller alderspensjon.
                             </BodyShort>
-                            {isSuccess(hentTTPesysStatus) ? (
+                            {isSuccess(hentTTPesysStatus) && !isSuccess(slettTrygdetidsgrunnlagStatus) && (
                               <>
                                 {mapFailure(slettTrygdetidsgrunnlagStatus, (error) => (
                                   <ApiErrorAlert>Kunne ikke ferdigstille oppgave: {error.detail}</ApiErrorAlert>
@@ -188,7 +188,9 @@ export const TrygdetidPerioder = ({
                                   Tilbakestill trygdetidsgrunnlag
                                 </Button>
                               </>
-                            ) : (
+                            )}
+
+                            {(!isSuccess(hentTTPesysStatus) || isSuccess(slettTrygdetidsgrunnlagStatus)) && (
                               <Button
                                 size="small"
                                 onClick={oppdaterTrygdetidMedPesysData}

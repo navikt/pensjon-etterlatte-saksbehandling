@@ -26,6 +26,7 @@ import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthP
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapFailure } from '~shared/api/apiUtils'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export interface Hjemmel {
   lenke: string
@@ -42,6 +43,7 @@ const Virkningstidspunkt = (props: {
 }) => {
   const { behandling, erBosattUtland } = props
 
+  const tidligVirkningstidspunktTillatt = useFeaturetoggle(FeatureToggle.tillate_tidlig_virkningstidspunkt)
   const dispatch = useAppDispatch()
   const [fastsettVirkStatus, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
 
@@ -79,8 +81,12 @@ const Virkningstidspunkt = (props: {
     }
   }
 
+  const minimumVirkningstidspunkt = tidligVirkningstidspunktTillatt
+    ? subYears(new Date(), 3)
+    : hentMinimumsVirkningstidspunkt(foersteDoedsdato(), getSoeknadMottattDato(), behandling.sakType)
+
   const { monthpickerProps, inputProps } = useMonthpicker({
-    fromDate: hentMinimumsVirkningstidspunkt(foersteDoedsdato(), getSoeknadMottattDato(), behandling.sakType),
+    fromDate: minimumVirkningstidspunkt,
     toDate: addMonths(new Date(), 4),
     onMonthChange: (date: Date) => setVirkningstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',

@@ -94,7 +94,7 @@ class VedtaksvurderingRepository(
                                 "beregningsresultat" to it.beregning?.toJson(),
                                 "avkorting" to it.avkorting?.toJson(),
                                 "vilkaarsresultat" to it.vilkaarsvurdering?.toJson(),
-                                "revurderingsaarsak" to it.revurderingAarsak,
+                                "revurderingsaarsak" to it.revurderingAarsak?.toJson(),
                                 "revurderinginfo" to it.revurderingInfo?.toJson(),
                                 "opphoer_fom" to it.opphoerFraOgMed?.atDay(1),
                             )

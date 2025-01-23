@@ -223,12 +223,6 @@ class OverstyrtTrygdetidManglerAvdoed :
         detail = "Overstyrt trygdetid mangler avdød. Trygdetiden må overskrives med ny overstyrt trygdetid",
     )
 
-class IngenStoetteForUkjentAvdoed :
-    UgyldigForespoerselException(
-        code = "INGEN_STOETTE_FOR_UKJENT_AVDOED",
-        detail = "Brevløsningen støtter ikke ukjent avdød",
-    )
-
 class ManglerFrivilligSkattetrekk(
     behandlingId: UUID?,
 ) : UgyldigForespoerselException(

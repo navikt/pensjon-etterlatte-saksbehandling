@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -30,11 +31,15 @@ object BrevDataMapperRedigerbartUtfallVarsel {
 
         SakType.OMSTILLINGSSTOENAD ->
             if (revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
-                val erTidligereFamiliepleier = detaljertBehandling?.tidligereFamiliepleier?.svar == true
+                requireNotNull(detaljertBehandling) {
+                    throw InternfeilException("Mangler behandling – får ikke utledet dødsdato")
+                }
+
+                val erTidligereFamiliepleier = detaljertBehandling.tidligereFamiliepleier?.svar == true
 
                 val doedsdatoEllerOpphoertPleieforhold =
                     if (erTidligereFamiliepleier) {
-                        detaljertBehandling?.tidligereFamiliepleier!!.opphoertPleieforhold!!
+                        detaljertBehandling.tidligereFamiliepleier!!.opphoertPleieforhold!!
                     } else {
                         grunnlag
                             ?.hentAvdoede()
@@ -43,7 +48,7 @@ object BrevDataMapperRedigerbartUtfallVarsel {
                             ?.verdi
                     }
 
-                val virk = detaljertBehandling!!.virkningstidspunkt?.dato
+                val virk = detaljertBehandling.virkningstidspunkt?.dato
                 val er12mndvarsel = virk!!.isAfter(YearMonth.from(doedsdatoEllerOpphoertPleieforhold!!.plusMonths(12)))
 
                 OmstillingsstoenadAktivitetspliktVarselUtfall(er12mndvarsel)

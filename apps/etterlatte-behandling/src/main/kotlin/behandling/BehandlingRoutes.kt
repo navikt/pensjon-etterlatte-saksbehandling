@@ -38,7 +38,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -420,14 +419,6 @@ internal fun Route.behandlingRoutes(
                         "FANT_IKKE_BEHANDLING",
                         "Fant ikke behandling med id=$behandlingId",
                     )
-                }
-            }
-
-            post("/gyldigfremsatt") {
-                kunSkrivetilgang {
-                    val body = call.receive<GyldighetsResultat>()
-                    gyldighetsproevingService.lagreGyldighetsproeving(behandlingId, body)
-                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

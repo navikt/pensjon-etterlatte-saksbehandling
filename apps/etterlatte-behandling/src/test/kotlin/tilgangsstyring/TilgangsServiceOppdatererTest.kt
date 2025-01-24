@@ -28,7 +28,7 @@ class TilgangsServiceOppdatererTest {
     private val skjermingKlient = mockk<SkjermingKlient>()
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val sakService = mockk<SakService>()
-    private val tilgangsServiceOppdaterer = TilgangsServiceOppdaterer(sakService, skjermingKlient, pdltjenesterKlient)
+    private val oppdaterTilgangService = OppdaterTilgangService(sakService, skjermingKlient, pdltjenesterKlient)
     val soeker = "11057523044"
     val persongalleri =
         Persongalleri(
@@ -59,7 +59,7 @@ class TilgangsServiceOppdatererTest {
         every { sakService.finnSak(sakId) } returns sak
         every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } returns 1
         every { sakService.settEnhetOmAdresebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
-        tilgangsServiceOppdaterer.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 1) {
             sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -79,7 +79,7 @@ class TilgangsServiceOppdatererTest {
         every { sakService.finnSak(sakId) } returns sak
         every { sakService.markerSakerMedSkjerming(any(), any()) } just Runs
         every { sakService.oppdaterEnhetForSaker(any()) } just Runs
-        tilgangsServiceOppdaterer.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 1) {
             sakService.markerSakerMedSkjerming(match { it.first().sakId == sak.id.sakId }, true)
@@ -97,7 +97,7 @@ class TilgangsServiceOppdatererTest {
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
 
         every { sakService.finnSak(sakId) } returns sak
-        tilgangsServiceOppdaterer.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
+        oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 0) {
             sakService.oppdaterAdressebeskyttelse(any(), any())

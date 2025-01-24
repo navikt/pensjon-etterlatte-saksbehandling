@@ -64,7 +64,7 @@ import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.tilgangsstyring.TilgangsServiceOppdaterer
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import org.junit.jupiter.api.AfterEach
@@ -130,7 +130,7 @@ internal class BehandlingFactoryTest {
             vilkaarsvurderingService = vilkaarsvurderingService,
             kommerBarnetTilGodeService = kommerBarnetTilGodeServiceMock,
             behandlingInfoService = mockk(),
-            tilgangsService = TilgangsServiceOppdaterer(sakServiceMock, mockk(relaxed = true), mockk(relaxed = true)),
+            tilgangsService = OppdaterTilgangService(sakServiceMock, mockk(relaxed = true), mockk(relaxed = true)),
         )
 
     @BeforeEach

@@ -34,8 +34,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.tilgangsstyring.TilgangsServiceOppdaterer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -260,6 +260,6 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             behandlingInfoService = mockk(),
-            tilgangsService = TilgangsServiceOppdaterer(applicationContext.sakService, mockk(relaxed = true), mockk(relaxed = true)),
+            tilgangsService = OppdaterTilgangService(applicationContext.sakService, mockk(relaxed = true), mockk(relaxed = true)),
         )
 }

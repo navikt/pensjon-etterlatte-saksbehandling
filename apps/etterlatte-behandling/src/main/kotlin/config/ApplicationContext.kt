@@ -149,7 +149,7 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.tilgangsstyring.TilgangsServiceOppdaterer
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
@@ -585,8 +585,8 @@ internal class ApplicationContext(
             behandlingsStatusService,
         )
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
-    val tilgangsServiceOppdaterer =
-        TilgangsServiceOppdaterer(
+    val oppdaterTilgangService =
+        OppdaterTilgangService(
             sakService = sakService,
             skjermingKlient = skjermingKlient,
             pdltjenesterKlient = pdlTjenesterKlient,
@@ -605,7 +605,7 @@ internal class ApplicationContext(
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             vilkaarsvurderingService = vilkaarsvurderingService,
             behandlingInfoService = behandlingInfoService,
-            tilgangsService = tilgangsServiceOppdaterer,
+            tilgangsService = oppdaterTilgangService,
         )
 
     val migreringService =

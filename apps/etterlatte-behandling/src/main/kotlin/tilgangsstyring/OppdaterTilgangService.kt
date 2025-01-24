@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.sak.PersonManglerSak
 import no.nav.etterlatte.sak.SakService
 
-class TilgangsServiceOppdaterer(
+class OppdaterTilgangService(
     private val sakService: SakService,
     private val skjermingKlient: SkjermingKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
@@ -30,11 +30,11 @@ class TilgangsServiceOppdaterer(
         persongalleri: Persongalleri,
     ) {
         val sak = sakService.finnSak(sakId) ?: throw PersonManglerSak()
-        val alleIdenter = persongalleri.hentAlleIdentifikatorer() // mappe to folkeregisteridentifikator?
+        val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 
         val identerMedGradering = alleIdenter.map { hentGraderingForIdent(it, sak) }
 
-        if (identerMedGradering.any { it.erGradert() }) {
+        if (identerMedGradering.any { it.harAdressebeskyttelse() }) {
             val hoyesteGradering = identerMedGradering.hentPrioritertGradering()
             sakService.oppdaterAdressebeskyttelse(sakId, hoyesteGradering)
             sakService.settEnhetOmAdresebeskyttet(sak, hoyesteGradering)

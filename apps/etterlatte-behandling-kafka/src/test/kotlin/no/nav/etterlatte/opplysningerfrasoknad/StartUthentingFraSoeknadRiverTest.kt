@@ -19,7 +19,7 @@ import java.io.FileNotFoundException
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class StartUthentingFraSoeknadRiverTest {
     companion object {
-        val melding = readFile("/melding.json")
+        val melding = readFile("/opplysningerfrasoeknad/barnepensjon_trenger_behandling.json")
         val opplysningsuthenterMock = mockk<Opplysningsuthenter>()
 
         fun readFile(file: String) =
@@ -34,7 +34,7 @@ internal class StartUthentingFraSoeknadRiverTest {
         val soknad: JsonNode =
             objectMapper.treeToValue(
                 objectMapper.readTree(
-                    javaClass.getResource("/melding.json")!!.readText(),
+                    javaClass.getResource("/opplysningerfrasoeknad/barnepensjon_trenger_behandling.json")!!.readText(),
                 )!!["@skjema_info"],
             )
         val opplysninger =

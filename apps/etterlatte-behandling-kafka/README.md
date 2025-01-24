@@ -16,3 +16,7 @@ Når vedtak sender ut melding om at noe har skjedd på et vedtak leses dette og 
 ### PdlHendelser
 Når hendelser fra PDL sender ut en melding om en personhendelse vi muligens er interessert i, plukkes denne meldingen 
 opp sendes med et HTTP-kall til behandlings-appen.
+
+### Opplysninger fra søknad
+Når `etterlatte-gyldig-soeknad` har opprettet en behandling vil den sende ut melding om nye opplysninger tilknyttet 
+søknaden. Dette blir så behandlet i `etterlatte-behandling-kafka` og deretter sendt til `etterlatte-grunnlag`. 

@@ -53,6 +53,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -318,6 +319,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
                 kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
                 behandlingInfoService = mockk(),
+                tilgangsService = OppdaterTilgangService(applicationContext.sakService, mockk(relaxed = true), mockk(relaxed = true)),
             )
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -972,5 +974,6 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             behandlingInfoService = mockk(),
+            tilgangsService = OppdaterTilgangService(applicationContext.sakService, mockk(relaxed = true), mockk(relaxed = true)),
         )
 }

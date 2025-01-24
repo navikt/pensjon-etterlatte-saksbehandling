@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 
-interface TilgangService {
+interface TilgangServiceSjekker {
     fun harTilgangTilBehandling(
         behandlingId: String,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
@@ -48,9 +48,9 @@ data class SakMedGradering(
     val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
 )
 
-class TilgangServiceImpl(
+class TilgangServiceSjekkerImpl(
     private val dao: SakTilgangDao,
-) : TilgangService {
+) : TilgangServiceSjekker {
     override fun harTilgangTilPerson(
         fnr: String,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,

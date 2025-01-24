@@ -2,13 +2,16 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AKTIVITETSPLIKT_DTO_RIVER_KEY
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktDto
 import no.nav.etterlatte.libs.common.aktivitetsplikt.AktivitetspliktHendelse
 import no.nav.etterlatte.libs.common.behandling.BEHANDLING_ID_PAA_VENT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.NY_ENHET_KEY
 import no.nav.etterlatte.libs.common.behandling.PAA_VENT_AARSAK_KEY
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.behandling.REFERANSE_ENDRET_ENHET_KEY
 import no.nav.etterlatte.libs.common.behandling.STATISTIKKBEHANDLING_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
@@ -23,6 +26,12 @@ interface BehandlingHendelserKafkaProducer {
     fun sendMeldingForHendelseStatistikk(
         statistikkBehandling: StatistikkBehandling,
         hendelseType: BehandlingHendelseType,
+        overstyrtTekniskTid: Tidspunkt? = null,
+    )
+
+    fun sendMeldingForEndretEnhet(
+        oppgaveReferanse: String,
+        enhet: Enhetsnummer,
         overstyrtTekniskTid: Tidspunkt? = null,
     )
 
@@ -68,6 +77,34 @@ class BehandlingsHendelserKafkaProducerImpl(
                 logger.info(
                     "Posted event ${hendelseType.lagEventnameForType()} for behandling ${statistikkBehandling.id}" +
                         " to partiton $partition, offset $offset correlationid: $correlationId",
+                )
+            }
+    }
+
+    override fun sendMeldingForEndretEnhet(
+        oppgaveReferanse: String,
+        enhet: Enhetsnummer,
+        overstyrtTekniskTid: Tidspunkt?,
+    ) {
+        val correlationId = getCorrelationId()
+        val hendelse = BehandlingHendelseType.ENDRET_ENHET
+        rapid
+            .publiser(
+                oppgaveReferanse,
+                JsonMessage
+                    .newMessage(
+                        hendelse.lagEventnameForType(),
+                        mapOf(
+                            CORRELATION_ID_KEY to correlationId,
+                            TEKNISK_TID_KEY to (overstyrtTekniskTid ?: Tidspunkt.now()),
+                            REFERANSE_ENDRET_ENHET_KEY to oppgaveReferanse,
+                            NY_ENHET_KEY to enhet.enhetNr,
+                        ),
+                    ).toJson(),
+            ).also { (partition, offset) ->
+                logger.info(
+                    "Postet hendelse ${hendelse.lagEventnameForType()} for oppgave med referanse " +
+                        "$oppgaveReferanse til partisjon $partition, offset $offset correlationid: $correlationId",
                 )
             }
     }

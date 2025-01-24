@@ -485,6 +485,19 @@ class OppgaveService(
         oppgaverForSak.forEach {
             if (it.erUnderBehandling()) {
                 oppgaveDao.endreStatusPaaOppgave(it.id, Status.NY)
+
+                // For oppgaver som ikke er ferdige er det relevant for saksbehandlingsstatistikken
+                // å få en oppdatert rad med ny enhet
+                when (it.type) {
+                    OppgaveType.FOERSTEGANGSBEHANDLING,
+                    OppgaveType.REVURDERING,
+                    OppgaveType.TILBAKEKREVING,
+                    OppgaveType.KLAGE,
+                    -> {
+                        hendelser.sendMeldingForEndretEnhet(it.referanse, enhetsID)
+                    }
+                    else -> Unit
+                }
             }
             oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
         }

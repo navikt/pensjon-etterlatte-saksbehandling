@@ -23,6 +23,7 @@ import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
 import no.nav.etterlatte.statistikk.river.AktivitetspliktHendelseRiver
 import no.nav.etterlatte.statistikk.river.AvbruttOpprettetBehandlinghendelseRiver
+import no.nav.etterlatte.statistikk.river.BehandlingEndretEnhetRiver
 import no.nav.etterlatte.statistikk.river.BehandlingPaaVentHendelseRiver
 import no.nav.etterlatte.statistikk.river.KlagehendelseRiver
 import no.nav.etterlatte.statistikk.river.SoeknadStatistikkRiver
@@ -52,6 +53,7 @@ class ApplicationContext {
             SoeknadStatistikkRiver(rapidsConnection, soeknadStatistikkService)
             KlagehendelseRiver(rapidsConnection, statistikkService)
             AktivitetspliktHendelseRiver(rapidsConnection, aktivitetspliktService)
+            BehandlingEndretEnhetRiver(rapidsConnection, statistikkService)
         }
 
     private val behandlingKlient: BehandlingKlient by lazy {

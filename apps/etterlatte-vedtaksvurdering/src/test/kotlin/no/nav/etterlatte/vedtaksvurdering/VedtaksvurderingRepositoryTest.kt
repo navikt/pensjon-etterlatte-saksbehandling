@@ -156,6 +156,7 @@ internal class VedtaksvurderingRepositoryTest(
                 it.virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
                 it.vilkaarsvurdering shouldBe objectMapper.createObjectNode()
                 it.beregning shouldBe objectMapper.createObjectNode()
+                it.revurderingAarsak shouldBe Revurderingaarsak.REGULERING
                 it.avkorting shouldBe avkorting
                 it.utbetalingsperioder.first().let { utbetalingsperiode ->
                     utbetalingsperiode.id shouldNotBe null

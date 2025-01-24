@@ -26,6 +26,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { ClickEvent, trackClick } from '~utils/amplitude'
 import { Tilbakemelding } from '~shared/tilbakemelding/Tilbakemelding'
+import { KopierVilkaarAvdoed } from '~components/behandling/vilkaarsvurdering/KopierVilkaarAvdoed'
+import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -39,6 +41,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
     behandling.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
+  const kopierVilkaarAvdoedEnabled = useFeaturetoggle(FeatureToggle.kopier_vilkaar_avdoed)
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [slettVilkaarsvurderingStatus, slettGammelVilkaarsvurdering] = useApiCall(slettVilkaarsvurdering)
   const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)
@@ -128,6 +131,12 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
               </Alert>
             </AlertWrapper>
           )}
+
+          <Box paddingInline="16" paddingBlock="16 4">
+            {kopierVilkaarAvdoedEnabled && behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
+              <KopierVilkaarAvdoed behandlingId={behandling.id} />
+            )}
+          </Box>
 
           {vilkaarsvurdering.vilkaar.map((value, index) => (
             <ManueltVilkaar

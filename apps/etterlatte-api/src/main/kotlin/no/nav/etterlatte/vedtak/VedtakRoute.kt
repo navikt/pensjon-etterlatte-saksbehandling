@@ -17,7 +17,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 fun Route.vedtakRoute(vedtakService: VedtakService) {
-    // Tiltenkt for eksternt for etterlatte men internt i Nav. Initelt gjelder dette EESSI.
+    // Tiltenkt for eksterne konsumenter i Nav. Initelt gjelder dette EESSI.
     route("api/v1/vedtak") {
         install(AuthorizationPlugin) {
             accessPolicyRolesEllerAdGrupper = setOf("les-bp-vedtak", "les-oms-vedtak")

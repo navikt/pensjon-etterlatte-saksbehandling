@@ -6,12 +6,15 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.date.shouldBeBetween
 import io.kotest.matchers.date.shouldBeToday
 import io.kotest.matchers.date.shouldNotBeToday
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.KONTANT_FOT
-import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -27,14 +30,18 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.opprettBehandling
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -43,6 +50,7 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 import kotlin.random.Random
 
@@ -55,6 +63,7 @@ internal class SakSkrivDaoTest(
     private lateinit var tilgangService: TilgangServiceSjekker
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
+    private lateinit var sakendringerDao: SakendringerDao
 
     companion object {
         @RegisterExtension
@@ -65,7 +74,8 @@ internal class SakSkrivDaoTest(
     fun beforeAll() {
         val connectionAutoclosing = ConnectionAutoclosingTest(dataSource)
         sakLesDao = SakLesDao(connectionAutoclosing)
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
+        sakendringerDao = SakendringerDao(ConnectionAutoclosingTest(dataSource))
+        sakSkrivDao = SakSkrivDao(sakendringerDao)
         tilgangService = TilgangServiceSjekkerImpl(SakTilgangDao(dataSource))
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
@@ -74,7 +84,11 @@ internal class SakSkrivDaoTest(
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
                 ConnectionAutoclosingTest(dataSource),
             )
-        Kontekst.set(null)
+        nyKontekstMedBruker(
+            mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { name() } returns "Børre"
+            },
+        )
     }
 
     @AfterEach
@@ -550,6 +564,68 @@ internal class SakSkrivDaoTest(
 
     @Test
     fun `skal opprette sak med lagring av endring`() {
-        sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val sak = sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+
+        val endringForSak = sakendringerDao.hentEndringerForSak(sak.id).single()
+
+        with(endringForSak) {
+            foer shouldBe null
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)
+            endringstype shouldBe Saksendring.Endringstype.OPPRETT_SAK
+            identtype shouldBe Saksendring.Identtype.SAKSBEHANDLER
+            ident shouldBe "Børre"
+            assertTrue(tidspunkt.isAfter(Tidspunkt.now().minus(2, ChronoUnit.SECONDS)))
+            assertTrue(tidspunkt.isBefore(Tidspunkt.now()))
+        }
+    }
+
+    @Test
+    fun `skal oppdatere sak med lagring av endring`() {
+        val sak = sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.FORTROLIG)
+
+        val endringForOppdatering =
+            sakendringerDao
+                .hentEndringerForSak(sak.id)
+                .single { it.foer != null }
+
+        with(endringForOppdatering) {
+            foer?.id shouldBe sak.id
+            etter.id shouldBe sak.id
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)
+            foer?.adressebeskyttelse shouldBe null
+            etter.adressebeskyttelse shouldBe AdressebeskyttelseGradering.FORTROLIG
+        }
+    }
+
+    @Test
+    fun `skal oppdatere flere saker med lagring av endring`() {
+        val sak1 = sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakSkrivDao.opprettSak("25018012345", SakType.OMSTILLINGSSTOENAD, Enheter.NORDLAND_BODOE.enhetNr)
+        sakSkrivDao.oppdaterEnheterPaaSaker(
+            listOf(
+                SakMedEnhet(sak1.id, Enheter.AALESUND.enhetNr),
+                SakMedEnhet(sak2.id, Enheter.KLAGE_VEST.enhetNr),
+            ),
+        )
+
+        val endringForSak1 =
+            sakendringerDao
+                .hentEndringerForSak(sak1.id)
+                .single { it.foer != null }
+        with(endringForSak1) {
+            foer?.enhet shouldBe Enheter.PORSGRUNN.enhetNr
+            etter.enhet shouldBe Enheter.AALESUND.enhetNr
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak1.id)
+        }
+        val endringForSak2 =
+            sakendringerDao
+                .hentEndringerForSak(sak2.id)
+                .single { it.foer != null }
+        with(endringForSak2) {
+            foer?.enhet shouldBe Enheter.NORDLAND_BODOE.enhetNr
+            etter.enhet shouldBe Enheter.KLAGE_VEST.enhetNr
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak2.id)
+        }
     }
 }

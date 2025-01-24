@@ -28,7 +28,7 @@ class SakSkrivDao(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int =
-        sakendringerDao.oppdaterSaker(sakId, ENDRE_ADRESSEBESKYTTELSE) { connection ->
+        sakendringerDao.oppdaterSak(sakId, ENDRE_ADRESSEBESKYTTELSE) { connection ->
             with(connection) {
                 val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
                 statement.setString(1, adressebeskyttelseGradering.name)
@@ -71,7 +71,7 @@ class SakSkrivDao(
         sakId: SakId,
         nyIdent: Folkeregisteridentifikator,
     ) {
-        sakendringerDao.oppdaterSaker(sakId, ENDRE_IDENT) {
+        sakendringerDao.oppdaterSak(sakId, ENDRE_IDENT) {
             it
                 .prepareStatement(
                     """

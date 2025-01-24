@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
+import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.sak.Saksendring.Endringstype
 import no.nav.etterlatte.sak.Saksendring.Identtype
 import sak.KomplettSak
@@ -24,7 +25,7 @@ import java.util.UUID
 class SakendringerDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    internal fun oppdaterSaker(
+    internal fun oppdaterSak(
         id: SakId,
         endringstype: Endringstype,
         block: (connection: Connection) -> Unit,
@@ -56,10 +57,10 @@ class SakendringerDao(
         endringstype: Endringstype,
         block: (connection: Connection) -> Unit,
     ) = sakIdList.forEach { sakId ->
-        oppdaterSaker(sakId, endringstype, block)
+        oppdaterSak(sakId, endringstype, block)
     }
 
-    private fun hentKomplettSak(sakId: SakId): KomplettSak =
+    internal fun hentKomplettSak(sakId: SakId): KomplettSak =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement = prepareStatement("SELECT * FROM sak WHERE id = ?")
@@ -78,6 +79,27 @@ class SakendringerDao(
                             enhet = Enhetsnummer(getString("enhet")),
                             flyktning = this.getString("flyktning")?.let { objectMapper.readValue(it) },
                             opprettet = getTidspunkt("opprettet"),
+                        )
+                    }
+            }
+        }
+
+    internal fun hentEndringerForSak(sakId: SakId): List<Saksendring> =
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement = prepareStatement("select * from saksendring where sak_id = ?")
+                statement.setLong(1, sakId.sakId)
+                statement
+                    .executeQuery()
+                    .toList {
+                        Saksendring(
+                            id = UUID.randomUUID(),
+                            endringstype = enumValueOf<Endringstype>(getString("endringstype")),
+                            foer = getString("foer")?.let { objectMapper.readValue(it) },
+                            etter = objectMapper.readValue(getString("etter")),
+                            tidspunkt = getTidspunkt("tidspunkt"),
+                            ident = getString("ident"),
+                            identtype = enumValueOf(getString("identtype")),
                         )
                     }
             }

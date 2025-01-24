@@ -31,7 +31,12 @@
 {{#familier}}
     <dialog id="modal-{{avdoed}}">
         <h4>Søknad for avdød {{avdoed}}</h4>
-        <form>
+        <form
+                hx-post="{{path}}/send-soeknad"
+                hx-vals='{"avdoed": "{{avdoed}}", "barnListe": {{barn}}}'
+                hx-swap="innerHTML"
+                hx-target="#sendSoknadResult-{{avdoed}}"
+        >
 
             <div class="mb-3">
                 <label for="ytelse" class="form-label">Ytelse:</label>
@@ -92,11 +97,8 @@
 
             </div>
 
-            <button class="btn me-1 btn-info"
-                    hx-post="{{path}}/send-soeknad"
-                    hx-vals='{"avdoed": "{{avdoed}}", "barnListe": {{barn}}}'
-                    hx-swap="innerHTML"
-                    hx-target="#sendSoknadResult-{{avdoed}}"
+            <button id="soknad-{{avdoed}}"
+                    class="btn me-1 btn-info"
             >
                 Send
             </button>

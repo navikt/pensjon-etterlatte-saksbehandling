@@ -1,4 +1,5 @@
 import {
+  Alert,
   BodyShort,
   ConfirmationPanel,
   ErrorMessage,
@@ -202,6 +203,10 @@ const Virkningstidspunkt = (props: {
               <Heading level="3" size="small">
                 Hva er virkningstidspunkt for behandlingen?
               </Heading>
+
+              {!foersteDoedsdato() && (
+                <Alert variant="warning">Det er anbefalt å registrere dødsdato før du setter virkningstidspunkt.</Alert>
+              )}
 
               {erBosattUtland && (
                 <DatoVelger

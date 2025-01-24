@@ -51,33 +51,6 @@ class VedtaksvurderingRepository(
             this.block(it)
         }
 
-    fun hentVedtakTilSamordning(
-        sakId: SakId,
-        tx: TransactionalSession? = null,
-    ): Vedtak? =
-        tx.session {
-            hent(
-                queryString = """
-            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
-                tilbakekreving, klage 
-            FROM vedtak 
-            WHERE sakid = :sakId
-            AND vedtakstatus = :vedtakStatus
-            ORDER BY datoattestert DESC
-            LIMIT 1
-            """,
-                params =
-                    mapOf(
-                        "sakId" to sakId.sakId,
-                        "vedtakStatus" to VedtakStatus.TIL_SAMORDNING.name,
-                    ),
-            ) {
-                it.toVedtak(emptyList())
-            }
-        }
-
     fun opprettVedtak(
         opprettVedtak: OpprettVedtak,
         tx: TransactionalSession? = null,
@@ -235,7 +208,7 @@ class VedtaksvurderingRepository(
                             ?.let(Date::valueOf),
                     "type" to it.type.name,
                     "beloep" to it.beloep,
-                    "regelverk" to it.regelverk?.name,
+                    "regelverk" to it.regelverk.name,
                 ),
         ).let { query -> tx.run(query.asUpdate) }
     }

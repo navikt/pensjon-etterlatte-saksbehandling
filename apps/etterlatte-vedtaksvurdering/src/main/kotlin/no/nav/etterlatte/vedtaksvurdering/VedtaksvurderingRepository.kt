@@ -7,6 +7,7 @@ import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -50,33 +51,6 @@ class VedtaksvurderingRepository(
             this.block(it)
         }
 
-    fun hentVedtakTilSamordning(
-        sakId: SakId,
-        tx: TransactionalSession? = null,
-    ): Vedtak? =
-        tx.session {
-            hent(
-                queryString = """
-            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
-                tilbakekreving, klage 
-            FROM vedtak 
-            WHERE sakid = :sakId
-            AND vedtakstatus = :vedtakStatus
-            ORDER BY datoattestert DESC
-            LIMIT 1
-            """,
-                params =
-                    mapOf(
-                        "sakId" to sakId.sakId,
-                        "vedtakStatus" to VedtakStatus.TIL_SAMORDNING.name,
-                    ),
-            ) {
-                it.toVedtak(emptyList())
-            }
-        }
-
     fun opprettVedtak(
         opprettVedtak: OpprettVedtak,
         tx: TransactionalSession? = null,
@@ -94,7 +68,7 @@ class VedtaksvurderingRepository(
                                 "beregningsresultat" to it.beregning?.toJson(),
                                 "avkorting" to it.avkorting?.toJson(),
                                 "vilkaarsresultat" to it.vilkaarsvurdering?.toJson(),
-                                "revurderingsaarsak" to it.revurderingAarsak?.toJson(),
+                                "revurderingsaarsak" to it.revurderingAarsak?.name,
                                 "revurderinginfo" to it.revurderingInfo?.toJson(),
                                 "opphoer_fom" to it.opphoerFraOgMed?.atDay(1),
                             )
@@ -234,7 +208,7 @@ class VedtaksvurderingRepository(
                             ?.let(Date::valueOf),
                     "type" to it.type.name,
                     "beloep" to it.beloep,
-                    "regelverk" to it.regelverk?.name,
+                    "regelverk" to it.regelverk.name,
                 ),
         ).let { query -> tx.run(query.asUpdate) }
     }
@@ -570,7 +544,7 @@ class VedtaksvurderingRepository(
                             beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
                             avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
                             utbetalingsperioder = utbetalingsperioder,
-                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { objectMapper.readValue(it) },
+                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { Revurderingaarsak.valueOf(it) },
                             revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
                             opphoerFraOgMed = sqlDateOrNull("opphoer_fom")?.toLocalDate()?.let { YearMonth.from(it) },
                         )

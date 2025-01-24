@@ -3,11 +3,12 @@ package no.nav.etterlatte.libs.common.vilkaarsvurdering
 enum class VilkaarType(
     val rekkefoelge: Int,
     val tittel: String,
+    val gjelderAvoded: Boolean = false,
 ) {
     // Barnepensjon gammelt regelverk
     BP_FORMAAL(10, "Lever barnet?"),
-    BP_DOEDSFALL_FORELDER(100, "Dødsfall forelder"),
-    BP_YRKESSKADE_AVDOED(200, "Yrkesskade"),
+    BP_DOEDSFALL_FORELDER(100, "Dødsfall forelder", gjelderAvoded = true),
+    BP_YRKESSKADE_AVDOED(200, "Yrkesskade", gjelderAvoded = true),
     BP_ALDER_BARN(300, "Barnets alder"),
     BP_ALDER_BARN_UNNTAK_UTDANNING(301, "Ja. Barnet er foreldreløs og har utdanning som hovedbeskjeftigelse"),
     BP_ALDER_BARN_UNNTAK_LAERLING_PRAKTIKANT(
@@ -22,50 +23,55 @@ enum class VilkaarType(
         402,
         "Ja. Den avdøde har mindre enn 20 års botid, men har opptjent rett til tilleggspensjon",
     ),
-    BP_FORTSATT_MEDLEMSKAP_UNNTAK_YRKESSKADE(403, "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom"),
+    BP_FORTSATT_MEDLEMSKAP_UNNTAK_YRKESSKADE(403, "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom", gjelderAvoded = true),
     BP_FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRELOEST_BARN_I_KULL_MEDLEM_TRYGDEN(
         404,
         "Ja. Minst ett av barna i et foreldreløst barnekull er medlem i trygden",
     ),
-    BP_VURDERING_AV_EKSPORT(450, "Vurdering av eksport"),
-    BP_FORUTGAAENDE_MEDLEMSKAP(500, "Avdødes forutgående medlemskap - Folketrygden"),
+    BP_VURDERING_AV_EKSPORT(450, "Vurdering av eksport", gjelderAvoded = true),
+    BP_FORUTGAAENDE_MEDLEMSKAP(500, "Avdødes forutgående medlemskap - Folketrygden", gjelderAvoded = true),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR(
         501,
         """
         Ja. Avdøde var medlem ved dødsfallet og hadde ikke fylt 26 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR(
         502,
         """
         Ja. Avdøde var medlem ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_HALV_MINSTEPENSJON(
         503,
         """
         Ja. Avdøde var medlem ved dødsfallet og kunne fått en ytelse på minst 1 G (har minst 20 års medlemskap, eller opptjent rett til tilleggspensjon høyere enn særtillegget)
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_AVTALEFESTET_PENSJON(
         504,
         """
         Ja. Avdøde hadde tidsrom med avtalefestet pensjon med statstilskott, som skal likestilles med tidsrom med pensjon fra folketrygden
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
-    BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_YRKESSKADE(505, "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom"),
+    BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_YRKESSKADE(505, "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom", gjelderAvoded = true),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_LOVFESTET_PENSJONSORDNING(
         506,
         """
         Ja. Avdøde hadde tidsrom med pensjon fra en lovfestet pensjonsordning som er tilpasset folketrygden ved at det ikke gis ordinær barnepensjon
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
-    BP_FORUTGAAENDE_MEDLEMSKAP_EOES(600, "Avdødes forutgående medlemskap - EØS/avtaleland"),
+    BP_FORUTGAAENDE_MEDLEMSKAP_EOES(600, "Avdødes forutgående medlemskap - EØS/avtaleland", gjelderAvoded = true),
 
     // Barnepensjon nytt regelverk
     BP_FORMAAL_2024(10, "Lever barnet?"),
-    BP_DOEDSFALL_FORELDER_2024(100, "Dødsfall forelder"),
-    BP_YRKESSKADE_AVDOED_2024(200, "Yrkesskade"),
+    BP_DOEDSFALL_FORELDER_2024(100, "Dødsfall forelder", gjelderAvoded = true),
+    BP_YRKESSKADE_AVDOED_2024(200, "Yrkesskade", gjelderAvoded = true),
     BP_ALDER_BARN_2024(300, "Barnets alder"),
     BP_ALDER_BARN_UNNTAK_YS_GAMMELT_REGELVERK(
         301,
@@ -79,45 +85,54 @@ enum class VilkaarType(
         Ja. Den avdøde har mindre enn 20 års botid, men har minimum fem poengår. Trygdetid beregnes bare etter faktiske poengår
         """.trimIndent(),
     ),
-    BP_FORTSATT_MEDLEMSKAP_UNNTAK_YRKESSKADE_2024(403, "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom"),
+    BP_FORTSATT_MEDLEMSKAP_UNNTAK_YRKESSKADE_2024(403, "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom", gjelderAvoded = true),
     BP_FORTSATT_MEDLEMSKAP_UNNTAK_FORELDRELOEST_BARN_I_KULL_MEDLEM_TRYGDEN_2024(
         404,
         "Ja. Minst ett av barna i et foreldreløst barnekull er medlem i trygden",
     ),
-    BP_VURDERING_AV_EKSPORT_2024(450, "Vurdering av eksport"),
-    BP_FORUTGAAENDE_MEDLEMSKAP_2024(500, "Avdødes forutgående medlemskap - Folketrygden"),
+    BP_VURDERING_AV_EKSPORT_2024(450, "Vurdering av eksport", gjelderAvoded = true),
+    BP_FORUTGAAENDE_MEDLEMSKAP_2024(500, "Avdødes forutgående medlemskap - Folketrygden", gjelderAvoded = true),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR_2024(
         501,
         """
         Ja. Avdøde var medlem ved dødsfallet og hadde ikke fylt 26 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR_2024(
         502,
         """
         Ja. Avdøde var medlem ved dødsfallet og hadde vært medlem etter fylte 16 år med unntak av 5 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_HALV_MINSTEPENSJON_2024(
         503,
         """
         Ja. Avdøde var medlem ved dødsfallet og kunne fått en ytelse på minst 1 G (har minst 20 års medlemskap, eller opptjent rett til tilleggspensjon høyere enn særtillegget)
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_AVTALEFESTET_PENSJON_2024(
         504,
         """
         Ja. Avdøde hadde tidsrom med avtalefestet pensjon med statstilskott, som skal likestilles med tidsrom med pensjon fra folketrygden
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
-    BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_YRKESSKADE_2024(505, "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom"),
+    BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_YRKESSKADE_2024(
+        505,
+        "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom",
+        gjelderAvoded = true,
+    ),
     BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_LOVFESTET_PENSJONSORDNING_2024(
         506,
         """
         Ja. Avdøde hadde tidsrom med pensjon fra en lovfestet pensjonsordning som er tilpasset folketrygden ved at det ikke gis ordinær barnepensjon
         """.trimIndent(),
+        gjelderAvoded = true,
     ),
-    BP_FORUTGAAENDE_MEDLEMSKAP_EOES_2024(600, "Avdødes forutgående medlemskap - EØS/avtaleland"),
+    BP_FORUTGAAENDE_MEDLEMSKAP_EOES_2024(600, "Avdødes forutgående medlemskap - EØS/avtaleland", gjelderAvoded = true),
 
     // Omstillingsstønad
     OMS_ETTERLATTE_LEVER(90, "Lever den etterlatte?"),

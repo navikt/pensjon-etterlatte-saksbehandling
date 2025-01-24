@@ -9,7 +9,7 @@ include(
     "apps:etterlatte-testdata",
     "apps:etterlatte-testdata-behandler",
     "apps:etterlatte-utbetaling",
-    "apps:etterlatte-oppdater-behandling",
+    "apps:etterlatte-behandling-kafka",
     "apps:etterlatte-beregning",
     "apps:etterlatte-beregning-kafka",
     "apps:etterlatte-vedtaksvurdering",

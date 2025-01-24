@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: etterlatte-oppdater-behandling
+  name: etterlatte-behandling-kafka
   namespace: etterlatte
   labels:
     team: etterlatte
@@ -28,7 +28,7 @@ spec:
   secureLogs:
     enabled: true
   kafka:
-    pool: nav-prod
+    pool: nav-dev
   azure:
     application:
       enabled: true
@@ -41,12 +41,11 @@ spec:
     min: 1
   env:
     - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.etterlatteytelser
+      value: etterlatte.dodsmelding
     - name: KAFKA_RESET_POLICY
-      #sette tilbake til none senere
       value: latest
     - name: BEHANDLING_AZURE_SCOPE
-      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -55,3 +54,8 @@ spec:
         - application: etterlatte-behandling
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+    inbound:
+      rules:
+        - application: azure-token-generator # https://docs.nais.io/auth/entra-id/how-to/generate/?h=token+azure
+          namespace: aura
+          cluster: dev-gcp

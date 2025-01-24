@@ -3,7 +3,7 @@
 Applikasjonen lytter på livshendelser fra PDL sitt
 Kafka-topic `pdl.leesah-v1` ([Livet er en strøm av hendelser](https://pdldocs-navno.msappproxy.net/ekstern/index.html#))
 . Hendelser av bestemte typer blir håndtert, og det blir postet events til Rapids & Rivers som plukkes opp av
-applikasjonen `etterlatte-oppdater-behandling`.
+applikasjonen `etterlatte-behandling-kafka`.
 
 Bygget med Kotlin, Rapids & Rivers og [Ktor](https://ktor.io/).
 
@@ -21,7 +21,7 @@ kan PDL sende ut livshendelser.
 Når en livshendelse observeres, sjekkes det hvilken type hendelse det er. Om hendelsen er av en type som kan håndteres,
 hentes først fnr for personen hendelsen gjelder fra PDL ved REST-kall til applikasjonen `etterlatte-pdltjenester`.
 Videre postes det en melding til Rapids & Rivers med hendelsesnøkkel: `PDL:PERSONHENDELSE`.
-Applikasjonen `etterlatte-oppdater-behandling` lytter på disse hendelsene.
+Applikasjonen `etterlatte-behandling-kafka` lytter på disse hendelsene.
 
 ## Kom i gang
 

@@ -10,6 +10,9 @@ servers:
   - url: https://etterlatte-api.intern.dev.nav.no/api/v1
   - url: https://etterlatte-api.intern.prod.nav.no/api/v1
 
+security:
+  - BearerAuth: []
+
 paths:
   /vedtak:
     post:
@@ -92,3 +95,12 @@ components:
           type: string
           format: decimal
           description: BigDecimal
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      description: "Legg til token uten Bearer prefiks"
+      name: bearerAuth
+      in: header
+      scheme: bearer
+      bearerFormat: JWT

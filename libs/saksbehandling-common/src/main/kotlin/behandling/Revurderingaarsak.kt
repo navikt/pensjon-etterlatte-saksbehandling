@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.GcpEnv
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.DevOgProd
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.IngenMiljoe
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.KunIDev
@@ -114,11 +115,4 @@ enum class Revurderingaarsak(
     }
 
     fun kanLagreFritekstFeltForManuellRevurdering(): Boolean = this in listOf<Revurderingaarsak>(ANNEN, ANNEN_UTEN_BREV)
-}
-
-enum class GcpEnv(
-    val env: String,
-) {
-    PROD("prod-gcp"),
-    DEV("dev-gcp"),
 }

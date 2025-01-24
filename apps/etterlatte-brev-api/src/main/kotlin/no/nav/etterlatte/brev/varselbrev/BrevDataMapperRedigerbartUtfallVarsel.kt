@@ -7,12 +7,9 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
-import java.time.YearMonth
 
 object BrevDataMapperRedigerbartUtfallVarsel {
     fun hentBrevDataRedigerbar(
@@ -31,27 +28,8 @@ object BrevDataMapperRedigerbartUtfallVarsel {
 
         SakType.OMSTILLINGSSTOENAD ->
             if (revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT) {
-                requireNotNull(detaljertBehandling) {
-                    throw InternfeilException("Mangler behandling – får ikke utledet dødsdato")
-                }
-
-                val erTidligereFamiliepleier = detaljertBehandling.tidligereFamiliepleier?.svar == true
-
-                val doedsdatoEllerOpphoertPleieforhold =
-                    if (erTidligereFamiliepleier) {
-                        detaljertBehandling.tidligereFamiliepleier!!.opphoertPleieforhold!!
-                    } else {
-                        grunnlag
-                            ?.hentAvdoede()
-                            ?.singleOrNull()
-                            ?.hentDoedsdato()
-                            ?.verdi
-                    }
-
-                val virk = detaljertBehandling.virkningstidspunkt?.dato
-                val er12mndvarsel = virk!!.isAfter(YearMonth.from(doedsdatoEllerOpphoertPleieforhold!!.plusMonths(12)))
-
-                OmstillingsstoenadAktivitetspliktVarselUtfall(er12mndvarsel)
+                val er12Mndvarsel = gjelderAktivitetspliktVarselOver12mnd(detaljertBehandling, grunnlag)
+                OmstillingsstoenadAktivitetspliktVarselUtfall(er12Mndvarsel)
             } else {
                 ManueltBrevData()
             }

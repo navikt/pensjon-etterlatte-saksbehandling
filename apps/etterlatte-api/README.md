@@ -148,7 +148,7 @@ Som for omstillingsstønad.
       ```
 
 
-## Internt i Nav
+# Internt i Nav
 
 Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, men da på `/api/pensjon/vedtak` osv.
 

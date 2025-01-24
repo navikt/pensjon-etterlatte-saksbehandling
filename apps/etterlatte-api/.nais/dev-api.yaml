@@ -194,6 +194,8 @@ spec:
             roles:
               - les-oms-samordning-vedtak
               - les-bp-samordning-vedtak
+              - les-oms-vedtak
+              - les-bp-vedtak
         - application: tokenx-token-generator
           namespace: aura
           cluster: dev-gcp

@@ -50,6 +50,7 @@ import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.tilgangsstyring.TilgangsServiceOppdaterer
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -68,6 +69,7 @@ class BehandlingFactory(
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val behandlingInfoService: BehandlingInfoService,
+    private val tilgangsService: TilgangsServiceOppdaterer,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -258,6 +260,8 @@ class BehandlingFactory(
                         },
                     gruppeId = persongalleri.avdoed.firstOrNull(),
                 )
+
+            tilgangsService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
             return BehandlingOgOppgave(behandling, oppgave) {
                 behandlingHendelser.sendMeldingForHendelseStatistikk(
                     behandling.toStatistikkBehandling(persongalleri),

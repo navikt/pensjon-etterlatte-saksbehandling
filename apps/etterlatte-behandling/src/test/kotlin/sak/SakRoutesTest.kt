@@ -58,7 +58,7 @@ internal class SakRoutesTest {
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val sakService = mockk<SakService>(relaxUnitFun = true)
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>(relaxUnitFun = true)
-    private val tilgangService = mockk<TilgangService>(relaxUnitFun = true)
+    private val tilgangService = mockk<TilgangServiceSjekker>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveService>(relaxUnitFun = true)
     private val requestLogger = mockk<BehandlingRequestLogger>()
     private val hendelseDao = mockk<HendelseDao>()

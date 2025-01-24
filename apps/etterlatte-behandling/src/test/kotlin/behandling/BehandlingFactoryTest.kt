@@ -64,6 +64,7 @@ import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.tilgangsstyring.TilgangsServiceOppdaterer
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import org.junit.jupiter.api.AfterEach
@@ -129,6 +130,7 @@ internal class BehandlingFactoryTest {
             vilkaarsvurderingService = vilkaarsvurderingService,
             kommerBarnetTilGodeService = kommerBarnetTilGodeServiceMock,
             behandlingInfoService = mockk(),
+            tilgangsService = TilgangsServiceOppdaterer(sakServiceMock, mockk(relaxed = true), mockk(relaxed = true)),
         )
 
     @BeforeEach
@@ -233,8 +235,10 @@ internal class BehandlingFactoryTest {
         Assertions.assertEquals(sakId1, behandlingOpprettes.captured.sakId)
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
 
-        verify(exactly = 1) {
+        verify(exactly = 2) {
             sakServiceMock.finnSak(any())
+        }
+        verify(exactly = 1) {
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
@@ -326,8 +330,10 @@ internal class BehandlingFactoryTest {
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
-        verify(exactly = 1) {
+        verify(exactly = 2) {
             sakServiceMock.finnSak(any())
+        }
+        verify(exactly = 1) {
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
@@ -437,8 +443,10 @@ internal class BehandlingFactoryTest {
                     user.brukerTokenInfo,
                 )
         }
-        verify(exactly = 2) {
+        verify(exactly = 3) {
             sakServiceMock.finnSak(any())
+        }
+        verify(exactly = 2) {
             behandlingDaoMock.hentBehandlingerForSak(any())
         }
         verify(exactly = 1) {
@@ -880,13 +888,16 @@ internal class BehandlingFactoryTest {
             )
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
+
         verify(exactly = 2) {
-            sakServiceMock.finnSak(any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.hentBehandlingerForSak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
+        }
+        verify(exactly = 4) {
+            sakServiceMock.finnSak(any())
         }
     }
 
@@ -1052,12 +1063,14 @@ internal class BehandlingFactoryTest {
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
         verify(exactly = 2) {
-            sakServiceMock.finnSak(any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.hentBehandlingerForSak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
+        }
+        verify(exactly = 3) {
+            sakServiceMock.finnSak(any())
         }
     }
 
@@ -1138,9 +1151,11 @@ internal class BehandlingFactoryTest {
         Assertions.assertEquals(sakId1, behandlingOpprettes.captured.sakId)
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
 
+        verify(exactly = 2) {
+            sakServiceMock.finnSak(any())
+        }
         verify(exactly = 1) {
             sakServiceMock.finnEllerOpprettSakMedGrunnlag(persongalleri.soeker, SakType.BARNEPENSJON)
-            sakServiceMock.finnSak(sak.id)
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.hentBehandling(any())

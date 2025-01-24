@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.sak.TilgangService
+import no.nav.etterlatte.sak.TilgangServiceSjekker
 import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.tilgangsstyring.sjekkSkrivetilgang
 
@@ -29,7 +29,7 @@ inline val PipelineContext<*, ApplicationCall>.berOmSkrivetilgang: Boolean
             "Skrivetilgangparameter er ikke i query params",
         )
 
-internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
+internal fun Route.tilgangRoutes(tilgangService: TilgangServiceSjekker) {
     route("/$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()

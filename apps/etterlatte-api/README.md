@@ -112,15 +112,6 @@ personen vedtaket gjelder og på vedtakets virkningsdato.
 }
 ```
 
-## Internt i Nav
-
-Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, men da på `/api/pensjon/vedtak` osv.
-
-### Vedtak API (kun for bruk internt i nav)
-
-[Dokumentert med swagger](src/main/resources/vedtakSwaggerV1.yaml)
-
----
 
 ## Eksempler
 ### Løpende omstillingsstønad
@@ -155,6 +146,17 @@ Som for omstillingsstønad.
          "barnepensjon": true
        }
       ```
+
+
+## Internt i Nav
+
+Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, men da på `/api/pensjon/vedtak` osv.
+
+### Vedtak API (kun for bruk internt i nav)
+
+[Dokumentert med swagger](src/main/resources/vedtakSwaggerV1.yaml)
+
+---
 
 
 

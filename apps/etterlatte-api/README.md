@@ -14,7 +14,7 @@ til tjenestepensjonsleverandørene (KLP, SPK, m.fl.), slik at de kan gjøre sine
 
 Nytt scope for etterlatte-api med Maskinporten _nav:etterlatteytelser/vedtaksinformasjon.read_
 
-Oppbygging av maskinporten scope:
+Oppbygging av maskinporten scope: (se yaml maskinporten.scopes.exposes)
 ```
 scope := <prefix>:<subscope>
 subscope := <product><separator><name>

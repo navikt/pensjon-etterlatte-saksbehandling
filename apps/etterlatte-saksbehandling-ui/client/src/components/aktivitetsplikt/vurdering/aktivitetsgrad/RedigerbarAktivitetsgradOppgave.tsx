@@ -95,7 +95,7 @@ export const RedigerbarAktivitsgradKnapper = ({
 
       {aktivitet.skjoennsmessigVurdering && (
         <VStack gap="4">
-          <Label>Trenger bruker ekstra oppfølging?</Label>
+          <Label>Vil bruker være selvforsørget etter stønaden utløper?</Label>
           <BodyShort>{teksterAktivitetspliktSkjoennsmessigVurdering[aktivitet.skjoennsmessigVurdering]}</BodyShort>
         </VStack>
       )}

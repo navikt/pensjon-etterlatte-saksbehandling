@@ -1,14 +1,7 @@
-# Etterlatte API
+# Etterlatte API dokumentasjon
 
-App som tilbyr endepunkter til eksterne tjenester.
+App som tilbyr endepunkter til eksterne konsumenter.
 
-## Vedtak API
-
-[Dokumentert med swagger](src/main/resources/vedtakSwaggerV1.yaml)
-
-
-
----
 
 # samordning-vedtak-api
 
@@ -123,6 +116,13 @@ personen vedtaket gjelder og på vedtakets virkningsdato.
 
 Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, men da på `/api/pensjon/vedtak` osv.
 
+### Vedtak API (kun for bruk internt i nav)
+
+[Dokumentert med swagger](src/main/resources/vedtakSwaggerV1.yaml)
+
+---
+
+## Eksempler
 ### Løpende omstillingsstønad
 
 Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før
@@ -155,6 +155,9 @@ Som for omstillingsstønad.
          "barnepensjon": true
        }
       ```
+
+
+
 
 ## Kom i gang
 

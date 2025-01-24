@@ -34,26 +34,38 @@ class BehandlingEndretEnhetRiver(
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
-    ) = try {
-        val tekniskTid = parseTekniskTid(packet, logger)
-        val referanse = UUID.fromString(packet[REFERANSE_ENDRET_ENHET_KEY].textValue())
-        val nyEnhet = Enhetsnummer(packet[NY_ENHET_KEY].textValue())
+    ) {
+        try {
+            val tekniskTid = parseTekniskTid(packet, logger)
+            val referanse =
+                try {
+                    UUID.fromString(packet[REFERANSE_ENDRET_ENHET_KEY].textValue())
+                } catch (e: Exception) {
+                    logger.warn(
+                        "Referanse for oppgave med endret enhet er ikke en uuid " +
+                            "(fikk ${packet[REFERANSE_ENDRET_ENHET_KEY].textValue()}). " +
+                            "Hopper over endret enhet-meldingen.",
+                    )
+                    return
+                }
+            val nyEnhet = Enhetsnummer(packet[NY_ENHET_KEY].textValue())
 
-        service
-            .registrerEndretEnhetForReferanse(referanse, nyEnhet, tekniskTid)
-            ?.also {
-                context.publish(
-                    mapOf(
-                        StatistikkhendelseType.REGISTRERT.lagParMedEventNameKey(),
-                        "sak_rad" to objectMapper.writeValueAsString(it),
-                    ).toJson(),
-                )
-            } ?: logger.info("Ikke registrert statistikk på pakken ${packet.correlationId}")
-    } catch (e: Exception) {
-        logger.error(
-            """
-            Kunne ikke mappe ut statistikk for endret enhet-hendelse i pakken med korrelasjonsId ${packet.correlationId}
-            """.trimIndent(),
-        )
+            service
+                .registrerEndretEnhetForReferanse(referanse, nyEnhet, tekniskTid)
+                ?.also {
+                    context.publish(
+                        mapOf(
+                            StatistikkhendelseType.REGISTRERT.lagParMedEventNameKey(),
+                            "sak_rad" to objectMapper.writeValueAsString(it),
+                        ).toJson(),
+                    )
+                } ?: logger.info("Ikke registrert statistikk på pakken ${packet.correlationId}")
+        } catch (e: Exception) {
+            logger.error(
+                """
+                Kunne ikke mappe ut statistikk for endret enhet-hendelse i pakken med korrelasjonsId ${packet.correlationId}
+                """.trimIndent(),
+            )
+        }
     }
 }

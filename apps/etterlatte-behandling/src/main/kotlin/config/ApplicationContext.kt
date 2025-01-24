@@ -39,10 +39,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
-import no.nav.etterlatte.behandling.jobs.OppgaveEnhetEndretDao
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
-import no.nav.etterlatte.behandling.jobs.SendEndretEnhet
-import no.nav.etterlatte.behandling.jobs.SendMeldingOmOppgaverUnderBehandlingJob
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -613,21 +610,6 @@ internal class ApplicationContext(
             aktivitetspliktBrevDao = aktivitetspliktBrevDao,
             brevApiKlient = brevApiKlient,
             behandlingService = behandlingService,
-        )
-
-    // Utsending av meldinger for enheter oppgaver under behandling
-    private val sendEndretEnhet =
-        SendEndretEnhet(
-            behandlingHendelserKafkaProducer = behandlingsHendelser,
-            oppgaveEnhetEndretDao = OppgaveEnhetEndretDao(connectionAutoclosing = autoClosingDatabase),
-            oppgaveEndringerDao = oppgaveDaoEndringer,
-        )
-    val sendMeldingOmOppgaverUnderBehandlingJob: SendMeldingOmOppgaverUnderBehandlingJob =
-        SendMeldingOmOppgaverUnderBehandlingJob(
-            erLeader = { leaderElectionKlient.isLeader() },
-            sendEndretEnhet = sendEndretEnhet,
-            sakTilgangDao = sakTilgangDao,
-            dataSource = dataSource,
         )
 
     // Jobs

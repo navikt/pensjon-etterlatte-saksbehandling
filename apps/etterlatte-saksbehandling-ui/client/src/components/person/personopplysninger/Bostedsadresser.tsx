@@ -11,6 +11,10 @@ export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: Bostedsad
   const sortedBostedsadresse = bostedsadresse?.sort((a: Bostedsadresse, b: Bostedsadresse) => {
     if (a.gyldigFraOgMed && b.gyldigFraOgMed) {
       return compareDesc(new Date(a.gyldigFraOgMed), new Date(b.gyldigFraOgMed))
+    } else if (a.gyldigFraOgMed && !b.gyldigFraOgMed) {
+      return -1
+    } else if (!a.gyldigFraOgMed && b.gyldigFraOgMed) {
+      return 1
     }
     return 0
   })

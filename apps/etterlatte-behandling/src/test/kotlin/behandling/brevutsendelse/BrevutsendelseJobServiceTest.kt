@@ -32,7 +32,7 @@ internal class BrevutsendelseJobServiceTest(
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(mockk()), mockk(), null)
 
     private val brevutsendelseDao: BrevutsendelseDao = BrevutsendelseDao(ConnectionAutoclosingTest(dataSource))
-    private val sakDao: SakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { mockk() })
+    private val sakDao: SakSkrivDao = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
     private val brevutsendelseService: BrevutsendelseService = mockk()
 
     private val brevutsendelseJobService: BrevutsendelseJobService =

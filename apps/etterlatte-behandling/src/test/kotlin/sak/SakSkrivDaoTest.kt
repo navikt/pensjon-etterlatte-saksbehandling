@@ -65,7 +65,7 @@ internal class SakSkrivDaoTest(
     fun beforeAll() {
         val connectionAutoclosing = ConnectionAutoclosingTest(dataSource)
         sakLesDao = SakLesDao(connectionAutoclosing)
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         tilgangService = TilgangServiceSjekkerImpl(SakTilgangDao(dataSource))
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
@@ -447,7 +447,7 @@ internal class SakSkrivDaoTest(
     }
 
     @Test
-    fun `oppdater ident på sak`() {
+    fun `oppdater ident på sak med lagring av endring`() {
         val opprinneligIdent = Random.nextLong().toString()
         val sak = sakSkrivDao.opprettSak(opprinneligIdent, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
@@ -546,5 +546,10 @@ internal class SakSkrivDaoTest(
         sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdToSlutt)) shouldBe listOf(sak2.id)
         sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdEnStart)) shouldBe emptyList()
         sakLesDao.finnSakerMedPleieforholdOpphoerer(YearMonth.from(pleieForholdToStart)) shouldBe emptyList()
+    }
+
+    @Test
+    fun `skal opprette sak med lagring av endring`() {
+        sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
     }
 }

@@ -94,7 +94,7 @@ internal class GenerellBehandlingServiceTest(
         dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
         hendelseDao = spyk(HendelseDao(ConnectionAutoclosingTest(dataSource)))
         behandlingRepo =
             BehandlingDao(

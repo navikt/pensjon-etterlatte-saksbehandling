@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -19,20 +20,10 @@ import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_ENHET
 import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_IDENT
 import no.nav.etterlatte.sak.Saksendring.Endringstype.ENDRE_SKJERMING
 import no.nav.etterlatte.sak.Saksendring.Endringstype.OPPRETT_SAK
-import java.sql.ResultSet
 
 class SakSkrivDao(
     private val sakendringerDao: SakendringerDao,
 ) {
-    private val mapTilSak: ResultSet.() -> Sak = {
-        Sak(
-            sakType = enumValueOf(getString("sakType")),
-            ident = getString("fnr"),
-            id = SakId(getLong("id")),
-            enhet = Enhetsnummer(getString("enhet")),
-        )
-    }
-
     fun oppdaterAdresseBeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
@@ -72,7 +63,7 @@ class SakSkrivDao(
                     statement
                         .executeQuery()
                         .singleOrNull(mapTilSak),
-                ) { "Kunne ikke opprette sak for fnr: $fnr" }
+                ) { "Kunne ikke opprette sak for fnr: ${fnr.maskerFnr()}" }
             }
         }
 

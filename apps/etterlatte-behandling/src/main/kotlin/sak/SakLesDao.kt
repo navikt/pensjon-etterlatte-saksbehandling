@@ -23,15 +23,6 @@ import java.time.YearMonth
 class SakLesDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    private val mapTilSak: ResultSet.() -> Sak = {
-        Sak(
-            sakType = enumValueOf(getString("sakType")),
-            ident = getString("fnr"),
-            id = SakId(getLong("id")),
-            enhet = Enhetsnummer(getString("enhet")),
-        )
-    }
-
     fun finnSakerMedGraderingOgSkjerming(sakIder: List<SakId>): List<SakMedGradering> =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
@@ -216,4 +207,13 @@ class SakLesDao(
                 SakId(getLong("sak_id"))
             }
         }
+}
+
+internal val mapTilSak: ResultSet.() -> Sak = {
+    Sak(
+        sakType = enumValueOf(getString("sakType")),
+        ident = getString("fnr"),
+        id = SakId(getLong("id")),
+        enhet = Enhetsnummer(getString("enhet")),
+    )
 }

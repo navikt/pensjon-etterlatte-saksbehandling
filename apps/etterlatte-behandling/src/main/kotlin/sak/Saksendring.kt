@@ -1,14 +1,14 @@
 package no.nav.etterlatte.sak
 
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import sak.KomplettSak
 import java.util.UUID
 
 data class Saksendring(
     val id: UUID,
     val endringstype: Endringstype,
-    val foer: Sak?,
-    val etter: Sak,
+    val foer: KomplettSak?,
+    val etter: KomplettSak,
     val tidspunkt: Tidspunkt,
     val ident: String,
     val identtype: Identtype,

@@ -76,7 +76,7 @@ internal class TilgangServiceTest(
     fun beforeAll() {
         tilgangService = TilgangServiceSjekkerImpl(SakTilgangDao(dataSource))
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))
-        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
+        sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)))
 
         sakService =
             SakServiceImpl(

@@ -12,13 +12,13 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.AvdoedSoeknad
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Samtykke
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoekerBarnSoeknad
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoeknadstypeOpplysning
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utbetalingsinformasjon
-import no.nav.etterlatte.opplysningerfrasoknad.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
+import no.nav.etterlatte.opplysningerfrasoknad.uthenter.Opplysningsuthenter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

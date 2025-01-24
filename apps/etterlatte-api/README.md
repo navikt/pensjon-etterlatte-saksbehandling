@@ -14,6 +14,18 @@ til tjenestepensjonsleverandørene (KLP, SPK, m.fl.), slik at de kan gjøre sine
 
 Nytt scope for etterlatte-api med Maskinporten _nav:etterlatteytelser/vedtaksinformasjon.read_
 
+Oppbygging av maskinporten scope:
+```
+scope := <prefix>:<subscope>
+subscope := <product><separator><name>
+separator=/
+organization:product/name.accesstype
+nav:etterlatteytelser/vedtaksinformasjon.read
+```
+NB: The default separator is :. If name contains /, the default separator is instead /.
+
+Eks: https://docs.nais.io/auth/maskinporten/reference/#scope-naming
+
 etterlatte-samordning-vedtak(gammel og skal saneres) krever token utstedt av Maskinporten med scope _nav:
 etterlatteytelser:vedtaksinformasjon.read_
 
@@ -73,11 +85,11 @@ personen vedtaket gjelder og på vedtakets virkningsdato.
 | prod-eksterne | etterlatte-api.nav.no             |
 | prod-nav      | etterlatte-api.intern.nav.no      |
 
-**deprecated** (fjernes 1 mars 2025)
-| Miljø | Ingress |
-|:------|:------------------------------------------------|
-| dev | etterlatte-samordning-vedtak.ekstern.dev.nav.no |
-| prod | etterlatte-samordning-vedtak.nav.no |
+#### **deprecated** (fjernes 1 mars 2025)
+| Miljø | Ingress                                          |
+|:------|:------------------------------------------------ |
+| dev   | etterlatte-samordning-vedtak.ekstern.dev.nav.no  |
+| prod  | etterlatte-samordning-vedtak.nav.no              |
 
 ## Feilkoder
 

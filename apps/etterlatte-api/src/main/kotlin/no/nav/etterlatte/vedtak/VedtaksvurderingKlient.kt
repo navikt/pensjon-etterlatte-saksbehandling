@@ -25,7 +25,7 @@ class VedtaksvurderingKlient(
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
 
-    private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/api/vedtak/for/eksternt"
+    private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/vedtak/fnr"
 
     suspend fun hentVedtak(request: Folkeregisteridentifikator): List<VedtakDto> {
         sikkerlogger().info("Henter vedtak med fnr=$request")

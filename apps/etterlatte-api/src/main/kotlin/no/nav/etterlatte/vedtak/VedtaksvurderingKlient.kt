@@ -7,7 +7,9 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -32,6 +34,7 @@ class VedtaksvurderingKlient(
             httpClient
                 .post {
                     url(vedtaksvurderingUrl)
+                    contentType(ContentType.Application.Json)
                     setBody(request)
                 }.body()
         } catch (e: ClientRequestException) {

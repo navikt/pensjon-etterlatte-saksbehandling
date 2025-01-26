@@ -465,4 +465,23 @@ internal class VedtaksvurderingRepositoryTest(
             it.soeker shouldBe soeker2
         }
     }
+
+    @Test
+    fun `skal hente vedtak for fnr selv om ikke saktype er spesifisert`() {
+        val soeker1 = Folkeregisteridentifikator.of(FNR_1)
+
+        listOf(
+            opprettVedtak(
+                sakId = SakId(10),
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                status = VedtakStatus.IVERKSATT,
+            ),
+        ).map { repository.opprettVedtak(it) }
+            .forEach { repository.iverksattVedtak(it.behandlingId) }
+
+        val results = repository.hentFerdigstilteVedtak(soeker1)
+
+        results.size shouldBe 1
+    }
 }

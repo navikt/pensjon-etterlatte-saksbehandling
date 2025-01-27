@@ -18,5 +18,5 @@ Når hendelser fra PDL sender ut en melding om en personhendelse vi muligens er 
 opp sendes med et HTTP-kall til behandlings-appen.
 
 ### Opplysninger fra søknad
-Når `etterlatte-gyldig-soeknad` har opprettet en behandling vil den sende ut melding om nye opplysninger tilknyttet 
-søknaden. Dette blir så behandlet i `etterlatte-behandling-kafka` og deretter sendt til `etterlatte-grunnlag`. 
+Når `OpprettBehandlingRiver.kt` har opprettet en behandling, vil den sende ut melding om nye opplysninger tilknyttet 
+søknaden. Dette blir så behandlet i `StartUthentingFraSoeknadRiver.kt` og deretter plukket opp av `etterlatte-grunnlag`. 

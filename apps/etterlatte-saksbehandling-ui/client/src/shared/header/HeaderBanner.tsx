@@ -13,11 +13,11 @@ export const HeaderBanner = () => {
     <InternalHeader data-theme="light">
       <InternalHeader.Title href="/">
         <HStack gap="4">
-          <div>
-            {erDesember && (
+          {erDesember && (
+            <div>
               <img src="/Christmas_tree_02.png" alt="juletre" style={{ height: '1.5rem', width: '1.5rem' }} />
-            )}
-          </div>
+            </div>
+          )}
           Gjenny
           {erDesember && (
             <img

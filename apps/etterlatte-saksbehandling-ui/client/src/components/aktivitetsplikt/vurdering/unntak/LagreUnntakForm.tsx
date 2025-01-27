@@ -38,25 +38,27 @@ export const LagreUnntakForm = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(sendInn)}>
-        <UnntakAktivitetsplikt vurderingType={vurderingType} erVarigUnntak={erVarigUnntak} />
-        <HStack gap="4">
-          {!!onAvbryt && (
-            <Button variant="secondary" onClick={onAvbryt}>
-              Avbryt
+        <VStack gap="4">
+          <UnntakAktivitetsplikt vurderingType={vurderingType} erVarigUnntak={erVarigUnntak} />
+          <HStack gap="4">
+            {!!onAvbryt && (
+              <Button variant="secondary" onClick={onAvbryt}>
+                Avbryt
+              </Button>
+            )}
+            <Button
+              variant="primary"
+              type="submit"
+              icon={<FloppydiskIcon aria-hidden />}
+              loading={isPending(lagreUnntakStatus)}
+            >
+              Lagre
             </Button>
+          </HStack>
+          {isFailure(lagreUnntakStatus) && (
+            <ApiErrorAlert>Kunne ikke lagre unntak: {lagreUnntakStatus.error.detail}</ApiErrorAlert>
           )}
-          <Button
-            variant="primary"
-            type="submit"
-            icon={<FloppydiskIcon aria-hidden />}
-            loading={isPending(lagreUnntakStatus)}
-          >
-            Lagre
-          </Button>
-        </HStack>
-        {isFailure(lagreUnntakStatus) && (
-          <ApiErrorAlert>Kunne ikke lagre unntak: {lagreUnntakStatus.error.detail}</ApiErrorAlert>
-        )}
+        </VStack>
       </form>
     </FormProvider>
   )

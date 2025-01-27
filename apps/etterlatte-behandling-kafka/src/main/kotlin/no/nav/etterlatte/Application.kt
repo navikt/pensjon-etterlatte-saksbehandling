@@ -3,6 +3,8 @@ package no.nav.etterlatte
 import no.nav.etterlatte.brev.OppdaterDoedshendelseBrevDistribuert
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbRiver
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
+import no.nav.etterlatte.opplysningerfrasoknad.StartUthentingFraSoeknadRiver
+import no.nav.etterlatte.opplysningerfrasoknad.uthenter.Opplysningsuthenter
 import no.nav.etterlatte.pdl.PdlHendelserRiver
 import no.nav.etterlatte.regulering.FinnSakerTilReguleringRiver
 import no.nav.etterlatte.regulering.OmregningBrevDistribusjonRiver
@@ -44,4 +46,5 @@ private fun settOppRivers(
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
     AarligInntektsjusteringJobbRiver(rapidsConnection, behandlingservice, featureToggleService)
     OmregningBrevDistribusjonRiver(rapidsConnection, behandlingservice)
+    StartUthentingFraSoeknadRiver(rapidsConnection, Opplysningsuthenter())
 }

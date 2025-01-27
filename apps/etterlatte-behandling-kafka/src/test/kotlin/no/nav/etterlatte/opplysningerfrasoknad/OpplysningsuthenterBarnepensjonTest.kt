@@ -34,7 +34,11 @@ internal class OpplysningsuthenterBarnepensjonTest {
             Opplysningsuthenter().lagOpplysningsListe(
                 objectMapper.treeToValue(
                     objectMapper.readTree(
-                        OpplysningsuthenterBarnepensjonTest::class.java.getResource("/melding.json")!!.readText(),
+                        OpplysningsuthenterBarnepensjonTest::class.java
+                            .getResource(
+                                "/opplysningerfrasoeknad/barnepensjon_trenger_behandling.json",
+                            )!!
+                            .readText(),
                     )!!["@skjema_info"],
                 ),
                 SoeknadType.BARNEPENSJON,

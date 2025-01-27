@@ -16,7 +16,6 @@ jobs:
           - gyldig-soeknad
           - hendelser-pdl
           - oppdater-behandling
-          - opplysninger-fra-soeknad
           - pdltjenester
           - saksbehandling-ui
           - statistikk

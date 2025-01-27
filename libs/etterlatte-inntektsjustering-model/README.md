@@ -37,7 +37,7 @@ flowchart TB
     end
 
     subgraph Gjenny
-        subgraph gyldig-soeknad
+        subgraph etterlatte-behandling-kafka
 
         end
         subgraph etterlatte-behandling
@@ -51,11 +51,11 @@ flowchart TB
             service-manuelt --> OppgaveService
         end
 
-        gyldig-soeknad --> behandling-route
+        etterlatte-behandling-kafka --> behandling-route
     end
 
     selvbetjening-motta --> kafka-innsendt
-    kafka-innsendt --> gyldig-soeknad
+    kafka-innsendt --> etterlatte-behandling-kafka
     service-automatisk --> kafka-omregning
     InntektsjusteringSelvbetjeningService --> kafka-fullfoert
     kafka-fullfoert --> selvbetjening-fullfoert

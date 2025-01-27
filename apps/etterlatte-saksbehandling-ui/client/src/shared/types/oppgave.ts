@@ -91,6 +91,7 @@ export enum Oppgavetype {
   AARLIG_INNTEKTSJUSTERING = 'AARLIG_INNTEKTSJUSTERING',
   INNTEKTSOPPLYSNING = 'INNTEKTSOPPLYSNING',
   MANUELL_UTSENDING_BREV = 'MANUELL_UTSENDING_BREV',
+  OPPFOELGING = 'OPPFOELGING',
 }
 
 export const oppgavestatuserForRedigerbarOppgave: Array<Oppgavestatus> = [

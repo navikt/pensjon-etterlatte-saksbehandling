@@ -1,10 +1,10 @@
 package no.nav.etterlatte.tilgangsstyring
 
-import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -57,8 +57,8 @@ class TilgangsServiceOppdatererTest {
         val sakId = SakId(1L)
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
         every { sakService.finnSak(sakId) } returns sak
-        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } returns 1
-        every { sakService.settEnhetOmAdresebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
+        every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just runs
+        every { sakService.settEnhetOmAdresebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just runs
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 1) {
@@ -77,8 +77,8 @@ class TilgangsServiceOppdatererTest {
         val sakId = SakId(1L)
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
         every { sakService.finnSak(sakId) } returns sak
-        every { sakService.markerSakerMedSkjerming(any(), any()) } just Runs
-        every { sakService.oppdaterEnhetForSaker(any()) } just Runs
+        every { sakService.markerSakerMedSkjerming(any(), any()) } just runs
+        every { sakService.oppdaterEnhetForSaker(any()) } just runs
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 1) {

@@ -3,7 +3,6 @@ include(
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-behandling",
     "apps:etterlatte-gyldig-soeknad",
-    "apps:etterlatte-opplysninger-fra-soeknad",
     "apps:etterlatte-egne-ansatte-lytter",
     "apps:etterlatte-institusjonsopphold",
     "apps:etterlatte-testdata",

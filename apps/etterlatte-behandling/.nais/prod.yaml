@@ -213,7 +213,6 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-tidshendelser
-        - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold

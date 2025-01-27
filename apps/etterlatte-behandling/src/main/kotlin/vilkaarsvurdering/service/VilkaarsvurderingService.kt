@@ -10,11 +10,15 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -151,6 +155,7 @@ class VilkaarsvurderingService(
         kopierFraBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         kopierResultat: Boolean = true,
+        kopierKunVilkaarGjeldendeAvdoede: Boolean = false,
     ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
@@ -171,7 +176,7 @@ class VilkaarsvurderingService(
 
                     else ->
                         oppdaterVilkaar(
-                            kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
+                            kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(kopierKunVilkaarGjeldendeAvdoede),
                             behandling = behandling,
                             virkningstidspunkt = virkningstidspunkt,
                         )
@@ -437,6 +442,103 @@ class VilkaarsvurderingService(
         } else {
             BarnepensjonVilkaar1967.inngangsvilkaar()
         }
+    }
+
+    fun finnBehandlingMedVilkaarsvurderingForSammeAvdoede(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): UUID? {
+        val gjeldendeBehandling = behandlingService.hentBehandling(behandlingId) ?: throw Exception("Fant ingen behandling") // TODO
+        if (gjeldendeBehandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
+            logger.info("Støtter ikke å kopiere vilkårsvurdering for annet enn førstegangsbehandling")
+            return null
+        }
+
+        val avdoedeForGjeldendeBehandling: List<Folkeregisteridentifikator> =
+            runBlocking {
+                grunnlagKlient
+                    .hentGrunnlagForBehandling(behandlingId, brukerTokenInfo)
+            }.hentAvdoede()
+                .mapNotNull { it.hentFoedselsnummer()?.verdi }
+
+        if (avdoedeForGjeldendeBehandling.isEmpty()) {
+            logger.info("Ingen avdøde funnet for gjeldende behandling $behandlingId")
+            return null
+        }
+
+        logger.info("${avdoedeForGjeldendeBehandling.size} er funnet for gjeldende behandling med id $behandlingId")
+        sikkerlogger().info(
+            "Avdøde ${avdoedeForGjeldendeBehandling.joinToString(", ")} er funnet for gjeldende behandling med id $behandlingId",
+        )
+
+        return behandlingerMedVilkaarsvurderingForAvdoede(avdoedeForGjeldendeBehandling)
+            .firstOrNull { it != behandlingId }
+    }
+
+    private fun behandlingerMedVilkaarsvurderingForAvdoede(avdoedeForGjeldendeBehandling: List<Folkeregisteridentifikator>): List<UUID> {
+        logger.info("Henter saker med felles avdøde fra grunnlag")
+        val sakerMedFellesAvdoede =
+            avdoedeForGjeldendeBehandling.flatMap { avdoed ->
+                val personSakOgRolle = runBlocking { grunnlagKlient.hentPersonSakOgRolle(avdoed.value) }
+                personSakOgRolle.sakiderOgRoller
+                    .filter { it.rolle == Saksrolle.AVDOED }
+                    .map { it.sakId }
+                    .toSet()
+            }
+
+        logger.info("Fant ${sakerMedFellesAvdoede.size} saker med felles avdøde fra grunnlag")
+
+        // Basert på sakene, henter ut behandlinger som ikke er avbrutt og ikke er i statuser før fullført vilkårsvurdering
+        val aktuelleBehandlinger =
+            sakerMedFellesAvdoede.mapNotNull { sakId ->
+                behandlingService
+                    .hentBehandlingerForSak(sakId)
+                    .asSequence()
+                    .filter { it.sak.sakType == SakType.BARNEPENSJON }
+                    .filter { it.status !in listOf(BehandlingStatus.AVBRUTT, BehandlingStatus.OPPRETTET) }
+                    .sortedByDescending { it.behandlingOpprettet }
+                    .firstOrNull()
+            }
+
+        logger.info("Fant ${aktuelleBehandlinger.size} aktuelle behandlinger som har vilkårsvurdering")
+        if (aktuelleBehandlinger.isEmpty()) {
+            return emptyList()
+        }
+
+        return aktuelleBehandlinger.mapNotNull { behandling ->
+            val vilkaarsvurdering = repository.hent(behandling.id)
+            vilkaarsvurdering?.behandlingId
+        }
+    }
+
+    fun kopierVilkaarForAvdoede(
+        behandlingId: UUID,
+        kildeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Vilkaarsvurdering {
+        logger.info("Kopierer avdødes vilkår fra behandling $kildeBehandlingId til behandling $behandlingId")
+        slettVilkaarsvurdering(behandlingId, brukerTokenInfo)
+
+        val nyVilkaarsvurderingMedKopierteVilkaarForAvdoedes =
+            kopierVilkaarsvurdering(
+                behandlingId = behandlingId,
+                kopierFraBehandling = kildeBehandlingId,
+                brukerTokenInfo = brukerTokenInfo,
+                kopierResultat = false,
+                kopierKunVilkaarGjeldendeAvdoede = true,
+            )
+
+        logger.info(
+            "Antall vilkår som er kopiert er ${nyVilkaarsvurderingMedKopierteVilkaarForAvdoedes.vilkaarsvurdering.vilkaar.count {
+                it.kopiertFraVilkaarId != null
+            }} av totalt ${nyVilkaarsvurderingMedKopierteVilkaarForAvdoedes.vilkaarsvurdering.vilkaar.count()}",
+        )
+
+        // Sett tilbake status (vilkårsvurdering er ikke oppfylt da kopiering her kun tar noen vilkår og ikke totalvurdering)
+        behandlingStatus.settOpprettet(behandlingId, brukerTokenInfo, dryRun = false)
+
+        logger.info("Ny vilkårsvurdering med kopierte vilkår er opprettet")
+        return nyVilkaarsvurderingMedKopierteVilkaarForAvdoedes.vilkaarsvurdering
     }
 }
 

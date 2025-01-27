@@ -42,7 +42,7 @@ class ApplicationBuilder {
             ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
-    private val brevapiKlient = BrevapiKlient(config, brevhttpKlient) // todo må ha install(HttpTimeout)
+    private val brevapiKlient = BrevapiKlient(config, brevhttpKlient)
     private val grunnlagKlient = GrunnlagKlient(config, grunnlagHttpKlient)
     private val connection =
         initRogR(

@@ -65,33 +65,26 @@ class BrevService(
                 brevData = req.brevParametereAutomatisk.brevDataMapping(),
             )
         val brevId = brev.id
-        val brevStatus = brev.status
         try {
-            if (brevStatus.ikkeFerdigstilt()) {
-                pdfGenerator.ferdigstillOgGenererPDF(
-                    brevId,
-                    bruker,
-                    avsenderRequest = { _, _, _ ->
-                        AvsenderRequest(
-                            saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
-                            attestantIdent = req.avsenderRequest.attestantIdent,
-                            sakenhet = enhetsnummer,
-                        )
-                    },
-                    brevKodeMapping = { req.brevKode },
-                    brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
-                )
-            }
+            pdfGenerator.ferdigstillOgGenererPDF(
+                brevId,
+                bruker,
+                avsenderRequest = { _, _, _ ->
+                    AvsenderRequest(
+                        saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
+                        attestantIdent = req.avsenderRequest.attestantIdent,
+                        sakenhet = enhetsnummer,
+                    )
+                },
+                brevKodeMapping = { req.brevKode },
+                brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+            )
 
-            if (brevStatus.ikkeJournalfoert()) {
-                logger.info("Journalfører brev med id: $brevId")
-                journalfoerBrevService.journalfoer(brevId, bruker)
-            }
+            logger.info("Journalfører brev med id: $brevId")
+            journalfoerBrevService.journalfoer(brevId, bruker)
 
-            if (brevStatus.ikkeDistribuert()) {
-                logger.info("Distribuerer brev med id: $brevId")
-                distribuerer.distribuer(brevId, bruker = bruker)
-            }
+            logger.info("Distribuerer brev med id: $brevId")
+            distribuerer.distribuer(brevId, bruker = bruker)
 
             logger.info("Brevid: $brevId er distribuert")
             return BrevDistribusjonResponse(brevId, true)

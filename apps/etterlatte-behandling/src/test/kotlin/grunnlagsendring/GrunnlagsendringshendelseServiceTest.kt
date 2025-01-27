@@ -671,7 +671,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns sakIder
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } just runs
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
@@ -719,7 +719,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns sakIder
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } just runs
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
@@ -770,7 +770,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.FORTROLIG)
 
         coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns sakIder
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } just runs
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {

@@ -570,7 +570,7 @@ internal class SakSkrivDaoTest(
 
         with(endringForSak) {
             foer shouldBe null
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
             endringstype shouldBe Saksendring.Endringstype.OPPRETT_SAK
             identtype shouldBe Saksendring.Identtype.SAKSBEHANDLER
             ident shouldBe "Børre"
@@ -592,7 +592,7 @@ internal class SakSkrivDaoTest(
         with(endringForOppdatering) {
             foer?.id shouldBe sak.id
             etter.id shouldBe sak.id
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
             foer?.adressebeskyttelse shouldBe null
             etter.adressebeskyttelse shouldBe AdressebeskyttelseGradering.FORTROLIG
         }
@@ -616,7 +616,7 @@ internal class SakSkrivDaoTest(
         with(endringForSak1) {
             foer?.enhet shouldBe Enheter.PORSGRUNN.enhetNr
             etter.enhet shouldBe Enheter.AALESUND.enhetNr
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak1.id)
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak1.id)!!
         }
         val endringForSak2 =
             sakendringerDao
@@ -625,7 +625,7 @@ internal class SakSkrivDaoTest(
         with(endringForSak2) {
             foer?.enhet shouldBe Enheter.NORDLAND_BODOE.enhetNr
             etter.enhet shouldBe Enheter.KLAGE_VEST.enhetNr
-            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak2.id)
+            etter shouldBeEqual sakendringerDao.hentKomplettSak(sak2.id)!!
         }
     }
 }

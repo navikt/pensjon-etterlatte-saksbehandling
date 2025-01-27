@@ -88,7 +88,7 @@ interface SakService {
     fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int
+    )
 
     fun sjekkSkjerming(
         fnr: String,
@@ -487,7 +487,7 @@ class SakServiceImpl(
     override fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
+    ) = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
     override fun sjekkSkjerming(
         fnr: String,

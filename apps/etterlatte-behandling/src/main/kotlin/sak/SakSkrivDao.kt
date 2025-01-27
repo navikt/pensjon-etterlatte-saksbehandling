@@ -27,22 +27,21 @@ class SakSkrivDao(
     fun oppdaterAdresseBeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int =
-        sakendringerDao.oppdaterSak(sakId, ENDRE_ADRESSEBESKYTTELSE) { connection ->
-            with(connection) {
-                val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
-                statement.setString(1, adressebeskyttelseGradering.name)
-                statement.setSakId(2, sakId)
-                statement.executeUpdate().also {
-                    logger.info(
-                        "Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId, antall oppdatert er $it",
-                    )
-                    krev(it > 0) {
-                        "Kunne ikke oppdaterAdresseBeskyttelse for id sakid $sakId"
-                    }
+    ) = sakendringerDao.oppdaterSak(sakId, ENDRE_ADRESSEBESKYTTELSE) { connection ->
+        with(connection) {
+            val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
+            statement.setString(1, adressebeskyttelseGradering.name)
+            statement.setSakId(2, sakId)
+            statement.executeUpdate().also {
+                logger.info(
+                    "Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId, antall oppdatert er $it",
+                )
+                krev(it > 0) {
+                    "Kunne ikke oppdaterAdresseBeskyttelse for id sakid $sakId"
                 }
             }
         }
+    }
 
     fun opprettSak(
         fnr: String,

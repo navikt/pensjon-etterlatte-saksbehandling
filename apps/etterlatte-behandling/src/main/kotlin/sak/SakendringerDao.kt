@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
-import no.nav.etterlatte.libs.database.single
+import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.sak.Saksendring.Endringstype
 import no.nav.etterlatte.sak.Saksendring.Identtype
@@ -25,20 +25,6 @@ import java.util.UUID
 class SakendringerDao(
     private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
-    internal fun oppdaterSak(
-        id: SakId,
-        endringstype: Endringstype,
-        block: (connection: Connection) -> Unit,
-    ): Int {
-        val foer = krevIkkeNull(hentKomplettSak(id)) { "Må ha en sak for å kunne endre den" }
-        connectionAutoclosing.hentConnection { connection ->
-            block(connection)
-        }
-        val etter = krevIkkeNull(hentKomplettSak(id)) { "Må ha en sak etter endring" }
-
-        return lagreSaksendring(saksendring(endringstype, foer, etter))
-    }
-
     internal fun opprettSak(
         endringstype: Endringstype,
         block: (connection: Connection) -> Sak,
@@ -46,9 +32,13 @@ class SakendringerDao(
         connectionAutoclosing
             .hentConnection { connection ->
                 block(connection)
-            }.also { sakId ->
+            }.also { sak ->
                 lagreSaksendring(
-                    saksendring(endringstype, null, hentKomplettSak(sakId.id)),
+                    saksendring(
+                        endringstype,
+                        null,
+                        krevIkkeNull(hentKomplettSak(sak.id)) { "Sak med ID ${sak.id} ble ikke funnet etter oppretting" },
+                    ),
                 )
             }
 
@@ -56,18 +46,46 @@ class SakendringerDao(
         sakIdList: Collection<SakId>,
         endringstype: Endringstype,
         block: (connection: Connection) -> Unit,
-    ) = sakIdList.forEach { sakId ->
-        oppdaterSak(sakId, endringstype, block)
+    ) {
+        val sakerFoer =
+            sakIdList.map {
+                krevIkkeNull(hentKomplettSak(it)) { "Fant ikke sak med ID $it. Må ha en sak for å kunne endre den" }
+            }
+
+        connectionAutoclosing.hentConnection { connection ->
+            block(connection)
+        }
+
+        val sakerEtter =
+            sakIdList.map {
+                krevIkkeNull(hentKomplettSak(it)) { "Fant ikke sak med ID $it. Må ha en sak etter endring" }
+            }
+
+        sakerEtter.forEach { sakEtter ->
+            lagreSaksendring(
+                saksendring(
+                    endringstype,
+                    sakerFoer.singleOrNull { it.id == sakEtter.id },
+                    sakEtter,
+                ),
+            )
+        }
     }
 
-    internal fun hentKomplettSak(sakId: SakId): KomplettSak =
+    internal fun oppdaterSak(
+        id: SakId,
+        endringstype: Endringstype,
+        block: (connection: Connection) -> Unit,
+    ) = oppdaterSaker(listOf(id), endringstype, block)
+
+    internal fun hentKomplettSak(sakId: SakId): KomplettSak? =
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement = prepareStatement("SELECT * FROM sak WHERE id = ?")
                 statement.setLong(1, sakId.sakId)
                 statement
                     .executeQuery()
-                    .single {
+                    .singleOrNull {
                         KomplettSak(
                             id = SakId(getLong("id")),
                             ident = getString("fnr"),

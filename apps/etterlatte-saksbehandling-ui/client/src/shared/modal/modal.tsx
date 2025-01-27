@@ -45,7 +45,7 @@ export const GeneriskModal = ({
             onClick={() => {
               setModalisOpen(false)
             }}
-            loading={!!loading}
+            disabled={!!loading}
           >
             {tekstKnappNei}
           </Button>

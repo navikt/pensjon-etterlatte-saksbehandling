@@ -51,7 +51,7 @@ const val ANTALL = "antall"
 const val PLEIEFORHOLDET_OPPHOERTE_PARAMETER = "opphoerte"
 
 internal fun Route.sakSystemRoutes(
-    tilgangService: TilgangService,
+    tilgangService: TilgangServiceSjekker,
     sakService: SakService,
     behandlingService: BehandlingService,
     requestLogger: BehandlingRequestLogger,
@@ -205,7 +205,7 @@ class SakIkkeFunnetException(
     )
 
 internal fun Route.sakWebRoutes(
-    tilgangService: TilgangService,
+    tilgangService: TilgangServiceSjekker,
     sakService: SakService,
     behandlingService: BehandlingService,
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService,

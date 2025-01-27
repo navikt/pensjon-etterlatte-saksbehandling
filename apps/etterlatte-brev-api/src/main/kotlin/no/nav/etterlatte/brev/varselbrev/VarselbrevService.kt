@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.opprettAvsenderRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.pdf.PDFGenerator
@@ -25,6 +26,7 @@ internal class VarselbrevService(
     private val behandlingService: BehandlingService,
     private val pdfGenerator: PDFGenerator,
     private val brevDataMapperFerdigstillVarsel: BrevDataMapperFerdigstillVarsel,
+    private val grunnlagKlient: GrunnlagKlient,
 ) {
     fun hentVarselbrev(behandlingId: UUID) = db.hentBrevForBehandling(behandlingId, Brevtype.VARSEL)
 
@@ -36,6 +38,7 @@ internal class VarselbrevService(
         val sakType = behandlingService.hentSak(sakId, brukerTokenInfo).sakType
         val brevkode = hentBrevkode(sakType, behandlingId, brukerTokenInfo)
         val behandling = behandlingService.hentBehandling(behandlingId, brukerTokenInfo)
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
 
         val brevdata =
             BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
@@ -43,7 +46,10 @@ internal class VarselbrevService(
                 brukerTokenInfo,
                 behandling.utlandstilknytning?.type,
                 behandling.revurderingsaarsak,
+                grunnlag,
+                behandling,
             )
+
         return brevoppretter
             .opprettBrevSomHarInnhold(
                 sakId = sakId,
@@ -52,25 +58,6 @@ internal class VarselbrevService(
                 brevKode = brevkode,
                 brevData = brevdata,
             ).first
-    }
-
-    private suspend fun hentBrevkode(
-        sakType: SakType,
-        behandlingId: UUID?,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = if (sakType == SakType.BARNEPENSJON) {
-        Brevkoder.BP_VARSEL
-    } else {
-        val erAktivitetsplikt =
-            behandlingId
-                ?.let { behandlingService.hentBehandling(behandlingId, brukerTokenInfo) }
-                ?.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT
-
-        if (erAktivitetsplikt) {
-            Brevkoder.OMS_VARSEL_AKTIVITETSPLIKT
-        } else {
-            Brevkoder.OMS_VARSEL
-        }
     }
 
     suspend fun ferdigstillOgGenererPDF(
@@ -104,4 +91,23 @@ internal class VarselbrevService(
         },
         brevDataMapping = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
+
+    private suspend fun hentBrevkode(
+        sakType: SakType,
+        behandlingId: UUID?,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = if (sakType == SakType.BARNEPENSJON) {
+        Brevkoder.BP_VARSEL
+    } else {
+        val erAktivitetsplikt =
+            behandlingId
+                ?.let { behandlingService.hentBehandling(behandlingId, brukerTokenInfo) }
+                ?.revurderingsaarsak == Revurderingaarsak.AKTIVITETSPLIKT
+
+        if (erAktivitetsplikt) {
+            Brevkoder.OMS_VARSEL_AKTIVITETSPLIKT
+        } else {
+            Brevkoder.OMS_VARSEL
+        }
+    }
 }

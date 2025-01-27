@@ -37,6 +37,7 @@ enum class BehandlingHendelseType : EventnameHendelseType {
     PAA_VENT,
     AV_VENT,
     AVBRUTT,
+    ENDRET_ENHET,
     ;
 
     override fun lagEventnameForType(): String = "BEHANDLING:${this.name}"
@@ -44,6 +45,8 @@ enum class BehandlingHendelseType : EventnameHendelseType {
 
 const val STATISTIKKBEHANDLING_RIVER_KEY = "behandling"
 const val BEHANDLING_ID_PAA_VENT_RIVER_KEY = "behandling_vent"
+const val REFERANSE_ENDRET_ENHET_KEY = "referanse_endret_enhet"
+const val NY_ENHET_KEY = "ny_enhet"
 const val PAA_VENT_AARSAK_KEY = "paaVentAarsak"
 
 enum class PaaVentAarsak {

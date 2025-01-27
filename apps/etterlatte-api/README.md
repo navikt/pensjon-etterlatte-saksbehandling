@@ -1,14 +1,7 @@
-# Etterlatte API
+# Etterlatte API dokumentasjon
 
-App som tilbyr endepunkter til eksterne tjenester.
+App som tilbyr endepunkter til eksterne konsumenter.
 
-## Vedtak API
-
-[Dokumentert med swagger](src/main/resources/vedtakSwaggerV1.yaml)
-
-
-
----
 
 # samordning-vedtak-api
 
@@ -20,6 +13,18 @@ til tjenestepensjonsleverandørene (KLP, SPK, m.fl.), slik at de kan gjøre sine
 #### Maskinporten
 
 Nytt scope for etterlatte-api med Maskinporten _nav:etterlatteytelser/vedtaksinformasjon.read_
+
+Oppbygging av maskinporten scope: (se yaml maskinporten.scopes.exposes)
+```
+scope := <prefix>:<subscope>
+subscope := <product><separator><name>
+separator=/
+organization:product/name.accesstype
+nav:etterlatteytelser/vedtaksinformasjon.read
+```
+NB: The default separator is :. If name contains /, the default separator is instead /.
+
+Eks: https://docs.nais.io/auth/maskinporten/reference/#scope-naming
 
 etterlatte-samordning-vedtak(gammel og skal saneres) krever token utstedt av Maskinporten med scope _nav:
 etterlatteytelser:vedtaksinformasjon.read_
@@ -80,11 +85,11 @@ personen vedtaket gjelder og på vedtakets virkningsdato.
 | prod-eksterne | etterlatte-api.nav.no             |
 | prod-nav      | etterlatte-api.intern.nav.no      |
 
-**deprecated** (fjernes 1 mars 2025)
-| Miljø | Ingress |
-|:------|:------------------------------------------------|
-| dev | etterlatte-samordning-vedtak.ekstern.dev.nav.no |
-| prod | etterlatte-samordning-vedtak.nav.no |
+#### **deprecated** (fjernes 1 mars 2025)
+| Miljø | Ingress                                          |
+|:------|:------------------------------------------------ |
+| dev   | etterlatte-samordning-vedtak.ekstern.dev.nav.no  |
+| prod  | etterlatte-samordning-vedtak.nav.no              |
 
 ## Feilkoder
 
@@ -119,10 +124,8 @@ personen vedtaket gjelder og på vedtakets virkningsdato.
 }
 ```
 
-## Internt i Nav
 
-Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, men da på `/api/pensjon/vedtak` osv.
-
+## Eksempler
 ### Løpende omstillingsstønad
 
 Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før
@@ -155,6 +158,20 @@ Som for omstillingsstønad.
          "barnepensjon": true
        }
       ```
+
+
+# Internt i Nav
+
+Endepunktene som er nevnt over finnes også til bruk for Nav-interne systemer, men da på `/api/pensjon/vedtak` osv.
+
+### Vedtak API (kun for bruk internt i nav)
+
+[Dokumentert med swagger](src/main/resources/vedtakSwaggerV1.yaml)
+
+---
+
+
+
 
 ## Kom i gang
 

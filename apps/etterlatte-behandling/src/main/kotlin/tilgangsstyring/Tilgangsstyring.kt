@@ -29,7 +29,7 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
-import no.nav.etterlatte.sak.TilgangService
+import no.nav.etterlatte.sak.TilgangServiceSjekker
 
 class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
@@ -158,7 +158,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
 
 // Disse extension funksjonene er ikke gjort i hooken ovenfor pga casting overhead
 suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInternal(
-    tilgangService: TilgangService,
+    tilgangService: TilgangServiceSjekker,
     onSuccess: (fnr: Folkeregisteridentifikator) -> Unit,
 ) {
     val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()

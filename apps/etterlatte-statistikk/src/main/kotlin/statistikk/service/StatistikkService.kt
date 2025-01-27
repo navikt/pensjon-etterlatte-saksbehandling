@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class StatistikkService(
@@ -525,6 +527,40 @@ class StatistikkService(
             }
         }
         return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
+    }
+
+    fun registrerEndretEnhetForReferanse(
+        referanse: UUID,
+        nyEnhet: Enhetsnummer,
+        tekniskTid: LocalDateTime,
+    ): SakRad? {
+        val sisteRadForReferanse = sakRepository.hentSisteRad(referanse)
+        if (sisteRadForReferanse == null) {
+            logger.warn("Fikk melding om behandling statistikk ikke kjenner til, med referanse $referanse")
+            return null
+        }
+
+        return if (sisteRadForReferanse.ansvarligEnhet == nyEnhet) {
+            logger.info(
+                "Behandlingen med referanse $referanse har allerede enhet $nyEnhet på siste registrering. " +
+                    "Oppdaterer ikke statistikken.",
+            )
+            null
+        } else {
+            val tekniskTidForOppdatertEnhet =
+                if (sisteRadForReferanse.tekniskTid >= tekniskTid.toTidspunkt()) {
+                    sisteRadForReferanse.tekniskTid.plus(1, ChronoUnit.SECONDS)
+                } else {
+                    tekniskTid.toTidspunkt()
+                }
+            val nyRad =
+                sisteRadForReferanse.copy(
+                    ansvarligEnhet = nyEnhet,
+                    status = BehandlingHendelseType.ENDRET_ENHET.name,
+                    tekniskTid = tekniskTidForOppdatertEnhet,
+                )
+            return sakRepository.lagreRad(nyRad)
+        }
     }
 
     fun registrerStatistikkBehandlingPaaVentHendelse(

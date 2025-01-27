@@ -90,6 +90,13 @@ interface SakService {
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
 
+    fun sjekkSkjerming(
+        fnr: String,
+        sakId: SakId,
+        type: SakType,
+        overstyrendeEnhet: Enhetsnummer?,
+    )
+
     fun hentEnkeltSakForPerson(fnr: String): Sak
 
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
@@ -109,6 +116,11 @@ interface SakService {
     ): Sak
 
     fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
+
+    fun settEnhetOmAdresebeskyttet(
+        sak: Sak,
+        gradering: AdressebeskyttelseGradering,
+    )
 }
 
 class ManglerTilgangTilEnhet(
@@ -370,7 +382,7 @@ class SakServiceImpl(
         return sak
     }
 
-    private fun settEnhetOmAdresebeskyttet(
+    override fun settEnhetOmAdresebeskyttet(
         sak: Sak,
         gradering: AdressebeskyttelseGradering,
     ) {
@@ -477,7 +489,7 @@ class SakServiceImpl(
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
-    private fun sjekkSkjerming(
+    override fun sjekkSkjerming(
         fnr: String,
         sakId: SakId,
         type: SakType,

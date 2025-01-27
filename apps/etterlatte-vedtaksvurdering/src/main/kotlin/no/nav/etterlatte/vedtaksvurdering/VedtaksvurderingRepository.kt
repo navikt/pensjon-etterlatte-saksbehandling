@@ -51,33 +51,6 @@ class VedtaksvurderingRepository(
             this.block(it)
         }
 
-    fun hentVedtakTilSamordning(
-        sakId: SakId,
-        tx: TransactionalSession? = null,
-    ): Vedtak? =
-        tx.session {
-            hent(
-                queryString = """
-            SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
-                datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom,
-                tilbakekreving, klage 
-            FROM vedtak 
-            WHERE sakid = :sakId
-            AND vedtakstatus = :vedtakStatus
-            ORDER BY datoattestert DESC
-            LIMIT 1
-            """,
-                params =
-                    mapOf(
-                        "sakId" to sakId.sakId,
-                        "vedtakStatus" to VedtakStatus.TIL_SAMORDNING.name,
-                    ),
-            ) {
-                it.toVedtak(emptyList())
-            }
-        }
-
     fun opprettVedtak(
         opprettVedtak: OpprettVedtak,
         tx: TransactionalSession? = null,
@@ -235,7 +208,7 @@ class VedtaksvurderingRepository(
                             ?.let(Date::valueOf),
                     "type" to it.type.name,
                     "beloep" to it.beloep,
-                    "regelverk" to it.regelverk?.name,
+                    "regelverk" to it.regelverk.name,
                 ),
         ).let { query -> tx.run(query.asUpdate) }
     }
@@ -346,13 +319,7 @@ class VedtaksvurderingRepository(
 
     fun hentFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
-        sakType: SakType,
-        tx: TransactionalSession? = null,
-    ): List<Vedtak> = hentFerdigstilteVedtak(fnr, listOf(sakType), tx)
-
-    fun hentFerdigstilteVedtak(
-        fnr: Folkeregisteridentifikator,
-        sakType: List<SakType> = listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+        sakType: SakType? = null,
         tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """
@@ -361,8 +328,8 @@ class VedtaksvurderingRepository(
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom
             FROM vedtak  
             WHERE fnr = :fnr 
-            AND saktype in (:saktype)
             AND vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
+            ${if (sakType == null) "" else "AND saktype = :saktype"}
             """
         return tx.session {
             hentListe(
@@ -370,7 +337,7 @@ class VedtaksvurderingRepository(
                 params = {
                     mapOf(
                         "fnr" to fnr.value,
-                        "saktype" to sakType.joinToString { it.name },
+                        "saktype" to sakType?.name,
                     )
                 },
             ) {

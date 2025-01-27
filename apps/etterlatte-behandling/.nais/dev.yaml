@@ -205,7 +205,6 @@ spec:
         - application: etterlatte-statistikk
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold

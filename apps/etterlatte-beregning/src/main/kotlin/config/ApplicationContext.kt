@@ -8,6 +8,8 @@ import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.avkorting.AvkortingTidligAlderspensjonService
 import no.nav.etterlatte.avkorting.MottattInntektsjusteringService
+import no.nav.etterlatte.avkorting.inntektskomponent.InntektskomponentKlient
+import no.nav.etterlatte.avkorting.inntektskomponent.InntektskomponentService
 import no.nav.etterlatte.beregning.AnvendtTrygdetidRepository
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
@@ -29,6 +31,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.sanksjon.SanksjonRepository
 import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.etterlatte.ytelseMedGrunnlag.BeregningOgAvkortingBrevService
@@ -56,6 +59,19 @@ class ApplicationContext {
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
+
+    val inntektskomponentKlient =
+        InntektskomponentKlient(
+            httpClient =
+                httpClientClientCredentials(
+                    azureAppClientId = config.getString("azure.app.client.id"),
+                    azureAppJwk = config.getString("azure.app.jwk"),
+                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                    azureAppScope = config.getString("inntektskomponenten.scope"),
+                ),
+            url = config.getString("inntektskomponenten.url"),
+        )
+    val inntektskomponentService = InntektskomponentService(inntektskomponentKlient)
 
     val sanksjonService =
         SanksjonService(

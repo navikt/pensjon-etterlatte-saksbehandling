@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -33,7 +34,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
@@ -86,7 +86,7 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
                 factory
                     .opprettBehandling(
                         sak.id,
-                        persongalleri(),
+                        defaultPersongalleriGydligeFnr,
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
@@ -260,6 +260,13 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
             vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             behandlingInfoService = mockk(),
-            tilgangsService = OppdaterTilgangService(applicationContext.sakService, mockk(relaxed = true), mockk(relaxed = true)),
+            tilgangsService =
+                OppdaterTilgangService(
+                    applicationContext.sakService,
+                    mockk(relaxed = true),
+                    mockk(relaxed = true),
+                    mockk(relaxed = true),
+                    mockk(relaxed = true),
+                ),
         )
 }

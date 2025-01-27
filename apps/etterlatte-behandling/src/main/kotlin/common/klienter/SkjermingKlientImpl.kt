@@ -13,13 +13,17 @@ import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.Pingable
 import org.slf4j.LoggerFactory
 
-class SkjermingKlient(
+interface SkjermingKlient : Pingable {
+    suspend fun personErSkjermet(fnr: String): Boolean
+}
+
+class SkjermingKlientImpl(
     private val httpClient: HttpClient,
     private val url: String,
-) : Pingable {
+) : SkjermingKlient {
     val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun personErSkjermet(fnr: String): Boolean =
+    override suspend fun personErSkjermet(fnr: String): Boolean =
         httpClient
             .post("$url/skjermet") {
                 accept(ContentType.Application.Json)

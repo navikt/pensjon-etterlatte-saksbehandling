@@ -10,9 +10,11 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -48,6 +50,8 @@ abstract class BehandlingIntegrationTest {
         pdlTjenesterKlient: PdlTjenesterKlient? = null,
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
         testProdusent: TestProdusent<String, String>? = null,
+        skjermingKlient: SkjermingKlient? = null,
+        grunnlagklient: GrunnlagKlient? = null,
     ) {
         mockOAuth2Server.start()
         val props = dbExtension.properties()
@@ -94,11 +98,11 @@ abstract class BehandlingIntegrationTest {
                     ),
                 rapid = testProdusent ?: TestProdusent(),
                 featureToggleService = featureToggleService,
-                skjermingHttpKlient = skjermingHttpClient(),
+                skjermingKlient = skjermingKlient ?: SkjermingKlientTest(),
                 leaderElectionHttpClient = leaderElection(),
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
-                grunnlagKlientImpl = GrunnlagKlientTest(),
+                grunnlagKlientImpl = grunnlagklient ?: GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),

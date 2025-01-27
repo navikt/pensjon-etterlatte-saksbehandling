@@ -33,6 +33,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -52,7 +53,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
@@ -107,7 +107,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 factory
                     .opprettBehandling(
                         sak.id,
-                        persongalleri(),
+                        defaultPersongalleriGydligeFnr,
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),
@@ -165,7 +165,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.REVURDERING,
                 merknad = revurdering.revurderingsaarsak?.lesbar(),
-                gruppeId = "avdoed",
+                gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
@@ -273,7 +273,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.REVURDERING,
                     merknad = revurdering.revurderingsaarsak?.lesbar(),
-                    gruppeId = "avdoed",
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             }
@@ -319,7 +319,14 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
                 kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
                 behandlingInfoService = mockk(),
-                tilgangsService = OppdaterTilgangService(applicationContext.sakService, mockk(relaxed = true), mockk(relaxed = true)),
+                tilgangsService =
+                    OppdaterTilgangService(
+                        applicationContext.sakService,
+                        mockk(relaxed = true),
+                        mockk(relaxed = true),
+                        mockk(relaxed = true),
+                        mockk(relaxed = true),
+                    ),
             )
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -397,7 +404,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.FOERSTEGANGSBEHANDLING,
                     merknad = "2 søsken",
-                    gruppeId = "Avdoed",
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
                 oppgaveService.opprettOppgave(
@@ -406,7 +413,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.REVURDERING,
                     merknad = revurdering.revurderingsaarsak?.lesbar(),
-                    gruppeId = "avdoed",
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.opprettOppgave(
                     referanse = revurdering.id.toString(),
@@ -414,12 +421,12 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                     kilde = OppgaveKilde.BEHANDLING,
                     type = OppgaveType.REVURDERING,
                     merknad = revurdering.revurderingsaarsak?.lesbar(),
-                    gruppeId = "avdoed",
+                    gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
                 )
                 oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any())
                 hendelser.sendMeldingForHendelseStatistikk(
                     behandling.toStatistikkBehandling(
-                        persongalleri(),
+                        defaultPersongalleriGydligeFnr,
                     ),
                     BehandlingHendelseType.OPPRETTET,
                 )
@@ -488,7 +495,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
                 kilde = OppgaveKilde.BEHANDLING,
                 type = OppgaveType.REVURDERING,
                 merknad = revurdering.revurderingsaarsak?.lesbar(),
-                gruppeId = "avdoed",
+                gruppeId = defaultPersongalleriGydligeFnr.avdoed.first(),
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             oppgaveService.hentOppgaverForSak(sak.id)
@@ -974,6 +981,13 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             vilkaarsvurderingService = applicationContext.vilkaarsvurderingService,
             kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
             behandlingInfoService = mockk(),
-            tilgangsService = OppdaterTilgangService(applicationContext.sakService, mockk(relaxed = true), mockk(relaxed = true)),
+            tilgangsService =
+                OppdaterTilgangService(
+                    applicationContext.sakService,
+                    mockk(relaxed = true),
+                    mockk(relaxed = true),
+                    mockk(relaxed = true),
+                    mockk(relaxed = true),
+                ),
         )
 }

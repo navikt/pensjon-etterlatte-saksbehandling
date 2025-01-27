@@ -61,6 +61,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -244,7 +249,7 @@ fun foerstegangsbehandling(
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
-    persongalleri: Persongalleri = persongalleri(),
+    persongalleri: Persongalleri = defaultPersongalleriGydligeFnr,
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
     utlandstilknytning: Utlandstilknytning? = null,
@@ -282,7 +287,7 @@ fun revurdering(
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-    persongalleri: Persongalleri = persongalleri(),
+    persongalleri: Persongalleri = defaultPersongalleriGydligeFnr,
     revurderingAarsak: Revurderingaarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(id),
     virkningstidspunkt: Virkningstidspunkt? = null,
@@ -323,12 +328,22 @@ fun revurdering(
     tidligereFamiliepleier = tidligereFamiliepleier,
 )
 
+val soeker = "11057523044"
+val defaultPersongalleriGydligeFnr =
+    Persongalleri(
+        soeker,
+        INNSENDER_FOEDSELSNUMMER.value,
+        listOf(HELSOESKEN2_FOEDSELSNUMMER.value, HALVSOESKEN_FOEDSELSNUMMER.value),
+        listOf(AVDOED_FOEDSELSNUMMER.value),
+        listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+    )
+
 fun persongalleri(
-    soeker: String = "Soeker",
-    innsender: String = "Innsender",
-    soesken: List<String> = listOf("Soester", "Bror"),
-    avdoed: List<String> = listOf("Avdoed"),
-    gjenlevende: List<String> = listOf("Gjenlevende"),
+    soeker: String = no.nav.etterlatte.soeker,
+    innsender: String = INNSENDER_FOEDSELSNUMMER.value,
+    soesken: List<String> = listOf(HELSOESKEN2_FOEDSELSNUMMER.value, HALVSOESKEN_FOEDSELSNUMMER.value),
+    avdoed: List<String> = listOf(AVDOED_FOEDSELSNUMMER.value),
+    gjenlevende: List<String> = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
 ) = Persongalleri(
     soeker = soeker,
     innsender = innsender,

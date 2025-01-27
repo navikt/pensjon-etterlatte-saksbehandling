@@ -21,7 +21,7 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -109,7 +109,7 @@ internal class EgenAnsattServiceTest(
                 coEvery { grunnlagFinnes(any(), any()) } returns false
             }
         val featureToggleService = mockk<FeatureToggleService>()
-        val skjermingKlient = mockk<SkjermingKlient>()
+        val skjermingKlient = mockk<SkjermingKlientImpl>()
         grunnlagKlient = mockk()
         oppdaterTilgangService = mockk()
         sakLesDao = SakLesDao(ConnectionAutoclosingTest(dataSource))

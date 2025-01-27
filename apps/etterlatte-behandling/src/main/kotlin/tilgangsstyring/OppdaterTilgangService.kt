@@ -14,12 +14,15 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.sak.PersonManglerSak
 import no.nav.etterlatte.sak.SakService
+import org.slf4j.LoggerFactory
 
 class OppdaterTilgangService(
     private val sakService: SakService,
     private val skjermingKlient: SkjermingKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     /**
      * Her skal den høyeste graderingen aldri bli overskredet
      * Fra høyeste til lavest: STRENGT_FORTROLIG_UTLAND/STRENGT_FORTROLIG, FORTROLIG, EGEN_ANSATT
@@ -29,6 +32,7 @@ class OppdaterTilgangService(
         sakId: SakId,
         persongalleri: Persongalleri,
     ) {
+        logger.info("Håndterer tilganger for sak $sakId")
         val sak = sakService.finnSak(sakId) ?: throw PersonManglerSak()
         val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 

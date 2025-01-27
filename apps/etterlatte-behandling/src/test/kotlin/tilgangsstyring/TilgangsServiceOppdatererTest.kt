@@ -29,8 +29,8 @@ class TilgangsServiceOppdatererTest {
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val sakService = mockk<SakService>()
     private val oppdaterTilgangService = OppdaterTilgangService(sakService, skjermingKlient, pdltjenesterKlient)
-    val soeker = "11057523044"
-    val persongalleri =
+    private val soeker = "11057523044"
+    private val persongalleri =
         Persongalleri(
             soeker,
             INNSENDER_FOEDSELSNUMMER.value,

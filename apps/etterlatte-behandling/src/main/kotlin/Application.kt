@@ -209,9 +209,8 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         egenAnsattService =
             EgenAnsattService(
                 applicationContext.sakService,
-                applicationContext.oppgaveService,
-                sikkerLogg,
-                applicationContext.enhetService,
+                applicationContext.grunnlagKlientImpl,
+                applicationContext.oppdaterTilgangService,
             ),
         requestLogger = applicationContext.behandlingRequestLogger,
     )

@@ -94,7 +94,7 @@ class BrevService(
             }
 
             logger.info("Brevid: $brevId er distribuert")
-            return BrevDistribusjonResponse(brevId, true, false)
+            return BrevDistribusjonResponse(brevId, true)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
             logger.error(
@@ -103,7 +103,7 @@ class BrevService(
             )
 
             oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker, req.brevKode)
-            return BrevDistribusjonResponse(brevId, false, true)
+            return BrevDistribusjonResponse(brevId, false)
         }
     }
 

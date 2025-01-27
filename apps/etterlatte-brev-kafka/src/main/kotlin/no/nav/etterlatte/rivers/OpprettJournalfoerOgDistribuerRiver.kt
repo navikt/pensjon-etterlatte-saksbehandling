@@ -132,7 +132,9 @@ class OpprettJournalfoerOgDistribuerRiver(
                     avsenderRequest = SaksbehandlerOgAttestant(Fagsaksystem.EY.navn, Fagsaksystem.EY.navn),
                     sakId = sakId,
                 )
+
             val brevDistribusjonResponse = brevapiKlient.opprettJournalFoerOgDistribuer(sakId, req)
+
             return brevDistribusjonResponse
         } catch (e: Exception) {
             val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"

@@ -37,17 +37,15 @@ class BrevapiKlient(
     ): BrevDistribusjonResponse {
         try {
             logger.info("Oppretter brev for sak med sakId=$sakid")
-            return retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
-                httpClient
-                    .post("$baseUrl/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
-                        contentType(ContentType.Application.Json)
-                        setBody(opprett.toJson())
-                        timeout {
-                            socketTimeoutMillis = Duration.ofMinutes(1).toMillis()
-                            requestTimeoutMillis = Duration.ofMinutes(1).toMillis()
-                        }
-                    }.body<BrevDistribusjonResponse>()
-            }
+            return httpClient
+                .post("$baseUrl/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
+                    contentType(ContentType.Application.Json)
+                    setBody(opprett.toJson())
+                    timeout {
+                        socketTimeoutMillis = Duration.ofMinutes(1).toMillis()
+                        requestTimeoutMillis = Duration.ofMinutes(1).toMillis()
+                    }
+                }.body<BrevDistribusjonResponse>()
         } catch (e: ResponseException) {
             logger.error("opprett-journalfoer-og-distribuer for sak med sakId=$sakid feilet", e)
 

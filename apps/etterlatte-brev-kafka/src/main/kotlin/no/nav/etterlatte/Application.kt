@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import no.nav.etterlatte.klienter.BrevapiKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -27,7 +28,9 @@ class ApplicationBuilder {
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
             azureAppScope = config.getString("brevapi.azure.scope"),
             ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
-        )
+        ).config {
+            install(HttpTimeout)
+        }
     }
 
     private val grunnlagHttpKlient: HttpClient by lazy {
@@ -39,7 +42,7 @@ class ApplicationBuilder {
             ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
-    private val brevapiKlient = BrevapiKlient(config, brevhttpKlient)
+    private val brevapiKlient = BrevapiKlient(config, brevhttpKlient) // todo må ha install(HttpTimeout)
     private val grunnlagKlient = GrunnlagKlient(config, grunnlagHttpKlient)
     private val connection =
         initRogR(

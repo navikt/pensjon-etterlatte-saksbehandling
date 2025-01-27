@@ -155,65 +155,58 @@ export const TrygdetidPerioder = ({
           </Button>
         </div>
       )}
-      {kanLeggeTilNyPeriode && faktiskTrygdetid && (
-        <>
-          {kanHenteTrygdetidFraPesys && (
-            <>
-              {mapResult(sjekkOmAvodedHarTTIPesysStatus, {
-                initial: null,
-                pending: <Spinner label="Sjekker om avdøede har trygdetidsgrunnlag i Pesys" />,
-                error: () => <Alert variant="warning">Kunne ikke sjekke trygdetidsgrunnag i Pesys</Alert>,
-                success: (harTrygdetidsgrunnlagIPesys) => {
-                  return (
-                    <>
-                      {harTrygdetidsgrunnlagIPesys && (
+      {kanLeggeTilNyPeriode &&
+        faktiskTrygdetid &&
+        kanHenteTrygdetidFraPesys &&
+        mapResult(sjekkOmAvodedHarTTIPesysStatus, {
+          initial: null,
+          pending: <Spinner label="Sjekker om avdøede har trygdetidsgrunnlag i Pesys" />,
+          error: () => <Alert variant="warning">Kunne ikke sjekke trygdetidsgrunnag i Pesys</Alert>,
+          success: (harTrygdetidsgrunnlagIPesys) => {
+            return (
+              <>
+                {harTrygdetidsgrunnlagIPesys && (
+                  <>
+                    <Box maxWidth="fit-content">
+                      <Heading size="small">Legg inn trygdetidsgrunnlag</Heading>
+                      <BodyShort>Avdøed har trygdetidsgrunnlag registrert på uføretrygd eller alderspensjon.</BodyShort>
+                      {isSuccess(hentTTPesysStatus) && !isSuccess(slettTrygdetidsgrunnlagStatus) && (
                         <>
-                          <Box maxWidth="fit-content">
-                            <Heading size="small">Legg inn trygdetidsgrunnlag</Heading>
-                            <BodyShort>
-                              Avdøed har trygdetidsgrunnlag registrert på uføretrygd eller alderspensjon.
-                            </BodyShort>
-                            {isSuccess(hentTTPesysStatus) && !isSuccess(slettTrygdetidsgrunnlagStatus) && (
-                              <>
-                                {mapFailure(slettTrygdetidsgrunnlagStatus, (error) => (
-                                  <ApiErrorAlert>Kunne ikke ferdigstille oppgave: {error.detail}</ApiErrorAlert>
-                                ))}
+                          {mapFailure(slettTrygdetidsgrunnlagStatus, (error) => (
+                            <ApiErrorAlert>Kunne ikke ferdigstille oppgave: {error.detail}</ApiErrorAlert>
+                          ))}
 
-                                <Button
-                                  variant="secondary"
-                                  size="small"
-                                  onClick={tilbakestillTrygdetider}
-                                  loading={isPending(hentTTPesysStatus)}
-                                >
-                                  Tilbakestill trygdetidsgrunnlag
-                                </Button>
-                              </>
-                            )}
-
-                            {(!isSuccess(hentTTPesysStatus) || isSuccess(slettTrygdetidsgrunnlagStatus)) && (
-                              <Button
-                                size="small"
-                                onClick={oppdaterTrygdetidMedPesysData}
-                                loading={isPending(hentTTPesysStatus)}
-                              >
-                                Legg inn
-                              </Button>
-                            )}
-                          </Box>
-                          {isFailure(hentTTPesysStatus) && (
-                            <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>
-                          )}
-                          {isPending(hentTTPesysStatus) && <Spinner label="Henter trygdetid i Pesys" />}
+                          <Button
+                            variant="secondary"
+                            size="small"
+                            onClick={tilbakestillTrygdetider}
+                            loading={isPending(hentTTPesysStatus)}
+                          >
+                            Tilbakestill trygdetidsgrunnlag
+                          </Button>
                         </>
                       )}
-                    </>
-                  )
-                },
-              })}
-            </>
-          )}
-        </>
-      )}
+
+                      {(!isSuccess(hentTTPesysStatus) || isSuccess(slettTrygdetidsgrunnlagStatus)) && (
+                        <Button
+                          size="small"
+                          onClick={oppdaterTrygdetidMedPesysData}
+                          loading={isPending(hentTTPesysStatus)}
+                        >
+                          Legg inn
+                        </Button>
+                      )}
+                    </Box>
+                    {isFailure(hentTTPesysStatus) && (
+                      <Alert variant="warning">Kunne ikke hente trygdetid fra Pesys</Alert>
+                    )}
+                    {isPending(hentTTPesysStatus) && <Spinner label="Henter trygdetid i Pesys" />}
+                  </>
+                )}
+              </>
+            )
+          },
+        })}
     </VStack>
   )
 }

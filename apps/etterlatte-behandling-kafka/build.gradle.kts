@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":libs:etterlatte-omregning-model"))
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:etterlatte-tidshendelser-model"))
+    implementation(libs.etterlatte.common)
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.ktor2.servertests)

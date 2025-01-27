@@ -52,7 +52,7 @@ internal class SakSkrivDaoTest(
 ) {
     private lateinit var sakRepo: SakSkrivDao
     private lateinit var sakLesDao: SakLesDao
-    private lateinit var tilgangService: TilgangService
+    private lateinit var tilgangService: TilgangServiceSjekker
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
 
@@ -66,7 +66,7 @@ internal class SakSkrivDaoTest(
         val connectionAutoclosing = ConnectionAutoclosingTest(dataSource)
         sakLesDao = SakLesDao(connectionAutoclosing)
         sakRepo = SakSkrivDao(SakendringerDao(ConnectionAutoclosingTest(dataSource)) { sakLesDao.hentSak(it) })
-        tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+        tilgangService = TilgangServiceSjekkerImpl(SakTilgangDao(dataSource))
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
             BehandlingDao(

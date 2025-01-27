@@ -39,10 +39,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
-import no.nav.etterlatte.behandling.jobs.OppgaveEnhetEndretDao
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
-import no.nav.etterlatte.behandling.jobs.SendEndretEnhet
-import no.nav.etterlatte.behandling.jobs.SendMeldingOmOppgaverUnderBehandlingJob
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
@@ -144,11 +141,12 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakSkrivDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.SakendringerDao
-import no.nav.etterlatte.sak.TilgangServiceImpl
+import no.nav.etterlatte.sak.TilgangServiceSjekkerImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.AldersovergangService
@@ -445,7 +443,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
         )
 
-    val tilgangService = TilgangServiceImpl(sakTilgangDao)
+    val tilgangService = TilgangServiceSjekkerImpl(sakTilgangDao)
 
     val externalServices: List<Pingable> =
         listOf(
@@ -584,6 +582,12 @@ internal class ApplicationContext(
             behandlingsStatusService,
         )
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
+    val oppdaterTilgangService =
+        OppdaterTilgangService(
+            sakService = sakService,
+            skjermingKlient = skjermingKlient,
+            pdltjenesterKlient = pdlTjenesterKlient,
+        )
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,
@@ -598,6 +602,7 @@ internal class ApplicationContext(
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             vilkaarsvurderingService = vilkaarsvurderingService,
             behandlingInfoService = behandlingInfoService,
+            tilgangsService = oppdaterTilgangService,
         )
 
     val migreringService =
@@ -613,21 +618,6 @@ internal class ApplicationContext(
             aktivitetspliktBrevDao = aktivitetspliktBrevDao,
             brevApiKlient = brevApiKlient,
             behandlingService = behandlingService,
-        )
-
-    // Utsending av meldinger for enheter oppgaver under behandling
-    private val sendEndretEnhet =
-        SendEndretEnhet(
-            behandlingHendelserKafkaProducer = behandlingsHendelser,
-            oppgaveEnhetEndretDao = OppgaveEnhetEndretDao(connectionAutoclosing = autoClosingDatabase),
-            oppgaveEndringerDao = oppgaveDaoEndringer,
-        )
-    val sendMeldingOmOppgaverUnderBehandlingJob: SendMeldingOmOppgaverUnderBehandlingJob =
-        SendMeldingOmOppgaverUnderBehandlingJob(
-            erLeader = { leaderElectionKlient.isLeader() },
-            sendEndretEnhet = sendEndretEnhet,
-            sakTilgangDao = sakTilgangDao,
-            dataSource = dataSource,
         )
 
     // Jobs

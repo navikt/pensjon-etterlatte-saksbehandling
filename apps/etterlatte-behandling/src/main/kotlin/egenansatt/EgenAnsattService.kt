@@ -22,7 +22,7 @@ class EgenAnsattService(
     fun haandterSkjerming(skjermetHendelse: EgenAnsattSkjermet) {
         val saker = sakService.finnSaker(skjermetHendelse.fnr)
         val sakerMedGradering = sakService.sjekkOmSakerErGradert(saker.map(Sak::id))
-        val sakerSomHarGradering = sakerMedGradering.filter { it.adressebeskyttelseGradering?.erGradert() ?: false }
+        val sakerSomHarGradering = sakerMedGradering.filter { it.adressebeskyttelseGradering?.harAdressebeskyttelse() ?: false }
         if (sakerSomHarGradering.isNotEmpty()) return
         val maskerFnr = skjermetHendelse.fnr.maskerFnr()
         if (saker.isEmpty()) {

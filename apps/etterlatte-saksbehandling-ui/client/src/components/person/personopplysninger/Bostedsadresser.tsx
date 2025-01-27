@@ -5,8 +5,20 @@ import { Heading, Table } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formatering/dato'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { Bostedsadresse } from '~shared/types/familieOpplysninger'
+import { compareDesc } from 'date-fns'
 
 export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: Bostedsadresse[] }): ReactNode => {
+  const sortedBostedsadresse = bostedsadresse?.sort((a: Bostedsadresse, b: Bostedsadresse) => {
+    if (a.gyldigFraOgMed && b.gyldigFraOgMed) {
+      return compareDesc(new Date(a.gyldigFraOgMed), new Date(b.gyldigFraOgMed))
+    } else if (a.gyldigFraOgMed && !b.gyldigFraOgMed) {
+      return -1
+    } else if (!a.gyldigFraOgMed && b.gyldigFraOgMed) {
+      return 1
+    }
+    return 0
+  })
+
   return (
     <Personopplysning heading="Bostedsadresser" icon={<HouseIcon aria-hidden />}>
       <Table>
@@ -18,9 +30,9 @@ export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: Bostedsad
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {!!bostedsadresse?.length ? (
+          {!!sortedBostedsadresse?.length ? (
             <>
-              {bostedsadresse.map((adresse: Bostedsadresse, index: number) => (
+              {sortedBostedsadresse.map((adresse: Bostedsadresse, index: number) => (
                 <Table.Row key={index}>
                   <BostedsadresseDataCell bostedsadresse={bostedsadresse} index={index} visAktiv />
                   <Table.DataCell>

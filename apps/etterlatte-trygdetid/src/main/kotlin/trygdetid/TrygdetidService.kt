@@ -180,6 +180,8 @@ private fun TrygdetidPeriodePesys.fraPesystilVanlig(): TrygdetidPeriode =
         til = til,
     )
 
+private const val AUTOMATISK_FREMTIDIG_BEGRUNNELSE = "Automatisk beregnet fremtidig trygdetid"
+
 class TrygdetidServiceImpl(
     private val trygdetidRepository: TrygdetidRepository,
     private val behandlingKlient: BehandlingKlient,
@@ -472,7 +474,7 @@ class TrygdetidServiceImpl(
                         Grunnlagsopplysning.automatiskSaksbehandler.ident,
                         Tidspunkt.now(),
                     ),
-                begrunnelse = "Automatisk beregnet fremtidig trygdetid",
+                begrunnelse = AUTOMATISK_FREMTIDIG_BEGRUNNELSE,
                 poengInnAar = false,
                 poengUtAar = false,
                 prorata = false,
@@ -507,10 +509,17 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
         kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
+            // Hvis vi oppdaterer en trygdetid som har automatisk begrunnelse, fjern automatisk begrunnelse
+            val trygdetidGrunnlagForOppdatering =
+                when (trygdetidGrunnlag.begrunnelse) {
+                    AUTOMATISK_FREMTIDIG_BEGRUNNELSE -> trygdetidGrunnlag.copy(begrunnelse = null)
+                    else -> trygdetidGrunnlag
+                }
+
             lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
                 behandlingId,
                 trygdetidId,
-                trygdetidGrunnlag,
+                trygdetidGrunnlagForOppdatering,
                 brukerTokenInfo,
             )
         }

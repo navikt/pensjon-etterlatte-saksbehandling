@@ -218,11 +218,11 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
-                vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+                vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sakId, bruker)
                 avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
                     YearMonth.of(2024, 1),
-                    behandling.sak,
+                    behandling.sakId,
                     alleVedtak,
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
@@ -280,11 +280,11 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
-                vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+                vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sakId, bruker)
                 avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
                     YearMonth.of(2024, 1),
-                    behandling.sak,
+                    behandling.sakId,
                     alleVedtak,
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
@@ -352,11 +352,11 @@ internal class AvkortingServiceTest {
             coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
-                vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, bruker)
+                vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sakId, bruker)
                 avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
                     YearMonth.of(2024, 1),
-                    behandling.sak,
+                    behandling.sakId,
                     alleVedtak,
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
@@ -432,7 +432,7 @@ internal class AvkortingServiceTest {
                 AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, true)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
-                grunnlagKlient.aldersovergangMaaned(behandling.sak, SakType.OMSTILLINGSSTOENAD, bruker)
+                grunnlagKlient.aldersovergangMaaned(behandling.sakId, SakType.OMSTILLINGSSTOENAD, bruker)
                 endretGrunnlag.fom
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
@@ -521,7 +521,7 @@ internal class AvkortingServiceTest {
                 avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
                     forrigeAvkorting,
                     YearMonth.of(2024, 3),
-                    revurdering.sak,
+                    revurdering.sakId,
                     alleVedtak,
                 )
                 avkortingRepository.hentAvkorting(forrigeBehandling)
@@ -595,7 +595,7 @@ internal class AvkortingServiceTest {
                 AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, true)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
-                grunnlagKlient.aldersovergangMaaned(behandling.sak, SakType.OMSTILLINGSSTOENAD, bruker)
+                grunnlagKlient.aldersovergangMaaned(behandling.sakId, SakType.OMSTILLINGSSTOENAD, bruker)
                 endretGrunnlag.fom
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
@@ -657,7 +657,7 @@ internal class AvkortingServiceTest {
                 AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, true)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
-                grunnlagKlient.aldersovergangMaaned(behandling.sak, SakType.OMSTILLINGSSTOENAD, bruker)
+                grunnlagKlient.aldersovergangMaaned(behandling.sakId, SakType.OMSTILLINGSSTOENAD, bruker)
                 endretGrunnlag.fom
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
@@ -727,7 +727,7 @@ internal class AvkortingServiceTest {
                 AvkortingValider.validerInntekt(endretGrunnlag, eksisterendeAvkorting, true)
                 beregningService.hentBeregningNonnull(behandlingId)
                 sanksjonService.hentSanksjon(behandlingId)
-                grunnlagKlient.aldersovergangMaaned(behandling.sak, SakType.OMSTILLINGSSTOENAD, bruker)
+                grunnlagKlient.aldersovergangMaaned(behandling.sakId, SakType.OMSTILLINGSSTOENAD, bruker)
                 endretGrunnlag.fom
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,

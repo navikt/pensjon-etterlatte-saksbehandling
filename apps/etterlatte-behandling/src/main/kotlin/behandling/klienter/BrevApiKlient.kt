@@ -144,7 +144,7 @@ class BrevApiKlientObo(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/brev/$brevId?${SAKID_CALL_PARAMETER}=${sakId.sakId}",
+                        url = "$resourceUrl/api/brev/$brevId?${SAKID_CALL_PARAMETER}=${sakId.value}",
                     ),
                 brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(
@@ -223,7 +223,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
         post(
-            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak?sakId=${sakId.sakId}",
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak?sakId=${sakId.value}",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -246,7 +246,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
-            url = "$resourceUrl/api/brev/$brevId/oversendelse/ferdigstill?sakId=${sakId.sakId}",
+            url = "$resourceUrl/api/brev/$brevId/oversendelse/ferdigstill?sakId=${sakId.value}",
             postBody = "",
             onSuccess = {},
             brukerTokenInfo = brukerTokenInfo,
@@ -259,7 +259,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ): JournalpostIdDto =
         post(
-            url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=${sakId.sakId}",
+            url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=${sakId.value}",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -270,7 +270,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ): BestillingsIdDto =
         post(
-            url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=${sakId.sakId}",
+            url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=${sakId.value}",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -281,7 +281,7 @@ class BrevApiKlientObo(
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev =
         get(
-            url = "$resourceUrl/api/brev/$brevId?sakId=${sakId.sakId}",
+            url = "$resourceUrl/api/brev/$brevId?sakId=${sakId.value}",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )

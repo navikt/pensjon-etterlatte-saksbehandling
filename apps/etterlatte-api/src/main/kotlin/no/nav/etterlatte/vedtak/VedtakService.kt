@@ -19,7 +19,7 @@ class VedtakService(
 fun VedtakDto.fromDto(): Vedtak {
     val vedtakInnhold = (innhold as VedtakInnholdDto.VedtakBehandlingDto)
     return Vedtak(
-        sakId = sak.id.sakId,
+        sakId = sak.id.value,
         sakType = sak.sakType.name,
         virkningstidspunkt = vedtakInnhold.virkningstidspunkt.atStartOfMonth(),
         type = VedtakType.valueOf(type.name),

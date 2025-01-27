@@ -72,7 +72,7 @@ internal class BeregningServiceTest {
         val beregning = mockk<Beregning>()
         val overstyrBeregning =
             OverstyrBeregning(
-                behandling.sak,
+                behandling.sakId,
                 "Test",
                 Tidspunkt.now(),
                 kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
@@ -144,7 +144,7 @@ internal class BeregningServiceTest {
         val beregning = mockk<Beregning>()
         val overstyrBeregning =
             OverstyrBeregning(
-                behandling.sak,
+                behandling.sakId,
                 "Test",
                 Tidspunkt.now(),
                 kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
@@ -209,7 +209,7 @@ internal class BeregningServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { beregningRepository.hentOverstyrBeregning(any()) } returns
             OverstyrBeregning(
-                behandling.sak,
+                behandling.sakId,
                 "Test",
                 Tidspunkt.now(),
                 kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
@@ -220,7 +220,7 @@ internal class BeregningServiceTest {
 
             overstyrBeregning shouldNotBe null
 
-            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.sakId shouldBe behandling.sakId
             overstyrBeregning?.beskrivelse shouldBe "Test"
             overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.UKJENT_KATEGORI
 
@@ -248,7 +248,7 @@ internal class BeregningServiceTest {
 
             overstyrBeregning shouldNotBe null
 
-            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.sakId shouldBe behandling.sakId
             overstyrBeregning?.beskrivelse shouldBe "Test"
             overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.UKJENT_KATEGORI
 
@@ -281,7 +281,7 @@ internal class BeregningServiceTest {
 
             overstyrBeregning shouldNotBe null
 
-            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.sakId shouldBe behandling.sakId
             overstyrBeregning?.beskrivelse shouldBe "Test"
 
             verify(exactly = 1) {
@@ -304,7 +304,7 @@ internal class BeregningServiceTest {
         coEvery { behandlingKlient.statusTrygdetidOppdatert(any(), any(), any()) } returns true
         every { beregningRepository.hentOverstyrBeregning(any()) } returns
             OverstyrBeregning(
-                behandling.sak,
+                behandling.sakId,
                 "Test",
                 Tidspunkt.now(),
                 kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
@@ -320,7 +320,7 @@ internal class BeregningServiceTest {
 
             overstyrBeregning shouldNotBe null
 
-            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.sakId shouldBe behandling.sakId
             overstyrBeregning?.beskrivelse shouldBe "Test"
             overstyrBeregning?.kategori shouldBe OverstyrtBeregningKategori.UKJENT_KATEGORI
 
@@ -331,7 +331,7 @@ internal class BeregningServiceTest {
     private fun mockBehandling(type: SakType): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns sakId1
+            every { sakId } returns sakId1
             every { sakType } returns type
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))

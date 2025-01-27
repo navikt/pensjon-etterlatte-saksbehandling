@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Kjoereplan
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import java.math.BigDecimal
@@ -46,6 +46,7 @@ data class OppdragslinjeForKonsistensavstemming(
 
 /**
  * For performance - avoid the standard serializer's use of reflection
+ *  Dette er galskap og burde slettes fortest mulig
  */
 internal class OppdragForKonsistensavstemmingSerializer :
     StdSerializer<OppdragForKonsistensavstemming>(OppdragForKonsistensavstemming::class.java) {
@@ -56,9 +57,7 @@ internal class OppdragForKonsistensavstemmingSerializer :
     ) {
         gen.writeStartObject()
 
-        gen.writeObjectFieldStart("sakId")
-        gen.writeObjectField("value", value.sakId.value)
-        gen.writeEndObject()
+        gen.writeObjectField("sakId", value.sakId)
 
         gen.writeObjectField("sakType", value.sakType.name)
 

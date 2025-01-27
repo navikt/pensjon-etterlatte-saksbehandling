@@ -26,7 +26,7 @@ class BrevutsendelseDao(
                         """.trimIndent(),
                     )
                 statement.setObject(1, brevutsendelse.id)
-                statement.setLong(2, brevutsendelse.sakId.sakId)
+                statement.setLong(2, brevutsendelse.sakId.value)
                 statement.setString(3, brevutsendelse.status.name)
                 statement.setObject(4, brevutsendelse.merknad)
                 statement.setObject(5, brevutsendelse.resultat)

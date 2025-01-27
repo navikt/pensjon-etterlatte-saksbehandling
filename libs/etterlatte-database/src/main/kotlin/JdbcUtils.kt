@@ -57,4 +57,4 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
 fun PreparedStatement.setSakId(
     index: Int,
     sakId: SakId,
-) = this.setLong(index, sakId.sakId)
+) = this.setLong(index, sakId.value)

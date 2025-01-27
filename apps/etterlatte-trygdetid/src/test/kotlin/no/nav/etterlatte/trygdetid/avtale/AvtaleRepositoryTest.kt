@@ -83,6 +83,6 @@ internal class AvtaleRepositoryTest(
     private fun behandlingMock() =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns SakId(123L)
+            every { sakId } returns SakId(123L)
         }
 }

@@ -98,7 +98,7 @@ internal class PesysRepository(
             opprett(
                 "INSERT INTO pesyskopling(behandling_id,pesys_id,sak_id) VALUES(:behandling_id,:pesys_id,:sak_id)" +
                     " ON CONFLICT(pesys_id) DO UPDATE SET behandling_id = :behandling_id, sak_id = :sak_id",
-                mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id, "sak_id" to sakId.sakId),
+                mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id, "sak_id" to sakId.value),
                 "Lagra koplinga mellom sak $sakId, behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
             )
         }

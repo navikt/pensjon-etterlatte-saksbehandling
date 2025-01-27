@@ -1,14 +1,11 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
 import no.nav.etterlatte.libs.common.UUID30
+import no.nav.etterlatte.libs.common.sak.SakId
 import java.math.BigDecimal
 import java.time.YearMonth
 
 data class KravgrunnlagId(
-    val value: Long,
-)
-
-data class SakId(
     val value: Long,
 )
 

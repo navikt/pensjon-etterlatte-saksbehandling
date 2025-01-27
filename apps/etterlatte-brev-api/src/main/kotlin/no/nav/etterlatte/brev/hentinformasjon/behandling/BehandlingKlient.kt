@@ -35,7 +35,7 @@ class BehandlingKlient(
         brukerTokenInfo: BrukerTokenInfo,
     ): Sak =
         get(
-            url = "$resourceUrl/saker/${sakId.sakId}",
+            url = "$resourceUrl/saker/${sakId.value}",
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Sjekking av tilgang for behandling med id =$sakId feilet" },
             brukerTokenInfo = brukerTokenInfo,
@@ -46,7 +46,7 @@ class BehandlingKlient(
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling =
         get(
-            url = "$resourceUrl/saker/${sakId.sakId}/behandlinger/sisteIverksatte",
+            url = "$resourceUrl/saker/${sakId.value}/behandlinger/sisteIverksatte",
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Klarte ikke hente siste iverksatte behandling på sak med id=$sakId" },
             brukerTokenInfo = brukerTokenInfo,

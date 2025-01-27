@@ -49,7 +49,7 @@ class BehandlingKlient(
         logger.info("Henter sak med id=$sakId")
 
         return try {
-            httpClient.get("$behandlingUrl/sak/${sakId.sakId}").body<Sak>()
+            httpClient.get("$behandlingUrl/sak/${sakId.value}").body<Sak>()
         } catch (e: ClientRequestException) {
             if (e.response.status == HttpStatusCode.NotFound) {
                 logger.info("Ingen sak med id=$sakId funnet")

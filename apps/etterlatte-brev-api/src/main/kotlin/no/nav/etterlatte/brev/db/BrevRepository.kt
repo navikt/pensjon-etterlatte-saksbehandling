@@ -99,7 +99,7 @@ class BrevRepository(
 
     fun hentBrevForSak(sakId: SakId): List<Brev> =
         using(sessionOf(ds)) { session ->
-            session.list(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId.sakId)) { brevRow ->
+            session.list(queryOf(HENT_BREV_FOR_SAK_QUERY, sakId.value)) { brevRow ->
                 brevRow.tilBrev(session.hentMottakere(brevRow.long("id")))
             }
         }
@@ -356,7 +356,7 @@ class BrevRepository(
                     queryOf(
                         OPPRETT_BREV_QUERY,
                         mapOf(
-                            "sak_id" to ulagretBrev.sakId.sakId,
+                            "sak_id" to ulagretBrev.sakId.value,
                             "behandling_id" to ulagretBrev.behandlingId,
                             "prosess_type" to ulagretBrev.prosessType.name,
                             "soeker_fnr" to ulagretBrev.soekerFnr,

@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.simulering
 
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -10,7 +11,6 @@ import no.nav.etterlatte.utbetaling.common.OppdragDefaults
 import no.nav.etterlatte.utbetaling.common.SimulertBeregning
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeFagomraade
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingMapper
@@ -49,7 +49,7 @@ class SimuleringOsService(
 
         val innhold = vedtak.innhold
         if (innhold is VedtakInnholdDto.VedtakBehandlingDto) {
-            val sakensUtbetalinger = utbetalingDao.hentUtbetalinger(SakId(vedtak.sak.id.sakId))
+            val sakensUtbetalinger = utbetalingDao.hentUtbetalinger(SakId(vedtak.sak.id.value))
             val utbetalingsvedtak =
                 Utbetalingsvedtak.fra(
                     vedtak = vedtak,

@@ -261,7 +261,7 @@ class TrygdetidServiceImpl(
             BehandlingType.REVURDERING -> {
                 val sisteIverksatteBehandling =
                     vedtaksvurderingKlient
-                        .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                        .hentIverksatteVedtak(behandling.sakId, brukerTokenInfo)
                         .sortedByDescending { it.datoFattet }
                         .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke trygdetid
 
@@ -311,7 +311,7 @@ class TrygdetidServiceImpl(
         }.map { avdoedMedFnr ->
             val trygdetid =
                 Trygdetid(
-                    sakId = behandling.sak,
+                    sakId = behandling.sakId,
                     behandlingId = behandling.id,
                     opplysninger = hentOpplysninger(avdoedMedFnr.second, behandling.id),
                     ident = avdoedMedFnr.first,
@@ -649,7 +649,7 @@ class TrygdetidServiceImpl(
                 }.map { forrigeTrygdetid ->
                     val kopiertTrygdetid =
                         Trygdetid(
-                            sakId = behandling.sak,
+                            sakId = behandling.sakId,
                             behandlingId = behandling.id,
                             opplysninger = forrigeTrygdetid.opplysninger.map { it.copy(id = UUID.randomUUID()) },
                             trygdetidGrunnlag = forrigeTrygdetid.trygdetidGrunnlag.map { it.copy(id = UUID.randomUUID()) },
@@ -805,7 +805,7 @@ class TrygdetidServiceImpl(
 
         val trygdetid =
             Trygdetid(
-                sakId = behandling.sak,
+                sakId = behandling.sakId,
                 behandlingId = behandlingId,
                 opplysninger = avdoed?.let { hentOpplysninger(it, behandlingId) } ?: emptyList(),
                 ident = ident,

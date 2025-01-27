@@ -58,7 +58,7 @@ class TilbakekrevingHendelseRepository(
                 paramMap =
                     mapOf(
                         "id" to id,
-                        "sakId" to sakId.sakId,
+                        "sakId" to sakId.value,
                         "payload" to payload,
                         "type" to type.name,
                         "jmsTimestamp" to jmsTimestamp?.toTimestamp(),
@@ -92,7 +92,7 @@ class TilbakekrevingHendelseRepository(
                     """.trimIndent(),
                 paramMap =
                     mapOf(
-                        "sakId" to sakId.sakId,
+                        "sakId" to sakId.value,
                     ),
             ).let {
                 session.run(

@@ -59,7 +59,7 @@ class VedtakServiceImpl(
         dato: LocalDate,
     ): LoependeYtelseDTO =
         runBlocking {
-            vedtakKlient.get("$url/api/vedtak/loepende/${sakId.sakId}?dato=$dato").body()
+            vedtakKlient.get("$url/api/vedtak/loepende/${sakId.value}?dato=$dato").body()
         }
 
     override fun opprettVedtakFattOgAttester(
@@ -67,7 +67,7 @@ class VedtakServiceImpl(
         behandlingId: UUID,
     ): VedtakOgRapid =
         runBlocking {
-            vedtakKlient.post("$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk").body()
+            vedtakKlient.post("$url/api/vedtak/${sakId.value}/$behandlingId/automatisk").body()
         }
 
     override fun opprettVedtakOgFatt(
@@ -76,7 +76,7 @@ class VedtakServiceImpl(
     ): VedtakOgRapid =
         runBlocking {
             vedtakKlient
-                .post("$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk/stegvis") {
+                .post("$url/api/vedtak/${sakId.value}/$behandlingId/automatisk/stegvis") {
                     contentType(ContentType.Application.Json)
                     setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
                 }.body()
@@ -88,7 +88,7 @@ class VedtakServiceImpl(
     ): VedtakOgRapid =
         runBlocking {
             vedtakKlient
-                .post("$url/api/vedtak/${sakId.sakId}/$behandlingId/automatisk/stegvis") {
+                .post("$url/api/vedtak/${sakId.value}/$behandlingId/automatisk/stegvis") {
                     contentType(ContentType.Application.Json)
                     setBody(MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.toJson())
                 }.body()

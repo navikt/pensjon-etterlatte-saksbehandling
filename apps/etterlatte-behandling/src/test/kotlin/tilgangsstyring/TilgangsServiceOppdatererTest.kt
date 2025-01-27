@@ -94,7 +94,7 @@ class TilgangsServiceOppdatererTest {
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 1) {
-            sakService.markerSakerMedSkjerming(match { it.first().sakId == sak.id.sakId }, true)
+            sakService.markerSakerMedSkjerming(match { it.first().value == sak.id.value }, true)
             sakService.oppdaterEnhetForSaker(match { it.first().id == sak.id })
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
         }

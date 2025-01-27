@@ -62,7 +62,7 @@ class SanksjonService(
             return
         }
 
-        val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
+        val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sakId, brukerTokenInfo).id
 
         val sanksjonerIDenneBehandlingen = sanksjonRepository.hentSanksjon(behandlingId)
         val sanksjonerIForrigeBehandling = sanksjonRepository.hentSanksjon(forrigeBehandlingId)
@@ -92,7 +92,7 @@ class SanksjonService(
         if (!behandling.status.kanEndres()) throw BehandlingKanIkkeEndres()
 
         if (behandling.virkningstidspunkt == null) throw ManglerVirkningstidspunktException()
-        if (sanksjon.sakId != behandling.sak) throw SakidTilhoererIkkeBehandlingException()
+        if (sanksjon.sakId != behandling.sakId) throw SakidTilhoererIkkeBehandlingException()
 
         val normalisertFom = YearMonth.from(sanksjon.fom)
         val normalisertTom = sanksjon.tom?.let { YearMonth.from(it) }
@@ -105,7 +105,7 @@ class SanksjonService(
         if (sanksjon.id === null) {
             logger.info("Oppretter sanksjon med behandlingID=$behandlingId")
             settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
-            return sanksjonRepository.opprettSanksjon(behandlingId, behandling.sak, brukerTokenInfo.ident(), sanksjon)
+            return sanksjonRepository.opprettSanksjon(behandlingId, behandling.sakId, brukerTokenInfo.ident(), sanksjon)
         }
 
         logger.info("Oppdaterer sanksjon med behandlingID=$behandlingId")
@@ -131,7 +131,7 @@ class SanksjonService(
             return true
         }
         val forrigeIverksatteBehandling =
-            behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+            behandlingKlient.hentSisteIverksatteBehandling(behandling.sakId, brukerTokenInfo)
         val sanksjonerIForrigeBehandling =
             sanksjonRepository.hentSanksjon(forrigeIverksatteBehandling.id) ?: emptyList()
         val sanksjonerIBehandling = sanksjonRepository.hentSanksjon(behandling.id) ?: emptyList()

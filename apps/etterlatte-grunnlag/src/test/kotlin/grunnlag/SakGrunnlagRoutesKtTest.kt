@@ -59,7 +59,7 @@ internal class SakGrunnlagRoutesKtTest {
         val sakId = randomSakId()
 
         testApplication {
-            val response = createHttpClient().get("api/grunnlag/sak/${sakId.sakId}")
+            val response = createHttpClient().get("api/grunnlag/sak/${sakId.value}")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
@@ -76,7 +76,7 @@ internal class SakGrunnlagRoutesKtTest {
 
         testApplication {
             val response =
-                createHttpClient().get("api/grunnlag/sak/${sakId.sakId}") {
+                createHttpClient().get("api/grunnlag/sak/${sakId.value}") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")
@@ -100,7 +100,7 @@ internal class SakGrunnlagRoutesKtTest {
 
         testApplication {
             val response =
-                createHttpClient().get("api/grunnlag/sak/${sakId.sakId}") {
+                createHttpClient().get("api/grunnlag/sak/${sakId.value}") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer ${mockOAuth2Server.issueSaksbehandlerToken()}")

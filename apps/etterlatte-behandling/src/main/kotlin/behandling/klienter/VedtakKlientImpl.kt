@@ -339,7 +339,7 @@ class VedtakKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/vedtak/loepende/${sakId.sakId}?dato=$dato",
+                            url = "$resourceUrl/api/vedtak/loepende/${sakId.value}?dato=$dato",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(

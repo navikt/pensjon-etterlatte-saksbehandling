@@ -23,7 +23,7 @@ class GrunnlagKlient(
         try {
             logger.info("Henter grunnlag for sak med sakId=$sakid")
             return retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
-                httpClient.get("$baseUrl/api/grunnlag/sak/${sakid.sakId}").body<Grunnlag>()
+                httpClient.get("$baseUrl/api/grunnlag/sak/${sakid.value}").body<Grunnlag>()
             }
         } catch (e: ResponseException) {
             logger.error("Henter grunnlag for sak med sakId=$sakid feilet", e)

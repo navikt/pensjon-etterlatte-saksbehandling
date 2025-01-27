@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -17,6 +18,19 @@ import kotlin.reflect.full.memberProperties
 class KonsistensavstemmingTest {
     @Nested
     inner class Serializers {
+        @Test
+        fun `Basic test`() {
+            val lol = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = emptyList())
+            val serializedJson = lol.toJson()
+            val strukturertData =
+                objectMapper.readValue<OppdragForKonsistensavstemming>(
+                    serializedJson,
+                    OppdragForKonsistensavstemming::class.java,
+                )
+
+            strukturertData shouldBe lol
+        }
+
         @Test
         fun `verifiser at serialiser (custom) og deserialiser (med standard Jackson) gir samme resultat`() {
             val testdata = opprettKonsistensavstemmingAlleFelterUtfylt()

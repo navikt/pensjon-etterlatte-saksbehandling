@@ -58,7 +58,7 @@ class AldersovergangServiceTest(
                     mapOf(
                         "opplysning_type" to "SOEKER_PDL_V1",
                         "opplysning" to "{}",
-                        "sak_id" to sakId.sakId,
+                        "sak_id" to sakId.value,
                         "hendelsenummer" to 1,
                         "fnr" to SOEKER_FOEDSELSNUMMER.value,
                     )
@@ -71,7 +71,7 @@ class AldersovergangServiceTest(
                     mapOf(
                         "opplysning_type" to "FOEDSELSDATO",
                         "opplysning" to foedselsdato,
-                        "sak_id" to sakId.sakId,
+                        "sak_id" to sakId.value,
                         "hendelsenummer" to 2,
                         "fnr" to SOEKER_FOEDSELSNUMMER.value,
                     )

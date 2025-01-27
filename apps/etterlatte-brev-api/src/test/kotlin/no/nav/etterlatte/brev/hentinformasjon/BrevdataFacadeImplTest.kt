@@ -258,7 +258,7 @@ internal class BrevdataFacadeImplTest {
     private fun lagBehandling() =
         DetaljertBehandling(
             id = UUID.randomUUID(),
-            sak = sakId1,
+            sakId = sakId1,
             sakType = SakType.BARNEPENSJON,
             soeker = "123",
             status = BehandlingStatus.OPPRETTET,

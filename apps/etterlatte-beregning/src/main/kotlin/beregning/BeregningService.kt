@@ -78,7 +78,7 @@ class BeregningService(
     }
 
     fun hentOverstyrBeregning(behandling: DetaljertBehandling): OverstyrBeregning? =
-        beregningRepository.hentOverstyrBeregning(behandling.sak)
+        beregningRepository.hentOverstyrBeregning(behandling.sakId)
 
     suspend fun hentOverstyrBeregningPaaBehandlingId(
         behandlingId: UUID,
@@ -86,7 +86,7 @@ class BeregningService(
     ): OverstyrBeregning? {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        return beregningRepository.hentOverstyrBeregning(behandling.sak)
+        return beregningRepository.hentOverstyrBeregning(behandling.sakId)
     }
 
     suspend fun opprettOverstyrBeregning(
@@ -105,7 +105,7 @@ class BeregningService(
                 val opprettetOverstyrtBeregning =
                     beregningRepository.opprettOverstyrBeregning(
                         OverstyrBeregning(
-                            behandling.sak,
+                            behandling.sakId,
                             overstyrBeregning.beskrivelse,
                             Tidspunkt.now(),
                             kategori = overstyrBeregning.kategori,
@@ -130,7 +130,7 @@ class BeregningService(
                 validerFoersteVirke(behandlingKlient, behandling, brukerTokenInfo)
             }
 
-            beregningRepository.deaktiverOverstyrtBeregning(behandling.sak)
+            beregningRepository.deaktiverOverstyrtBeregning(behandling.sakId)
             beregningRepository.slettOverstyrtBeregningsgrunnlag(behandling.id)
             behandlingKlient.statusTrygdetidOppdatert(behandlingId, brukerTokenInfo, commit = true)
         } else {
@@ -151,7 +151,7 @@ class BeregningService(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val foersteVirkDto: FoersteVirkDto? = behandlingKlient.hentFoersteVirkningsdato(behandling.sak, brukerTokenInfo)
+        val foersteVirkDto: FoersteVirkDto? = behandlingKlient.hentFoersteVirkningsdato(behandling.sakId, brukerTokenInfo)
 
         if (foersteVirkDto != null && YearMonth.from(foersteVirkDto.foersteIverksatteVirkISak) != behandling.virkningstidspunkt?.dato) {
             throw KanIkkeAktivereOverstyrtBeregningGrunnetVirkningsdato()

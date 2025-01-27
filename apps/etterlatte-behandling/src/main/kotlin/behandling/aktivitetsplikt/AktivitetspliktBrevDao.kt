@@ -69,7 +69,7 @@ class AktivitetspliktBrevDao(
                         begrunnelse = excluded.begrunnelse
                         """.trimIndent(),
                     )
-                stmt.setLong(1, data.sakid.sakId)
+                stmt.setLong(1, data.sakid.value)
                 stmt.setObject(2, data.oppgaveId)
                 stmt.setObject(3, data.utbetaling)
                 stmt.setObject(4, data.redusertEtterInntekt)

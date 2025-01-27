@@ -76,7 +76,7 @@ class BeregningRepository(
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.hentOverstyrBeregning,
-                paramMap = mapOf("sakId" to sakId.sakId),
+                paramMap = mapOf("sakId" to sakId.value),
             ).let { query ->
                 tx.run(query.map { toOverstyrBeregning(it) }.asSingle)
             }
@@ -88,7 +88,7 @@ class BeregningRepository(
                 statement = Queries.opprettOverstyrBeregning,
                 paramMap =
                     mapOf(
-                        "sakId" to overstyrBeregning.sakId.sakId,
+                        "sakId" to overstyrBeregning.sakId.value,
                         "beskrivelse" to overstyrBeregning.beskrivelse,
                         "tidspunkt" to overstyrBeregning.tidspunkt.toTimestamp(),
                         "status" to overstyrBeregning.status.name,
@@ -111,7 +111,7 @@ class BeregningRepository(
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.updateOverstyrtberegning,
-                paramMap = mapOf("sakId" to sakId.sakId, "status" to OverstyrBeregningStatus.IKKE_AKTIV.name),
+                paramMap = mapOf("sakId" to sakId.value, "status" to OverstyrBeregningStatus.IKKE_AKTIV.name),
             ).let { query ->
                 tx.run(query.asUpdate)
             }
@@ -135,7 +135,7 @@ class BeregningRepository(
             "soeskenFlokk" to beregningsperiode.soeskenFlokk?.toJson(),
             "grunnbeloepMnd" to beregningsperiode.grunnbelopMnd,
             "grunnbeloep" to beregningsperiode.grunnbelop,
-            "sakId" to beregning.grunnlagMetadata.sakId.sakId,
+            "sakId" to beregning.grunnlagMetadata.sakId.value,
             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon,
             "trygdetid" to beregningsperiode.trygdetid,
             "trygdetidForIdent" to beregningsperiode.trygdetidForIdent,

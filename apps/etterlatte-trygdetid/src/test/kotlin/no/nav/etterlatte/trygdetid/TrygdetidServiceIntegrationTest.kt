@@ -136,7 +136,7 @@ internal class TrygdetidServiceIntegrationTest(
     @Test
     fun `skal opprette ny trygdetid og overskrive eksisterende`() {
         val behandlingId = UUID.randomUUID()
-        val sakId = randomSakId()
+        val sakIdRandom = randomSakId()
         val grunnlagTestData = GrunnlagTestData()
 
         coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
@@ -144,7 +144,7 @@ internal class TrygdetidServiceIntegrationTest(
         coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns
             mockk {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdRandom
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
             }
@@ -154,7 +154,7 @@ internal class TrygdetidServiceIntegrationTest(
             repository.opprettTrygdetid(
                 trygdetid(
                     behandlingId = behandlingId,
-                    sakId = sakId,
+                    sakId = sakIdRandom,
                     opplysninger = opplysningsgrunnlag(grunnlagTestData),
                 ),
             )

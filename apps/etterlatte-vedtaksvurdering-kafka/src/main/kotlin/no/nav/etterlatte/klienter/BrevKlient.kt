@@ -33,7 +33,7 @@ class BrevKlient(
                 logger.info("Ber brev-api om å opprette vedtaksbrev for behandling id=$behandlingId")
                 retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
                     httpClient
-                        .post("$url/api/brev/behandling/$behandlingId/vedtak?sakId=${sakId.sakId}") {
+                        .post("$url/api/brev/behandling/$behandlingId/vedtak?sakId=${sakId.value}") {
                             contentType(ContentType.Application.Json)
                             // setBody(opprett.toJson())
                         }.body<Brev>()

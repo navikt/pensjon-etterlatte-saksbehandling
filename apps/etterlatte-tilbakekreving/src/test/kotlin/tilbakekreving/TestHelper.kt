@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.UUID30
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
@@ -17,7 +18,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
 import no.nav.etterlatte.libs.common.tilbakekreving.Periode
-import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
@@ -101,7 +101,7 @@ fun kravgrunnlag(
     perioder: List<KravgrunnlagPeriode>? = null,
 ) = Kravgrunnlag(
     kravgrunnlagId = KravgrunnlagId(123L),
-    sakId = SakId(sak.id.sakId),
+    sakId = SakId(sak.id.value),
     vedtakId = VedtakId(2L),
     kontrollFelt = Kontrollfelt(""),
     status = status,
@@ -152,7 +152,7 @@ fun kravOgVedtakStatus(
     behandlingId: UUID30 = UUID.randomUUID().toUUID30(),
     status: KravgrunnlagStatus = KravgrunnlagStatus.NY,
 ) = KravOgVedtakstatus(
-    sakId = SakId(sak.id.sakId),
+    sakId = SakId(sak.id.value),
     vedtakId = VedtakId(2L),
     status = status,
     referanse = behandlingId,

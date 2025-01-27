@@ -140,7 +140,7 @@ class BehandlingKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/sak/${sakId.sakId}/behandlinger/foerstevirk",
+                            url = "$resourceUrl/api/sak/${sakId.value}/behandlinger/foerstevirk",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
@@ -170,7 +170,7 @@ class BehandlingKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/saker/${sakId.sakId}/behandlinger/sisteIverksatte",
+                            url = "$resourceUrl/saker/${sakId.value}/behandlinger/sisteIverksatte",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
@@ -279,7 +279,7 @@ class BehandlingKlientImpl(
         logger.info("Oppretter oppgave for sakId=$sakId")
 
         val resource =
-            Resource(clientId = clientId, url = "$resourceUrl/oppgaver/sak/${sakId.sakId}/opprett")
+            Resource(clientId = clientId, url = "$resourceUrl/oppgaver/sak/${sakId.value}/opprett")
 
         downstreamResourceClient.post(
             resource,

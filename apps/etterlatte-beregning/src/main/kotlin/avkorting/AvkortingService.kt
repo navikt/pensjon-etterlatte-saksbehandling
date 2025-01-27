@@ -111,7 +111,7 @@ class AvkortingService(
             when (behandling.opphoerFraOgMed) {
                 null -> {
                     val aldersovergang =
-                        grunnlagKlient.aldersovergangMaaned(behandling.sak, behandling.sakType, brukerTokenInfo)
+                        grunnlagKlient.aldersovergangMaaned(behandling.sakId, behandling.sakType, brukerTokenInfo)
                     when (aldersovergang.year) {
                         lagreGrunnlag.fom.year -> aldersovergang
                         else -> null
@@ -131,7 +131,7 @@ class AvkortingService(
                 aldersovergangMaaned,
             )
 
-        avkortingRepository.lagreAvkorting(behandlingId, behandling.sak, beregnetAvkorting)
+        avkortingRepository.lagreAvkorting(behandlingId, behandling.sakId, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         val avkortingFrontend =
             if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
@@ -194,7 +194,7 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandling.id)
         val sanksjoner = sanksjonService.hentSanksjon(behandling.id) ?: emptyList()
         val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning, sanksjoner)
-        avkortingRepository.lagreAvkorting(behandling.id, behandling.sak, beregnetAvkorting)
+        avkortingRepository.lagreAvkorting(behandling.id, behandling.sakId, beregnetAvkorting)
         val lagretAvkorting = hentAvkortingNonNull(behandling.id)
         settBehandlingStatusAvkortet(brukerTokenInfo, behandling, lagretAvkorting)
         return lagretAvkorting
@@ -261,7 +261,7 @@ class AvkortingService(
         brukerTokenInfo: BrukerTokenInfo,
         virkningstidspunkt: YearMonth,
     ): Avkorting {
-        val alleVedtak = vedtakKlient.hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+        val alleVedtak = vedtakKlient.hentIverksatteVedtak(behandling.sakId, brukerTokenInfo)
         val forrigeBehandlingId =
             alleVedtak
                 .filter {
@@ -277,7 +277,7 @@ class AvkortingService(
         return avkortingReparerAarsoppgjoeret.hentSisteAvkortingMedReparertAarsoppgjoer(
             forrigeAvkorting,
             virkningstidspunkt,
-            behandling.sak,
+            behandling.sakId,
             alleVedtak,
         )
     }

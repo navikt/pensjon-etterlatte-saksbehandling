@@ -85,7 +85,7 @@ class MigrertYrkesskadeTest(
             dataSource.insert("migrert_yrkesskade", params = {
                 mapOf(
                     "behandling_id" to behandlingId,
-                    "sak_id" to sakId.sakId,
+                    "sak_id" to sakId.value,
                 )
             })
             Assertions.assertTrue(service.erMigrertYrkesskadefordel(behandlingId))

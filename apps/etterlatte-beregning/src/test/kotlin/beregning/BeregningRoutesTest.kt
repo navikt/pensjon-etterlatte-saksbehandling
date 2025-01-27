@@ -100,7 +100,7 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        every { behandling.sak } returns sakId1
+        every { behandling.sakId } returns sakId1
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
@@ -183,7 +183,7 @@ internal class BeregningRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        every { behandling.sak } returns sakId1
+        every { behandling.sakId } returns sakId1
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns
             OverstyrBeregning(
                 sakId1,
@@ -218,7 +218,7 @@ internal class BeregningRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        every { behandling.sak } returns sakId1
+        every { behandling.sakId } returns sakId1
         every { beregningRepository.hentOverstyrBeregning(sakId1) } returns null
 
         testApplication {
@@ -268,7 +268,7 @@ internal class BeregningRoutesTest {
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-            every { sak } returns sakId1
+            every { sakId } returns sakId1
             every { sakType } returns SakType.BARNEPENSJON
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
             every { opphoerFraOgMed } returns null

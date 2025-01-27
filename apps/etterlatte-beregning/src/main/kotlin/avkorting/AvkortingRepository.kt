@@ -244,7 +244,7 @@ class AvkortingRepository(
             mapOf(
                 "id" to aarsoppgjoer.id,
                 "behandling_id" to behandlingId,
-                "sak_id" to sakId.sakId,
+                "sak_id" to sakId.value,
                 "aar" to aarsoppgjoer.aar,
                 "fom" to aarsoppgjoer.fom.atDay(1),
             ),
@@ -506,7 +506,7 @@ class AvkortingRepository(
         dataSource.transaction { tx ->
             queryOf(
                 "SELECT * FROM avkorting_aarsoppgjoer WHERE sak_id= ? ORDER BY aar ASC",
-                sakId.sakId,
+                sakId.value,
             ).let { query ->
                 tx.run(
                     query

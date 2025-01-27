@@ -161,7 +161,7 @@ class BehandlingKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/saker/${sakId.sakId}",
+                            url = "$resourceUrl/saker/${sakId.value}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
@@ -184,7 +184,7 @@ class BehandlingKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/oppgaver/sak/${sakId.sakId}/oppgaver",
+                            url = "$resourceUrl/oppgaver/sak/${sakId.value}/oppgaver",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(

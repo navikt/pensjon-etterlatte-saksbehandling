@@ -27,7 +27,7 @@ class VedtaksvurderingSakKlient(
         logger.info("Henter lopende vedtak, date=$dato")
         return try {
             httpClient
-                .get("$vedtaksvurderingUrl/loepende/${sakId.sakId}?dato=$dato")
+                .get("$vedtaksvurderingUrl/loepende/${sakId.value}?dato=$dato")
                 .body()
         } catch (e: ClientRequestException) {
             logger.error("Det oppstod feil i kall til vedtak API", e)

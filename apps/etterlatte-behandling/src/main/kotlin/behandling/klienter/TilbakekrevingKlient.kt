@@ -62,7 +62,7 @@ class TilbakekrevingKlientImpl(
     ): Kravgrunnlag {
         logger.info("Henter oppdatert kravgrunnlag tilknyttet tilbakekreving for sak $sakId")
         val response =
-            client.get("$url/api/tilbakekreving/${sakId.sakId}/kravgrunnlag/$kravgrunnlagId") {
+            client.get("$url/api/tilbakekreving/${sakId.value}/kravgrunnlag/$kravgrunnlagId") {
                 contentType(ContentType.Application.Json)
             }
         if (!response.status.isSuccess()) {

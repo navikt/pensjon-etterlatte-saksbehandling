@@ -226,7 +226,7 @@ class GrunnlagKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}",
+                            url = "$resourceApiUrl/grunnlag/sak/${sakId.value}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
@@ -298,7 +298,7 @@ class GrunnlagKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}/opprett-grunnlag",
+                        url = "$resourceApiUrl/grunnlag/sak/${sakId.value}/opprett-grunnlag",
                     ),
                 postBody = opplysningsbehov.toJson(),
                 brukerTokenInfo = brukerTokenInfo,
@@ -398,7 +398,7 @@ class GrunnlagKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}/nye-opplysninger",
+                        url = "$resourceApiUrl/grunnlag/sak/${sakId.value}/nye-opplysninger",
                     ),
                 postBody = saksopplysninger.toJson(),
                 brukerTokenInfo = brukerTokenInfo,
@@ -414,7 +414,7 @@ class GrunnlagKlientImpl(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceApiUrl/grunnlag/sak/${sakId.sakId}",
+                        url = "$resourceApiUrl/grunnlag/sak/${sakId.value}",
                     ),
                 brukerTokenInfo = Kontekst.get().brukerTokenInfo!!,
             ).mapBoth(
@@ -475,7 +475,7 @@ class GrunnlagKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/grunnlag/aldersovergang/sak/${sakId.sakId}/${sakType.name}",
+                            url = "$resourceUrl/api/grunnlag/aldersovergang/sak/${sakId.value}/${sakType.name}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -9,10 +10,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class VedtakId(
-    val value: Long,
-)
-
-data class SakId(
     val value: Long,
 )
 

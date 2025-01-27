@@ -336,7 +336,7 @@ fun behandling(
     opphoerFraOgMed: YearMonth? = null,
 ) = DetaljertBehandling(
     id = id,
-    sak = sak,
+    sakId = sak,
     sakType = sakType,
     soeker = "12312312321",
     status = status,

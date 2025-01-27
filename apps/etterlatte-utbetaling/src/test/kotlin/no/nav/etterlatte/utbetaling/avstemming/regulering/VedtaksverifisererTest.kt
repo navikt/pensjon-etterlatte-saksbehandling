@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.Regelverk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -19,7 +20,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjo
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Periode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.PeriodeForUtbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Sak
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao

@@ -77,7 +77,7 @@ class BeregningsGrunnlagService(
                         // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
                         val sisteIverksatteBehandling =
                             vedtaksvurderingKlient
-                                .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                                .hentIverksatteVedtak(behandling.sakId, brukerTokenInfo)
                                 .sortedByDescending { it.datoFattet }
                                 .first { it.vedtakType != VedtakType.OPPHOER }
 
@@ -240,7 +240,7 @@ class BeregningsGrunnlagService(
         return if (behandling.behandlingType == BehandlingType.REVURDERING) {
             val sisteIverksatteBehandling =
                 vedtaksvurderingKlient
-                    .hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                    .hentIverksatteVedtak(behandling.sakId, brukerTokenInfo)
                     .sortedByDescending { it.datoFattet }
                     .first { it.vedtakType != VedtakType.OPPHOER } // Opphør har ikke beregningsgrunnlag
 
@@ -272,7 +272,7 @@ class BeregningsGrunnlagService(
                 runBlocking {
                     behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 }
-            if (beregningRepository.hentOverstyrBeregning(behandling.sak) != null) {
+            if (beregningRepository.hentOverstyrBeregning(behandling.sakId) != null) {
                 dupliserOverstyrBeregningGrunnlag(behandlingId, forrigeBehandlingId)
                 return
             } else {
@@ -370,7 +370,7 @@ class BeregningsGrunnlagService(
                         trygdetidForIdent = it.data.trygdetidForIdent,
                         prorataBroekTeller = it.data.prorataBroekTeller,
                         prorataBroekNevner = it.data.prorataBroekNevner,
-                        sakId = behandling.sak,
+                        sakId = behandling.sakId,
                         beskrivelse = it.data.beskrivelse,
                         aarsak = it.data.aarsak,
                         kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),

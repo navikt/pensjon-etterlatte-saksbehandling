@@ -102,7 +102,7 @@ class BeregningsGrunnlagRepository(
                                 "trygdetid_for_ident" to grunnlag.trygdetidForIdent,
                                 "prorata_broek_teller" to grunnlag.prorataBroekTeller,
                                 "prorata_broek_nevner" to grunnlag.prorataBroekNevner,
-                                "sak_id" to grunnlag.sakId.sakId,
+                                "sak_id" to grunnlag.sakId.value,
                                 "beskrivelse" to grunnlag.beskrivelse,
                                 "aarsak" to grunnlag.aarsak,
                                 "kilde" to grunnlag.kilde.toJson(),

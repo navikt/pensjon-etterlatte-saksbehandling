@@ -161,7 +161,7 @@ class HendelseDao(
             saksIDer.map { sakId ->
                 mapOf(
                     "jobbId" to jobbId,
-                    "sakId" to sakId.sakId,
+                    "sakId" to sakId.value,
                     "steg" to steg.name,
                 )
             }

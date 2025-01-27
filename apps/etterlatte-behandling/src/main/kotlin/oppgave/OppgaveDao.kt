@@ -298,7 +298,7 @@ class OppgaveDaoImpl(
                         )
                         """.trimIndent(),
                     )
-                statement.setLong(1, sakId.sakId)
+                statement.setLong(1, sakId.value)
                 statement.setString(2, type.name)
                 statement.executeQuery().single {
                     val trueOrFalsePostgresFormat = getString("exists")

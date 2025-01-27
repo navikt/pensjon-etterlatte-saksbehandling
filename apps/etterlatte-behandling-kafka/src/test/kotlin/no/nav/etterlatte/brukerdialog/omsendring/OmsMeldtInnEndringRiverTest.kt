@@ -109,7 +109,7 @@ class OmsMeldtInnEndringRiverTest {
 
         val pdfData = objectMapper.readValue<ArkiverOmsMeldtInnEndring>(pdfDataSlot.captured.toJson())
         with(pdfData) {
-            sakId.sakId shouldBe 321L
+            sakId.value shouldBe 321L
             type shouldBe "ANNET"
             endringer shouldBe "Endringer fra bruker.."
             tidspunkt shouldBe "01.08.2024 05:06:07"

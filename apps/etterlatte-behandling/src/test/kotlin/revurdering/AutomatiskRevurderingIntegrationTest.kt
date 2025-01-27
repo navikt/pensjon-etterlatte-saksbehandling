@@ -162,7 +162,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                         Assertions.assertEquals(HttpStatusCode.OK, it.status)
                         it.body<DetaljertBehandling>().also { behandling ->
                             Assertions.assertEquals(revurdering, behandling.id)
-                            Assertions.assertEquals(sakId, behandling.sak)
+                            Assertions.assertEquals(sakId, behandling.sakId)
                         }
                     }
             }

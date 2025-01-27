@@ -32,7 +32,7 @@ class OppgaveKlient(
 
         return try {
             httpClient
-                .post("$behandlingUrl/oppgaver/sak/${sakId.sakId}/opprett") {
+                .post("$behandlingUrl/oppgaver/sak/${sakId.value}/opprett") {
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                     setBody(oppgave)

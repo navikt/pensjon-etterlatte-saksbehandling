@@ -22,7 +22,7 @@ class AvkortingTidligAlderspensjonService(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        logger.info("Sjekker om vi skal opprette oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
+        logger.info("Sjekker om vi skal opprette oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sakId.value}")
         val avkorting =
             avkortingRepository.hentAvkorting(behandlingId) ?: throw AvkortingFinnesIkkeException(behandlingId)
 
@@ -57,7 +57,7 @@ class AvkortingTidligAlderspensjonService(
             }
 
         if (overstyrtInntektsavkorting != null) {
-            logger.info("Oppretter oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sak.sakId}")
+            logger.info("Oppretter oppgave om opphør grunnen tidlig alderspensjon for sakId=${behandling.sakId.value}")
 
             // Vi trekker fra 2 måneder (2L) for å få måneden før opphør (2024.03).
             // For eksempel, hvis fom = 2024.1 og innvilgaMaaneder = 3:
@@ -69,7 +69,7 @@ class AvkortingTidligAlderspensjonService(
                     .atDay(1)
 
             behandlingKlient.opprettOppgave(
-                behandling.sak,
+                behandling.sakId,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
@@ -78,7 +78,7 @@ class AvkortingTidligAlderspensjonService(
                 behandlingId.toString(),
             )
         } else {
-            logger.info("Fant ingen tidlig alderspensjon for sakId=${behandling.sak.sakId}, trenger ingen oppgave om opphør.")
+            logger.info("Fant ingen tidlig alderspensjon for sakId=${behandling.sakId.value}, trenger ingen oppgave om opphør.")
         }
     }
 }

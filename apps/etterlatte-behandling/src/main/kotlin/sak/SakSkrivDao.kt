@@ -85,7 +85,7 @@ class SakSkrivDao(
                     """.trimIndent(),
                 ).apply {
                     setString(1, nyIdent.value)
-                    setLong(2, sakId.sakId)
+                    setLong(2, sakId.value)
                 }.executeUpdate()
         }
     }

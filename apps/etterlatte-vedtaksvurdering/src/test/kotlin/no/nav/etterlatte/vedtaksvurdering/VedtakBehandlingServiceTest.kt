@@ -829,7 +829,7 @@ internal class VedtakBehandlingServiceTest(
         val regulering =
             DetaljertBehandling(
                 id = behandlingId,
-                sak = sakId1,
+                sakId = sakId1,
                 sakType = SakType.BARNEPENSJON,
                 behandlingType = BehandlingType.REVURDERING,
                 revurderingsaarsak = Revurderingaarsak.REGULERING,
@@ -1918,7 +1918,7 @@ internal class VedtakBehandlingServiceTest(
     ): DetaljertBehandling =
         DetaljertBehandling(
             id = behandlingId,
-            sak = sakId,
+            sakId = sakId,
             sakType = saktype,
             soeker = SOEKER_FOEDSELSNUMMER.value,
             status = BehandlingStatus.OPPRETTET,

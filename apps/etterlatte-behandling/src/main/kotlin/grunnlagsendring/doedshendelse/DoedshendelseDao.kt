@@ -71,7 +71,7 @@ class DoedshendelseDao(
                     WHERE id = ?
                     """.trimIndent(),
                 ).apply {
-                    setLong(1, doedshendelseInternal.sakId?.sakId)
+                    setLong(1, doedshendelseInternal.sakId?.value)
                     setString(2, doedshendelseInternal.status.name)
                     setString(3, doedshendelseInternal.utfall?.name)
                     setTidspunkt(4, doedshendelseInternal.endret)

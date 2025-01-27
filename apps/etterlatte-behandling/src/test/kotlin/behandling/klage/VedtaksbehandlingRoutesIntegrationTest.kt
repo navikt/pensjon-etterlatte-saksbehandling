@@ -29,12 +29,12 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagId
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
-import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.libs.testdata.grunnlag.BARN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
@@ -241,7 +241,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
     private fun kravgrunnlag(sak: Sak) =
         Kravgrunnlag(
             kravgrunnlagId = KravgrunnlagId(123L),
-            sakId = SakId(sak.id.sakId),
+            sakId = SakId(sak.id.value),
             vedtakId = VedtakId(2L),
             kontrollFelt = Kontrollfelt(""),
             status = KravgrunnlagStatus.ANNU,

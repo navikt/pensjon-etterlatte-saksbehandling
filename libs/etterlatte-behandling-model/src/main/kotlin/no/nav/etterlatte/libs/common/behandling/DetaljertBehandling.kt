@@ -9,7 +9,7 @@ import java.util.UUID
 
 data class DetaljertBehandling(
     val id: UUID,
-    val sak: SakId,
+    val sakId: SakId,
     val sakType: SakType,
     val soeker: String,
     val status: BehandlingStatus,

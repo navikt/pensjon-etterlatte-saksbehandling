@@ -87,7 +87,7 @@ class VedtaksvurderingRepository(
                         """,
                 mapOf(
                     "behandlingId" to opprettVedtak.behandlingId,
-                    "sakid" to opprettVedtak.sakId.sakId,
+                    "sakid" to opprettVedtak.sakId.value,
                     "saktype" to opprettVedtak.sakType.name,
                     "fnr" to opprettVedtak.soeker.value,
                     "vedtakstatus" to opprettVedtak.status.name,
@@ -310,7 +310,7 @@ class VedtaksvurderingRepository(
         return tx.session {
             hentListe(
                 queryString = hentVedtak,
-                params = { mapOf("sakId" to sakId.sakId) },
+                params = { mapOf("sakId" to sakId.value) },
             ) {
                 it.toVedtak(emptyList())
             }

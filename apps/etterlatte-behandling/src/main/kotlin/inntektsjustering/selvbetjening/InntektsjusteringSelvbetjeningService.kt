@@ -41,7 +41,7 @@ class InntektsjusteringSelvbetjeningService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun behandleInntektsjustering(mottattInntektsjustering: MottattInntektsjustering) {
-        logger.info("Starter behandling av innmeldt inntektsjustering for sak ${mottattInntektsjustering.sak.sakId}")
+        logger.info("Starter behandling av innmeldt inntektsjustering for sak ${mottattInntektsjustering.sak.value}")
 
         if (skalGjoeresAutomatisk(mottattInntektsjustering.sak)) {
             startAutomatiskBehandling(mottattInntektsjustering)
@@ -52,7 +52,7 @@ class InntektsjusteringSelvbetjeningService(
     }
 
     private fun startAutomatiskBehandling(mottattInntektsjustering: MottattInntektsjustering) {
-        logger.info("Behandles automatisk: starter omregning for sak ${mottattInntektsjustering.sak.sakId}")
+        logger.info("Behandles automatisk: starter omregning for sak ${mottattInntektsjustering.sak.value}")
         val correlationId = getCorrelationId()
         rapid
             .publiser(
@@ -83,9 +83,9 @@ class InntektsjusteringSelvbetjeningService(
 
     private fun startManuellBehandling(mottattInntektsjustering: MottattInntektsjustering) =
         inTransaction {
-            logger.info("Behandles manuelt: oppretter oppgave for mottatt inntektsjustering for sak ${mottattInntektsjustering.sak.sakId}")
+            logger.info("Behandles manuelt: oppretter oppgave for mottatt inntektsjustering for sak ${mottattInntektsjustering.sak.value}")
             oppgaveService.opprettOppgave(
-                sakId = SakId(mottattInntektsjustering.sak.sakId),
+                sakId = SakId(mottattInntektsjustering.sak.value),
                 kilde = OppgaveKilde.BRUKERDIALOG,
                 type = OppgaveType.INNTEKTSOPPLYSNING,
                 merknad = "Ny inntektsopplysning",

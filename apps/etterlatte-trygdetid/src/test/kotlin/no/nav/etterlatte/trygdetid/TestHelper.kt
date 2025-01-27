@@ -37,7 +37,7 @@ fun behandling(
     behandlingStatus: BehandlingStatus = BehandlingStatus.VILKAARSVURDERT,
 ) = DetaljertBehandling(
     id = behandlingId,
-    sak = sakId,
+    sakId = sakId,
     sakType = SakType.BARNEPENSJON,
     soeker = "",
     status = behandlingStatus,

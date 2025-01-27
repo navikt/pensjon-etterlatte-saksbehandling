@@ -9,9 +9,9 @@ import java.io.Serializable
 @JsonDeserialize(keyUsing = SakIdKeyDeserializer::class)
 @JvmInline
 value class SakId(
-    @JsonValue val sakId: Long,
+    @JsonValue val value: Long,
 ) : Serializable {
-    override fun toString() = sakId.toString()
+    override fun toString() = value.toString()
 }
 
 fun String.tilSakId() = SakId(this.toLong())

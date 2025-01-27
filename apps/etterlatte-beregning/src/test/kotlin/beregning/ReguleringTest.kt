@@ -223,7 +223,7 @@ class ReguleringTest {
         vedtaksloesning: Vedtaksloesning = Vedtaksloesning.GJENNY,
     ) = mockk<DetaljertBehandling>().apply {
         every { id } returns UUID.randomUUID()
-        every { sak } returns sakId1
+        every { sakId } returns sakId1
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         every { kilde } returns vedtaksloesning

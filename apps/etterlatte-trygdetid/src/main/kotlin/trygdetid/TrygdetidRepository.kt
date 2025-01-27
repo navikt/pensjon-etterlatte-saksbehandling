@@ -204,7 +204,7 @@ class TrygdetidRepository(
             mapOf(
                 "id" to trygdetid.id,
                 "behandlingId" to trygdetid.behandlingId,
-                "sakId" to trygdetid.sakId.sakId,
+                "sakId" to trygdetid.sakId.value,
                 "ident" to trygdetid.ident,
                 "yrkesskade" to trygdetid.yrkesskade,
             ),

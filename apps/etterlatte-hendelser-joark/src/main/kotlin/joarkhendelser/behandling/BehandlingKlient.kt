@@ -59,7 +59,7 @@ class BehandlingKlient(
         referanse: String,
     ): UUID =
         httpClient
-            .post("$url/oppgaver/sak/${sakId.sakId}/opprett") {
+            .post("$url/oppgaver/sak/${sakId.value}/opprett") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     NyOppgaveDto(

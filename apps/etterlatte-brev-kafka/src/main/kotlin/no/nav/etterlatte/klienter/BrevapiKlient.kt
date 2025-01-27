@@ -38,7 +38,7 @@ class BrevapiKlient(
         try {
             logger.info("Oppretter brev for sak med sakId=$sakid")
             return httpClient
-                .post("$baseUrl/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
+                .post("$baseUrl/api/brev/sak/${sakid.value}/opprett-journalfoer-og-distribuer") {
                     contentType(ContentType.Application.Json)
                     setBody(opprett.toJson())
                     timeout {
@@ -67,7 +67,7 @@ class BrevapiKlient(
             return retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
                 httpClient
                     .post(
-                        "$baseUrl/api/brev/$brevId/distribuer?distribusjonsType=${distribusjonsType.name}&sakId=${sakId.sakId}",
+                        "$baseUrl/api/brev/$brevId/distribuer?distribusjonsType=${distribusjonsType.name}&sakId=${sakId.value}",
                     ) {
                         contentType(ContentType.Application.Json)
                     }.body<BestillingsIdDto>()
@@ -112,7 +112,7 @@ class BrevapiKlient(
         try {
             logger.info("Oppretet og journalfører notat med sakid: $sakId")
             retryOgPakkUt(times = 5, vent = { timesleft -> Thread.sleep(Duration.ofSeconds(1L * timesleft)) }) {
-                httpClient.post("$baseUrl/api/notat/sak/${sakId.sakId}/manuellsamordning") {
+                httpClient.post("$baseUrl/api/notat/sak/${sakId.value}/manuellsamordning") {
                     contentType(ContentType.Application.Json)
                     setBody(samordningManueltBehandletRequest.toJson())
                 }

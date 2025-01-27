@@ -270,8 +270,8 @@ class AktivitetspliktServiceTest {
             val vurdering = service.hentVurderingForOppgave(oppgaveId)
 
             vurdering shouldNotBe null
-            vurdering?.aktivitet?.isEmpty() shouldNotBe true
-            vurdering?.unntak shouldBe emptyList()
+            vurdering.aktivitet.isEmpty() shouldNotBe true
+            vurdering.unntak shouldBe emptyList()
 
             verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) }
@@ -343,8 +343,8 @@ class AktivitetspliktServiceTest {
             val vurdering = service.hentVurderingForOppgave(oppgaveId)
 
             vurdering shouldNotBe null
-            vurdering?.aktivitet shouldBe emptyList()
-            vurdering?.unntak?.isEmpty() shouldBe false
+            vurdering.aktivitet shouldBe emptyList()
+            vurdering.unntak.isEmpty() shouldBe false
 
             verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) }
@@ -707,7 +707,7 @@ class AktivitetspliktServiceTest {
         }
 
         @Test
-        fun `opprette revurdering aktivitetsplikt ikke er oppfylt, aktivitetsgrad over 50skjønnsmessig nei - 12 mnd`() {
+        fun `opprette revurdering aktivitetsplikt ikke er oppfylt, aktivitetsgrad over 50 skjønnsmessig nei - 12 mnd`() {
             val revurdering =
                 mockk<Revurdering> {
                     every { id } returns UUID.randomUUID()

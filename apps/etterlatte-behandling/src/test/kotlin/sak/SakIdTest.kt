@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.sak
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,6 +19,19 @@ class SakIdTest {
         val serialisertMap = sakIdKeyMap.toJson()
         val deserialisertMap = objectMapper.readValue<Map<SakId, String>>(serialisertMap)
         assertEquals(sakIdKeyMap, deserialisertMap)
+    }
+
+    @Test
+    fun `Long sakid brukt som JSON key kan deserialiseres til saKid value class`() {
+        val sakIdValue = "1123234"
+        val sakIdKey = 456713L
+        val sakIdKeyMap = mapOf(sakIdKey to sakIdValue) // Just to be clear så må det ikke være SakId for å bli det)
+
+        val serialisertMap = sakIdKeyMap.toJson()
+        val deserialisertMap = objectMapper.readValue<Map<SakId, String>>(serialisertMap)
+        deserialisertMap.keys.size shouldBe 1
+        deserialisertMap.entries.first().value shouldBe sakIdValue
+        deserialisertMap.entries.first().key shouldBe SakId(sakIdKey)
     }
 
     @Test

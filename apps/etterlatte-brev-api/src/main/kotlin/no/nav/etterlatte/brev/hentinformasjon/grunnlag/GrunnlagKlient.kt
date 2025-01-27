@@ -38,7 +38,7 @@ class GrunnlagKlient(
 
             return downstreamResourceClient
                 .get(
-                    Resource(clientId, "$baseUrl/api/grunnlag/sak/${sakid.sakId}"),
+                    Resource(clientId, "$baseUrl/api/grunnlag/sak/${sakid.value}"),
                     brukerTokenInfo,
                 ).mapBoth(
                     success = { resource -> resource.response.let { deserialize(it.toString()) } },

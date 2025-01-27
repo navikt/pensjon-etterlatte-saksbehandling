@@ -44,7 +44,7 @@ class OmregningDao(
 
                 statement.setString(1, kjoering)
                 if (harEkskluderteSaker) {
-                    statement.setArray(2, createArrayOf("bigint", ekskluderteSaker.map { it.sakId }.toTypedArray()))
+                    statement.setArray(2, createArrayOf("bigint", ekskluderteSaker.map { it.value }.toTypedArray()))
                 }
                 statement.setInt(if (harEkskluderteSaker) 3 else 2, antall)
 
@@ -165,7 +165,7 @@ class OmregningDao(
                         """.trimIndent(),
                     )
                 statement.setString(1, kjoering)
-                statement.setLong(2, sakId.sakId)
+                statement.setLong(2, sakId.value)
                 statement.executeQuery().singleOrNull {
                     Pair(
                         getLong("sak_id"),

@@ -90,7 +90,7 @@ class AvkortingTidligAlderspensjonServiceTest {
 
         coEvery {
             behandlingKlient.opprettOppgave(
-                behandling.sak,
+                behandling.sakId,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
@@ -107,7 +107,7 @@ class AvkortingTidligAlderspensjonServiceTest {
         val slotTidspunkt = slot<Tidspunkt>()
         coVerify(exactly = 1) {
             behandlingKlient.opprettOppgave(
-                behandling.sak,
+                behandling.sakId,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
@@ -175,7 +175,7 @@ class AvkortingTidligAlderspensjonServiceTest {
 
         coEvery {
             behandlingKlient.opprettOppgave(
-                behandling.sak,
+                behandling.sakId,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
@@ -192,7 +192,7 @@ class AvkortingTidligAlderspensjonServiceTest {
         val slotTidspunkt = slot<Tidspunkt>()
         coVerify(exactly = 1) {
             behandlingKlient.opprettOppgave(
-                behandling.sak,
+                behandling.sakId,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
@@ -243,7 +243,7 @@ class AvkortingTidligAlderspensjonServiceTest {
 
         coEvery {
             behandlingKlient.opprettOppgave(
-                behandling.sak,
+                behandling.sakId,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",
@@ -260,7 +260,7 @@ class AvkortingTidligAlderspensjonServiceTest {
         val slotTidspunkt = slot<Tidspunkt>()
         coVerify(exactly = 1) {
             behandlingKlient.opprettOppgave(
-                behandling.sak,
+                behandling.sakId,
                 brukerTokenInfo,
                 OppgaveType.GENERELL_OPPGAVE,
                 "Opphør av ytelse på grunn av alderspensjon.",

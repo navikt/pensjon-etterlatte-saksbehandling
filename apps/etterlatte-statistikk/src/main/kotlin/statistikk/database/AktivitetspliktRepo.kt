@@ -102,7 +102,7 @@ class AktivitetspliktRepo(
                     ORDER BY sak_id, registrert_maaned DESC
                     """.trimIndent(),
                 )
-            statement.setArray(1, connection.createArrayOf("bigint", sakIder.map { it.sakId }.toTypedArray()))
+            statement.setArray(1, connection.createArrayOf("bigint", sakIder.map { it.value }.toTypedArray()))
             statement.setString(2, yearMonth.toString())
             statement
                 .executeQuery()

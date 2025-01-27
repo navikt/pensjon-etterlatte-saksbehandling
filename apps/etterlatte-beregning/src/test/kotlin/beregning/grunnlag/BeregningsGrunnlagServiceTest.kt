@@ -189,8 +189,8 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `skal ikke tillate endringer i beregningsgrunnlaget før virk på revurdering`() {
-        val sakId = randomSakId()
-        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+        val sakIdRandom = randomSakId()
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakIdsendtinn = sakIdRandom)
 
         val virk = YearMonth.of(2023, JANUARY)
         val virkMock = mockk<Virkningstidspunkt>()
@@ -200,7 +200,7 @@ internal class BeregningsGrunnlagServiceTest {
                 type = SakType.BARNEPENSJON,
                 uuid = randomUUID(),
                 behandlingstype = BehandlingType.REVURDERING,
-                sakId = sakId,
+                sakIdsendtinn = sakIdRandom,
             )
         every { revurdering.virkningstidspunkt } returns virkMock
 
@@ -232,7 +232,7 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
         coEvery { behandlingKlient.statusTrygdetidOppdatert(revurdering.id, any(), any()) } returns true
         coEvery {
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakIdRandom, any())
         } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
@@ -264,14 +264,14 @@ internal class BeregningsGrunnlagServiceTest {
     @Test
     fun `skal ikke tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler`() {
         val sakId = randomSakId()
-        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakIdsendtinn = sakId)
 
         val revurdering =
             mockBehandling(
                 type = SakType.BARNEPENSJON,
                 uuid = randomUUID(),
                 behandlingstype = BehandlingType.REVURDERING,
-                sakId = sakId,
+                sakIdsendtinn = sakId,
             )
 
         val grunnlagEndring =
@@ -322,14 +322,14 @@ internal class BeregningsGrunnlagServiceTest {
     @Test
     fun `skal tillate endringer i beregningsgrunnlaget hvis forrigeGrunnlag mangler pga overstyrt beregning`() {
         val sakId = randomSakId()
-        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakIdsendtinn = sakId)
 
         val revurdering =
             mockBehandling(
                 type = SakType.BARNEPENSJON,
                 uuid = randomUUID(),
                 behandlingstype = BehandlingType.REVURDERING,
-                sakId = sakId,
+                sakIdsendtinn = sakId,
             )
 
         val grunnlagEndring =
@@ -381,7 +381,7 @@ internal class BeregningsGrunnlagServiceTest {
     @Test
     fun `skal tillate endringer i beregningsgrunnlaget etter virk på revurdering`() {
         val sakId = randomSakId()
-        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakId = sakId)
+        val foerstegangsbehandling = mockBehandling(type = SakType.BARNEPENSJON, uuid = randomUUID(), sakIdsendtinn = sakId)
 
         val virk = YearMonth.of(2023, JANUARY)
         val virkMock = mockk<Virkningstidspunkt>()
@@ -391,7 +391,7 @@ internal class BeregningsGrunnlagServiceTest {
                 type = SakType.BARNEPENSJON,
                 uuid = randomUUID(),
                 behandlingstype = BehandlingType.REVURDERING,
-                sakId = sakId,
+                sakIdsendtinn = sakId,
             )
         every { revurdering.virkningstidspunkt } returns virkMock
 
@@ -1042,12 +1042,12 @@ internal class BeregningsGrunnlagServiceTest {
         type: SakType,
         uuid: UUID,
         behandlingstype: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        sakId: SakId = sakId1,
+        sakIdsendtinn: SakId = sakId1,
         virkningstidspunktdato: YearMonth = REFORM_TIDSPUNKT_BP,
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns uuid
-            every { sak } returns sakId
+            every { sakId } returns sakIdsendtinn
             every { sakType } returns type
             every { behandlingType } returns behandlingstype
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virkningstidspunktdato)

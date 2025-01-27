@@ -101,7 +101,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                    OverstyrBeregning(behandling.sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
                     bruker,
                 )
 
@@ -184,7 +184,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                    OverstyrBeregning(behandling.sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
                     bruker,
                 )
 
@@ -274,7 +274,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                    OverstyrBeregning(behandling.sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
                     bruker,
                 )
 
@@ -364,7 +364,7 @@ internal class BeregnOverstyrServiceTest {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                    OverstyrBeregning(behandling.sakId, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
                     bruker,
                 )
 
@@ -403,7 +403,7 @@ internal class BeregnOverstyrServiceTest {
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns UUID.randomUUID()
-            every { sak } returns sakId1
+            every { sakId } returns sakId1
             every { behandlingType } returns type
             every { sakType } returns saksType
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)

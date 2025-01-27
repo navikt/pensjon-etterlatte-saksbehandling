@@ -2,6 +2,7 @@ package behandling.tilbakekreving
 
 import no.nav.etterlatte.libs.common.UUID30
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
 import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
@@ -13,7 +14,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
 import no.nav.etterlatte.libs.common.tilbakekreving.Periode
-import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBeloepBehold
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBeloepBeholdSvar
@@ -34,7 +34,7 @@ fun kravgrunnlag(
     behandlingId: UUID30 = UUID.randomUUID().toUUID30(),
 ) = Kravgrunnlag(
     kravgrunnlagId = KravgrunnlagId(123L),
-    sakId = SakId(sak.id.sakId),
+    sakId = SakId(sak.id.value),
     vedtakId = VedtakId(2L),
     kontrollFelt = Kontrollfelt(""),
     status = KravgrunnlagStatus.NY,

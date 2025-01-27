@@ -1009,7 +1009,7 @@ internal class BeregnBarnepensjonServiceTest {
     ): DetaljertBehandling =
         mockk<DetaljertBehandling> {
             every { id } returns randomUUID()
-            every { sak } returns sakId1
+            every { sakId } returns sakId1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
             every { kilde } returns vedtaksloesning

@@ -49,7 +49,7 @@ class SanksjonRepository(
                     mapOf(
                         "id" to UUID.randomUUID(),
                         "behandlingId" to behandlingId,
-                        "sak_id" to sakId.sakId,
+                        "sak_id" to sakId.value,
                         "type" to sanksjon.type.name,
                         "fom" to sanksjon.fom,
                         "tom" to sanksjon.tom,
@@ -80,7 +80,7 @@ class SanksjonRepository(
                     mapOf(
                         "id" to UUID.randomUUID(),
                         "behandlingId" to behandlingId,
-                        "sak_id" to sakId.sakId,
+                        "sak_id" to sakId.value,
                         "type" to sanksjon.type.name,
                         "fom" to sanksjon.fom.atDay(1),
                         "tom" to sanksjon.tom?.atEndOfMonth(),

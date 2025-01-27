@@ -136,9 +136,7 @@ fun oppdragMedFeiletKvittering(
 
 fun utbetalingKonsistensavstemming(
     id: UUID = UUID.randomUUID(),
-    sakId: no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId =
-        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
-            .SakId(1),
+    sakId: SakId = SakId(1),
     sakType: Saktype? = Saktype.BARNEPENSJON,
     vedtakId: Long = 1,
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
@@ -185,9 +183,7 @@ fun utbetalingKonsistensavstemming(
 
 fun utbetaling(
     id: UUID = UUID.randomUUID(),
-    sakId: no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId =
-        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
-            .SakId(1),
+    sakId: SakId = SakId(1),
     sakType: Saktype? = Saktype.BARNEPENSJON,
     vedtakId: Long = 1,
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
@@ -237,9 +233,7 @@ fun utbetaling(
 
 fun utbetalingslinje(
     utbetalingId: UUID = UUID.randomUUID(),
-    sakId: no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId =
-        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
-            .SakId(1),
+    sakId: SakId = SakId(1),
     utbetalingslinjeId: Long = 1,
     type: Utbetalingslinjetype = Utbetalingslinjetype.UTBETALING,
     erstatter: Long? = null,
@@ -273,9 +267,7 @@ fun utbetalingMedOpphoer() =
             listOf(
                 utbetalingslinje(
                     utbetalingId = UUID.randomUUID(),
-                    sakId =
-                        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
-                            .SakId(1),
+                    sakId = SakId(1),
                     utbetalingslinjeId = 1,
                     type = Utbetalingslinjetype.OPPHOER,
                     beloep = null,
@@ -312,9 +304,7 @@ fun oppdragForKonsistensavstemming(
     fnr: String = "123456",
     oppdragslinjeForKonsistensavstemming: List<OppdragslinjeForKonsistensavstemming>,
 ) = OppdragForKonsistensavstemming(
-    sakId =
-        no.nav.etterlatte.utbetaling.iverksetting.utbetaling
-            .SakId(sakId.sakId),
+    sakId = SakId(sakId.value),
     sakType = sakType,
     fnr = Foedselsnummer(fnr),
     utbetalingslinjer = oppdragslinjeForKonsistensavstemming,

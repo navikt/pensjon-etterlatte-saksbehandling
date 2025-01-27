@@ -393,7 +393,7 @@ internal class VedtaksvurderingRouteTest {
 
             val hentetLoependeYtelse =
                 client
-                    .get("/api/vedtak/loepende/${sakId.sakId}?dato=${loependeYtelse.dato}") {
+                    .get("/api/vedtak/loepende/${sakId.value}?dato=${loependeYtelse.dato}") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         header(HttpHeaders.Authorization, "Bearer $token")
                     }.let {

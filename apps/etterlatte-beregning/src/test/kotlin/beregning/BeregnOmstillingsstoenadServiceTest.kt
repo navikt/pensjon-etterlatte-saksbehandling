@@ -330,7 +330,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns sakId1
+            every { sakId } returns sakId1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         }

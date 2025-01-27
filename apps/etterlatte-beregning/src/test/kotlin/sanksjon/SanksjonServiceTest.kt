@@ -507,7 +507,7 @@ internal class SanksjonServiceTest {
             coEvery { behandlingKlient.hentBehandling(forrigeBehandlingId, bruker) } returns forrigeBehandling
             coEvery {
                 behandlingKlient.hentSisteIverksatteBehandling(
-                    behandling.sak,
+                    behandling.sakId,
                     bruker,
                 )
             } returns SisteIverksatteBehandling(forrigeBehandlingId)
@@ -544,7 +544,7 @@ internal class SanksjonServiceTest {
             every { sanksjonRepository.hentSanksjon(behandlingId) } returns sanksjonerIBehandling
             every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns sanksjonerForrige
 
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, any()) } returns
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(behandling.sakId, any()) } returns
                 SisteIverksatteBehandling(forrigeBehandlingId)
 
             // Vi oppretter ingen sanksjoner, siden behandlingen har allerede sanksjoner lagt inn

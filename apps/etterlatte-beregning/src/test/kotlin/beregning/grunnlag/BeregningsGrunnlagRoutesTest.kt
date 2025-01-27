@@ -94,7 +94,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
-                sak = randomSakId(),
+                sakId = randomSakId(),
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
@@ -148,7 +148,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
-                sak = sakId,
+                sakId = sakId,
                 sakType = SakType.BARNEPENSJON,
                 soeker = "",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
@@ -296,7 +296,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
-                sak = randomSakId(),
+                sakId = randomSakId(),
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
@@ -357,7 +357,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
-                sak = randomSakId(),
+                sakId = randomSakId(),
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
@@ -646,7 +646,7 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
-                sak = randomSakId,
+                sakId = randomSakId,
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,

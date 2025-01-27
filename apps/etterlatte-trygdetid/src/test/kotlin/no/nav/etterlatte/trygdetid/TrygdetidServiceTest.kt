@@ -135,11 +135,11 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal opprette trygdetid`() {
         val behandlingId = randomUUID()
-        val sakId = randomSakId()
+        val sakIdrandom = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdrandom
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
             }
@@ -163,7 +163,7 @@ internal class TrygdetidServiceTest {
                 .first()
                 .hentFoedselsnummer()!!
                 .verdi
-        val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
+        val trygdetid = trygdetid(behandlingId, sakIdrandom, ident = forventetIdent.value)
 
         every { repository.hentTrygdetiderForBehandling(any()) } returns emptyList() andThen listOf(trygdetid)
         every { repository.hentTrygdetid(any()) } returns trygdetid
@@ -237,7 +237,7 @@ internal class TrygdetidServiceTest {
         }
         verify {
             behandling.id
-            behandling.sak
+            behandling.sakId
             behandling.behandlingType
             behandling.tidligereFamiliepleier
         }
@@ -246,17 +246,17 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal kopiere trygdetid hvis revurdering`() {
         val behandlingId = randomUUID()
-        val sakId = randomSakId()
+        val sakIdrandom = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdrandom
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.DOEDSFALL
             }
 
         val forrigebehandlingId = randomUUID()
-        val forrigeTrygdetid = trygdetid(behandlingId, sakId)
+        val forrigeTrygdetid = trygdetid(behandlingId, sakIdrandom)
         val oppdatertTrygdetidCaptured = slot<Trygdetid>()
         val vedtakSammendrag = mockVedtak(forrigebehandlingId, VedtakType.ENDRING)
 
@@ -283,7 +283,7 @@ internal class TrygdetidServiceTest {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakIdrandom, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
 
@@ -302,7 +302,7 @@ internal class TrygdetidServiceTest {
         }
         verify {
             behandling.behandlingType
-            behandling.sak
+            behandling.sakId
             behandling.id
             behandling.revurderingsaarsak
             vedtakSammendrag.behandlingId
@@ -320,11 +320,11 @@ internal class TrygdetidServiceTest {
                 beregnetTrygdetid = beregnetTrygdetid(overstyrt = true, total = 39),
             )
         val behandlingId = randomUUID()
-        val sakId = forrigeTrygdetid.sakId
+        val sakIdtt = forrigeTrygdetid.sakId
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdtt
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.DOEDSFALL
             }
@@ -355,7 +355,7 @@ internal class TrygdetidServiceTest {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakIdtt, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
 
@@ -371,7 +371,7 @@ internal class TrygdetidServiceTest {
         }
         verify {
             behandling.id
-            behandling.sak
+            behandling.sakId
             behandling.behandlingType
             behandling.revurderingsaarsak
             vedtakSammendrag.behandlingId
@@ -386,7 +386,7 @@ internal class TrygdetidServiceTest {
         val behandling =
             mockk<DetaljertBehandling> {
                 every { id } returns behandlingId
-                every { sak } returns randomSakId()
+                every { sakId } returns randomSakId()
                 every { status } returns BehandlingStatus.VILKAARSVURDERT
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
@@ -421,7 +421,7 @@ internal class TrygdetidServiceTest {
             behandling.id
             behandling.behandlingType
             behandling.status
-            behandling.sak
+            behandling.sakId
             behandling.tidligereFamiliepleier
         }
     }
@@ -433,7 +433,7 @@ internal class TrygdetidServiceTest {
         val behandling =
             mockk<DetaljertBehandling> {
                 every { id } returns behandlingId
-                every { sak } returns randomSakId()
+                every { sakId } returns randomSakId()
                 every { status } returns BehandlingStatus.VILKAARSVURDERT
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { soeker } returns SOEKER_FOEDSELSNUMMER.value
@@ -469,7 +469,7 @@ internal class TrygdetidServiceTest {
             behandling.id
             behandling.behandlingType
             behandling.status
-            behandling.sak
+            behandling.sakId
             behandling.tidligereFamiliepleier?.svar
             behandling.soeker
         }
@@ -478,11 +478,11 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal opprette trygdetid hvis revurdering og forrige trygdetid mangler og det ikke er regulering`() {
         val behandlingId = randomUUID()
-        val sakId = randomSakId()
+        val sakIdRandom = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdRandom
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.SOESKENJUSTERING
             }
@@ -494,7 +494,7 @@ internal class TrygdetidServiceTest {
                 .first()
                 .hentFoedselsnummer()!!
                 .verdi
-        val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
+        val trygdetid = trygdetid(behandlingId, sakIdRandom, ident = forventetIdent.value)
         val vedtakSammendrag = mockVedtak(forrigeBehandlingId, VedtakType.ENDRING)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -522,7 +522,7 @@ internal class TrygdetidServiceTest {
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakIdRandom, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
             repository.hentTrygdetidMedId(any(), any())
             repository.opprettTrygdetid(
@@ -543,7 +543,7 @@ internal class TrygdetidServiceTest {
         verify {
             behandling.revurderingsaarsak
             behandling.id
-            behandling.sak
+            behandling.sakId
             behandling.behandlingType
             vedtakSammendrag.behandlingId
             vedtakSammendrag.vedtakType
@@ -553,11 +553,11 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal ikke opprette trygdetid hvis revurdering og forrige trygdetid mangler og det er automatisk regulering`() {
         val behandlingId = randomUUID()
-        val sakId = randomSakId()
+        val sakIdrandom = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdrandom
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
                 every { prosesstype } returns Prosesstype.AUTOMATISK
@@ -583,7 +583,7 @@ internal class TrygdetidServiceTest {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakIdrandom, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
         }
         coVerify {
@@ -593,7 +593,7 @@ internal class TrygdetidServiceTest {
             behandling.revurderingsaarsak
             behandling.prosesstype
             behandling.id
-            behandling.sak
+            behandling.sakId
             behandling.behandlingType
             vedtakSammendrag.behandlingId
             vedtakSammendrag.vedtakType
@@ -603,11 +603,11 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal opprette trygdetid hvis revurdering og forrige trygdetid mangler og det er manuell regulering`() {
         val behandlingId = randomUUID()
-        val sakId = randomSakId()
+        val sakIdRand = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdRand
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
                 every { prosesstype } returns Prosesstype.MANUELL
@@ -620,7 +620,7 @@ internal class TrygdetidServiceTest {
                 .first()
                 .hentFoedselsnummer()!!
                 .verdi
-        val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
+        val trygdetid = trygdetid(behandlingId, sakIdRand, ident = forventetIdent.value)
         val vedtakSammendrag = mockVedtak(forrigeBehandlingId, VedtakType.ENDRING)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -652,7 +652,7 @@ internal class TrygdetidServiceTest {
         coVerify(exactly = 1) {
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             repository.hentTrygdetiderForBehandling(behandlingId)
-            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, saksbehandler)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakIdRand, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.hentTrygdetidMedId(any(), any())
@@ -675,7 +675,7 @@ internal class TrygdetidServiceTest {
             behandling.revurderingsaarsak
             behandling.prosesstype
             behandling.id
-            behandling.sak
+            behandling.sakId
             behandling.behandlingType
             vedtakSammendrag.behandlingId
             vedtakSammendrag.vedtakType
@@ -708,12 +708,12 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal opprette manglende trygdetid ved opprettelse naar det allerede finnes men ikke for alle avdoede`() {
         val behandlingId = randomUUID()
-        val sakId = randomSakId()
+        val sakIdrandom = randomSakId()
 
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdrandom
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
             }
@@ -748,7 +748,7 @@ internal class TrygdetidServiceTest {
             repository.opprettTrygdetid(
                 withArg { trygdetid ->
                     trygdetid.ident shouldBe AVDOED2_FOEDSELSNUMMER.value
-                    trygdetid.sakId shouldBe sakId
+                    trygdetid.sakId shouldBe sakIdrandom
                     trygdetid.behandlingId shouldBe behandlingId
 
                     trygdetid.opplysninger.let { opplysninger ->
@@ -787,7 +787,7 @@ internal class TrygdetidServiceTest {
 
         verify {
             behandling.id
-            behandling.sak
+            behandling.sakId
             behandling.behandlingType
             behandling.tidligereFamiliepleier
         }
@@ -1141,7 +1141,7 @@ internal class TrygdetidServiceTest {
 
     @Test
     fun `skal opprette ny trygdetid av kopi fra forrige behandling`() {
-        val sakId = randomSakId()
+        val sakIdRandom = randomSakId()
         val behandlingId = randomUUID()
         val forrigeBehandlingId = randomUUID()
         val forrigeTrygdetidGrunnlag = trygdetidGrunnlag()
@@ -1157,7 +1157,7 @@ internal class TrygdetidServiceTest {
         val regulering =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdRandom
             }
 
         coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns regulering
@@ -1195,7 +1195,7 @@ internal class TrygdetidServiceTest {
 
         verify {
             regulering.id
-            regulering.sak
+            regulering.sakId
 
             avtaleService.hentAvtaleForBehandling(forrigeBehandlingId)
         }
@@ -1203,7 +1203,7 @@ internal class TrygdetidServiceTest {
 
     @Test
     fun `skal opprette manglende trygdetid av kopi fra forrige behandling`() {
-        val sakId = randomSakId()
+        val sakIdRandom = randomSakId()
         val behandlingId = randomUUID()
         val forrigeBehandlingId = randomUUID()
         val forrigeTrygdetidGrunnlag = trygdetidGrunnlag(begrunnelse = "Forrige")
@@ -1228,7 +1228,7 @@ internal class TrygdetidServiceTest {
         val revurdering =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdRandom
             }
 
         val doedsdato = LocalDate.of(2023, 11, 12)
@@ -1278,7 +1278,7 @@ internal class TrygdetidServiceTest {
         }
         verify {
             revurdering.id
-            revurdering.sak
+            revurdering.sakId
 
             avtaleService.hentAvtaleForBehandling(forrigeBehandlingId)
         }
@@ -1539,7 +1539,7 @@ internal class TrygdetidServiceTest {
 
     @Test
     fun `opprettOverstyrtBeregnetTrygdetid kaster feil hvis ingen avdoede i persongalleri har doedsdato`() {
-        val sakId: SakId = randomSakId()
+        val sakIdrandom: SakId = randomSakId()
         val behandlingId = randomUUID()
         val grunnlag =
             GrunnlagTestData(
@@ -1569,7 +1569,7 @@ internal class TrygdetidServiceTest {
         val behandling: DetaljertBehandling =
             mockk {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdrandom
                 every { status } returns BehandlingStatus.OPPRETTET
             }
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
@@ -1599,7 +1599,7 @@ internal class TrygdetidServiceTest {
 
     @Test
     fun `opprettOverstyrtBeregnetTrygdetid tillater aa opprette overstyrt trygdetid uten avdoede`() {
-        val sakId: SakId = randomSakId()
+        val sakIdrandom: SakId = randomSakId()
         val behandlingId = randomUUID()
         val grunnlag =
             GrunnlagTestData(
@@ -1622,7 +1622,7 @@ internal class TrygdetidServiceTest {
         val behandling: DetaljertBehandling =
             mockk {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdrandom
                 every { status } returns BehandlingStatus.OPPRETTET
                 every { tidligereFamiliepleier } returns null
             }
@@ -1648,14 +1648,14 @@ internal class TrygdetidServiceTest {
         verify {
             behandling.status
             behandling.id
-            behandling.sak
+            behandling.sakId
             behandling.tidligereFamiliepleier
         }
     }
 
     @Test
     fun `opprettOverstyrtBeregnetTrygdetid tillater å opprette overstyrt trygdetid uten avdøde med soeker som ident`() {
-        val sakId: SakId = randomSakId()
+        val sakIdRandom: SakId = randomSakId()
         val behandlingId = randomUUID()
         val grunnlag =
             GrunnlagTestData(
@@ -1678,7 +1678,7 @@ internal class TrygdetidServiceTest {
         val behandling: DetaljertBehandling =
             mockk {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdRandom
                 every { status } returns BehandlingStatus.OPPRETTET
                 every { soeker } returns "12345678901"
                 every { tidligereFamiliepleier } returns
@@ -1713,7 +1713,7 @@ internal class TrygdetidServiceTest {
         verify {
             behandling.status
             behandling.id
-            behandling.sak
+            behandling.sakId
             behandling.soeker
             behandling.tidligereFamiliepleier
         }
@@ -1745,11 +1745,11 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal ikke opprette fremtidig grunnlag hvis man er for gammel`() {
         val behandlingId = randomUUID()
-        val sakId = randomSakId()
+        val sakIdrandom = randomSakId()
         val behandling =
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
-                every { sak } returns sakId
+                every { sakId } returns sakIdrandom
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { tidligereFamiliepleier } returns null
             }
@@ -1773,7 +1773,7 @@ internal class TrygdetidServiceTest {
                 .first()
                 .hentFoedselsnummer()!!
                 .verdi
-        val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
+        val trygdetid = trygdetid(behandlingId, sakIdrandom, ident = forventetIdent.value)
 
         every { repository.hentTrygdetiderForBehandling(any()) } returns emptyList() andThen listOf(trygdetid)
         every { repository.hentTrygdetid(any()) } returns trygdetid
@@ -1824,7 +1824,7 @@ internal class TrygdetidServiceTest {
         }
         verify {
             behandling.id
-            behandling.sak
+            behandling.sakId
             behandling.behandlingType
             behandling.tidligereFamiliepleier
         }

@@ -52,7 +52,7 @@ internal class TrygdetidRepositoryTest(
 
         val opplysninger = opplysningsgrunnlag(foedselsdato, doedsdato, seksten, seksti)
 
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, opplysninger = opplysninger)
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId, opplysninger = opplysninger)
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
 
@@ -101,7 +101,7 @@ internal class TrygdetidRepositoryTest(
     @Test
     fun `skal opprette og hente trygdetid`() {
         val behandling = behandlingMock()
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId)
 
         repository.opprettTrygdetid(opprettetTrygdetid)
         val trygdetid = repository.hentTrygdetid(behandling.id)
@@ -115,7 +115,7 @@ internal class TrygdetidRepositoryTest(
     @Test
     fun `skal opprette og hente trygdetid med yrkesskade`() {
         val behandling = behandlingMock()
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, yrkesskade = true)
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId, yrkesskade = true)
 
         repository.opprettTrygdetid(opprettetTrygdetid)
         val trygdetid = repository.hentTrygdetid(behandling.id)
@@ -134,7 +134,7 @@ internal class TrygdetidRepositoryTest(
         val opprettetTrygdetid =
             trygdetid(
                 behandling.id,
-                behandling.sak,
+                behandling.sakId,
                 trygdetidGrunnlag = listOf(trygdetidGrunnlag),
                 beregnetTrygdetid = beregnetTrygdetid,
             )
@@ -158,7 +158,7 @@ internal class TrygdetidRepositoryTest(
         val opprettetTrygdetid =
             trygdetid(
                 behandling.id,
-                behandling.sak,
+                behandling.sakId,
                 trygdetidGrunnlag = listOf(trygdetidGrunnlag),
                 beregnetTrygdetid = beregnetTrygdetid,
                 yrkesskade = true,
@@ -183,7 +183,7 @@ internal class TrygdetidRepositoryTest(
         val opprettetTrygdetid =
             trygdetid(
                 behandling.id,
-                behandling.sak,
+                behandling.sakId,
                 trygdetidGrunnlag = listOf(trygdetidGrunnlag),
                 beregnetTrygdetid = beregnetTrygdetid,
             )
@@ -202,7 +202,7 @@ internal class TrygdetidRepositoryTest(
     fun `skal opprette et trygdetidsgrunnlag`() {
         val behandling = behandlingMock()
         val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId)
 
         val lagretTrygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
         val trygdetidMedTrygdetidGrunnlag =
@@ -218,7 +218,7 @@ internal class TrygdetidRepositoryTest(
     fun `skal slette et trygdetidsgrunnlag`() {
         val behandling = behandlingMock()
         val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId)
 
         val lagretTrygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
         val trygdetidMedTrygdetidGrunnlag =
@@ -240,7 +240,7 @@ internal class TrygdetidRepositoryTest(
     fun `skal oppdatere et trygdetidsgrunnlag`() {
         val behandling = behandlingMock()
         val trygdetidGrunnlag = trygdetidGrunnlag(beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag())
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
         val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = LandNormalisert.POLEN.isoCode)
@@ -261,7 +261,7 @@ internal class TrygdetidRepositoryTest(
                 beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(),
                 begrunnelse = "Test",
             )
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
 
@@ -293,7 +293,7 @@ internal class TrygdetidRepositoryTest(
                 beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(),
                 begrunnelse = "Test",
             )
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId, trygdetidGrunnlag = listOf(trygdetidGrunnlag))
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
 
@@ -324,7 +324,7 @@ internal class TrygdetidRepositoryTest(
     fun `skal oppdatere beregnet trygdetid`() {
         val beregnetTrygdetid = beregnetTrygdetid(total = 12, tidspunkt = Tidspunkt.now())
         val behandling = behandlingMock()
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId)
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
         val trygdetidMedBeregnetTrygdetid =
@@ -339,7 +339,7 @@ internal class TrygdetidRepositoryTest(
     fun `skal oppdatere beregnet trygdetid med yrkesskade`() {
         val beregnetTrygdetid = beregnetTrygdetid(total = 12, tidspunkt = Tidspunkt.now(), yrkesskade = true)
         val behandling = behandlingMock()
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, yrkesskade = true)
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId, yrkesskade = true)
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
         val trygdetidMedBeregnetTrygdetid =
@@ -353,7 +353,7 @@ internal class TrygdetidRepositoryTest(
     @Test
     fun `skal oppdatere trygdetid with overstyrt poengaar`() {
         val behandling = behandlingMock()
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId)
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
 
@@ -370,7 +370,7 @@ internal class TrygdetidRepositoryTest(
     fun `skal nullstille beregnet trygdetid`() {
         val beregnetTrygdetid = beregnetTrygdetid(total = 12, tidspunkt = Tidspunkt.now())
         val behandling = behandlingMock()
-        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sakId)
 
         val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
         val trygdetidMedBeregnetTrygdetid =
@@ -392,9 +392,9 @@ internal class TrygdetidRepositoryTest(
         val behandling3 = behandlingMock()
         val fnr1 = "02438311109"
         val fnr2 = "18498248795"
-        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr1))
-        repository.opprettTrygdetid(trygdetid(behandling2.id, behandling2.sak, ident = fnr2))
-        repository.opprettTrygdetid(trygdetid(behandling3.id, behandling3.sak, ident = fnr1))
+        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sakId, ident = fnr1))
+        repository.opprettTrygdetid(trygdetid(behandling2.id, behandling2.sakId, ident = fnr2))
+        repository.opprettTrygdetid(trygdetid(behandling3.id, behandling3.sakId, ident = fnr1))
 
         val behandlinger: List<TrygdetidPartial> =
             repository
@@ -415,10 +415,10 @@ internal class TrygdetidRepositoryTest(
         val fnr1 = "02438311109"
         val fnr2 = "18498248795"
         val fnr3 = "31488338237"
-        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr1))
-        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr2))
-        repository.opprettTrygdetid(trygdetid(behandling2.id, behandling2.sak, ident = fnr1))
-        repository.opprettTrygdetid(trygdetid(behandling3.id, behandling3.sak, ident = fnr3))
+        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sakId, ident = fnr1))
+        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sakId, ident = fnr2))
+        repository.opprettTrygdetid(trygdetid(behandling2.id, behandling2.sakId, ident = fnr1))
+        repository.opprettTrygdetid(trygdetid(behandling3.id, behandling3.sakId, ident = fnr3))
 
         val trygdetider: List<TrygdetidPartial> =
             repository.hentTrygdetiderForAvdoede(listOf(fnr1, fnr2))
@@ -435,7 +435,7 @@ internal class TrygdetidRepositoryTest(
 
         val fnr1 = "02438311109"
         val fnr2 = "18498248795"
-        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sak, ident = fnr1))
+        repository.opprettTrygdetid(trygdetid(behandling1.id, behandling1.sakId, ident = fnr1))
 
         val trygdetider: List<TrygdetidPartial> =
             repository.hentTrygdetiderForAvdoede(
@@ -449,6 +449,6 @@ internal class TrygdetidRepositoryTest(
     private fun behandlingMock() =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { sak } returns SakId(123L)
+            every { sakId } returns SakId(123L)
         }
 }

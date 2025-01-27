@@ -505,7 +505,7 @@ class VedtakBehandlingService(
         val opprettetVedtak =
             OpprettVedtak(
                 soeker = behandling.soeker.let { Folkeregisteridentifikator.of(it) },
-                sakId = behandling.sak,
+                sakId = behandling.sakId,
                 sakType = behandling.sakType,
                 behandlingId = behandling.id,
                 status = VedtakStatus.OPPRETTET,
@@ -708,7 +708,7 @@ class VedtakBehandlingService(
     ): VedtakData =
         coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-            val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
+            val sak = behandlingKlient.hentSak(behandling.sakId, brukerTokenInfo)
             val trygdetider = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
             when (behandling.behandlingType) {

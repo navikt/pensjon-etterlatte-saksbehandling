@@ -49,7 +49,7 @@ class VedtaksvurderingKlientImpl(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/vedtak/sak/${sakId.sakId}/iverksatte",
+                            url = "$resourceUrl/api/vedtak/sak/${sakId.value}/iverksatte",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(

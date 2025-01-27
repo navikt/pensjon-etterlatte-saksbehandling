@@ -239,7 +239,7 @@ internal fun Behandling.toStatistikkBehandling(
 internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Persongalleri): DetaljertBehandling =
     DetaljertBehandling(
         id = id,
-        sak = sak.id,
+        sakId = sak.id,
         sakType = sak.sakType,
         soeker = persongalleri.soeker,
         status = status,

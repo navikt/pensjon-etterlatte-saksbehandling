@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -41,15 +42,19 @@ class BrevapiKlient(
                     .post("$baseUrl/api/brev/sak/${sakid.sakId}/opprett-journalfoer-og-distribuer") {
                         contentType(ContentType.Application.Json)
                         setBody(opprett.toJson())
+                        timeout {
+                            socketTimeoutMillis = Duration.ofMinutes(1).toMillis()
+                            requestTimeoutMillis = Duration.ofMinutes(1).toMillis()
+                        }
                     }.body<BrevDistribusjonResponse>()
             }
         } catch (e: ResponseException) {
-            logger.error("Henting av grunnlag for sak med sakId=$sakid feilet", e)
+            logger.error("opprett-journalfoer-og-distribuer for sak med sakId=$sakid feilet", e)
 
             throw ForespoerselException(
                 status = e.response.status.value,
                 code = "UKJENT_FEIL_OPPRETTELSE_AV_BREV",
-                detail = "Kunne ikke opprette brev for sak: $sakid",
+                detail = "Kunne ikke opprette brev, journalfoer eller distribuer for sak: $sakid",
             )
         }
     }

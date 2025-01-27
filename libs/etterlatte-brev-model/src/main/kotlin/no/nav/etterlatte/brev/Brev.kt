@@ -172,4 +172,5 @@ data class OpprettJournalpostResponse(
 data class BrevDistribusjonResponse(
     val brevId: BrevID,
     val erDistribuert: Boolean,
+    val oppgaveErLaget: Boolean,
 )

@@ -77,48 +77,53 @@ class OpprettJournalfoerOgDistribuerRiver(
         }
     }
 
+    private suspend fun genererBrevdata(
+        sakId: SakId,
+        packet: JsonMessage,
+        brevKode: Brevkoder,
+    ): BrevParametereAutomatisk =
+        when (brevKode) {
+            Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
+                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
+                val brevdata = opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
+                BarnepensjonInformasjonDoedsfallRedigerbar(
+                    brevdata.borIutland,
+                    brevdata.avdoedNavn,
+                    brevdata.erOver18aar,
+                )
+            }
+
+            Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
+                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                val brevdata =
+                    opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
+                BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar(
+                    brevdata.avdoedNavn,
+                    brevdata.borIutland,
+                )
+            }
+
+            Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
+                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                val brevdata =
+                    opprettOmstillingsstoenadInformasjonDoedsfall(
+                        sakId,
+                        borIutland,
+                    )
+                OmstillingsstoenadInformasjonDoedsfallRedigerbar(brevdata.borIutland, brevdata.avdoedNavn)
+            }
+
+            else -> throw Exception("Støtter ikke brevtype $brevKode i sak $sakId")
+        }
+
     private suspend fun opprettJournalfoerOgDistribuer(
         sakId: SakId,
         brevKode: Brevkoder,
         packet: JsonMessage,
     ): BrevDistribusjonResponse {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
-        val brevdata: BrevParametereAutomatisk =
-            when (brevKode) {
-                Brevkoder.BP_INFORMASJON_DOEDSFALL -> {
-                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                    val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
-                    val brevdata = opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
-                    BarnepensjonInformasjonDoedsfallRedigerbar(
-                        brevdata.borIutland,
-                        brevdata.avdoedNavn,
-                        brevdata.erOver18aar,
-                    )
-                }
-
-                Brevkoder.BP_INFORMASJON_DOEDSFALL_MELLOM_ATTEN_OG_TJUE_VED_REFORMTIDSPUNKT -> {
-                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                    val brevdata =
-                        opprettBarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunkt(sakId, borIutland)
-                    BarnepensjonInformasjonDoedsfallMellomAttenOgTjueVedReformtidspunktRedigerbar(
-                        brevdata.avdoedNavn,
-                        brevdata.borIutland,
-                    )
-                }
-
-                Brevkoder.OMS_INFORMASJON_DOEDSFALL -> {
-                    val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                    val brevdata =
-                        opprettOmstillingsstoenadInformasjonDoedsfall(
-                            sakId,
-                            borIutland,
-                        )
-                    OmstillingsstoenadInformasjonDoedsfallRedigerbar(brevdata.borIutland, brevdata.avdoedNavn)
-                }
-
-                else -> throw Exception("Støtter ikke brevtype $brevKode i sak $sakId")
-            }
-
+        val brevdata = genererBrevdata(sakId, packet, brevKode)
         try {
             val req =
                 OpprettJournalfoerOgDistribuerRequest(

@@ -36,7 +36,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.UUID
-import kotlin.collections.contains
 
 class BrevService(
     private val db: BrevRepository,
@@ -66,38 +65,45 @@ class BrevService(
                 brevData = req.brevParametereAutomatisk.brevDataMapping(),
             )
         val brevId = brev.id
-
+        val brevStatus = brev.status
         try {
-            pdfGenerator.ferdigstillOgGenererPDF(
-                brevId,
-                bruker,
-                avsenderRequest = { _, _, _ ->
-                    AvsenderRequest(
-                        saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
-                        attestantIdent = req.avsenderRequest.attestantIdent,
-                        sakenhet = enhetsnummer,
-                    )
-                },
-                brevKodeMapping = { req.brevKode },
-                brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
-            )
+            if (brevStatus.ikkeFerdigstilt()) {
+                pdfGenerator.ferdigstillOgGenererPDF(
+                    brevId,
+                    bruker,
+                    avsenderRequest = { _, _, _ ->
+                        AvsenderRequest(
+                            saksbehandlerIdent = req.avsenderRequest.saksbehandlerIdent,
+                            attestantIdent = req.avsenderRequest.attestantIdent,
+                            sakenhet = enhetsnummer,
+                        )
+                    },
+                    brevKodeMapping = { req.brevKode },
+                    brevDataMapping = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+                )
+            }
 
-            logger.info("Journalfører brev med id: $brevId")
-            journalfoerBrevService.journalfoer(brevId, bruker)
+            if (brevStatus.ikkeJournalfoert()) {
+                logger.info("Journalfører brev med id: $brevId")
+                journalfoerBrevService.journalfoer(brevId, bruker)
+            }
 
-            logger.info("Distribuerer brev med id: $brevId")
-            distribuerer.distribuer(brevId, bruker = bruker)
+            if (brevStatus.ikkeDistribuert()) {
+                logger.info("Distribuerer brev med id: $brevId")
+                distribuerer.distribuer(brevId, bruker = bruker)
+            }
 
             logger.info("Brevid: $brevId er distribuert")
-            return BrevDistribusjonResponse(brevId, true)
+            return BrevDistribusjonResponse(brevId, true, false)
         } catch (e: Exception) {
             val oppdatertBrev = db.hentBrev(brevId)
             logger.error(
                 "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
                 e,
             )
-            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
-            return BrevDistribusjonResponse(brevId, false)
+
+            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker, req.brevKode)
+            return BrevDistribusjonResponse(brevId, false, true)
         }
     }
 

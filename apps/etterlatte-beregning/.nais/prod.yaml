@@ -95,6 +95,10 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-trygdetid
+    - name: INNTEKTSKOMPONENT_URL
+      value: https://team-inntekt-proxy.prod-fss-pub.nais.io/proxy/inntektskomponenten-q2
+    - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
+      value: api://prod-fss.team-inntekt.inntektskomponenten/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

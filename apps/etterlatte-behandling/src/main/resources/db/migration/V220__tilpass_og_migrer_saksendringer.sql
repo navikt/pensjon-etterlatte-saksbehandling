@@ -27,8 +27,8 @@ SET identtype =
 UPDATE saksendring
 SET sak_id = CAST(etter ->> 'id' AS BIGINT);
 
-ALTER TABLE saksendring DROP COLUMN kallendemetode;
-
+ALTER TABLE saksendring
+    ALTER COLUMN kallendemetode DROP NOT NULL;
 ALTER TABLE saksendring
     ALTER COLUMN endringstype SET NOT NULL;
 ALTER TABLE saksendring

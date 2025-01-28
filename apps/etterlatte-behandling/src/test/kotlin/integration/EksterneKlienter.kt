@@ -34,6 +34,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
+import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlag.PersonopplysningerResponse
 import no.nav.etterlatte.kodeverk.Beskrivelse
 import no.nav.etterlatte.kodeverk.Betydning
@@ -107,14 +108,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)
     }
 
-    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri =
-        Persongalleri(
-            "soeker",
-            "innsender",
-            listOf("soesken"),
-            listOf("avdoed"),
-            listOf("gjenlevende"),
-        )
+    override suspend fun hentPersongalleri(sakId: SakId): Persongalleri = defaultPersongalleriGydligeFnr
 
     override suspend fun hentPersongalleri(
         behandlingId: UUID,
@@ -125,14 +119,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
             kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
             meta = emptyMap<String, String>().toObjectNode(),
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
-            opplysning =
-                Persongalleri(
-                    "soeker",
-                    "innsender",
-                    listOf("soesken"),
-                    listOf("avdoed"),
-                    listOf("gjenlevende"),
-                ),
+            opplysning = defaultPersongalleriGydligeFnr,
         )
 
     override suspend fun hentGrunnlagForSak(
@@ -495,6 +482,19 @@ class BrevApiKlientTest : BrevApiKlient {
             brevtype = Brevtype.MANUELT,
             brevkoder = Brevkoder.TOMT_INFORMASJONSBREV,
         )
+}
+
+class SkjermingKlientTest : SkjermingKlient {
+    override suspend fun personErSkjermet(fnr: String): Boolean = false
+
+    override val serviceName: String
+        get() = "Navansatt"
+    override val beskrivelse: String
+        get() = "Henter navn for saksbehandlerident"
+    override val endpoint: String
+        get() = "endpoint"
+
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, endpoint, serviceName)
 }
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {

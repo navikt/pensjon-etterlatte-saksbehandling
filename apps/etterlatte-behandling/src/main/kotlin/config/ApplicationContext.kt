@@ -86,6 +86,7 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.config.JobbKeys.JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS
 import no.nav.etterlatte.config.JobbKeys.JOBB_METRIKKER_OPENING_HOURS
 import no.nav.etterlatte.config.JobbKeys.JOBB_SAKSBEHANDLER_OPENING_HOURS
@@ -247,7 +248,6 @@ internal class ApplicationContext(
             properties = featureToggleProperties(config),
             brukerIdent = { finnBrukerIdent() },
         ),
-    val skjermingHttpKlient: HttpClient = skjermingHttpClient(config),
     val navAnsattKlient: NavAnsattKlient =
         NavAnsattKlientImpl(
             navAnsattHttpClient(config),
@@ -274,6 +274,7 @@ internal class ApplicationContext(
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
+    val skjermingKlient: SkjermingKlient = SkjermingKlientImpl(skjermingHttpClient(config), env.requireEnvValue(SKJERMING_URL)),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -319,7 +320,6 @@ internal class ApplicationContext(
     val vilkaarsvurderingDao = VilkaarsvurderingDao(autoClosingDatabase, DelvilkaarDao())
 
     // Klient
-    val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.requireEnvValue(SKJERMING_URL))
     val leaderElectionKlient = LeaderElection(env[ELECTOR_PATH], leaderElectionHttpClient)
 
     val klageKlient = KlageKlientImpl(klageHttpClient, url = env.requireEnvValue(ETTERLATTE_KLAGE_API_URL))
@@ -456,13 +456,13 @@ internal class ApplicationContext(
             tilbakekrevingKlient,
         )
     val selfTestService = SelfTestService(externalServices)
-    val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
+    val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
             sakSkrivDao,
             sakLesDao,
             skjermingKlient,
-            enhetService,
+            brukerService,
             grunnlagsService,
             krrKlient,
             pdlTjenesterKlient,
@@ -504,7 +504,7 @@ internal class ApplicationContext(
             pdltjenesterKlient = pdlTjenesterKlient,
             grunnlagKlient = grunnlagKlientImpl,
             sakService = sakService,
-            brukerService = enhetService,
+            brukerService = brukerService,
             doedshendelseService = doedshendelseService,
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
         )
@@ -587,6 +587,8 @@ internal class ApplicationContext(
             sakService = sakService,
             skjermingKlient = skjermingKlient,
             pdltjenesterKlient = pdlTjenesterKlient,
+            brukerService = brukerService,
+            oppgaveService = oppgaveService,
         )
     val behandlingFactory =
         BehandlingFactory(

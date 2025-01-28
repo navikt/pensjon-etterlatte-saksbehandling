@@ -14,6 +14,7 @@ import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.gyldighetsresultatVurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
@@ -32,7 +33,6 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.module
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
-import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.virkningstidspunktVurdering
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
@@ -66,7 +66,7 @@ class AutomatiskRevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingFactory
                     .opprettBehandling(
                         sak.id,
-                        persongalleri(),
+                        defaultPersongalleriGydligeFnr,
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         request = applicationContext.behandlingFactory.hentDataForOpprettBehandling(sak.id),

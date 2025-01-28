@@ -130,7 +130,14 @@ internal class BehandlingFactoryTest {
             vilkaarsvurderingService = vilkaarsvurderingService,
             kommerBarnetTilGodeService = kommerBarnetTilGodeServiceMock,
             behandlingInfoService = mockk(),
-            tilgangsService = OppdaterTilgangService(sakServiceMock, mockk(relaxed = true), mockk(relaxed = true)),
+            tilgangsService =
+                OppdaterTilgangService(
+                    sakServiceMock,
+                    mockk(relaxed = true),
+                    mockk(relaxed = true),
+                    mockk(relaxed = true),
+                    mockk(relaxed = true),
+                ),
         )
 
     @BeforeEach

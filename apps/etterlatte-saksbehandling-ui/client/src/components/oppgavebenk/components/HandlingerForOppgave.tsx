@@ -20,6 +20,7 @@ import Spinner from '~shared/Spinner'
 import { mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InntektsopplysningModal } from '~components/oppgavebenk/oppgaveModal/InntektsopplysningModal'
+import { OppfoelgingAvOppgaveModal } from '~components/oppgavebenk/oppgaveModal/OppfoelgingsOppgaveModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -190,6 +191,8 @@ export const HandlingerForOppgave = ({
         pending: <Spinner label="Oppretter ..." margin="0" />,
         error: (error) => <ApiErrorAlert>{error?.detail ?? 'Ukjent feil'}</ApiErrorAlert>,
       })
+    case Oppgavetype.OPPFOELGING:
+      return <OppfoelgingAvOppgaveModal oppgave={oppgave} oppdaterStatus={oppdaterStatus} />
 
     default:
       return null

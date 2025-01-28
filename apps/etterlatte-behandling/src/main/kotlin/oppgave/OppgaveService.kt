@@ -695,6 +695,7 @@ class OppgaveService(
                         ->
                             true
 
+                        OppgaveType.OPPFOELGING,
                         OppgaveType.KLAGE,
                         OppgaveType.KRAVPAKKE_UTLAND,
                         OppgaveType.MANGLER_SOEKNAD,

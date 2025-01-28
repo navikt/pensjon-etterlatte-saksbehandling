@@ -620,6 +620,7 @@ internal class ApplicationContext(
             aktivitetspliktBrevDao = aktivitetspliktBrevDao,
             brevApiKlient = brevApiKlient,
             behandlingService = behandlingService,
+            unleashFeatureToggleService = featureToggleService,
         )
 
     // Jobs

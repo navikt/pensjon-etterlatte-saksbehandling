@@ -285,12 +285,14 @@ data class LagreAktivitetspliktUnntak(
     val beskrivelse: String,
 )
 
-enum class AktivitetspliktUnntakType {
-    OMSORG_BARN_UNDER_ETT_AAR,
-    OMSORG_BARN_SYKDOM,
-    MANGLENDE_TILSYNSORDNING_SYKDOM,
-    SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE,
-    GRADERT_UFOERETRYGD,
-    MIDLERTIDIG_SYKDOM,
-    FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT,
+enum class AktivitetspliktUnntakType(
+    val navn: String,
+) {
+    OMSORG_BARN_UNDER_ETT_AAR("Omsorg for barn under ett år"),
+    OMSORG_BARN_SYKDOM("Omsorg for barn som har sykdom, skade eller funksjonshemming"),
+    MANGLENDE_TILSYNSORDNING_SYKDOM("Manglende tilsynsordning ved sykdom"),
+    SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE("Bruker har sykdom, redusert arbeidsevne, AAP"),
+    GRADERT_UFOERETRYGD("Gradert uføretrygd"),
+    MIDLERTIDIG_SYKDOM("Midlertidig sykdom"),
+    FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT("Bruker er født i 1963 eller tidligere og har lav inntekt"),
 }

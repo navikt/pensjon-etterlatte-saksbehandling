@@ -27,15 +27,15 @@ export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade 
         )
       }
       readOnly={!redigerbar}
+      value={[yrkesskade]}
     >
       <Checkbox
-        checked={yrkesskade}
         onChange={() => {
           const oppdatertYrkesskade = !(yrkesskade ?? false)
-
           setYrkesskade(oppdatertYrkesskade)
           oppdaterYrkesskade(oppdatertYrkesskade)
         }}
+        value={true}
       >
         Godkjent yrkesskade/sykdom
       </Checkbox>

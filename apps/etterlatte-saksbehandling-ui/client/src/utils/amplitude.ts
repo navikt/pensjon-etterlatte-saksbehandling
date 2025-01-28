@@ -46,6 +46,9 @@ export enum ClickEvent {
 
   // Tilbakemeldinger
   TILBAKEMELDING_INFORMASJON_FRA_BRUKER = 'tilbakemelding informasjon fra bruker',
+  TILBAKEMELDING_SAKSBEHANDLING_UTLAND_FOERSTEGANGSBEHANDLING = 'tilbakemelding saksbehandling utland førstegangsbehandling',
+  TILBAKEMELDING_SAKSBEHANDLING_UTLAND_AVSLAG = 'tilbakemelding saksbehandling utland avslag',
+  TILBAKEMELDING_SAKSBEHANDLING_UTLAND_SLUTTBEHANDLING = 'tilbakemelding saksbehandling utland sluttbehandling',
 
   // Generelt
   VIS_VARSLINGER = 'vis varslinger',

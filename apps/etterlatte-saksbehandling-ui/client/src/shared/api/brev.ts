@@ -29,7 +29,8 @@ export const ferdigstillVedtaksbrev = async (behandlingId: string): Promise<ApiR
   apiClient.post(`/brev/behandling/${behandlingId}/vedtak/ferdigstill`, {})
 
 export const opprettVedtaksbrev = async (args: { sakId: number; behandlingId: string }): Promise<ApiResponse<IBrev>> =>
-  apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
+  //apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
+  apiClient.post(`/brev/tilbakekreving/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
 
 export const opprettMottaker = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<Mottaker>> =>
   apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, {})

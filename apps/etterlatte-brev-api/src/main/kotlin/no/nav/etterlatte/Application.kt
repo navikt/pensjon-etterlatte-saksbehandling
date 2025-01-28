@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.notat.notatRoute
 import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
+import no.nav.etterlatte.brev.tilbakekreving.tilbakekrevingBrevRoute
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrev.vedtaksbrevRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstart
@@ -41,6 +42,8 @@ private class Server(
             varselbrevRoute(context.varselbrevService, context.tilgangssjekker)
             notatRoute(context.notatService, context.nyNotatService, context.tilgangssjekker)
             oversendelseBrevRoute(context.oversendelseBrevService, context.tilgangssjekker)
+
+            tilbakekrevingBrevRoute(context.tilbakekrevingBrevService, context.tilgangssjekker)
         }
 
     fun run() =

@@ -43,12 +43,11 @@ class TilbakekrevingVedtaksbrevService(
     private val behandlingService: BehandlingService,
 ) {
     suspend fun opprettVedtaksbrev(
-        bruker: BrukerTokenInfo,
-        behandlingId: UUID,
         sakId: SakId,
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
     ): Brev {
         // TODO valider at ikke finnes fra før etc..
-
         // TODO flytte henting av data til behandling?
         val brevdata =
             retryOgPakkUt {

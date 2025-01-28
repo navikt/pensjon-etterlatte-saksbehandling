@@ -1,4 +1,4 @@
-update oppgave set status = 'AVBRUTT' where id IN (
+delete from oppgave where id IN (
      'a3b4c6cc-62ef-4764-83af-11a888b2eba5',
      '8ea9126e-45cf-4a03-aac3-5f98ac9b12c8',
      '5a43e765-060f-45d8-a149-f5e0c4204154',

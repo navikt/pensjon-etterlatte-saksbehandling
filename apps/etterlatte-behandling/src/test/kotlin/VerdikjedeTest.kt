@@ -200,7 +200,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, it.status)
                     val behandling: DetaljertBehandling = it.body()
                     assertNotNull(behandling.id)
-                    assertEquals("soeker", behandling.soeker)
+                    assertEquals(defaultPersongalleriGydligeFnr.soeker, behandling.soeker)
                 }
 
             client

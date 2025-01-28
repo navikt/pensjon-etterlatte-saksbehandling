@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -50,6 +51,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class AktivitetspliktService(
@@ -144,6 +146,38 @@ class AktivitetspliktService(
                 logger.info("Aktivitetsgrad er under 50%, revurdering skal opprettes for sak ${aktivitetsgrad.sakId}")
             }
         }
+
+    fun opprettOppfoelgingsoppgaveUnntak(
+        referanse: UUID,
+        unntak: List<AktivitetspliktUnntak>,
+        sak: Sak,
+    ) {
+        // Hvis bruker har varig unntak er det ikke nødvendig å følge opp
+        if (unntak.any { it.unntak === AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT }) {
+            return
+        }
+
+        val unntakUtenTilOgMed = unntak.filter { it.tom == null }
+        if (unntakUtenTilOgMed.isNotEmpty()) {
+            // Lag en oppfølgingsoppgave for å følge opp unntak uten frist
+            oppgaveService.opprettOppgave(
+                referanse = referanse.toString(),
+                sakId = sak.id,
+                kilde = OppgaveKilde.SAKSBEHANDLER,
+                type = OppgaveType.OPPFOELGING,
+                merknad = "Unntak ${
+                    unntakUtenTilOgMed.joinToString(
+                        separator = ", ",
+                        prefix = "\"",
+                        postfix = "\"",
+                    ) { it.unntak.navn }
+                } har ikke til og med dato.",
+                frist = Tidspunkt.now().plus(2, ChronoUnit.MONTHS),
+                saksbehandler = null,
+                gruppeId = null,
+            )
+        }
+    }
 
     private fun harUnntakPaaDato(
         unntak: AktivitetspliktUnntak,

@@ -125,6 +125,7 @@ enum class OppgaveType {
     INNTEKTSOPPLYSNING,
     AARLIG_INNTEKTSJUSTERING,
     MANUELL_UTSENDING_BREV,
+    OPPFOELGING,
     ;
 
     companion object {

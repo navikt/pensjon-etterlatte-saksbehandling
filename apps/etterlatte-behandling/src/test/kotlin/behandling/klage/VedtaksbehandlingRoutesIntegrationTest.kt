@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.defaultPersongalleriGydligeFnr
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
@@ -41,7 +42,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.mockedSakTilgangDao
 import no.nav.etterlatte.module
-import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -197,7 +197,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 factory
                     .opprettBehandling(
                         sak.id,
-                        persongalleri(),
+                        defaultPersongalleriGydligeFnr,
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                         factory.hentDataForOpprettBehandling(sak.id),

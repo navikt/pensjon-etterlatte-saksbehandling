@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.GrunnlagService
@@ -213,7 +214,7 @@ class RevurderingService(
                             grunnlagService.leggInnNyttGrunnlag(
                                 it,
                                 persongalleri,
-                                HardkodaSystembruker.opprettGrunnlag,
+                                Kontekst.get().brukerTokenInfo ?: HardkodaSystembruker.opprettGrunnlag, // Yolo
                             )
                         } else {
                             grunnlagService.laasTilGrunnlagIBehandling(

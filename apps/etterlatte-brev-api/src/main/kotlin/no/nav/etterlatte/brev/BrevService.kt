@@ -36,7 +36,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.UUID
-import kotlin.collections.contains
 
 class BrevService(
     private val db: BrevRepository,
@@ -66,7 +65,6 @@ class BrevService(
                 brevData = req.brevParametereAutomatisk.brevDataMapping(),
             )
         val brevId = brev.id
-
         try {
             pdfGenerator.ferdigstillOgGenererPDF(
                 brevId,
@@ -96,7 +94,8 @@ class BrevService(
                 "Feil opp sto under ferdigstill/journalfør/distribuer av brevID=$brevId, status: ${oppdatertBrev.status}",
                 e,
             )
-            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker)
+
+            oppgaveService.opprettOppgaveForFeiletBrev(req.sakId, brevId, bruker, req.brevKode)
             return BrevDistribusjonResponse(brevId, false)
         }
     }

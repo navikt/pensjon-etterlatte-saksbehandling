@@ -543,6 +543,13 @@ class VilkaarsvurderingService(
         logger.info("Kopierer avdødes vilkår fra behandling $kildeBehandlingId til behandling $behandlingId")
         slettVilkaarsvurdering(behandlingId, brukerTokenInfo)
 
+        // Validere at vi faktisk kan kopiere vilkår fra denne behandlingen
+        val gyldigBehandling = finnBehandlingMedVilkaarsvurderingForSammeAvdoede(behandlingId)
+        if (gyldigBehandling != kildeBehandlingId) {
+            logger.info("Behandling som er kandidat for å kopiere vilkår fra er ikke samme som kildeBehandlingId")
+            throw KanIkkeKopiereVilkaarForSammeAvdoedeFraBehandling()
+        }
+
         val nyVilkaarsvurderingMedKopierteVilkaarForAvdoedes =
             kopierVilkaarsvurdering(
                 behandlingId = behandlingId,
@@ -606,6 +613,12 @@ class BehandlingVirkningstidspunktIkkeFastsatt :
     UgyldigForespoerselException(
         code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_IKKE_SATT",
         detail = "Virkningstidspunkt for behandlingen er ikke satt",
+    )
+
+class KanIkkeKopiereVilkaarForSammeAvdoedeFraBehandling :
+    UgyldigForespoerselException(
+        code = "VILKAARSVURDERING_KAN_IKKE_KOPIERE_VILKAAR",
+        detail = "Kan ikke kopiere vilkår fra behandling",
     )
 
 class BehandlingIkkeFunnet(

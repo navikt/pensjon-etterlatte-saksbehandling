@@ -67,6 +67,7 @@ import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.vilkaarsvurdering.dao.DelvilkaarDao
 import no.nav.etterlatte.vilkaarsvurdering.dao.VilkaarsvurderingDao
 import no.nav.etterlatte.vilkaarsvurdering.service.BehandlingstilstandException
+import no.nav.etterlatte.vilkaarsvurdering.service.KanIkkeKopiereVilkaarForSammeAvdoedeFraBehandling
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingManglerResultat
 import no.nav.etterlatte.vilkaarsvurdering.service.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.service.VirkningstidspunktSamsvarerIkke
@@ -809,6 +810,52 @@ internal class VilkaarsvurderingServiceTest(
         with(vilkaarsvurderingMedKopierteVilkaar) {
             this.behandlingId shouldBe behandlingId2
             this.vilkaar.count { it.vurdering != null } shouldBe 5
+        }
+    }
+
+    @Test
+    fun `skal feile dersom det forsoekes aa kopiere vilkaar fra ikke gyldig kilde behandling`() {
+        val avdoed1 = AVDOED_FOEDSELSNUMMER
+
+        val behandlingId1 = randomUUID()
+        val behandlingId2 = randomUUID()
+
+        val behandling1 = mockBehandling(sakId = sakId1, behandlingId = behandlingId1)
+        val behandling2 = mockBehandling(sakId = sakId2, behandlingId = behandlingId2, behandlingStatus = BehandlingStatus.OPPRETTET)
+
+        coEvery { behandlingService.hentBehandling(behandlingId1) } returns behandling1
+        coEvery { behandlingService.hentBehandling(behandlingId2) } returns behandling2
+        every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
+
+        coEvery { grunnlagKlient.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        coEvery { grunnlagKlient.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed1.value) } returns
+            PersonMedSakerOgRoller(
+                avdoed1.value,
+                listOf(
+                    SakidOgRolle(sakId1, Saksrolle.AVDOED),
+                    SakidOgRolle(sakId2, Saksrolle.AVDOED),
+                ),
+            )
+
+        every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
+        every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
+
+        // Oppretter først en vilkårsvurdering som er ferdig behandlet i sak 1
+        val vilkaarsvurderingSak1 = runBlocking { opprettVilkaarsvurderingOgFyllUtAlleVurderinger(behandlingId1) }
+
+        // Oppretter så en vilkårsvurdering i sak 2 (ingen vilkår er behandlet forløpig på denne)
+        val vilkaarsvurderingSak2 = runBlocking { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId2, brukerTokenInfo) }
+
+        vilkaarsvurderingSak1.vilkaarsvurdering.behandlingId shouldBe behandlingId1
+
+        // Kopier vilkår fra vilkårsvurderingen for sak 1 til vilkårsvurderingen for sak 2
+        assertThrows<KanIkkeKopiereVilkaarForSammeAvdoedeFraBehandling> {
+            vilkaarsvurderingServiceImpl.kopierVilkaarForAvdoede(
+                vilkaarsvurderingSak2.vilkaarsvurdering.behandlingId,
+                randomUUID(), // en tilfeldig behandling
+                brukerTokenInfo,
+            )
         }
     }
 

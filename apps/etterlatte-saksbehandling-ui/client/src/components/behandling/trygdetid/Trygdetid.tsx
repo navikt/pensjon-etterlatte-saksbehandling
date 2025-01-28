@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentTrygdetider, ITrygdetid, opprettTrygdetider } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { Alert, BodyShort, Box, Heading, Tabs, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, HStack, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isPending } from '~shared/api/apiUtils'
@@ -23,6 +23,10 @@ import { ILand, sorterLand } from '~utils/kodeverk'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TrygdetidIAnnenBehandlingMedSammeAvdoede } from '~components/behandling/trygdetid/TrygdetidIAnnenBehandlingMedSammeAvdoede'
 import { FeatureToggle, useFeaturetoggle } from '~useUnleash'
+import { Tilbakemelding } from '~shared/tilbakemelding/Tilbakemelding'
+import { ClickEvent } from '~utils/amplitude'
+import { SakType } from '~shared/types/sak'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 
 interface Props {
   redigerbar: boolean
@@ -126,6 +130,12 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
     )
   }
 
+  const erOMSUtlandAvslag = () =>
+    behandling.utlandstilknytning &&
+    behandling.utlandstilknytning.type !== UtlandstilknytningType.NASJONAL &&
+    behandling.sakType === SakType.OMSTILLINGSSTOENAD &&
+    behandling.vilkaarsvurdering?.resultat?.utfall === VilkaarsvurderingResultat.IKKE_OPPFYLT
+
   return (
     <Box paddingInline="16" maxWidth="69rem">
       {kopierTrygdetidsgrunnlagEnabled && behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
@@ -205,10 +215,8 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
             )}
           </>
         )}
-
         <Spinner label="Henter trygdetid" visible={isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)} />
         <Spinner label="Oppretter trygdetid" visible={isPending(opprettTrygdetidRequest)} />
-
         {isFailureHandler({
           apiResult: hentTrygdetidRequest,
           errorMessage: 'En feil har oppstått ved henting av trygdetid',
@@ -221,7 +229,6 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           apiResult: hentAlleLandRequest,
           errorMessage: 'En feil har oppstått ved henting av landliste',
         })}
-
         {behandlingsIdMangler && <ApiErrorAlert>Finner ikke behandling - ID mangler</ApiErrorAlert>}
         {trygdetidIdMangler && (
           <ApiErrorAlert>
@@ -229,6 +236,15 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
               ? 'Behandlingen har ingen trygdetid'
               : 'Finner ikke trygdetid - ID mangler'}
           </ApiErrorAlert>
+        )}
+        {erOMSUtlandAvslag() && (
+          <HStack justify="center" paddingBlock="0 8">
+            <Tilbakemelding
+              spoersmaal="Hvordan opplevde du saksbehandlingen av denne utlandssaken i Gjenny?"
+              clickEvent={ClickEvent.TILBAKEMELDING_SAKSBEHANDLING_UTLAND_AVSLAG}
+              behandlingId={behandling.id}
+            />
+          </HStack>
         )}
       </VStack>
     </Box>

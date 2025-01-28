@@ -60,6 +60,11 @@ enum class JobbType(
         JobbKategori.AARLIG_INNTEKTSJUSTERING,
         sakType = SakType.OMSTILLINGSSTOENAD,
     ),
+    OPPFOELGING(
+        "Oppfølgingsoppgave",
+        JobbKategori.OPPGAVE,
+        sakType = SakType.OMSTILLINGSSTOENAD,
+    ),
 }
 
 enum class JobbKategori {
@@ -67,4 +72,5 @@ enum class JobbKategori {
     OMS_DOEDSDATO,
     REGULERING,
     AARLIG_INNTEKTSJUSTERING,
+    OPPGAVE,
 }

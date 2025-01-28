@@ -6,9 +6,9 @@ import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
-import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Timer
 
@@ -21,7 +21,7 @@ class JobbSchedulerTask(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun schedule(): Timer {
-        logger.info("Starter sjekk av at alle periodiske jobber er planlagt for neste måned, med intervall $periode")
+        logger.info("Starter sjekk av at alle periodiske jobber er planlagt for neste måned / dag, med intervall $periode")
 
         return fixedRateCancellableTimer(
             name = "JOBB_POLLER_TASK",
@@ -30,7 +30,8 @@ class JobbSchedulerTask(
             loggerInfo = LoggerInfo(logger = logger),
             openingHours = openingHours,
         ) {
-            jobbScheduler.poll()
+            jobbScheduler.scheduleMaanedligeJobber()
+            jobbScheduler.scheduleDagligeJobber()
         }
     }
 }
@@ -40,28 +41,40 @@ class JobbScheduler(
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
 
-    fun poll() {
+    fun scheduleDagligeJobber() {
+        logger.info("Sjekker for jobber å legge til for neste dag: ${LocalDate.now().plusDays(1)}")
+
+        val planlagteJobberNesteDag = hendelseDao.finnAktuellJobb(LocalDate.now().plusDays(1))
+
+        PeriodiskeDagligeJobber.entries
+            // filtrere bort jobber som allerede er planlagt for neste dag
+            .filter { periodiskJobb ->
+                planlagteJobberNesteDag.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
+            }
+            // opprett jobb for neste dag
+            .forEach { periodiskJobb ->
+                hendelseDao.opprettDagligJobb(periodiskJobb)
+            }
+    }
+
+    fun scheduleMaanedligeJobber() {
         val nesteMaaned = YearMonth.now().plusMonths(1)
         logger.info("Sjekker for jobber å legge til for måned: $nesteMaaned")
 
         val planlagteJobberNesteMnd = hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned)
 
-        // Ta bort de periodiske jobbene som allerede er lagt inn for neste mnd
-        filtrerBortPlanlagteJobber(planlagteJobberNesteMnd).forEach { fasteJobber ->
-            // For de periodiske jobbene som mangler, opprett jobb for neste mnd
-            hendelseDao.opprettJobb(fasteJobber, nesteMaaned)
-        }
+        PeriodiskeMaanedligeJobber.entries
+            // filtrere bort jobber som allerede er planlagt for neste måned
+            .filter { periodiskJobb ->
+                planlagteJobberNesteMnd.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
+            }
+            // opprett jobb for neste dag
+            .forEach { periodiskJobb ->
+                hendelseDao.opprettMaanedligJobb(periodiskJobb, nesteMaaned)
+            }
     }
 
-    private fun filtrerBortPlanlagteJobber(kjoreringNesteMaaned: List<HendelserJobb>) =
-        PeriodiskeJobber.entries.filter { fastJobb ->
-            kjoreringNesteMaaned.none { kjoringNesteMaaned ->
-                kjoringNesteMaaned.type ==
-                    fastJobb.jobbType
-            }
-        }
-
-    enum class PeriodiskeJobber(
+    enum class PeriodiskeMaanedligeJobber(
         val jobbType: JobbType,
         val dagIMaaned: Int,
         // Merk at justering av behandlingMaaned kan medføre uønsket oppførsel (f.eks. har løpende ytelse sjekker feil måned)
@@ -72,5 +85,11 @@ class JobbScheduler(
         OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK(JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK, 8, 0),
         OMS_DOED_12MND(JobbType.OMS_DOED_12MND, 1, 0),
         OMS_DOED_10MND(JobbType.OMS_DOED_10MND, 1, 0),
+    }
+
+    enum class PeriodiskeDagligeJobber(
+        val jobbType: JobbType,
+    ) {
+        OPPFOELGING_UNNTAK_UTLOEPER(JobbType.OPPFOELGING),
     }
 }

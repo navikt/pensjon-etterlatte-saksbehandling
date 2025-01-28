@@ -205,7 +205,6 @@ spec:
         - application: etterlatte-egne-ansatte-lytter
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-gyldig-soeknad
         - application: etterlatte-behandling-kafka
         - application: etterlatte-hendelser-joark
         - application: etterlatte-hendelser-ufoere

@@ -7,6 +7,7 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
@@ -32,7 +33,10 @@ class OppdaterTilgangService(
         val sak = sakService.finnSak(sakId) ?: throw PersonManglerSak()
         val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 
-        val identerMedGradering = alleIdenter.map { hentGraderingForIdent(it, sak) }
+        val identerMedGradering =
+            alleIdenter
+                .filter { Folkeregisteridentifikator.isValid(it) }
+                .map { hentGraderingForIdent(it, sak) }
 
         if (identerMedGradering.any { it.harAdressebeskyttelse() }) {
             val hoyesteGradering = identerMedGradering.hentPrioritertGradering()

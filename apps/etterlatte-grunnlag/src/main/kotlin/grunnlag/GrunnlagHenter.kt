@@ -6,7 +6,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -137,28 +136,17 @@ class GrunnlagHenter(
             },
         )
 
-    private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(
-        overstyrtKilde: Grunnlagsopplysning.Kilde? = null,
-    ): Grunnlagsopplysning<JsonNode> =
+    private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(overstyrtKilde: Grunnlagsopplysning.Kilde): Grunnlagsopplysning<JsonNode> =
         Grunnlagsopplysning(
             id = UUID.randomUUID(),
-            kilde =
-                overstyrtKilde
-                    ?: if (this.innsender == null) {
-                        Grunnlagsopplysning.UkjentInnsender(Tidspunkt.now())
-                    } else if (this.innsender == Vedtaksloesning.PESYS.name) {
-                        Grunnlagsopplysning.Pesys.create()
-                    } else if (this.innsender!!.matches(Regex("[A-Z][0-9]+"))) {
-                        Grunnlagsopplysning.Saksbehandler(this.innsender!!, Tidspunkt.now())
-                    } else {
-                        Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
-                    },
+            kilde = overstyrtKilde,
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
             meta = objectMapper.createObjectNode(),
             opplysning =
                 if (Folkeregisteridentifikator.isValid(this.innsender)) {
                     this.toJsonNode()
                 } else {
+                    logger.error("Ugyldig ident er lagret")
                     this.copy(innsender = null).toJsonNode()
                 },
             attestering = null,

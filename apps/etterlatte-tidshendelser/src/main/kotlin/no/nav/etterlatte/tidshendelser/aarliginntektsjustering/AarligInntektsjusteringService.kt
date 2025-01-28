@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.inntektsjustering.AarligInntektsjusteringRequest
 import no.nav.etterlatte.rapidsandrivers.InntektsjusteringHendelseType
 import no.nav.etterlatte.rapidsandrivers.RapidEvents
 import no.nav.etterlatte.rapidsandrivers.tilSeparertString
-import no.nav.etterlatte.tidshendelser.HendelserJobb
+import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
 import no.nav.etterlatte.tidshendelser.regulering.Reguleringskonfigurasjon
 import no.nav.helse.rapids_rivers.JsonMessage

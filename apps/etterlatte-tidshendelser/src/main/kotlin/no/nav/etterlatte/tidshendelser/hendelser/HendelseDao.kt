@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tidshendelser
+package no.nav.etterlatte.tidshendelser.hendelser
 
 import kotliquery.Row
 import kotliquery.TransactionalSession
@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.tidshendelser.JobbType
+import no.nav.etterlatte.tidshendelser.JobbScheduler
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
@@ -131,7 +132,7 @@ class HendelseDao(
     }
 
     fun opprettJobb(
-        jobb: OpprettJobb.FasteJobber,
+        jobb: JobbScheduler.PeriodiskeJobber,
         maaned: YearMonth,
     ) {
         datasource.transaction { tx ->

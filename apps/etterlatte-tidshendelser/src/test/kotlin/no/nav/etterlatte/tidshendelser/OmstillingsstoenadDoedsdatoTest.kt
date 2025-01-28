@@ -9,8 +9,13 @@ import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.tidshendelser.JobbType
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
+import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
+import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus
+import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
+import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime

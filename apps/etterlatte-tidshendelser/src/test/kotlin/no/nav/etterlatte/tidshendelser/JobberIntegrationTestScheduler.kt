@@ -3,7 +3,8 @@ package no.nav.etterlatte.tidshendelser
 import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
 import no.nav.etterlatte.libs.tidshendelser.JobbType
-import no.nav.etterlatte.tidshendelser.OpprettJobb.FasteJobber
+import no.nav.etterlatte.tidshendelser.JobbScheduler.PeriodiskeJobber
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -13,7 +14,7 @@ import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OpprettJobberIntegrationTest(
+class JobberIntegrationTestScheduler(
     dataSource: DataSource,
 ) {
     companion object {
@@ -24,7 +25,7 @@ class OpprettJobberIntegrationTest(
     private val nesteMaaned = YearMonth.now().plusMonths(1)
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
-    private val opprettJobb = OpprettJobb(hendelseDao)
+    private val jobbScheduler = JobbScheduler(hendelseDao)
 
     @BeforeEach
     fun beforeEach() {
@@ -39,8 +40,8 @@ class OpprettJobberIntegrationTest(
 
     @Test
     fun `skal lage jobber om de ikke er laget fra før`() {
-        opprettJobb.poll()
-        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize FasteJobber.entries.size
+        jobbScheduler.poll()
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeJobber.entries.size
     }
 
     @Test
@@ -50,9 +51,9 @@ class OpprettJobberIntegrationTest(
             nesteMaaned,
             nesteMaaned.atDay(5),
         )
-        opprettJobb.poll()
+        jobbScheduler.poll()
 
-        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize FasteJobber.entries.size
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeJobber.entries.size
     }
 
     @Test
@@ -62,8 +63,8 @@ class OpprettJobberIntegrationTest(
             nesteMaaned,
             nesteMaaned.atDay(5),
         )
-        opprettJobb.poll()
+        jobbScheduler.poll()
 
-        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize FasteJobber.entries.size + 1
+        hendelseDao.finnJobberMedKjoeringForMaaned(nesteMaaned) shouldHaveSize PeriodiskeJobber.entries.size + 1
     }
 }

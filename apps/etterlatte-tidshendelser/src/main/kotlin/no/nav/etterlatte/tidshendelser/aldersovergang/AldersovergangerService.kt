@@ -1,9 +1,12 @@
-package no.nav.etterlatte.tidshendelser
+package no.nav.etterlatte.tidshendelser.aldersovergang
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.tidshendelser.JobbType
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
+import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
+import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.slf4j.LoggerFactory

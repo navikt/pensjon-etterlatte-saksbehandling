@@ -10,6 +10,11 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseRiver
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseStatus
+import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus
+import no.nav.etterlatte.tidshendelser.hendelser.Steg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test

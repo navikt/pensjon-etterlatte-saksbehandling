@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tidshendelser
+package no.nav.etterlatte.tidshendelser.hendelser
 
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId

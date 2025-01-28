@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tidshendelser
+package no.nav.etterlatte.tidshendelser.hendelser
 
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.jobs.LoggerInfo

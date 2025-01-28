@@ -12,6 +12,11 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
+import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
+import no.nav.etterlatte.tidshendelser.hendelser.JobbStatus
+import no.nav.etterlatte.tidshendelser.hendelser.Steg
+import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

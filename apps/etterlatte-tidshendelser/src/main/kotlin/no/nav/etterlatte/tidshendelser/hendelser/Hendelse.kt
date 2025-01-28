@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tidshendelser
+package no.nav.etterlatte.tidshendelser.hendelser
 
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import java.time.LocalDate

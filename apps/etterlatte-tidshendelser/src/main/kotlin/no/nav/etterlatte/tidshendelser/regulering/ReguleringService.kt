@@ -6,7 +6,7 @@ import no.nav.etterlatte.rapidsandrivers.RapidEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.tilSeparertString
-import no.nav.etterlatte.tidshendelser.HendelserJobb
+import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -114,7 +114,6 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 inTransaction {
                     vilkaarsvurderingService.finnBehandlingMedVilkaarsvurderingForSammeAvdoede(
                         behandlingId,
-                        brukerTokenInfo,
                     )
                 }
 

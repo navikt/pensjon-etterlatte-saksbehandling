@@ -16,9 +16,9 @@ import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -444,60 +444,84 @@ class VilkaarsvurderingService(
         }
     }
 
-    fun finnBehandlingMedVilkaarsvurderingForSammeAvdoede(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): UUID? {
-        val gjeldendeBehandling = behandlingService.hentBehandling(behandlingId) ?: throw Exception("Fant ingen behandling") // TODO
+    fun finnBehandlingMedVilkaarsvurderingForSammeAvdoede(behandlingId: UUID): UUID? {
+        val gjeldendeBehandling = behandlingService.hentBehandling(behandlingId) ?: throw BehandlingIkkeFunnet(behandlingId)
         if (gjeldendeBehandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
             logger.info("Støtter ikke å kopiere vilkårsvurdering for annet enn førstegangsbehandling")
             return null
         }
 
         val avdoedeForGjeldendeBehandling: List<Folkeregisteridentifikator> =
-            runBlocking {
-                grunnlagKlient
-                    .hentGrunnlagForBehandling(behandlingId, brukerTokenInfo)
-            }.hentAvdoede()
-                .mapNotNull { it.hentFoedselsnummer()?.verdi }
+            runBlocking { grunnlagKlient.hentPersongalleri(gjeldendeBehandling.sak.id) }
+                .avdoed
+                .map { Folkeregisteridentifikator.of(it) }
 
         if (avdoedeForGjeldendeBehandling.isEmpty()) {
-            logger.info("Ingen avdøde funnet for gjeldende behandling $behandlingId")
+            logger.info("Ingen avdøde funnet for gjeldende behandling $behandlingId, det er ikke aktuelt å kopiere vilkår")
             return null
         }
 
-        logger.info("${avdoedeForGjeldendeBehandling.size} er funnet for gjeldende behandling med id $behandlingId")
+        logger.info("${avdoedeForGjeldendeBehandling.size} avdøde er funnet for gjeldende behandling $behandlingId")
         sikkerlogger().info(
-            "Avdøde ${avdoedeForGjeldendeBehandling.joinToString(", ")} er funnet for gjeldende behandling med id $behandlingId",
+            "Avdøde ${avdoedeForGjeldendeBehandling.joinToString(", ")} er funnet for gjeldende behandling $behandlingId",
         )
 
-        return behandlingerMedVilkaarsvurderingForAvdoede(avdoedeForGjeldendeBehandling)
+        return behandlingerMedVilkaarsvurderingForAvdoede(avdoedeForGjeldendeBehandling.toSet(), gjeldendeBehandling.sak.id)
             .firstOrNull { it != behandlingId }
     }
 
-    private fun behandlingerMedVilkaarsvurderingForAvdoede(avdoedeForGjeldendeBehandling: List<Folkeregisteridentifikator>): List<UUID> {
+    private fun behandlingerMedVilkaarsvurderingForAvdoede(
+        avdoedeForGjeldendeBehandling: Set<Folkeregisteridentifikator>,
+        gjeldendeSak: SakId,
+    ): List<UUID> {
         logger.info("Henter saker med felles avdøde fra grunnlag")
-        val sakerMedFellesAvdoede =
-            avdoedeForGjeldendeBehandling.flatMap { avdoed ->
-                val personSakOgRolle = runBlocking { grunnlagKlient.hentPersonSakOgRolle(avdoed.value) }
-                personSakOgRolle.sakiderOgRoller
-                    .filter { it.rolle == Saksrolle.AVDOED }
-                    .map { it.sakId }
-                    .toSet()
-            }
+        val kandidatSakerForAvdoede: Set<SakId> =
+            avdoedeForGjeldendeBehandling
+                .flatMap { avdoed ->
+                    runBlocking { grunnlagKlient.hentPersonSakOgRolle(avdoed.value) }
+                        .sakiderOgRoller
+                        .filter { it.sakId != gjeldendeSak && it.rolle == Saksrolle.AVDOED }
+                        .map { it.sakId }
+                }.toSet()
 
-        logger.info("Fant ${sakerMedFellesAvdoede.size} saker med felles avdøde fra grunnlag")
+        if (kandidatSakerForAvdoede.isEmpty()) {
+            logger.info("Fant ingen saker med felles avdøde fra grunnlag")
+            return emptyList()
+        }
 
-        // Basert på sakene, henter ut behandlinger som ikke er avbrutt og ikke er i statuser før fullført vilkårsvurdering
+        logger.info("Fant ${kandidatSakerForAvdoede.size} saker med felles avdøde fra grunnlag")
+
         val aktuelleBehandlinger =
-            sakerMedFellesAvdoede.mapNotNull { sakId ->
-                behandlingService
-                    .hentBehandlingerForSak(sakId)
-                    .asSequence()
-                    .filter { it.sak.sakType == SakType.BARNEPENSJON }
-                    .filter { it.status !in listOf(BehandlingStatus.AVBRUTT, BehandlingStatus.OPPRETTET) }
-                    .sortedByDescending { it.behandlingOpprettet }
-                    .firstOrNull()
+            kandidatSakerForAvdoede.mapNotNull { sakId ->
+                val avdoedeForKandidatSak =
+                    runBlocking { grunnlagKlient.hentPersongalleri(sakId) }
+                        .avdoed
+                        .map { Folkeregisteridentifikator.of(it) }
+                        .toSet()
+
+                // Det er et kriterie at saken som skal brukes som utgangspunkt for å kopiere vilkår har akkurat de
+                // samme avdøde som er i gjeldende sak - dette fordi vilkårsvurderingen potensielt kan inneholde
+                // vurderinger som angår alle avdøde i persongalleriet
+                val sammeAvdoede = avdoedeForKandidatSak == avdoedeForGjeldendeBehandling
+
+                if (sammeAvdoede) {
+                    behandlingService
+                        .hentBehandlingerForSak(sakId)
+                        .asSequence()
+                        .filter { it.sak.sakType == SakType.BARNEPENSJON }
+                        // Kun behandlinger som har vilkårsvurdering er aktuelt
+                        .filter { it.status !in listOf(BehandlingStatus.AVBRUTT, BehandlingStatus.OPPRETTET) }
+                        .sortedByDescending { it.behandlingOpprettet }
+                        .firstOrNull()
+                } else {
+                    logger.info("Avdøde for gjeldende behandling og kandidat saker matchet ikke (se sikkerlogg)")
+                    sikkerlogger().info(
+                        "Avdøde for gjeldende behandling og kandidat saker matchet ikke " +
+                            "(avdoedeForKandidatSak=$avdoedeForKandidatSak, " +
+                            "avdoedeForGjeldendeBehandling=$avdoedeForGjeldendeBehandling)",
+                    )
+                    null
+                }
             }
 
         logger.info("Fant ${aktuelleBehandlinger.size} aktuelle behandlinger som har vilkårsvurdering")
@@ -582,4 +606,11 @@ class BehandlingVirkningstidspunktIkkeFastsatt :
     UgyldigForespoerselException(
         code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_IKKE_SATT",
         detail = "Virkningstidspunkt for behandlingen er ikke satt",
+    )
+
+class BehandlingIkkeFunnet(
+    behandlingId: UUID,
+) : IkkeFunnetException(
+        code = "BEHANDLING_IKKE_FUNNET",
+        detail = "Behandling $behandlingId ikke funnet",
     )

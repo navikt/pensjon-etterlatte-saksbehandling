@@ -25,7 +25,6 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.behandling.sakId2
-import no.nav.etterlatte.behandling.sakId3
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -40,7 +39,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -60,6 +58,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
@@ -102,7 +101,7 @@ internal class VilkaarsvurderingServiceTest(
     private val behandlingService = mockk<BehandlingService>()
     private val behandlingStatus: BehandlingStatusService = mockk<BehandlingStatusServiceImpl>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val behandlingId: UUID = UUID.randomUUID()
+    private val behandlingId: UUID = randomUUID()
 
     private val brukerTokenInfo = simpleSaksbehandler()
     private val grunnlagMock: Grunnlag = mockk()
@@ -127,7 +126,7 @@ internal class VilkaarsvurderingServiceTest(
         every { behandlingStatus.settVilkaarsvurdert(any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(any()) } returns
             mockk<Behandling>().apply {
-                every { id } returns UUID.randomUUID()
+                every { id } returns randomUUID()
                 every { sak.id } returns sakId1
                 every { sak.sakType } returns SakType.BARNEPENSJON
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
@@ -178,7 +177,7 @@ internal class VilkaarsvurderingServiceTest(
     fun `Ny vilkaarsvurdering for BP med virk fom 1-1-2024 skal ha vilkaar etter nytt regelverk`() {
         coEvery { behandlingService.hentBehandling(any()) } returns
             mockk<Behandling>().apply {
-                every { id } returns UUID.randomUUID()
+                every { id } returns randomUUID()
                 every { sak.id } returns sakId1
                 every { sak.sakType } returns SakType.BARNEPENSJON
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
@@ -223,7 +222,7 @@ internal class VilkaarsvurderingServiceTest(
     fun `Skal opprette vilkaarsvurdering for foerstegangsbehandling omstillingssoeknad med grunnlagsopplysninger`() {
         coEvery { behandlingService.hentBehandling(any()) } returns
             mockk<Behandling>().apply {
-                every { id } returns UUID.randomUUID()
+                every { id } returns randomUUID()
                 every { sak.id } returns sakId2
                 every { sak.sakType } returns SakType.OMSTILLINGSSTOENAD
                 every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
@@ -234,7 +233,7 @@ internal class VilkaarsvurderingServiceTest(
         val soeknadMottattDato = LocalDateTime.now()
         val soeknadMottattDatoOpplysning =
             Opplysning.Konstant(
-                UUID.randomUUID(),
+                randomUUID(),
                 kilde,
                 SoeknadMottattDato(mottattDato = soeknadMottattDato).toJsonNode(),
             )
@@ -406,7 +405,7 @@ internal class VilkaarsvurderingServiceTest(
     @Test
     fun `kan opprette og kopiere vilkaarsvurdering fra forrige behandling`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val nyBehandlingId = UUID.randomUUID()
+        val nyBehandlingId = randomUUID()
         coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
 
@@ -456,7 +455,7 @@ internal class VilkaarsvurderingServiceTest(
     @Test
     fun `revurdering kopierer forrige vilkaarsvurdering ved opprettelse`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val revurderingId = UUID.randomUUID()
+        val revurderingId = randomUUID()
 
         coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
@@ -517,7 +516,7 @@ internal class VilkaarsvurderingServiceTest(
     @Test
     fun `revurdering kopierer ikke forrige vilkaarsvurdering ved opprettelse naar kopierVedRevurdering er false`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val revurderingId = UUID.randomUUID()
+        val revurderingId = randomUUID()
 
         coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
@@ -580,7 +579,7 @@ internal class VilkaarsvurderingServiceTest(
     fun `kopier vilkaarsvurdering gir NullpointerException hvis det ikke finnes tidligere vilkaarsvurdering`() {
         assertThrows<NullPointerException> {
             vilkaarsvurderingServiceImpl.kopierVilkaarsvurdering(
-                UUID.randomUUID(),
+                randomUUID(),
                 behandlingId,
                 brukerTokenInfo,
             )
@@ -589,8 +588,8 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `skal legge til nye og fjerne slettede vilkaar ved kopiering av vilkaarsvurdering - totalvurdering slettes`() {
-        val nyBehandlingId = UUID.randomUUID()
-        val opprinneligBehandlingId = UUID.randomUUID()
+        val nyBehandlingId = randomUUID()
+        val opprinneligBehandlingId = randomUUID()
 
         coEvery { behandlingService.hentBehandling(nyBehandlingId) } returns behandling()
 
@@ -624,8 +623,8 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `skal ikke endre vilkaar ved kopiering av vilkaarsvurdering ved regulering - totalvurdering er uforandret`() {
-        val nyBehandlingId = UUID.randomUUID()
-        val opprinneligBehandlingId = UUID.randomUUID()
+        val nyBehandlingId = randomUUID()
+        val opprinneligBehandlingId = randomUUID()
 
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(nyBehandlingId) } returns
@@ -663,8 +662,8 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `skal kopiere eksisterende vilkaarsvurdering uten endringer paa vilkaar - totalvurdering er uforandret`() {
-        val nyBehandlingId = UUID.randomUUID()
-        val opprinneligBehandlingId = UUID.randomUUID()
+        val nyBehandlingId = randomUUID()
+        val opprinneligBehandlingId = randomUUID()
 
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
         coEvery { behandlingService.hentBehandling(nyBehandlingId) } returns behandling()
@@ -762,53 +761,42 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `skal identifisere eksisterende vilkaarsvurdering med felles avdoed og kopiere vilkaar fra denne`() {
-        val avdoed = AVDOED_FOEDSELSNUMMER
-        val behandlingIdSak1 = randomUUID()
-        val behandlingIdSak2 = randomUUID()
+        val avdoed1 = AVDOED_FOEDSELSNUMMER
 
-        coEvery { grunnlagKlient.hentGrunnlag(sakId1) } returns
-            GrunnlagTestData(
-                opplysningsmapAvdoedOverrides = mapOf(FOEDSELSNUMMER to konstantOpplysning(avdoed)),
-            ).hentOpplysningsgrunnlag()
+        val behandlingId1 = randomUUID()
+        val behandlingId2 = randomUUID()
 
-        coEvery { grunnlagKlient.hentPersonSakOgRolle(AVDOED_FOEDSELSNUMMER.value) } returns
+        val behandling1 = mockBehandling(sakId = sakId1, behandlingId = behandlingId1)
+        val behandling2 = mockBehandling(sakId = sakId2, behandlingId = behandlingId2, behandlingStatus = BehandlingStatus.OPPRETTET)
+
+        coEvery { behandlingService.hentBehandling(behandlingId1) } returns behandling1
+        coEvery { behandlingService.hentBehandling(behandlingId2) } returns behandling2
+        every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
+
+        coEvery { grunnlagKlient.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        coEvery { grunnlagKlient.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed1.value) } returns
             PersonMedSakerOgRoller(
-                AVDOED_FOEDSELSNUMMER.value,
+                avdoed1.value,
                 listOf(
                     SakidOgRolle(sakId1, Saksrolle.AVDOED),
                     SakidOgRolle(sakId2, Saksrolle.AVDOED),
-                    SakidOgRolle(sakId3, Saksrolle.AVDOED),
                 ),
             )
+
         every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
         every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
-        coEvery { behandlingService.hentBehandling(any()) } returns behandling(behandlingStatus = BehandlingStatus.OPPRETTET)
-        every { behandlingService.hentBehandlingerForSak(any()) } returns
-            listOf(
-                mockBehandling(sakId = sakId1, behandlingId = behandlingIdSak1, behandlingStatus = BehandlingStatus.VILKAARSVURDERT),
-                mockBehandling(
-                    sakType = SakType.OMSTILLINGSSTOENAD,
-                    sakId = sakId3,
-                    behandlingId = randomUUID(),
-                    behandlingStatus = BehandlingStatus.VILKAARSVURDERT,
-                ),
-                mockBehandling(sakId = sakId2, behandlingId = behandlingIdSak2, behandlingStatus = BehandlingStatus.OPPRETTET),
-            )
 
         // Oppretter først en vilkårsvurdering som er ferdig behandlet i sak 1
-        val vilkaarsvurderingSak1 = runBlocking { opprettVilkaarsvurderingOgFyllUtAlleVurderinger(behandlingIdSak1) }
+        val vilkaarsvurderingSak1 = runBlocking { opprettVilkaarsvurderingOgFyllUtAlleVurderinger(behandlingId1) }
 
         // Oppretter så en vilkårsvurdering i sak 2 (ingen vilkår er behandlet forløpig på denne)
-        val vilkaarsvurderingSak2 = runBlocking { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingIdSak2, brukerTokenInfo) }
+        val vilkaarsvurderingSak2 = runBlocking { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId2, brukerTokenInfo) }
 
         // Sjekker om det finnes behandling hvor det er felles avdød
-        val behandlingMedFellesAvdoed =
-            vilkaarsvurderingServiceImpl.finnBehandlingMedVilkaarsvurderingForSammeAvdoede(
-                behandlingIdSak2,
-                brukerTokenInfo,
-            )
+        val behandlingMedFellesAvdoed = vilkaarsvurderingServiceImpl.finnBehandlingMedVilkaarsvurderingForSammeAvdoede(behandlingId2)
 
-        vilkaarsvurderingSak1.vilkaarsvurdering.behandlingId shouldBe behandlingIdSak1
+        vilkaarsvurderingSak1.vilkaarsvurdering.behandlingId shouldBe behandlingId1
 
         // Kopier vilkår fra vilkårsvurderingen for sak 1 til vilkårsvurderingen for sak 2
         val vilkaarsvurderingMedKopierteVilkaar =
@@ -819,22 +807,124 @@ internal class VilkaarsvurderingServiceTest(
             )
 
         with(vilkaarsvurderingMedKopierteVilkaar) {
-            this.behandlingId shouldBe behandlingIdSak2
+            this.behandlingId shouldBe behandlingId2
             this.vilkaar.count { it.vurdering != null } shouldBe 5
         }
+    }
+
+    @Test
+    fun `skal kunne kopiere vilkaarsvurdering hvis behandling i annen sak har felles avdoede`() {
+        val avdoed1 = AVDOED_FOEDSELSNUMMER
+        val avdoed2 = AVDOED2_FOEDSELSNUMMER
+
+        val behandlingId1 = randomUUID()
+        val behandlingId2 = randomUUID()
+
+        val behandling1 = mockBehandling(sakId = sakId1, behandlingId = behandlingId1)
+        val behandling2 = mockBehandling(sakId = sakId2, behandlingId = behandlingId2, behandlingStatus = BehandlingStatus.OPPRETTET)
+
+        coEvery { behandlingService.hentBehandling(behandlingId1) } returns behandling1
+        coEvery { behandlingService.hentBehandling(behandlingId2) } returns behandling2
+        every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
+
+        coEvery { grunnlagKlient.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
+        coEvery { grunnlagKlient.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed1.value) } returns
+            PersonMedSakerOgRoller(
+                avdoed1.value,
+                listOf(
+                    SakidOgRolle(sakId1, Saksrolle.AVDOED),
+                    SakidOgRolle(sakId2, Saksrolle.AVDOED),
+                ),
+            )
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed2.value) } returns
+            PersonMedSakerOgRoller(
+                avdoed2.value,
+                listOf(
+                    SakidOgRolle(sakId1, Saksrolle.AVDOED),
+                    SakidOgRolle(sakId2, Saksrolle.AVDOED),
+                ),
+            )
+
+        every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
+        every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
+
+        // Oppretter først en vilkårsvurdering som er ferdig behandlet i sak 1
+        runBlocking { opprettVilkaarsvurderingOgFyllUtAlleVurderinger(behandlingId1) }
+
+        // Oppretter så en vilkårsvurdering i sak 2 (ingen vilkår er behandlet forløpig på denne)
+        runBlocking { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId2, brukerTokenInfo) }
+
+        // Sjekker om det finnes behandling hvor det er felles avdød
+        val behandlingMedFellesAvdoed = vilkaarsvurderingServiceImpl.finnBehandlingMedVilkaarsvurderingForSammeAvdoede(behandlingId2)
+
+        behandlingMedFellesAvdoed shouldBe behandlingId1
+    }
+
+    @Test
+    fun `skal ikke kunne kopiere vilkaarsvurdering hvis behandling i annen sak ikke har helt like avdoede`() {
+        val avdoed1 = AVDOED_FOEDSELSNUMMER
+        val avdoed2 = AVDOED2_FOEDSELSNUMMER
+
+        val behandlingId1 = randomUUID()
+        val behandlingId2 = randomUUID()
+
+        val behandling1 = mockBehandling(sakId = sakId1, behandlingId = behandlingId1)
+        val behandling2 = mockBehandling(sakId = sakId2, behandlingId = behandlingId2, behandlingStatus = BehandlingStatus.OPPRETTET)
+
+        coEvery { behandlingService.hentBehandling(behandlingId1) } returns behandling1
+        coEvery { behandlingService.hentBehandling(behandlingId2) } returns behandling2
+        every { behandlingService.hentBehandlingerForSak(any()) } returns listOf(behandling1, behandling2)
+
+        coEvery { grunnlagKlient.hentPersongalleri(sakId1) } returns mockk { every { avdoed } returns listOf(avdoed1.value, avdoed2.value) }
+        coEvery { grunnlagKlient.hentPersongalleri(sakId2) } returns mockk { every { avdoed } returns listOf(avdoed1.value) }
+
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed1.value) } returns
+            PersonMedSakerOgRoller(
+                avdoed1.value,
+                listOf(
+                    SakidOgRolle(sakId1, Saksrolle.AVDOED),
+                    SakidOgRolle(sakId2, Saksrolle.AVDOED),
+                ),
+            )
+
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(avdoed2.value) } returns
+            PersonMedSakerOgRoller(
+                avdoed2.value,
+                listOf(
+                    SakidOgRolle(sakId1, Saksrolle.AVDOED),
+                ),
+            )
+
+        every { behandlingStatus.settVilkaarsvurdert(any(), any(), any()) } just Runs
+        every { behandlingStatus.settOpprettet(any(), any(), any()) } just Runs
+
+        // Oppretter først en vilkårsvurdering som er ferdig behandlet i sak 1
+        runBlocking { opprettVilkaarsvurderingOgFyllUtAlleVurderinger(behandlingId1) }
+
+        // Oppretter så en vilkårsvurdering i sak 2 (ingen vilkår er behandlet forløpig på denne)
+        runBlocking { vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId2, brukerTokenInfo) }
+
+        // Sjekker om det finnes behandling hvor det er felles avdød
+        val behandlingMedFellesAvdoed = vilkaarsvurderingServiceImpl.finnBehandlingMedVilkaarsvurderingForSammeAvdoede(behandlingId2)
+
+        behandlingMedFellesAvdoed shouldBe null
     }
 
     private fun mockBehandling(
         sakType: SakType = SakType.BARNEPENSJON,
         sakId: SakId,
-        behandlingId: UUID,
+        behandlingId: UUID = randomUUID(),
         behandlingStatus: BehandlingStatus = BehandlingStatus.VILKAARSVURDERT,
     ): Behandling =
-        mockk {
+        mockk<Behandling>().apply {
             every { sak.sakType } returns sakType
             every { sak.id } returns sakId
+            every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            every { revurderingsaarsak() } returns null
             every { id } returns behandlingId
             every { status } returns behandlingStatus
+            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.now())
         }
 
     private fun <T : Any> konstantOpplysning(a: T): Opplysning.Konstant<JsonNode> {

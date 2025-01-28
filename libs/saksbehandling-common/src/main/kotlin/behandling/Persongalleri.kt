@@ -4,6 +4,9 @@ import no.nav.etterlatte.libs.common.person.FolkeregisteridentifikatorValidator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import java.time.LocalDate
 
+/*
+    innsender: Denne brukes til å indikere system eller saksbehandler ident(manuelt opprettet behandling) i tillegg til faktisk innsender(innbygger)
+ */
 data class Persongalleri(
     val soeker: String,
     val innsender: String? = null,

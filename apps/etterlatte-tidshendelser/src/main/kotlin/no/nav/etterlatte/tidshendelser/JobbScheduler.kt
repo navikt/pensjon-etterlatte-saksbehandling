@@ -68,7 +68,7 @@ class JobbScheduler(
             .filter { periodiskJobb ->
                 planlagteJobberNesteMnd.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
             }
-            // opprett jobb for neste dag
+            // opprett jobb for neste måned
             .forEach { periodiskJobb ->
                 hendelseDao.opprettMaanedligJobb(periodiskJobb, nesteMaaned)
             }
@@ -90,6 +90,6 @@ class JobbScheduler(
     enum class PeriodiskeDagligeJobber(
         val jobbType: JobbType,
     ) {
-        OPPFOELGING_UNNTAK_UTLOEPER(JobbType.OPPFOELGING),
+        OPPFOELGING_UNNTAK_UTLOEPER(JobbType.OPPFOELGING_UNNTAK_UTLOEPER),
     }
 }

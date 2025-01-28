@@ -31,6 +31,7 @@ import no.nav.etterlatte.tidshendelser.hendelser.HendelsePublisher
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
+import no.nav.etterlatte.tidshendelser.oppgave.OppfoelgingsOppgaveService
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import java.time.Duration
@@ -80,6 +81,7 @@ class AppContext(
     private val reguleringDao = ReguleringDao(dataSource)
     private val reguleringService = ReguleringService(publisher, reguleringDao)
     private val inntektsjusteringService = AarligInntektsjusteringService(publisher, reguleringDao)
+    private val oppfoelgingsOppgaveService = OppfoelgingsOppgaveService()
 
     val jobbPollerTask =
         JobbPollerTask(
@@ -93,6 +95,7 @@ class AppContext(
                     omstillingsstoenadService,
                     reguleringService,
                     inntektsjusteringService,
+                    oppfoelgingsOppgaveService,
                 ),
         )
 

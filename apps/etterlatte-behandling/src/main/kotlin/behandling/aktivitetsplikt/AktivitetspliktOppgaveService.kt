@@ -16,7 +16,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.UnleashFeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -52,7 +52,7 @@ class AktivitetspliktOppgaveService(
     private val aktivitetspliktBrevDao: AktivitetspliktBrevDao,
     private val brevApiKlient: BrevApiKlient,
     private val behandlingService: BehandlingService,
-    private val unleashFeatureToggleService: UnleashFeatureToggleService,
+    private val unleashFeatureToggleService: FeatureToggleService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 

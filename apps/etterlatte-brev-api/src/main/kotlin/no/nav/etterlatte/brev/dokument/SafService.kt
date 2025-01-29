@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 class SafService(
@@ -48,7 +49,7 @@ class SafService(
                 detail = "Fant ingen journalposter på brukeren",
             )
         } else {
-            throw konverterTilForespoerselException(response.errors)
+            throw konverterTilForespoerselException(response.errors, request.foedselsnummer.value)
         }
     }
 
@@ -64,7 +65,7 @@ class SafService(
             response.data?.journalpost
                 ?: throw JournalpostIkkeFunnet(journalpostId)
         } else {
-            throw konverterTilForespoerselException(response.errors)
+            throw konverterTilForespoerselException(response.errors, journalpostId)
         }
     }
 
@@ -79,16 +80,21 @@ class SafService(
         return if (response.errors.isNullOrEmpty()) {
             response.data?.journalpost
         } else {
-            throw konverterTilForespoerselException(response.errors)
+            throw konverterTilForespoerselException(response.errors, journalpostId)
         }
     }
 
-    private fun konverterTilForespoerselException(errors: List<Error>): ForespoerselException {
+    private fun konverterTilForespoerselException(
+        errors: List<Error>,
+        id: String,
+    ): ForespoerselException {
         errors.forEach {
             if (errors.all { err -> err.extensions?.code == Error.Code.FORBIDDEN }) {
-                logger.warn("${errors.size} feil oppsto ved kall mot saf, alle var tilgangssjekk: ${it.toJson()}")
+                logger.error("Deny for henting mot saf se sikkerlogg")
+                sikkerLogg.error("Deny henting fra SAF for identifikator: $id. error: ${it.toJson()}")
             } else {
-                logger.error("${errors.size} feil oppsto ved kall mot saf: ${it.toJson()}")
+                logger.error("${errors.size} feil oppsto ved kall mot saf se sikkerlogg.")
+                sikkerLogg.error("Feil mot saf, id: identifikator: $id. feil: ${it.toJson()}")
             }
         }
 

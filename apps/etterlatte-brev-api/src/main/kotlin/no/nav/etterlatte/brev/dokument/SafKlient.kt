@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.dokument
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.get
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -53,11 +52,7 @@ class SafKlient(
         } catch (re: ResponseException) {
             when (re.response.status) {
                 HttpStatusCode.Forbidden -> {
-                    val errorMessage = re.response.body<JsonNode>()["message"]?.asText()
-                    // TODO bedre håndtering av dette? https://jira.adeo.no/browse/EY-4755
-                    logger.warn(errorMessage ?: "Feil fra Saf: ${re.response.bodyAsText()}")
-
-                    throw IkkeTilgangTilJournalpost()
+                    throw IkkeTilgangTilJournalpost("Du mangler tilgang til tema ressursen tilhører eller geografisk område.")
                 }
                 HttpStatusCode.NotFound -> {
                     throw IkkeFunnetException(

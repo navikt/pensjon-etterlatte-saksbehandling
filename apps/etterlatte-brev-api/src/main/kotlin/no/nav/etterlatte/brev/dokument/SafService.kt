@@ -123,11 +123,12 @@ class JournalpostIkkeFunnet(
         detail = "Journalpost med journalpostId=$journalpostId ikke funnet i Joark",
     )
 
-class IkkeTilgangTilJournalpost :
-    ForespoerselException(
+class IkkeTilgangTilJournalpost(
+    msg: String = "",
+) : ForespoerselException(
         status = HttpStatusCode.Forbidden.value,
         code = "IKKE_TILGANG_JOURNALPOST",
-        detail = "Ikke tilgang til å se journalposten",
+        detail = "Ikke tilgang til å se journalposten. $msg",
     )
 
 class SafServerError :

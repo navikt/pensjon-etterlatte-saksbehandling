@@ -73,6 +73,7 @@ export const TrygdetidManueltOverstyrt = ({
               nevner: getValues().prorataNevner!!,
             }
           : undefined,
+        begrunnelse: getValues().begrunnelse,
       },
       (trygdetid) => {
         oppdaterTrygdetid(trygdetid)

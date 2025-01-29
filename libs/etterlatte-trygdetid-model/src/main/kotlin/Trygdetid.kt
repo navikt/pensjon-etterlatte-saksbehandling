@@ -109,6 +109,7 @@ data class DetaljertBeregnetTrygdetidResultat(
     val overstyrt: Boolean,
     val yrkesskade: Boolean,
     val beregnetSamletTrygdetidNorge: Int?,
+    val overstyrtBegrunnelse: String = "",
 ) {
     companion object {
         fun fraSamletTrygdetidProrata(

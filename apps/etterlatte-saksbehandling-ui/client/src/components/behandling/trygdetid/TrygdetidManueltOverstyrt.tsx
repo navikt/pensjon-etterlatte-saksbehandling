@@ -15,6 +15,14 @@ import { Toast } from '~shared/alerts/Toast'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { FormProvider, useForm } from 'react-hook-form'
 
+interface IOverstyrtTrygdetidForm {
+  skalHaProrata: boolean
+  anvendtTrygdetid: number
+  prorataTeller: number | undefined
+  prorataNevner: number | undefined
+  begrunnelse: string
+}
+
 export const TrygdetidManueltOverstyrt = ({
   trygdetidId,
   ident,
@@ -36,13 +44,7 @@ export const TrygdetidManueltOverstyrt = ({
   const [oppdaterStatus, oppdaterTrygdetidRequest] = useApiCall(oppdaterTrygdetidOverstyrtMigrering)
   const [opprettStatus, opprettTrygdetid] = useApiCall(opprettTrygdetider)
 
-  const methods = useForm<{
-    skalHaProrata: boolean
-    anvendtTrygdetid: number
-    prorataTeller: number | undefined
-    prorataNevner: number | undefined
-    begrunnelse: string
-  }>({
+  const methods = useForm<IOverstyrtTrygdetidForm>({
     defaultValues: {
       skalHaProrata: !!beregnetTrygdetid.resultat.prorataBroek,
       anvendtTrygdetid: !!beregnetTrygdetid.resultat.prorataBroek
@@ -58,22 +60,21 @@ export const TrygdetidManueltOverstyrt = ({
     handleSubmit,
     formState: { errors },
     watch,
-    getValues,
   } = methods
 
-  const lagre = () => {
+  const lagre = (data: IOverstyrtTrygdetidForm) => {
     oppdaterTrygdetidRequest(
       {
         behandlingId: behandling!!.id,
         trygdetidId: trygdetidId,
-        anvendtTrygdetid: getValues().anvendtTrygdetid,
-        prorataBroek: getValues().skalHaProrata
+        anvendtTrygdetid: data.anvendtTrygdetid,
+        prorataBroek: data.skalHaProrata
           ? {
-              teller: getValues().prorataTeller!!,
-              nevner: getValues().prorataNevner!!,
+              teller: data.prorataTeller!!,
+              nevner: data.prorataNevner!!,
             }
           : undefined,
-        begrunnelse: getValues().begrunnelse,
+        begrunnelse: data.begrunnelse,
       },
       (trygdetid) => {
         oppdaterTrygdetid(trygdetid)
@@ -167,16 +168,16 @@ export const TrygdetidManueltOverstyrt = ({
               </Box>
             </HStack>
           )}
-          <HStack gap="4">
-            <Box width="20rem">
-              <Textarea
-                {...register('begrunnelse', {})}
-                label="Begrunnelse"
-                error={errors.begrunnelse?.message}
-                readOnly={!redigerbar}
-              />
-            </Box>
-          </HStack>
+          <Box width="20rem">
+            <Textarea
+              {...register('begrunnelse', {
+                required: { value: true, message: 'Må fylles ut' },
+              })}
+              label="Begrunnelse"
+              error={errors.begrunnelse?.message}
+              readOnly={!redigerbar}
+            />
+          </Box>
           {redigerbar && (
             <Box width="20rem">
               <Button variant="primary" size="small" onClick={handleSubmit(lagre)} loading={isPending(oppdaterStatus)}>

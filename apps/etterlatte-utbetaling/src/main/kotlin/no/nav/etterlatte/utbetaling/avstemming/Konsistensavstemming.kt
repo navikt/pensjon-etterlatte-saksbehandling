@@ -74,6 +74,7 @@ internal class OppdragForKonsistensavstemmingSerializer :
 
 /**
  * For performance - avoid the standard serializer's use of reflection
+ * ADVARSEL: FARE FOR FEIL HER
  */
 internal class OppdragslinjeForKonsistensavstemmingSerializer :
     StdSerializer<OppdragslinjeForKonsistensavstemming>(OppdragslinjeForKonsistensavstemming::class.java) {

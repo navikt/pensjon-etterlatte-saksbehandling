@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.Land
 import no.nav.etterlatte.brev.model.ManglerFrivilligSkattetrekk
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
@@ -55,6 +56,7 @@ data class BarnepensjonRevurdering(
             avdoede: List<Avdoed>,
             datoVedtakOmgjoering: LocalDate?,
             erMigrertYrkesskade: Boolean,
+            landKodeverk: List<Land>,
         ): BarnepensjonRevurdering {
             val feilutbetaling =
                 krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
@@ -71,6 +73,7 @@ data class BarnepensjonRevurdering(
                         grunnbeloep,
                         trygdetid,
                         erForeldreloes,
+                        landKodeverk,
                     ),
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,

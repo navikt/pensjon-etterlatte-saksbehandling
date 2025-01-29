@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.BrevDataRedigerbar
 import no.nav.etterlatte.brev.Slate
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.Land
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.erYrkesskade
 import no.nav.etterlatte.brev.model.fromDto
@@ -63,6 +64,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
             vilkaarsVurdering: VilkaarsvurderingDto,
             behandling: DetaljertBehandling,
             navnAvdoed: String,
+            landKodeverk: List<Land>,
         ): OmstillingsstoenadInntektsjusteringVedtak {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
@@ -93,6 +95,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = navnAvdoed,
+                                landKodeverk = landKodeverk,
                             ),
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =

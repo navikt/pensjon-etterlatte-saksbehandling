@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.Land
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningRedigerbartUtfall
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
@@ -64,6 +65,7 @@ data class OmstillingsstoenadRevurdering(
             datoVedtakOmgjoering: LocalDate?,
             utlandstilknytning: UtlandstilknytningType?,
             behandling: DetaljertBehandling,
+            landKodeverk: List<Land>,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
@@ -108,6 +110,7 @@ data class OmstillingsstoenadRevurdering(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = null,
+                                landKodeverk = landKodeverk,
                             ),
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =

@@ -136,7 +136,8 @@ data class ForskjelligAvdoedPeriode(
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
-    val land: String,
+    val landkode: String,
+    val land: String?,
     val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
     val type: TrygdetidType,
 )
@@ -145,6 +146,7 @@ fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt: BeregningsMetode,
     beregningsMetodeFraGrunnlag: BeregningsMetode,
     navnAvdoed: String?,
+    landKodeverk: List<Land>,
 ) = TrygdetidMedBeregningsmetode(
     navnAvdoed = navnAvdoed,
     trygdetidsperioder =
@@ -160,7 +162,8 @@ fun TrygdetidDto.fromDto(
             Trygdetidsperiode(
                 datoFOM = grunnlag.periodeFra,
                 datoTOM = grunnlag.periodeTil,
-                land = grunnlag.bosted,
+                landkode = grunnlag.bosted,
+                land = toLand(landKodeverk, grunnlag.bosted),
                 opptjeningsperiode = grunnlag.beregnet,
                 type = TrygdetidType.valueOf(grunnlag.type),
             )
@@ -188,6 +191,11 @@ fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt = beregningsMetodeAnvendt,
     ident = this.ident,
 )
+
+private fun toLand(
+    landKodeverk: List<Land>,
+    landKode: String,
+) = landKodeverk.firstOrNull { it.isoLandkode == landKode }?.beskrivelse?.tekst
 
 fun TrygdetidDto.erYrkesskade() = beregnetTrygdetid?.resultat?.yrkesskade ?: false
 

@@ -6,10 +6,12 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
+import no.nav.etterlatte.brev.model.Beskrivelse
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.Land
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -119,6 +121,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                     ),
                 erMigrertYrkesskade = false,
                 erSluttbehandling = false,
+                landKodeverk = landKodeverk(),
             )
 
         Assertions.assertEquals(
@@ -204,5 +207,11 @@ internal class BarnepensjonInnvilgetDTOTest {
         BarnepensjonBeregningsperiode.fra(
             this,
             false,
+        )
+
+    private fun landKodeverk() =
+        listOf(
+            Land("SWE", Beskrivelse("Sverige")),
+            Land("NOR", Beskrivelse("Norge")),
         )
 }

@@ -45,13 +45,14 @@ class EtterlatteBrevTrygdetidTest {
                             type = TrygdetidType.FAKTISK,
                         ),
                     ),
-            ).fromDto(BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL, "Ole"),
+            ).fromDto(BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL, "Ole", landKodeverk()),
         ) {
             beregnetTrygdetidAar shouldBe 40
             prorataBroek shouldBe null
             trygdetidsperioder.size shouldBe 2
             trygdetidsperioder.forEach {
-                it.land shouldBe "NOR"
+                it.landkode shouldBe "NOR"
+                it.land shouldBe "Norge"
             }
         }
     }
@@ -81,13 +82,14 @@ class EtterlatteBrevTrygdetidTest {
                             prorata = true,
                         ),
                     ),
-            ).fromDto(BeregningsMetode.PRORATA, BeregningsMetode.BEST, "Ole"),
+            ).fromDto(BeregningsMetode.PRORATA, BeregningsMetode.BEST, "Ole", landKodeverk()),
         ) {
             beregnetTrygdetidAar shouldBe 29
             prorataBroek shouldBe null
             trygdetidsperioder.size shouldBe 1
             trygdetidsperioder.forEach {
-                it.land shouldNotBe "NOR"
+                it.landkode shouldNotBe "NOR"
+                it.land shouldNotBe "Norge"
             }
         }
     }
@@ -146,3 +148,9 @@ fun trygdetidGrunnlagDto(
     poengUtAar = false,
     poengInnAar = false,
 )
+
+fun landKodeverk() =
+    listOf(
+        Land("SWE", Beskrivelse("Sverige")),
+        Land("NOR", Beskrivelse("Norge")),
+    )

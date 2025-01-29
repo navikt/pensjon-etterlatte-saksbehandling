@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.ForskjelligAvdoedPeriode
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.Land
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -49,6 +50,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
             erGjenoppretting: Boolean,
             erMigrertYrkesskade: Boolean,
             erSluttbehandling: Boolean,
+            landKodeverk: List<Land>,
         ): BarnepensjonInnvilgelseForeldreloes =
             BarnepensjonInnvilgelseForeldreloes(
                 innhold = innhold.innhold(),
@@ -60,6 +62,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         grunnbeloep,
                         trygdetid,
                         erForeldreloes = true,
+                        landKodeverk,
                     ),
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,

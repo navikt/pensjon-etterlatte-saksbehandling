@@ -38,6 +38,7 @@ class BarnepensjonBeregningTest {
                 ),
                 IdentMedMetodeIGrunnlagOgAnvendtMetode("idTilOle", BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL),
                 avdoede,
+                landKodeverk(),
             ),
         ) {
             navnAvdoed shouldBe "Ole"
@@ -59,6 +60,7 @@ class BarnepensjonBeregningTest {
                 ),
                 IdentMedMetodeIGrunnlagOgAnvendtMetode(UKJENT_AVDOED, BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL),
                 avdoede,
+                landKodeverk(),
             ),
         ) {
             navnAvdoed shouldBe null
@@ -80,7 +82,14 @@ class BarnepensjonBeregningTest {
                 ),
                 IdentMedMetodeIGrunnlagOgAnvendtMetode("17418340118", BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL),
                 avdoede,
+                landKodeverk(),
             )
         }
     }
+
+    private fun landKodeverk() =
+        listOf(
+            Land("SWE", Beskrivelse("Sverige")),
+            Land("NOR", Beskrivelse("Norge")),
+        )
 }

@@ -4,6 +4,7 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.Land
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -143,6 +144,14 @@ class BehandlingKlient(
             url = "$resourceUrl/api/klage/$klageId",
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Kunne ikke hente klage med id=$klageId" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+
+    internal suspend fun hentLand(brukerTokenInfo: BrukerTokenInfo): List<Land> =
+        get(
+            url = "$resourceUrl/api/kodeverk/land",
+            onSuccess = { deserialize(it.response.toString()) },
+            errorMessage = { "Kunne ikke hente land fra kodeverk" },
             brukerTokenInfo = brukerTokenInfo,
         )
 }

@@ -142,8 +142,18 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             <Box paddingInline="16">
               <Tilbakemelding
                 spoersmaal="Hvor fornøyd er du med informasjonen fra bruker i søknaden?"
-                clickEvent={ClickEvent.TILBAKEMELDING_INFORMASJON_FRA_BRUKER}
+                clickEvent={ClickEvent.TILBAKEMELDING_INFORMASJON_FRA_BRUKER_FOERSTEGANGSBEHANDLING}
                 behandlingId={behandlingId}
+              />
+            </Box>
+          )}
+
+          {behandling.behandlingType === IBehandlingsType.REVURDERING && (
+            <Box paddingInline="16">
+              <Tilbakemelding
+                spoersmaal="Hvor fornøyd er du med informasjonen som er meldt inn fra bruker?"
+                clickEvent={ClickEvent.TILBAKEMELDING_INFORMASJON_FRA_BRUKER_REVURDERING}
+                behandlingId={behandling.id}
               />
             </Box>
           )}

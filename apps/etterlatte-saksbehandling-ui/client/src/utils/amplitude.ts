@@ -45,7 +45,8 @@ export enum ClickEvent {
   KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
 
   // Tilbakemeldinger
-  TILBAKEMELDING_INFORMASJON_FRA_BRUKER = 'tilbakemelding informasjon fra bruker',
+  TILBAKEMELDING_INFORMASJON_FRA_BRUKER_FOERSTEGANGSBEHANDLING = 'tilbakemelding informasjon fra bruker førstegangsbehandling',
+  TILBAKEMELDING_INFORMASJON_FRA_BRUKER_REVURDERING = 'tilbakemelding informasjon fra bruker revurdering',
   TILBAKEMELDING_SAKSBEHANDLING_UTLAND_FOERSTEGANGSBEHANDLING = 'tilbakemelding saksbehandling utland førstegangsbehandling',
   TILBAKEMELDING_SAKSBEHANDLING_UTLAND_AVSLAG = 'tilbakemelding saksbehandling utland avslag',
   TILBAKEMELDING_SAKSBEHANDLING_UTLAND_SLUTTBEHANDLING = 'tilbakemelding saksbehandling utland sluttbehandling',

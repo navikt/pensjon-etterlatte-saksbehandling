@@ -3,8 +3,10 @@ package no.nav.etterlatte.beregning
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sakId1
@@ -56,7 +58,7 @@ internal class BeregnOverstyrServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -96,6 +98,7 @@ internal class BeregnOverstyrServiceTest {
                         every { type } returns ""
                     },
             )
+        every { beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(behandling.id, any(), any()) } just Runs
 
         runBlocking {
             val beregning =
@@ -139,7 +142,7 @@ internal class BeregnOverstyrServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -179,6 +182,7 @@ internal class BeregnOverstyrServiceTest {
                         every { type } returns ""
                     },
             )
+        every { beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(behandling.id, any(), any()) } just Runs
 
         runBlocking {
             val beregning =
@@ -229,7 +233,7 @@ internal class BeregnOverstyrServiceTest {
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.OPPFYLT
             }
-        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -269,6 +273,7 @@ internal class BeregnOverstyrServiceTest {
                         every { type } returns ""
                     },
             )
+        every { beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(behandling.id, any(), any()) } just Runs
 
         runBlocking {
             val beregning =
@@ -319,7 +324,7 @@ internal class BeregnOverstyrServiceTest {
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
             }
-        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -359,6 +364,7 @@ internal class BeregnOverstyrServiceTest {
                         every { type } returns ""
                     },
             )
+        every { beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(behandling.id, any(), any()) } just Runs
 
         runBlocking {
             val beregning =

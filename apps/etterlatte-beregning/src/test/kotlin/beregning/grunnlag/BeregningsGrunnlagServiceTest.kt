@@ -733,7 +733,7 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
 
-        val grunnlag = beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandlingId)
+        val grunnlag = runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandlingId, mockk(relaxed = true)) }
 
         grunnlag.perioder.let { perioder ->
             perioder.size shouldBe 2

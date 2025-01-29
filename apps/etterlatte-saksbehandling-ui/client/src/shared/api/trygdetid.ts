@@ -148,7 +148,7 @@ export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
     prorataBroek: args.prorataBroek,
     overstyrt: true,
     yrkesskade: false,
-    begrunnelse: args.begrunnelse,
+    overstyrtBegrunnelse: args.begrunnelse,
   })
 
 export const kopierTrygdetidFraAnnenBehandling = async (args: {
@@ -217,6 +217,7 @@ export interface IDetaljertBeregnetTrygdetidResultat {
   overstyrt: boolean
   yrkesskade: boolean
   beregnetSamletTrygdetidNorge?: number
+  overstyrtBegrunnelse: string
 }
 
 export interface IFaktiskTrygdetid {

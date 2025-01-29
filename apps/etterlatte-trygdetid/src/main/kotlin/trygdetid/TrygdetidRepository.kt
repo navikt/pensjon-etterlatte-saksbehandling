@@ -65,7 +65,8 @@ class TrygdetidRepository(
                         poengaar_overstyrt,
                         yrkesskade,
                         beregnet_samlet_trygdetid_norge,
-                        kopiert_grunnlag_fra_behandling
+                        kopiert_grunnlag_fra_behandling,
+                        overstyrt_begrunnelse
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                     """.trimIndent(),
@@ -631,6 +632,7 @@ class TrygdetidRepository(
                     overstyrt = boolean("beregnet_trygdetid_overstyrt"),
                     yrkesskade = boolean("yrkesskade"),
                     beregnetSamletTrygdetidNorge = intOrNull("beregnet_samlet_trygdetid_norge"),
+                    overstyrtBegrunnelse = stringOrNull("overstyrt_begrunnelse"),
                 ),
             tidspunkt = tidspunkt("trygdetid_tidspunkt"),
             regelResultat =

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
+import java.util.UUID
 import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
@@ -39,7 +40,8 @@ internal class TrygdetidRepositoryTest(
 
     private val pdlKilde: Grunnlagsopplysning.Pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
 
-    private val regelKilde: Grunnlagsopplysning.RegelKilde = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
+    private val regelKilde: Grunnlagsopplysning.RegelKilde =
+        Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
 
     @Test
     fun `skal opprette trygdetid med opplysninger`() {
@@ -444,6 +446,24 @@ internal class TrygdetidRepositoryTest(
                 ),
             )
         trygdetider shouldBe emptyList()
+    }
+
+    @Test
+    fun `overstyrt trygdetid skal ha begrunnelse`() {
+        val behandling = UUID.randomUUID()
+
+        val beregnet =
+            beregnetTrygdetid(
+                overstyrt = true,
+                overstyrtBegrunnelse = "Er overstyrt",
+            )
+        repository.opprettTrygdetid(trygdetid(behandlingId = behandling, beregnetTrygdetid = beregnet))
+
+        val trygdetid = repository.hentTrygdetid(behandling)
+
+        with(trygdetid!!) {
+            beregnetTrygdetid!!.resultat.overstyrtBegrunnelse shouldBe "Er overstyrt"
+        }
     }
 
     private fun behandlingMock() =

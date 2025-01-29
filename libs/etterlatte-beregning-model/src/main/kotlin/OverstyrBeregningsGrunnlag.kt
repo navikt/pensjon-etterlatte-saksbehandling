@@ -22,7 +22,24 @@ data class OverstyrBeregningGrunnlagDao(
     val aarsak: String?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val reguleringRegelresultat: JsonNode? = null,
-)
+) {
+    fun tilGrunnlagMedPeriode(): GrunnlagMedPeriode<OverstyrBeregningGrunnlagData> =
+        GrunnlagMedPeriode(
+            data =
+                OverstyrBeregningGrunnlagData(
+                    utbetaltBeloep = this.utbetaltBeloep,
+                    foreldreloessats = this.foreldreloessats,
+                    trygdetid = this.trygdetid,
+                    trygdetidForIdent = this.trygdetidForIdent,
+                    prorataBroekTeller = this.prorataBroekTeller,
+                    prorataBroekNevner = this.prorataBroekNevner,
+                    beskrivelse = this.beskrivelse,
+                    aarsak = this.aarsak,
+                ),
+            fom = this.datoFOM,
+            tom = this.datoTOM,
+        )
+}
 
 data class OverstyrBeregningGrunnlagData(
     val utbetaltBeloep: Long,

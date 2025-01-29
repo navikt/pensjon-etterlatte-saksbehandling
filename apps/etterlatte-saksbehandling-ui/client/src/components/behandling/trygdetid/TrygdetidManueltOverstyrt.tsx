@@ -44,11 +44,10 @@ export const TrygdetidManueltOverstyrt = ({
     // TODO begrunnelse
   }>({
     defaultValues: {
-      skalHaProrata: beregnetTrygdetid.resultat.prorataBroek !== undefined,
-      anvendtTrygdetid:
-        beregnetTrygdetid.resultat.prorataBroek !== undefined
-          ? beregnetTrygdetid.resultat.samletTrygdetidTeoretisk
-          : beregnetTrygdetid.resultat.samletTrygdetidNorge,
+      skalHaProrata: !!beregnetTrygdetid.resultat.prorataBroek,
+      anvendtTrygdetid: !!beregnetTrygdetid.resultat.prorataBroek
+        ? beregnetTrygdetid.resultat.samletTrygdetidTeoretisk
+        : beregnetTrygdetid.resultat.samletTrygdetidNorge,
       prorataTeller: beregnetTrygdetid.resultat.prorataBroek?.teller,
       prorataNevner: beregnetTrygdetid.resultat.prorataBroek?.nevner,
       // TODO begrunnelse

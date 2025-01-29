@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.revurdering
 
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.GrunnlagService
@@ -28,14 +26,12 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
-import no.nav.etterlatte.libs.ktor.token.HardkodaSystembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -209,24 +205,6 @@ class RevurderingService(
 
                             else -> true
                         }
-                    runBlocking {
-                        if (kanHenteNyttGrunnlag) {
-                            grunnlagService.leggInnNyttGrunnlag(
-                                it,
-                                persongalleri,
-                                Kontekst.get().brukerTokenInfo ?: HardkodaSystembruker.opprettGrunnlag, // Yolo
-                            )
-                        } else {
-                            grunnlagService.laasTilGrunnlagIBehandling(
-                                it,
-                                krevIkkeNull(forrigeBehandling.id) {
-                                    "Har en automatisk behandling som ikke sender med behandlingId for sist iverksatt. " +
-                                        "Da kan vi ikke legge inn riktig grunnlag. Automatisk behandling id=${it.id}"
-                                },
-                                HardkodaSystembruker.opprettGrunnlag,
-                            )
-                        }
-                    }
                 },
                 sendMeldingForHendelse = {
                     behandlingHendelser.sendMeldingForHendelseStatistikk(

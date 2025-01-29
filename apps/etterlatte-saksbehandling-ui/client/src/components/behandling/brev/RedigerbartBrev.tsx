@@ -1,4 +1,4 @@
-import { Accordion, Tabs } from '@navikt/ds-react'
+import { Accordion, Tabs, Alert, VStack } from '@navikt/ds-react'
 import SlateEditor from '~components/behandling/brev/SlateEditor'
 import React, { useEffect, useState } from 'react'
 import { FilePdfIcon, PencilIcon } from '@navikt/aksel-icons'
@@ -164,13 +164,17 @@ export default function RedigerbartBrev({
                   vedlegg.map((brevVedlegg) => (
                     <Accordion.Item key={brevVedlegg.key}>
                       <Accordion.Header>{brevVedlegg.tittel}</Accordion.Header>
+
                       <Accordion.Content>
-                        <SlateEditor
-                          value={brevVedlegg.payload}
-                          onChange={onChangeVedlegg}
-                          readonly={!kanRedigeres}
-                          editKey={brevVedlegg.key}
-                        />
+                        <VStack gap="4">
+                          {getInfoboksForVedlegg(brevVedlegg.tittel)}
+                          <SlateEditor
+                            value={brevVedlegg.payload}
+                            onChange={onChangeVedlegg}
+                            readonly={!kanRedigeres}
+                            editKey={brevVedlegg.key}
+                          />
+                        </VStack>
                       </Accordion.Content>
                     </Accordion.Item>
                   ))}
@@ -205,3 +209,16 @@ export default function RedigerbartBrev({
 const Container = styled.div`
   width: 100%;
 `
+
+const getInfoboksForVedlegg = (tittel: string) => {
+  const vedleggInfo = [
+    {
+      tittel: 'Utfall ved beregning av omstillingsstønad',
+      infotekst:
+        'SKRIV INN HVILKEN INNTEKT SOM ER LAGT TIL GRUNN. HER KAN DU OGSÅ LEGGE INN OM INSTITUSJONSOPPHOLD E.L. OM DET SKULLE VÆRE AKTUELT.',
+    },
+  ]
+
+  const skalViseInfoboks = vedleggInfo.find((info) => info.tittel === tittel)
+  return skalViseInfoboks ? <Alert variant="info">{skalViseInfoboks.infotekst}</Alert> : null
+}

@@ -165,6 +165,7 @@ fun beregnetTrygdetid(
     tidspunkt: Tidspunkt = Tidspunkt.now(),
     yrkesskade: Boolean = false,
     overstyrt: Boolean = false,
+    overstyrtBegrunnelse: String? = null,
 ) = DetaljertBeregnetTrygdetid(
     resultat =
         DetaljertBeregnetTrygdetidResultat(
@@ -178,6 +179,7 @@ fun beregnetTrygdetid(
             overstyrt = overstyrt,
             yrkesskade = yrkesskade,
             beregnetSamletTrygdetidNorge = null,
+            overstyrtBegrunnelse = overstyrtBegrunnelse,
         ),
     tidspunkt = tidspunkt,
     regelResultat = "".toJsonNode(),

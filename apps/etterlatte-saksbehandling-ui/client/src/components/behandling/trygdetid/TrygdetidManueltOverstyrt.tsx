@@ -52,7 +52,7 @@ export const TrygdetidManueltOverstyrt = ({
         : beregnetTrygdetid.resultat.samletTrygdetidNorge,
       prorataTeller: beregnetTrygdetid.resultat.prorataBroek?.teller,
       prorataNevner: beregnetTrygdetid.resultat.prorataBroek?.nevner,
-      begrunnelse: '',
+      begrunnelse: beregnetTrygdetid.resultat.overstyrtBegrunnelse,
     },
   })
   const {

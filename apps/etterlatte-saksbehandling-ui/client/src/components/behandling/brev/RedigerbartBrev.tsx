@@ -1,4 +1,4 @@
-import { Accordion, Tabs, Alert, VStack } from '@navikt/ds-react'
+import { Accordion, Tabs, VStack } from '@navikt/ds-react'
 import SlateEditor from '~components/behandling/brev/SlateEditor'
 import React, { useEffect, useState } from 'react'
 import { FilePdfIcon, PencilIcon } from '@navikt/aksel-icons'
@@ -12,6 +12,7 @@ import { isPending, isPendingOrInitial, isSuccess, isSuccessOrInitial } from '~s
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { TilbakestillOgLagreRad } from '~components/behandling/brev/TilbakestillOgLagreRad'
 import { formaterTidspunktTimeMinutterSekunder } from '~utils/formatering/dato'
+import VedleggInfo from '~components/vedlegg/VedleggInfo'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',
@@ -167,7 +168,7 @@ export default function RedigerbartBrev({
 
                       <Accordion.Content>
                         <VStack gap="4" paddingBlock="4" paddingInline="0">
-                          {getInfoboksForVedlegg(brevVedlegg.tittel)}
+                          <VedleggInfo vedleggTittel={brevVedlegg.tittel} />
                           <SlateEditor
                             value={brevVedlegg.payload}
                             onChange={onChangeVedlegg}
@@ -209,16 +210,3 @@ export default function RedigerbartBrev({
 const Container = styled.div`
   width: 100%;
 `
-
-const getInfoboksForVedlegg = (tittel: string) => {
-  const vedleggInfo = [
-    {
-      brevtittel: 'Utfall ved beregning av omstillingsstønad',
-      infotekst:
-        'Skriv inn hvilken inntekt som er lagt til grunn. Her kan du også legge inn om institusjonsopphold e.l. dersom det skulle være aktuelt.',
-    },
-  ]
-
-  const skalViseInfoboks = vedleggInfo.find((info) => info.brevtittel === tittel)
-  return skalViseInfoboks ? <Alert variant="info">{skalViseInfoboks.infotekst}</Alert> : null
-}

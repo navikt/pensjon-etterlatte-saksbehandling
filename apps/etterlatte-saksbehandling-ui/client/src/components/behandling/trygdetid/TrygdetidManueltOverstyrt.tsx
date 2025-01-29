@@ -38,7 +38,7 @@ export const TrygdetidManueltOverstyrt = ({
 
   const methods = useForm<{
     skalHaProrata: boolean
-    anvendtTrygdetid: number | undefined
+    anvendtTrygdetid: number
     prorataTeller: number | undefined
     prorataNevner: number | undefined
     // TODO begrunnelse
@@ -67,7 +67,7 @@ export const TrygdetidManueltOverstyrt = ({
       {
         behandlingId: behandling!!.id,
         trygdetidId: trygdetidId,
-        anvendtTrygdetid: getValues().anvendtTrygdetid!!,
+        anvendtTrygdetid: getValues().anvendtTrygdetid,
         prorataBroek: getValues().skalHaProrata
           ? {
               teller: getValues().prorataTeller!!,

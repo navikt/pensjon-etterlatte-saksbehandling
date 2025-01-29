@@ -2,7 +2,6 @@ package no.nav.etterlatte.grunnlagsendring
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
@@ -47,7 +46,6 @@ class GrunnlagsendringshendelseService(
     private val pdltjenesterKlient: PdlTjenesterKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val sakService: SakService,
-    private val brukerService: BrukerService,
     private val doedshendelseService: DoedshendelseService,
     private val grunnlagsendringsHendelseFilter: GrunnlagsendringsHendelseFilter,
     private val tilgangsService: OppdaterTilgangService,
@@ -182,10 +180,11 @@ class GrunnlagsendringshendelseService(
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
         if (sakIder.isEmpty()) {
             logger.info("Forkaster hendelse da vi ikke fant noen saker på den.")
+            return
         }
         sakIder.forEach {
             val pg = grunnlagKlient.hentPersongalleri(it)
-            tilgangsService.haandtergraderingOgEgenAnsatt(it, pg)
+            inTransaction { tilgangsService.haandtergraderingOgEgenAnsatt(it, pg) }
         }
     }
 
@@ -392,7 +391,7 @@ class GrunnlagsendringshendelseService(
             } else {
                 forkastHendelse(grunnlagsendringshendelse, samsvarMellomPdlOgGrunnlag)
             }
-        } catch (e: GrunnlagRolleException) {
+        } catch (_: GrunnlagRolleException) {
             logger.warn("GrunnlagRolleException ble kastet – forkaster hendelsen")
 
             forkastHendelse(

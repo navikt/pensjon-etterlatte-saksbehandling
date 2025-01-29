@@ -36,6 +36,7 @@ class EgenAnsattService(
                     )
                 }
         } else {
+            // TODO: skal vi gjøre dette her eller bruke haandtergraderingOgEgenAnsatt? denne tar ikke høyde for alle muligheter som den over.
             saker.forEach {
                 oppdaterTilgangService.fjernSkjermingFraSak(it, skjermetHendelse.fnr)
             }

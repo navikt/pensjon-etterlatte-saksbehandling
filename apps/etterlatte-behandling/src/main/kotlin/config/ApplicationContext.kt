@@ -514,7 +514,6 @@ internal class ApplicationContext(
             pdltjenesterKlient = pdlTjenesterKlient,
             grunnlagKlient = grunnlagKlientImpl,
             sakService = sakService,
-            brukerService = brukerService,
             doedshendelseService = doedshendelseService,
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
             tilgangsService = oppdaterTilgangService,

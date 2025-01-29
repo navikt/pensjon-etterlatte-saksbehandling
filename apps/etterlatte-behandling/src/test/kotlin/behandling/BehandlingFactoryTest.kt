@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktKopierService
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -89,8 +90,21 @@ internal class BehandlingFactoryTest {
     private val kommerBarnetTilGodeServiceMock = mockk<KommerBarnetTilGodeService>()
     private val vilkaarsvurderingService = mockk<VilkaarsvurderingService>()
     private val grunnlagService = mockk<GrunnlagServiceImpl>(relaxUnitFun = true)
-    private val oppgaveService = mockk<OppgaveService>()
-    private val sakServiceMock = mockk<SakService>()
+    private val oppgaveService =
+        mockk<OppgaveService> {
+            every { oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
+        }
+    private val brukerService =
+        mockk<BrukerService> {
+            every { finnEnhetForPersonOgTema(any(), any(), any()) } returns
+                ArbeidsFordelingEnhet(Enheter.defaultEnhet.navn, Enheter.defaultEnhet.enhetNr)
+        }
+    private val sakServiceMock =
+        mockk<SakService> {
+            every { oppdaterAdressebeskyttelse(any(), any()) } returns 1
+            every { oppdaterEnhetForSaker(any()) } just Runs
+            every { markerSakerMedSkjerming(any(), any()) } just Runs
+        }
     private val aktivitetspliktDao = mockk<AktivitetspliktDao>()
     private val aktivitetspliktKopierService = mockk<AktivitetspliktKopierService>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
@@ -140,8 +154,8 @@ internal class BehandlingFactoryTest {
                     sakServiceMock,
                     mockk(relaxed = true),
                     mockk(relaxed = true),
-                    mockk(relaxed = true),
-                    mockk(relaxed = true),
+                    brukerService = brukerService,
+                    oppgaveService,
                 ),
         )
 
@@ -269,6 +283,11 @@ internal class BehandlingFactoryTest {
             )
         }
         coVerify(exactly = 1) { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) }
+        verify(exactly = 1) {
+            sakServiceMock.oppdaterAdressebeskyttelse(any(), any())
+            sakServiceMock.oppdaterEnhetForSaker(any())
+            sakServiceMock.markerSakerMedSkjerming(any(), any())
+        }
     }
 
     @Test
@@ -361,6 +380,11 @@ internal class BehandlingFactoryTest {
             )
         }
         coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) }
+        verify(exactly = 1) {
+            sakServiceMock.oppdaterAdressebeskyttelse(any(), any())
+            sakServiceMock.oppdaterEnhetForSaker(any())
+            sakServiceMock.markerSakerMedSkjerming(any(), any())
+        }
     }
 
     @Test
@@ -477,6 +501,11 @@ internal class BehandlingFactoryTest {
                 merknad = null,
                 gruppeId = persongalleri.avdoed.single(),
             )
+        }
+        verify(exactly = 1) {
+            sakServiceMock.oppdaterAdressebeskyttelse(any(), any())
+            sakServiceMock.oppdaterEnhetForSaker(any())
+            sakServiceMock.markerSakerMedSkjerming(any(), any())
         }
     }
 
@@ -911,6 +940,11 @@ internal class BehandlingFactoryTest {
         verify(exactly = 4) {
             sakServiceMock.finnSak(any())
         }
+        verify(exactly = 2) {
+            sakServiceMock.oppdaterAdressebeskyttelse(any(), any())
+            sakServiceMock.oppdaterEnhetForSaker(any())
+            sakServiceMock.markerSakerMedSkjerming(any(), any())
+        }
     }
 
     @Test
@@ -1084,6 +1118,11 @@ internal class BehandlingFactoryTest {
         verify(exactly = 3) {
             sakServiceMock.finnSak(any())
         }
+        verify(exactly = 1) {
+            sakServiceMock.oppdaterAdressebeskyttelse(any(), any())
+            sakServiceMock.oppdaterEnhetForSaker(any())
+            sakServiceMock.markerSakerMedSkjerming(any(), any())
+        }
     }
 
     @Test
@@ -1188,6 +1227,11 @@ internal class BehandlingFactoryTest {
         coVerify {
             grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class))
             grunnlagService.leggTilNyeOpplysninger(any(), any(), any())
+        }
+        verify(exactly = 1) {
+            sakServiceMock.oppdaterAdressebeskyttelse(any(), any())
+            sakServiceMock.oppdaterEnhetForSaker(any())
+            sakServiceMock.markerSakerMedSkjerming(any(), any())
         }
     }
 

@@ -35,13 +35,9 @@ import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
+import no.nav.etterlatte.persongalleri
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -56,14 +52,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
     private val skjermingHttpKlient = spyk<SkjermingKlientTest>()
     private val grunnlagKlient = spyk<GrunnlagKlientTest>() // test versjon så vi får data for andre random ting som er brukt
     private val soeker = SOEKER_FOEDSELSNUMMER.value
-    private val persongalleri =
-        Persongalleri(
-            soeker,
-            INNSENDER_FOEDSELSNUMMER.value,
-            listOf(HELSOESKEN2_FOEDSELSNUMMER.value, HALVSOESKEN_FOEDSELSNUMMER.value),
-            listOf(AVDOED_FOEDSELSNUMMER.value),
-            listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
-        )
+    private val persongalleri = persongalleri()
 
     @BeforeEach
     fun start() =
@@ -288,6 +277,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     }
 
             Assertions.assertNotNull(adressebeskyttetUtenSkjerming.id)
+            // TODO: hvorfor beholder ikke denne skjermingen?
             Assertions.assertEquals(Enheter.STRENGT_FORTROLIG.enhetNr, adressebeskyttetUtenSkjerming.enhet)
         }
     }

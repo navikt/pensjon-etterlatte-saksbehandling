@@ -265,8 +265,8 @@ class OmgjoeringKlageRevurderingServiceTest : BehandlingIntegrationTest() {
                     applicationContext.sakService,
                     mockk(relaxed = true),
                     mockk(relaxed = true),
-                    mockk(relaxed = true),
-                    mockk(relaxed = true),
+                    applicationContext.brukerService,
+                    applicationContext.oppgaveService,
                 ),
         )
 }

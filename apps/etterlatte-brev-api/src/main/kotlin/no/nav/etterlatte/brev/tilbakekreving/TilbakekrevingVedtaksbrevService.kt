@@ -3,9 +3,11 @@ package no.nav.etterlatte.brev.tilbakekreving
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.AvsenderRequest
+import no.nav.etterlatte.brev.BrevData
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.ManueltBrevData
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
@@ -18,9 +20,11 @@ import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.grunnlag.GrunnlagService
 import no.nav.etterlatte.brev.hentinformasjon.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -30,6 +34,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
@@ -49,19 +54,65 @@ class TilbakekrevingVedtaksbrevService(
     ): Brev {
         // TODO valider at ikke finnes fra før etc..
         // TODO flytte henting av data til behandling?
-        val brevdata =
+        val brevSakData =
             retryOgPakkUt {
-                tilbakekrevingBrevData(bruker, behandlingId, sakId)
+                utledBrevSakData(bruker, behandlingId, sakId)
             }
 
-        return opprettBrev(bruker, behandlingId, brevdata)
+        val brevSendeData = utledBrevSendeData(bruker, brevSakData)
+
+        return opprettBrev(bruker, behandlingId, brevSendeData, brevSakData.sak)
     }
 
-    private suspend fun tilbakekrevingBrevData(
+    suspend fun genererPdf(
+        id: BrevID,
+        bruker: BrukerTokenInfo,
+    ): Pdf {
+        // TODO valider
+
+        val brev = db.hentBrev(id)
+
+        val brevSakData =
+            retryOgPakkUt {
+                utledBrevSakData(bruker, brev.behandlingId!!, brev.sakId)
+            }
+
+        val brevSendeData = utledBrevSendeData(bruker, brevSakData)
+
+        val pdf =
+            genererPdf(
+                sak = brevSakData.sak,
+                brev,
+                brevSendeData,
+            )
+
+        // logger.info("PDF generert ok. Sjekker om den skal lagres og ferdigstilles")
+        brev.brevkoder?.let { db.oppdaterBrevkoder(brev.id, it) }
+
+        if (brevSakData.vedtak.status != VedtakStatus.FATTET_VEDTAK) {
+            // logger.info("Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=$brevId)")
+        } else {
+            val saksbehandlerident: String = brevSakData.vedtak.vedtakFattet?.ansvarligSaksbehandler ?: bruker.ident()
+            if (!bruker.erSammePerson(saksbehandlerident)) {
+                // logger.info("Lagrer PDF for brev med id=$brevId")
+                db.lagrePdf(brev.id, pdf)
+            } else {
+                /*
+                logger.warn(
+                    "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerVedtak)" +
+                        " og attestant (${brukerTokenInfo.ident()}) er samme person.",
+                )
+                 */
+            }
+        }
+        return pdf
+    }
+
+    private suspend fun utledBrevSakData(
         bruker: BrukerTokenInfo,
         behandlingId: UUID,
         sakId: SakId,
-    ): TilbakekrevingBrevData =
+    ): BrevSakData =
         coroutineScope {
             val sak =
                 async {
@@ -80,7 +131,7 @@ class TilbakekrevingVedtaksbrevService(
                     grunnlagService.hentVergeForSak(sak.await().sakType, null, grunnlag.await())
                 }
 
-            TilbakekrevingBrevData(
+            BrevSakData(
                 sak = sak.await(),
                 vedtak =
                     vedtak.await()
@@ -90,19 +141,13 @@ class TilbakekrevingVedtaksbrevService(
             )
         }
 
-    // TODO tilbakestill
-    // overstyrt språk...
-
-    private suspend fun opprettBrev(
+    private suspend fun utledBrevSendeData(
         bruker: BrukerTokenInfo,
-        behandlingId: UUID,
-        brevData: TilbakekrevingBrevData,
+        brevdata: BrevSakData,
+        brevInnholdData: BrevData = ManueltBrevData(),
         overstyrtSpraak: Spraak? = null, // TODO skal benyttes ved tilbakestilling av brev
-    ): Brev {
-        val brevKode = Brevkoder.TILBAKEKREVING
-        val brevinnholdData = ManueltBrevData()
-
-        val (sak, vedtak, grunnlag, verge) = brevData
+    ): BrevSendeData {
+        val (sak, vedtak, grunnlag, verge) = brevdata
 
         val innloggetSaksbehandlerIdent = bruker.ident() // TODO bør ikke være nødvendig for kun vedtaksbrev?
         val avsender =
@@ -125,6 +170,23 @@ class TilbakekrevingVedtaksbrevService(
             )
 
         val spraak = overstyrtSpraak ?: grunnlag.mapSpraak()
+
+        return BrevSendeData(
+            brevKode = Brevkoder.TILBAKEKREVING,
+            brevinnholdData = brevInnholdData,
+            avsender = avsender,
+            personerISak = personerISak,
+            spraak = spraak,
+        )
+    }
+
+    private suspend fun opprettBrev(
+        bruker: BrukerTokenInfo,
+        behandlingId: UUID,
+        brevSendeData: BrevSendeData,
+        sak: Sak,
+    ): Brev {
+        val (brevKode, brevinnholdData, personerISak, spraak, avsender) = brevSendeData
 
         val innhold =
             brevbaker.hentRedigerbarTekstFraBrevbakeren(
@@ -160,11 +222,40 @@ class TilbakekrevingVedtaksbrevService(
 
         return db.opprettBrev(nyttBrev, bruker)
     }
+
+    private suspend fun genererPdf(
+        sak: Sak,
+        brev: Brev,
+        brevSendeData: BrevSendeData,
+    ): Pdf {
+        val (brevKode, brevinnholdData, personerISak, spraak, avsender) = brevSendeData
+
+        val brevRequest =
+            BrevbakerRequest.fra(
+                brevKode = brevKode.ferdigstilling,
+                brevData = brevinnholdData,
+                avsender = avsender,
+                soekerOgEventuellVerge = personerISak.soekerOgEventuellVerge(),
+                sakId = sak.id,
+                spraak = brev.spraak, // TODO godt nok?,
+                sakType = sak.sakType,
+            )
+
+        return brevbaker.genererPdf(brev.id, brevRequest)
+    }
 }
 
-private data class TilbakekrevingBrevData(
+data class BrevSakData(
     val sak: Sak,
     val vedtak: VedtakDto,
     val grunnlag: Grunnlag,
     val verge: Verge?,
+)
+
+data class BrevSendeData(
+    val brevKode: Brevkoder,
+    val brevinnholdData: BrevData,
+    val personerISak: PersonerISak,
+    val spraak: Spraak,
+    val avsender: Avsender,
 )

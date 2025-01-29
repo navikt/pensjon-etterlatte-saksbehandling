@@ -83,8 +83,6 @@ interface SakService {
 
     fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
 
-    fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering>
-
     fun oppdaterAdressebeskyttelse(
         sakId: SakId,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
@@ -522,8 +520,6 @@ class SakServiceImpl(
     override fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>) {
         dao.oppdaterEnheterPaaSaker(saker)
     }
-
-    override fun sjekkOmSakerErGradert(sakIder: List<SakId>): List<SakMedGradering> = lesDao.finnSakerMedGraderingOgSkjerming(sakIder)
 
     override fun finnSak(
         ident: String,

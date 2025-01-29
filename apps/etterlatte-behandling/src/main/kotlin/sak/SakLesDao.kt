@@ -32,23 +32,6 @@ class SakLesDao(
         )
     }
 
-    fun finnSakerMedGraderingOgSkjerming(sakIder: List<SakId>): List<SakMedGradering> =
-        connectionAutoclosing.hentConnection { connection ->
-            with(connection) {
-                val statement =
-                    prepareStatement(
-                        "SELECT id, adressebeskyttelse from sak where id = any(?)",
-                    )
-                statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
-                statement.executeQuery().toList {
-                    SakMedGradering(
-                        id = SakId(getLong(1)),
-                        adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
-                    )
-                }
-            }
-        }
-
     fun hentSaker(
         kjoering: String,
         antall: Int,

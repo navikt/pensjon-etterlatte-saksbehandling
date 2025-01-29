@@ -8,12 +8,10 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
-import no.nav.etterlatte.libs.common.Enhetsnummer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
@@ -29,7 +27,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -38,7 +35,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
 import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -53,6 +50,7 @@ class GrunnlagsendringshendelseService(
     private val brukerService: BrukerService,
     private val doedshendelseService: DoedshendelseService,
     private val grunnlagsendringsHendelseFilter: GrunnlagsendringsHendelseFilter,
+    private val tilgangsService: OppdaterTilgangService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -181,42 +179,13 @@ class GrunnlagsendringshendelseService(
         }
 
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
-        /*
-        Her skal vi bruke OppdaterTilgangService.haandtergraderingOgEgenAnsatt
-         */
-        val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
-        inTransaction {
-            val (eksisterendeSaker, manglendeSaker) =
-                sakIder
-                    .map { it to sakService.finnSak(it) }
-                    .partition { it.second != null }
-
-            val faktiskeSaker = eksisterendeSaker.map { it.second!! }
-
-            if (manglendeSaker.isNotEmpty()) {
-                logger.error("Sakider som ikke finnes lenger ${manglendeSaker.map { it.first }.joinToString { "," }}")
-            }
-
-            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering, saker = faktiskeSaker)
-
-            faktiskeSaker.forEach { sak ->
-                sakService.oppdaterAdressebeskyttelse(
-                    sak.id,
-                    gradering,
-                )
-                sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sak med gradering=$gradering")
-            }
+        if (sakIder.isEmpty()) {
+            logger.info("Forkaster hendelse da vi ikke fant noen saker på den.")
         }
-
-        if (sakIder.isNotEmpty() &&
-            gradering in
-            listOf(
-                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
-            )
-        ) {
-            logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
+        sakIder.forEach {
+            val pg = grunnlagKlient.hentPersongalleri(it)
+            tilgangsService.haandtergraderingOgEgenAnsatt(it, pg)
         }
     }
 
@@ -224,36 +193,6 @@ class GrunnlagsendringshendelseService(
         logger.info("Oppretter manuell oppgave for Bosted")
         opprettBostedhendelse(bostedsadresse)
     }
-
-    private fun oppdaterEnheterForsaker(
-        fnr: String,
-        gradering: AdressebeskyttelseGradering,
-        saker: List<Sak>,
-    ) {
-        val sakerMedNyEnhet =
-            saker.map {
-                SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
-            }
-        sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
-        oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
-    }
-
-    private fun finnEnhetFraGradering(
-        fnr: String,
-        gradering: AdressebeskyttelseGradering,
-        sakType: SakType,
-    ): Enhetsnummer =
-        when (gradering) {
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
-            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
-            AdressebeskyttelseGradering.FORTROLIG -> {
-                brukerService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
-            }
-
-            AdressebeskyttelseGradering.UGRADERT -> {
-                brukerService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
-            }
-        }
 
     fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern {
         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)

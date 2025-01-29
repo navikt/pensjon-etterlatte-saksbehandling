@@ -498,6 +498,14 @@ internal class ApplicationContext(
         )
 
     val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
+    val oppdaterTilgangService =
+        OppdaterTilgangService(
+            sakService = sakService,
+            skjermingKlient = skjermingKlient,
+            pdltjenesterKlient = pdlTjenesterKlient,
+            brukerService = brukerService,
+            oppgaveService = oppgaveService,
+        )
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
@@ -509,6 +517,7 @@ internal class ApplicationContext(
             brukerService = brukerService,
             doedshendelseService = doedshendelseService,
             grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
+            tilgangsService = oppdaterTilgangService,
         )
 
     private val doedshendelseReminderJob =
@@ -593,14 +602,7 @@ internal class ApplicationContext(
             behandlingsStatusService,
         )
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
-    val oppdaterTilgangService =
-        OppdaterTilgangService(
-            sakService = sakService,
-            skjermingKlient = skjermingKlient,
-            pdltjenesterKlient = pdlTjenesterKlient,
-            brukerService = brukerService,
-            oppgaveService = oppgaveService,
-        )
+
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,

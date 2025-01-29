@@ -21,6 +21,11 @@ import no.nav.etterlatte.sak.PersonManglerSak
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 
+data class TilgangsUtfall(
+    val sattAdressebeskyttelse: Boolean,
+    val sattEgenansatt: Boolean,
+)
+
 class OppdaterTilgangService(
     private val sakService: SakService,
     private val skjermingKlient: SkjermingKlient,
@@ -38,8 +43,8 @@ class OppdaterTilgangService(
     fun haandtergraderingOgEgenAnsatt(
         sakId: SakId,
         persongalleri: Persongalleri,
-    ) {
-        logger.info("Håndterer tilganger for sak $sakId")
+    ): TilgangsUtfall {
+        logger.info("Håndterer tilganger for sakid $sakId")
         val sak = sakService.finnSak(sakId) ?: throw PersonManglerSak()
         val alleIdenter = persongalleri.hentAlleIdentifikatorer()
 
@@ -51,7 +56,6 @@ class OppdaterTilgangService(
         if (identerMedGradering.any { it.harAdressebeskyttelse() }) {
             val hoyesteGradering = identerMedGradering.hentPrioritertGradering()
             sakService.oppdaterAdressebeskyttelse(sakId, hoyesteGradering)
-
             /*
                 Hvis det er fotrolig blir det en virtuell enhet og vi kan på forhånd ikke vite hvilken det er
                 Med Streng fortrolig vet vi hvilke enheter som kan behandle disse
@@ -61,6 +65,7 @@ class OppdaterTilgangService(
                 val sakMedEnhet = listOf(SakMedEnhet(sakId, enhet))
                 sakService.oppdaterEnhetForSaker(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
+                return TilgangsUtfall(sattAdressebeskyttelse = true, sattEgenansatt = false)
             } else {
                 sakService.settEnhetOmAdresseebeskyttet(sak, hoyesteGradering)
                 val enhet =
@@ -70,14 +75,24 @@ class OppdaterTilgangService(
                         else -> throw InternfeilException("Feil gradering, kun strengt fortrolig håndteres her")
                     }
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(SakMedEnhet(sakId, enhet.enhetNr)))
+                return TilgangsUtfall(sattAdressebeskyttelse = true, sattEgenansatt = false)
             }
         } else {
             val egenAnsattSkjerming = alleIdenter.map { fnr -> sjekkOmIdentErSkjermet(fnr) }
+            sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)
             if (egenAnsattSkjerming.any { it }) {
                 sakService.markerSakerMedSkjerming(listOf(sakId), true)
                 val sakMedEnhet = listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr))
                 sakService.oppdaterEnhetForSaker(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
+                return TilgangsUtfall(sattAdressebeskyttelse = false, sattEgenansatt = true)
+            } else {
+                val enhet = hentEnhet(fnr = sak.ident, sak = sak)
+                val sakMedEnhet = listOf(SakMedEnhet(sakId, enhet))
+                sakService.oppdaterEnhetForSaker(sakMedEnhet)
+                sakService.markerSakerMedSkjerming(listOf(sakId), false)
+                oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
+                return TilgangsUtfall(sattAdressebeskyttelse = false, sattEgenansatt = false)
             }
         }
     }

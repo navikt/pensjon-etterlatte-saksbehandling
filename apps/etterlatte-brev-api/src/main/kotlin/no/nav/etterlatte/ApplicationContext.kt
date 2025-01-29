@@ -61,6 +61,7 @@ import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
 import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
+import no.nav.etterlatte.brev.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService
@@ -98,6 +99,7 @@ internal class ApplicationContext {
     val grunnlagKlient = GrunnlagKlient(config, httpClient())
     val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
     val beregningKlient = BeregningKlient(config, httpClient())
+    val pdltjenesterKlient = PdlTjenesterKlient(config, httpClient())
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val oppgaveKlient = OppgaveKlient(config, httpClient())
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
@@ -109,7 +111,7 @@ internal class ApplicationContext {
 
     val beregningService = BeregningService(beregningKlient)
     val norg2Klient = Norg2Klient(env.requireEnvValue(NORG2_URL), httpClient())
-    val adresseService = AdresseService(norg2Klient, saksbehandlerKlient, regoppslagKlient)
+    val adresseService = AdresseService(norg2Klient, saksbehandlerKlient, regoppslagKlient, pdltjenesterKlient)
 
     val grunnlagService = GrunnlagService(grunnlagKlient, adresseService)
     val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
@@ -257,6 +259,8 @@ enum class BrevKey : EnvEnum {
     CLAMAV_ENDPOINT_URL,
     REGOPPSLAG_SCOPE,
     REGOPPSLAG_URL,
+    ETTERLATTE_PDLTJENESTER_URL,
+    ETTERLATTE_PDLTJENESTER_CLIENT_ID,
     SAF_BASE_URL,
     SAF_SCOPE,
     ;

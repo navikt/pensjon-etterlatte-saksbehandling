@@ -166,7 +166,7 @@ export default function RedigerbartBrev({
                       <Accordion.Header>{brevVedlegg.tittel}</Accordion.Header>
 
                       <Accordion.Content>
-                        <VStack gap="4" padding="4 0">
+                        <VStack gap="4" paddingBlock="4" paddingInline="0">
                           {getInfoboksForVedlegg(brevVedlegg.tittel)}
                           <SlateEditor
                             value={brevVedlegg.payload}

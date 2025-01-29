@@ -150,8 +150,12 @@ class GrunnlagHenter(
                 if (Folkeregisteridentifikator.isValid(this.innsender)) {
                     this.toJsonNode()
                 } else {
-                    logger.error("Ugyldig ident er lagret, se relatert for opplysninstypeid: $opplysningid")
-                    this.copy(innsender = null).toJsonNode()
+                    if (this.innsender == null) {
+                        this.toJsonNode()
+                    } else {
+                        logger.error("Ugyldig ident er lagret, se relatert for opplysninstypeid: $opplysningid")
+                        this.copy(innsender = null).toJsonNode()
+                    }
                 },
             attestering = null,
             fnr = null,

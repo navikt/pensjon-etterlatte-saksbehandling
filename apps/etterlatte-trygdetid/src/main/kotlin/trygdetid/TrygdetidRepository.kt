@@ -455,7 +455,8 @@ class TrygdetidRepository(
                   trygdetid_tidspunkt = :trygdetidTidspunkt,
                   trygdetid_regelresultat = :trygdetidRegelresultat,
                   beregnet_trygdetid_overstyrt = :overstyrt,
-                  yrkesskade = :yrkesskade
+                  yrkesskade = :yrkesskade,
+                  overstyrt_begrunnelse = :overstyrtBegrunnelse
                 WHERE behandling_id = :behandlingId AND id = :trygdetidId
                 """.trimIndent(),
             paramMap =
@@ -489,6 +490,7 @@ class TrygdetidRepository(
                     "trygdetidRegelresultat" to beregnetTrygdetid.regelResultat.toJson(),
                     "overstyrt" to beregnetTrygdetid.resultat.overstyrt,
                     "yrkesskade" to beregnetVerdi.yrkesskade,
+                    "overstyrtBegrunnelse" to beregnetVerdi.overstyrtBegrunnelse,
                 ),
         ).let { query ->
             tx.update(query)
@@ -522,7 +524,8 @@ class TrygdetidRepository(
                 trygdetid_tidspunkt = null,
                 trygdetid_regelresultat = null,
                 beregnet_trygdetid_overstyrt = false,
-                yrkesskade = false
+                yrkesskade = false,
+                overstyrt_begrunnelse = null
             WHERE behandling_id = :behandlingId
             """.trimIndent(),
         paramMap = mapOf("behandlingId" to behandlingId),

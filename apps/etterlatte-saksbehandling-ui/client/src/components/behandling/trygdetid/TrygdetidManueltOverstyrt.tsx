@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, Box, Button, Checkbox, Heading, HStack, TextField, VStack } from '@navikt/ds-react'
+import { Alert, Box, Button, Checkbox, Heading, HStack, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   IDetaljertBeregnetTrygdetid,
@@ -14,6 +14,14 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Toast } from '~shared/alerts/Toast'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { FormProvider, useForm } from 'react-hook-form'
+
+interface IOverstyrtTrygdetidForm {
+  skalHaProrata: boolean
+  anvendtTrygdetid: number
+  prorataTeller: number | undefined
+  prorataNevner: number | undefined
+  begrunnelse: string
+}
 
 export const TrygdetidManueltOverstyrt = ({
   trygdetidId,
@@ -36,13 +44,7 @@ export const TrygdetidManueltOverstyrt = ({
   const [oppdaterStatus, oppdaterTrygdetidRequest] = useApiCall(oppdaterTrygdetidOverstyrtMigrering)
   const [opprettStatus, opprettTrygdetid] = useApiCall(opprettTrygdetider)
 
-  const methods = useForm<{
-    skalHaProrata: boolean
-    anvendtTrygdetid: number
-    prorataTeller: number | undefined
-    prorataNevner: number | undefined
-    // TODO begrunnelse
-  }>({
+  const methods = useForm<IOverstyrtTrygdetidForm>({
     defaultValues: {
       skalHaProrata: !!beregnetTrygdetid.resultat.prorataBroek,
       anvendtTrygdetid: !!beregnetTrygdetid.resultat.prorataBroek
@@ -50,7 +52,7 @@ export const TrygdetidManueltOverstyrt = ({
         : beregnetTrygdetid.resultat.samletTrygdetidNorge,
       prorataTeller: beregnetTrygdetid.resultat.prorataBroek?.teller,
       prorataNevner: beregnetTrygdetid.resultat.prorataBroek?.nevner,
-      // TODO begrunnelse
+      begrunnelse: '',
     },
   })
   const {
@@ -58,21 +60,21 @@ export const TrygdetidManueltOverstyrt = ({
     handleSubmit,
     formState: { errors },
     watch,
-    getValues,
   } = methods
 
-  const lagre = () => {
+  const lagre = (data: IOverstyrtTrygdetidForm) => {
     oppdaterTrygdetidRequest(
       {
         behandlingId: behandling!!.id,
         trygdetidId: trygdetidId,
-        anvendtTrygdetid: getValues().anvendtTrygdetid,
-        prorataBroek: getValues().skalHaProrata
+        anvendtTrygdetid: data.anvendtTrygdetid,
+        prorataBroek: data.skalHaProrata
           ? {
-              teller: getValues().prorataTeller!!,
-              nevner: getValues().prorataNevner!!,
+              teller: data.prorataTeller!!,
+              nevner: data.prorataNevner!!,
             }
           : undefined,
+        begrunnelse: data.begrunnelse,
       },
       (trygdetid) => {
         oppdaterTrygdetid(trygdetid)
@@ -123,13 +125,12 @@ export const TrygdetidManueltOverstyrt = ({
               required: { value: true, message: 'Må fylles ut' },
             })}
             label="Anvendt trygdetid"
-            placeholder="Anvendt trygdetid"
             htmlSize={20}
             error={errors.anvendtTrygdetid?.message}
-            disabled={!redigerbar}
+            readOnly={!redigerbar}
           />
 
-          <Checkbox {...register('skalHaProrata')} disabled={!redigerbar}>
+          <Checkbox {...register('skalHaProrata')} readOnly={!redigerbar}>
             Prorata brøk
           </Checkbox>
 
@@ -146,9 +147,8 @@ export const TrygdetidManueltOverstyrt = ({
                     required: { value: true, message: 'Må fylles ut' },
                   })}
                   label="Prorata teller"
-                  placeholder="Prorata teller"
                   error={errors.prorataTeller?.message}
-                  disabled={!redigerbar}
+                  readOnly={!redigerbar}
                 />
               </Box>
               <Box width="20rem">
@@ -162,13 +162,22 @@ export const TrygdetidManueltOverstyrt = ({
                     required: { value: true, message: 'Må fylles ut' },
                   })}
                   label="Prorata nevner"
-                  placeholder="Prorata nevner"
                   error={errors.prorataNevner?.message}
-                  disabled={!redigerbar}
+                  readOnly={!redigerbar}
                 />
               </Box>
             </HStack>
           )}
+          <Box width="20rem">
+            <Textarea
+              {...register('begrunnelse', {
+                required: { value: true, message: 'Må fylles ut' },
+              })}
+              label="Begrunnelse"
+              error={errors.begrunnelse?.message}
+              readOnly={!redigerbar}
+            />
+          </Box>
           {redigerbar && (
             <Box width="20rem">
               <Button variant="primary" size="small" onClick={handleSubmit(lagre)} loading={isPending(oppdaterStatus)}>

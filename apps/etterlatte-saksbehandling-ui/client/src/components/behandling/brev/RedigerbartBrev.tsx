@@ -215,7 +215,7 @@ const getInfoboksForVedlegg = (tittel: string) => {
     {
       brevtittel: 'Utfall ved beregning av omstillingsstønad',
       infotekst:
-        'SKRIV INN HVILKEN INNTEKT SOM ER LAGT TIL GRUNN. HER KAN DU OGSÅ LEGGE INN OM INSTITUSJONSOPPHOLD E.L. OM DET SKULLE VÆRE AKTUELT.',
+        'Skriv inn hvilken inntekt som er lagt til grunn. Her kan du også legge inn om institusjonsopphold e.l. dersom det skulle være aktuelt.',
     },
   ]
 

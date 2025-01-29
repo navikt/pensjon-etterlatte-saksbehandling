@@ -41,6 +41,15 @@ data class OverstyrBeregningGrunnlagDao(
         )
 }
 
+data class OverstyrtBeregningsgrunnlagSammenligningsperiode(
+    val utbetaltBeloep: Long,
+    val foreldreloessats: Boolean?,
+    val trygdetid: Long,
+    val trygdetidForIdent: String?,
+    val prorataBroekTeller: Long?,
+    val prorataBroekNevner: Long?,
+)
+
 data class OverstyrBeregningGrunnlagData(
     val utbetaltBeloep: Long,
     val foreldreloessats: Boolean?,
@@ -50,7 +59,17 @@ data class OverstyrBeregningGrunnlagData(
     val prorataBroekNevner: Long?,
     val beskrivelse: String,
     val aarsak: String?,
-)
+) {
+    fun tilSammenligningsperiode(): OverstyrtBeregningsgrunnlagSammenligningsperiode =
+        OverstyrtBeregningsgrunnlagSammenligningsperiode(
+            utbetaltBeloep = this.utbetaltBeloep,
+            foreldreloessats = this.foreldreloessats,
+            trygdetid = this.trygdetid,
+            trygdetidForIdent = this.trygdetidForIdent,
+            prorataBroekTeller = this.prorataBroekTeller,
+            prorataBroekNevner = this.prorataBroekNevner,
+        )
+}
 
 data class OverstyrBeregningGrunnlagDTO(
     val perioder: List<GrunnlagMedPeriode<OverstyrBeregningGrunnlagData>>,

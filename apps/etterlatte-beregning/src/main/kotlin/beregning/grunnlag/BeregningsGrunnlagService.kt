@@ -475,19 +475,24 @@ class BeregningsGrunnlagService(
         val forrigeIverksatteBehandling = runBlocking { forrigeIverksatteBehandling(behandlingId, brukerTokenInfo) }
         if (forrigeIverksatteBehandling != null) {
             // har vi overstyrt beregning for denne behandlingen?
-            val forrigeOverstyrBeregningGrunnlag =
+            val forrigeOverstyrBeregningGrunnlagPerioder =
                 runBlocking { hentOverstyrBeregningGrunnlag(forrigeIverksatteBehandling.behandlingId, brukerTokenInfo) }
-            if (forrigeOverstyrBeregningGrunnlag.perioder.isEmpty()) {
+                    .perioder
+                    .mapVerdier(OverstyrBeregningGrunnlagData::tilSammenligningsperiode)
+            if (forrigeOverstyrBeregningGrunnlagPerioder.isEmpty()) {
                 return
             }
-            val naavaerendeGrunnlag = runBlocking { hentOverstyrBeregningGrunnlag(behandlingId, brukerTokenInfo) }
+            val naavaerendeGrunnlagPerioder =
+                runBlocking { hentOverstyrBeregningGrunnlag(behandlingId, brukerTokenInfo) }
+                    .perioder
+                    .mapVerdier(OverstyrBeregningGrunnlagData::tilSammenligningsperiode)
             if (!erGrunnlagLiktFoerEnDato(
-                    naavaerendeGrunnlag.perioder,
-                    forrigeOverstyrBeregningGrunnlag.perioder,
+                    naavaerendeGrunnlagPerioder.sortedBy { it.fom },
+                    forrigeOverstyrBeregningGrunnlagPerioder.sortedBy { it.fom },
                     virkningstidspunkt.atDay(1),
                 )
             ) {
-                throw OverstyrtBeregningsgrunnlagEndresFoerVirk(
+                throw OverstyrtBeregningsgrunnlagEndresFoerVirkException(
                     behandlingId = behandlingId,
                     forrigeBehandlingId = forrigeIverksatteBehandling.behandlingId,
                 )
@@ -529,7 +534,7 @@ class BPBeregningsgrunnlagSoeskenMarkertDoedException(
         meta = mapOf("behandlingId" to behandlingId),
     )
 
-class OverstyrtBeregningsgrunnlagEndresFoerVirk(
+class OverstyrtBeregningsgrunnlagEndresFoerVirkException(
     behandlingId: UUID,
     forrigeBehandlingId: UUID,
 ) : UgyldigForespoerselException(

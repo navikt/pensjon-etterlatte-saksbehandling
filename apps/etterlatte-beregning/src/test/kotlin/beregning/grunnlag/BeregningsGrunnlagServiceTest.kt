@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.Month.APRIL
@@ -484,7 +485,12 @@ internal class BeregningsGrunnlagServiceTest {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
-            verify(exactly = 0) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
+            verify(exactly = 0) {
+                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 
@@ -525,7 +531,12 @@ internal class BeregningsGrunnlagServiceTest {
             beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, bruker)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
+            verify(exactly = 1) {
+                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                    any(),
+                    any(),
+                )
+            }
         }
     }
 
@@ -678,7 +689,13 @@ internal class BeregningsGrunnlagServiceTest {
             )
         }
         assertEquals(
-            listOf(GrunnlagMedPeriode<List<SoeskenMedIBeregning>>(emptyList(), behandling.virkningstidspunkt?.dato?.atDay(1)!!, null)),
+            listOf(
+                GrunnlagMedPeriode<List<SoeskenMedIBeregning>>(
+                    emptyList(),
+                    behandling.virkningstidspunkt?.dato?.atDay(1)!!,
+                    null,
+                ),
+            ),
             slot.captured.soeskenMedIBeregning,
         )
     }
@@ -733,7 +750,8 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
 
-        val grunnlag = runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandlingId, mockk(relaxed = true)) }
+        val grunnlag =
+            runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandlingId, mockk(relaxed = true)) }
 
         grunnlag.perioder.let { perioder ->
             perioder.size shouldBe 2
@@ -1034,6 +1052,265 @@ internal class BeregningsGrunnlagServiceTest {
                         OverstyrBeregningGrunnlagDao::reguleringRegelresultat,
                     )
                 },
+            )
+        }
+    }
+
+    @Test
+    fun `sjekkOmOverstyrtGrunnlagErLiktFoerVirk gir ingen feil i revurdering hvis kun denne behandling er overstyrt`() {
+        val sakId = SakId(1L)
+
+        val behandlingId = randomUUID()
+        val virkFoerstegangsbehandling = YearMonth.of(2024, 6)
+        val foerstegangsbehandling =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkFoerstegangsbehandling,
+                uuid = behandlingId,
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sakId,
+            )
+
+        val revurderingId = randomUUID()
+        val virkRevurdering = YearMonth.of(2024, 6)
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkRevurdering,
+                uuid = revurderingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+            listOf(
+                mockVedtak(
+                    behandlingId,
+                    VedtakType.INNVILGELSE,
+                ),
+            )
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns emptyList()
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(revurderingId) } returns
+            listOf(
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = revurderingId,
+                    utbetaltBeloep = 1L,
+                    datoFOM = virkRevurdering.atDay(1),
+                ),
+            )
+
+        assertDoesNotThrow {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+                revurderingId,
+                virkRevurdering,
+                mockk(relaxed = true),
+            )
+        }
+    }
+
+    @Test
+    fun `sjekkOmOverstyrtGrunnlagErLiktFoerVirk gir ingen feil i førstegangsbehandling`() {
+        val sakId = SakId(1L)
+        val behandlingId = UUID.randomUUID()
+        val virk = YearMonth.of(2024, 6)
+        val behandling =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virk,
+                uuid = behandlingId,
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sakId,
+            )
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns behandling
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns emptyList()
+        assertDoesNotThrow {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(behandlingId, virk, mockk(relaxed = true))
+        }
+    }
+
+    @Test
+    fun `sjekkOmOverstyrtGrunnlagErLiktFoerVirk kaster ikke feil hvis det kun er endret i detaljer etter virk`() {
+        val sakId = SakId(1L)
+
+        val behandlingId = randomUUID()
+        val virkFoerstegangsbehandling = YearMonth.of(2024, 1)
+        val foerstegangsbehandling =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkFoerstegangsbehandling,
+                uuid = behandlingId,
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sakId,
+            )
+
+        val revurderingId = randomUUID()
+        val virkRevurdering = YearMonth.of(2024, 6)
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkRevurdering,
+                uuid = revurderingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+            listOf(
+                mockVedtak(
+                    behandlingId,
+                    VedtakType.INNVILGELSE,
+                ),
+            )
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
+            listOf(
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = behandlingId,
+                    utbetaltBeloep = 1L,
+                    datoFOM = virkFoerstegangsbehandling.atDay(1),
+                ),
+            )
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(revurderingId) } returns
+            listOf(
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = behandlingId,
+                    utbetaltBeloep = 1L,
+                    datoFOM = virkFoerstegangsbehandling.atDay(1),
+                    datoTOM = virkRevurdering.minusMonths(1).atEndOfMonth(),
+                ),
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = revurderingId,
+                    utbetaltBeloep = 2L,
+                    datoFOM = virkRevurdering.atDay(1),
+                ),
+            )
+
+        assertDoesNotThrow {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+                revurderingId,
+                virkRevurdering,
+                mockk(relaxed = true),
+            )
+        }
+    }
+
+    @Test
+    fun `sjekkOmOverstyrtGrunnlagErLiktFoerVirk kaster feil hvis det er endret i detaljer før virk`() {
+        val sakId = SakId(1L)
+
+        val behandlingId = randomUUID()
+        val virkFoerstegangsbehandling = YearMonth.of(2024, 1)
+        val foerstegangsbehandling =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkFoerstegangsbehandling,
+                uuid = behandlingId,
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sakId,
+            )
+
+        val revurderingId = randomUUID()
+        val virkRevurdering = YearMonth.of(2024, 6)
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkRevurdering,
+                uuid = revurderingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+            listOf(
+                mockVedtak(
+                    behandlingId,
+                    VedtakType.INNVILGELSE,
+                ),
+            )
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
+            listOf(
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = behandlingId,
+                    utbetaltBeloep = 1L,
+                    datoFOM = virkFoerstegangsbehandling.atDay(1),
+                ),
+            )
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(revurderingId) } returns
+            listOf(
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = revurderingId,
+                    utbetaltBeloep = 2L,
+                    datoFOM = virkFoerstegangsbehandling.atDay(1),
+                ),
+            )
+
+        assertThrows<OverstyrtBeregningsgrunnlagEndresFoerVirkException> {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+                revurderingId,
+                virkRevurdering,
+                mockk(relaxed = true),
+            )
+        }
+    }
+
+    @Test
+    fun `sjekkOmOverstyrtGrunnlagErLiktFoerVirk kaster feil hvis det er manglende perioder før virk`() {
+        val sakId = SakId(1L)
+
+        val behandlingId = randomUUID()
+        val virkFoerstegangsbehandling = YearMonth.of(2024, 1)
+        val foerstegangsbehandling =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkFoerstegangsbehandling,
+                uuid = behandlingId,
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sakId,
+            )
+
+        val revurderingId = randomUUID()
+        val virkRevurdering = YearMonth.of(2024, 6)
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkRevurdering,
+                uuid = revurderingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+            listOf(
+                mockVedtak(
+                    behandlingId,
+                    VedtakType.INNVILGELSE,
+                ),
+            )
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
+            listOf(
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = behandlingId,
+                    utbetaltBeloep = 1L,
+                    datoFOM = virkFoerstegangsbehandling.atDay(1),
+                ),
+            )
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(revurderingId) } returns
+            listOf(
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = revurderingId,
+                    utbetaltBeloep = 2L,
+                    datoFOM = virkRevurdering.atDay(1),
+                ),
+            )
+
+        assertThrows<OverstyrtBeregningsgrunnlagEndresFoerVirkException> {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+                revurderingId,
+                virkRevurdering,
+                mockk(relaxed = true),
             )
         }
     }

@@ -213,12 +213,12 @@ const Container = styled.div`
 const getInfoboksForVedlegg = (tittel: string) => {
   const vedleggInfo = [
     {
-      tittel: 'Utfall ved beregning av omstillingsstønad',
+      brevtittel: 'Utfall ved beregning av omstillingsstønad',
       infotekst:
         'SKRIV INN HVILKEN INNTEKT SOM ER LAGT TIL GRUNN. HER KAN DU OGSÅ LEGGE INN OM INSTITUSJONSOPPHOLD E.L. OM DET SKULLE VÆRE AKTUELT.',
     },
   ]
 
-  const skalViseInfoboks = vedleggInfo.find((info) => info.tittel === tittel)
+  const skalViseInfoboks = vedleggInfo.find((info) => info.brevtittel === tittel)
   return skalViseInfoboks ? <Alert variant="info">{skalViseInfoboks.infotekst}</Alert> : null
 }

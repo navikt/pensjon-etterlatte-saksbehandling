@@ -9,7 +9,6 @@ import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.FantIkkeIdentTilTrygdetidBlantAvdoede
 import no.nav.etterlatte.brev.model.ForskjelligTrygdetid
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.Land
 import no.nav.etterlatte.brev.model.ManglerAvdoedBruktTilTrygdetid
 import no.nav.etterlatte.brev.model.OverstyrtTrygdetidManglerAvdoed
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
@@ -18,6 +17,7 @@ import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.sikkerLogg
@@ -36,7 +36,7 @@ internal fun barnepensjonBeregning(
     grunnbeloep: Grunnbeloep,
     trygdetid: List<TrygdetidDto>,
     erForeldreloes: Boolean = false,
-    landKodeverk: List<Land>,
+    landKodeverk: List<LandDto>,
 ): BarnepensjonBeregning {
     val beregningsperioder =
         barnepensjonBeregningsperioder(utbetalingsinfo, erForeldreloes)
@@ -80,7 +80,7 @@ fun mapRiktigMetodeForAnvendteTrygdetider(
     trygdetid: List<TrygdetidDto>,
     avdoede: List<Avdoed>,
     beregningsperioder: List<Beregningsperiode>,
-    landKodeverk: List<Land>,
+    landKodeverk: List<LandDto>,
 ): List<TrygdetidMedBeregningsmetode> {
     val anvendteTrygdetiderIdenter =
         beregningsperioder
@@ -170,7 +170,7 @@ internal fun trygdetidMedBeregningsmetode(
     trygdetidDto: TrygdetidDto,
     identMedMetoder: IdentMedMetodeIGrunnlagOgAnvendtMetode,
     avdoede: List<Avdoed>,
-    landKodeverk: List<Land>,
+    landKodeverk: List<LandDto>,
 ) = trygdetidDto.fromDto(
     identMedMetoder.beregningsMetodeAnvendt,
     identMedMetoder.beregningsMetodeFraGrunnlag,

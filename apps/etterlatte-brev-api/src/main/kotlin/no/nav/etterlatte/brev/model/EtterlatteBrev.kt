@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.hentinformasjon.beregning.UgyldigBeregningsMetode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.trygdetid.TrygdetidType
@@ -146,7 +147,7 @@ fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt: BeregningsMetode,
     beregningsMetodeFraGrunnlag: BeregningsMetode,
     navnAvdoed: String?,
-    landKodeverk: List<Land>,
+    landKodeverk: List<LandDto>,
 ) = TrygdetidMedBeregningsmetode(
     navnAvdoed = navnAvdoed,
     trygdetidsperioder =
@@ -163,7 +164,7 @@ fun TrygdetidDto.fromDto(
                 datoFOM = grunnlag.periodeFra,
                 datoTOM = grunnlag.periodeTil,
                 landkode = grunnlag.bosted,
-                land = toLand(landKodeverk, grunnlag.bosted),
+                land = landKodeverk.hentLandFraLandkode(grunnlag.bosted),
                 opptjeningsperiode = grunnlag.beregnet,
                 type = TrygdetidType.valueOf(grunnlag.type),
             )
@@ -192,10 +193,7 @@ fun TrygdetidDto.fromDto(
     ident = this.ident,
 )
 
-private fun toLand(
-    landKodeverk: List<Land>,
-    landKode: String,
-) = landKodeverk.firstOrNull { it.isoLandkode == landKode }?.beskrivelse?.tekst
+private fun List<LandDto>.hentLandFraLandkode(landkode: String) = firstOrNull { it.isoLandkode == landkode }?.beskrivelse?.tekst
 
 fun TrygdetidDto.erYrkesskade() = beregnetTrygdetid?.resultat?.yrkesskade ?: false
 

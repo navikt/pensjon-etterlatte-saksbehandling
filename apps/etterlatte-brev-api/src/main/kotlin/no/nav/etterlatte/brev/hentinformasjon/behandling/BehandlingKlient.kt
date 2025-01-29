@@ -4,7 +4,6 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
-import no.nav.etterlatte.brev.model.Land
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -12,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -147,7 +147,7 @@ class BehandlingKlient(
             brukerTokenInfo = brukerTokenInfo,
         )
 
-    internal suspend fun hentLand(brukerTokenInfo: BrukerTokenInfo): List<Land> =
+    internal suspend fun hentLand(brukerTokenInfo: BrukerTokenInfo): List<LandDto> =
         get(
             url = "$resourceUrl/api/kodeverk/land",
             onSuccess = { deserialize(it.response.toString()) },

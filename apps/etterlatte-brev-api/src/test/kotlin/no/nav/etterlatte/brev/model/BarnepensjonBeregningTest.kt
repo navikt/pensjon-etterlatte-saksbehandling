@@ -5,6 +5,8 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.bp.IdentMedMetodeIGrunnlagOgAnvendtMetode
 import no.nav.etterlatte.brev.model.bp.trygdetidMedBeregningsmetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.kodeverk.BeskrivelseDto
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.Test
@@ -89,7 +91,7 @@ class BarnepensjonBeregningTest {
 
     private fun landKodeverk() =
         listOf(
-            Land("SWE", Beskrivelse("Sverige")),
-            Land("NOR", Beskrivelse("Norge")),
+            LandDto("SWE", "2020-01-01", "2999-01-01", BeskrivelseDto("SVERIGE", "Sverige")),
+            LandDto("NOR", "2020-01-01", "2999-01-01", BeskrivelseDto("NORGE", "Norge")),
         )
 }

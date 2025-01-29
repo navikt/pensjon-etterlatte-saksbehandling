@@ -139,7 +139,7 @@ class TilgangsServiceOppdatererTest {
 
         verify(exactly = 1) {
             sakService.oppdaterEnhetForSaker(match { it.first().id == sak.id && it.first().enhet == Enheter.defaultEnhet.enhetNr })
-            sakService.markerSakerMedSkjerming(match { it.first().sakId == sak.id.sakId }, false)
+            sakService.markerSakerMedSkjerming(match { it.first().value == sak.id.value }, false)
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(
                 match {
                     it.first().id == sak.id &&

@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.kodeverk.BeskrivelseDto
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -45,13 +47,14 @@ class EtterlatteBrevTrygdetidTest {
                             type = TrygdetidType.FAKTISK,
                         ),
                     ),
-            ).fromDto(BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL, "Ole"),
+            ).fromDto(BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL, "Ole", landKodeverk()),
         ) {
             beregnetTrygdetidAar shouldBe 40
             prorataBroek shouldBe null
             trygdetidsperioder.size shouldBe 2
             trygdetidsperioder.forEach {
-                it.land shouldBe "NOR"
+                it.landkode shouldBe "NOR"
+                it.land shouldBe "Norge"
             }
         }
     }
@@ -81,13 +84,14 @@ class EtterlatteBrevTrygdetidTest {
                             prorata = true,
                         ),
                     ),
-            ).fromDto(BeregningsMetode.PRORATA, BeregningsMetode.BEST, "Ole"),
+            ).fromDto(BeregningsMetode.PRORATA, BeregningsMetode.BEST, "Ole", landKodeverk()),
         ) {
             beregnetTrygdetidAar shouldBe 29
             prorataBroek shouldBe null
             trygdetidsperioder.size shouldBe 1
             trygdetidsperioder.forEach {
-                it.land shouldNotBe "NOR"
+                it.landkode shouldNotBe "NOR"
+                it.land shouldNotBe "Norge"
             }
         }
     }
@@ -146,3 +150,9 @@ fun trygdetidGrunnlagDto(
     poengUtAar = false,
     poengInnAar = false,
 )
+
+private fun landKodeverk() =
+    listOf(
+        LandDto("SWE", "2020-01-01", "2999-01-01", BeskrivelseDto("SVERIGE", "Sverige")),
+        LandDto("NOR", "2020-01-01", "2999-01-01", BeskrivelseDto("NORGE", "Norge")),
+    )

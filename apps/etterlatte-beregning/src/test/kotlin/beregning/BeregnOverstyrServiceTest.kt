@@ -3,8 +3,10 @@ package no.nav.etterlatte.beregning
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sakId1
@@ -12,6 +14,7 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
+import no.nav.etterlatte.beregning.grunnlag.OverstyrtBeregningsgrunnlagEndresFoerVirkException
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
@@ -22,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.beregning.OverstyrtBeregningKategori
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -29,6 +33,7 @@ import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -56,7 +61,7 @@ internal class BeregnOverstyrServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -96,12 +101,24 @@ internal class BeregnOverstyrServiceTest {
                         every { type } returns ""
                     },
             )
+        every {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+                behandling.id,
+                any(),
+                any(),
+            )
+        } just Runs
 
         runBlocking {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                    OverstyrBeregning(
+                        behandling.sak,
+                        "Test",
+                        Tidspunkt.now(),
+                        kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
+                    ),
                     bruker,
                 )
 
@@ -139,7 +156,7 @@ internal class BeregnOverstyrServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -179,12 +196,24 @@ internal class BeregnOverstyrServiceTest {
                         every { type } returns ""
                     },
             )
+        every {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+                behandling.id,
+                any(),
+                any(),
+            )
+        } just Runs
 
         runBlocking {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                    OverstyrBeregning(
+                        behandling.sak,
+                        "Test",
+                        Tidspunkt.now(),
+                        kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
+                    ),
                     bruker,
                 )
 
@@ -229,7 +258,7 @@ internal class BeregnOverstyrServiceTest {
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.OPPFYLT
             }
-        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -269,12 +298,24 @@ internal class BeregnOverstyrServiceTest {
                         every { type } returns ""
                     },
             )
+        every {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+                behandling.id,
+                any(),
+                any(),
+            )
+        } just Runs
 
         runBlocking {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                    OverstyrBeregning(
+                        behandling.sak,
+                        "Test",
+                        Tidspunkt.now(),
+                        kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
+                    ),
                     bruker,
                 )
 
@@ -319,7 +360,7 @@ internal class BeregnOverstyrServiceTest {
             mockk {
                 every { utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
             }
-        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
@@ -359,12 +400,24 @@ internal class BeregnOverstyrServiceTest {
                         every { type } returns ""
                     },
             )
+        every {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+                behandling.id,
+                any(),
+                any(),
+            )
+        } just Runs
 
         runBlocking {
             val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now(), kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI),
+                    OverstyrBeregning(
+                        behandling.sak,
+                        "Test",
+                        Tidspunkt.now(),
+                        kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
+                    ),
                     bruker,
                 )
 
@@ -392,6 +445,48 @@ internal class BeregnOverstyrServiceTest {
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `beregn skal sjekke om overstyrt grunnlag er likt før virk`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING, YearMonth.of(2019, 11))
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        every { vilkaarsvurderingDto.resultat } returns
+            mockk {
+                every { utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
+            }
+        coEvery { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any(), any()) } returns
+            OverstyrBeregningGrunnlag(
+                perioder = emptyList(),
+                kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+            )
+        every {
+            beregningsGrunnlagService.sjekkOmOverstyrtGrunnlagErLiktFoerVirk(
+                behandling.id,
+                behandling.virkningstidspunkt!!.dato,
+                any(),
+            )
+        } throws OverstyrtBeregningsgrunnlagEndresFoerVirkException(behandling.id, UUID.randomUUID())
+
+        assertThrows<OverstyrtBeregningsgrunnlagEndresFoerVirkException> {
+            runBlocking {
+                beregnOverstyrBeregningService.beregn(
+                    behandling,
+                    OverstyrBeregning(
+                        behandling.sak,
+                        "Test",
+                        Tidspunkt.now(),
+                        kategori = OverstyrtBeregningKategori.UKJENT_KATEGORI,
+                    ),
+                    bruker,
+                )
             }
         }
     }

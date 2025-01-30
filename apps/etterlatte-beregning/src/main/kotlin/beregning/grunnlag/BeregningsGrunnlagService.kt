@@ -324,6 +324,10 @@ class BeregningsGrunnlagService(
             // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
             val forrigeIverksatte = forrigeIverksatteBehandling(behandlingId, brukerTokenInfo)
             if (forrigeIverksatte != null) {
+                logger.info(
+                    "Gir ut det forrige overstyrte beregningsgrunnlaget i behandling ${forrigeIverksatte.behandlingId} for " +
+                        "nåværende behandling under arbeid $behandlingId",
+                )
                 val overstyrtePerioderForrigeBehandling =
                     beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(forrigeIverksatte.behandlingId)
                 OverstyrBeregningGrunnlag(
@@ -331,6 +335,10 @@ class BeregningsGrunnlagService(
                     kilde = overstyrtePerioderForrigeBehandling.firstOrNull()?.kilde ?: automatiskSaksbehandler,
                 ).also {
                     // Lagre ned det grunnlaget vi gir ut fra forrige iverksatte også på behandlingen vi er i
+                    logger.info(
+                        "Kopierte overstyrt beregningsgrunnlag fra ${forrigeIverksatte.behandlingId} til " +
+                            "$behandlingId, med ${overstyrtePerioderForrigeBehandling.size} perioder.",
+                    )
                     if (overstyrtePerioderForrigeBehandling.isNotEmpty()) {
                         beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                             behandlingId,

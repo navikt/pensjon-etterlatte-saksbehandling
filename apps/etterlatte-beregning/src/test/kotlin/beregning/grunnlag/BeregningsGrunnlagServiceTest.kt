@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning.grunnlag
 
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -1054,6 +1055,67 @@ internal class BeregningsGrunnlagServiceTest {
                 },
             )
         }
+    }
+
+    @Test
+    fun `hentOverstyrtBeregningsgrunnlag skal hente og kopiere forrige behandlings grunnlag hvis nåværende er tom`() {
+        val sakId = SakId(1L)
+
+        val behandlingId = randomUUID()
+        val virkFoerstegangsbehandling = YearMonth.of(2024, 1)
+        val foerstegangsbehandling =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkFoerstegangsbehandling,
+                uuid = behandlingId,
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sakId,
+            )
+
+        val revurderingId = randomUUID()
+        val virkRevurdering = YearMonth.of(2024, 6)
+        val revurdering =
+            mockBehandling(
+                type = SakType.BARNEPENSJON,
+                virkningstidspunktdato = virkRevurdering,
+                uuid = revurderingId,
+                behandlingstype = BehandlingType.REVURDERING,
+                sakId = sakId,
+            )
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns revurdering
+        coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns foerstegangsbehandling
+        coEvery { vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any()) } returns
+            listOf(
+                mockVedtak(
+                    behandlingId,
+                    VedtakType.INNVILGELSE,
+                ),
+            )
+        val overstyrtePerioderForrigeBehandling =
+            listOf(
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = behandlingId,
+                    utbetaltBeloep = 1L,
+                    datoFOM = virkFoerstegangsbehandling.atDay(1),
+                ),
+            )
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
+            overstyrtePerioderForrigeBehandling
+
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(revurderingId) } returns emptyList()
+
+        val slotOverstyrtePerioder = slot<List<OverstyrBeregningGrunnlagDao>>()
+        every {
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                revurderingId,
+                capture(slotOverstyrtePerioder),
+            )
+        } just Runs
+
+        val grunnlag =
+            runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(revurderingId, mockk(relaxed = true)) }
+        assertEquals(1, grunnlag.perioder.size)
+        slotOverstyrtePerioder.captured == overstyrtePerioderForrigeBehandling
     }
 
     @Test

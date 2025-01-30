@@ -1,6 +1,7 @@
 package no.nav.etterlatte.joarkhendelser
 
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
+import no.nav.etterlatte.joarkhendelser.config.sikkerLogg
 import no.nav.etterlatte.joarkhendelser.joark.Bruker
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.Error
@@ -49,7 +50,7 @@ class JoarkHendelseHandler(
             if (response.errors.isNullOrEmpty()) {
                 response.data?.journalpost
             } else {
-                throw mapError(response.errors)
+                throw mapError(response.errors, journalpostId)
             }
 
         if (journalpost == null) {
@@ -205,13 +206,17 @@ class JoarkHendelseHandler(
         }
     }
 
-    // TODO: kan vel ikke logge hele error obj her heller
-    private fun mapError(errors: List<Error>): Exception {
+    private fun mapError(
+        errors: List<Error>,
+        journalpostId: Long,
+    ): Exception {
         errors.forEach {
             if (errors.all { err -> err.extensions?.code == Error.Code.FORBIDDEN }) {
-                logger.warn("${errors.size} feil oppsto ved kall mot saf, alle var tilgangssjekk: ${it.toJson()}")
+                logger.error("Deny for henting mot saf se sikkerlogg")
+                sikkerLogg.error("Deny henting fra SAF for identifikator: $journalpostId. error: ${it.toJson()}")
             } else {
-                logger.error("${errors.size} feil oppsto ved kall mot saf: ${it.toJson()}")
+                logger.error("${errors.size} feil oppsto ved kall mot saf se sikkerlogg.")
+                sikkerLogg.error("Feil mot saf, id: identifikator: $journalpostId. feil: ${it.toJson()}")
             }
         }
 

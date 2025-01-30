@@ -228,7 +228,8 @@ class BehandlingFactory(
                 grunnlagService.leggInnNyttGrunnlag(
                     behandling,
                     persongalleri,
-                    brukerTokenInfo,
+                    // IKKE endre på dette da vi må bruke systembruker mot grunnlag i denne flyten for å få OK på tilgangskontroll,
+                    HardkodaSystembruker.opprettGrunnlag,
                 )
             }
 
@@ -344,7 +345,8 @@ class BehandlingFactory(
             grunnlagService.leggInnNyttGrunnlag(
                 behandlingerForOmgjoering.nyFoerstegangsbehandling,
                 persongalleri,
-                brukerTokenInfo = saksbehandler,
+                // IKKE endre på dette da vi må bruke systembruker mot grunnlag i denne flyten for å få OK på tilgangskontroll
+                HardkodaSystembruker.opprettGrunnlag,
             )
         }
 

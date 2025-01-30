@@ -11,21 +11,23 @@ import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
+import java.time.YearMonth
 
 data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
     val inntektsbeloep: Kroner,
-    val opphoerDato: LocalDate?,
+    val inntektsaar: Int,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             avkortingsinfo: Avkortingsinfo,
-            opphoerDato: LocalDate?,
+            virkningstidspunkt: YearMonth,
         ): OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall {
             val sisteBeregningsperiode =
                 avkortingsinfo.beregningsperioder
@@ -38,7 +40,7 @@ data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
 
             return OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
                 inntektsbeloep = sisteBeregningsperiode.inntekt,
-                opphoerDato = opphoerDato,
+                inntektsaar = virkningstidspunkt.year,
             )
         }
     }
@@ -63,6 +65,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
             vilkaarsVurdering: VilkaarsvurderingDto,
             behandling: DetaljertBehandling,
             navnAvdoed: String,
+            landKodeverk: List<LandDto>,
         ): OmstillingsstoenadInntektsjusteringVedtak {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
@@ -93,6 +96,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = navnAvdoed,
+                                landKodeverk = landKodeverk,
                             ),
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =

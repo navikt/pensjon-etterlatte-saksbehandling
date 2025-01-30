@@ -46,6 +46,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   const avdoedesDoedsdato = avdoede?.opplysning?.doedsdato
   const [aktivitetOppfolging, setAktivitetOppfolging] = useState<AktivitetspliktOppfolging>()
   const [manglerAktivitetspliktVurdering, setManglerAktivitetspliktVurdering] = useState<boolean | undefined>(undefined)
+  const [visFeilmelding, setVisFeilmelding] = useState<boolean>(false)
 
   const [hentetAktivitetspliktOppfoelgingStatus, hentAktivitetspliktOppfoelging] =
     useApiCall(hentAktivitetspliktOppfolging)
@@ -60,12 +61,18 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
 
   const erFerdigUtfylt = () => {
     if (manglerAktivitetspliktVurdering === undefined || manglerAktivitetspliktVurdering) {
-      setManglerAktivitetspliktVurdering(true)
+      setVisFeilmelding(true)
       return
     }
 
     next()
   }
+
+  useEffect(() => {
+    if (!manglerAktivitetspliktVurdering) {
+      setVisFeilmelding(false)
+    }
+  }, [manglerAktivitetspliktVurdering])
 
   return (
     <>
@@ -125,7 +132,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
 
         <AktivitetspliktVurdering
           behandling={behandling}
-          resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
+          setManglerAktivitetspliktVurdering={setManglerAktivitetspliktVurdering}
           doedsdato={avdoedesDoedsdato!!}
         />
 
@@ -193,7 +200,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </Button>
         </TekstWrapper>
 
-        {manglerAktivitetspliktVurdering && (
+        {visFeilmelding && (
           <Alert style={{ maxWidth: '16em' }} variant="error">
             Du må fylle ut vurdering om aktivitetsplikt
           </Alert>

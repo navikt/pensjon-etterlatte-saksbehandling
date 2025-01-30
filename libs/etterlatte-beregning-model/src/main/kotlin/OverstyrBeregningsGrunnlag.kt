@@ -22,6 +22,32 @@ data class OverstyrBeregningGrunnlagDao(
     val aarsak: String?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val reguleringRegelresultat: JsonNode? = null,
+) {
+    fun tilGrunnlagMedPeriode(): GrunnlagMedPeriode<OverstyrBeregningGrunnlagData> =
+        GrunnlagMedPeriode(
+            data =
+                OverstyrBeregningGrunnlagData(
+                    utbetaltBeloep = this.utbetaltBeloep,
+                    foreldreloessats = this.foreldreloessats,
+                    trygdetid = this.trygdetid,
+                    trygdetidForIdent = this.trygdetidForIdent,
+                    prorataBroekTeller = this.prorataBroekTeller,
+                    prorataBroekNevner = this.prorataBroekNevner,
+                    beskrivelse = this.beskrivelse,
+                    aarsak = this.aarsak,
+                ),
+            fom = this.datoFOM,
+            tom = this.datoTOM,
+        )
+}
+
+data class OverstyrtBeregningsgrunnlagSammenligningsperiode(
+    val utbetaltBeloep: Long,
+    val foreldreloessats: Boolean?,
+    val trygdetid: Long,
+    val trygdetidForIdent: String?,
+    val prorataBroekTeller: Long?,
+    val prorataBroekNevner: Long?,
 )
 
 data class OverstyrBeregningGrunnlagData(
@@ -33,7 +59,17 @@ data class OverstyrBeregningGrunnlagData(
     val prorataBroekNevner: Long?,
     val beskrivelse: String,
     val aarsak: String?,
-)
+) {
+    fun tilSammenligningsperiode(): OverstyrtBeregningsgrunnlagSammenligningsperiode =
+        OverstyrtBeregningsgrunnlagSammenligningsperiode(
+            utbetaltBeloep = this.utbetaltBeloep,
+            foreldreloessats = this.foreldreloessats,
+            trygdetid = this.trygdetid,
+            trygdetidForIdent = this.trygdetidForIdent,
+            prorataBroekTeller = this.prorataBroekTeller,
+            prorataBroekNevner = this.prorataBroekNevner,
+        )
+}
 
 data class OverstyrBeregningGrunnlagDTO(
     val perioder: List<GrunnlagMedPeriode<OverstyrBeregningGrunnlagData>>,

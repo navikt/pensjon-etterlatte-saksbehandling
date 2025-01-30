@@ -240,7 +240,7 @@ export const lagreSluttbehandlingOmgjoering = async (args: {
   return apiClient.post(`/behandling/${args.behandlingId}/info/sluttbehandling`, { ...args.sluttbehandling })
 }
 
-export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> => apiClient.get<ILand[]>('/kodeverk/land') //TODO: verify path
+export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> => apiClient.get<ILand[]>('/kodeverk/land')
 
 export const redigerAnnenForelder = async (args: {
   behandlingId: string

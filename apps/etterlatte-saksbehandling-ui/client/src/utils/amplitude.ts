@@ -48,7 +48,8 @@ export enum ClickEvent {
   KOPIER_VILKAAR_FRA_BEHANDLING_MED_SAMME_AVDOED = 'kopier vilkår fra behandling med samme avdoed',
 
   // Tilbakemeldinger
-  TILBAKEMELDING_INFORMASJON_FRA_BRUKER = 'tilbakemelding informasjon fra bruker',
+  TILBAKEMELDING_INFORMASJON_FRA_BRUKER_FOERSTEGANGSBEHANDLING = 'tilbakemelding informasjon fra bruker førstegangsbehandling',
+  TILBAKEMELDING_INFORMASJON_FRA_BRUKER_REVURDERING = 'tilbakemelding informasjon fra bruker revurdering',
   TILBAKEMELDING_SAKSBEHANDLING_UTLAND_FOERSTEGANGSBEHANDLING = 'tilbakemelding saksbehandling utland førstegangsbehandling',
   TILBAKEMELDING_SAKSBEHANDLING_UTLAND_AVSLAG = 'tilbakemelding saksbehandling utland avslag',
   TILBAKEMELDING_SAKSBEHANDLING_UTLAND_SLUTTBEHANDLING = 'tilbakemelding saksbehandling utland sluttbehandling',

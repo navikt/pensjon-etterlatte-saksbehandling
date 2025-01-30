@@ -17,15 +17,16 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
+import java.time.YearMonth
 
 data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
     val inntektsbeloep: Kroner,
-    val opphoerDato: LocalDate?,
+    val inntektsaar: Int,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
             avkortingsinfo: Avkortingsinfo,
-            opphoerDato: LocalDate?,
+            virkningstidspunkt: YearMonth,
         ): OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall {
             val sisteBeregningsperiode =
                 avkortingsinfo.beregningsperioder
@@ -38,7 +39,7 @@ data class OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
 
             return OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall(
                 inntektsbeloep = sisteBeregningsperiode.inntekt,
-                opphoerDato = opphoerDato,
+                inntektsaar = virkningstidspunkt.year,
             )
         }
     }

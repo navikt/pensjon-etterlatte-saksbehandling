@@ -331,7 +331,7 @@ class BeregningsGrunnlagService(
                     kilde = overstyrtePerioderForrigeBehandling.firstOrNull()?.kilde ?: automatiskSaksbehandler,
                 ).also {
                     // Lagre ned det grunnlaget vi gir ut fra forrige iverksatte også på behandlingen vi er i
-                    if (overstyrtePerioderForrigeBehandling.isEmpty()) {
+                    if (overstyrtePerioderForrigeBehandling.isNotEmpty()) {
                         beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                             behandlingId,
                             overstyrtePerioderForrigeBehandling,

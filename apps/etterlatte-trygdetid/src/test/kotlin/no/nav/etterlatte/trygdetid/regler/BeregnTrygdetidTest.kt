@@ -146,6 +146,7 @@ internal class BeregnTrygdetidTest {
                         doedsDato = datoer?.second ?: LocalDate.of(2023, 3, 15),
                         norskPoengaar = norskPoengaar,
                         yrkesskade = yrkesskade,
+                        nordiskKonvensjon = false,
                     ),
                 kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
                 beskrivelse = "Perioder",

@@ -24,15 +24,6 @@ import kotlin.math.round
 // TODO dato settes riktig senere
 val TRYGDETID_DATO: LocalDate = LocalDate.of(1900, 1, 1)
 
-// TODO TEMP TEMP
-val nordiskKonvensjon =
-    definerKonstant<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean>(
-        gjelderFra = TRYGDETID_DATO,
-        beskrivelse = "tullball",
-        regelReferanse = RegelReferanse("BareTull"),
-        verdi = true,
-    )
-
 data class TrygdetidPeriodeMedPoengaar(
     val fra: LocalDate,
     val til: LocalDate,
@@ -63,11 +54,20 @@ data class TrygdetidGrunnlagMedAvdoed(
     val doedsDato: LocalDate,
     val norskPoengaar: Int?,
     val yrkesskade: Boolean,
+    val nordiskKonvensjon: Boolean,
 )
 
 data class TrygdetidGrunnlagMedAvdoedGrunnlag(
     val trygdetidGrunnlagMedAvdoed: FaktumNode<TrygdetidGrunnlagMedAvdoed>,
 )
+
+val nordiskKonvensjon: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Hent nordisk konvensjon",
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
+        finnFelt = { it.nordiskKonvensjon },
+    )
 
 val dagerPrMaanedTrygdetidGrunnlag =
     definerKonstant<TrygdetidGrunnlagMedAvdoedGrunnlag, Int>(

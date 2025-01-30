@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.SAMORDNET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.TIL_SAMORDNING
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -1024,6 +1025,7 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
         val datoer = hentDatoerForBehandling(trygdetid)
+        val nordiskKonvensjon = avtaleService.hentAvtaleForBehandling(behandlingId)?.nordiskTrygdeAvtale == JaNei.JA
 
         val nyBeregnetTrygdetid =
             beregnTrygdetidService.beregnTrygdetid(
@@ -1032,8 +1034,8 @@ class TrygdetidServiceImpl(
                 datoer.doedsDato,
                 trygdetid.overstyrtNorskPoengaar,
                 trygdetid.yrkesskade,
+                nordiskKonvensjon,
             )
-
         return when (nyBeregnetTrygdetid) {
             null -> trygdetid.nullstillBeregnetTrygdetid()
             else -> trygdetid.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)

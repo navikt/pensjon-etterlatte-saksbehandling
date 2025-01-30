@@ -51,13 +51,20 @@ export const AktivitetspliktTidslinje = ({ behandling, doedsdato, sakId }: Props
   useEffect(() => {
     hentAktiviteterOgHendelserRequest({ sakId: sakId, behandlingId: behandling?.id }, (aktiviteter) => {
       oppdaterAktiviteter(aktiviteter.perioder)
-      setHendelser(aktiviteter.hendelser)
+      oppdaterHendelser(aktiviteter.hendelser)
     })
   }, [behandling, sakId])
 
   const oppdaterAktiviteter = (aktiviteter: IAktivitetPeriode[]) => {
     setAktivitetsTypeProps([...new Set(aktiviteter.map((a) => a.type))].map(mapAktivitetstypeProps))
     setAktiviteter(aktiviteter)
+  }
+
+  const oppdaterHendelser = (hendelser: IAktivitetHendelse[]) => {
+    const filtrerteHendelser = hendelser.filter((hendelse) => {
+      return new Date(hendelse.dato) >= doedsdato && new Date(hendelse.dato) <= sluttdato
+    })
+    setHendelser(filtrerteHendelser)
   }
 
   const fjernAktivitet = (aktivitetId: string) => {

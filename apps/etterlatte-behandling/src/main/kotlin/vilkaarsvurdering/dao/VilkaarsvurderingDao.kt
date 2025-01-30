@@ -262,10 +262,12 @@ class VilkaarsvurderingDao(
                         query.map { row -> row.toVilkaarWrapper() }.asList,
                     ).groupBy { it.vilkaarId }
                     .map { (vilkaarId, alleDelvilkaar) ->
+
                         val hovedvilkaar = alleDelvilkaar.first { it.hovedvilkaar }
                         val unntaksvilkaar = alleDelvilkaar.filter { !it.hovedvilkaar }.map { it.delvilkaar }
                         Vilkaar(
                             id = vilkaarId,
+                            kopiertFraVilkaarId = hovedvilkaar.kopiertFraVilkaarId,
                             hovedvilkaar = hovedvilkaar.delvilkaar,
                             unntaksvilkaar = unntaksvilkaar,
                             vurdering = hovedvilkaar.vurderingData,
@@ -302,6 +304,7 @@ class VilkaarsvurderingDao(
                 mapOf(
                     "id" to vilkaar.id,
                     "vilkaarsvurdering_id" to vilkaarsvurderingId,
+                    "kopiert_fra_vilkaar_id" to vilkaar.kopiertFraVilkaarId,
                     "resultat_kommentar" to vilkaar.vurdering?.kommentar,
                     "resultat_tidspunkt" to
                         vilkaar.vurdering
@@ -336,6 +339,7 @@ class VilkaarsvurderingDao(
     private fun Row.toVilkaarWrapper() =
         VilkaarDataWrapper(
             vilkaarId = uuid("id"),
+            kopiertFraVilkaarId = uuidOrNull("kopiert_fra_vilkaar_id"),
             hovedvilkaar = boolean("hovedvilkaar"),
             delvilkaar = this.toDelvilkaar(),
             vurderingData =
@@ -350,6 +354,7 @@ class VilkaarsvurderingDao(
 
     data class VilkaarDataWrapper(
         val vilkaarId: UUID,
+        val kopiertFraVilkaarId: UUID?,
         val vurderingData: VilkaarVurderingData?,
         val hovedvilkaar: Boolean,
         val delvilkaar: Delvilkaar,
@@ -366,8 +371,8 @@ class VilkaarsvurderingDao(
         """
 
         const val LAGRE_VILKAAR = """
-            INSERT INTO vilkaar(id, vilkaarsvurdering_id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler) 
-            VALUES(:id, :vilkaarsvurdering_id, :resultat_kommentar, :resultat_tidspunkt, :resultat_saksbehandler) 
+            INSERT INTO vilkaar(id, vilkaarsvurdering_id, kopiert_fra_vilkaar_id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler) 
+            VALUES(:id, :vilkaarsvurdering_id, :kopiert_fra_vilkaar_id, :resultat_kommentar, :resultat_tidspunkt, :resultat_saksbehandler) 
         """
 
         const val LAGRE_VILKAARSVURDERING_RESULTAT = """
@@ -383,7 +388,7 @@ class VilkaarsvurderingDao(
         const val LAGRE_VILKAAR_RESULTAT = """
             UPDATE vilkaar
             SET resultat_kommentar = :resultat_kommentar, resultat_tidspunkt = :resultat_tidspunkt, 
-                resultat_saksbehandler = :resultat_saksbehandler   
+                resultat_saksbehandler = :resultat_saksbehandler, kopiert_fra_vilkaar_id = null
             WHERE id = :id
         """
 
@@ -402,6 +407,7 @@ class VilkaarsvurderingDao(
                    v.resultat_kommentar,
                    v.resultat_tidspunkt,
                    v.resultat_saksbehandler,
+                   v.kopiert_fra_vilkaar_id,
                    dv.vilkaar_id,
                    dv.vilkaar_type,
                    dv.hovedvilkaar,

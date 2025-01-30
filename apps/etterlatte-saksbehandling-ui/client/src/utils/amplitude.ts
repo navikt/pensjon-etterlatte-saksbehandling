@@ -44,6 +44,9 @@ export enum ClickEvent {
   // Trygdetid
   KOPIER_TRYGDETIDSGRUNNLAG_FRA_BEHANDLING_MED_SAMME_AVDOEDE = 'kopier trygdetidsgrunnlag fra behandling med samme avdoede',
 
+  // Vilkårsvurdering
+  KOPIER_VILKAAR_FRA_BEHANDLING_MED_SAMME_AVDOED = 'kopier vilkår fra behandling med samme avdoed',
+
   // Tilbakemeldinger
   TILBAKEMELDING_INFORMASJON_FRA_BRUKER_FOERSTEGANGSBEHANDLING = 'tilbakemelding informasjon fra bruker førstegangsbehandling',
   TILBAKEMELDING_INFORMASJON_FRA_BRUKER_REVURDERING = 'tilbakemelding informasjon fra bruker revurdering',

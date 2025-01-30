@@ -27,10 +27,24 @@ data class Vilkaar(
     val hovedvilkaar: Delvilkaar,
     val unntaksvilkaar: List<Delvilkaar> = emptyList(),
     val vurdering: VilkaarVurderingData? = null,
+    val kopiertFraVilkaarId: UUID? = null,
     val id: UUID = UUID.randomUUID(),
 )
 
-fun List<Vilkaar>.kopier() = this.map { it.copy(id = UUID.randomUUID()) }
+fun List<Vilkaar>.kopier(kopierKunVilkaarGjeldendeAvdoede: Boolean = false) =
+    this
+        .filter { !kopierKunVilkaarGjeldendeAvdoede || it.gjelderAvdoede() }
+        .map {
+            it.copy(
+                id = UUID.randomUUID(),
+                kopiertFraVilkaarId = it.id,
+            )
+        }
+
+private fun Vilkaar.gjelderAvdoede(): Boolean {
+    if (hovedvilkaar.resultat != null && hovedvilkaar.type.gjelderAvdoede) return true
+    return unntaksvilkaar.any { unntaksvilkaar -> unntaksvilkaar.resultat != null && unntaksvilkaar.type.gjelderAvdoede }
+}
 
 data class Delvilkaar(
     val type: VilkaarType,

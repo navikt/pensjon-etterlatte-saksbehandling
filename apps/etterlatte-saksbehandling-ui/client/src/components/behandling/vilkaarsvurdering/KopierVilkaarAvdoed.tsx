@@ -6,23 +6,33 @@ import { ExternalLinkIcon, PlusCircleIcon, XMarkOctagonIcon } from '@navikt/akse
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ClickEvent, trackClickJaNei } from '~utils/amplitude'
 import { JaNei } from '~shared/types/ISvar'
-import { hentKandidatForKopieringAvVilkaar, kopierVilkaarFraAnnenBehandling } from '~shared/api/vilkaarsvurdering'
+import {
+  hentKandidatForKopieringAvVilkaar,
+  kopierVilkaarFraAnnenBehandling,
+  Vilkaar,
+} from '~shared/api/vilkaarsvurdering'
 import { updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
-export const KopierVilkaarAvdoed = ({ behandlingId }: { behandlingId: string }) => {
+export const KopierVilkaarAvdoed = ({ behandlingId, vilkaar }: { behandlingId: string; vilkaar: Vilkaar[] }) => {
   const [hentKandidatForKopieringAvVilkaarStatus, hentKandidatForKopieringAvVilkaarReq] = useApiCall(
     hentKandidatForKopieringAvVilkaar
   )
   const [kopierVilkaarStatus, kopierVilkaarReq] = useApiCall(kopierVilkaarFraAnnenBehandling)
   const [visDetaljer, setVisDetaljer] = useState<boolean | undefined>(undefined)
   const dispatch = useAppDispatch()
-  const skalViseDetaljer = visDetaljer
   const avdoede = usePersonopplysninger()
     ?.avdoede.map((p) => p.opplysning?.foedselsnummer)
     .join(', ')
+
+  const harKopierteVilkaar = () => {
+    return vilkaar.some((v) => v.kopiertFraVilkaarId != null)
+  }
+
+  // Viser detaljer dersom vilkår ikke allerede er kopiert
+  const skalViseDetaljer = visDetaljer ?? !harKopierteVilkaar()
 
   const kopierVilkaar = (kildeBehandlingId: string) => {
     trackClickJaNei(ClickEvent.KOPIER_VILKAAR_FRA_BEHANDLING_MED_SAMME_AVDOED, JaNei.JA)

@@ -73,6 +73,7 @@ export interface IVilkaarsvurdering {
 
 export interface Vilkaar {
   id: string
+  kopiertFraVilkaarId: string
   hovedvilkaar: Delvilkaar
   unntaksvilkaar: Delvilkaar[]
   vurdering?: VurdertResultat | null

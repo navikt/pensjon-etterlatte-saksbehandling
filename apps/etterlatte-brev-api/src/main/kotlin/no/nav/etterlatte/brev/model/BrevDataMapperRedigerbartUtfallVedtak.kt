@@ -394,6 +394,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         OmstillingsstoenadVedtakInntektsjusteringRedigerbartUtfall.fra(
             avkortingsinfo = avkortingsinfo.await(),
             opphoerDato = opphoerDato,
+            virkningstidspunkt = virkningstidspunkt,
         )
     }
 

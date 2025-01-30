@@ -32,7 +32,7 @@ class PdlTjenesterKlient(
         ident: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): LocalDate? {
-        logger.info("Henter ident fra PDL for fnr=${ident.maskerFnr()}")
+        logger.info("Henter fødselsdato fra PDL for fnr=${ident.maskerFnr()}")
 
         return retry<LocalDate?> {
             downstreamResourceClient
@@ -42,7 +42,10 @@ class PdlTjenesterKlient(
                     HentPdlIdentRequest(PersonIdent(ident)),
                 ).mapBoth(
                     success = { deserialize(it.response.toString()) },
-                    failure = { throw it },
+                    failure = {
+                        logger.warn("Kunne ikke hente fødselsdato fra PDL for fnr=${ident.maskerFnr()}")
+                        null
+                    },
                 )
         }.let { result ->
             when (result) {

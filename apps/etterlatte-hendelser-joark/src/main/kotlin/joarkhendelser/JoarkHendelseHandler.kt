@@ -80,10 +80,6 @@ class JoarkHendelseHandler(
         val temaGammelt = hendelse.temaGammelt
 
         if (bytterFraEtterlatteTemaTilNoeAnnet(hendelse)) {
-            val journalpost = hentJournalpost(journalpostId)
-            if (journalpostErFerdigstilt(journalpost)) {
-                return
-            }
             logger.info(
                 "Avbryter oppgaver for hendelse (id=$hendelseId, journalpostId=$journalpostId, tema=$temaNytt, temaGammelt=$temaGammelt, type=${hendelse.hendelsesType})",
             )

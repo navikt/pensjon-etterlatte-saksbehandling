@@ -8,9 +8,13 @@ import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
  *  EYB = [SakType.BARNEPENSJON]
  *  EYO = [SakType.OMSTILLINGSSTOENAD]
  **/
-fun JournalfoeringHendelseRecord.erTemaEtterlatte(): Boolean =
+fun JournalfoeringHendelseRecord.erNyttTemaEtterlatte(): Boolean =
     temaNytt == SakType.BARNEPENSJON.tema ||
         temaNytt == SakType.OMSTILLINGSSTOENAD.tema
+
+fun JournalfoeringHendelseRecord.erGammeltTemaEtterlatte(): Boolean =
+    temaGammelt == SakType.BARNEPENSJON.tema ||
+        temaGammelt == SakType.OMSTILLINGSSTOENAD.tema
 
 /**
  * Konverterer [JournalfoeringHendelseRecord] sin journalpostStatus til merknad som brukes i Gjenny-oppgaven

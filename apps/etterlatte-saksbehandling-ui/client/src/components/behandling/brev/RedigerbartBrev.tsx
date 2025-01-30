@@ -1,4 +1,4 @@
-import { Accordion, Tabs } from '@navikt/ds-react'
+import { Accordion, Tabs, VStack } from '@navikt/ds-react'
 import SlateEditor from '~components/behandling/brev/SlateEditor'
 import React, { useEffect, useState } from 'react'
 import { FilePdfIcon, PencilIcon } from '@navikt/aksel-icons'
@@ -12,6 +12,7 @@ import { isPending, isPendingOrInitial, isSuccess, isSuccessOrInitial } from '~s
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { TilbakestillOgLagreRad } from '~components/behandling/brev/TilbakestillOgLagreRad'
 import { formaterTidspunktTimeMinutterSekunder } from '~utils/formatering/dato'
+import VedleggInfo from '~components/vedlegg/VedleggInfo'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',
@@ -164,13 +165,17 @@ export default function RedigerbartBrev({
                   vedlegg.map((brevVedlegg) => (
                     <Accordion.Item key={brevVedlegg.key}>
                       <Accordion.Header>{brevVedlegg.tittel}</Accordion.Header>
+
                       <Accordion.Content>
-                        <SlateEditor
-                          value={brevVedlegg.payload}
-                          onChange={onChangeVedlegg}
-                          readonly={!kanRedigeres}
-                          editKey={brevVedlegg.key}
-                        />
+                        <VStack gap="4" paddingBlock="4" paddingInline="0">
+                          <VedleggInfo vedleggTittel={brevVedlegg.tittel} />
+                          <SlateEditor
+                            value={brevVedlegg.payload}
+                            onChange={onChangeVedlegg}
+                            readonly={!kanRedigeres}
+                            editKey={brevVedlegg.key}
+                          />
+                        </VStack>
                       </Accordion.Content>
                     </Accordion.Item>
                   ))}

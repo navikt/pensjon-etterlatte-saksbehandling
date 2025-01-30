@@ -18,7 +18,6 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnOppgaveId
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnSak
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -181,18 +180,17 @@ class DoedshendelseJobService(
                 SakType.BARNEPENSJON -> hentAnnenForelder(doedshendelse)
                 SakType.OMSTILLINGSSTOENAD -> null
             }
-        val galleri =
+        val persongalleri =
             Persongalleri(
                 soeker = doedshendelse.beroertFnr,
                 avdoed = listOf(doedshendelse.avdoedFnr),
                 gjenlevende = listOfNotNull(gjenlevende),
-                innsender = Vedtaksloesning.GJENNY.name,
             )
 
         runBlocking {
             grunnlagService.leggInnNyttGrunnlagSak(
                 sak = opprettetSak,
-                galleri,
+                persongalleri,
                 HardkodaSystembruker.doedshendelse,
             )
         }

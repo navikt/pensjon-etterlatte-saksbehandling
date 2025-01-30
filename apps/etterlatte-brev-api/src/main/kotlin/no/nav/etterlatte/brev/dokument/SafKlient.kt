@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 /*
@@ -54,10 +55,9 @@ class SafKlient(
             when (re.response.status) {
                 HttpStatusCode.Forbidden -> {
                     val errorMessage = re.response.body<JsonNode>()["message"]?.asText()
-                    // TODO bedre håndtering av dette? https://jira.adeo.no/browse/EY-4755
-                    logger.warn(errorMessage ?: "Feil fra Saf: ${re.response.bodyAsText()}")
-
-                    throw IkkeTilgangTilJournalpost()
+                    logger.error("Deny for henting mot saf se sikkerlogg journalpostId: $journalpostId")
+                    sikkerLogg.error("Deny melding fra SAF for journalpostId: $journalpostId. error: $errorMessage")
+                    throw IkkeTilgangTilJournalpost("Du mangler tilgang til tema ressursen tilhører eller geografisk område.")
                 }
                 HttpStatusCode.NotFound -> {
                     throw IkkeFunnetException(

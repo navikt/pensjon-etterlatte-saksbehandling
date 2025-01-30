@@ -85,8 +85,11 @@ class SakSkrivDao(
         }
     }
 
-    fun oppdaterEnheterPaaSaker(saker: List<SakMedEnhet>) {
-        sakendringerDao.oppdaterSaker(saker.map { it.id }, ENDRE_ENHET) {
+    fun oppdaterEnheterPaaSaker(
+        saker: List<SakMedEnhet>,
+        kommentar: String? = null,
+    ) {
+        sakendringerDao.oppdaterSaker(saker.map { it.id }, ENDRE_ENHET, kommentar) {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -108,7 +111,7 @@ class SakSkrivDao(
     fun markerSakerMedSkjerming(
         sakIder: List<SakId>,
         skjermet: Boolean,
-    ) = sakendringerDao.oppdaterSaker(sakIder, ENDRE_SKJERMING) {
+    ) = sakendringerDao.oppdaterSaker(sakIder, ENDRE_SKJERMING, null) {
         with(it) {
             val statement =
                 prepareStatement(

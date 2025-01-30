@@ -147,7 +147,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))
+                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr, kommentar = "Lorem ipsum"))
                 }
             assertEquals(200, response.status.value)
             verify(exactly = 1) { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) }
@@ -169,7 +169,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = Enhetsnummer("4805")))
+                    setBody(EnhetRequest(enhet = Enhetsnummer("4805"), kommentar = "Lorem ipsum"))
                 }
             assertEquals(400, response.status.value)
             verify(exactly = 0) { sakService.finnSak(any()) }
@@ -190,7 +190,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/endre-enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr))
+                    setBody(EnhetRequest(enhet = Enheter.PORSGRUNN.enhetNr, kommentar = "Lorem ipsum"))
                 }
             assertEquals(400, response.status.value)
         }

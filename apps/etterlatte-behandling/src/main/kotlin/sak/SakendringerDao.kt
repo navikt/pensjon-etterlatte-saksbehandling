@@ -39,6 +39,7 @@ class SakendringerDao(
                         endringstype = endringstype,
                         sakFoer = null,
                         sakEtter = krevIkkeNull(hentKomplettSak(sak.id)) { "Sak med ID ${sak.id} ble ikke funnet etter oppretting" },
+                        kommentar = null,
                     ),
                 )
             }
@@ -46,6 +47,7 @@ class SakendringerDao(
     internal fun oppdaterSaker(
         sakIdList: Collection<SakId>,
         endringstype: Endringstype,
+        kommentar: String?,
         block: (connection: Connection) -> Unit,
     ) {
         val sakerFoer =
@@ -68,6 +70,7 @@ class SakendringerDao(
                     endringstype,
                     sakerFoer.singleOrNull { it.id == sakEtter.id },
                     sakEtter,
+                    kommentar,
                 ),
             )
         }
@@ -77,7 +80,7 @@ class SakendringerDao(
         id: SakId,
         endringstype: Endringstype,
         block: (connection: Connection) -> Unit,
-    ) = oppdaterSaker(listOf(id), endringstype, block)
+    ) = oppdaterSaker(listOf(id), endringstype, null, block)
 
     internal fun hentKomplettSak(sakId: SakId): KomplettSak? =
         connectionAutoclosing.hentConnection { connection ->
@@ -119,6 +122,7 @@ class SakendringerDao(
                             tidspunkt = getTidspunkt("tidspunkt"),
                             ident = getString("ident"),
                             identtype = enumValueOf(getString("identtype")),
+                            kommentar = getString("kommentar"),
                         )
                     }
             }
@@ -155,6 +159,7 @@ class SakendringerDao(
         endringstype: Endringstype,
         sakFoer: KomplettSak?,
         sakEtter: KomplettSak,
+        kommentar: String?,
     ): Saksendring {
         val appUser = Kontekst.get().AppUser
 
@@ -170,6 +175,7 @@ class SakendringerDao(
                     is SaksbehandlerMedEnheterOgRoller -> Identtype.SAKSBEHANDLER
                     else -> Identtype.GJENNY
                 },
+            kommentar = kommentar,
         )
     }
 }

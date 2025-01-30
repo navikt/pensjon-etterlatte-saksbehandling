@@ -12,6 +12,7 @@ data class Saksendring(
     val tidspunkt: Tidspunkt,
     val ident: String,
     val identtype: Identtype,
+    val kommentar: String?,
 ) {
     enum class Identtype { SAKSBEHANDLER, GJENNY }
 

@@ -51,7 +51,6 @@ export const Vurdering = ({
     : 'Er hovedvilkår oppfylt?' // TODO denne burde vi kunne bli kvitt når BP får spørsmål som en del av vilkår
 
   useEffect(() => {
-    // TODO denne er jeg ikke sikker på? Ønsker bare å endre denne som kun settes initielt dersom det er endringer på vilkaar
     setVilkaarutkast(initiellForm(vilkaar))
   }, [vilkaar])
 

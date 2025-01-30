@@ -61,7 +61,7 @@ class OppdaterTilgangService(
                 sakService.oppdaterEnhetForSaker(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
             } else {
-                sakService.settEnhetOmAdresseebeskyttet(sak, hoyesteGradering)
+                sakService.settEnhetOmAdressebeskyttet(sak, hoyesteGradering)
                 val enhet =
                     when (hoyesteGradering) {
                         AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG_UTLAND

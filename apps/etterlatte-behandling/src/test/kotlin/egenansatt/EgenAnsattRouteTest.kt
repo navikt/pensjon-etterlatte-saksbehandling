@@ -35,7 +35,7 @@ import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import no.nav.etterlatte.persongalleri
 import org.junit.jupiter.api.AfterEach
@@ -51,7 +51,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
     private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val skjermingHttpKlient = spyk<SkjermingKlientTest>()
     private val grunnlagKlient = spyk<GrunnlagKlientTest>() // test versjon så vi får data for andre random ting som er brukt
-    private val soeker = SOEKER_FOEDSELSNUMMER.value
+    private val soeker = no.nav.etterlatte.soeker // Obs denne må matche med grunnlag sitt persongalleri
     private val persongalleri = persongalleri()
 
     @BeforeEach
@@ -176,7 +176,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal ikke sette skjerming hvis adressebeskyttet, og da beholde 2103 som enhet`() {
-        val fnr = SOEKER_FOEDSELSNUMMER.value
+        val fnr = soeker
 
         testApplication {
             val client =
@@ -191,6 +191,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             coEvery {
                 pdltjenesterKlient.hentAdressebeskyttelseForPerson(HentAdressebeskyttelseRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
             } returns AdressebeskyttelseGradering.UGRADERT
+
             coEvery {
                 pdltjenesterKlient.hentGeografiskTilknytning(
                     fnr,
@@ -220,7 +221,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                         setBody(
                             BehandlingsBehov(
                                 sak.id,
-                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Persongalleri(fnr, INNSENDER_FOEDSELSNUMMER.value, emptyList(), emptyList(), emptyList()),
                                 Tidspunkt.now().toLocalDatetimeUTC().toString(),
                             ),
                         )
@@ -229,6 +230,9 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                         UUID.fromString(it.body())
                     }
 
+            val adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
+            coEvery { pdltjenesterKlient.hentAdressebeskyttelseForPerson(match { it.ident.value == fnr }) } returns
+                adressebeskyttelseGradering
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@EgenAnsattRouteTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -236,7 +240,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                        adressebeskyttelseGradering = adressebeskyttelseGradering,
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
@@ -277,7 +281,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     }
 
             Assertions.assertNotNull(adressebeskyttetUtenSkjerming.id)
-            // TODO: hvorfor beholder ikke denne skjermingen?
+            // TODO: hvorfor beholder ikke denne skjermingen? av en eller annen grunn forsvrinner saken som ble opprettet underveis i testen. sykt
             Assertions.assertEquals(Enheter.STRENGT_FORTROLIG.enhetNr, adressebeskyttetUtenSkjerming.enhet)
         }
     }

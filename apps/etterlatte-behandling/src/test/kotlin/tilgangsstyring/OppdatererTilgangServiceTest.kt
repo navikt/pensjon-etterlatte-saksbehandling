@@ -1,6 +1,5 @@
 package no.nav.etterlatte.tilgangsstyring
 
-import io.kotest.matchers.longs.exactly
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
@@ -56,14 +55,14 @@ class OppdatererTilgangServiceTest {
         val sak = Sak(soeker, saktype, sakId, Enheter.PORSGRUNN.enhetNr)
         every { sakService.finnSak(sakId) } returns sak
         every { sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } returns 1
-        every { sakService.settEnhetOmAdresseebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
+        every { sakService.settEnhetOmAdressebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG) } just Runs
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } just Runs
 
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 1) {
             sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-            sakService.settEnhetOmAdresseebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+            sakService.settEnhetOmAdressebeskyttet(sak, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(match { it.first().id == sak.id })
         }
     }
@@ -117,7 +116,7 @@ class OppdatererTilgangServiceTest {
         oppdaterTilgangService.haandtergraderingOgEgenAnsatt(sakId, persongalleri)
 
         verify(exactly = 0) {
-            sakService.settEnhetOmAdresseebeskyttet(any(), any())
+            sakService.settEnhetOmAdressebeskyttet(any(), any())
         }
         verify(exactly = 1) {
             sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.UGRADERT)

@@ -9,7 +9,6 @@ import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.mockk.spyk
-import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -53,7 +52,6 @@ abstract class BehandlingIntegrationTest {
         testProdusent: TestProdusent<String, String>? = null,
         skjermingKlient: SkjermingKlient? = null,
         grunnlagklient: GrunnlagKlient? = null,
-        brukerService: BrukerService? = null,
     ) {
         mockOAuth2Server.start()
         val props = dbExtension.properties()
@@ -117,7 +115,6 @@ abstract class BehandlingIntegrationTest {
                 axsysKlient = AxsysKlientTest(),
                 pdlTjenesterKlient = pdlTjenesterKlient ?: PdltjenesterKlientTest(),
                 kodeverkKlient = KodeverkKlientTest(),
-                brukerService = brukerService ?: BrukerServiceTest(),
             )
     }
 

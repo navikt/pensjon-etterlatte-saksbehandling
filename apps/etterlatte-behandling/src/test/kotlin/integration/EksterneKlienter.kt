@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
@@ -60,6 +59,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
@@ -82,7 +82,6 @@ import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
@@ -643,19 +642,6 @@ class KodeverkKlientTest : KodeverkKlient {
     }
 }
 
-class BrukerServiceTest : BrukerService {
-    override fun finnEnhetForPersonOgTema(
-        fnr: String,
-        tema: String,
-        saktype: SakType,
-    ): ArbeidsFordelingEnhet = ArbeidsFordelingEnhet(Enheter.defaultEnhet.navn, Enheter.defaultEnhet.enhetNr)
-
-    override suspend fun finnNavkontorForPerson(
-        fnr: String,
-        saktype: SakType,
-    ): Navkontor = Navkontor("1202 NAV BERGEN SØR", Enheter.PORSGRUNN.enhetNr)
-}
-
 class PdltjenesterKlientTest : PdlTjenesterKlient {
     override fun hentPdlModellForSaktype(
         foedselsnummer: String,
@@ -678,9 +664,10 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         TODO("Not yet implemented")
     }
 
+    // Greit å holde denne i sync ellers mocke til om man vil teste relaterte identer. Hvis ikke vil man ikke finne saker på identer man tester på.
     override suspend fun hentPdlFolkeregisterIdenter(ident: String): PdlFolkeregisterIdentListe =
         PdlFolkeregisterIdentListe(
-            listOf(PdlIdentifikator.FolkeregisterIdent(SOEKER_FOEDSELSNUMMER)),
+            listOf(PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(ident))),
         )
 
     override suspend fun hentAdressebeskyttelseForPerson(

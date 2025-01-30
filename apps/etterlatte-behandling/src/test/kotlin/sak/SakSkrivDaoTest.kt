@@ -243,8 +243,8 @@ internal class SakSkrivDaoTest(
             .sortedBy { it.tidspunkt }
             .map { Pair(it.foer?.erSkjermet, it.etter.erSkjermet) } shouldBe
             listOf(
-                Pair(null, false),
-                Pair(false, true),
+                Pair(null, null),
+                Pair(null, true),
                 Pair(true, false),
             )
         sakendringerDao
@@ -252,8 +252,8 @@ internal class SakSkrivDaoTest(
             .sortedBy { it.tidspunkt }
             .map { Pair(it.foer?.erSkjermet, it.etter.erSkjermet) } shouldBe
             listOf(
-                Pair(null, false),
-                Pair(false, true),
+                Pair(null, null),
+                Pair(null, true),
             )
     }
 

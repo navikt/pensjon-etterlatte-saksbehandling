@@ -6,6 +6,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Enhetsnummer
+import no.nav.etterlatte.libs.common.feilhaandtering.krev
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -93,9 +94,9 @@ class SakendringerDao(
                             adressebeskyttelse =
                                 getString("adressebeskyttelse")
                                     ?.let { enumValueOf<AdressebeskyttelseGradering>(it) },
-                            erSkjermet = getBoolean("erskjermet"),
+                            erSkjermet = if (getObject("erskjermet") != null) getBoolean("erskjermet") else null,
                             enhet = Enhetsnummer(getString("enhet")),
-                            flyktning = this.getString("flyktning")?.let { objectMapper.readValue(it) },
+                            flyktning = getString("flyktning")?.let { objectMapper.readValue(it) },
                             opprettet = getTidspunkt("opprettet"),
                         )
                     }
@@ -111,7 +112,7 @@ class SakendringerDao(
                     .executeQuery()
                     .toList {
                         Saksendring(
-                            id = UUID.randomUUID(),
+                            id = UUID.fromString(getString("id")),
                             endringstype = enumValueOf<Endringstype>(getString("endringstype")),
                             foer = getString("foer")?.let { objectMapper.readValue(it) },
                             etter = objectMapper.readValue(getString("etter")),
@@ -123,8 +124,11 @@ class SakendringerDao(
             }
         }
 
-    private fun lagreSaksendring(saksendring: Saksendring): Int =
-        connectionAutoclosing.hentConnection {
+    internal fun lagreSaksendring(saksendring: Saksendring): Int {
+        if (saksendring.foer != null) {
+            krev(saksendring.foer.id == saksendring.etter.id) { "Saks-ID må være like før og etter" }
+        }
+        return connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -145,6 +149,7 @@ class SakendringerDao(
                 statement.executeUpdate()
             }
         }
+    }
 
     private fun saksendring(
         endringstype: Endringstype,

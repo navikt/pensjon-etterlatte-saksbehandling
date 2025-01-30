@@ -227,6 +227,36 @@ internal class SakSkrivDaoTest(
         }
     }
 
+    @Test
+    fun `Skal kunne markere flere saker med skjerming`() {
+        val sak1 = sakSkrivDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakSkrivDao.opprettSak("fnr2", SakType.OMSTILLINGSSTOENAD, Enheter.AALESUND.enhetNr)
+
+        sakSkrivDao.markerSakerMedSkjerming(listOf(sak1.id, sak2.id), true)
+        sakSkrivDao.markerSakerMedSkjerming(listOf(sak1.id), false)
+
+        sakendringerDao.hentKomplettSak(sak1.id)?.erSkjermet shouldBe false
+        sakendringerDao.hentKomplettSak(sak2.id)?.erSkjermet shouldBe true
+
+        sakendringerDao
+            .hentEndringerForSak(sak1.id)
+            .sortedBy { it.tidspunkt }
+            .map { Pair(it.foer?.erSkjermet, it.etter.erSkjermet) } shouldBe
+            listOf(
+                Pair(null, false),
+                Pair(false, true),
+                Pair(true, false),
+            )
+        sakendringerDao
+            .hentEndringerForSak(sak2.id)
+            .sortedBy { it.tidspunkt }
+            .map { Pair(it.foer?.erSkjermet, it.etter.erSkjermet) } shouldBe
+            listOf(
+                Pair(null, false),
+                Pair(false, true),
+            )
+    }
+
     @Nested
     inner class HentAlleSaker {
         @Test
@@ -580,8 +610,10 @@ internal class SakSkrivDaoTest(
     }
 
     @Test
-    fun `skal oppdatere sak med lagring av endring`() {
+    fun `skal oppdatere adressebeskyttelse med lagring av endring`() {
         val sak = sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val komplettSakFoer = sakendringerDao.hentKomplettSak(sak.id)!!
+
         sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.FORTROLIG)
 
         val endringForOppdatering =
@@ -592,6 +624,7 @@ internal class SakSkrivDaoTest(
         with(endringForOppdatering) {
             foer?.id shouldBe sak.id
             etter.id shouldBe sak.id
+            foer!! shouldBeEqual komplettSakFoer
             etter shouldBeEqual sakendringerDao.hentKomplettSak(sak.id)!!
             foer?.adressebeskyttelse shouldBe null
             etter.adressebeskyttelse shouldBe AdressebeskyttelseGradering.FORTROLIG
@@ -599,7 +632,7 @@ internal class SakSkrivDaoTest(
     }
 
     @Test
-    fun `skal oppdatere flere saker med lagring av endring`() {
+    fun `skal oppdatere enhet på flere saker med lagring av endring`() {
         val sak1 = sakSkrivDao.opprettSak("01018012345", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
         val sak2 = sakSkrivDao.opprettSak("25018012345", SakType.OMSTILLINGSSTOENAD, Enheter.NORDLAND_BODOE.enhetNr)
         sakSkrivDao.oppdaterEnheterPaaSaker(

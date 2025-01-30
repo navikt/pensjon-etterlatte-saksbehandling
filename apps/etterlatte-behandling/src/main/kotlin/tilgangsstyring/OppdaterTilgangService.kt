@@ -79,8 +79,8 @@ class OppdaterTilgangService(
                 sakService.oppdaterEnhetForSaker(sakMedEnhet)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)
             } else {
-                val enhet = hentEnhet(fnr = sak.ident, sak = sak)
-                val sakMedEnhet = listOf(SakMedEnhet(sakId, enhet))
+                val enhetsNummer = hentEnhet(fnr = sak.ident, sak = sak)
+                val sakMedEnhet = listOf(SakMedEnhet(sakId, enhetsNummer))
                 sakService.oppdaterEnhetForSaker(sakMedEnhet)
                 sakService.markerSakerMedSkjerming(listOf(sakId), false)
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakMedEnhet)

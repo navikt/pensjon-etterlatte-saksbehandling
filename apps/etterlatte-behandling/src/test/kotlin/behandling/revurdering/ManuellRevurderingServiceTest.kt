@@ -12,7 +12,6 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
@@ -51,10 +50,11 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.soeker
 import no.nav.etterlatte.tilgangsstyring.OppdaterTilgangService
-import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -70,20 +70,10 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
-    val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
+    val user = mockSaksbehandler("test")
 
     @BeforeAll
     fun start() {
-        val saksbehandlerMedRoller =
-            mockk<SaksbehandlerMedRoller> {
-                every { harRolleStrengtFortrolig() } returns false
-                every { harRolleEgenAnsatt() } returns false
-                every { harRolleAttestant() } returns true
-            }
-        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
-        every { user.name() } returns "User"
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-
         startServer()
         nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
@@ -91,7 +81,7 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    val fnr: String = "123"
+    val fnr: String = soeker
 
     private fun opprettSakMedFoerstegangsbehandling(
         fnr: String,
@@ -101,6 +91,8 @@ class ManuellRevurderingServiceTest : BehandlingIntegrationTest() {
             inTransaction {
                 applicationContext.sakSkrivDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
+        val lol = inTransaction { applicationContext.sakLesDao.hentSak(sak.id) }
+        println(lol)
         val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =
             inTransaction {

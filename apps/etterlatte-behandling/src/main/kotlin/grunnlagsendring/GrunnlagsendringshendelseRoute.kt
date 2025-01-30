@@ -58,6 +58,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
             }
         }
 
+        // Merk at denne endepunktet i seg selv gir ikke ny gradering, denne baserer seg på hva PDL sier om personen og 3-parter
         post("/adressebeskyttelse") {
             kunSystembruker {
                 val adressebeskyttelse = call.receive<Adressebeskyttelse>()

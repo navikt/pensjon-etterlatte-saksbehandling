@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
+import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
@@ -277,6 +278,7 @@ internal class ApplicationContext(
     val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
     val kodeverkKlient: KodeverkKlient = KodeverkKlientImpl(config, httpClient()),
     val skjermingKlient: SkjermingKlient = SkjermingKlientImpl(skjermingHttpClient(config), env.requireEnvValue(SKJERMING_URL)),
+    val brukerService: BrukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient),
 ) {
     val httpPort = env.getOrDefault(HTTP_PORT, "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -458,7 +460,7 @@ internal class ApplicationContext(
             tilbakekrevingKlient,
         )
     val selfTestService = SelfTestService(externalServices)
-    val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
+
     val sakService =
         SakServiceImpl(
             sakSkrivDao,

@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
@@ -640,6 +641,19 @@ class KodeverkKlientTest : KodeverkKlient {
             ),
         )
     }
+}
+
+class BrukerServiceTest : BrukerService {
+    override fun finnEnhetForPersonOgTema(
+        fnr: String,
+        tema: String,
+        saktype: SakType,
+    ): ArbeidsFordelingEnhet = ArbeidsFordelingEnhet(Enheter.defaultEnhet.navn, Enheter.defaultEnhet.enhetNr)
+
+    override suspend fun finnNavkontorForPerson(
+        fnr: String,
+        saktype: SakType,
+    ): Navkontor = Navkontor("1202 NAV BERGEN SØR", Enheter.PORSGRUNN.enhetNr)
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {

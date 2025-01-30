@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
@@ -144,7 +145,15 @@ class TilbakekrevingDao(
                 .map { (maaned, perioder) ->
                     TilbakekrevingPeriode(
                         maaned = maaned,
-                        tilbakekrevingsbeloep = perioder,
+                        tilbakekrevingsbeloep =
+                            perioder.sortedBy {
+                                // Sorterer basert på klassetype for visning
+                                when (it.klasseType) {
+                                    KlasseType.FEIL.name -> 0
+                                    KlasseType.YTEL.name -> 1
+                                    else -> 2
+                                }
+                            },
                     )
                 }
         }

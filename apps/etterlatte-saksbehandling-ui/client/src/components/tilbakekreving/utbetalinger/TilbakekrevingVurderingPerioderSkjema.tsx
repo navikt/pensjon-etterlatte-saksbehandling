@@ -137,11 +137,9 @@ export function TilbakekrevingVurderingPerioderSkjema({
             </Table.Header>
             <Table.Body>
               {watch().values.map((periode, indexPeriode) => {
-                return periode.tilbakekrevingsbeloep
-                  .map(leggPaaOrginalIndex)
-                  .filter(klasseTypeYtelse)
-                  .map((beloep) => {
-                    const indexBeloep = beloep.originalIndex
+                return periode.tilbakekrevingsbeloep.map(leggPaaOrginalIndex).map((beloep) => {
+                  const indexBeloep = beloep.originalIndex
+                  if (klasseTypeYtelse(beloep)) {
                     return (
                       <Table.Row key={`beloepRad-${indexPeriode}-${indexBeloep}`} style={{ alignItems: 'start' }}>
                         <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
@@ -288,7 +286,28 @@ export function TilbakekrevingVurderingPerioderSkjema({
                         </Table.DataCell>
                       </Table.Row>
                     )
-                  })
+                  } else {
+                    return (
+                      <Table.Row key={`beloepRad-${indexPeriode}-${beloep.originalIndex}`}>
+                        <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
+                        <Table.DataCell key="klasse">
+                          {tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}
+                        </Table.DataCell>
+                        <Table.DataCell key="bruttoUtbetaling">{beloep.bruttoUtbetaling} kr</Table.DataCell>
+                        <Table.DataCell key="nyBruttoUtbetaling">{beloep.nyBruttoUtbetaling} kr</Table.DataCell>
+                        <Table.DataCell key="beregnetFeilutbetaling"></Table.DataCell>
+                        <Table.DataCell key="skatteprosent"></Table.DataCell>
+                        <Table.DataCell key="bruttoTilbakekreving"></Table.DataCell>
+                        <Table.DataCell key="nettoTilbakekreving"></Table.DataCell>
+                        <Table.DataCell key="skatt"></Table.DataCell>
+                        <Table.DataCell key="skyld"></Table.DataCell>
+                        <Table.DataCell key="resultat"></Table.DataCell>
+                        <Table.DataCell key="tilbakekrevingsprosent"></Table.DataCell>
+                        <Table.DataCell key="rentetillegg"></Table.DataCell>
+                      </Table.Row>
+                    )
+                  }
+                })
               })}
             </Table.Body>
           </Table>

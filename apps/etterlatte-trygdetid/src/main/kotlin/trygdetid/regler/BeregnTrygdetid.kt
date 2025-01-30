@@ -309,7 +309,7 @@ val opptjeningsTidIMnd =
     }
 
 /**
- * NY Regel for Nordisk Art 9
+ * Finne ut om valg av nordisk konvensjon art 9 skal overstyre bruk av 4/5 regel
  */
 val nordiskEllerFireFemtedeler =
     RegelMeta(
@@ -332,7 +332,7 @@ val fremtidigTrygdetidForNasjonal =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Regn ut fremtidig trygdetid nasjonal",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-NASJONAL-TRYGDETID"),
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-NASJONAL-TRYGDETID", versjon = "1.1"),
     ) benytter nordiskEllerFireFemtedeler og fremtidigTrygdetid og opptjeningsTidIMnd med
         { nordiskEllerFireFemtedeler, fremtidig, opptjening ->
             if (fremtidig != null) {

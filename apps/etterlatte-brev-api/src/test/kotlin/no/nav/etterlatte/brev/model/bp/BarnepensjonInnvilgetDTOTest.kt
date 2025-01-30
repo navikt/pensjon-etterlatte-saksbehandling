@@ -16,6 +16,8 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.kodeverk.BeskrivelseDto
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -119,6 +121,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                     ),
                 erMigrertYrkesskade = false,
                 erSluttbehandling = false,
+                landKodeverk = landKodeverk(),
             )
 
         Assertions.assertEquals(
@@ -204,5 +207,11 @@ internal class BarnepensjonInnvilgetDTOTest {
         BarnepensjonBeregningsperiode.fra(
             this,
             false,
+        )
+
+    private fun landKodeverk() =
+        listOf(
+            LandDto("SWE", "2020-01-01", "2999-01-01", BeskrivelseDto("SVERIGE", "Sverige")),
+            LandDto("NOR", "2020-01-01", "2999-01-01", BeskrivelseDto("NORGE", "Norge")),
         )
 }

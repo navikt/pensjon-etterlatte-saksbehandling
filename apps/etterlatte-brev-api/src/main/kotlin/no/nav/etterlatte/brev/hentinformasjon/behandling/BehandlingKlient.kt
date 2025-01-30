@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.TidligereFamiliepleier
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakId
@@ -143,6 +144,14 @@ class BehandlingKlient(
             url = "$resourceUrl/api/klage/$klageId",
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Kunne ikke hente klage med id=$klageId" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+
+    internal suspend fun hentLand(brukerTokenInfo: BrukerTokenInfo): List<LandDto> =
+        get(
+            url = "$resourceUrl/api/kodeverk/land",
+            onSuccess = { deserialize(it.response.toString()) },
+            errorMessage = { "Kunne ikke hente land fra kodeverk" },
             brukerTokenInfo = brukerTokenInfo,
         )
 }

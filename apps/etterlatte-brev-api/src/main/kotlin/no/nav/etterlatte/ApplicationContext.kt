@@ -181,7 +181,7 @@ internal class ApplicationContext {
             behandlingService,
         )
     val brevDataMapperFerdigstillVarsel =
-        BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, vilkaarsvurderingService)
+        BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService, behandlingService, vilkaarsvurderingService)
 
     val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingService, pdfGenerator, brevDataMapperFerdigstillVarsel, grunnlagKlient)

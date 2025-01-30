@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -64,6 +65,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
             vilkaarsVurdering: VilkaarsvurderingDto,
             behandling: DetaljertBehandling,
             navnAvdoed: String,
+            landKodeverk: List<LandDto>,
         ): OmstillingsstoenadInntektsjusteringVedtak {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
@@ -94,6 +96,7 @@ class OmstillingsstoenadInntektsjusteringVedtak(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = navnAvdoed,
+                                landKodeverk = landKodeverk,
                             ),
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
@@ -47,6 +48,7 @@ data class OmstillingsstoenadInnvilgelse(
             avdoede: List<Avdoed>,
             utlandstilknytning: UtlandstilknytningType?,
             behandling: DetaljertBehandling,
+            landKodeverk: List<LandDto>,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map { it.tilOmstillingsstoenadBeregningsperiode() }
@@ -91,6 +93,7 @@ data class OmstillingsstoenadInnvilgelse(
                                 beregningsMetodeFraGrunnlag = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = beregningsperioderOpphoer.sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = null,
+                                landKodeverk = landKodeverk,
                             ),
                         oppphoersdato = beregningsperioderOpphoer.forventetOpphoerDato,
                         opphoerNesteAar =

@@ -1,8 +1,14 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.brev.OppdaterDoedshendelseBrevDistribuert
+import no.nav.etterlatte.brukerdialog.inntektsjustering.InntektsjusteringRiver
+import no.nav.etterlatte.brukerdialog.omsendring.OmsMeldtInnEndringRiver
+import no.nav.etterlatte.brukerdialog.soeknad.NySoeknadRiver
+import no.nav.etterlatte.brukerdialog.soeknad.OpprettBehandlingRiver
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbRiver
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
+import no.nav.etterlatte.opplysningerfrasoknad.StartUthentingFraSoeknadRiver
+import no.nav.etterlatte.opplysningerfrasoknad.uthenter.Opplysningsuthenter
 import no.nav.etterlatte.pdl.PdlHendelserRiver
 import no.nav.etterlatte.regulering.FinnSakerTilReguleringRiver
 import no.nav.etterlatte.regulering.OmregningBrevDistribusjonRiver
@@ -44,4 +50,29 @@ private fun settOppRivers(
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
     AarligInntektsjusteringJobbRiver(rapidsConnection, behandlingservice, featureToggleService)
     OmregningBrevDistribusjonRiver(rapidsConnection, behandlingservice)
+
+    StartUthentingFraSoeknadRiver(rapidsConnection, Opplysningsuthenter())
+
+    NySoeknadRiver(
+        rapidsConnection = rapidsConnection,
+        behandlingKlient = appBuilder.behandlingKlient,
+        journalfoerSoeknadService = appBuilder.journalfoerSoeknadService,
+    )
+
+    OpprettBehandlingRiver(
+        rapidsConnection,
+        appBuilder.behandlingKlient,
+    )
+
+    InntektsjusteringRiver(
+        rapidsConnection,
+        behandlingKlient = appBuilder.behandlingKlient,
+        journalfoerInntektsjusteringService = appBuilder.journalfoerInntektsjusteringService,
+    )
+
+    OmsMeldtInnEndringRiver(
+        rapidsConnection,
+        behandlingKlient = appBuilder.behandlingKlient,
+        journalfoerService = appBuilder.journalfoerOmsMeldtInnEndringService,
+    )
 }

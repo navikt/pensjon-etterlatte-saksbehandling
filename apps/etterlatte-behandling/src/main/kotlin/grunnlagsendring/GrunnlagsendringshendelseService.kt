@@ -181,6 +181,9 @@ class GrunnlagsendringshendelseService(
         }
 
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
+        /*
+        Her skal vi bruke OppdaterTilgangService.haandtergraderingOgEgenAnsatt
+         */
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
         inTransaction {

@@ -86,6 +86,10 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-trygdetid
+    - name: INNTEKTSKOMPONENT_URL
+      value: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q2
+    - name: INNTEKTSKOMPONENT_OUTBOUND_SCOPE
+      value: api://dev-fss.team-inntekt.inntektskomponenten/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -97,6 +101,7 @@ spec:
         - application: etterlatte-trygdetid
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: team-inntekt-proxy.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

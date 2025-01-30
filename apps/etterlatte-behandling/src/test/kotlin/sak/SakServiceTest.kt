@@ -32,7 +32,7 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.randomSakId
 import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlientImpl
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -75,7 +75,7 @@ internal class SakServiceTest {
     private val norg2Klient = mockk<Norg2Klient>()
     private val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     private val saksbehandlerService = mockk<SaksbehandlerService>()
-    private val skjermingKlient = mockk<SkjermingKlient>()
+    private val skjermingKlient = mockk<SkjermingKlientImpl>()
     private val sakSkrivDao = mockk<SakSkrivDao>()
     private val sakLesDao = mockk<SakLesDao>()
     private val grunnlagservice = mockk<GrunnlagService>()

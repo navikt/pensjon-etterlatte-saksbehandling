@@ -6,7 +6,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -20,11 +19,14 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class GrunnlagHenter(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag =
         coroutineScope {
             val persongalleri = opplysningsbehov.persongalleri
@@ -137,34 +139,29 @@ class GrunnlagHenter(
             },
         )
 
-    private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(
-        overstyrtKilde: Grunnlagsopplysning.Kilde? = null,
-    ): Grunnlagsopplysning<JsonNode> =
-        Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde =
-                overstyrtKilde
-                    ?: if (this.innsender == null) {
-                        Grunnlagsopplysning.UkjentInnsender(Tidspunkt.now())
-                    } else if (this.innsender == Vedtaksloesning.PESYS.name) {
-                        Grunnlagsopplysning.Pesys.create()
-                    } else if (this.innsender!!.matches(Regex("[A-Z][0-9]+"))) {
-                        Grunnlagsopplysning.Saksbehandler(this.innsender!!, Tidspunkt.now())
-                    } else {
-                        Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
-                    },
+    private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(overstyrtKilde: Grunnlagsopplysning.Kilde): Grunnlagsopplysning<JsonNode> {
+        val opplysningid = UUID.randomUUID()
+        return Grunnlagsopplysning(
+            id = opplysningid,
+            kilde = overstyrtKilde,
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
             meta = objectMapper.createObjectNode(),
             opplysning =
                 if (Folkeregisteridentifikator.isValid(this.innsender)) {
                     this.toJsonNode()
                 } else {
-                    this.copy(innsender = null).toJsonNode()
+                    if (this.innsender == null) {
+                        this.toJsonNode()
+                    } else {
+                        logger.error("Ugyldig ident er lagret, se relatert for opplysninstypeid: $opplysningid")
+                        this.copy(innsender = null).toJsonNode()
+                    }
                 },
             attestering = null,
             fnr = null,
             periode = null,
         )
+    }
 
     private fun Persongalleri.tilGrunnlagsopplysningFraPdl(): Grunnlagsopplysning<JsonNode> =
         Grunnlagsopplysning(

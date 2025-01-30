@@ -117,7 +117,7 @@ interface SakService {
 
     fun hentSakerMedPleieforholdetOpphoerte(maanedOpphoerte: YearMonth): List<SakId>
 
-    fun settEnhetOmAdresebeskyttet(
+    fun settEnhetOmAdresseebeskyttet(
         sak: Sak,
         gradering: AdressebeskyttelseGradering,
     )
@@ -377,12 +377,12 @@ class SakServiceImpl(
                 )
             }
         oppdaterAdressebeskyttelse(sak.id, hentetGradering)
-        settEnhetOmAdresebeskyttet(sak, hentetGradering)
+        settEnhetOmAdresseebeskyttet(sak, hentetGradering)
         sjekkGraderingOgEnhetStemmer(lesDao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
     }
 
-    override fun settEnhetOmAdresebeskyttet(
+    override fun settEnhetOmAdresseebeskyttet(
         sak: Sak,
         gradering: AdressebeskyttelseGradering,
     ) {

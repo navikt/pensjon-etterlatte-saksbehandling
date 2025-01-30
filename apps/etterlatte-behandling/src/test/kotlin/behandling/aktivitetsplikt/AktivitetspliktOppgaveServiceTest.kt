@@ -54,6 +54,7 @@ class AktivitetspliktOppgaveServiceTest {
             aktivitetspliktBrevDao,
             brevApiKlient,
             mockk(relaxed = true),
+            mockk(relaxed = true),
         )
 
     private val sak =

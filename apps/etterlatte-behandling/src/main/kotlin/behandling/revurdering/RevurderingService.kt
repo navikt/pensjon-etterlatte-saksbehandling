@@ -213,6 +213,7 @@ class RevurderingService(
                             grunnlagService.leggInnNyttGrunnlag(
                                 it,
                                 persongalleri,
+                                // IKKE endre på dette da vi må bruke systembruker mot grunnlag i denne flyten for å få OK på tilgangskontroll
                                 HardkodaSystembruker.opprettGrunnlag,
                             )
                         } else {

@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import java.time.LocalDate
 
@@ -55,6 +56,7 @@ data class BarnepensjonRevurdering(
             avdoede: List<Avdoed>,
             datoVedtakOmgjoering: LocalDate?,
             erMigrertYrkesskade: Boolean,
+            landKodeverk: List<LandDto>,
         ): BarnepensjonRevurdering {
             val feilutbetaling =
                 krevIkkeNull(brevutfall.feilutbetaling?.valg?.let(::toFeilutbetalingType)) {
@@ -71,6 +73,7 @@ data class BarnepensjonRevurdering(
                         grunnbeloep,
                         trygdetid,
                         erForeldreloes,
+                        landKodeverk,
                     ),
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,

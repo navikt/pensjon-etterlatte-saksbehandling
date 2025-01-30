@@ -256,7 +256,8 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val sakId = randomSakId()
         val behandlingId = UUID.randomUUID()
         val persongalleri = GrunnlagTestData().hentPersonGalleri()
-        val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, persongalleri)
+        val opplysningsbehov =
+            Opplysningsbehov(sakId, SakType.BARNEPENSJON, persongalleri, Grunnlagsopplysning.Saksbehandler.create("ident"))
 
         coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just Runs
 

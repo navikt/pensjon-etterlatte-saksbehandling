@@ -3,6 +3,8 @@ package no.nav.etterlatte.tidshendelser
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.tidshendelser.JobbType
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
+import no.nav.etterlatte.tidshendelser.hendelser.HendelserJobb
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.sql.DataSource

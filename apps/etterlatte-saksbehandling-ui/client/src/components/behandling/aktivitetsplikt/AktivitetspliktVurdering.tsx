@@ -40,11 +40,11 @@ const harVarigUnntak = (vurdering: IAktivitetspliktVurderingNyDto): boolean => {
 
 export const AktivitetspliktVurdering = ({
   behandling,
-  resetManglerAktivitetspliktVurdering,
+  setManglerAktivitetspliktVurdering,
   doedsdato,
 }: {
   behandling: IDetaljertBehandling
-  resetManglerAktivitetspliktVurdering: () => void
+  setManglerAktivitetspliktVurdering: (manglerVurdering: boolean) => void
   doedsdato: Date
 }) => {
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurderingNyDto>()
@@ -75,7 +75,6 @@ export const AktivitetspliktVurdering = ({
             if (vurderingHarInnhold(result)) {
               setManglerVurdering(false)
               setHarAktivitetsplikt(JaNei.JA)
-              resetManglerAktivitetspliktVurdering()
             } else {
               setManglerVurdering(true)
             }
@@ -97,6 +96,10 @@ export const AktivitetspliktVurdering = ({
     }
   }, [updated])
 
+  useEffect(() => {
+    setManglerAktivitetspliktVurdering(manglerVurdering)
+  }, [manglerVurdering])
+
   const lagreVarigUnntak = () => {
     if (harAktivitetsplikt == JaNei.NEI) {
       lagreUnntakVarig(
@@ -113,6 +116,7 @@ export const AktivitetspliktVurdering = ({
         },
         (data) => {
           dispatch(setVurderingBehandling(data))
+          setManglerVurdering(false)
         }
       )
     } else {

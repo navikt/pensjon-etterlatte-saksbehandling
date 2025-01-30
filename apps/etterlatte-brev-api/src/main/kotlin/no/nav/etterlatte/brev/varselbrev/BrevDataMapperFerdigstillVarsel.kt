@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.ManueltBrevMedTittelData
+import no.nav.etterlatte.brev.hentinformasjon.behandling.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.hentinformasjon.trygdetid.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.vilkaarsvurdering.VilkaarsvurderingService
@@ -23,6 +24,7 @@ import java.util.UUID
 class BrevDataMapperFerdigstillVarsel(
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService,
+    private val behandlingService: BehandlingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) {
     suspend fun hentBrevDataFerdigstilling(request: BrevDataFerdigstillingRequest) =
@@ -75,6 +77,8 @@ class BrevDataMapperFerdigstillVarsel(
         coroutineScope {
             val grunnbeloep = async { beregningService.hentGrunnbeloep(request.bruker) }
             val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, request.bruker) }
+            val landKodeverk = async { behandlingService.hentLand(request.bruker) }
+
             val utbetalingsinfo =
                 async {
                     beregningService.finnUtbetalingsinfo(
@@ -92,6 +96,7 @@ class BrevDataMapperFerdigstillVarsel(
                 grunnbeloep = grunnbeloep.await(),
                 trygdetid = krevIkkeNull(trygdetid.await()) { "Fant ingen trygdetid for behandling $behandlingId" },
                 erForeldreloes = request.erForeldreloes,
+                landKodeverk = landKodeverk.await(),
             )
         }
 }

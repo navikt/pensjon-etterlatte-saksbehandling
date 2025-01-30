@@ -15,6 +15,8 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -34,6 +36,15 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
+enum class AktivitetspliktOppgaveToggles(
+    private val key: String,
+) : FeatureToggle {
+    UNNTAK_UTEN_FRIST("aktivitetsplikt-oppgave-unntak-ingen-frist"),
+    ;
+
+    override fun key(): String = key
+}
+
 class AktivitetspliktOppgaveService(
     private val aktivitetspliktService: AktivitetspliktService,
     private val oppgaveService: OppgaveService,
@@ -41,6 +52,7 @@ class AktivitetspliktOppgaveService(
     private val aktivitetspliktBrevDao: AktivitetspliktBrevDao,
     private val brevApiKlient: BrevApiKlient,
     private val behandlingService: BehandlingService,
+    private val unleashFeatureToggleService: FeatureToggleService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -85,11 +97,7 @@ class AktivitetspliktOppgaveService(
             vurderingType = vurderingType,
             oppgave = oppgave,
             sak = sak,
-            vurdering =
-                vurderinger ?: AktivitetspliktVurdering(
-                    emptyList(),
-                    emptyList(),
-                ),
+            vurdering = vurderinger,
         )
     }
 
@@ -188,6 +196,7 @@ class AktivitetspliktOppgaveService(
                         nasjonalEllerUtland = nasjonalEllerUtlandMapped,
                         spraak = spraak,
                     )
+
                 OppgaveType.AKTIVITETSPLIKT_12MND ->
                     BrevParametre.AktivitetspliktInformasjon10Mnd(
                         aktivitetsgrad = aktivitetsgrad,
@@ -196,6 +205,7 @@ class AktivitetspliktOppgaveService(
                         nasjonalEllerUtland = nasjonalEllerUtlandMapped,
                         spraak = spraak,
                     )
+
                 else -> throw FeilOppgavetype("Prøver å lage aktivitetsplikt med oppgavetype: ${oppgave.type} id: ${oppgave.id}")
             }
         return brevparametere
@@ -305,8 +315,13 @@ class AktivitetspliktOppgaveService(
                 enhetsnummer = sak.enhet,
                 avsenderRequest = SaksbehandlerOgAttestant(saksbehandlerIdent = brukerTokenInfo.ident()),
             )
-        val brevrespons: BrevStatusResponse = runBlocking { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(req, brukerTokenInfo) }
+        val brevrespons: BrevStatusResponse =
+            runBlocking { brevApiKlient.ferdigstillJournalFoerOgDistribuerBrev(req, brukerTokenInfo) }
         if (brevrespons.status.erDistribuert()) {
+            if (unleashFeatureToggleService.isEnabled(AktivitetspliktOppgaveToggles.UNNTAK_UTEN_FRIST, false)) {
+                val unntakIOppgave = aktivitetspliktService.hentVurderingForOppgave(oppgaveId).unntak
+                aktivitetspliktService.opprettOppfoelgingsoppgaveUnntak(oppgaveId, unntakIOppgave, sak)
+            }
             return oppgaveService.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
         } else {
             logger.warn("Brev ble ikke distribuert, ferdigstiller ikke oppgave $oppgaveId for aktivitetsplikt")

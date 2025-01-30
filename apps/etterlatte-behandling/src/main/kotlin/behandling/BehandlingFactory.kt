@@ -107,22 +107,11 @@ class BehandlingFactory(
             }
         }
 
-        val persongalleri =
-            with(request) {
-                if (kilde?.foerstOpprettaIPesys() == true) {
-                    persongalleri.copy(innsender = kilde!!.name)
-                } else if (persongalleri.innsender == null) {
-                    persongalleri.copy(innsender = brukerTokenInfo.ident())
-                } else {
-                    persongalleri
-                }
-            }
-
         val behandling =
             inTransaction {
                 opprettBehandling(
                     sak.id,
-                    persongalleri,
+                    request.persongalleri,
                     request.mottattDato,
                     request.kilde ?: Vedtaksloesning.GJENNY,
                     request = hentDataForOpprettBehandling(sak.id),
@@ -239,6 +228,7 @@ class BehandlingFactory(
                 grunnlagService.leggInnNyttGrunnlag(
                     behandling,
                     persongalleri,
+                    // IKKE endre på dette da vi må bruke systembruker mot grunnlag i denne flyten for å få OK på tilgangskontroll,
                     HardkodaSystembruker.opprettGrunnlag,
                 )
             }
@@ -355,6 +345,7 @@ class BehandlingFactory(
             grunnlagService.leggInnNyttGrunnlag(
                 behandlingerForOmgjoering.nyFoerstegangsbehandling,
                 persongalleri,
+                // IKKE endre på dette da vi må bruke systembruker mot grunnlag i denne flyten for å få OK på tilgangskontroll
                 HardkodaSystembruker.opprettGrunnlag,
             )
         }

@@ -23,8 +23,14 @@ import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_INITIAL_D
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_INTERVAL
 import no.nav.etterlatte.tidshendelser.TidshendelserKey.OPPRETT_JOBBER_OPENING_HOURS
 import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjusteringService
+import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
+import no.nav.etterlatte.tidshendelser.hendelser.HendelsePoller
+import no.nav.etterlatte.tidshendelser.hendelser.HendelsePollerTask
+import no.nav.etterlatte.tidshendelser.hendelser.HendelsePublisher
 import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
+import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringDao
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import java.time.Duration
@@ -90,12 +96,12 @@ class AppContext(
                 ),
         )
 
-    val opprettJobberTask =
-        OpprettJobberJobb(
+    val jobberTaskScheduler =
+        JobbSchedulerTask(
             initialDelaySeconds = env.requireEnvValue(OPPRETT_JOBBER_INITIAL_DELAY).toLong(),
             periode = env.requireEnvValue(OPPRETT_JOBBER_INTERVAL).let { Duration.parse(it) } ?: Duration.ofMinutes(5),
             openingHours = env.requireEnvValue(OPPRETT_JOBBER_OPENING_HOURS).let { OpeningHours.of(it) },
-            opprettJobb = OpprettJobb(hendelseDao),
+            jobbScheduler = JobbScheduler(hendelseDao),
         )
 
     val hendelsePollerTask =

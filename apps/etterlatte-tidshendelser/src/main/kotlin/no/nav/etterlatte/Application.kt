@@ -3,7 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.tidshendelser.AppContext
-import no.nav.etterlatte.tidshendelser.HendelseRiver
+import no.nav.etterlatte.tidshendelser.hendelser.HendelseRiver
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.initRogR
 import java.util.Timer
@@ -24,7 +24,7 @@ fun main() =
                         appContext.dataSource.migrate()
                         timers.add(appContext.jobbPollerTask.schedule())
                         timers.add(appContext.hendelsePollerTask.schedule())
-                        timers.add(appContext.opprettJobberTask.schedule())
+                        timers.add(appContext.jobberTaskScheduler.schedule())
                     }
 
                     override fun onShutdownSignal(rapidsConnection: RapidsConnection) {

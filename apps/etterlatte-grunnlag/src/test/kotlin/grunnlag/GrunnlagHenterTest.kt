@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.sakId1
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.person.Person
@@ -63,6 +64,7 @@ class GrunnlagHenterTest {
                             grunnlagTestData.avdoede.map { it.foedselsnummer.value },
                             listOf(grunnlagTestData.gjenlevende.foedselsnummer.value),
                         ),
+                        kilde = Grunnlagsopplysning.Saksbehandler.create("ident"),
                     ),
                 )
             }

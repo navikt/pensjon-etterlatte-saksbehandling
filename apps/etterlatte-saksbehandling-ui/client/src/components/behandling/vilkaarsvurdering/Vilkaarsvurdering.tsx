@@ -133,9 +133,11 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
           )}
 
           <Box paddingInline="16" paddingBlock="16 4">
-            {kopierVilkaarAvdoedEnabled && behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-              <KopierVilkaarAvdoed behandlingId={behandling.id} vilkaar={vilkaarsvurdering.vilkaar} />
-            )}
+            {kopierVilkaarAvdoedEnabled &&
+              behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+              vilkaarsvurdering.resultat == null && (
+                <KopierVilkaarAvdoed behandlingId={behandling.id} vilkaar={vilkaarsvurdering.vilkaar} />
+              )}
           </Box>
 
           {vilkaarsvurdering.vilkaar.map((value, index) => (

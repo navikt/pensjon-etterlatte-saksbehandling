@@ -447,7 +447,13 @@ class VilkaarsvurderingService(
     fun finnBehandlingMedVilkaarsvurderingForSammeAvdoede(behandlingId: UUID): UUID? {
         val gjeldendeBehandling = behandlingService.hentBehandling(behandlingId) ?: throw BehandlingIkkeFunnet(behandlingId)
         if (gjeldendeBehandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
-            logger.info("Støtter ikke å kopiere vilkårsvurdering for annet enn førstegangsbehandling")
+            logger.info("Støtter ikke å kopiere vilkår i vilkårsvurdering for annet enn førstegangsbehandling")
+            return null
+        }
+
+        val gjeldendeVilkaarsvurdering = hentVilkaarsvurdering(behandlingId)
+        if (gjeldendeVilkaarsvurdering?.resultat != null) {
+            logger.info("Støtter ikke å kopiere vilkår i vilkårsvurdering som har utfylt resultat")
             return null
         }
 

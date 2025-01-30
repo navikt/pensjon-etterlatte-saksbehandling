@@ -8,7 +8,8 @@ import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.joarkhendelser.joark.Kanal
 import no.nav.etterlatte.joarkhendelser.joark.SafKlient
-import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
+import no.nav.etterlatte.joarkhendelser.joark.erGammeltTemaEtterlatte
+import no.nav.etterlatte.joarkhendelser.joark.erNyttTemaEtterlatte
 import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
 import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
 import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory
  *
  * @see: https://confluence.adeo.no/display/BOA/Joarkhendelser
  **/
+
 class JoarkHendelseHandler(
     private val behandlingService: BehandlingService,
     private val safKlient: SafKlient,
@@ -40,20 +42,7 @@ class JoarkHendelseHandler(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(JoarkHendelseHandler::class.java)
 
-    suspend fun haandterHendelse(hendelse: JournalfoeringHendelseRecord) {
-        val hendelseId = hendelse.hendelsesId
-        val journalpostId = hendelse.journalpostId
-        val temaNytt = hendelse.temaNytt
-
-        if (!hendelse.erTemaEtterlatte()) {
-            logger.debug("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
-            return // Avbryter behandling
-        }
-
-        logger.info(
-            "Starter behandling av hendelse (id=$hendelseId, journalpostId=$journalpostId, tema=$temaNytt)",
-        )
-
+    private suspend fun hentJournalpost(journalpostId: Long): Journalpost {
         val response = safKlient.hentJournalpost(journalpostId)
 
         val journalpost =
@@ -65,12 +54,53 @@ class JoarkHendelseHandler(
 
         if (journalpost == null) {
             throw NullPointerException("Fant ingen journalpost med id=$journalpostId")
-        } else if (journalpost.erFerdigstilt()) {
+        }
+        return journalpost
+    }
+
+    private fun journalpostErFerdigstilt(journalpost: Journalpost): Boolean {
+        if (journalpost.erFerdigstilt()) {
             logger.info(
-                "Journalpost med id=$journalpostId er allerede ferdigstilt og tilknyttet sak (${journalpost.sak})",
+                "Journalpost med id=${journalpost.journalpostId} er allerede ferdigstilt og tilknyttet sak (${journalpost.sak})",
             )
+            return true
+        } else {
+            return false
+        }
+    }
+
+    private fun bytterFraEtterlatteTemaTilNoeAnnet(hendelse: JournalfoeringHendelseRecord): Boolean =
+        hendelse.erGammeltTemaEtterlatte() && !hendelse.erNyttTemaEtterlatte()
+
+    suspend fun haandterHendelse(hendelse: JournalfoeringHendelseRecord) {
+        val hendelseId = hendelse.hendelsesId
+        val journalpostId = hendelse.journalpostId
+        val temaNytt = hendelse.temaNytt
+        val temaGammelt = hendelse.temaGammelt
+
+        if (bytterFraEtterlatteTemaTilNoeAnnet(hendelse)) {
+            val journalpost = hentJournalpost(journalpostId)
+            if (journalpostErFerdigstilt(journalpost)) {
+                return
+            }
+            logger.info(
+                "Avbryter oppgaver for hendelse (id=$hendelseId, journalpostId=$journalpostId, tema=$temaNytt, temaGammelt=$temaGammelt, type=${hendelse.hendelsesType})",
+            )
+
+            behandlingService.avbrytOppgaverTilknyttetJournalpost(journalpostId)
+            return
+        } else if (!hendelse.erNyttTemaEtterlatte()) {
+            logger.debug("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
+            return // Avbryter behandling
+        }
+
+        val journalpost = hentJournalpost(journalpostId)
+        if (journalpostErFerdigstilt(journalpost)) {
             return
         }
+        logger.info(
+            "Starter behandling av hendelse (id=$hendelseId, journalpostId=$journalpostId, temaNytt=$temaNytt, temaGammelt=$temaGammelt)",
+        )
 
         try {
             if (journalpost.bruker == null) {
@@ -105,7 +135,6 @@ class JoarkHendelseHandler(
                 HendelseType.ENDELIG_JOURNALFOERT ->
                     behandleEndeligJournalfoert(ident, sakType, journalpost)
 
-                // TODO: Må avklare om dette er noe vi faktisk trenger å behandle
                 HendelseType.JOURNALPOST_UTGAATT -> {
                     logger.info("Journalpost $journalpostId har status=${journalpost.journalstatus}")
 
@@ -176,6 +205,7 @@ class JoarkHendelseHandler(
         }
     }
 
+    // TODO: kan vel ikke logge hele error obj her heller
     private fun mapError(errors: List<Error>): Exception {
         errors.forEach {
             if (errors.all { err -> err.extensions?.code == Error.Code.FORBIDDEN }) {

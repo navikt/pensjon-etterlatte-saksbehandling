@@ -32,7 +32,7 @@ internal class JournalfoeringHendelseExtensionsKtTest {
                 every { temaNytt } returns tema
             }
 
-        assertEquals(skalBehandles, hendelse.erTemaEtterlatte())
+        assertEquals(skalBehandles, hendelse.erNyttTemaEtterlatte())
     }
 
     @Test

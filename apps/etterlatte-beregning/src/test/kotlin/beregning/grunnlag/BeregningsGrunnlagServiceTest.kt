@@ -1115,7 +1115,7 @@ internal class BeregningsGrunnlagServiceTest {
         val grunnlag =
             runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(revurderingId, mockk(relaxed = true)) }
         assertEquals(1, grunnlag.perioder.size)
-        slotOverstyrtePerioder.captured == overstyrtePerioderForrigeBehandling
+        assertEquals(slotOverstyrtePerioder.captured, overstyrtePerioderForrigeBehandling)
     }
 
     @Test

@@ -49,8 +49,8 @@ class OmsMeldtInnEndringRiverTest {
             OmsMeldtInnEndring(
                 id = UUID.randomUUID(),
                 fnr = "123",
-                type = OmsEndringType.ANNET,
-                endringer = "Endringer fra bruker..",
+                endring = OmsEndring.ANNET,
+                beskrivelse = "Endringer fra bruker..",
                 tidspunkt = Instant.parse("2024-08-01T05:06:07Z"),
             )
 

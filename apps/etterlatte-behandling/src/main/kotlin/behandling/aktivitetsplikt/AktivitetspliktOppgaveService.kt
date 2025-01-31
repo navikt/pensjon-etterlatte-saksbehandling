@@ -40,6 +40,7 @@ enum class AktivitetspliktOppgaveToggles(
     private val key: String,
 ) : FeatureToggle {
     UNNTAK_UTEN_FRIST("aktivitetsplikt-oppgave-unntak-ingen-frist"),
+    UNNTAK_MED_FRIST("aktivitetsplikt-oppgave-unntak-med-frist"),
     ;
 
     override fun key(): String = key

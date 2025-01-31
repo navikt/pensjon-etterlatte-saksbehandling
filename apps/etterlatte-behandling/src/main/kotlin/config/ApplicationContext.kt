@@ -567,7 +567,14 @@ internal class ApplicationContext(
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
-    val aktivitetspliktOppgaveUnntakUtloeperJobService = AktivitetspliktOppgaveUnntakUtloeperJobService(aktivitetspliktDao)
+    val aktivitetspliktOppgaveUnntakUtloeperJobService =
+        AktivitetspliktOppgaveUnntakUtloeperJobService(
+            aktivitetspliktDao,
+            aktivitetspliktService,
+            oppgaveService,
+            vedtakKlient,
+            featureToggleService,
+        )
 
     val gosysOppgaveService =
         GosysOppgaveServiceImpl(

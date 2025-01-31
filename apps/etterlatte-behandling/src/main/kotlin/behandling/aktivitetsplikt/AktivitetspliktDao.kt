@@ -369,18 +369,14 @@ class AktivitetspliktDao(
                 val stmt =
                     prepareStatement(
                         """
-                    SELECT DISTINCT au.sak_id 
-                    FROM aktivitetsplikt_unntak au
-                        LEFT JOIN oppgave o
-                        ON au.id = o.reference_id
-                    WHERE au.tom IS NOT NULL
-                        AND au.tom <= CURRENT_DATE + INTERVAL '2 months'
-                        AND o.type = 'OPPFOELGING'
-                        AND o.id IS NULL
+                        SELECT DISTINCT sak_id 
+                        FROM aktivitetsplikt_unntak 
+                        WHERE tom IS NOT NULL
+                            AND tom <= CURRENT_DATE + INTERVAL '2 months'
                         """.trimMargin(),
                     )
 
-                stmt.executeUpdate()
+                stmt.executeQuery().toList { SakId(getLong("sak_id")) }
             }
         }
 

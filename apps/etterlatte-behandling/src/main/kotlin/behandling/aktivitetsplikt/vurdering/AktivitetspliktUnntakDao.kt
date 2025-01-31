@@ -286,7 +286,7 @@ data class LagreAktivitetspliktUnntak(
 )
 
 enum class AktivitetspliktUnntakType(
-    val navn: String,
+    val lesbartNavn: String,
 ) {
     OMSORG_BARN_UNDER_ETT_AAR("Omsorg for barn under ett år"),
     OMSORG_BARN_SYKDOM("Omsorg for barn som har sykdom, skade eller funksjonshemming"),

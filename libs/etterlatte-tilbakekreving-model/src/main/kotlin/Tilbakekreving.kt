@@ -75,6 +75,15 @@ data class TilbakekrevingPeriode(
 
 fun List<Tilbakekrevingsbelop>.kunYtelse() = filter { it.klasseType == KlasseType.YTEL.name }
 
+val tilbakekrevingsbeloepComparator =
+    compareBy<Tilbakekrevingsbelop> {
+        when (it.klasseType) {
+            KlasseType.FEIL.name -> 0
+            KlasseType.YTEL.name -> 1
+            else -> 2
+        }
+    }
+
 data class Tilbakekrevingsbelop(
     val id: UUID,
     val klasseKode: String,
@@ -97,24 +106,25 @@ fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPe
         TilbakekrevingPeriode(
             maaned = periode.periode.fraOgMed,
             tilbakekrevingsbeloep =
-                periode.grunnlagsbeloep.map {
-                    Tilbakekrevingsbelop(
-                        id = UUID.randomUUID(),
-                        klasseKode = it.klasseKode.value,
-                        klasseType = it.klasseType.name,
-                        bruttoUtbetaling = it.bruttoUtbetaling.toInt(),
-                        nyBruttoUtbetaling = it.nyBruttoUtbetaling.toInt(),
-                        skatteprosent = it.skatteProsent,
-                        bruttoTilbakekreving = it.bruttoTilbakekreving.toInt(),
-                        beregnetFeilutbetaling = null,
-                        nettoTilbakekreving = null,
-                        skatt = null,
-                        skyld = null,
-                        resultat = null,
-                        tilbakekrevingsprosent = null,
-                        rentetillegg = null,
-                    )
-                },
+                periode.grunnlagsbeloep
+                    .map {
+                        Tilbakekrevingsbelop(
+                            id = UUID.randomUUID(),
+                            klasseKode = it.klasseKode.value,
+                            klasseType = it.klasseType.name,
+                            bruttoUtbetaling = it.bruttoUtbetaling.toInt(),
+                            nyBruttoUtbetaling = it.nyBruttoUtbetaling.toInt(),
+                            skatteprosent = it.skatteProsent,
+                            bruttoTilbakekreving = it.bruttoTilbakekreving.toInt(),
+                            beregnetFeilutbetaling = null,
+                            nettoTilbakekreving = null,
+                            skatt = null,
+                            skyld = null,
+                            resultat = null,
+                            tilbakekrevingsprosent = null,
+                            rentetillegg = null,
+                        )
+                    }.sortedWith(tilbakekrevingsbeloepComparator),
         )
     }
 

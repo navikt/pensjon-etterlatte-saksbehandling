@@ -5,6 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
@@ -104,6 +105,36 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                     e,
                 )
                 call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+            }
+        }
+
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/behandling-med-vilkaarsvurdering-for-avdoede") {
+            logger.info("Sjekker om det finnes andre behandlinger for samme avdøde som har vilkårsvurdering")
+            val kandidatBehandlingId =
+                inTransaction {
+                    vilkaarsvurderingService.finnBehandlingMedVilkaarsvurderingForSammeAvdoede(
+                        behandlingId,
+                    )
+                }
+
+            when (kandidatBehandlingId) {
+                null -> call.respond(HttpStatusCode.NoContent)
+                else -> call.respondText(kandidatBehandlingId.toString())
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/kopier-vilkaar/{kildeBehandlingId}") {
+            withUuidParam("kildeBehandlingId") { kildeBehandlingId ->
+                logger.info("Kopierer vilkår fra behandling $kildeBehandlingId til behandling $behandlingId")
+                call.respond(
+                    inTransaction {
+                        vilkaarsvurderingService.kopierVilkaarForAvdoede(
+                            behandlingId = behandlingId,
+                            kildeBehandlingId = kildeBehandlingId,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    },
+                )
             }
         }
 

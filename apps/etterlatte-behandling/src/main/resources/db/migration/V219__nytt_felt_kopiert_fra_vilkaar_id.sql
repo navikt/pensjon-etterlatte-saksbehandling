@@ -1,0 +1,1 @@
+ALTER TABLE vilkaar ADD COLUMN kopiert_fra_vilkaar_id uuid;

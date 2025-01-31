@@ -99,6 +99,7 @@ class GrunnlagServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = grunnlagKlient.grunnlagFinnes(sakId, brukerTokenInfo)
 
+    // TODO: legg inn test for systembruker her
     override suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,

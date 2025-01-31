@@ -1056,6 +1056,7 @@ class TrygdetidServiceImpl(
             val trygdetiderMaal = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
 
             krev(trygdetiderMaal.map { it.ident }.sorted() == trygdetiderKilde.map { it.ident }.sorted()) {
+                logger.error("Trygdetidene gjelder forskjellige avdøde. Se sikkerlogg for detaljer.")
                 sikkerlogger().error(
                     """
                     Trygdetidene gjelder forskjellige avdøde ved kopiering av trygdetidsgrunnlag 
@@ -1064,7 +1065,7 @@ class TrygdetidServiceImpl(
                     Kilde: ${trygdetiderMaal.joinToString { it.ident }}
                     """,
                 )
-                "Trygdetidene gjelder forskjellige avdøde. Se sikkerlogg for detaljer."
+                "Trygdetidene gjelder forskjellige avdøde"
             }
 
             // TODO Hva om trygdetid har f.x. overstyrt poengår fra før?
@@ -1103,6 +1104,14 @@ class TrygdetidServiceImpl(
             return null
         }
 
+        if (!lagredeTrygdetiderHarSammeAvdoede(behandlingId, avdoede)) {
+            logger.warn(
+                "Avdøde i grunnlag stemmer ikke med avdøde i trygdetider. " +
+                    "Returnerer ingen behandling med trygdetid for samme avdøde.",
+            )
+            return null
+        }
+
         return behandlingMedTrygdetiderForAvdoede(avdoede)
             .filter { it != behandlingId }
             .firstOrNull { behandlingStatusOkForKopieringAvTrygdetid(it, brukerTokenInfo) }
@@ -1138,6 +1147,17 @@ class TrygdetidServiceImpl(
                     SAMORDNET,
                 )
         }
+
+    private fun lagredeTrygdetiderHarSammeAvdoede(
+        behandlingId: UUID,
+        avdoede: List<Folkeregisteridentifikator>,
+    ): Boolean {
+        val trygdetidIdenter = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).map { it.ident }
+        return (
+            trygdetidIdenter.size == avdoede.size &&
+                trygdetidIdenter.containsAll(avdoede.map { it.value })
+        )
+    }
 }
 
 class ManglerForrigeTrygdetidMaaReguleresManuelt :

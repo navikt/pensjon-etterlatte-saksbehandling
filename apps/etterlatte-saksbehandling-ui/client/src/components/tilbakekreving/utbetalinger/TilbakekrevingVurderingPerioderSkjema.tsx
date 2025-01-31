@@ -23,6 +23,7 @@ import { FixedAlert } from '~shared/alerts/FixedAlert'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { formaterMaanedDato } from '~utils/formatering/dato'
+import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
@@ -137,11 +138,9 @@ export function TilbakekrevingVurderingPerioderSkjema({
             </Table.Header>
             <Table.Body>
               {watch().values.map((periode, indexPeriode) => {
-                return periode.tilbakekrevingsbeloep
-                  .map(leggPaaOrginalIndex)
-                  .filter(klasseTypeYtelse)
-                  .map((beloep) => {
-                    const indexBeloep = beloep.originalIndex
+                return periode.tilbakekrevingsbeloep.map(leggPaaOrginalIndex).map((beloep) => {
+                  const indexBeloep = beloep.originalIndex
+                  if (klasseTypeYtelse(beloep)) {
                     return (
                       <Table.Row key={`beloepRad-${indexPeriode}-${indexBeloep}`} style={{ alignItems: 'start' }}>
                         <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
@@ -288,7 +287,17 @@ export function TilbakekrevingVurderingPerioderSkjema({
                         </Table.DataCell>
                       </Table.Row>
                     )
-                  })
+                  } else {
+                    // Kun visning av andre klassetyper enn YTEL - Disse har ikke vurderingsfelter
+                    return (
+                      <TilbakekrevingVurderingPerioderRadAndreKlassetyper
+                        key={`beloepRad-${indexPeriode}-${indexBeloep}`}
+                        periode={periode}
+                        beloep={beloep}
+                      />
+                    )
+                  }
+                })
               })}
             </Table.Body>
           </Table>

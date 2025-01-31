@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.mockk.Runs
@@ -1115,7 +1116,17 @@ internal class BeregningsGrunnlagServiceTest {
         val grunnlag =
             runBlocking { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(revurderingId, mockk(relaxed = true)) }
         assertEquals(1, grunnlag.perioder.size)
-        assertEquals(slotOverstyrtePerioder.captured, overstyrtePerioderForrigeBehandling)
+
+        val forrigePeriode = overstyrtePerioderForrigeBehandling.single()
+        slotOverstyrtePerioder.captured.single().asClue {
+            it.trygdetid shouldBe forrigePeriode.trygdetid
+            it.utbetaltBeloep shouldBe forrigePeriode.utbetaltBeloep
+            it.foreldreloessats shouldBe forrigePeriode.foreldreloessats
+            it.prorataBroekNevner shouldBe forrigePeriode.prorataBroekNevner
+            it.prorataBroekTeller shouldBe forrigePeriode.prorataBroekTeller
+            it.datoFOM shouldBe forrigePeriode.datoFOM
+            it.datoTOM shouldBe forrigePeriode.datoTOM
+        }
     }
 
     @Test

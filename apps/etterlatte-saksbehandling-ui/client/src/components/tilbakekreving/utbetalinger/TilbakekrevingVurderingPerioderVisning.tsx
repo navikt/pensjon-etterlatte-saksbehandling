@@ -11,6 +11,7 @@ import React, { useState } from 'react'
 import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { formaterMaanedDato } from '~utils/formatering/dato'
+import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const navigate = useNavigate()
@@ -60,24 +61,13 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
                   </Table.Row>
                 )
               } else {
+                // Kun visning av andre klassetyper enn YTEL - Disse har ikke vurderingsfelter
                 return (
-                  <Table.Row key={`beloepRad-${indexPeriode}-${beloep.originalIndex}`}>
-                    <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
-                    <Table.DataCell key="klasse">
-                      {tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}
-                    </Table.DataCell>
-                    <Table.DataCell key="bruttoUtbetaling">{beloep.bruttoUtbetaling} kr</Table.DataCell>
-                    <Table.DataCell key="nyBruttoUtbetaling">{beloep.nyBruttoUtbetaling} kr</Table.DataCell>
-                    <Table.DataCell key="beregnetFeilutbetaling"></Table.DataCell>
-                    <Table.DataCell key="skatteprosent"></Table.DataCell>
-                    <Table.DataCell key="bruttoTilbakekreving"></Table.DataCell>
-                    <Table.DataCell key="nettoTilbakekreving"></Table.DataCell>
-                    <Table.DataCell key="skatt"></Table.DataCell>
-                    <Table.DataCell key="skyld"></Table.DataCell>
-                    <Table.DataCell key="resultat"></Table.DataCell>
-                    <Table.DataCell key="tilbakekrevingsprosent"></Table.DataCell>
-                    <Table.DataCell key="rentetillegg"></Table.DataCell>
-                  </Table.Row>
+                  <TilbakekrevingVurderingPerioderRadAndreKlassetyper
+                    key={`beloepRad-${indexPeriode}-${beloep.originalIndex}`}
+                    periode={periode}
+                    beloep={beloep}
+                  />
                 )
               }
             })

@@ -23,6 +23,7 @@ import { FixedAlert } from '~shared/alerts/FixedAlert'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { formaterMaanedDato } from '~utils/formatering/dato'
+import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
@@ -287,24 +288,13 @@ export function TilbakekrevingVurderingPerioderSkjema({
                       </Table.Row>
                     )
                   } else {
+                    // Kun visning av andre klassetyper enn YTEL - Disse har ikke vurderingsfelter
                     return (
-                      <Table.Row key={`beloepRad-${indexPeriode}-${beloep.originalIndex}`}>
-                        <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
-                        <Table.DataCell key="klasse">
-                          {tekstKlasseKode[beloep.klasseKode] ?? beloep.klasseKode}
-                        </Table.DataCell>
-                        <Table.DataCell key="bruttoUtbetaling">{beloep.bruttoUtbetaling} kr</Table.DataCell>
-                        <Table.DataCell key="nyBruttoUtbetaling">{beloep.nyBruttoUtbetaling} kr</Table.DataCell>
-                        <Table.DataCell key="beregnetFeilutbetaling"></Table.DataCell>
-                        <Table.DataCell key="skatteprosent"></Table.DataCell>
-                        <Table.DataCell key="bruttoTilbakekreving"></Table.DataCell>
-                        <Table.DataCell key="nettoTilbakekreving"></Table.DataCell>
-                        <Table.DataCell key="skatt"></Table.DataCell>
-                        <Table.DataCell key="skyld"></Table.DataCell>
-                        <Table.DataCell key="resultat"></Table.DataCell>
-                        <Table.DataCell key="tilbakekrevingsprosent"></Table.DataCell>
-                        <Table.DataCell key="rentetillegg"></Table.DataCell>
-                      </Table.Row>
+                      <TilbakekrevingVurderingPerioderRadAndreKlassetyper
+                        key={`beloepRad-${indexPeriode}-${indexBeloep}`}
+                        periode={periode}
+                        beloep={beloep}
+                      />
                     )
                   }
                 })

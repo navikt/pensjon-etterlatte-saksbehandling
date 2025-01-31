@@ -209,6 +209,9 @@ spec:
             roles:
               - les-oms-sak
               - les-bp-sak
+              - les-oms-vedtak
+              - les-bp-vedtak
+              - opprett-jfr-oppgave
         - application: eessi-pensjon-prefill-q1
           namespace: eessipensjon
           cluster: dev-gcp
@@ -231,14 +234,6 @@ spec:
             roles:
               - les-oms-vedtak
               - les-bp-vedtak
-        - application: eessi-pensjon-journalforing-q2
-          namespace: eessipensjon
-          cluster: dev-gcp
-          permissions:
-            roles:
-              - les-oms-vedtak
-              - les-bp-vedtak
-              - opprett-jfr-oppgave
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

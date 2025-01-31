@@ -62,6 +62,7 @@ import no.nav.etterlatte.brev.pdf.PDFGenerator
 import no.nav.etterlatte.brev.pdf.PDFService
 import no.nav.etterlatte.brev.pdfgen.PdfGeneratorKlient
 import no.nav.etterlatte.brev.pdl.PdlTjenesterKlient
+import no.nav.etterlatte.brev.tilbakekreving.TilbakekrevingVedtaksbrevService
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.vedtaksbrev.VedtaksbrevService

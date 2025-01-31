@@ -207,7 +207,7 @@ class TilbakekrevingVedtaksbrevService(
                 behandlingId = behandlingId,
                 prosessType = BrevProsessType.REDIGERBAR,
                 soekerFnr = personerISak.soeker.fnr.value,
-                mottakere = adresseService.hentMottakere(sak.sakType, personerISak),
+                mottakere = adresseService.hentMottakere(sak.sakType, personerISak, bruker),
                 opprettet = Tidspunkt.now(),
                 innhold =
                     BrevInnhold(

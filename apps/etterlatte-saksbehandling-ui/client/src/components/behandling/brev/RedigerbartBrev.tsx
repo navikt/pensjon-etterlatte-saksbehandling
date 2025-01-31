@@ -30,6 +30,7 @@ interface RedigerbartBrevProps {
   kanRedigeres: boolean
   lukkAdvarselBehandlingEndret?: () => void
   tilbakestillingsaction: () => void
+  tilbakekrevingBrev: boolean
 }
 
 export default function RedigerbartBrev({
@@ -37,6 +38,7 @@ export default function RedigerbartBrev({
   kanRedigeres,
   lukkAdvarselBehandlingEndret,
   tilbakestillingsaction,
+  tilbakekrevingBrev = false,
 }: RedigerbartBrevProps) {
   const [fane, setFane] = useState<string>(kanRedigeres ? ManueltBrevFane.REDIGER : ManueltBrevFane.FORHAANDSVIS)
   const [content, setContent] = useState<any[]>([])
@@ -58,7 +60,10 @@ export default function RedigerbartBrev({
 
   const lagre = () => {
     apiLagreManuellPayload({ brevId: brev.id, sakId: brev.sakId, payload: content, payload_vedlegg: vedlegg }, () => {
-      setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())}` })
+      setLagretStatus({
+        lagret: true,
+        beskrivelse: `Lagret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())}`,
+      })
       if (lukkAdvarselBehandlingEndret) lukkAdvarselBehandlingEndret()
     })
   }
@@ -200,7 +205,7 @@ export default function RedigerbartBrev({
         </Tabs.Panel>
 
         <Tabs.Panel value={ManueltBrevFane.FORHAANDSVIS}>
-          <ForhaandsvisningBrev brev={brev} />
+          <ForhaandsvisningBrev brev={brev} tilbakekrevingBrev={tilbakekrevingBrev} />
         </Tabs.Panel>
       </Tabs>
     </Container>

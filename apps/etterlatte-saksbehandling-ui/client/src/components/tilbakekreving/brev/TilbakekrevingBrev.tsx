@@ -84,6 +84,7 @@ export function TilbakekrevingBrev({
             brev={vedtaksbrev}
             kanRedigeres={redigerbar}
             tilbakestillingsaction={() => setTilbakestilt(true)}
+            tilbakekrevingBrev={true}
           />
         )}
       </BrevContent>

@@ -13,7 +13,11 @@ import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.EnvEnum
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import org.slf4j.Logger
+
+val sikkerLogg: Logger = sikkerlogger()
 
 class ApplicationContext(
     env: Miljoevariabler = Miljoevariabler.systemEnv(),

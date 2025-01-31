@@ -126,6 +126,10 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-trygdetid
+    - name: ETTERLATTE_PDLTJENESTER_URL
+      value: http://etterlatte-pdltjenester
+    - name: ETTERLATTE_PDLTJENESTER_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-pdltjenester
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -136,6 +140,7 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-beregning
         - application: etterlatte-behandling
+        - application: etterlatte-pdltjenester
         - application: etterlatte-trygdetid
         - application: ey-pdfgen
         - application: clamav

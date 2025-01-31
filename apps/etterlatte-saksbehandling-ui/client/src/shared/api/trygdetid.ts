@@ -140,6 +140,7 @@ export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
   trygdetidId: string
   anvendtTrygdetid: number
   prorataBroek?: IProrataBroek
+  begrunnelse: string
 }): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid_v2/${args.behandlingId}/migrering/${args.trygdetidId}/manuell/lagre`, {
     samletTrygdetidNorge: args.prorataBroek ? undefined : args.anvendtTrygdetid,
@@ -147,6 +148,7 @@ export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
     prorataBroek: args.prorataBroek,
     overstyrt: true,
     yrkesskade: false,
+    overstyrtBegrunnelse: args.begrunnelse,
   })
 
 export const kopierTrygdetidFraAnnenBehandling = async (args: {
@@ -215,6 +217,7 @@ export interface IDetaljertBeregnetTrygdetidResultat {
   overstyrt: boolean
   yrkesskade: boolean
   beregnetSamletTrygdetidNorge?: number
+  overstyrtBegrunnelse: string
 }
 
 export interface IFaktiskTrygdetid {

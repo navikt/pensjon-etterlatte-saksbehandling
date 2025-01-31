@@ -209,6 +209,46 @@ internal class JoarkHendelseHandlerTest {
     }
 
     @Nested
+    @DisplayName("Hendelser som har gammelt tema etterlatte skal lukke tidligere oppgaver")
+    inner class HendelserSomSkalAvbryteOppgaver {
+        @ParameterizedTest
+        @EnumSource(SakType::class)
+        fun `Skal lukke tidligere oppgaver tilknyttet journalposten`(sakType: SakType) {
+            val journalpostId = Random.nextLong()
+            val ident = "09498230323"
+            val journalpost =
+                opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
+
+            coEvery { safKlientMock.hentJournalpost(any()) } returns
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
+                )
+            val hendelse =
+                opprettHendelse(
+                    journalpostId = journalpostId,
+                    temaNytt = "GEN",
+                    temaGammelt = sakType.tema,
+                    hendelsesType = HendelseType.JOURNALPOST_UTGAATT,
+                )
+
+            runBlocking {
+                sut.haandterHendelse(hendelse)
+            }
+            coVerify(exactly = 1) {
+                safKlientMock.hentJournalpost(journalpostId)
+                behandlingKlientMock.avbrytOppgaver(journalpostId.toString())
+            }
+            coVerify(exactly = 0) {
+                pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
+                behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
+                behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("Hendelser som ikke skal behandles")
     inner class HendelserSomIkkeSkalBehandles {
         @Test

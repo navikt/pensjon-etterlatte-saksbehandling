@@ -53,6 +53,31 @@ class PdlKlient(
         }
     }
 
+    suspend fun hentFoedselsdato(ident: String): PdlFoedselsdatoResponse {
+        val request =
+            PdlGraphqlRequest(
+                query = getQuery("/pdl/hentFoedselsdato.graphql"),
+                variables = PdlVariables(ident),
+            )
+
+        return retry<PdlFoedselsdatoResponse>(times = 3) {
+            httpClient
+                .post(apiUrl) {
+                    behandlingsnummer(SakType.entries)
+                    contentType(Json)
+                    accept(Json)
+                    setBody(request)
+                }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success ->
+                    it.content.also { result -> loggDelvisReturnerteData(result, request) }
+
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
     suspend fun hentAdressebeskyttelse(hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest): PdlAdressebeskyttelseResponse {
         val request =
             PdlAdressebeskyttelseRequest(

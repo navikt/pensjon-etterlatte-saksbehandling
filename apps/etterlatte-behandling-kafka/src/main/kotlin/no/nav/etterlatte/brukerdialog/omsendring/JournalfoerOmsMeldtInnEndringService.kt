@@ -91,8 +91,8 @@ class JournalfoerOmsMeldtInnEndringService(
                         ArkiverOmsMeldtInnEndring(
                             id = omsMeldtInnEndring.id,
                             sakId = sakId,
-                            type = omsMeldtInnEndring.type.name,
-                            endringer = omsMeldtInnEndring.endringer,
+                            type = omsMeldtInnEndring.endring.name,
+                            endringer = omsMeldtInnEndring.beskrivelse,
                             tidspunkt = formatertTidspunkt(omsMeldtInnEndring.tidspunkt),
                         ),
                     mal = "oms_meldt_inn_endring_v1",

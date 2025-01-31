@@ -12,6 +12,7 @@ import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
@@ -77,6 +78,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
             utlandstilknytning: UtlandstilknytningType?,
             avdoede: List<Avdoed>,
             brevutfall: BrevutfallDto?,
+            landKodeverk: List<LandDto>,
         ): BarnepensjonOmregnetNyttRegelverk {
             val erUnder18AarNonNull =
                 krevIkkeNull(erUnder18Aar) {
@@ -93,6 +95,8 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         utbetalingsinfo,
                         grunnbeloep,
                         trygdetid,
+                        erForeldreloes = false,
+                        landKodeverk,
                     ),
                 frivilligSkattetrekk = brevutfall?.frivilligSkattetrekk ?: false,
                 erBosattUtlandet =

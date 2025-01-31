@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.krevIkkeNull
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.sikkerLogg
@@ -35,12 +36,13 @@ internal fun barnepensjonBeregning(
     grunnbeloep: Grunnbeloep,
     trygdetid: List<TrygdetidDto>,
     erForeldreloes: Boolean = false,
+    landKodeverk: List<LandDto>,
 ): BarnepensjonBeregning {
     val beregningsperioder =
         barnepensjonBeregningsperioder(utbetalingsinfo, erForeldreloes)
     val sisteBeregningsperiode = beregningsperioder.maxBy { periode -> periode.datoFOM }
     val mappedeTrygdetider =
-        mapRiktigMetodeForAnvendteTrygdetider(trygdetid, avdoede, utbetalingsinfo.beregningsperioder)
+        mapRiktigMetodeForAnvendteTrygdetider(trygdetid, avdoede, utbetalingsinfo.beregningsperioder, landKodeverk)
     val forskjelligTrygdetid =
         finnForskjelligTrygdetid(
             mappedeTrygdetider,
@@ -78,6 +80,7 @@ fun mapRiktigMetodeForAnvendteTrygdetider(
     trygdetid: List<TrygdetidDto>,
     avdoede: List<Avdoed>,
     beregningsperioder: List<Beregningsperiode>,
+    landKodeverk: List<LandDto>,
 ): List<TrygdetidMedBeregningsmetode> {
     val anvendteTrygdetiderIdenter =
         beregningsperioder
@@ -105,6 +108,7 @@ fun mapRiktigMetodeForAnvendteTrygdetider(
             trygdetidDto = trygdetidDto,
             identMedMetoder = anvendteTrygdetiderIdenter[trygdetidDto.ident] ?: fallbackMetode,
             avdoede = avdoede,
+            landKodeverk = landKodeverk,
         )
     }
 }
@@ -166,10 +170,12 @@ internal fun trygdetidMedBeregningsmetode(
     trygdetidDto: TrygdetidDto,
     identMedMetoder: IdentMedMetodeIGrunnlagOgAnvendtMetode,
     avdoede: List<Avdoed>,
+    landKodeverk: List<LandDto>,
 ) = trygdetidDto.fromDto(
     identMedMetoder.beregningsMetodeAnvendt,
     identMedMetoder.beregningsMetodeFraGrunnlag,
     hentAvdoedNavn(trygdetidDto, avdoede),
+    landKodeverk,
 )
 
 private fun hentAvdoedNavn(

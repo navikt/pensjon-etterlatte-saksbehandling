@@ -5,6 +5,8 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.model.bp.IdentMedMetodeIGrunnlagOgAnvendtMetode
 import no.nav.etterlatte.brev.model.bp.trygdetidMedBeregningsmetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.kodeverk.BeskrivelseDto
+import no.nav.etterlatte.libs.common.kodeverk.LandDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.Test
@@ -38,6 +40,7 @@ class BarnepensjonBeregningTest {
                 ),
                 IdentMedMetodeIGrunnlagOgAnvendtMetode("idTilOle", BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL),
                 avdoede,
+                landKodeverk(),
             ),
         ) {
             navnAvdoed shouldBe "Ole"
@@ -59,6 +62,7 @@ class BarnepensjonBeregningTest {
                 ),
                 IdentMedMetodeIGrunnlagOgAnvendtMetode(UKJENT_AVDOED, BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL),
                 avdoede,
+                landKodeverk(),
             ),
         ) {
             navnAvdoed shouldBe null
@@ -80,7 +84,14 @@ class BarnepensjonBeregningTest {
                 ),
                 IdentMedMetodeIGrunnlagOgAnvendtMetode("17418340118", BeregningsMetode.NASJONAL, BeregningsMetode.NASJONAL),
                 avdoede,
+                landKodeverk(),
             )
         }
     }
+
+    private fun landKodeverk() =
+        listOf(
+            LandDto("SWE", "2020-01-01", "2999-01-01", BeskrivelseDto("SVERIGE", "Sverige")),
+            LandDto("NOR", "2020-01-01", "2999-01-01", BeskrivelseDto("NORGE", "Norge")),
+        )
 }

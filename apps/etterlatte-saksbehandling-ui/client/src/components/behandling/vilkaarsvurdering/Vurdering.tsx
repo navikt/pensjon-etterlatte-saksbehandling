@@ -1,5 +1,5 @@
 import { BodyShort, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat, vurderVilkaar } from '~shared/api/vilkaarsvurdering'
 import styled from 'styled-components'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
@@ -24,7 +24,7 @@ interface VilkaarFormValidert {
 
 const initiellForm = (vilkaar: Vilkaar): VilkaarForm => ({
   resultat: vilkaar.hovedvilkaar?.resultat ?? null,
-  kommentar: vilkaar.vurdering?.kommentar ?? '',
+  kommentar: vilkaar.vurdering?.kommentar,
   vilkaarsUnntakType:
     vilkaar.unntaksvilkaar?.find((unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat)?.type ??
     '',
@@ -49,6 +49,10 @@ export const Vurdering = ({
   const vilkaarSpoersmaal = vilkaar.hovedvilkaar.spoersmaal
     ? vilkaar.hovedvilkaar.spoersmaal
     : 'Er hovedvilkår oppfylt?' // TODO denne burde vi kunne bli kvitt når BP får spørsmål som en del av vilkår
+
+  useEffect(() => {
+    setVilkaarutkast(initiellForm(vilkaar))
+  }, [vilkaar])
 
   const valider = (vilkaarForm: VilkaarForm): vilkaarForm is VilkaarFormValidert => {
     const resultatIkkeValgt = vilkaarForm.resultat == undefined

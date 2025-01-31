@@ -102,7 +102,6 @@ class BrevDataMapperFerdigstillingVedtak(
                         innholdMedVedlegg,
                         behandlingId!!,
                         virkningstidspunkt!!,
-                        sakType,
                         sakId,
                         utlandstilknytningType,
                         revurderingsaarsak,
@@ -119,7 +118,6 @@ class BrevDataMapperFerdigstillingVedtak(
                         innholdMedVedlegg,
                         behandlingId!!,
                         virkningstidspunkt!!,
-                        sakType,
                         erForeldreloes,
                         utlandstilknytningType,
                         loependeIPesys,
@@ -178,10 +176,8 @@ class BrevDataMapperFerdigstillingVedtak(
                     omstillingsstoenadInntektsjusteringVedtak(
                         bruker,
                         innholdMedVedlegg,
-                        revurderingsaarsak,
                         avdoede,
                         behandlingId!!,
-                        sakId,
                         sakType,
                         vedtakType!!,
                         virkningstidspunkt!!,
@@ -244,6 +240,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
+        val landKodeverk = async { behandlingService.hentLand(bruker) }
 
         if (erForeldreloes) {
             barnepensjonInnvilgelse(
@@ -251,7 +248,6 @@ class BrevDataMapperFerdigstillingVedtak(
                 innholdMedVedlegg,
                 behandlingId,
                 virkningstidspunkt,
-                sakType,
                 erForeldreloes,
                 utlandstilknytningType,
                 loependeIPesys,
@@ -269,6 +265,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 utlandstilknytning = utlandstilknytningType,
                 avdoede = avdoede,
                 brevutfall = brevutfall.await(),
+                landKodeverk = landKodeverk.await(),
             )
         }
     }
@@ -278,7 +275,6 @@ class BrevDataMapperFerdigstillingVedtak(
         innholdMedVedlegg: InnholdMedVedlegg,
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
-        sakType: SakType,
         sakId: SakId,
         utlandstilknytningType: UtlandstilknytningType?,
         revurderingaarsak: Revurderingaarsak?,
@@ -306,6 +302,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val grunnbeloep = async { beregningService.hentGrunnbeloep(bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
+        val landKodeverk = async { behandlingService.hentLand(bruker) }
 
         val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
 
@@ -330,6 +327,7 @@ class BrevDataMapperFerdigstillingVedtak(
             avdoede,
             datoVedtakOmgjoering,
             erMigrertYrkesskade.await(),
+            landKodeverk.await(),
         )
     }
 
@@ -338,7 +336,6 @@ class BrevDataMapperFerdigstillingVedtak(
         innholdMedVedlegg: InnholdMedVedlegg,
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
-        sakType: SakType,
         erForeldreloes: Boolean,
         utlandstilknytningType: UtlandstilknytningType?,
         loependeIPesys: Boolean,
@@ -359,6 +356,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val erMigrertYrkesskade = async { vilkaarsvurderingService.erMigrertYrkesskade(behandlingId, bruker) }
         val behandling = async { behandlingService.hentBehandling(behandlingId, bruker) }.await()
+        val landKodeverk = async { behandlingService.hentLand(bruker) }.await()
 
         if (erForeldreloes) {
             BarnepensjonInnvilgelseForeldreloes.fra(
@@ -374,6 +372,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
                 erSluttbehandling = behandling.erSluttbehandling,
+                landKodeverk = landKodeverk,
             )
         } else {
             BarnepensjonInnvilgelse.fra(
@@ -388,6 +387,7 @@ class BrevDataMapperFerdigstillingVedtak(
                 erGjenoppretting = systemkilde == Vedtaksloesning.GJENOPPRETTA,
                 erMigrertYrkesskade = erMigrertYrkesskade.await(),
                 erSluttbehandling = behandling.erSluttbehandling,
+                landKodeverk = landKodeverk,
             )
         }
     }
@@ -446,7 +446,8 @@ class BrevDataMapperFerdigstillingVedtak(
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val etterbetaling = async { behandlingService.hentEtterbetaling(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
-        val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+        val behandling = async { behandlingService.hentBehandling(behandlingId, bruker) }
+        val land = async { behandlingService.hentLand(bruker) }
 
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,
@@ -456,7 +457,8 @@ class BrevDataMapperFerdigstillingVedtak(
             krevIkkeNull(vilkaarsvurdering.await()) { "Mangler vilkårsvurdering" },
             avdoede,
             utlandstilknytningType,
-            behandling,
+            behandling.await(),
+            land.await(),
         )
     }
 
@@ -495,6 +497,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val brevutfall = async { behandlingService.hentBrevutfall(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
+        val land = async { behandlingService.hentLand(bruker) }
 
         val datoVedtakOmgjoering =
             klage
@@ -514,6 +517,7 @@ class BrevDataMapperFerdigstillingVedtak(
             datoVedtakOmgjoering,
             utlandstilknytningType,
             behandling,
+            land.await(),
         )
     }
 
@@ -537,10 +541,8 @@ class BrevDataMapperFerdigstillingVedtak(
     private suspend fun omstillingsstoenadInntektsjusteringVedtak(
         bruker: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
-        revurderingaarsak: Revurderingaarsak?,
         avdoede: List<Avdoed>,
         behandlingId: UUID,
-        sakId: SakId,
         sakType: SakType,
         vedtakType: VedtakType,
         virkningstidspunkt: YearMonth,
@@ -559,6 +561,7 @@ class BrevDataMapperFerdigstillingVedtak(
         val behandling = behandlingService.hentBehandling(behandlingId, bruker)
         val trygdetid = async { trygdetidService.hentTrygdetid(behandlingId, bruker) }
         val vilkaarsvurdering = async { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId, bruker) }
+        val land = async { behandlingService.hentLand(bruker) }
 
         OmstillingsstoenadInntektsjusteringVedtak.fra(
             innholdMedVedlegg = innholdMedVedlegg,
@@ -567,6 +570,7 @@ class BrevDataMapperFerdigstillingVedtak(
             vilkaarsVurdering = vilkaarsvurdering.await(),
             behandling = behandling,
             navnAvdoed = avdoede.single().navn,
+            land.await(),
         )
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -98,6 +99,7 @@ class GrunnlagServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean = grunnlagKlient.grunnlagFinnes(sakId, brukerTokenInfo)
 
+    // TODO: legg inn test for systembruker her
     override suspend fun leggInnNyttGrunnlagSak(
         sak: Sak,
         persongalleri: Persongalleri,
@@ -173,7 +175,7 @@ class GrunnlagServiceImpl(
             sakType = sak.sakType,
             persongalleri = persongalleri,
             kilde =
-                when (brukerTokenInfo) {
+                when (Kontekst.get().brukerTokenInfo) {
                     is Saksbehandler -> Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
                     else -> Grunnlagsopplysning.Gjenny(brukerTokenInfo.ident(), Tidspunkt.now())
                 },

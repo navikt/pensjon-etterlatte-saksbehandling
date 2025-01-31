@@ -25,6 +25,7 @@ object TrygdetidBeregningService {
         doedsDato: LocalDate,
         norskPoengaar: Int?,
         yrkesskade: Boolean,
+        nordiskKonvensjon: Boolean,
     ): DetaljertBeregnetTrygdetid? {
         logger.info("Beregner antall år trygdetid")
 
@@ -45,6 +46,7 @@ object TrygdetidBeregningService {
                             doedsDato = doedsDato,
                             norskPoengaar = norskPoengaar,
                             yrkesskade = yrkesskade,
+                            nordiskKonvensjon = nordiskKonvensjon,
                         ),
                     kilde = "System",
                     beskrivelse = "Beregn detaljert trygdetidsgrunnlag",

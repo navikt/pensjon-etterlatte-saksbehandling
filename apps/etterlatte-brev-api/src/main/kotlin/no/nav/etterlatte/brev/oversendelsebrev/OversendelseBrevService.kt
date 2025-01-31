@@ -88,7 +88,7 @@ class OversendelseBrevServiceImpl(
         val klage = behandlingService.hentKlage(behandlingId, brukerTokenInfo)
         val (spraak, personerISak) = hentSpraakOgPersonerISak(klage, brukerTokenInfo)
 
-        val mottakere = adresseService.hentMottakere(klage.sak.sakType, personerISak)
+        val mottakere = adresseService.hentMottakere(klage.sak.sakType, personerISak, brukerTokenInfo)
 
         val brev =
             brevRepository.opprettBrev(

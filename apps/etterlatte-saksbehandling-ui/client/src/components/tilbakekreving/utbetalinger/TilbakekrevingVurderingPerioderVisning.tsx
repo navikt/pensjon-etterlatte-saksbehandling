@@ -11,6 +11,7 @@ import React, { useState } from 'react'
 import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { formaterMaanedDato } from '~utils/formatering/dato'
+import { TilbakekrevingVurderingPerioderRadAndreKlassetyper } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderRadAndreKlassetyper'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const navigate = useNavigate()
@@ -38,10 +39,8 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
         </Table.Header>
         <Table.Body>
           {perioder.map((periode, indexPeriode) => {
-            return periode.tilbakekrevingsbeloep
-              .map(leggPaaOrginalIndex)
-              .filter(klasseTypeYtelse)
-              .map((beloep) => {
+            return periode.tilbakekrevingsbeloep.map(leggPaaOrginalIndex).map((beloep) => {
+              if (klasseTypeYtelse(beloep)) {
                 return (
                   <Table.Row key={`beloepRad-${indexPeriode}-${beloep.originalIndex}`}>
                     <Table.DataCell key="maaned">{formaterMaanedDato(periode.maaned)}</Table.DataCell>
@@ -61,7 +60,17 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
                     <Table.DataCell key="rentetillegg">{beloep.rentetillegg} kr</Table.DataCell>
                   </Table.Row>
                 )
-              })
+              } else {
+                // Kun visning av andre klassetyper enn YTEL - Disse har ikke vurderingsfelter
+                return (
+                  <TilbakekrevingVurderingPerioderRadAndreKlassetyper
+                    key={`beloepRad-${indexPeriode}-${beloep.originalIndex}`}
+                    periode={periode}
+                    beloep={beloep}
+                  />
+                )
+              }
+            })
           })}
         </Table.Body>
       </Table>

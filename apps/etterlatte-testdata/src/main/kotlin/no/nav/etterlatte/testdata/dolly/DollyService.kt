@@ -180,7 +180,7 @@ class DollyMock : DollyInterface {
                 ibruk = true,
                 avdoed = "123",
                 gjenlevende = "321",
-                barn = listOf("444", "555"),
+                barn = listOf("044", "555"),
             ),
             ForenkletFamilieModell(
                 ibruk = true,

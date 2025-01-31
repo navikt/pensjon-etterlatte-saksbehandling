@@ -17,7 +17,9 @@ import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterException
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlFoedselsdato
 import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
+import no.nav.etterlatte.pdl.PdlHentFoedselsdato
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
@@ -210,6 +212,9 @@ class ParallelleSannheterService(
                 vergemaal = hentPerson.vergemaalEllerFremtidsfullmakt?.firstOrNull()?.let(VergeMapper::mapVerge),
             )
         }
+
+    suspend fun mapFoedselsdato(hentFoedselsdato: PdlHentFoedselsdato): PdlFoedselsdato =
+        ppsKlient.avklarFoedselsdato(hentFoedselsdato.foedselsdato)
 
     suspend fun mapPersonSoek(
         ident: String,

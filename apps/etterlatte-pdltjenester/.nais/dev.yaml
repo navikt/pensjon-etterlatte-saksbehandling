@@ -73,6 +73,7 @@ spec:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:
+        - application: etterlatte-brev-api
         - application: etterlatte-hendelser-pdl
         - application: etterlatte-hendelser-joark
         - application: etterlatte-behandling

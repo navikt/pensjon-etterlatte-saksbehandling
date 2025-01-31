@@ -7,7 +7,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -48,16 +47,17 @@ class BehandlingClient(
         persongalleri: Persongalleri,
     ): UUID =
         runBlocking {
-            val response =
-                sakOgBehandlingApp
-                    .post("$url/behandlinger/opprettbehandling") {
-                        contentType(ContentType.Application.Json)
-                        setBody(BehandlingsBehov(sakId, persongalleri, mottattDato.toString()))
-                    }
-            if (!response.status.isSuccess()) {
+            try {
+                val response =
+                    sakOgBehandlingApp
+                        .post("$url/behandlinger/opprettbehandling") {
+                            contentType(ContentType.Application.Json)
+                            setBody(BehandlingsBehov(sakId, persongalleri, mottattDato.toString()))
+                        }
+                UUID.fromString(response.body())
+            } catch (_: Exception) {
                 throw FeiletVedOpprettBehandling(sakId)
             }
-            UUID.fromString(response.body())
         }
 
     fun behandleInntektsjustering(request: MottattInntektsjustering) {

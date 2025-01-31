@@ -36,6 +36,8 @@
       <env name="SAF_SCOPE" value="api://dev-fss.teamdokumenthandtering.saf/.default" />
       <env name="SOKOS_KONTOREG_SCOPE" value="dev-gcp:okonomi:sokos-kontoregister-person" />
       <env name="SOKOS_KONTOREG_URL" value="https://sokos-kontoregister-person.intern.dev.nav.no" />
+      <env name="ETTERLATTE_PDLTJENESTER_URL" value="https://etterlatte-pdltjenester.intern.dev.nav.no" />
+      <env name="ETTERLATTE_PDLTJENESTER_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-pdltjenester" />
       <env name="BREVBAKER_URL" value="https://pensjon-brevbaker.intern.dev.nav.no" />
       <env name="BREVBAKER_SCOPE" value="api://dev-gcp.pensjonsbrev.pensjon-brevbaker/.default" />
       <env name="PDFGEN_URL" value="https://etterlatte-pdfgen.intern.dev.nav.no/api/v1/genpdf" />

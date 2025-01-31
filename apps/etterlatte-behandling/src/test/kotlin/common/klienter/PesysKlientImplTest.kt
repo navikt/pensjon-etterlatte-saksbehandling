@@ -15,8 +15,8 @@ class PesysKlientImplTest {
             {
                 "sakType": "UFOREP",
                 "sakStatus": "LOPENDE",
-                "fomDato": "2010-04-01T00:00:00+0200",
-                "tomDate": "2010-04-01T00:00:00+0200"
+                "fomDato": "2010-04-01",
+                "tomDate": "2010-04-30"
             }
             """.trimIndent()
 
@@ -27,7 +27,7 @@ class PesysKlientImplTest {
                 sakType = SakSammendragResponse.UFORE_SAKTYPE,
                 sakStatus = SakSammendragResponse.Status.LOPENDE,
                 fomDato = LocalDate.of(2010, 4, 1),
-                tomDate = LocalDate.of(2010, 4, 1),
+                tomDate = LocalDate.of(2010, 4, 30),
             )
     }
 }

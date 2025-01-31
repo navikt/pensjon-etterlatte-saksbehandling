@@ -100,6 +100,6 @@ data class OmsMeldtInnEndring(
 
 enum class OmsEndring {
     INNTEKT,
-    INNTEKT_OG_AKTIVITET,
+    AKTIVITET_OG_INNTEKT,
     ANNET,
 }

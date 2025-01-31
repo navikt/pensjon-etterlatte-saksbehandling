@@ -56,6 +56,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingMedBehandlingGrunnlagsversjon
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
@@ -76,6 +77,10 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
+/*
+Grunnlag vet ikke om behandlingen har blitt opprettet enda da opprett grunnlag kallet går så dette må gjøres med systembruker
+grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class))
+ */
 internal class BehandlingFactoryTest {
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>(relaxed = true)
     private val behandlingDaoMock = mockk<BehandlingDao>(relaxUnitFun = true)
@@ -220,7 +225,7 @@ internal class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) } returns Unit
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
 
         val resultat =
@@ -263,7 +268,7 @@ internal class BehandlingFactoryTest {
                 gruppeId = "Avdoed",
             )
         }
-        coVerify(exactly = 1) { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
+        coVerify(exactly = 1) { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) }
     }
 
     @Test
@@ -320,7 +325,7 @@ internal class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) } returns Unit
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
 
         val foerstegangsbehandling =
@@ -355,7 +360,7 @@ internal class BehandlingFactoryTest {
                 gruppeId = persongalleri.avdoed.single(),
             )
         }
-        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
+        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) }
     }
 
     @Test
@@ -415,7 +420,7 @@ internal class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) } returns Unit
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any()) } returns mockOppgave
         every {
             oppgaveService.avbrytAapneOppgaverMedReferanse(any())
@@ -462,7 +467,7 @@ internal class BehandlingFactoryTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseStatistikk(any(), any())
         }
-        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
+        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) }
         verify {
             oppgaveService.opprettOppgave(
                 referanse = foerstegangsbehandling.id.toString(),
@@ -606,7 +611,7 @@ internal class BehandlingFactoryTest {
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
         coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) } just runs
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns
@@ -658,7 +663,7 @@ internal class BehandlingFactoryTest {
         }
         coVerify {
             grunnlagService.hentPersongalleri(sak.id)
-            grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class))
         }
     }
 
@@ -686,7 +691,7 @@ internal class BehandlingFactoryTest {
         val opprettBehandlingSlot = slot<OpprettBehandling>()
         every { behandlingDaoMock.opprettBehandling(capture(opprettBehandlingSlot)) } just runs
         coEvery { grunnlagService.hentPersongalleri(sak.id) } returns Persongalleri(sak.ident)
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } just runs
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) } just runs
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns
@@ -730,7 +735,7 @@ internal class BehandlingFactoryTest {
         }
         coVerify {
             grunnlagService.hentPersongalleri(sak.id)
-            grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class))
         }
     }
 
@@ -791,7 +796,7 @@ internal class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) } returns Unit
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
@@ -894,7 +899,7 @@ internal class BehandlingFactoryTest {
                 gruppeId = persongalleri.avdoed.single(),
             )
         }
-        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
+        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) }
 
         verify(exactly = 2) {
             behandlingDaoMock.hentBehandling(any())
@@ -965,7 +970,7 @@ internal class BehandlingFactoryTest {
                 any(),
             )
         } returns Unit
-        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) } returns Unit
+        coEvery { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) } returns Unit
         every {
             oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), gruppeId = any())
         } returns mockOppgave
@@ -1068,7 +1073,7 @@ internal class BehandlingFactoryTest {
                 gruppeId = persongalleri.avdoed.single(),
             )
         }
-        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any()) }
+        coVerify { grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class)) }
         verify(exactly = 2) {
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.opprettBehandling(any())
@@ -1181,7 +1186,7 @@ internal class BehandlingFactoryTest {
             )
         }
         coVerify {
-            grunnlagService.leggInnNyttGrunnlag(any(), any(), any())
+            grunnlagService.leggInnNyttGrunnlag(any(), any(), any(Systembruker::class))
             grunnlagService.leggTilNyeOpplysninger(any(), any(), any())
         }
     }

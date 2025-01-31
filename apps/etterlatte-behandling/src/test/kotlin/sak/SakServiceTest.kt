@@ -52,6 +52,7 @@ import no.nav.etterlatte.libs.common.sak.SakId
 import no.nav.etterlatte.libs.common.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Claims
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.person.krr.KrrKlient
@@ -97,9 +98,12 @@ internal class SakServiceTest {
     @BeforeEach
     fun before() {
         clearAllMocks()
-
-        coEvery { grunnlagservice.leggInnNyttGrunnlagSak(any(), any(), any()) } just runs
-        coEvery { grunnlagservice.leggTilNyeOpplysningerBareSak(any(), any(), any()) } just runs
+        /*
+         Asserter her på at vi må bruke systembruker siden vi ikke nødvendigvis har tilgang med saksbehandlertoken da alt skjer i en transaction
+         Gjelder ikke for oppdaterIdentForSak()
+         */
+        coEvery { grunnlagservice.leggInnNyttGrunnlagSak(any(), any(), any(Systembruker::class)) } just runs
+        coEvery { grunnlagservice.leggTilNyeOpplysningerBareSak(any(), any(), any(Systembruker::class)) } just runs
 
         coEvery { krrKlient.hentDigitalKontaktinformasjon(any()) } returns
             DigitalKontaktinformasjon(
@@ -456,9 +460,8 @@ internal class SakServiceTest {
         verify(exactly = 1) { sakSkrivDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
     }
 
-    // TODO: skriv om til at pdltjenester returnerer  strengt fortrolgi for denne
     @Test
-    fun `finnEllerOpprettSak lagre enhet og setter gradering`() {
+    fun `finnEllerOpprettSak lagrer enhet og setter gradering`() {
         systemBrukerKontekst()
 
         coEvery { pdlTjenesterKlient.hentPdlFolkeregisterIdenter(any()) } returns dummyPdlResponse(KONTANT_FOT.value)

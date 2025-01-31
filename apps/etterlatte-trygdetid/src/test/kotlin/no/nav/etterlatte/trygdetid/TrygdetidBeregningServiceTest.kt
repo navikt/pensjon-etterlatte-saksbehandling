@@ -36,6 +36,7 @@ class TrygdetidBeregningServiceTest {
                 doedsDato = now,
                 norskPoengaar = null,
                 yrkesskade = false,
+                nordiskKonvensjon = false,
             )
         beregnetTrygdetid shouldNotBe null
         with(beregnetTrygdetid!!) {
@@ -68,6 +69,7 @@ class TrygdetidBeregningServiceTest {
                 doedsDato = now,
                 norskPoengaar = null,
                 yrkesskade = false,
+                nordiskKonvensjon = false,
             )
 
         beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe 40
@@ -87,6 +89,7 @@ class TrygdetidBeregningServiceTest {
                 doedsDato = LocalDate.now(),
                 norskPoengaar = null,
                 yrkesskade = false,
+                nordiskKonvensjon = false,
             )
 
         beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe null
@@ -119,6 +122,7 @@ class TrygdetidBeregningServiceTest {
                 doedsDato = now,
                 norskPoengaar = 10,
                 yrkesskade = false,
+                nordiskKonvensjon = false,
             )
         beregnetTrygdetid shouldNotBe null
         with(beregnetTrygdetid!!) {
@@ -141,6 +145,7 @@ class TrygdetidBeregningServiceTest {
                 doedsDato = now,
                 norskPoengaar = 10,
                 yrkesskade = false,
+                nordiskKonvensjon = false,
             )
         beregnetTrygdetid shouldNotBe null
         with(beregnetTrygdetid!!) {
@@ -206,6 +211,7 @@ class TrygdetidBeregningServiceTest {
                 doedsDato = now,
                 norskPoengaar = 10,
                 yrkesskade = true,
+                nordiskKonvensjon = false,
             )
         beregnetTrygdetid shouldNotBe null
         with(beregnetTrygdetid!!) {

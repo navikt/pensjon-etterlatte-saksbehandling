@@ -54,11 +54,20 @@ data class TrygdetidGrunnlagMedAvdoed(
     val doedsDato: LocalDate,
     val norskPoengaar: Int?,
     val yrkesskade: Boolean,
+    val nordiskKonvensjon: Boolean,
 )
 
 data class TrygdetidGrunnlagMedAvdoedGrunnlag(
     val trygdetidGrunnlagMedAvdoed: FaktumNode<TrygdetidGrunnlagMedAvdoed>,
 )
+
+val nordiskKonvensjon: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Hent nordisk konvensjon",
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
+        finnFelt = { it.nordiskKonvensjon },
+    )
 
 val dagerPrMaanedTrygdetidGrunnlag =
     definerKonstant<TrygdetidGrunnlagMedAvdoedGrunnlag, Int>(
@@ -300,31 +309,46 @@ val opptjeningsTidIMnd =
     }
 
 /**
+ * Finne ut om valg av nordisk konvensjon art 9 skal overstyre bruk av 4/5 regel
+ */
+val nordiskEllerFireFemtedeler =
+    RegelMeta(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Gruppere fremtidig trygdetid",
+        regelReferanse = RegelReferanse(id = "REGEL-NORDISK-ELLER-FIREFEMTEDELER"),
+    ) benytter faktiskNorge og opptjeningsTidIMnd og nordiskKonvensjon med {
+        faktisk,
+        opptjening,
+        nordisk,
+        ->
+        val mindreEnnFireFemtedelerAvOpptjeningstiden = ((faktisk?.antallMaaneder ?: 0) * 5) < opptjening * 4
+        mindreEnnFireFemtedelerAvOpptjeningstiden && !nordisk
+    }
+
+/**
  * Beregn fremtidig nasjonal trygdetid justert etter opptjeningsregel om at verdi er mindre enn 4/5 opptjeningstid.
  */
 val fremtidigTrygdetidForNasjonal =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Regn ut fremtidig trygdetid nasjonal",
-        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-NASJONAL-TRYGDETID"),
-    ) benytter faktiskNorge og fremtidigTrygdetid og opptjeningsTidIMnd med { faktisk, fremtidig, opptjening ->
+        regelReferanse = RegelReferanse(id = "REGEL-BEREGN-FREMTIDIG-NASJONAL-TRYGDETID", versjon = "1.1"),
+    ) benytter nordiskEllerFireFemtedeler og fremtidigTrygdetid og opptjeningsTidIMnd med
+        { nordiskEllerFireFemtedeler, fremtidig, opptjening ->
+            if (fremtidig != null) {
+                val fremtidigPeriode =
+                    fremtidig.justertForOpptjeningstiden(opptjening, nordiskEllerFireFemtedeler)
 
-        if (fremtidig != null) {
-            val mindreEnnFireFemtedelerAvOpptjeningstiden = ((faktisk?.antallMaaneder ?: 0) * 5) < opptjening * 4
-
-            val fremtidigPeriode =
-                fremtidig.justertForOpptjeningstiden(opptjening, mindreEnnFireFemtedelerAvOpptjeningstiden)
-
-            FremtidigTrygdetid(
-                periode = fremtidigPeriode,
-                antallMaaneder = fremtidigPeriode.toTotalMonths(),
-                opptjeningstidIMaaneder = opptjening,
-                mindreEnnFireFemtedelerAvOpptjeningstiden = mindreEnnFireFemtedelerAvOpptjeningstiden,
-            )
-        } else {
-            null
+                FremtidigTrygdetid(
+                    periode = fremtidigPeriode,
+                    antallMaaneder = fremtidigPeriode.toTotalMonths(),
+                    opptjeningstidIMaaneder = opptjening,
+                    mindreEnnFireFemtedelerAvOpptjeningstiden = nordiskEllerFireFemtedeler,
+                )
+            } else {
+                null
+            }
         }
-    }
 
 /**
  * Beregn fremtidig teoretisk trygdetid justert etter opptjeningsregel om at verdi er mindre enn 4/5 opptjeningstid.

@@ -363,7 +363,7 @@ class AktivitetspliktDao(
         }
     }
 
-    fun finnSakerKlarForOppfoelgingsoppgaveVarigUnntakUtloeper() =
+    fun finnSakerKlarForOppfoelgingsoppgaveVarigUnntakUtloeper(tom: LocalDate?) =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -372,10 +372,10 @@ class AktivitetspliktDao(
                         SELECT DISTINCT sak_id 
                         FROM aktivitetsplikt_unntak 
                         WHERE tom IS NOT NULL
-                            AND tom <= CURRENT_DATE + INTERVAL '2 months'
+                            AND tom <= ?
                         """.trimMargin(),
                     )
-
+                stmt.setDate(1, Date.valueOf(tom))
                 stmt.executeQuery().toList { SakId(getLong("sak_id")) }
             }
         }

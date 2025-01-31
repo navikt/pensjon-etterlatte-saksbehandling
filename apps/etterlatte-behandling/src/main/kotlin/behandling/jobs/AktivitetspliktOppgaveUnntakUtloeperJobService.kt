@@ -41,19 +41,19 @@ class AktivitetspliktOppgaveUnntakUtloeperJobService(
     }
 
     private suspend fun opprettOppfoelgingsOppgaveForAktivitetspliktUnntakUtloeper() {
-        val utloeperDato = LocalDate.now().plusMonths(2)
-        val sakIds = aktivitetspliktDao.finnSakerKlarForOppfoelgingsoppgaveVarigUnntakUtloeper()
+        val tomDato = LocalDate.now().plusMonths(2)
+        val sakIds = aktivitetspliktDao.finnSakerKlarForOppfoelgingsoppgaveVarigUnntakUtloeper(tomDato)
         logger.info("Fant ${sakIds.size} saker som skal sjekkes for oppfølgingsoppgaver unntak utløper")
 
         sakIds.forEach { sakId ->
             if (!vedtakKlient
                     .sakHarLopendeVedtakPaaDato(
                         sakId,
-                        utloeperDato,
+                        tomDato,
                         HardkodaSystembruker.oppgave,
                     ).erLoepende
             ) {
-                logger.info("Lager ikke oppfølgingsoppgave for sak $sakId fordi sak er ikke løpende på tidspunkt $utloeperDato")
+                logger.info("Lager ikke oppfølgingsoppgave for sak $sakId grunnen ikke løpende på dato $tomDato")
                 return@forEach
             }
 
@@ -65,7 +65,7 @@ class AktivitetspliktOppgaveUnntakUtloeperJobService(
                     .map { it.referanse }
 
             sak.unntak
-                .filter { it.tom != null && it.tom <= utloeperDato }
+                .filter { it.tom != null && it.tom <= tomDato }
                 .forEach { unntak ->
                     val harOppave = oppgaveReferanser.any { unntak.id.toString() == it }
                     if (harOppave) {

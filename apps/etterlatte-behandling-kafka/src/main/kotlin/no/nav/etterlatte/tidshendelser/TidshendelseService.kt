@@ -194,7 +194,7 @@ class TidshendelseService(
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,
-            JobbType.OPPFOELGING_UNNTAK_UTLOEPER,
+
             -> throw InternfeilException("Skal ikke lage oppgave for jobbtype: ${hendelse.jobbtype}")
         }
 
@@ -209,7 +209,6 @@ class TidshendelseService(
             JobbType.OMS_DOED_10MND -> AKTIVITETSPLIKT_12MND
             JobbType.OMS_DOED_6MND, JobbType.OMS_DOED_12MND -> AKTIVITETSPLIKT_REVURDERING
             JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK -> AKTIVITETSPLIKT_INFORMASJON_VARIG_UNNTAK
-            JobbType.OPPFOELGING_UNNTAK_UTLOEPER -> OppgaveType.OPPFOELGING
             JobbType.REGULERING,
             JobbType.FINN_SAKER_TIL_REGULERING,
             JobbType.AARLIG_INNTEKTSJUSTERING,

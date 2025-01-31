@@ -158,23 +158,6 @@ class HendelseDao(
         }
     }
 
-    fun opprettDagligJobb(jobb: JobbScheduler.PeriodiskeDagligeJobber) {
-        datasource.transaction { tx ->
-            queryOf(
-                """
-                INSERT INTO jobb (type, kjoeredato, behandlingsmaaned)
-                VALUES (:type, :kjoeredato, :behandlingsmaaned)
-                """.trimIndent(),
-                mapOf(
-                    "type" to jobb.jobbType.name,
-                    "kjoeredato" to LocalDate.now().plusDays(1),
-                ),
-            ).let { query -> tx.run(query.asUpdate) }
-
-            logger.info("Opprettet jobbtype ${jobb.jobbType} for dag ${LocalDate.now()}")
-        }
-    }
-
     fun opprettHendelserForSaker(
         jobbId: Int,
         saksIDer: List<SakId>,

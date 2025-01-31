@@ -272,6 +272,9 @@ internal fun Route.aktivitetspliktRoutes(
                     call.respond(opprettet)
                 }
             }
+
+            // TODO: opprett oppgave hvis varig unntak utløper
+            // TODO: TOM is not null, TOM <= CURRET_DATE
         }
         route("varigUnntak") {
             post {

@@ -363,6 +363,27 @@ class AktivitetspliktDao(
         }
     }
 
+    fun finnSakerKlarForOppfoelgingsoppgaveVarigUnntakUtloeper() =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                    SELECT DISTINCT au.sak_id 
+                    FROM aktivitetsplikt_unntak au
+                        LEFT JOIN oppgave o
+                        ON au.id = o.reference_id
+                    WHERE au.tom IS NOT NULL
+                        AND au.tom <= CURRENT_DATE + INTERVAL '2 months'
+                        AND o.type = 'OPPFOELGING'
+                        AND o.id IS NULL
+                        """.trimMargin(),
+                    )
+
+                stmt.executeUpdate()
+            }
+        }
+
     private fun ResultSet.toAktivitet() =
         AktivitetspliktAktivitetPeriode(
             id = getUUID("id"),

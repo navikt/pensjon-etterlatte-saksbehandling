@@ -60,11 +60,6 @@ enum class JobbType(
         JobbKategori.AARLIG_INNTEKTSJUSTERING,
         sakType = SakType.OMSTILLINGSSTOENAD,
     ),
-    OPPFOELGING_UNNTAK_UTLOEPER(
-        "Oppfølgingsoppgave for unntak utløper",
-        JobbKategori.OPPFOELGINGS_OPPGAVE,
-        sakType = null,
-    ),
 }
 
 enum class JobbKategori {
@@ -72,5 +67,4 @@ enum class JobbKategori {
     OMS_DOEDSDATO,
     REGULERING,
     AARLIG_INNTEKTSJUSTERING,
-    OPPFOELGINGS_OPPGAVE,
 }

@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Timer
 
@@ -31,7 +30,6 @@ class JobbSchedulerTask(
             openingHours = openingHours,
         ) {
             jobbScheduler.scheduleMaanedligeJobber()
-            jobbScheduler.scheduleDagligeJobber()
         }
     }
 }
@@ -40,22 +38,6 @@ class JobbScheduler(
     private val hendelseDao: HendelseDao,
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
-
-    fun scheduleDagligeJobber() {
-        logger.info("Sjekker for jobber å legge til for neste dag: ${LocalDate.now().plusDays(1)}")
-
-        val planlagteJobberNesteDag = hendelseDao.finnAktuellJobb(LocalDate.now().plusDays(1))
-
-        PeriodiskeDagligeJobber.entries
-            // filtrere bort jobber som allerede er planlagt for neste dag
-            .filter { periodiskJobb ->
-                planlagteJobberNesteDag.none { kjoering -> kjoering.type == periodiskJobb.jobbType }
-            }
-            // opprett jobb for neste dag
-            .forEach { periodiskJobb ->
-                hendelseDao.opprettDagligJobb(periodiskJobb)
-            }
-    }
 
     fun scheduleMaanedligeJobber() {
         val nesteMaaned = YearMonth.now().plusMonths(1)
@@ -85,11 +67,5 @@ class JobbScheduler(
         OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK(JobbType.OMS_DOED_6MND_INFORMASJON_VARIG_UNNTAK, 8, 0),
         OMS_DOED_12MND(JobbType.OMS_DOED_12MND, 1, 0),
         OMS_DOED_10MND(JobbType.OMS_DOED_10MND, 1, 0),
-    }
-
-    enum class PeriodiskeDagligeJobber(
-        val jobbType: JobbType,
-    ) {
-        OPPFOELGING_UNNTAK_UTLOEPER(JobbType.OPPFOELGING_UNNTAK_UTLOEPER),
     }
 }

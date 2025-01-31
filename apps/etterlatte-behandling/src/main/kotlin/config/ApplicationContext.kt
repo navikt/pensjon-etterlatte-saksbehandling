@@ -37,6 +37,8 @@ import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
+import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJob
+import no.nav.etterlatte.behandling.jobs.AktivitetspliktOppgaveUnntakUtloeperJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
@@ -565,6 +567,8 @@ internal class ApplicationContext(
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
+    val aktivitetspliktOppgaveUnntakUtloeperJobService = AktivitetspliktOppgaveUnntakUtloeperJobService(aktivitetspliktDao)
+
     val gosysOppgaveService =
         GosysOppgaveServiceImpl(
             gosysOppgaveKlient,
@@ -631,6 +635,15 @@ internal class ApplicationContext(
             Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(10, ChronoUnit.MINUTES),
             openingHours = env.requireEnvValue(JOBB_METRIKKER_OPENING_HOURS).let { OpeningHours.of(it) },
+        )
+    }
+
+    val aktivitetspliktOppgaveUnntakUtloeperJob: AktivitetspliktOppgaveUnntakUtloeperJob by lazy {
+        AktivitetspliktOppgaveUnntakUtloeperJob(
+            aktivitetspliktOppgaveUnntakUtloeperJobService,
+            { leaderElectionKlient.isLeader() },
+            initialDelay = if (isProd()) Duration.of(3, ChronoUnit.MINUTES).toMillis() else Duration.of(20, ChronoUnit.MINUTES).toMillis(),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
         )
     }
 

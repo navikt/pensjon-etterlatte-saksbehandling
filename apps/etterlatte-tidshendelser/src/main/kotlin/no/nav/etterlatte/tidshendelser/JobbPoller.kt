@@ -9,7 +9,6 @@ import no.nav.etterlatte.tidshendelser.aarliginntektsjustering.AarligInntektsjus
 import no.nav.etterlatte.tidshendelser.aldersovergang.AldersovergangerService
 import no.nav.etterlatte.tidshendelser.hendelser.HendelseDao
 import no.nav.etterlatte.tidshendelser.omstillingsstoenad.OmstillingsstoenadService
-import no.nav.etterlatte.tidshendelser.oppgave.OppfoelgingsOppgaveService
 import no.nav.etterlatte.tidshendelser.regulering.ReguleringService
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -44,7 +43,6 @@ class JobbPoller(
     private val omstillingsstoenadService: OmstillingsstoenadService,
     private val reguleringService: ReguleringService,
     private val inntektsjusteringService: AarligInntektsjusteringService,
-    private val oppfoelgingsOppgaveService: OppfoelgingsOppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
 
@@ -62,7 +60,6 @@ class JobbPoller(
                         JobbKategori.OMS_DOEDSDATO -> omstillingsstoenadService.execute(it)
                         JobbKategori.REGULERING -> reguleringService.execute(it)
                         JobbKategori.AARLIG_INNTEKTSJUSTERING -> inntektsjusteringService.execute(it)
-                        JobbKategori.OPPFOELGINGS_OPPGAVE -> oppfoelgingsOppgaveService.execute(it)
                     }
 
                 if (saker.isEmpty()) {

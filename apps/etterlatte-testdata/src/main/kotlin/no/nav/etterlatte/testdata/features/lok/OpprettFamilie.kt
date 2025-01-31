@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.ktor.token.brukerTokenInfo
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyInterface
+import no.nav.etterlatte.testdata.dolly.ForenkletFamilieModell
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
 import no.nav.etterlatte.testdata.features.dolly.generererBestilling
 
@@ -64,7 +65,7 @@ class OpprettFamilie(
                                 "opprettfamilie/familie.hbs",
                                 mapOf(
                                     "path" to path,
-                                    "familier" to familier,
+                                    "familier" to familier.map { FamilieView(it) },
                                 ),
                             ),
                         )
@@ -124,7 +125,7 @@ class OpprettFamilie(
                     val behandlingssteg = Behandlingssteg.valueOf(params["behandlingssteg"]!!)
                     val gjenlevende = params["gjenlevende"]!!
                     val avdoed = params["avdoed"]!!
-                    val barnListe = params["barnListe"]?.split(",") ?: emptyList()
+                    val barnListe = params.getAll("barnListe")!!
                     val soeker =
                         when (ytelse) {
                             SoeknadType.BARNEPENSJON -> params["barn"]!!
@@ -166,3 +167,20 @@ class OpprettFamilie(
             }
         }
 }
+
+data class FamilieView(
+    val familie: ForenkletFamilieModell,
+    val sendSoeknadData: String =
+        """
+        {
+            "avdoed": "${familie.avdoed}",
+            "barnListe": ${
+            familie.barn.map {
+                """
+                "$it"
+                """.trimIndent()
+            }
+        }
+        }
+        """.trimIndent(),
+)

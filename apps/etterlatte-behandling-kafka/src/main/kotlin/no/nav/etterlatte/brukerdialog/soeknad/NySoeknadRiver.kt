@@ -3,6 +3,7 @@ package no.nav.etterlatte.brukerdialog.soeknad
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.ServerResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brukerdialog.soeknad.client.BehandlingClient
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.JournalfoerSoeknadService
@@ -153,7 +154,10 @@ internal class NySoeknadRiver(
             }
         } catch (e: ResponseException) {
             logger.error("Avbrutt fordeling - kunne ikke hente eller opprette sak: ${e.message}")
-
+            // Svelg slik at Innsendt søknad vil retrye
+            null
+        } catch (e: ServerResponseException) {
+            logger.error("Avbrutt fordeling - kunne ikke hente eller opprette sak: ${e.message}")
             // Svelg slik at Innsendt søknad vil retrye
             null
         }

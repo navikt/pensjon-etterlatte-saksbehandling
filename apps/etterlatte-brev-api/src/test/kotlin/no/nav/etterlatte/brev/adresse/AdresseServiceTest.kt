@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.adresse
 
 import io.kotest.matchers.shouldBe
+import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -15,7 +16,9 @@ import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.MottakerType
+import no.nav.etterlatte.brev.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.ktor.token.simpleSaksbehandler
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -35,7 +38,8 @@ internal class AdresseServiceTest {
     private val norg2Mock = mockk<Norg2Klient>()
     private val saksbehandlerKlient = mockk<SaksbehandlerKlient>()
     private val regoppslagMock = mockk<RegoppslagKlient>()
-    private val adresseService = AdresseService(norg2Mock, saksbehandlerKlient, regoppslagMock)
+    private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
+    private val adresseService = AdresseService(norg2Mock, saksbehandlerKlient, regoppslagMock, pdlTjenesterKlientMock)
 
     companion object {
         private val ANSVARLIG_ENHET = Enheter.defaultEnhet.enhetNr
@@ -115,10 +119,11 @@ internal class AdresseServiceTest {
             )
 
         coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.of(2001, 1, 1)
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak)
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 1
@@ -144,10 +149,11 @@ internal class AdresseServiceTest {
             )
 
         coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.of(2001, 1, 1)
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak)
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 2
@@ -176,10 +182,11 @@ internal class AdresseServiceTest {
             )
 
         coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.of(2001, 1, 1)
 
         val mottakere =
             runBlocking {
-                adresseService.hentMottakere(sakType, personerISak)
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
             }
 
         mottakere.size shouldBe 2
@@ -194,6 +201,108 @@ internal class AdresseServiceTest {
         coVerify(exactly = 1) {
             regoppslagMock.hentMottakerAdresse(sakType, personerISak.soeker.fnr.value)
             // Skal ikke hente mottaker adresse for verge
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class)
+    fun `Setter søker som hovedmottaker hvis fødselsdato mangler`(sakType: SakType) {
+        val personerISak =
+            PersonerISak(
+                innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
+                soeker = Soeker("LITEN", null, "FLASKE", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
+                verge = Vergemaal("Verg Vergesen", VERGE_FOEDSELSNUMMER),
+            )
+
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns null
+
+        val mottakere =
+            runBlocking {
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+            }
+
+        mottakere.size shouldBe 2
+
+        val verge =
+            mottakere.single { it.foedselsnummer!!.value == (personerISak.verge as Vergemaal).foedselsnummer.value }
+        verge.type shouldBe MottakerType.KOPI
+
+        val soeker = mottakere.single { it.foedselsnummer!!.value == personerISak.soeker.fnr.value }
+        soeker.type shouldBe MottakerType.HOVED
+
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, personerISak.soeker.fnr.value)
+            // Skal ikke hente mottaker adresse for verge
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class)
+    fun `Setter søker som kopimottaker hvis mellom 15-18 år`(sakType: SakType) {
+        val personerISak =
+            PersonerISak(
+                innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
+                soeker = Soeker("LITEN", null, "FLASKE", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
+                verge = Vergemaal("Verg Vergesen", VERGE_FOEDSELSNUMMER),
+            )
+
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.now().minusYears(15)
+
+        val mottakere =
+            runBlocking {
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+            }
+
+        mottakere.size shouldBe 2
+
+        val verge =
+            mottakere.single { it.foedselsnummer!!.value == (personerISak.verge as Vergemaal).foedselsnummer.value }
+        verge.type shouldBe MottakerType.HOVED
+
+        val soeker = mottakere.single { it.foedselsnummer!!.value == personerISak.soeker.fnr.value }
+        soeker.type shouldBe MottakerType.KOPI
+
+        coVerify(exactly = 1) {
+            regoppslagMock.hentMottakerAdresse(sakType, personerISak.soeker.fnr.value)
+            // Skal ikke hente mottaker adresse for verge
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class)
+    fun `Setter søker til null hvis under 15 år`(sakType: SakType) {
+        val personerISak =
+            PersonerISak(
+                innsender = Innsender(Foedselsnummer(INNSENDER_FOEDSELSNUMMER.value)),
+                soeker = Soeker("LITEN", null, "FLASKE", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+                avdoede = listOf(Avdoed(Foedselsnummer(AVDOED_FOEDSELSNUMMER.value), "RIKTIG BOK", LocalDate.now())),
+                verge = Vergemaal("Verg Vergesen", VERGE_FOEDSELSNUMMER),
+            )
+
+        coEvery { regoppslagMock.hentMottakerAdresse(any(), any()) } returns opprettRegoppslagResponse()
+        coEvery { pdlTjenesterKlientMock.hentFoedselsdato(any(), any()) } returns LocalDate.now().minusYears(14)
+
+        val mottakere =
+            runBlocking {
+                adresseService.hentMottakere(sakType, personerISak, simpleSaksbehandler())
+            }
+
+        mottakere.size shouldBe 1
+
+        val verge =
+            mottakere.single { it.foedselsnummer!!.value == (personerISak.verge as Vergemaal).foedselsnummer.value }
+        verge.type shouldBe MottakerType.HOVED
+
+        val soeker = mottakere.find { it.foedselsnummer!!.value == personerISak.soeker.fnr.value }
+        soeker shouldBe null
+
+        coVerify {
+            // Skal ikke hente mottaker adresse for verge eller søker
+            regoppslagMock wasNot Called
         }
     }
 

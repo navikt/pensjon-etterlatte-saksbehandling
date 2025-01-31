@@ -1,0 +1,26 @@
+fragment metadata on Metadata {
+    master
+    historisk
+    opplysningsId
+    endringer {
+        kilde
+        registrert
+        registrertAv
+        systemkilde
+        type
+    }
+}
+
+query(
+    $ident: ID!,
+) {
+    hentPerson(ident: $ident) {
+        foedselsdato {
+            foedselsdato
+            foedselsaar
+            metadata {
+                ...metadata
+            }
+        }
+    }
+}

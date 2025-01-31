@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
+import no.nav.etterlatte.libs.common.tilbakekreving.tilbakekrevingsbeloepComparator
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.setSakId
@@ -144,7 +145,8 @@ class TilbakekrevingDao(
                 .map { (maaned, perioder) ->
                     TilbakekrevingPeriode(
                         maaned = maaned,
-                        tilbakekrevingsbeloep = perioder,
+                        tilbakekrevingsbeloep =
+                            perioder.sortedWith(tilbakekrevingsbeloepComparator),
                     )
                 }
         }

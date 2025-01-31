@@ -94,6 +94,9 @@ export const AktivitetspliktVurdering = ({
     if (!vurderingHarInnhold(updated)) {
       setManglerVurdering(true)
     }
+    if (vurderingHarInnhold(updated)) {
+      setManglerVurdering(false)
+    }
   }, [updated])
 
   useEffect(() => {

@@ -21,7 +21,9 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
+import no.nav.etterlatte.pdl.PdlFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.ForeldreansvarHistorikkMapper
@@ -87,6 +89,29 @@ class PersonService(
                     hentPerson = it.data.hentPerson,
                     saktyper = request.saktyper,
                 )
+            }
+        }
+    }
+
+    suspend fun hentFoedselsdato(ident: String): PdlFoedselsdato {
+        logger.info("Henter navn, fødselsdato og fødselsnummer for ident=${ident.maskerFnr()} fra PDL")
+
+        return pdlKlient.hentFoedselsdato(ident).let {
+            if (it.data?.hentPerson == null) {
+                val pdlFeil = it.errors?.joinToString()
+
+                if (it.errors?.harAdressebeskyttelse() == true) {
+                    throw pdlForesporselFeiletForAdressebeskyttelse()
+                } else if (it.errors?.personIkkeFunnet() == true) {
+                    throw FantIkkePersonException("Fant ikke person i PDL")
+                } else {
+                    sikkerLogg.warn("Kunne ikke hente person med fnr=$ident fra PDL: $pdlFeil")
+                    throw no.nav.etterlatte.personweb.PdlForesporselFeilet(
+                        "Kunne ikke hente person med ident=${ident.maskerFnr()} se sikkerlogg for pdlfeil",
+                    )
+                }
+            } else {
+                parallelleSannheterService.mapFoedselsdato(it.data.hentPerson)
             }
         }
     }

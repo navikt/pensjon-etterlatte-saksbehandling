@@ -64,7 +64,7 @@ class VarselbrevTest(
     fun start() {
         val adresseService =
             mockk<AdresseService>().also {
-                coEvery { it.hentMottakere(any(), any()) } returns
+                coEvery { it.hentMottakere(any(), any(), any()) } returns
                     listOf(
                         Mottaker(
                             id = UUID.fromString("d762e98d-514d-4bb5-a6b5-a3fbf4d65887"),

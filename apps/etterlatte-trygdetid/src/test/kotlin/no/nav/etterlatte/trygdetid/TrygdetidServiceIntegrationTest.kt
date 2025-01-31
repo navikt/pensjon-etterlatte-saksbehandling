@@ -139,6 +139,7 @@ internal class TrygdetidServiceIntegrationTest(
         val sakId = randomSakId()
         val grunnlagTestData = GrunnlagTestData()
 
+        coEvery { avtaleService.hentAvtaleForBehandling(any()) } returns null
         coEvery { behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler) } returns true
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler) } returns true
         coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns

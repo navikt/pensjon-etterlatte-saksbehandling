@@ -10,33 +10,10 @@ import {
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
 import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { BenyttetTrygdetid } from '~components/behandling/beregne/BenyttetTrygdetid'
 
 interface Props {
   beregning: Beregning
-}
-
-const BenyttetTrygdetid = ({
-  trygdetid,
-  beregningsMetode,
-  samletNorskTrygdetid,
-  samletTeoretiskTrygdetid,
-}: {
-  trygdetid: number
-  beregningsMetode: string | undefined
-  samletNorskTrygdetid: number | undefined
-  samletTeoretiskTrygdetid: number | undefined
-}) => {
-  let benyttetTrygdetid = trygdetid
-
-  if (beregningsMetode === 'NASJONAL' && samletNorskTrygdetid) {
-    benyttetTrygdetid = samletNorskTrygdetid
-  }
-
-  if (beregningsMetode === 'PRORATA' && samletTeoretiskTrygdetid) {
-    benyttetTrygdetid = samletTeoretiskTrygdetid
-  }
-
-  return <>{benyttetTrygdetid}</>
 }
 
 export const BarnepensjonSammendrag = ({ beregning }: Props) => {
@@ -94,7 +71,7 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
               </Table.DataCell>
               <Table.DataCell>Barnepensjon</Table.DataCell>
               <Table.DataCell>
-                <BenyttetTrygdetid {...beregningsperiode} /> år
+                <BenyttetTrygdetid {...beregningsperiode} />
               </Table.DataCell>
               <Table.DataCell>
                 {beregningsperiode.broek && beregningsperiode.beregningsMetode === 'PRORATA' && (
@@ -121,6 +98,7 @@ export const TableWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
   max-width: 1200px;
+
   .table {
     max-width: 1200px;
 

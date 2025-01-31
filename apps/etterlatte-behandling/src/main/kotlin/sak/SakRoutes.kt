@@ -421,13 +421,19 @@ internal fun Route.sakWebRoutes(
 
 data class EnhetRequest(
     val enhet: Enhetsnummer,
-    val kommentar: String,
+    val kommentar: String?,
 ) {
     fun validate(): EnhetRequest {
         if (enhet !in Enheter.entries.map { it.enhetNr }) {
             throw UgyldigForespoerselException(
                 code = "ENHET IKKE GYLDIG",
                 detail = "Enhet $enhet er ikke i listen over gyldige enheter",
+            )
+        }
+        if (enhet == Enheter.PORSGRUNN.enhetNr) {
+            throw UgyldigForespoerselException(
+                code = "ENHET IKKE GYLDIG",
+                detail = "Porsgrunn?",
             )
         }
         return this

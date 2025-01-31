@@ -77,8 +77,9 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
         <Buildings3Icon aria-hidden width="1.75rem" height="1.75rem" />
         <BodyShort>Denne saken tilhører enhet {sak.enhet}</BodyShort>
       </HStack>
-      {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && <EndreEnhet sakId={sak.id} />}
       {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
+        <>
+        <EndreEnhet sakId={sak.id} />
         <ReadMore header="Ønsker du å bytte enhet?">
           <ol>
             <li>
@@ -88,6 +89,8 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
             <li>Overfør til riktig behandlende enhet.</li>
           </ol>
         </ReadMore>
+          
+        </>
       )}
 
       {mapResult(flyktningResult, {

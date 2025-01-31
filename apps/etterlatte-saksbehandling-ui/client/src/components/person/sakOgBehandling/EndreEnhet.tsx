@@ -1,4 +1,4 @@
-import { Alert, Button, Heading, HStack, Modal, Select, VStack } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Modal, Select, Textarea, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
@@ -7,28 +7,40 @@ import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { useForm } from 'react-hook-form'
 
 export const EndreEnhet = ({ sakId }: { sakId: number }) => {
-  const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
-  const [enhetsFilter, setEnhetsfilter] = useState<EnhetFilterKeys>('VELGENHET')
   const [endreEnhetStatus, endreEnhetKall, resetApiCall] = useApiCall(byttEnhetPaaSak)
-  const [enhetViByttetTil, setEnhetViByttetTil] = useState<string>('')
+  const [enhetViByttetTil, setEnhetViByttetTil] = useState<string>('VELGENHET')
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const harTilgangPaaNyEnhet = innloggetSaksbehandler.enheter.includes(enhetViByttetTil)
 
-  function endreEnhet() {
-    if (enhetsFilter === 'VELGENHET') {
-      return setError('Du må velge en enhet')
-    }
-    const enhet = filtrerEnhet(enhetsFilter)
-    setEnhetViByttetTil(enhet)
-    endreEnhetKall({ sakId: sakId, enhet })
+  interface EndreEnhetSkjema {
+    enhet: EnhetFilterKeys
+    kommentar?: string
+  }
+
+  const {
+    formState: { errors },
+    handleSubmit,
+    register,
+    reset,
+    watch,
+  } = useForm<EndreEnhetSkjema>({ defaultValues: { enhet: 'VELGENHET', kommentar: '' } })
+
+  const endreEnhet = (data: EndreEnhetSkjema) => {
+    console.log('Endrer til ' + data.enhet)
+
+    endreEnhetKall({ sakId: sakId, enhet: filtrerEnhet(data.enhet) }, () => {
+      setEnhetViByttetTil(filtrerEnhet(data.enhet))
+    })
   }
 
   const closeAndReset = () => {
-    setOpen(false)
+    console.log('Resetting')
+    reset()
     resetApiCall()
   }
 
@@ -81,37 +93,46 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
 
               {isFailure(endreEnhetStatus) && (
                 <ApiErrorAlert>
-                  Kunne ikke endre sakens enhet til {enhetsFilter}, på grunn av feil: {endreEnhetStatus.error.detail}
+                  Kunne ikke endre sakens enhet til {watch('enhet')} på grunn av feil: {endreEnhetStatus.error.detail}
                 </ApiErrorAlert>
               )}
 
-              <Select
-                label="Endre enhet"
-                value={enhetsFilter}
-                onChange={(e) => setEnhetsfilter(e.target.value as EnhetFilterKeys)}
-                error={error}
-              >
-                {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
-                  <option key={status} value={status}>
-                    {statusbeskrivelse}
-                  </option>
-                ))}
-              </Select>
+              <form onSubmit={handleSubmit(endreEnhet)}>
+                <Select
+                  {...register('enhet', {
+                    required: {
+                      value: true,
+                      message: 'Du må velge en enhet',
+                    },
+                  })}
+                  label="Enhet"
+                  error={errors.enhet?.message}
+                >
+                  {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
+                    <option key={status} value={status === 'VELGENHET' ? '' : status}>
+                      {statusbeskrivelse}
+                    </option>
+                  ))}
+                </Select>
 
-              {enhetsFilter !== 'VELGENHET' && !innloggetSaksbehandler.enheter.includes(filtrerEnhet(enhetsFilter)) && (
-                <Alert variant="warning">
-                  Du har ikke tilgang til enhet {enhetsFilter}, og vil ikke kunne se saken etter flytting.
-                </Alert>
-              )}
+                <Textarea {...register('kommentar')} label="Kommentar" />
 
-              <HStack gap="2" justify="end">
-                <Button variant="secondary" onClick={closeAndReset}>
-                  Avbryt
-                </Button>
-                <Button loading={isPending(endreEnhetStatus)} onClick={endreEnhet}>
-                  Endre
-                </Button>
-              </HStack>
+                {watch('enhet') !== 'VELGENHET' &&
+                  !innloggetSaksbehandler.enheter.includes(filtrerEnhet(watch('enhet'))) && (
+                    <Alert variant="warning">
+                      Du har ikke tilgang til enhet {watch('enhet')}, og vil ikke kunne se saken etter flytting.
+                    </Alert>
+                  )}
+
+                <HStack gap="2" justify="end">
+                  <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+                    Avbryt
+                  </Button>
+                  <Button type="submit" loading={isPending(endreEnhetStatus)}>
+                    Endre
+                  </Button>
+                </HStack>
+              </form>
             </VStack>
           )}
         </Modal.Body>

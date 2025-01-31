@@ -93,12 +93,12 @@ enum class OmsMeldtInnEndringHendelsetype(
 data class OmsMeldtInnEndring(
     val id: UUID = UUID.randomUUID(),
     val fnr: String,
-    val type: OmsEndringType,
-    val endringer: String,
+    val endring: OmsEndring,
+    val beskrivelse: String,
     val tidspunkt: Instant = Instant.now().truncatedTo(ChronoUnit.SECONDS),
 )
 
-enum class OmsEndringType {
+enum class OmsEndring {
     INNTEKT,
     INNTEKT_OG_AKTIVITET,
     ANNET,

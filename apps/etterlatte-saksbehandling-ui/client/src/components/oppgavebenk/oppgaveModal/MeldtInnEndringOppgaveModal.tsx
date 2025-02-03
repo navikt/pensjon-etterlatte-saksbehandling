@@ -77,6 +77,7 @@ export const MeldtInnEndringOppgaveModal = ({ oppgave, oppdaterStatus }: Props) 
               </Button>
               {kanRedigeres && erTildeltSaksbehandler && (
                 <HStack gap="4">
+                  {/* TODO: switche på skjema for avslutt oppgave og revurdering, ved revurdering må vi ha select og beskrivelse */}
                   <Button variant="secondary">Avslutt oppgave</Button>
                   <Button>Opprett revurdering</Button>
                 </HStack>

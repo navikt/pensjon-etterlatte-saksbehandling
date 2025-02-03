@@ -14,14 +14,15 @@ class GrunnlagPersongalleriService(
         logger.info("Kjører jobb for å hente tomme persongallerier")
         while (true) {
             val opplysningsid = grunnlagJobbDao.hentTommePersongalleriV1()
-            if (opplysningsid == null) {
+            if (opplysningsid.isEmpty()) {
                 logger.info("Fant ingen flere persongallerier")
                 break
             }
+
             logger.info("Henter data for opplysningsid $opplysningsid")
-            val hentetDataForOpplysningId = grunnlagBackupKlient.hentPersonGallerierFraBackup(opplysningsid)
-            grunnlagJobbDao.oppdaterTomtPersongalleri(hentetDataForOpplysningId)
-            logger.info("Oppdaterte $opplysningsid")
+            val hentetDataForOpplysningIder = grunnlagBackupKlient.hentPersonGallerierFraBackup(opplysningsid).hendelser
+            grunnlagJobbDao.oppdaterTomtPersongalleriBatch(hentetDataForOpplysningIder)
+            logger.info("Oppdaterte antall ${opplysningsid.size} opplysninsider")
             count += 1
         }
 

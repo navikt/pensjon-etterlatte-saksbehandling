@@ -32,8 +32,10 @@ class GrunnlagPersongalleriJobb(
                 measureTimedValue {
                     grunnlagPersongalleriService.kjoer()
                 }.let { (_, varighet) ->
-                    logger.info("Varigthet for $jobbNavn ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    logger.info("Varighet for $jobbNavn ${varighet.toString(DurationUnit.SECONDS, 2)}")
                 }
+            } else {
+                logger.info("Er ikke leader og kjører ikke $jobbNavn")
             }
         }
     }

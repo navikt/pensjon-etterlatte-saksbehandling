@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.tidshendelser.JobbType
 import no.nav.etterlatte.tidshendelser.JobbScheduler
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -33,17 +34,22 @@ class HendelseDao(
                 ?: throw NoSuchElementException("Fant ikke jobb med id $id")
         }
 
-    fun finnAktuellJobb(): List<HendelserJobb> =
+    // Henter jobber for kjoeredato, hvis ikke spesifisert brukes CURRENT_DATE
+    // COALESCE = returns first non-NULL value
+    fun finnAktuellJobb(kjoeredato: LocalDate? = null): List<HendelserJobb> =
         datasource.transaction { tx ->
             queryOf(
                 """
                 SELECT * FROM jobb 
                 WHERE status = :status
-                AND kjoeredato = CURRENT_DATE
+                AND kjoeredato = COALESCE(:kjoeredato, CURRENT_DATE)
                 ORDER BY id asc
                 LIMIT 1
                 """.trimIndent(),
-                mapOf("status" to JobbStatus.NY.name),
+                mapOf(
+                    "status" to JobbStatus.NY.name,
+                    "kjoeredato" to kjoeredato,
+                ),
             ).let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
         }
 
@@ -131,8 +137,8 @@ class HendelseDao(
         }
     }
 
-    fun opprettJobb(
-        jobb: JobbScheduler.PeriodiskeJobber,
+    fun opprettMaanedligJobb(
+        jobb: JobbScheduler.PeriodiskeMaanedligeJobber,
         maaned: YearMonth,
     ) {
         datasource.transaction { tx ->

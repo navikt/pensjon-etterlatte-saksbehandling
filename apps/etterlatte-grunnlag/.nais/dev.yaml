@@ -27,6 +27,7 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
+  leaderElection: true
   prometheus:
     enabled: true
     path: /metrics
@@ -78,6 +79,8 @@ spec:
       value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
     - name: ETTERLATTE_BEHANDLING_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: GRUNNLAGBACKUP_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-grunnlag-backuo/.default
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: PDLTJENESTER_URL

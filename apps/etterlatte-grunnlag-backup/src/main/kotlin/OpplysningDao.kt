@@ -60,7 +60,7 @@ class OpplysningDao(
     fun hentBulk(opplysningId: List<UUID>): List<GrunnlagHendelse> =
         datasource.connection.use {
             it
-                .prepareStatement("SELECT * FROM grunnlagshendelse WHERE opplysning_id = ANY(?)")
+                .prepareStatement("SELECT * FROM grunnlagshendelse WHERE opplysning_id = ANY(?::uuid[])")
                 .apply {
                     setArray(1, it.createArrayOf("text", opplysningId.toTypedArray()))
                 }.executeQuery()

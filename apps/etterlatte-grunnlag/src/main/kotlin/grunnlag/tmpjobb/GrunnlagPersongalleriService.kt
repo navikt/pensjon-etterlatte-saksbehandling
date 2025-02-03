@@ -13,6 +13,10 @@ class GrunnlagPersongalleriService(
         var count = 0
         logger.info("Kjører jobb for å hente tomme persongallerier")
         while (true) {
+            if (count == 100) {
+                logger.info("avsluttet etter 100 for å sjekke performance")
+                break
+            }
             val opplysningsid = grunnlagJobbDao.hentTommePersongalleriV1()
             if (opplysningsid == null) {
                 logger.info("Fant ingen flere persongallerier")

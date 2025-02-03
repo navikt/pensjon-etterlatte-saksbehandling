@@ -20,7 +20,7 @@ class JobbSchedulerTask(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun schedule(): Timer {
-        logger.info("Starter sjekk av at alle periodiske jobber er planlagt for neste måned / dag, med intervall $periode")
+        logger.info("Starter sjekk av at alle periodiske jobber er planlagt for neste måned, med intervall $periode")
 
         return fixedRateCancellableTimer(
             name = "JOBB_POLLER_TASK",

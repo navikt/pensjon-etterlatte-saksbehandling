@@ -3,7 +3,6 @@ package no.nav.etterlatte.grunnlag.tmpjobb
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
-import no.nav.etterlatte.libs.common.isDev
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
@@ -28,9 +27,13 @@ class GrunnlagPersongalleriJobb(
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
         ) {
-            if (erLeader() && isDev()) {
+            if (erLeader()) {
                 measureTimedValue {
-                    grunnlagPersongalleriService.kjoer()
+                    try {
+                        grunnlagPersongalleriService.kjoer()
+                    } catch (_: Exception) {
+                        logger.info("Timet ut")
+                    }
                 }.let { (_, varighet) ->
                     logger.info("Varighet for $jobbNavn ${varighet.toString(DurationUnit.SECONDS, 2)}")
                 }

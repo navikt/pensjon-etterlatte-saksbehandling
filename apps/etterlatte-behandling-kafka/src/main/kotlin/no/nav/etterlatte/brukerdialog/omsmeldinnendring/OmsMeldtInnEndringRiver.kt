@@ -1,8 +1,8 @@
-package no.nav.etterlatte.brukerdialog.omsendring
+package no.nav.etterlatte.brukerdialog.omsmeldinnendring
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brukerdialog.omsendring.OmsMeldtInnEndringHendelseKeys.HENDELSE_KEY
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndringHendelseKeys.HENDELSE_KEY
 import no.nav.etterlatte.brukerdialog.soeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
@@ -55,9 +55,9 @@ internal class OmsMeldtInnEndringRiver(
                 sakId = sak.id,
                 oppgave =
                     NyOppgaveDto(
-                        oppgaveKilde = OppgaveKilde.HENDELSE, // TODO
-                        oppgaveType = OppgaveType.GENERELL_OPPGAVE,
-                        merknad = "",
+                        oppgaveKilde = OppgaveKilde.BRUKERDIALOG_SELVBETJENING,
+                        oppgaveType = OppgaveType.MELDT_INN_ENDRING,
+                        merknad = "Endring meldt inn fra selvbetjening skjema",
                         referanse = journalpostResponse.journalpostId,
                         frist = null,
                     ),

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brukerdialog.omsendring
+package no.nav.etterlatte.brukerdialog.omsmeldinnendring
 
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking

@@ -8,6 +8,12 @@ import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.ArkiverOmsMeldtInnEndring
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.JournalfoerOmsMeldtInnEndringService
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsEndring
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndring
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndringHendelseKeys
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndringRiver
 import no.nav.etterlatte.brukerdialog.soeknad.client.BehandlingClient
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.AvsenderMottaker
 import no.nav.etterlatte.brukerdialog.soeknad.journalfoering.Bruker

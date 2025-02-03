@@ -2,7 +2,7 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.brev.OppdaterDoedshendelseBrevDistribuert
 import no.nav.etterlatte.brukerdialog.inntektsjustering.InntektsjusteringRiver
-import no.nav.etterlatte.brukerdialog.omsendring.OmsMeldtInnEndringRiver
+import no.nav.etterlatte.brukerdialog.omsmeldinnendring.OmsMeldtInnEndringRiver
 import no.nav.etterlatte.brukerdialog.soeknad.NySoeknadRiver
 import no.nav.etterlatte.brukerdialog.soeknad.OpprettBehandlingRiver
 import no.nav.etterlatte.inntektsjustering.AarligInntektsjusteringJobbRiver

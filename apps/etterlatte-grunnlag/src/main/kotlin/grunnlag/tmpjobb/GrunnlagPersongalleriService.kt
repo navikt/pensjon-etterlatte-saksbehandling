@@ -12,7 +12,8 @@ class GrunnlagPersongalleriService(
     fun kjoer() {
         var count = 0
         logger.info("Kjører jobb for å hente tomme persongallerier")
-        while (true) {
+        for (i in 1..300) {
+            print(i)
             val opplysningsid = grunnlagJobbDao.hentTommePersongalleriV1()
             if (opplysningsid == null) {
                 logger.info("Fant ingen flere persongallerier")
@@ -21,7 +22,7 @@ class GrunnlagPersongalleriService(
             logger.info("Henter data for opplysningsid $opplysningsid")
             val hentetDataForOpplysningId = grunnlagBackupKlient.hentPersonGallerierFraBackup(opplysningsid)
             grunnlagJobbDao.oppdaterTomtPersongalleri(hentetDataForOpplysningId)
-            logger.info("Oppdaterte $opplysningsid")
+            logger.info("Oppdaterte $opplysningsid opplysninsider")
             count += 1
         }
 

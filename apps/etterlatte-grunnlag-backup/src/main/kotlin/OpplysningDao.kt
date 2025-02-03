@@ -62,7 +62,7 @@ class OpplysningDao(
             it
                 .prepareStatement("SELECT * FROM grunnlagshendelse WHERE opplysning_id = ANY(?)")
                 .apply {
-                    setArray(1, it.createArrayOf("string", opplysningId.toTypedArray()))
+                    setArray(1, it.createArrayOf("text", opplysningId.toTypedArray()))
                 }.executeQuery()
                 .toList { asGrunnlagshendelse() }
         }

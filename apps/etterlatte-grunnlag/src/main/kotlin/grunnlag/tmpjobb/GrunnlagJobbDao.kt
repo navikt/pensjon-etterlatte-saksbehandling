@@ -16,7 +16,7 @@ class GrunnlagJobbDao(
             it
                 .prepareStatement(
                     """
-                    select opplysning_id from grunnlagshendelse where opplysning_type = 'PERSONGALLERI_V1' and opplysning is null AND opplysning_id = '0f2e17de-c8e2-4784-b27a-7efd4cb88199' limit 1;
+                    select opplysning_id from grunnlagshendelse where opplysning_type = 'PERSONGALLERI_V1' and opplysning is null limit 1;
                     """.trimIndent(),
                 ).executeQuery()
                 .firstOrNull { getString("opplysning_id") }

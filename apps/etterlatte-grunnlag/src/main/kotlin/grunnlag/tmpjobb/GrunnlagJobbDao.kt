@@ -9,10 +9,8 @@ import javax.sql.DataSource
 class GrunnlagJobbDao(
     private val datasource: DataSource,
 ) {
-    private val connection get() = datasource.connection
-
     fun hentTommePersongalleriV1(): List<String> =
-        connection.use {
+        datasource.connection.use {
             it
                 .prepareStatement(
                     """
@@ -23,7 +21,7 @@ class GrunnlagJobbDao(
         }
 
     fun oppdaterTomtPersongalleri(opplysning: OpplysningDao.GrunnlagHendelse) =
-        connection.use {
+        datasource.connection.use {
             it
                 .prepareStatement(
                     """

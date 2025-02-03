@@ -34,7 +34,7 @@ class GrunnlagJobbDao(
                 ).apply {
                     setString(1, opplysning.opplysning.opplysning.serialize())
                     setObject(2, opplysning.opplysning.id)
-                }
+                }.executeUpdate()
         }
 }
 

@@ -21,9 +21,7 @@ class GrunnlagPersongalleriService(
 
             logger.info("Henter data for opplysningsid $opplysningsid")
             val hentetDataForOpplysningIder = grunnlagBackupKlient.hentPersonGallerierFraBackup(opplysningsid).hendelser
-            hentetDataForOpplysningIder.forEach {
-                grunnlagJobbDao.oppdaterTomtPersongalleri(it)
-            }
+            grunnlagJobbDao.oppdaterTomtPersongalleriBatch(hentetDataForOpplysningIder)
             logger.info("Oppdaterte antall ${opplysningsid.size} opplysninsider")
             count += 1
         }

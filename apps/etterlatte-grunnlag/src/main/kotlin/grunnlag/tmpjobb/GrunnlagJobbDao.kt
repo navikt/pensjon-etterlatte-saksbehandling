@@ -34,6 +34,24 @@ class GrunnlagJobbDao(
                     setObject(2, opplysning.opplysning.id)
                 }.executeUpdate()
         }
+
+    fun oppdaterTomtPersongalleriBatch(opplysningr: List<OpplysningDao.GrunnlagHendelse>) =
+        datasource.connection.use {
+            it
+                .prepareStatement(
+                    """
+                    UPDATE grunnlagshendelse
+                    set opplysning = ?
+                    where opplysning_id = ?;
+                    """.trimIndent(),
+                ).apply {
+                    opplysningr.forEach {
+                        setString(1, it.opplysning.opplysning.serialize())
+                        setObject(2, it.opplysning.id)
+                        addBatch()
+                    }
+                }.executeBatch()
+        }
 }
 
 fun JsonNode?.serialize() = this?.let { objectMapper.writeValueAsString(it) }

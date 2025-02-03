@@ -6,8 +6,6 @@ import no.nav.etterlatte.libs.common.TimerJob
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
-import kotlin.time.DurationUnit
-import kotlin.time.measureTimedValue
 
 class GrunnlagPersongalleriJobb(
     private val grunnlagPersongalleriService: GrunnlagPersongalleriService,

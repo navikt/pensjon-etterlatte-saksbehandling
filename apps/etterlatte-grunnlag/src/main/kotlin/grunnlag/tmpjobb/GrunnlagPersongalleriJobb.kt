@@ -6,8 +6,6 @@ import no.nav.etterlatte.libs.common.TimerJob
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
-import kotlin.time.DurationUnit
-import kotlin.time.measureTimedValue
 
 class GrunnlagPersongalleriJobb(
     private val grunnlagPersongalleriService: GrunnlagPersongalleriService,
@@ -28,6 +26,7 @@ class GrunnlagPersongalleriJobb(
             period = interval.toMillis(),
         ) {
             if (erLeader()) {
+               /*
                 measureTimedValue {
                     try {
                         grunnlagPersongalleriService.kjoer()
@@ -37,6 +36,7 @@ class GrunnlagPersongalleriJobb(
                 }.let { (_, varighet) ->
                     logger.info("Varighet for $jobbNavn ${varighet.toString(DurationUnit.SECONDS, 2)}")
                 }
+                */
             } else {
                 logger.info("Er ikke leader og kjører ikke $jobbNavn")
             }
